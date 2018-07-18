@@ -3,7 +3,7 @@ using Meadow;
 
 namespace MeadowApplication
 {
-    public class MyApp : App
+    public class MyApp : AppBase
     {
         public MyApp()
         {
@@ -15,12 +15,17 @@ namespace MeadowApplication
             
         }
 
-        public override void OnSleep()
+        public override void WillSleep()
         {
             
         }
 
         public override void OnWake()
+        {
+            
+        }
+
+        public override void WillReset()
         {
             
         }
