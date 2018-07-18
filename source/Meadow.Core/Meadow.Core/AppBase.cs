@@ -22,9 +22,6 @@ namespace Meadow
             _current = this;
         }
 
-        //TODO: do we make these non-abstract, so that we can fufill the contract
-        // and not require the consumer to implement them?
-
         /// <summary>
         /// Called the first time the application is started.
         /// TODO: Is this necessary? Why not just use the ctor?
@@ -34,16 +31,16 @@ namespace Meadow
         /// <summary>
         /// Called when the application is put to sleep.
         /// </summary>
-        public abstract void WillSleep();
+        public virtual void WillSleep() {}
 
         /// <summary>
         /// Called when the application wakes up from sleep.
         /// </summary>
-        public abstract void OnWake();
+        public virtual void OnWake() {}
 
         /// <summary>
         /// 
         /// </summary>
-        public abstract void WillReset();
+        public virtual void WillReset() {}
     }
 }

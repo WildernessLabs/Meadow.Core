@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Meadow;
 
 namespace MeadowApplication
 {
     public class MyApp : AppBase
     {
+        protected bool _running;
+
         public MyApp()
         {
             Console.WriteLine("Got here.");
@@ -12,22 +15,21 @@ namespace MeadowApplication
 
         public override void Run()
         {
-            
+            StartDoingSomeStuff();
         }
 
-        public override void WillSleep()
+        public void StartDoingSomeStuff()
         {
-            
-        }
+            _running = true;
 
-        public override void OnWake()
-        {
-            
-        }
-
-        public override void WillReset()
-        {
-            
+            Task stuff = new Task (async () => {
+                while(_running){
+                    Console.WriteLine("I'm an app, and I'm OK.");
+                    Console.WriteLine("I sleep all night, and I work all day!");
+                    await Task.Delay(5000);
+                }
+            });
+            stuff.Start();
         }
     }
 }
