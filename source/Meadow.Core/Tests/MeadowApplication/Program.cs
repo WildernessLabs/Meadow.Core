@@ -4,6 +4,10 @@ using Meadow;
 
 namespace MeadowApplication
 {
+    /// <summary>
+    /// TODO: need to bake this into the Meadow Runtime, so it automatically
+    /// runs the user's app.
+    /// </summary>
     class Program
     {
         static IApp _app;
