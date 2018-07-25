@@ -4,13 +4,16 @@ using Meadow;
 
 namespace MeadowApplication
 {
-    public class MyApp : AppBase
+    public class MyApp : AppBase<MyApp>
     {
         protected bool _running;
 
         public MyApp()
         {
             Console.WriteLine("Got here.");
+
+            // can access anywhere via:
+            var goo = MyApp.Current;
         }
 
         public override void Run()

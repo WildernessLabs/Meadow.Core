@@ -1,25 +1,19 @@
 ﻿using System;
 namespace Meadow
 {
-    public abstract class AppBase : IApp
+    public abstract class AppBase<T> : IApp where T : class, IApp
     {
         /// <summary>
-        /// TODO: is there a better way to do this? could we somehow type Current
-        /// to be the type of the consumers app, so they didn't have to cast?
-        /// 
-        /// could we abuse generics or something?
-        /// 
-        /// What about a lambda?
         /// </summary>
         /// <value>The current.</value>
-        public static IApp Current
+        public static T Current
         {
             get { return _current; }
-        } private static IApp _current;
+        } private static T _current;
 
         protected AppBase()
         {
-            _current = this;
+            _current = this as T;
         }
 
         /// <summary>
