@@ -11,5 +11,6 @@
   <ItemGroup>
     <Folder Include="Hardware\" />
     <Folder Include="Utilities\" />
+    <Folder Include="Contracts\" />
   </ItemGroup>
 </Project>
