@@ -10,7 +10,12 @@ namespace Meadow.Hardware
         D01,
         D02,
         D03,
+        D04,
+        D05,
+        A00,
         A01,
-        A02
+        A02,
+        A03,
+        A04,
     }
 }

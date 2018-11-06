@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow
 {
-    public abstract class DigitalInputPortBase
+    public abstract class DigitalInputPortBase 
     {
         public event EventHandler<PortEventArgs> Changed = delegate { };
 
@@ -20,7 +20,7 @@ namespace Meadow
 
         protected void RaiseChanged(bool value)
         {
-            this.Changed(this, new PortEventArgs() { Value = value });
+            Changed(this, new PortEventArgs() { Value = value });
         }
     }
 }
