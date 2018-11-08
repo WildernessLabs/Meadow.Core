@@ -5,19 +5,11 @@ namespace Meadow
     {
         //protected H.OutputPort _digitalOutPort = null;
 
-        public override bool InitialState
-        {
-            get {
-                return base._initialState;
-            }
-        }
+        public override bool InitialState => base._initialState;
 
-        public override bool State
+        public override bool State 
         {
-            get
-            {
-                return _state;
-            }
+            get => _state;
             set
             {
                 // TODO: Write to port

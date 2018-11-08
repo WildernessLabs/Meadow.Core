@@ -6,10 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Class1.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Hardware\" />
+    <Folder Include="Hardware\" /> 
     <Folder Include="Utilities\" />
   </ItemGroup>
 </Project>
