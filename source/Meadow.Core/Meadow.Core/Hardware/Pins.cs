@@ -17,5 +17,6 @@ namespace Meadow.Hardware
         A02,
         A03,
         A04,
+        GPIO_NONE,
     }
 }

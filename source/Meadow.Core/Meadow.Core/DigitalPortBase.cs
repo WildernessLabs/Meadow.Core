@@ -7,6 +7,22 @@ namespace Meadow
     /// </summary>
     public abstract class DigitalPortBase : IDigitalPort
     {
+        public enum InterruptMode
+        {
+            InterruptNone = 0,
+            InterruptEdgeLow = 1,
+            InterruptEdgeHigh = 2,
+            InterruptEdgeBoth = 3,
+            InterruptEdgeLevelHigh = 4,
+            InterruptEdgeLevelLow = 5
+        }
+        public enum ResistorMode
+        {
+            Disabled = 0,
+            PullDown = 1,
+            PullUp = 2
+        }
+
         /// <summary>
         /// The PortDirectionType property is backed by the readonly _direction member. 
         /// This member must be set during the constructor and describes whether the 
