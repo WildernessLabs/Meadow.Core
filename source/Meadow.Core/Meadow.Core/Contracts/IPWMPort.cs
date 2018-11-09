@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Meadow.Contracts
+namespace Meadow
 {
     public interface IPWMPort : IPort
     {
