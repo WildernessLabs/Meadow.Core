@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public abstract class PwmPinBase : DigitalPinBase, IPWMChannel
+    public abstract class PwmPinBase : DigitalPinBase, IPwmPin
     {
         public double MinimumFrequency { get; protected set; }
         public double MaximumFrequency { get; protected set; }
