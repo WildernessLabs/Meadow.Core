@@ -1,18 +1,6 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    //======
-    // NO:
-    // Pwm
-    // Led
-    // 
-    // YES:
-    // PWM
-    // LED
-    // PwmLED
-    // RgbPwmLED
-    //=========
-
     public abstract class PwmPinBase : DigitalPinBase, IPWMChannel
     {
         public double MinimumFrequency { get; protected set; }
