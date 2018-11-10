@@ -16,10 +16,10 @@ namespace Meadow
             _current = this as T;
         }
 
-        public static D Device
-        {
-            get { return _device; }
-        } private static D _device;
+        public static D Device { get; }
+        //{
+        //    get { return _device; }
+        //} private static D _device;
 
         /// <summary>
         /// Called the first time the application is started.

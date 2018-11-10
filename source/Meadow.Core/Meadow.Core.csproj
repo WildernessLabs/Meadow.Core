@@ -11,5 +11,9 @@
     <Folder Include="Contracts\" />
     <Folder Include="Devices\" />
     <Folder Include="ExtensionMethods\" />
+    <Folder Include="Hardware\Contracts\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Hardware\Pins.cs" />
   </ItemGroup>
 </Project>

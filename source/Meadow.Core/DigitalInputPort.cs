@@ -8,7 +8,7 @@ namespace Meadow
         public bool GlitchFilter { get; set; }
         public ResistorMode Resistor { get; set; }
 
-        public DigitalInputPort(Pins portId, bool glitchFilter, ResistorMode resistorMode)
+        public DigitalInputPort(IDigitalChannel pin, bool glitchFilter, ResistorMode resistorMode)
         {
 
         }

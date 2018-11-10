@@ -7,12 +7,12 @@ namespace Meadow
 {
     public class AnalogInputPort : IAnalogPort
     {
-        readonly Pins pin;
+        readonly IAnalogChannel pin;
         private Cpu.AnalogChannel analogPin;
 
         public double Value { get; set; }
 
-        public AnalogInputPort(Pins pin)
+        public AnalogInputPort(IAnalogChannel pin)
         {
             this.pin = pin;
         }

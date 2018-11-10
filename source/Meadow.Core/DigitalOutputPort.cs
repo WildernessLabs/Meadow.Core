@@ -1,4 +1,6 @@
 ﻿using System;
+using Meadow.Hardware;
+
 namespace Meadow
 {
     public class DigitalOutputPort : DigitalOutputPortBase
@@ -29,7 +31,7 @@ namespace Meadow
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        public DigitalOutputPort(Hardware.Pins pin, bool initialState = false) : base(initialState)
+        public DigitalOutputPort(IDigitalChannel pin, bool initialState = false) : base(initialState)
         {
             //this._digitalOutPort = new H.OutputPort(pin, initialState);
         }

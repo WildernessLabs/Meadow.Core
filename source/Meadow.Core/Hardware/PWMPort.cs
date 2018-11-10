@@ -5,7 +5,9 @@ namespace Meadow.Hardware
 {
     public class PWMPort : IPWMPort, IDisposable
     {
-        public PWMPort(byte pin, double frequency = 100, double dutyCycle = 0, bool invert = false) {}
+        public PWMPort(IPWMChannel pin, double frequency = 100, double dutyCycle = 0, bool invert = false) {}
+
+        //TODO: fix these
         public PWMPort(Cpu.PWMChannel channel, double frequency_Hz = 100, double dutyCycle = 0, bool invert = false) { throw new NotImplementedException(); }
         public PWMPort(Cpu.PWMChannel channel, uint period, uint duration, TimeScaleFactor scale, bool invert) { throw new NotImplementedException(); }
 

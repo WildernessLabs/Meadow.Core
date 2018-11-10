@@ -47,9 +47,9 @@ namespace Meadow.Hardware
             public readonly uint Clock_RateKHz;
             public readonly SPI_module SPI_mod;
 
-            public Configuration(Pins ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod)
+            public Configuration(IDigitalPin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod)
             { throw new NotImplementedException(); }
-            public Configuration(Pins ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod, Cpu.Pin BusyPin, bool BusyPin_ActiveState)
+            public Configuration(IDigitalPin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod, Cpu.Pin BusyPin, bool BusyPin_ActiveState)
             { throw new NotImplementedException(); }
         }
     }
