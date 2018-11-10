@@ -17,6 +17,9 @@ namespace Meadow.Hardware
         A02,
         A03,
         A04,
+        OnboardLEDRed,
+        OnboardLEDGreen,
+        OnboardLEDBlue,
         GPIO_NONE,
     }
 }

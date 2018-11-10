@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow
 {
-    public abstract class AppBase<T> : IApp where T : class, IApp
+    public abstract class AppBase<D, T> : IApp where T : class, IApp where D : class, IDevice
     {
         /// <summary>
         /// </summary>
@@ -15,6 +15,11 @@ namespace Meadow
         {
             _current = this as T;
         }
+
+        public static D Device
+        {
+            get { return _device; }
+        } private static D _device;
 
         /// <summary>
         /// Called the first time the application is started.

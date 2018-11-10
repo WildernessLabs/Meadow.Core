@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDA0F516
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeadowApplication", "Tests\MeadowApplication\MeadowApplication.csproj", "{2E18F66C-4FAA-46DC-9B3B-4A998048DD18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hello_RGB", "Tests\Hello_RGB\Hello_RGB.csproj", "{62F85143-85EA-426F-8792-0A9B3C715FDE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,13 +21,8 @@ Global
 		{2E18F66C-4FAA-46DC-9B3B-4A998048DD18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E18F66C-4FAA-46DC-9B3B-4A998048DD18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E18F66C-4FAA-46DC-9B3B-4A998048DD18}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62F85143-85EA-426F-8792-0A9B3C715FDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62F85143-85EA-426F-8792-0A9B3C715FDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62F85143-85EA-426F-8792-0A9B3C715FDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62F85143-85EA-426F-8792-0A9B3C715FDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2E18F66C-4FAA-46DC-9B3B-4A998048DD18} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
-		{62F85143-85EA-426F-8792-0A9B3C715FDE} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 	EndGlobalSection
 EndGlobal

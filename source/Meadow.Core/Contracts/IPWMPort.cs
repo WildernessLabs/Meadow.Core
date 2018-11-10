@@ -5,6 +5,7 @@ namespace Meadow
 {
     public interface IPWMPort : IPort
     {
+        // TODO: these should return Task or Task<void> or whatever
         void Start();
         void Stop();
 
@@ -16,7 +17,17 @@ namespace Meadow
         double DutyCycle { get; set; }
         double Frequency { get; set; }
 
-        double Scale { get; set; }
+        bool Inverted { get; set; }
 
+        TimeScaleFactor Scale { get; set; }
+
+    }
+
+    // TODO: Maybe factor out?
+    public enum TimeScaleFactor : uint
+    {
+        Milliseconds = 1000,
+        Microseconds = 1000000,
+        Nanoseconds = 1000000000
     }
 }

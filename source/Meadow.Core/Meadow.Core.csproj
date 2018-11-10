@@ -9,5 +9,7 @@
     <Folder Include="Hardware\" /> 
     <Folder Include="Utilities\" />
     <Folder Include="Contracts\" />
+    <Folder Include="Devices\" />
+    <Folder Include="ExtensionMethods\" />
   </ItemGroup>
 </Project>

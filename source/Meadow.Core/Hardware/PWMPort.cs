@@ -1,0 +1,36 @@
+﻿using Meadow.Hardware;
+using System;
+
+namespace Meadow.Hardware
+{
+    public class PWMPort : IPWMPort, IDisposable
+    {
+        public PWMPort(byte pin, double frequency = 100, double dutyCycle = 100, bool invert = false) {}
+        public PWMPort(Cpu.PWMChannel channel, double frequency_Hz, double dutyCycle, bool invert) { throw new NotImplementedException(); }
+        public PWMPort(Cpu.PWMChannel channel, uint period, uint duration, TimeScaleFactor scale, bool invert) { throw new NotImplementedException(); }
+
+        ~PWMPort() { throw new NotImplementedException(); }
+
+        public double Duration { get; set; }
+        public double DutyCycle { get; set; }
+        public double Frequency { get; set; }
+        public double Period { get; set; }
+        public bool Inverted { get; set; }
+        //public Cpu.Pin Pin { get; }
+        public TimeScaleFactor Scale { get; set; }
+
+        public PortDirectionType DirectionType => PortDirectionType.Output;
+        public SignalType SignalType => SignalType.Digital;
+
+        public static void Start(PWMPort[] ports) { throw new NotImplementedException(); }
+        public static void Stop(PWMPort[] ports) { throw new NotImplementedException(); }
+        public void Dispose() { throw new NotImplementedException(); }
+        public void Start() { throw new NotImplementedException(); }
+        public void Stop() { throw new NotImplementedException(); }
+        protected void Commit() { throw new NotImplementedException(); }
+        protected void Dispose(bool disposing) { throw new NotImplementedException(); }
+        protected void Init() { throw new NotImplementedException(); }
+        protected void Uninit() { throw new NotImplementedException(); }
+
+    }
+}
