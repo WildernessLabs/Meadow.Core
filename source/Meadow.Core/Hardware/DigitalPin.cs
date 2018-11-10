@@ -5,6 +5,8 @@ namespace Meadow.Hardware
     {
         public DigitalPin(string name, uint address) : base(name, address)
         {
+
+
         }
     }
 }
