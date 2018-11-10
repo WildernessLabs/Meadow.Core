@@ -1,12 +1,12 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class AnalogPin : PinBase, IAnalogPin
+    public class AnalogPin : AnalogPinBase
     {
-        public AnalogPin(string name, uint address) : base (name, address)
+        public AnalogPin(string name, uint address, byte precision = 12) 
+            : base(name, address, precision)
         {
-        }
 
-        public byte Precision => 12;
+        }
     }
 }

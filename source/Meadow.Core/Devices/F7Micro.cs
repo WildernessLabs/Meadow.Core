@@ -15,7 +15,8 @@ namespace Meadow.Devices
             this.Capabilities = new DeviceCapabilities();
         }
 
-        public PinDefinitions Pins => new PinDefinitions();
+        protected PinDefinitions _pins = new PinDefinitions();
+        public PinDefinitions Pins => _pins;
 
         public class PinDefinitions
         {
