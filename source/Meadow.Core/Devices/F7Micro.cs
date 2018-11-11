@@ -45,6 +45,9 @@ namespace Meadow.Devices
             public readonly AnalogPin A05 = AnalogChannels.A05;
         }
 
+        // NOTE: this are split into three differnt classes in the chance that 
+        // we decide to expose them as groups, as in;
+        // Device.PwmChannels, Device.DigitalPins, etc.
 
         private static class DigitalChannels
         {
