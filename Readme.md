@@ -11,15 +11,14 @@ All peripherals must be able to be constructed with either a an `IPort` or an `I
 ```
 protected IDigitalPort _port;
 
-public Relay (IDigitalPin pin) {
-   _port = new DigitalPort(pin);
-  
-}
+public Relay (IDigitalPin pin) 
+  : this (new DigitalPort(pin)) { }
 
 public Relay (IDigitalPort port) {
-	_port = port;
+   _port = port;
 }
 ```
+
 
 ### Peripherals Must Only Accept Correct Port Type
 
@@ -29,8 +28,8 @@ e.g. `IDigitalPin` or `IPWMPin`
 
 ```
 public class AnalogSensor {
-	public AnalogSensor (IAnalogPin pin) { ... }
-	public AnalogSensor (IAnalogPort port) { ... }
+   public AnalogSensor (IAnalogPin pin) { ... }
+   public AnalogSensor (IAnalogPort port) { ... }
 }
 ```
 #### Digital Example
