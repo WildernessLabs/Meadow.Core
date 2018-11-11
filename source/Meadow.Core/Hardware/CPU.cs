@@ -2,6 +2,7 @@
 
 namespace Meadow.Hardware
 {
+    //TODO delete this class.
     public static class Cpu
     {
         public static TimeSpan GlitchFilterTime { get; set; }
