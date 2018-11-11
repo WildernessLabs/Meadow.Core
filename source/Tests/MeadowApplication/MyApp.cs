@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Meadow;
+using Meadow.Devices;
 
 namespace MeadowApplication
 {
-    public class MyApp : AppBase<MyApp>
+    public class MyApp : AppBase<F7Micro, MyApp>
     {
         protected bool _running;
 
