@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    public interface IPWMPort : IPort
+    public interface IPwmPort : IPort
     {
         // TODO: these should return Task or Task<void> or whatever
         void Start();

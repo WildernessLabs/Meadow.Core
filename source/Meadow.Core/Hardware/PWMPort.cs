@@ -3,7 +3,7 @@ using System;
 
 namespace Meadow.Hardware
 {
-    public class PWMPort : IPWMPort, IDisposable
+    public class PWMPort : IPwmPort, IDisposable
     {
         public PWMPort(IPWMChannel pin, double frequency = 100, double dutyCycle = 0, bool invert = false) {}
 
