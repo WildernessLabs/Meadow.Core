@@ -13,6 +13,8 @@
     <Folder Include="ExtensionMethods\" />
     <Folder Include="Hardware\Contracts\" />
     <Folder Include="OSInterop\" />
+    <Folder Include="Communications\" />
+    <Folder Include="Enumerations\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Hardware\Pins.cs" />
