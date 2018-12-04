@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using Meadow.Hardware;
+using Meadow.Gateway.WiFi;
 
 namespace Meadow.Devices
 {
     public class F7Micro : DeviceBase
     {
+        public List<WiFiAdapter> WiFiAdapters { get; }
+
+
         static F7Micro()
         {
         }
@@ -13,6 +17,11 @@ namespace Meadow.Devices
         public F7Micro()
         {
             this.Capabilities = new DeviceCapabilities();
+            this.WiFiAdapters = new List<WiFiAdapter>
+            {
+                // TODO: stuff.
+                new WiFiAdapter()
+            };
         }
 
         protected PinDefinitions _pins = new PinDefinitions();

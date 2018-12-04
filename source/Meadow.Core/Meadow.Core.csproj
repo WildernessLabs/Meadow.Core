@@ -16,6 +16,7 @@
     <Folder Include="Communications\" />
     <Folder Include="Enumerations\" />
     <Folder Include="Gateway\" />
+    <Folder Include="Gateway\WiFi\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Hardware\Pins.cs" />
