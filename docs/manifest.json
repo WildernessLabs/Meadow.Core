@@ -1,0 +1,1316 @@
+{
+  "homepages": [],
+  "source_base_path": "C:/Users/brian/dev/gh/Meadow.Core",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Conceptual",
+      "source_relative_path": "Readme.md",
+      "output": {
+        ".html": {
+          "relative_path": "Readme.html",
+          "hash": "b/fMImhv0Vn+RLO3+jiCrw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.AnalogInputPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.AnalogInputPort.html",
+          "hash": "1KqCjYsHa0w4VdQIy2lbnA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.AppBase-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.AppBase-2.html",
+          "hash": "5F0fe4so68DZNl0BI1L/Dw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.ByteOrder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.ByteOrder.html",
+          "hash": "jLnwBG44bfjv0nZDHXVhCg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Communications.I2CBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Communications.I2CBus.html",
+          "hash": "2bg3wReeNp9stlwJXLg1Sg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Communications.ICommunicationBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Communications.ICommunicationBus.html",
+          "hash": "UEwEqosegAYOkMOIXUZzBg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Communications.OneWireBus.Devices.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Communications.OneWireBus.Devices.html",
+          "hash": "PqwPXjc+fQm9idVr78y2rA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Communications.OneWireBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Communications.OneWireBus.html",
+          "hash": "7B2dLHvfjeFXMfXpoylSMA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Communications.SPIBus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Communications.SPIBus.html",
+          "hash": "eYGVgeQxZmvfRDAAcsWt5A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Communications.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Communications.html",
+          "hash": "S9uvXZJdl0NB76n6q12hMg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DeviceBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DeviceBase.html",
+          "hash": "7lMZsZZR741m6yElnirLng=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DeviceCapabilities.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DeviceCapabilities.html",
+          "hash": "Lfc60Uq8j6dW8BWQHSaMuQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Devices.F7Micro.PinDefinitions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Devices.F7Micro.PinDefinitions.html",
+          "hash": "a6QKIlFm4QSN9oweXA2iTg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Devices.F7Micro.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Devices.F7Micro.html",
+          "hash": "Hzn4rKmYgPAfWL5gY3PaIw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Devices.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Devices.html",
+          "hash": "RP33Ye7EYEC9UMq5hHIY+w=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalInputPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalInputPort.html",
+          "hash": "eXhY65EWjnmj7Yh/+mQxJQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalInputPortBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalInputPortBase.html",
+          "hash": "sFYp9hR1CxnFda2x9/z8yw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalOutputPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalOutputPort.html",
+          "hash": "CzMXVVdidS3elroMRJrqVA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalOutputPortBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalOutputPortBase.html",
+          "hash": "CnfNEGFyhYLbAh0CqKrNKw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalPortBase.InterruptMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalPortBase.InterruptMode.html",
+          "hash": "REVxaSXG8eProGosvv4XSw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalPortBase.ResistorMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalPortBase.ResistorMode.html",
+          "hash": "u1P24pmguCy40zGtkG7ZEg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.DigitalPortBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.DigitalPortBase.html",
+          "hash": "YXcTL2BvJR0BcbqNocFoIg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.Bluetooth.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.Bluetooth.html",
+          "hash": "AAAW7NFO1J5KtRhKQ9AUYA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.ConnectionMethodType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.ConnectionMethodType.html",
+          "hash": "k2X5z1nbB9bK/Vg//dtQ6A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.ConnectionResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.ConnectionResult.html",
+          "hash": "3Dx17SlLJAWxwudC+ds2lw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.ConnectionStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.ConnectionStatus.html",
+          "hash": "s569YcRLIFbSla+n2Dkt9w=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.NetworkAuthenticationType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.NetworkAuthenticationType.html",
+          "hash": "y2Ye0nPNKLdkbx5oKpX2wg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.NetworkEncryptionType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.NetworkEncryptionType.html",
+          "hash": "Cb/GCVdn0KrOcrpoHeY1Qg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.NetworkSecuritySettings.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.NetworkSecuritySettings.html",
+          "hash": "42Qx2suuHr96SaebIweMSQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.NetworkType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.NetworkType.html",
+          "hash": "FUd82CXsKIDRDXH+HE3aJg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.PhyType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.PhyType.html",
+          "hash": "XZVt6zCnIq7bvf4GimUmGw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.ReconnectionType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.ReconnectionType.html",
+          "hash": "s5/6Z01fL5ApUWeZpKG0Qw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.WiFiAdapter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.WiFiAdapter.html",
+          "hash": "J32l9pB2uyQoBIDbqT/cOw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.WifiNetwork.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.WifiNetwork.html",
+          "hash": "h8ZZf5/6mpLvFWleztdjyw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.WiFi.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.WiFi.html",
+          "hash": "3tA6IW3jYm73VpTnYfD8iw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Gateway.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Gateway.html",
+          "hash": "uUakbDy8L7jtvevZ8vMZSA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.AnalogPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.AnalogPin.html",
+          "hash": "FFV9JSn1RUl4lYVcy3lvVw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.AnalogPinBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.AnalogPinBase.html",
+          "hash": "i59SplTrCi4yxLwLpDToNA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.AnalogChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.AnalogChannel.html",
+          "hash": "ATrQUbCRr1GWBKUOwlEpQQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.AnalogOutputChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.AnalogOutputChannel.html",
+          "hash": "eBreEvkrFd0JWSqVoqNSbA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.PWMChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.PWMChannel.html",
+          "hash": "DK68mseo2JD7Ro0AV0nV4A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.Pin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.Pin.html",
+          "hash": "vZFYhncEUxxf9Q9TY22rRw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.PinUsage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.PinUsage.html",
+          "hash": "5y4w70dXtYiGSzJB36Kx5A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.PinValidInterruptMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.PinValidInterruptMode.html",
+          "hash": "mgipC/cwbB+jbI0D4J2pjg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.PinValidResistorMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.PinValidResistorMode.html",
+          "hash": "j9WqF+p4Khx7Zj0mOM6cNA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Cpu.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Cpu.html",
+          "hash": "ySeBwcquXSoSt/X1g7zCIw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.DigitalPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.DigitalPin.html",
+          "hash": "w3eEWnMjYZ1zjORIQ8Im0g=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.DigitalPinBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.DigitalPinBase.html",
+          "hash": "Cl3HIY0FpG3bm5SGDxBKxw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Handshake.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Handshake.html",
+          "hash": "belnQk+zRZuWdzSgYKxF+g=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.I2CDevice.Configuration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.I2CDevice.Configuration.html",
+          "hash": "5NaUlcGKqqyYmLaH99VnSQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.I2CDevice.I2CReadTransaction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.I2CDevice.I2CReadTransaction.html",
+          "hash": "3MldNoOQA+xdn2rdqaRucQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.I2CDevice.I2CTransaction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.I2CDevice.I2CTransaction.html",
+          "hash": "oZ64YFnyDS6a07PlS71RLQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.I2CDevice.I2CWriteTransaction.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.I2CDevice.I2CWriteTransaction.html",
+          "hash": "WiPhqcspIn2DJ/BJiaKL+g=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.I2CDevice.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.I2CDevice.html",
+          "hash": "YCT/oM010tpo1Z2HLBMhEw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IAnalogChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IAnalogChannel.html",
+          "hash": "/sMRwL6ucrYrf0wJA+w9VQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IAnalogPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IAnalogPin.html",
+          "hash": "lXBt59CW2MQjjgwdS0YHaQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IDigitalChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IDigitalChannel.html",
+          "hash": "5EqfOUzd7D9veI8RptSdfA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IDigitalPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IDigitalPin.html",
+          "hash": "LaEdLJIqRg0ZCedSUItX7A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IPWMChannel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IPWMChannel.html",
+          "hash": "6QfnJKNlsQ+9OVt0g+v4ug=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IPin.html",
+          "hash": "LWuHF3+9kpt/J36yBCRwgQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.IPwmPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.IPwmPin.html",
+          "hash": "WMA+BzeUnneYTgbUF0pIqQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.PWMPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.PWMPort.html",
+          "hash": "t/LjqVRSOaoBtf0TCBrvcg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Parity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Parity.html",
+          "hash": "h0c0INUibDNmw0RhZ6WG3A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.Pin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.Pin.html",
+          "hash": "oTokbqkrq0vE6u46/G5+rQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.PinBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.PinBase.html",
+          "hash": "IrKjFBSgp3sTZn4reptI1w=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.PwmPin.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.PwmPin.html",
+          "hash": "qZixuc4Qo/I1NUJqUd9QOA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.PwmPinBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.PwmPinBase.html",
+          "hash": "tJPzYaHU3s5Q2L/nD2XiMg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SPI.Configuration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SPI.Configuration.html",
+          "hash": "z37JTfYIqSI5a4v0zm+MYQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SPI.SPI_module.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SPI.SPI_module.html",
+          "hash": "pwUDkOnw5XvcN3yObK7nrw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SPI.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SPI.html",
+          "hash": "RuZvlHEkbmJeaYp4mbTH2A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialData.html",
+          "hash": "G0eBw0/zQ1VcWc1NWm1RgQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialDataReceivedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialDataReceivedEventArgs.html",
+          "hash": "BRPQYT9U6Y4MhRsXwFzV7Q=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialError.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialError.html",
+          "hash": "lIw+kfPDsb5Qy2P5rLA0Sw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialErrorReceivedEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialErrorReceivedEventArgs.html",
+          "hash": "bgasuByB7oR6MiENtavYow=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialPort.SerialDataReceivedEventHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialPort.SerialDataReceivedEventHandler.html",
+          "hash": "uV64CDMn77GbV2fvXdm2Ng=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialPort.SerialErrorReceivedEventHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialPort.SerialErrorReceivedEventHandler.html",
+          "hash": "VpS5qnZV97BbrDiGEW8f1A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.SerialPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.SerialPort.html",
+          "hash": "C1ciPgd09v5w/GtdELPySA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.StopBits.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.StopBits.html",
+          "hash": "6WzQGmeqH92UA7MQTeTMDA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Hardware.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Hardware.html",
+          "hash": "kKUItZbeMOPhNDJKfcfgMQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IAnalogPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IAnalogPort.html",
+          "hash": "+6A0C3/hX4XweaGvJSXhwQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IApp.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IApp.html",
+          "hash": "SLX/oGjqN/rEAMtq71ztHw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IDevice.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IDevice.html",
+          "hash": "ZvI9lZWD1jcJHX6mjrG4Gw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IDigitalInputPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IDigitalInputPort.html",
+          "hash": "FAoRjeMp1q8ACyVEGYRd1A=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IDigitalOutputPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IDigitalOutputPort.html",
+          "hash": "D1z/Uq4xeyXGuplFowUWvg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IDigitalPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IDigitalPort.html",
+          "hash": "2AlDsiIEDiJvsyablY/y9Q=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IPort.html",
+          "hash": "h7Ra1Wg0hveEzYFrgzZWXg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.IPwmPort.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.IPwmPort.html",
+          "hash": "32pX3ggdbQVWGvUdL6QT2g=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.NetworkCapabilities.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.NetworkCapabilities.html",
+          "hash": "cyfVflUGTlZtYVxY5FGNGw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.OneWire.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.OneWire.html",
+          "hash": "akRfPmjd5Ix4JsuFCiQykw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.PortDirectionType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.PortDirectionType.html",
+          "hash": "0IXUMssfodOjOwckmXz3VA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.PortEventArgs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.PortEventArgs.html",
+          "hash": "Zwww+cfm2fVlj2L38bfbUg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.SignalType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.SignalType.html",
+          "hash": "NDAeES4rX74dN9PHMdHz+g=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.TerminationType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.TerminationType.html",
+          "hash": "XGzx03wQ4DhvaECf5YN4TQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.TimeScaleFactor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.TimeScaleFactor.html",
+          "hash": "TGj/1RPHxZvZMfc6HrnIPA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Utilities.BitHelpers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Utilities.BitHelpers.html",
+          "hash": "OCAITJQpMc122bdUZibn9g=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.Utilities.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.Utilities.html",
+          "hash": "rOFba4C0knlp8rNIpHMRIg=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Meadow.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Meadow.html",
+          "hash": "jBomez5ffDQe0d6QzPOrKA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MeadowApplication.MyApp.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MeadowApplication.MyApp.html",
+          "hash": "9prTwpSRFGIfCJuVbgdsOQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MeadowApplication.SomeOtherClass.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MeadowApplication.SomeOtherClass.html",
+          "hash": "FyZXN3OvhXo88AdLbtraEQ=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/MeadowApplication.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/MeadowApplication.html",
+          "hash": "42y5BBvbXx+GRNgXXSZfEw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "OH88GZYxgDyG/5iCIEPYYw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "pnC1Orl7/5ZXfdD/0KfHvQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html",
+          "hash": "khDjkdNbtBj3sJ1zpLrcIw=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html",
+          "hash": "t7iiFrmuYmrKWisdq+lN6Q=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "LtAa6zudShEg5ntssUrqoA=="
+        }
+      },
+      "is_incremental": true,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "k+/dkjFuwAVS32HduMpmBw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": true,
+        "incrementalPhase": "build"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": true,
+          "incrementalPhase": "build"
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": true,
+          "incrementalPhase": "build"
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build"
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": true,
+        "details": "Can support incremental post processing.",
+        "incrementalPhase": "postProcessing"
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
