@@ -1,24 +1,107 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Meadow</RootNamespace>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Meadow.Core</RootNamespace>
+    <AssemblyName>Meadow.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Hardware\" /> 
-    <Folder Include="Utilities\" />
-    <Folder Include="Contracts\" />
-    <Folder Include="Devices\" />
-    <Folder Include="ExtensionMethods\" />
-    <Folder Include="Hardware\Contracts\" />
-    <Folder Include="OSInterop\" />
-    <Folder Include="Communications\" />
-    <Folder Include="Enumerations\" />
-    <Folder Include="Gateway\" />
-    <Folder Include="Gateway\WiFi\" />
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Hardware\Pins.cs" />
+    <Compile Include="AnalogInputPort.cs" />
+    <Compile Include="AppBase.cs" />
+    <Compile Include="DeviceBase.cs" />
+    <Compile Include="DeviceCapabilities.cs" />
+    <Compile Include="DigitalInputPort.cs" />
+    <Compile Include="DigitalInputPortBase.cs" />
+    <Compile Include="DigitalOutputPort.cs" />
+    <Compile Include="DigitalOutputPortBase.cs" />
+    <Compile Include="DigitalPortBase.cs" />
+    <Compile Include="OneWire.cs" />
+    <Compile Include="PortDirectionType.cs" />
+    <Compile Include="PortEventArgs.cs" />
+    <Compile Include="SignalType.cs" />
+    <Compile Include="TerminationType.cs" />
+    <Compile Include="Communications\I2CBus.cs" />
+    <Compile Include="Communications\ICommunicationBus.cs" />
+    <Compile Include="Communications\OneWireBus.cs" />
+    <Compile Include="Communications\SPIBus.cs" />
+    <Compile Include="Communications\SoftwareSPIBus.cs" />
+    <Compile Include="Contracts\IAnalogPort.cs" />
+    <Compile Include="Contracts\IApp.cs" />
+    <Compile Include="Contracts\IDevice.cs" />
+    <Compile Include="Contracts\IDigitalInputPort.cs" />
+    <Compile Include="Contracts\IDigitalOutputPort.cs" />
+    <Compile Include="Contracts\IDigitalPort.cs" />
+    <Compile Include="Contracts\IPort.cs" />
+    <Compile Include="Contracts\IPwmPort.cs" />
+    <Compile Include="Devices\F7Micro.cs" />
+    <Compile Include="Enumerations\ByteOrder.cs" />
+    <Compile Include="ExtensionMethods\Color.cs" />
+    <Compile Include="Gateway\Bluetooth.cs" />
+    <Compile Include="Gateway\WiFi\ConnectionMethodType.cs" />
+    <Compile Include="Gateway\WiFi\ConnectionResult.cs" />
+    <Compile Include="Gateway\WiFi\ConnectionStatus.cs" />
+    <Compile Include="Gateway\WiFi\NetworkAuthenticationType.cs" />
+    <Compile Include="Gateway\WiFi\NetworkEncryptionType.cs" />
+    <Compile Include="Gateway\WiFi\NetworkSecuritySettings.cs" />
+    <Compile Include="Gateway\WiFi\NetworkType.cs" />
+    <Compile Include="Gateway\WiFi\PhyType.cs" />
+    <Compile Include="Gateway\WiFi\ReconnectionType.cs" />
+    <Compile Include="Gateway\WiFi\WiFiAdapter.cs" />
+    <Compile Include="Gateway\WiFi\WiFiNetwork.cs" />
+    <Compile Include="Hardware\AnalogPin.cs" />
+    <Compile Include="Hardware\AnalogPinBase.cs" />
+    <Compile Include="Hardware\CPU.cs" />
+    <Compile Include="Hardware\DigitalPin.cs" />
+    <Compile Include="Hardware\DigitalPinBase.cs" />
+    <Compile Include="Hardware\PWMPort.cs" />
+    <Compile Include="Hardware\Pin.cs" />
+    <Compile Include="Hardware\PinBase.cs" />
+    <Compile Include="Hardware\PwmPin.cs" />
+    <Compile Include="Hardware\PwmPinBase.cs" />
+    <Compile Include="Hardware\SPI.cs" />
+    <Compile Include="Hardware\SerialPort.cs" />
+    <Compile Include="Hardware\Contracts\I2CDevice.cs" />
+    <Compile Include="Hardware\Contracts\IAnalogChannel.cs" />
+    <Compile Include="Hardware\Contracts\IAnalogPin.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalChannel.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalPin.cs" />
+    <Compile Include="Hardware\Contracts\IPWMChannel.cs" />
+    <Compile Include="Hardware\Contracts\IPin.cs" />
+    <Compile Include="Hardware\Contracts\IPwmPin.cs" />
+    <Compile Include="OSInterop\Platform.cs" />
+    <Compile Include="Utilities\BitHelpers.cs" />
+    <Compile Include="Interop\Interop.clock_gettime.cs" />
+    <Compile Include="Interop\Interop.timespec.cs" />
+    <Compile Include="Interop\Interop.clock_settime.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+    <Folder Include="Interop\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
