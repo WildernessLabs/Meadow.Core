@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace Meadow
+﻿namespace Meadow.Hardware
 {
     public interface IPwmPort : IPort
     {

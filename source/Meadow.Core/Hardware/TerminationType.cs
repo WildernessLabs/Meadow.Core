@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow
+﻿namespace Meadow.Hardware
 {
     /// <summary>
     /// Whether the circuit is terminated into the common/ground or a high (3.3V) voltage

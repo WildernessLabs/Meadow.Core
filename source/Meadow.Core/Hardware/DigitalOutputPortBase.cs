@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow
+﻿namespace Meadow.Hardware
 {
     /// <summary>
     /// DigitalOutputPortBase inherits from DigitalPortBase and provides a 

@@ -1,5 +1,6 @@
 ﻿using System;
-namespace Meadow
+
+namespace Meadow.Hardware
 {
     public abstract class DigitalInputPortBase : DigitalPortBase
     {

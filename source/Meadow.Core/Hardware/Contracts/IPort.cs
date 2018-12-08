@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Meadow
+﻿namespace Meadow.Hardware
 {
     //TODO: add IDisposable
     public interface IPort //: IDisposable

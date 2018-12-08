@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 /*
-namespace Meadow.Foundation.Communications
+namespace Meadow.Hardware.Communications
 {
     /// <summary>
     ///     Implement a software version of the SPI communication protocol.

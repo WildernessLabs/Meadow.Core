@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Meadow.Gateway
+namespace Meadow.Gateways
 {
     public class Bluetooth
     {

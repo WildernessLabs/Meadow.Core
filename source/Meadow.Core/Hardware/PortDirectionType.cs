@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow
+﻿namespace Meadow.Hardware
 {
     public enum PortDirectionType : byte
     {

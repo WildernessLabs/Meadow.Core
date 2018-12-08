@@ -1,5 +1,5 @@
 ﻿
-namespace Meadow.Communications
+namespace Meadow.Hardware.Communications
 {
     /// <summary>
     ///     Define a standard interface for communicating with an attached

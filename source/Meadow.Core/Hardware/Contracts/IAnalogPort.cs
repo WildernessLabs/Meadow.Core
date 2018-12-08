@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Meadow
+namespace Meadow.Hardware
 {
     public interface IAnalogPort : IPort
     {

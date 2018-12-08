@@ -1,8 +1,7 @@
-﻿using Meadow.Hardware;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Meadow.Communications
+namespace Meadow.Hardware.Communications
 {
     /// <summary>
     ///     I2CBus object used to communicate with an I2C device using the ICommunicationBus

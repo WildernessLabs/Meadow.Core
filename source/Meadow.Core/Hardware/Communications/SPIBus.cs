@@ -1,7 +1,6 @@
-﻿using Meadow.Hardware;
-using System;
+﻿using System;
 
-namespace Meadow.Communications
+namespace Meadow.Hardware.Communications
 {
     public class SPIBus : ICommunicationBus
     {

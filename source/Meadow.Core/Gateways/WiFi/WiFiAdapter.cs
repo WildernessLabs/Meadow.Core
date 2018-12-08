@@ -17,9 +17,9 @@ namespace Meadow.Gateway.WiFi
 
         }
 
-        public Task BeginScan()
+        public void BeginScan()
         {
-            return Task.Run(() => { 
+            Task.Run(() => { 
                 // do work.
             });
         }

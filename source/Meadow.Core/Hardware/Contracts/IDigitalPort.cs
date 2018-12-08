@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Meadow
+namespace Meadow.Hardware
 {
     public interface IDigitalPort : IPort
     {

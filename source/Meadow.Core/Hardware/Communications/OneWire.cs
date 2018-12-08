@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace Meadow
+namespace Meadow.Hardware.Communications
 {
     public class OneWire
     {

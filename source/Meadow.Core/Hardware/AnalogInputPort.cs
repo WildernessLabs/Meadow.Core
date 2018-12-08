@@ -1,9 +1,6 @@
-﻿using Meadow.Hardware;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
-namespace Meadow
+namespace Meadow.Hardware
 {
     public class AnalogInputPort : IAnalogPort
     {

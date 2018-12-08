@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow
+﻿namespace Meadow.Hardware
 {
     /// <summary>
     /// DigitalPortBase provides a base implementation for much of the 
