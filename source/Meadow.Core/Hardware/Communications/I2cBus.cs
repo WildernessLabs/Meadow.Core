@@ -19,12 +19,12 @@ namespace Meadow.Hardware.Communications
         ///     This I2CDevice is static and shared across all instances of the I2CBus.
         ///     Communication with difference devices is made possible by changing the
         /// </remarks>
-        private static I2CDevice _device;
+        private static I2cDevice _device;
 
         /// <summary>
         ///     Configuration property for this I2CDevice.
         /// </summary>
-        private readonly I2CDevice.Configuration _configuration;
+        private readonly I2cDevice.Configuration _configuration;
 
         /// <summary>
         ///     Timeout for I2C transactions.
@@ -51,10 +51,10 @@ namespace Meadow.Hardware.Communications
         /// <param name="transactionTimeout">Transaction timeout in milliseconds.</param>
         public I2CBus(byte address, ushort speed, ushort transactionTimeout = 100)
         {
-            _configuration = new I2CDevice.Configuration(address, speed);
+            _configuration = new I2cDevice.Configuration(address, speed);
             if (_device == null)
             {
-                _device = new I2CDevice(_configuration);
+                _device = new I2cDevice(_configuration);
             }
             _transactionTimeout = transactionTimeout;
         }
@@ -84,9 +84,9 @@ namespace Meadow.Hardware.Communications
         public void WriteBytes(byte[] values)
         {
             _device.Config = _configuration;
-            I2CDevice.I2CTransaction[] transaction =
+            I2cDevice.I2CTransaction[] transaction =
             {
-                I2CDevice.CreateWriteTransaction(values)
+                I2cDevice.CreateWriteTransaction(values)
             };
             var retryCount = 0;
             while (_device.Execute(transaction, _transactionTimeout) != values.Length)
@@ -162,10 +162,10 @@ namespace Meadow.Hardware.Communications
         {
             _device.Config = _configuration;
             var read = new byte[length];
-            I2CDevice.I2CTransaction[] transaction =
+            I2cDevice.I2CTransaction[] transaction =
             {
-                I2CDevice.CreateWriteTransaction(write),
-                I2CDevice.CreateReadTransaction(read)
+                I2cDevice.CreateWriteTransaction(write),
+                I2cDevice.CreateReadTransaction(read)
             };
             var bytesTransferred = 0;
             var retryCount = 0;
@@ -229,9 +229,9 @@ namespace Meadow.Hardware.Communications
         {
             _device.Config = _configuration;
             var result = new byte[numberOfBytes];
-            I2CDevice.I2CTransaction[] transaction =
+            I2cDevice.I2CTransaction[] transaction =
             {
-                I2CDevice.CreateReadTransaction(result)
+                I2cDevice.CreateReadTransaction(result)
             };
             var retryCount = 0;
             while (_device.Execute(transaction, _transactionTimeout) != numberOfBytes)

@@ -9,12 +9,12 @@ namespace Meadow.Hardware.Communications
         /// <summary>
         ///     SPI bus object.
         /// </summary>
-        private static SPI _spi;
+        private static Spi _spi;
 
         /// <summary>
         ///     Configuration to use for this instance of the SPIBus.
         /// </summary>
-        private SPI.Configuration _configuration;
+        private Spi.Configuration _configuration;
 
         #endregion Member variables / fields
 
@@ -34,10 +34,10 @@ namespace Meadow.Hardware.Communications
         ///     Create a new SPIBus object.
         /// </summary>
         /// <param name="configuration">SPI bus configuration.</param>
-        public SPIBus(SPI.Configuration configuration)
+        public SPIBus(Spi.Configuration configuration)
         {
             _configuration = configuration;
-            _spi = new SPI(configuration);
+            _spi = new Spi(configuration);
         }
 
         /// <summary>
@@ -48,10 +48,10 @@ namespace Meadow.Hardware.Communications
         /// <param name="cpha">CPHA - Clock Phase (0 or 1).</param>
         /// <param name="cpol">CPOL - Clock Polarity (0 or 1).</param>
         /// <param name="speed">Speed of the SPI bus.</param>
-        public SPIBus(SPI.SPI_module module, IDigitalPin chipSelect, ushort speed = 1000, byte cpha = 0, byte cpol = 0)
+        public SPIBus(Spi.SPI_module module, IDigitalPin chipSelect, ushort speed = 1000, byte cpha = 0, byte cpol = 0)
         {
             Configure(module, chipSelect, cpha, cpol, speed);
-            _spi = new SPI(_configuration);
+            _spi = new Spi(_configuration);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="chipSelect">Chip select pin.</param>
         /// <param name="mode">SPI Bus Mode - should be in the range 0 - 3.</param>
         /// <param name="speed">Speed of the SPI bus.</param>
-        public SPIBus(SPI.SPI_module module, IDigitalPin chipSelect, byte mode, ushort speed)
+        public SPIBus(Spi.SPI_module module, IDigitalPin chipSelect, byte mode, ushort speed)
         {
             if (mode > 3)
             {
@@ -90,7 +90,7 @@ namespace Meadow.Hardware.Communications
                     break;
             }
             Configure(module, chipSelect, cpha, cpol, speed);
-            _spi = new SPI(_configuration);
+            _spi = new Spi(_configuration);
         }
 
         #endregion Constructor(s)
@@ -106,7 +106,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="cpol">CPOL - Clock polarity (0 or 1).</param>
         /// <param name="speed">Speed of the SPI bus.</param>
         /// <returns>SPI Configuration object.</returns>
-        private void Configure(SPI.SPI_module module, IDigitalPin chipSelect, byte cpha, byte cpol,
+        private void Configure(Spi.SPI_module module, IDigitalPin chipSelect, byte cpha, byte cpol,
             ushort speed)
         {
             if (cpha > 1)
@@ -117,7 +117,7 @@ namespace Meadow.Hardware.Communications
             {
                 throw new ArgumentException("Clock polarity should be 0 to 1.");
             }
-            _configuration = new SPI.Configuration(SPI_mod: module,
+            _configuration = new Spi.Configuration(SPI_mod: module,
                                                ChipSelect_Port: chipSelect,
                                                ChipSelect_ActiveState: false,
                                                ChipSelect_SetupTime: 0,
