@@ -36,11 +36,11 @@ namespace Meadow.Hardware
 
         public class Configuration
         {
-            public readonly Cpu.Pin BusyPin;
+            public readonly IDigitalPin BusyPin;
             public readonly bool BusyPin_ActiveState;
             public readonly bool ChipSelect_ActiveState;
             public readonly uint ChipSelect_HoldTime;
-            public readonly Cpu.Pin ChipSelect_Port;
+            public readonly IDigitalPin ChipSelect_Port;
             public readonly uint ChipSelect_SetupTime;
             public readonly bool Clock_Edge;
             public readonly bool Clock_IdleState;
@@ -49,7 +49,7 @@ namespace Meadow.Hardware
 
             public Configuration(IDigitalPin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod)
             { throw new NotImplementedException(); }
-            public Configuration(IDigitalPin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod, Cpu.Pin BusyPin, bool BusyPin_ActiveState)
+            public Configuration(IDigitalPin ChipSelect_Port, bool ChipSelect_ActiveState, uint ChipSelect_SetupTime, uint ChipSelect_HoldTime, bool Clock_IdleState, bool Clock_Edge, uint Clock_RateKHz, SPI_module SPI_mod, IDigitalPin BusyPin, bool BusyPin_ActiveState)
             { throw new NotImplementedException(); }
         }
     }

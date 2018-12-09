@@ -5,12 +5,10 @@
     <RootNamespace>Meadow</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Hardware\" /> 
+  <ItemGroup> 
     <Folder Include="Utilities\" />
     <Folder Include="Contracts\" />
     <Folder Include="Devices\" />
-    <Folder Include="ExtensionMethods\" />
     <Folder Include="Hardware\Contracts\" />
     <Folder Include="OSInterop\" />
     <Folder Include="Enums\" />
@@ -19,7 +17,6 @@
     <Folder Include="Gateways\Bluetooth\" />
     <Folder Include="Hardware\Communications\" />
     <Folder Include="Hardware\Bases\" />
-    <Folder Include="Hardware\Enums\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Hardware\Pins.cs" />

@@ -61,13 +61,13 @@ namespace Meadow.Hardware.Communications
         /// <param name="chipSelect">Chip select pin.</param>
         /// <param name="cpha">Clock phase (0 or 1, default is 0).</param>
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
-        public SoftwareSPIBus(Cpu.Pin mosi, Cpu.Pin miso, Cpu.Pin clock, Cpu.Pin chipSelect, byte cpha = 0, byte cpol = 0)
+        public SoftwareSPIBus(IDigitalPin mosi, IDigitalPin miso, IDigitalPin clock, IDigitalPin chipSelect, byte cpha = 0, byte cpol = 0)
         {
-            if (mosi == Cpu.Pin.GPIO_NONE)
+            if (mosi == IDigitalPin.GPIO_NONE)
             {
                 throw new ArgumentException("MOSI line cannot be set to None.");
             }
-            if (clock == Cpu.Pin.GPIO_NONE)
+            if (clock == IDigitalPin.GPIO_NONE)
             {
                 throw new ArgumentException("Clock line cannot be set to None");
             }
@@ -75,9 +75,9 @@ namespace Meadow.Hardware.Communications
             _phase = (cpha == 1);
             _polarity = (cpol == 1);
             _mosi = new DigitalOutputPort(mosi, false);
-            _miso = miso == Cpu.Pin.GPIO_NONE ? null : new InputPort(miso, false, Port.ResistorMode.Disabled);
+            _miso = miso == IDigitalPin.GPIO_NONE ? null : new InputPort(miso, false, Port.ResistorMode.Disabled);
             _clock = new DigitalOutputPort(clock, _polarity);
-            _chipSelect = chipSelect == Cpu.Pin.GPIO_NONE ? null : new DigitalOutputPort(chipSelect, true);
+            _chipSelect = chipSelect == IDigitalPin.GPIO_NONE ? null : new DigitalOutputPort(chipSelect, true);
         }
 
         #endregion Constructors
