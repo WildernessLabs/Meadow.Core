@@ -30,6 +30,5 @@ namespace Meadow
         /// processing time.
         /// </summary>
         void WillReset();
-
     }
 }
