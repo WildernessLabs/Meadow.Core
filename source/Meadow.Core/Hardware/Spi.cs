@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Meadow.Hardware
 {
-    public class SPI : IDisposable
+    public class Spi : IDisposable
     {
         public enum SPI_module
         {
@@ -14,12 +14,12 @@ namespace Meadow.Hardware
             SPI4 = 3
         }
 
-        public SPI(Configuration config)
+        public Spi(Configuration config)
         {
 
         }
 
-        ~SPI() { throw new NotImplementedException(); }
+        ~Spi() { throw new NotImplementedException(); }
 
         public Configuration Config { get; set; }
 

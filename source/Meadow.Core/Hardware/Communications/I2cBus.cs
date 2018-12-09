@@ -7,7 +7,7 @@ namespace Meadow.Hardware.Communications
     ///     I2CBus object used to communicate with an I2C device using the ICommunicationBus
     ///     interface methods.
     /// </summary>
-    public class I2CBus : ICommunicationBus
+    public class I2cBus : ICommunicationBus
     {
         #region Member variables / fields.
 
@@ -39,7 +39,7 @@ namespace Meadow.Hardware.Communications
         ///     Default constructor for the I2CBus class.  This is private to prevent the
         ///     developer from calling it.
         /// </summary>
-        private I2CBus()
+        private I2cBus()
         {
         }
 
@@ -49,7 +49,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="address">Address of the device.</param>
         /// <param name="speed">Bus speed in kHz.</param>
         /// <param name="transactionTimeout">Transaction timeout in milliseconds.</param>
-        public I2CBus(byte address, ushort speed, ushort transactionTimeout = 100)
+        public I2cBus(byte address, ushort speed, ushort transactionTimeout = 100)
         {
             _configuration = new I2cDevice.Configuration(address, speed);
             if (_device == null)

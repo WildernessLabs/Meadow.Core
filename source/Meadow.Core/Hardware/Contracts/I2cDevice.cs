@@ -2,14 +2,14 @@
 
 namespace Meadow.Hardware
 {
-    public class I2CDevice : IDisposable
+    public class I2cDevice : IDisposable
     {
         public Configuration Config;
         protected bool m_disposed;
 
-        public I2CDevice(Configuration config) { throw new NotImplementedException(); }
+        public I2cDevice(Configuration config) { throw new NotImplementedException(); }
 
-        ~I2CDevice() { throw new NotImplementedException(); }
+        ~I2cDevice() { throw new NotImplementedException(); }
 
         public static I2CReadTransaction CreateReadTransaction(byte[] buffer) { throw new NotImplementedException(); }
         public static I2CWriteTransaction CreateWriteTransaction(byte[] buffer) { throw new NotImplementedException(); }

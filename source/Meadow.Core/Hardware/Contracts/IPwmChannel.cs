@@ -2,7 +2,7 @@
 
 namespace Meadow.Hardware
 {
-    public interface IPWMChannel
+    public interface IPwmChannel
     {
         double MinimumFrequency { get; }
         double MaximumFrequency { get; }

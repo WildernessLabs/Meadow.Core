@@ -3,15 +3,15 @@ using System;
 
 namespace Meadow.Hardware
 {
-    public class PWMPort : IPwmPort, IDisposable
+    public class PwmPort : IPwmPort, IDisposable
     {
-        public PWMPort(IPWMChannel pin, double frequency = 100, double dutyCycle = 0, bool invert = false) {}
+        public PwmPort(IPwmChannel pin, double frequency = 100, double dutyCycle = 0, bool invert = false) {}
 
         //TODO: fix these
-        public PWMPort(Cpu.PWMChannel channel, double frequency_Hz = 100, double dutyCycle = 0, bool invert = false) { throw new NotImplementedException(); }
-        public PWMPort(Cpu.PWMChannel channel, uint period, uint duration, TimeScaleFactor scale, bool invert) { throw new NotImplementedException(); }
+        public PwmPort(Cpu.PWMChannel channel, double frequency_Hz = 100, double dutyCycle = 0, bool invert = false) { throw new NotImplementedException(); }
+        public PwmPort(Cpu.PWMChannel channel, uint period, uint duration, TimeScaleFactor scale, bool invert) { throw new NotImplementedException(); }
 
-        ~PWMPort() { throw new NotImplementedException(); }
+        ~PwmPort() { throw new NotImplementedException(); }
 
         public double Duration { get; set; }
         public double DutyCycle { get; set; }
@@ -24,8 +24,8 @@ namespace Meadow.Hardware
         public PortDirectionType DirectionType => PortDirectionType.Output;
         public SignalType SignalType => SignalType.Digital;
 
-        public static void Start(PWMPort[] ports) { throw new NotImplementedException(); }
-        public static void Stop(PWMPort[] ports) { throw new NotImplementedException(); }
+        public static void Start(PwmPort[] ports) { throw new NotImplementedException(); }
+        public static void Stop(PwmPort[] ports) { throw new NotImplementedException(); }
         public void Dispose() { throw new NotImplementedException(); }
         public void Start() { throw new NotImplementedException(); }
         public void Stop() { throw new NotImplementedException(); }
