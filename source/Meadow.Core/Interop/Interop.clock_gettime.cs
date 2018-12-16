@@ -7,7 +7,7 @@ namespace Meadow.Core.Interop
     {
         public static partial class Nuttx
         {
-            [DllImport("nuttx", SetLastError = true)]
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int clock_gettime(clockid_t clk_id, ref timespec tp);
         }
     }

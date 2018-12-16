@@ -103,6 +103,12 @@
     <Compile Include="Interop\Interop.timespec.cs" />
     <Compile Include="OSInterop\Platform.cs" />
     <Compile Include="Utilities\BitHelpers.cs" />
+    <Compile Include="Interop\Interop.open.cs" />
+    <Compile Include="Interop\Interop.cs" />
+    <Compile Include="Interop\Interop.gpio.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Interop\stm32_gpio.h" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
