@@ -30,11 +30,15 @@ namespace Meadow.Core.Interop
             public enum GPIOPinType
             {
                 Input = 0,
-                Output,
-                Interrupt
+                Output = 1,
+                Interrupt = 2
             }; 
 
-
+            public struct GPIOPinState
+            {
+                public int PinNumber;
+                public bool State;
+            }
             //#define _TIOCBASE       (0x0100) /* Terminal I/O ioctl commands */
             //#define _WDIOCBASE      (0x0200) /* Watchdog driver ioctl commands */
             //#define _FIOCBASE       (0x0300) /* File system ioctl commands */

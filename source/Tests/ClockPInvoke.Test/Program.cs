@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Meadow.Core.Interop;
+using static Meadow.Core.Interop.Interop.Nuttx;
 
 namespace ClockPInvoke.Test
 {
@@ -10,8 +12,8 @@ namespace ClockPInvoke.Test
         {
             Console.WriteLine("Program Started (console)!");
 
-            ClockTest();
-            GPIOTest();
+//            ClockTest();
+            OnBoardLEDTest();
         }
 
         static void ClockTest()
@@ -29,68 +31,43 @@ namespace ClockPInvoke.Test
 //            }
         }
 
-        static void GPIOTest()
+        static void OnBoardLEDTest()
         {
-            var names = new string[]
-            {
-//                "/dev/gpin",
-                "/dev/gpout",
-//                "/dev/gpint"
-            };
-
-            foreach(var n in names)
-            {
-                for (int i = 1; i < 2; i++)
-                {
-                    var driverName = $"{n}{i}";
-                    Console.WriteLine($"Opening void driver {driverName}...");
-                    var handle = Interop.Nuttx.open_void(driverName, 2);
-                    Console.WriteLine($"Driver handle: {handle.ToString()}");
-                    /*
-                    if (handle != Interop.Nuttx.INVALID_HANDLE)
-                    {
-                        Console.WriteLine($"Reading pin type...");
-                        var result = Interop.Nuttx.ioctl(handle, Interop.Nuttx.GPIOC_PINTYPE, out Interop.Nuttx.GPIOPinType pinType);
-                        Console.WriteLine($"Ioctl result: {result}");
-                        Console.WriteLine($"Pin type: {pinType.ToString()} [{pinType}]");
-
-                        Console.WriteLine($"Closing driver...");
-                        Interop.Nuttx.close(handle);
-                    }
-                    */
-                }
-            }
-        }
-
-        static void LEDTest()
-        {
-            var driverName = "/dev/gpout1";
-
-            // open the driver
-            // fd = open(devpath, O_RDWR);
+            var driverName = $"/dev/gpio";
             Console.WriteLine($"Opening void driver {driverName}...");
-            var handle = Interop.Nuttx.open_void(driverName, 2);
+            var handle = Interop.Nuttx.open(driverName, DriverFlags.ReadOnly);
             Console.WriteLine($"Driver handle: {handle.ToString()}");
-            /*
-            // read the pin type
-            // et = ioctl(fd, GPIOC_PINTYPE, (unsigned long)((uintptr_t)&pintype));
-            Console.WriteLine($"Reading pin type...");
-            var result = Interop.Nuttx.ioctl(handle, Interop.Nuttx.GPIOC_PINTYPE, out Interop.Nuttx.GPIOPinType pinType);
-            Console.WriteLine($"Ioctl result: {result}");
-            Console.WriteLine($"Pin type: {pinType.ToString()} [{pinType}]");
-            */
-            // read the pin value
-            // ret = ioctl(fd, GPIOC_READ, (unsigned long)((uintptr_t) & invalue));
 
-            // write the output
-            // ret = ioctl(fd, GPIOC_WRITE, (unsigned long)outvalue);
+            var pinState = new GPIOPinState();
 
-            // close the driver
-            // close(fd);
-            Console.WriteLine($"Closing driver...");
-//            Interop.Nuttx.close(handle);
-            Console.WriteLine($"Done.");
+            while (true)
+            {
+                // invert the state
+                pinState.State = !pinState.State;
+                 
+                // set each color (the on-board is a 3-color LED)
 
+                // RED
+                pinState.PinNumber = 1;
+                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinNumber}");
+                Interop.Nuttx.ioctl(handle, GpioIoctlFn.WriteSingle, ref pinState);
+
+                Thread.Sleep(500);
+
+                // GREEN
+                pinState.PinNumber = 2;
+                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinNumber}");
+                Interop.Nuttx.ioctl(handle, GpioIoctlFn.WriteSingle, ref pinState);
+
+                Thread.Sleep(500);
+
+                // BLUE
+                pinState.PinNumber = 3;
+                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinNumber}");
+                Interop.Nuttx.ioctl(handle, GpioIoctlFn.WriteSingle, ref pinState);
+
+                Thread.Sleep(1000);
+            }
         }
 
     }
