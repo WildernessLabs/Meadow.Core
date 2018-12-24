@@ -18,17 +18,17 @@ namespace ClockPInvoke.Test
 
         static void ClockTest()
         {
-//            while (true)
-//            {
+            for(int i = 0; i < 10; i++)
+            { 
                 Console.WriteLine("Before clock_gettime");
 
-                Interop.Nuttx.timespec ts = new Interop.Nuttx.timespec();
-                var time = Interop.Nuttx.clock_gettime(Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
+                    Interop.Nuttx.timespec ts = new Interop.Nuttx.timespec();
+                    var time = Interop.Nuttx.clock_gettime(Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
 
-                Console.WriteLine("clock_gettime result: " + ts.tv_sec.ToString());
+                    Console.WriteLine("clock_gettime result: " + ts.tv_sec.ToString());
 
-                System.Threading.Thread.Sleep(1000);
-//            }
+                    System.Threading.Thread.Sleep(1000);
+            }
         }
 
         static void OnBoardLEDTest()
@@ -37,6 +37,16 @@ namespace ClockPInvoke.Test
             Console.WriteLine($"Opening void driver {driverName}...");
             var handle = Interop.Nuttx.open(driverName, DriverFlags.ReadOnly);
             Console.WriteLine($"Driver handle: {handle.ToString()}");
+
+            // initialize the GPIOs (this needs to be in some class initialization)
+            var ledBlueInit = GPIOConfigFlags.Pin0 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var ledGreenInit = GPIOConfigFlags.Pin1 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var ledRedInit = GPIOConfigFlags.Pin2 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            Console.WriteLine($"Doing pin initializations...");
+            Interop.Nuttx.ioctl(handle, GpioIoctlFn.SetConfig, ref ledBlueInit);
+            Interop.Nuttx.ioctl(handle, GpioIoctlFn.SetConfig, ref ledGreenInit);
+            Interop.Nuttx.ioctl(handle, GpioIoctlFn.SetConfig, ref ledRedInit);
 
             var pinState = new GPIOPinState();
 
@@ -47,24 +57,21 @@ namespace ClockPInvoke.Test
                  
                 // set each color (the on-board is a 3-color LED)
 
-                // RED
-                pinState.PinNumber = 1;
-                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinNumber}");
-                Interop.Nuttx.ioctl(handle, GpioIoctlFn.WriteSingle, ref pinState);
+                pinState.PinDesignator = PinDesignator.PortA | PinDesignator.Pin0;
+                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinDesignator.ToString()}");
+                Interop.Nuttx.ioctl(handle, GpioIoctlFn.Write, ref pinState);
 
                 Thread.Sleep(500);
 
-                // GREEN
-                pinState.PinNumber = 2;
-                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinNumber}");
-                Interop.Nuttx.ioctl(handle, GpioIoctlFn.WriteSingle, ref pinState);
+                pinState.PinDesignator = PinDesignator.PortA | PinDesignator.Pin1;
+                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinDesignator.ToString()}");
+                Interop.Nuttx.ioctl(handle, GpioIoctlFn.Write, ref pinState);
 
                 Thread.Sleep(500);
 
-                // BLUE
-                pinState.PinNumber = 3;
-                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinNumber}");
-                Interop.Nuttx.ioctl(handle, GpioIoctlFn.WriteSingle, ref pinState);
+                pinState.PinDesignator = PinDesignator.PortA | PinDesignator.Pin2;
+                Console.WriteLine($"Writing state {pinState.State} to pin {pinState.PinDesignator.ToString()}");
+                Interop.Nuttx.ioctl(handle, GpioIoctlFn.Write, ref pinState);
 
                 Thread.Sleep(1000);
             }

@@ -32,11 +32,11 @@ namespace Meadow.Core.Interop
                 Input = 0,
                 Output = 1,
                 Interrupt = 2
-            }; 
+            };
 
             public struct GPIOPinState
             {
-                public int PinNumber;
+                public PinDesignator PinDesignator;
                 public bool State;
             }
             //#define _TIOCBASE       (0x0100) /* Terminal I/O ioctl commands */
@@ -99,6 +99,118 @@ namespace Meadow.Core.Interop
             //#define GPIOC_PINTYPE    _GPIOC(3)
             //#define GPIOC_REGISTER   _GPIOC(4)
             //#define GPIOC_UNREGISTER _GPIOC(5)
+
+            private const int GPIO_MODE_SHIFT = 18;     /* Bits 18-19: GPIO port mode */
+            private const int GPIO_PUPD_SHIFT = 16;     /* Bits 16-17: Pull-up/pull down */
+            private const int GPIO_AF_SHIFT = 12;       /* Bits 12-15: Alternate function */
+            private const int GPIO_SPEED_SHIFT = 10;    /* Bits 10-11: GPIO frequency selection */
+            private const int GPIO_PORT_SHIFT = 4;      /* Bit 4-7:  Port number */
+            private const int GPIO_PIN_SHIFT = 0;       /* Bits 0-3: GPIO number: 0-15 */
+
+            [Flags]
+            public enum GPIOConfigFlags
+            {
+                ModeInput = 0 << GPIO_MODE_SHIFT,
+                ModeOutput = 1 << GPIO_MODE_SHIFT,
+                ModeAlternate = 2 << GPIO_MODE_SHIFT,
+                ModeAnalog = 3 << GPIO_MODE_SHIFT,
+
+                ResistorFloat = 0 << GPIO_PUPD_SHIFT,
+                ResistorPullUp = 1 << GPIO_PUPD_SHIFT,
+                ResistorPullDown = 2 << GPIO_PUPD_SHIFT,
+
+                AlternateFunction0 = 0 << GPIO_AF_SHIFT,
+                AlternateFunction1 = 1 << GPIO_AF_SHIFT,
+                AlternateFunction2 = 2 << GPIO_AF_SHIFT,
+                AlternateFunction3 = 3 << GPIO_AF_SHIFT,
+                AlternateFunction4 = 4 << GPIO_AF_SHIFT,
+                AlternateFunction5 = 5 << GPIO_AF_SHIFT,
+                AlternateFunction6 = 6 << GPIO_AF_SHIFT,
+                AlternateFunction7 = 7 << GPIO_AF_SHIFT,
+                AlternateFunction8 = 8 << GPIO_AF_SHIFT,
+                AlternateFunction9 = 9 << GPIO_AF_SHIFT,
+                AlternateFunction10 = 10 << GPIO_AF_SHIFT,
+                AlternateFunction11 = 11 << GPIO_AF_SHIFT,
+                AlternateFunction12 = 12 << GPIO_AF_SHIFT,
+                AlternateFunction13 = 13 << GPIO_AF_SHIFT,
+                AlternateFunction14 = 14 << GPIO_AF_SHIFT,
+                AlternateFunction15 = 15 << GPIO_AF_SHIFT,
+                AlternateFunction16 = 16 << GPIO_AF_SHIFT,
+
+                Speed2MHz = 0 << GPIO_SPEED_SHIFT,
+                Speed25MHz = 1 << GPIO_SPEED_SHIFT,
+                Speed50MHz = 2 << GPIO_SPEED_SHIFT,
+                Speed100MHz = 3 << GPIO_SPEED_SHIFT,
+
+                OutputOpenDrain = 1 << 9,
+
+                OutputInitialValueHigh = 1 << 8,
+                OutputInitialValueLow = 0 << 8,
+
+                InputInterruptEnable = 1 << 8,
+
+                PortA = 0 << GPIO_PORT_SHIFT,
+                PortB = 1 << GPIO_PORT_SHIFT,
+                PortC = 2 << GPIO_PORT_SHIFT,
+                PortD = 3 << GPIO_PORT_SHIFT,
+                PortE = 4 << GPIO_PORT_SHIFT,
+                PortF = 5 << GPIO_PORT_SHIFT,
+                PortG = 6 << GPIO_PORT_SHIFT,
+                PortH = 7 << GPIO_PORT_SHIFT,
+                PortI = 8 << GPIO_PORT_SHIFT,
+                PortJ = 8 << GPIO_PORT_SHIFT,
+                PortK = 10 << GPIO_PORT_SHIFT,
+
+                Pin0 = 0 << GPIO_PIN_SHIFT,
+                Pin1 = 1 << GPIO_PIN_SHIFT,
+                Pin2 = 2 << GPIO_PIN_SHIFT,
+                Pin3 = 3 << GPIO_PIN_SHIFT,
+                Pin4 = 4 << GPIO_PIN_SHIFT,
+                Pin5 = 5 << GPIO_PIN_SHIFT,
+                Pin6 = 6 << GPIO_PIN_SHIFT,
+                Pin7 = 7 << GPIO_PIN_SHIFT,
+                Pin8 = 8 << GPIO_PIN_SHIFT,
+                Pin9 = 9 << GPIO_PIN_SHIFT,
+                Pin10 = 10 << GPIO_PIN_SHIFT,
+                Pin11 = 11 << GPIO_PIN_SHIFT,
+                Pin12 = 12 << GPIO_PIN_SHIFT,
+                Pin13 = 13 << GPIO_PIN_SHIFT,
+                Pin14 = 14 << GPIO_PIN_SHIFT,
+                Pin15 = 15 << GPIO_PIN_SHIFT
+            }
+
+            [Flags]
+            public enum PinDesignator
+            {
+                PortA = 0 << GPIO_PORT_SHIFT,
+                PortB = 1 << GPIO_PORT_SHIFT,
+                PortC = 2 << GPIO_PORT_SHIFT,
+                PortD = 3 << GPIO_PORT_SHIFT,
+                PortE = 4 << GPIO_PORT_SHIFT,
+                PortF = 5 << GPIO_PORT_SHIFT,
+                PortG = 6 << GPIO_PORT_SHIFT,
+                PortH = 7 << GPIO_PORT_SHIFT,
+                PortI = 8 << GPIO_PORT_SHIFT,
+                PortJ = 8 << GPIO_PORT_SHIFT,
+                PortK = 10 << GPIO_PORT_SHIFT,
+
+                Pin0 = 0 << GPIO_PIN_SHIFT,
+                Pin1 = 1 << GPIO_PIN_SHIFT,
+                Pin2 = 2 << GPIO_PIN_SHIFT,
+                Pin3 = 3 << GPIO_PIN_SHIFT,
+                Pin4 = 4 << GPIO_PIN_SHIFT,
+                Pin5 = 5 << GPIO_PIN_SHIFT,
+                Pin6 = 6 << GPIO_PIN_SHIFT,
+                Pin7 = 7 << GPIO_PIN_SHIFT,
+                Pin8 = 8 << GPIO_PIN_SHIFT,
+                Pin9 = 9 << GPIO_PIN_SHIFT,
+                Pin10 = 10 << GPIO_PIN_SHIFT,
+                Pin11 = 11 << GPIO_PIN_SHIFT,
+                Pin12 = 12 << GPIO_PIN_SHIFT,
+                Pin13 = 13 << GPIO_PIN_SHIFT,
+                Pin14 = 14 << GPIO_PIN_SHIFT,
+                Pin15 = 15 << GPIO_PIN_SHIFT
+            }
 
         }
     }

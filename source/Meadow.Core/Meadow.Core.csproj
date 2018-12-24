@@ -106,6 +106,8 @@
     <Compile Include="Interop\Interop.open.cs" />
     <Compile Include="Interop\Interop.cs" />
     <Compile Include="Interop\Interop.gpio.cs" />
+    <Compile Include="Interop\Interop.ioctl.cs" />
+    <Compile Include="Interop\Interop.close.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
