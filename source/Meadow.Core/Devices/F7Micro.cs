@@ -96,5 +96,6 @@ namespace Meadow.Devices
             public static readonly AnalogPin A05 = new AnalogPin("A05", 0x0);
         }
 
+
     }
 }

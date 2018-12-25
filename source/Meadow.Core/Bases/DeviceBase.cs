@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Meadow.Hardware;
 
 namespace Meadow
@@ -9,5 +10,11 @@ namespace Meadow
     public abstract class DeviceBase : IDevice
     {
         public DeviceCapabilities Capabilities { get; protected set; }
+
+
+        protected DeviceBase()
+        {
+
+        }
     }
 }

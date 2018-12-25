@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Meadow.Core</RootNamespace>
+    <RootNamespace>Meadow</RootNamespace>
     <AssemblyName>Meadow.Core</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
   </PropertyGroup>
@@ -31,8 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AppBase.cs" />
-    <Compile Include="DeviceBase.cs" />
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
     <Compile Include="WakeUpOptions.cs" />
@@ -108,9 +106,17 @@
     <Compile Include="Interop\Interop.close.cs" />
     <Compile Include="Hardware\Enums\InteruptMode.cs" />
     <Compile Include="Hardware\Enums\ResistorMode.cs" />
+    <Compile Include="Bases\AppBase.cs" />
+    <Compile Include="Bases\DeviceBase.cs" />
+    <Compile Include="Hardware\Internals\DeviceChannelManager.cs" />
+    <Compile Include="Hardware\PortInUseException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Bases\" />
+    <Folder Include="Hardware\Internals\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

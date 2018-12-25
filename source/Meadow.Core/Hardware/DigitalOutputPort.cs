@@ -28,9 +28,18 @@
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        public DigitalOutputPort(IDigitalChannel pin, bool initialState = false) : base(initialState)
+        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) : base(initialState)
         {
             //this._digitalOutPort = new H.OutputPort(pin, initialState);
+
+            // attempt to reserve
+            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.Digital);
+            if(success.Item1)
+            {
+                //TODO: do interop
+            } else {
+                throw new PortInUseException();
+            }
         }
     }
 }
