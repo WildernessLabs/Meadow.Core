@@ -1,24 +1,116 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Meadow</RootNamespace>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Meadow.Core</RootNamespace>
+    <AssemblyName>Meadow.Core</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
   </PropertyGroup>
-
-  <ItemGroup> 
-    <Folder Include="Utilities\" />
-    <Folder Include="Contracts\" />
-    <Folder Include="Devices\" />
-    <Folder Include="Hardware\Contracts\" />
-    <Folder Include="OSInterop\" />
-    <Folder Include="Enums\" />
-    <Folder Include="Gateways\" />
-    <Folder Include="Gateways\WiFi\" />
-    <Folder Include="Gateways\Bluetooth\" />
-    <Folder Include="Hardware\Communications\" />
-    <Folder Include="Hardware\Bases\" />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Hardware\Pins.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AppBase.cs" />
+    <Compile Include="DeviceBase.cs" />
+    <Compile Include="DeviceCapabilities.cs" />
+    <Compile Include="MeadowOS.cs" />
+    <Compile Include="WakeUpOptions.cs" />
+    <Compile Include="Contracts\IApp.cs" />
+    <Compile Include="Contracts\IDevice.cs" />
+    <Compile Include="Devices\F7Micro.cs" />
+    <Compile Include="Enums\ByteOrder.cs" />
+    <Compile Include="Gateways\Bluetooth\AdapterCapabilities.cs" />
+    <Compile Include="Gateways\Bluetooth\BluetoothAdapter.cs" />
+    <Compile Include="Gateways\WiFi\ConnectionMethodType.cs" />
+    <Compile Include="Gateways\WiFi\ConnectionResult.cs" />
+    <Compile Include="Gateways\WiFi\ConnectionStatus.cs" />
+    <Compile Include="Gateways\WiFi\NetworkAuthenticationType.cs" />
+    <Compile Include="Gateways\WiFi\NetworkEncryptionType.cs" />
+    <Compile Include="Gateways\WiFi\NetworkSecuritySettings.cs" />
+    <Compile Include="Gateways\WiFi\NetworkType.cs" />
+    <Compile Include="Gateways\WiFi\PhyType.cs" />
+    <Compile Include="Gateways\WiFi\ReconnectionType.cs" />
+    <Compile Include="Gateways\WiFi\WiFiAdapter.cs" />
+    <Compile Include="Gateways\WiFi\WiFiNetwork.cs" />
+    <Compile Include="Hardware\AnalogInputPort.cs" />
+    <Compile Include="Hardware\AnalogPin.cs" />
+    <Compile Include="Hardware\Cpu.cs" />
+    <Compile Include="Hardware\DigitalInputPort.cs" />
+    <Compile Include="Hardware\DigitalOutputPort.cs" />
+    <Compile Include="Hardware\DigitalPin.cs" />
+    <Compile Include="Hardware\Pin.cs" />
+    <Compile Include="Hardware\PortEventArgs.cs" />
+    <Compile Include="Hardware\PwmPin.cs" />
+    <Compile Include="Hardware\PwmPort.cs" />
+    <Compile Include="Hardware\SerialPort.cs" />
+    <Compile Include="Hardware\Spi.cs" />
+    <Compile Include="Hardware\Bases\AnalogPinBase.cs" />
+    <Compile Include="Hardware\Bases\DigitalInputPortBase.cs" />
+    <Compile Include="Hardware\Bases\DigitalInterruptPortBase.cs" />
+    <Compile Include="Hardware\Bases\DigitalOutputPortBase.cs" />
+    <Compile Include="Hardware\Bases\DigitalPinBase.cs" />
+    <Compile Include="Hardware\Bases\DigitalPortBase.cs" />
+    <Compile Include="Hardware\Bases\PinBase.cs" />
+    <Compile Include="Hardware\Bases\PwmPinBase.cs" />
+    <Compile Include="Hardware\Communications\I2cBus.cs" />
+    <Compile Include="Hardware\Communications\ICommunicationBus.cs" />
+    <Compile Include="Hardware\Communications\OneWire.cs" />
+    <Compile Include="Hardware\Communications\OneWireBus.cs" />
+    <Compile Include="Hardware\Communications\SoftwareSPIBus.cs" />
+    <Compile Include="Hardware\Communications\SpiBus.cs" />
+    <Compile Include="Hardware\Contracts\I2cDevice.cs" />
+    <Compile Include="Hardware\Contracts\IAnalogChannel.cs" />
+    <Compile Include="Hardware\Contracts\IAnalogPin.cs" />
+    <Compile Include="Hardware\Contracts\IAnalogPort.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalChannel.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalInputPort.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalInterruptPort.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalOutputPort.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalPin.cs" />
+    <Compile Include="Hardware\Contracts\IDigitalPort.cs" />
+    <Compile Include="Hardware\Contracts\IPin.cs" />
+    <Compile Include="Hardware\Contracts\IPort.cs" />
+    <Compile Include="Hardware\Contracts\IPwmChannel.cs" />
+    <Compile Include="Hardware\Contracts\IPwmPin.cs" />
+    <Compile Include="Hardware\Contracts\IPwmPort.cs" />
+    <Compile Include="Hardware\Enums\PortDirectionType.cs" />
+    <Compile Include="Hardware\Enums\SignalType.cs" />
+    <Compile Include="Hardware\Enums\TerminationType.cs" />
+    <Compile Include="Interop\Interop.clock_gettime.cs" />
+    <Compile Include="Interop\Interop.clock_settime.cs" />
+    <Compile Include="Interop\Interop.timespec.cs" />
+    <Compile Include="Utilities\BitHelpers.cs" />
+    <Compile Include="Interop\Interop.open.cs" />
+    <Compile Include="Interop\Interop.cs" />
+    <Compile Include="Interop\Interop.gpio.cs" />
+    <Compile Include="Interop\Interop.ioctl.cs" />
+    <Compile Include="Interop\Interop.close.cs" />
+    <Compile Include="Hardware\Enums\InteruptMode.cs" />
+    <Compile Include="Hardware\Enums\ResistorMode.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Interop\stm32_gpio.h" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
