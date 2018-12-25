@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         public double Frequency { get; set; }
         public double Period { get; set; }
         public bool Inverted { get; set; }
-        //public Cpu.Pin Pin { get; }
+        //public IDigitalPin Pin { get; }
         public TimeScaleFactor Scale { get; set; }
 
         public PortDirectionType DirectionType => PortDirectionType.Output;

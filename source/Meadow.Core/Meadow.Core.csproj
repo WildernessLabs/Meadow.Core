@@ -40,7 +40,6 @@
     <Compile Include="Contracts\IDevice.cs" />
     <Compile Include="Devices\F7Micro.cs" />
     <Compile Include="Enums\ByteOrder.cs" />
-    <Compile Include="ExtensionMethods\Color.cs" />
     <Compile Include="Gateways\Bluetooth\AdapterCapabilities.cs" />
     <Compile Include="Gateways\Bluetooth\BluetoothAdapter.cs" />
     <Compile Include="Gateways\WiFi\ConnectionMethodType.cs" />
@@ -101,13 +100,14 @@
     <Compile Include="Interop\Interop.clock_gettime.cs" />
     <Compile Include="Interop\Interop.clock_settime.cs" />
     <Compile Include="Interop\Interop.timespec.cs" />
-    <Compile Include="OSInterop\Platform.cs" />
     <Compile Include="Utilities\BitHelpers.cs" />
     <Compile Include="Interop\Interop.open.cs" />
     <Compile Include="Interop\Interop.cs" />
     <Compile Include="Interop\Interop.gpio.cs" />
     <Compile Include="Interop\Interop.ioctl.cs" />
     <Compile Include="Interop\Interop.close.cs" />
+    <Compile Include="Hardware\Enums\InteruptMode.cs" />
+    <Compile Include="Hardware\Enums\ResistorMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
