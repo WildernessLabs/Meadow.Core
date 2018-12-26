@@ -52,7 +52,24 @@ namespace Meadow.Hardware
             }
         }
 
+        // TODO: do we want to message back any information?
+        internal static bool ReleasePin(IPin pin)
+        {
+            // thread sync
+            lock (_channelLock)
+            {
+                // if the config exists in the collection
+                ChannelConfig config = _channelStates[pin];
+                if (config != null)
+                {
+                    _channelStates.Remove(pin);
+                }
+            }
+            return true;
+        }
+
     }
+
 
     internal class ChannelConfig
     {
