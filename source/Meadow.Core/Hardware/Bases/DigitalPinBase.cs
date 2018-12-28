@@ -1,13 +1,13 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public abstract class DigitalPinBase : PinBase, IDigitalChannel
+    public abstract class DigitalPinBase : PinBase, IDigitalPin
     {
-        protected DigitalPinBase(string name, uint address, 
+        protected DigitalPinBase(string name, object key, 
                                  bool interruptCapable = false, 
                                  bool pullDownCapable = false, 
                                  bool pullUpCapable = false) 
-            : base(name, address)
+            : base(name, key)
         {
             _interruptCapable = interruptCapable;
             _pullDownCapable = pullDownCapable;
@@ -23,5 +23,7 @@ namespace Meadow.Hardware
 
         protected bool _pullUpCapable;
         public bool PullUpCapable => _pullUpCapable;
+
+        public abstract IGPIOManager GPIOManager { get; internal set; }
     }
 }

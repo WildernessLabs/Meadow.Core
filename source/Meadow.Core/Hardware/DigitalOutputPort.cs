@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     public class DigitalOutputPort : DigitalOutputPortBase
     {
         //protected H.OutputPort _digitalOutPort = null
-        protected IPin _pin;
+        protected IDigitalPin _pin;
         protected bool _disposed;
 
         public override bool InitialState => base._initialState;
@@ -15,8 +15,7 @@ namespace Meadow.Hardware
             get => _state;
             set
             {
-                // TODO: Write to port
-                //_digitalOutPort.Write(value);
+                _pin.GPIOManager.SetDiscrete(_pin, value);
                 _state = value;
             }
         }
@@ -35,13 +34,13 @@ namespace Meadow.Hardware
         public DigitalOutputPort(IDigitalPin pin, bool initialState = false) : base(initialState)
         {
             //this._digitalOutPort = new H.OutputPort(pin, initialState);
-
+            
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.Digital);
             if(success.Item1)
             {
                 this._pin = pin;
-                //TODO: do interop
+                _pin.GPIOManager.SetDiscrete(_pin, initialState);
             }
             else {
                 throw new PortInUseException();

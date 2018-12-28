@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Meadow.Hardware;
 using Meadow.Gateway.WiFi;
 
@@ -22,9 +21,13 @@ namespace Meadow.Devices
                 // TODO: stuff.
                 new WiFiAdapter()
             };
+
+            this.GPIOManager = new F7GPIOManager();
+            this.GPIOManager.Initialize();
+            _pins = new PinDefinitions(GPIOManager);
         }
 
-        protected PinDefinitions _pins = new PinDefinitions();
+        protected PinDefinitions _pins;
         public PinDefinitions Pins => _pins;
 
         public class PinDefinitions
@@ -44,17 +47,25 @@ namespace Meadow.Devices
             public readonly PwmPin D13 = PWMChannels.Pwm13;
             public readonly PwmPin D14 = PWMChannels.Pwm14;
             public readonly PwmPin D15 = PWMChannels.Pwm15;
-            public readonly PwmPin OnboardLEDRed   = PWMChannels.OnboardLEDRed;
-            public readonly PwmPin OnboardLEDGreen = PWMChannels.OnboardLEDGreen; 
-            public readonly PwmPin OnboardLEDBlue  = PWMChannels.OnboardLEDBlue;
             public readonly AnalogPin A01 = AnalogChannels.A01;
             public readonly AnalogPin A02 = AnalogChannels.A02;
             public readonly AnalogPin A03 = AnalogChannels.A03;
             public readonly AnalogPin A04 = AnalogChannels.A04;
             public readonly AnalogPin A05 = AnalogChannels.A05;
+
+            public readonly DigitalPin OnboardLEDRed = DigitalChannels.OnboardLEDRed;
+            public readonly DigitalPin OnboardLEDGreen = DigitalChannels.OnboardLEDGreen;
+            public readonly DigitalPin OnboardLEDBlue = DigitalChannels.OnboardLEDBlue;
+
+            public PinDefinitions(IGPIOManager manager)
+            {
+                OnboardLEDRed.GPIOManager = manager;
+                OnboardLEDGreen.GPIOManager = manager;
+                OnboardLEDBlue.GPIOManager = manager;
+            }
         }
 
-        // NOTE: this are split into three differnt classes in the chance that 
+        // NOTE: this are split into three different classes in the chance that 
         // we decide to expose them as groups, as in;
         // Device.PwmChannels, Device.DigitalPins, etc.
 
@@ -63,6 +74,10 @@ namespace Meadow.Devices
             // example for boards that have digital pins that don't have PWM timers
             // enabled on them.
             //public static readonly DigitalPin D99 = new DigitalPin("D99", 0x128);
+
+            public static readonly DigitalPin OnboardLEDBlue = new DigitalPin("OnboardLEDBlue", "PA0");
+            public static readonly DigitalPin OnboardLEDGreen = new DigitalPin("OnboardLEDGreen", "PA1");
+            public static readonly DigitalPin OnboardLEDRed = new DigitalPin("OnboardLEDRed", "PA2");
         }
 
         private static class PWMChannels
@@ -82,9 +97,9 @@ namespace Meadow.Devices
             public static readonly PwmPin Pwm13 = new PwmPin("Pwm13", 0x256);
             public static readonly PwmPin Pwm14 = new PwmPin("Pwm14", 0x256);
             public static readonly PwmPin Pwm15 = new PwmPin("Pwm15", 0x256);
-            public static readonly PwmPin OnboardLEDRed     = new PwmPin("Pwm01", 0x256);
-            public static readonly PwmPin OnboardLEDGreen = new PwmPin("Pwm01", 0x256);
-            public static readonly PwmPin OnboardLEDBlue  = new PwmPin("Pwm01", 0x256);
+            public static readonly PwmPin OnboardLEDRed = new PwmPin("Pwm01", "PA2");
+            public static readonly PwmPin OnboardLEDGreen = new PwmPin("Pwm01", "PA1");
+            public static readonly PwmPin OnboardLEDBlue = new PwmPin("Pwm01", "PA0");
         }
 
         private static class AnalogChannels
@@ -98,4 +113,5 @@ namespace Meadow.Devices
 
 
     }
+
 }
