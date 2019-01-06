@@ -25,7 +25,20 @@ namespace Meadow.Devices
             // generate a PinState for the desired pin and value
             var state = new GPIOPinState();
             state.PinDesignator = GetPinDesignator(pin);
-            state.State = value;
+
+            switch(pin.Key.ToString())
+            {
+                case "PA0":
+                case "PA1":
+                case "PA2":
+                    // this device uses inverted logic for the LEDs, so invert the requested value
+                    state.State = !value;
+                    break;
+                default:
+                    state.State = value;
+                    break;
+            }
+
 
             // and ship it to the driver
             Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.GpioIoctlFn.Write, ref state);
@@ -158,7 +171,12 @@ namespace Meadow.Devices
             }
         }
 
-        /// <summary>
+        public bool GetDiscrete(IDigitalPin pin)
+        {
+            throw new NotImplementedException();
+        }
+
+                /// <summary>
         /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).
         /// </summary>
         public void Initialize()
@@ -171,11 +189,77 @@ namespace Meadow.Devices
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ledBlueInit);
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ledGreenInit);
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ledRedInit);
-        }
 
-        public bool GetDiscrete(IDigitalPin pin)
-        {
-            throw new NotImplementedException();
+            // all port pins seem to be inverse on this board
+
+            // these are the "unallocated pin on the meadow
+            var pi9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var ph13 = GPIOConfigFlags.Pin13 | GPIOConfigFlags.PortH | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pc6 = GPIOConfigFlags.Pin6 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb8 = GPIOConfigFlags.Pin8 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pc7 = GPIOConfigFlags.Pin7 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb0 = GPIOConfigFlags.Pin0 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb7 = GPIOConfigFlags.Pin7 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb6 = GPIOConfigFlags.Pin6 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb1 = GPIOConfigFlags.Pin1 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var ph10 = GPIOConfigFlags.Pin10 | GPIOConfigFlags.PortH | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pc9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb14 = GPIOConfigFlags.Pin14 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb15 = GPIOConfigFlags.Pin15 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pg3 = GPIOConfigFlags.Pin3 | GPIOConfigFlags.PortG | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pe3 = GPIOConfigFlags.Pin3 | GPIOConfigFlags.PortE | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pi9);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ph13);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pc6);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb8);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb9);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pc7);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb0);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb7);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb6);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb1);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ph10);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pc9);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb14);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb15);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pg3);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pe3);
         }
     }
+
+    /* ===== MEADOW GPIO PIN MAP =====
+        BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?
+        J301-5      DAC_OUT1        PA4         A0
+        J301-6      DAC_OUT2        PA5         A1
+        J301-7      ADC1_IN3        PA3         A2
+        J301-8      ADC1_IN7        PA7         A3
+        J301-9      ADC1_IN10       PC0         A4
+        J301-10     ADC1_IN11       PC1         A5
+        J301-11     SPI3_CLK        PC10        SCK
+        J301-12     SPI3_MOSI       PB5         MOSI    AF6
+        J301-13     SPI3_MISO       PC11        MISO    AF6
+        J301-14     UART4_RX        PI9         D00     AF8
+        J301-15     UART4_TX        PH13        D01     AF8
+        J301-16     PC6             PC6         D02                 *
+        J301-17     CAN1_RX         PB8         D03     AF9
+        J301-18     CAN1_TX         PB9         D04     AF9
+
+        J302-4      PE3             PE3         D15
+        J302-5      PG3             PG3         D14
+        J302-6      USART1_RX       PB15        D13     AF4
+        J302-7      USART1_TX       PB14        D12     AF4
+        J302-8      PC9             PC9         D11
+        J302-9      PH10            PH10        D10
+        J302-10     PB1             PB1         D09
+        J302-11     I2C1_SCL        PB6         D08     AF4
+        J302-12     I2C1_SDA        PB7         D07     AF4
+        J302-13     PB0             PB0         D06
+        J302-14     PC7             PC7         D05
+
+        LED_B       PA0
+        LED_G       PA1
+        LED_R       PA2
+    */
 }

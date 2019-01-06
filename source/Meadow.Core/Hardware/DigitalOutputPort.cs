@@ -2,7 +2,7 @@
 
 namespace Meadow.Hardware
 {
-    public class DigitalOutputPort : DigitalOutputPortBase
+    public class DigitalOutputPort : DigitalOutputPortBase, IDisposable
     {
         //protected H.OutputPort _digitalOutPort = null
         protected IDigitalPin _pin;

@@ -32,21 +32,6 @@ namespace Meadow.Devices
 
         public class PinDefinitions
         {
-            public readonly PwmPin D01 = PWMChannels.Pwm01;
-            public readonly PwmPin D02 = PWMChannels.Pwm02;
-            public readonly PwmPin D03 = PWMChannels.Pwm03;
-            public readonly PwmPin D04 = PWMChannels.Pwm04;
-            public readonly PwmPin D05 = PWMChannels.Pwm05;
-            public readonly PwmPin D06 = PWMChannels.Pwm06;
-            public readonly PwmPin D07 = PWMChannels.Pwm07;
-            public readonly PwmPin D08 = PWMChannels.Pwm08;
-            public readonly PwmPin D09 = PWMChannels.Pwm09;
-            public readonly PwmPin D10 = PWMChannels.Pwm10;
-            public readonly PwmPin D11 = PWMChannels.Pwm11;
-            public readonly PwmPin D12 = PWMChannels.Pwm12;
-            public readonly PwmPin D13 = PWMChannels.Pwm13;
-            public readonly PwmPin D14 = PWMChannels.Pwm14;
-            public readonly PwmPin D15 = PWMChannels.Pwm15;
             public readonly AnalogPin A01 = AnalogChannels.A01;
             public readonly AnalogPin A02 = AnalogChannels.A02;
             public readonly AnalogPin A03 = AnalogChannels.A03;
@@ -57,11 +42,46 @@ namespace Meadow.Devices
             public readonly DigitalPin OnboardLEDGreen = DigitalChannels.OnboardLEDGreen;
             public readonly DigitalPin OnboardLEDBlue = DigitalChannels.OnboardLEDBlue;
 
+            public readonly DigitalPin D00 = DigitalChannels.D00;
+            public readonly DigitalPin D01 = DigitalChannels.D01;
+            public readonly DigitalPin D02 = DigitalChannels.D02;
+            public readonly DigitalPin D03 = DigitalChannels.D03;
+            public readonly DigitalPin D04 = DigitalChannels.D04;
+            public readonly DigitalPin D05 = DigitalChannels.D05;
+            public readonly DigitalPin D06 = DigitalChannels.D06;
+            public readonly DigitalPin D07 = DigitalChannels.D07;
+            public readonly DigitalPin D08 = DigitalChannels.D08;
+            public readonly DigitalPin D09 = DigitalChannels.D09;
+            public readonly DigitalPin D10 = DigitalChannels.D10;
+            public readonly DigitalPin D11 = DigitalChannels.D11;
+            public readonly DigitalPin D12 = DigitalChannels.D12;
+            public readonly DigitalPin D13 = DigitalChannels.D13;
+            public readonly DigitalPin D14 = DigitalChannels.D14;
+            public readonly DigitalPin D15 = DigitalChannels.D15;
+
             public PinDefinitions(IGPIOManager manager)
             {
                 OnboardLEDRed.GPIOManager = manager;
                 OnboardLEDGreen.GPIOManager = manager;
                 OnboardLEDBlue.GPIOManager = manager;
+
+                D00.GPIOManager
+                    = D01.GPIOManager
+                    = D02.GPIOManager
+                    = D03.GPIOManager
+                    = D04.GPIOManager
+                    = D05.GPIOManager
+                    = D06.GPIOManager
+                    = D07.GPIOManager
+                    = D08.GPIOManager
+                    = D09.GPIOManager
+                    = D10.GPIOManager
+                    = D11.GPIOManager
+                    = D12.GPIOManager
+                    = D13.GPIOManager
+                    = D14.GPIOManager
+                    = D15.GPIOManager
+                    = manager;
             }
         }
 
@@ -78,6 +98,23 @@ namespace Meadow.Devices
             public static readonly DigitalPin OnboardLEDBlue = new DigitalPin("OnboardLEDBlue", "PA0");
             public static readonly DigitalPin OnboardLEDGreen = new DigitalPin("OnboardLEDGreen", "PA1");
             public static readonly DigitalPin OnboardLEDRed = new DigitalPin("OnboardLEDRed", "PA2");
+
+            public static readonly DigitalPin D00 = new DigitalPin("D00", "PI9");
+            public static readonly DigitalPin D01 = new DigitalPin("D01", "PH13");
+            public static readonly DigitalPin D02 = new DigitalPin("D02", "PC6");
+            public static readonly DigitalPin D03 = new DigitalPin("D03", "PB8");
+            public static readonly DigitalPin D04 = new DigitalPin("D04", "PB9");
+            public static readonly DigitalPin D05 = new DigitalPin("D05", "PC7");
+            public static readonly DigitalPin D06 = new DigitalPin("D06", "PB0");
+            public static readonly DigitalPin D07 = new DigitalPin("D07", "PB7");
+            public static readonly DigitalPin D08 = new DigitalPin("D08", "PB6");
+            public static readonly DigitalPin D09 = new DigitalPin("D09", "PB1");
+            public static readonly DigitalPin D10 = new DigitalPin("D10", "PH10");
+            public static readonly DigitalPin D11 = new DigitalPin("D11", "PC9");
+            public static readonly DigitalPin D12 = new DigitalPin("D12", "PB14");
+            public static readonly DigitalPin D13 = new DigitalPin("D13", "PB15");
+            public static readonly DigitalPin D14 = new DigitalPin("D14", "PG3");
+            public static readonly DigitalPin D15 = new DigitalPin("D15", "PE3");
         }
 
         private static class PWMChannels
