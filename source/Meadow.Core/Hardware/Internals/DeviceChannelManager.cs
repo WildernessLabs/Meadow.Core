@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Meadow.Core.Interop;
+using static Meadow.Core.Interop.Interop.Nuttx;
 
 namespace Meadow.Hardware
 {
@@ -29,11 +31,10 @@ namespace Meadow.Hardware
             lock (_channelLock)
             {
                 // if the config exists in the collection
-                ChannelConfig config = _channelStates[pin];
-                if (config != null)
+                if(_channelStates.ContainsKey(pin))
                 {
                     // if the channel is already in use
-                    if (config.State == ChannelState.InUse)
+                    if (_channelStates[pin].State == ChannelState.InUse)
                     {
                         // bail out
                         return new Tuple<bool, string>(false, "Channel already in use.");
@@ -67,9 +68,7 @@ namespace Meadow.Hardware
             }
             return true;
         }
-
     }
-
 
     internal class ChannelConfig
     {

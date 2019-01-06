@@ -110,6 +110,8 @@
     <Compile Include="Bases\DeviceBase.cs" />
     <Compile Include="Hardware\Internals\DeviceChannelManager.cs" />
     <Compile Include="Hardware\PortInUseException.cs" />
+    <Compile Include="Devices\F7GPIOManager.cs" />
+    <Compile Include="Contracts\IGPIOManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />

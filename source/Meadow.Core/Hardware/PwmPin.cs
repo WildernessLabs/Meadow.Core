@@ -3,11 +3,13 @@ namespace Meadow.Hardware
 {
     public class PwmPin : PwmPinBase
     {
-        public PwmPin (string name, uint address, double minimumFrequency = 0,
+        public PwmPin (string name, object key, double minimumFrequency = 0,
                        double maximumFrequency = 100000)
-            : base(name, address, minimumFrequency, maximumFrequency)
+            : base(name, key, minimumFrequency, maximumFrequency)
         {
 
         }
+
+        public override IGPIOManager GPIOManager { get; internal set; }
     }
 }

@@ -10,6 +10,7 @@ namespace Meadow
     public abstract class DeviceBase : IDevice
     {
         public DeviceCapabilities Capabilities { get; protected set; }
+        public IGPIOManager GPIOManager { get; protected set; }
 
 
         protected DeviceBase()
