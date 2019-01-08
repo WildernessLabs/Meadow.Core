@@ -48,26 +48,3 @@ public class PwmLed {
    public PwmLed (IPwmPort port { ... }
 }
 ```
-
-# DocFX Site
-
-1. Install DocFx
-  
-  ```
-  brew install docfx
-  ```
-  
-2. Launch site:
-  
-  ```
-  docfx docfx/docfx.json --serve
-  ```
-  
-## Troubleshooting
-
-If it fails on Mac/Linux with some `SQLitePCLRaw` nonsense, run this:
-
-```
-nuget install -OutputDirectory $TMPDIR SQLitePCLRaw.core -ExcludeVersion
-for docfx in /usr/local/Cellar/docfx/*; do cp "$TMPDIR/SQLitePCLRaw.core/lib/net45/SQLitePCLRaw.core.dll" "$docfx/libexec"; done
-```
