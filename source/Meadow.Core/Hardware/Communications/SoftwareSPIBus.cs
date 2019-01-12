@@ -1,7 +1,7 @@
 ﻿using Meadow;
 using System;
 using System.Runtime.CompilerServices;
-/*
+
 namespace Meadow.Hardware.Communications
 {
     /// <summary>
@@ -63,11 +63,11 @@ namespace Meadow.Hardware.Communications
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
         public SoftwareSPIBus(IDigitalPin mosi, IDigitalPin miso, IDigitalPin clock, IDigitalPin chipSelect, byte cpha = 0, byte cpol = 0)
         {
-            if (mosi == IDigitalPin.GPIO_NONE)
+            if (mosi == null)
             {
                 throw new ArgumentException("MOSI line cannot be set to None.");
             }
-            if (clock == IDigitalPin.GPIO_NONE)
+            if (clock == null)
             {
                 throw new ArgumentException("Clock line cannot be set to None");
             }
@@ -75,9 +75,9 @@ namespace Meadow.Hardware.Communications
             _phase = (cpha == 1);
             _polarity = (cpol == 1);
             _mosi = new DigitalOutputPort(mosi, false);
-            _miso = miso == IDigitalPin.GPIO_NONE ? null : new InputPort(miso, false, Port.ResistorMode.Disabled);
+            _miso = miso == null ? null : new DigitalInputPort(miso, false, ResistorMode.Disabled);
             _clock = new DigitalOutputPort(clock, _polarity);
-            _chipSelect = chipSelect == IDigitalPin.GPIO_NONE ? null : new DigitalOutputPort(chipSelect, true);
+            _chipSelect = chipSelect == null ? null : new DigitalOutputPort(chipSelect, true);
         }
 
         #endregion Constructors
@@ -95,9 +95,9 @@ namespace Meadow.Hardware.Communications
 
             for (var index = 0; index < 8; index++)
             {
-                _mosi.Write((value & mask) > 0);
-                _clock.Write(!clock);
-                _clock.Write(clock);
+                _mosi.State = ((value & mask) > 0);
+                _clock.State = !clock;
+                _clock.State = clock;
                 mask >>= 1;
             }
         }
@@ -109,9 +109,9 @@ namespace Meadow.Hardware.Communications
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void WriteByte(byte value)
         {
-            _chipSelect?.Write(false);
+            if (_chipSelect != null) _chipSelect.State = false;
             Write(value);
-            _chipSelect?.Write(true);
+            if (_chipSelect != null) _chipSelect.State = true;
         }
 
         /// <summary>
@@ -124,12 +124,12 @@ namespace Meadow.Hardware.Communications
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void WriteBytes(byte[] values)
         {
-            _chipSelect?.Write(false);
+            if (_chipSelect != null) _chipSelect.State = false;
             for (int index = 0; index < values.Length; index++)
             {
                 Write(values[index]);
             }
-            _chipSelect?.Write(true);
+            if (_chipSelect != null) _chipSelect.State = true;
         }
 
         /// <summary>
@@ -222,18 +222,18 @@ namespace Meadow.Hardware.Communications
 
             for (var index = 0; index < 8; index++)
             {
-                _mosi.Write((value & mask) > 0);
-                _clock.Write(!clock);
+                _mosi.State = ((value & mask) > 0);
+                _clock.State = (!clock);
                 bool data;
                 if (_phase)
                 {
-                    _clock.Write(clock);
-                    data = _miso.Read();
+                    _clock.State = (clock);
+                    data = _miso.Value;
                 }
                 else
                 {
-                    data = _miso.Read();
-                    _clock.Write(clock);
+                    data = _miso.Value;
+                    _clock.State = (clock);
                 }
                 result <<= 1;
                 if (data)
@@ -264,7 +264,7 @@ namespace Meadow.Hardware.Communications
             {
                 throw new InvalidOperationException("Cannot read from SPI bus when the MISO pin is set to None");
             }
-            _chipSelect?.Write(false);
+            if (_chipSelect != null) _chipSelect.State = false;
             byte[] result = new byte[length];
             for (var index = 0; index < length; index++)
             {
@@ -275,8 +275,8 @@ namespace Meadow.Hardware.Communications
                 }
                 result[index] = WriteRead(value);
             }
-            _chipSelect?.Write(true);
-            _mosi.Write(false);
+            if (_chipSelect != null) _chipSelect.State = true;
+            _mosi.State = (false);
             return(result);
         }
 
@@ -365,5 +365,3 @@ namespace Meadow.Hardware.Communications
         #endregion Methods
     }
 }
-
-*/
