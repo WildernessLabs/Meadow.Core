@@ -8,7 +8,7 @@ namespace Meadow
         void SetDiscrete(IDigitalPin pin, bool value);
         bool GetDiscrete(IDigitalPin pin);
 
-        void Configure(IDigitalPin pin, bool initialState);
-        void Configure(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode);
+        void ConfigureOutput(IDigitalPin pin, bool initialState);
+        void ConfigureInput(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled);
     }
 }

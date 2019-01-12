@@ -19,8 +19,8 @@ namespace Meadow.Hardware
             {
                 this._pin = pin;
 
-                // make sure the pin is configured as a digital output
-                _pin.GPIOManager.Configure(_pin, glitchFilter, resistorMode);
+                // make sure the pin is configured as a digital input
+                _pin.GPIOManager.ConfigureInput(_pin, glitchFilter, resistorMode, false);
             }
             else
             {

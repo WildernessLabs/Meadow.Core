@@ -30,7 +30,8 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) : base(initialState)
+        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) 
+            : base(initialState)
         {
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
@@ -39,7 +40,7 @@ namespace Meadow.Hardware
                 this._pin = pin;
 
                 // make sure the pin is configured as a digital output with the proper state
-                _pin.GPIOManager.Configure(_pin, initialState);
+                _pin.GPIOManager.ConfigureOutput(_pin, initialState);
 
                 // initialize the output state
                 _pin.GPIOManager.SetDiscrete(_pin, initialState);
