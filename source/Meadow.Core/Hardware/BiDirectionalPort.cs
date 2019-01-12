@@ -6,9 +6,9 @@ namespace Meadow.Hardware
     /// Tristate port.
     /// </summary>
     /// <remarks>A tristate port is initially an input port</remarks>
-    public class TristatePort : IDisposable
+    public class BiDirectionalPort : IBiDirectionalPort, IDisposable
     {
-        public event EventHandler OnInterrupt;
+        public event EventHandler<PortEventArgs> Changed;
 
         protected IDigitalPin _pin;
         protected bool _disposed;
@@ -21,7 +21,7 @@ namespace Meadow.Hardware
         public bool InitialState { get; }
         public ResistorMode Resistor { get; }
 
-        public TristatePort(IDigitalPin pin, bool initialState = false, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
+        public BiDirectionalPort(IDigitalPin pin, bool initialState = false, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
         {
             InitialState = initialState;
             Resistor = resistorMode;
@@ -89,31 +89,38 @@ namespace Meadow.Hardware
             }
         }
 
-        public void DisableInterrupt()
+        public bool InterrupEnabled
         {
-            if (!_interruptEnabled) return;
+            get => _interruptEnabled;
+            set
+            {
+                if (value == InterrupEnabled) return;
 
-            _interruptEnabled = false;
-            throw new NotImplementedException();
+                _interruptEnabled = value;
+            }
         }
 
-        public void EnableInterrupt()
+        public PortDirectionType DirectionType
         {
-            if (_interruptEnabled) return;
-
-            _interruptEnabled = true;
-            throw new NotImplementedException();
+            get => _currentDirection; 
         }
 
-        public bool Read()
+        public SignalType SignalType
         {
-            return _pin.GPIOManager.GetDiscrete(_pin);
+            get => SignalType.Digital;
         }
 
-        public void Write(bool state)
+        public bool State
         {
-            _pin.GPIOManager.SetDiscrete(_pin, state);
-            _currentState = state;
+            get
+            {
+                return _pin.GPIOManager.GetDiscrete(_pin);
+            }
+            set
+            {
+                _pin.GPIOManager.SetDiscrete(_pin, value);
+                _currentState = value;
+            }
         }
     }
 }

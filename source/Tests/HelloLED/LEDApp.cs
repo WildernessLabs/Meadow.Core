@@ -68,7 +68,7 @@ namespace HelloLED
             {
                 state = !state;
                 output.State = state;
-                Console.WriteLine($"state: {input.Value}");
+                Console.WriteLine($"state: {input.State}");
                 Thread.Sleep(1000);
             }
         }
@@ -79,7 +79,7 @@ namespace HelloLED
 
             while(true)
             {
-                Console.WriteLine($"D05: {d05.Value}");
+                Console.WriteLine($"D05: {d05.State}");
                 Thread.Sleep(500);
             }
         }

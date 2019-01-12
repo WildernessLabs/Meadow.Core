@@ -112,7 +112,8 @@
     <Compile Include="Hardware\PortInUseException.cs" />
     <Compile Include="Devices\F7GPIOManager.cs" />
     <Compile Include="Contracts\IGPIOManager.cs" />
-    <Compile Include="Hardware\TristatePort.cs" />
+    <Compile Include="Hardware\BiDirectionalPort.cs" />
+    <Compile Include="Hardware\Contracts\IBiDirectionalPort.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />

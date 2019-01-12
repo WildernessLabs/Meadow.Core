@@ -228,11 +228,11 @@ namespace Meadow.Hardware.Communications
                 if (_phase)
                 {
                     _clock.State = (clock);
-                    data = _miso.Value;
+                    data = _miso.State;
                 }
                 else
                 {
-                    data = _miso.Value;
+                    data = _miso.State;
                     _clock.State = (clock);
                 }
                 result <<= 1;
