@@ -3,7 +3,7 @@ namespace Meadow.Hardware
 {
     public class DigitalInterruptPortBase : DigitalInputPortBase, IDigitalInterruptPort
     {
-public DigitalInterruptPortBase()
+        public DigitalInterruptPortBase()
         {
         }
 

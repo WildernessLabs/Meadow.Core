@@ -20,12 +20,15 @@ namespace Meadow.Devices
             DriverHandle = Interop.Nuttx.open(GPIODriverName, Interop.Nuttx.DriverFlags.ReadOnly);
         }
 
-        public void Configure(IDigitalPin pin, bool initialState)
+        public void ConfigureOutput(IDigitalPin pin, bool initialState)
         {
             var designator = GetPinDesignator(pin);
 
             // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
             var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            flags |= GPIOConfigFlags.ModeOutput;
+
             if (initialState)
             {
                 flags |= GPIOConfigFlags.OutputInitialValueHigh;
@@ -38,13 +41,16 @@ namespace Meadow.Devices
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
         }
 
-        public void Configure(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode)
+        public void ConfigureInput(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
         {
             var designator = GetPinDesignator(pin);
 
             // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
-            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeInput;
-            switch(resistorMode)
+            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            flags |= GPIOConfigFlags.ModeInput;
+
+            switch (resistorMode)
             {
                 case ResistorMode.Disabled:
                     flags |= GPIOConfigFlags.ResistorFloat;
@@ -57,8 +63,13 @@ namespace Meadow.Devices
                     break;
             }
 
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
+            if (interruptEnabled)
+            {
+                flags |= GPIOConfigFlags.InputInterruptEnable;
 
+            }
+
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
         }
 
         /// <summary>
