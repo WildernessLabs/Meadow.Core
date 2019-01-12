@@ -7,8 +7,8 @@ namespace Meadow.Hardware
         {
         }
 
-        public override bool Value => throw new NotImplementedException();
+        public override bool State { get; }
 
-        public bool InterrupEnabled => true;
+        bool IDigitalInterruptPort.InterrupEnabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 }

@@ -28,7 +28,7 @@ namespace Meadow.Hardware
             }
         }
 
-        public override bool Value
+        public override bool State
         {
             get => _pin.GPIOManager.GetDiscrete(_pin);
         }
