@@ -6,26 +6,17 @@ namespace Meadow.Hardware
     /// Tristate port.
     /// </summary>
     /// <remarks>A tristate port is initially an input port</remarks>
-    public class BiDirectionalPort : IBiDirectionalPort, IDisposable
+    public class BiDirectionalPort : BiDirectionalPortBase
     {
-        public event EventHandler<PortEventArgs> Changed;
+protected IDigitalPin _pin;
 
-        protected IDigitalPin _pin;
-        protected bool _disposed;
-        private bool _currentState;
-        private bool _interruptEnabled;
-
-        private PortDirectionType _currentDirection = PortDirectionType.Input;
-
-        public bool GlitchFilter { get; set; }
-        public bool InitialState { get; }
-        public ResistorMode Resistor { get; }
-
-        public BiDirectionalPort(IDigitalPin pin, bool initialState = false, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
+        public BiDirectionalPort(
+            IDigitalPin pin, 
+            bool initialState = false, 
+            bool glitchFilter = false, 
+            ResistorMode resistorMode = ResistorMode.Disabled)
+            : base (pin, initialState, glitchFilter, resistorMode)
         {
-            InitialState = initialState;
-            Resistor = resistorMode;
-
             // attempt to reserve the pin
             var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
 
@@ -42,13 +33,7 @@ namespace Meadow.Hardware
             }
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             // TODO: we should consider moving this logic to the finalizer
             // but the problem with that is that we don't know when it'll be called
@@ -89,28 +74,8 @@ namespace Meadow.Hardware
             }
         }
 
-        public bool InterrupEnabled
-        {
-            get => _interruptEnabled;
-            set
-            {
-                if (value == InterrupEnabled) return;
 
-                _interruptEnabled = value;
-            }
-        }
-
-        public PortDirectionType DirectionType
-        {
-            get => _currentDirection; 
-        }
-
-        public SignalType SignalType
-        {
-            get => SignalType.Digital;
-        }
-
-        public bool State
+        public override bool State
         {
             get
             {

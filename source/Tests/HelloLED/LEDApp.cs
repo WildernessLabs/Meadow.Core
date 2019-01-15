@@ -15,14 +15,14 @@ namespace HelloLED
 
         public override void Run()
         {
-            //CreateOutputs();
-            //ShowLights();
+            CreateOutputs();
+            ShowLights();
 
             //WalkOutputs();
 
             // WatchInputs();
 
-            LoopbackTest();
+            //LoopbackTest();
         }
 
         public void CreateOutputs()

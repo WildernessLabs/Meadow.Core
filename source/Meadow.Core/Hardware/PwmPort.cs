@@ -21,7 +21,7 @@ namespace Meadow.Hardware
         //public IDigitalPin Pin { get; }
         public TimeScaleFactor Scale { get; set; }
 
-        public PortDirectionType DirectionType => PortDirectionType.Output;
+        public PortDirectionType Direction => PortDirectionType.Output;
         public SignalType SignalType => SignalType.Digital;
 
         public static void Start(PwmPort[] ports) { throw new NotImplementedException(); }

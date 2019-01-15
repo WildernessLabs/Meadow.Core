@@ -20,7 +20,7 @@ namespace Meadow.Hardware
             this.analogPin = analogPin;
         }
 
-        public PortDirectionType DirectionType => throw new NotImplementedException();
+        public PortDirectionType Direction => throw new NotImplementedException();
 
         public SignalType SignalType => throw new NotImplementedException();
     }

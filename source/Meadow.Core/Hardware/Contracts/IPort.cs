@@ -3,7 +3,7 @@
     //TODO: add IDisposable
     public interface IPort //: IDisposable
     {
-        PortDirectionType DirectionType { get; }
+        PortDirectionType Direction { get; }
         SignalType SignalType { get; } 
     }
 }
