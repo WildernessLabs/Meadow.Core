@@ -114,6 +114,7 @@
     <Compile Include="Contracts\IGPIOManager.cs" />
     <Compile Include="Hardware\BiDirectionalPort.cs" />
     <Compile Include="Hardware\Contracts\IBiDirectionalPort.cs" />
+    <Compile Include="Hardware\Bases\BiDirectionalPortBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />

@@ -11,7 +11,7 @@
         /// This member must be set during the constructor and describes whether the 
         /// port in an input or output port.
         /// </summary>
-        public PortDirectionType DirectionType
+        public PortDirectionType Direction
         {
             get { return _direction; }
         }
