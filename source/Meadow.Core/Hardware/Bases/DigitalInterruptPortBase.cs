@@ -3,12 +3,12 @@ namespace Meadow.Hardware
 {
     public class DigitalInterruptPortBase : DigitalInputPortBase, IDigitalInterruptPort
     {
-public DigitalInterruptPortBase()
+        public DigitalInterruptPortBase()
         {
         }
 
-        public override bool Value => throw new NotImplementedException();
+        public override bool State { get; }
 
-        public bool InterrupEnabled => true;
+        bool IDigitalInterruptPort.InterrupEnabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 }

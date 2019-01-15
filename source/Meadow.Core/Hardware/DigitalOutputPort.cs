@@ -4,7 +4,6 @@ namespace Meadow.Hardware
 {
     public class DigitalOutputPort : DigitalOutputPortBase, IDisposable
     {
-        //protected H.OutputPort _digitalOutPort = null
         protected IDigitalPin _pin;
         protected bool _disposed;
 
@@ -31,18 +30,23 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) : base(initialState)
+        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) 
+            : base(initialState)
         {
-            //this._digitalOutPort = new H.OutputPort(pin, initialState);
-            
             // attempt to reserve
-            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.Digital);
-            if(success.Item1)
+            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
+            if (success.Item1)
             {
                 this._pin = pin;
+
+                // make sure the pin is configured as a digital output with the proper state
+                _pin.GPIOManager.ConfigureOutput(_pin, initialState);
+
+                // initialize the output state
                 _pin.GPIOManager.SetDiscrete(_pin, initialState);
             }
-            else {
+            else
+            {
                 throw new PortInUseException();
             }
         }

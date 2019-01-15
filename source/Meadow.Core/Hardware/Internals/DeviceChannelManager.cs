@@ -87,11 +87,14 @@ namespace Meadow.Hardware
     /// TODO: revisit this structure. Ultimately, it would be nice to know, specifically
     /// what a channel is cofigured for, i.e. DigitalInput, I2C TX, UART RX, etc.
     /// </summary>
-    internal enum ChannelConfigurationType
+    public enum ChannelConfigurationType
     {
         None,
-        Digital,
-        Analog,
+        DigitalOutput,
+        DigitalInput,
+        AnalogOutput,
+        AnalogInput,
+        PWM,
         SPI,
         I2C,
         CAN,

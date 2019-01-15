@@ -20,6 +20,63 @@ namespace Meadow.Devices
             DriverHandle = Interop.Nuttx.open(GPIODriverName, Interop.Nuttx.DriverFlags.ReadOnly);
         }
 
+        public void ConfigureOutput(IDigitalPin pin, bool initialState)
+        {
+            var designator = GetPinDesignator(pin);
+
+            // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
+            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            flags |= GPIOConfigFlags.ModeOutput;
+
+            if (initialState)
+            {
+                flags |= GPIOConfigFlags.OutputInitialValueHigh;
+            }
+            else
+            {
+                flags |= GPIOConfigFlags.OutputInitialValueLow;
+            }
+
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
+        }
+
+        public void ConfigureInput(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
+        {
+            var designator = GetPinDesignator(pin);
+
+            // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
+            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            flags |= GPIOConfigFlags.ModeInput;
+
+            switch (resistorMode)
+            {
+                case ResistorMode.Disabled:
+                    flags |= GPIOConfigFlags.ResistorFloat;
+                    break;
+                case ResistorMode.PullUp:
+                    flags |= GPIOConfigFlags.ResistorPullUp;
+                    break;
+                case ResistorMode.PullDown:
+                    flags |= GPIOConfigFlags.ResistorPullDown;
+                    break;
+            }
+
+            if (interruptEnabled)
+            {
+                flags |= GPIOConfigFlags.InputInterruptEnable;
+
+            }
+
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
+        }
+
+        /// <summary>
+        /// Sets the value out a discrete (digital output)
+        /// </summary>
+        /// <param name="pin">Pin.</param>
+        /// <param name="value">If set to <c>true</c> value.</param>
         void IGPIOManager.SetDiscrete(IDigitalPin pin, bool value)
         {
             // generate a PinState for the desired pin and value
@@ -171,12 +228,21 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Gets the value of a discrete (digital input)
+        /// </summary>
+        /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
+        /// <param name="pin">Pin.</param>
         public bool GetDiscrete(IDigitalPin pin)
         {
-            throw new NotImplementedException();
+            var designator = (int)GetPinDesignator(pin);
+
+            var result = Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.GpioIoctlFn.Read, ref designator);
+
+            return result != 0;
         }
 
-                /// <summary>
+        /// <summary>
         /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).
         /// </summary>
         public void Initialize()

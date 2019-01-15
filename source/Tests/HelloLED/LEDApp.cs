@@ -15,10 +15,14 @@ namespace HelloLED
 
         public override void Run()
         {
-            //CreateOutputs();
-            //ShowLights();
+            CreateOutputs();
+            ShowLights();
 
-            WalkOutputs();
+            //WalkOutputs();
+
+            // WatchInputs();
+
+            //LoopbackTest();
         }
 
         public void CreateOutputs()
@@ -49,6 +53,34 @@ namespace HelloLED
 
                 _d00.State = state;
                 Thread.Sleep(200);
+            }
+        }
+
+        public void LoopbackTest()
+        {
+            // assumes D04 is tied directly to D05
+            var output = new DigitalOutputPort(Device.Pins.D04);
+            var input = new DigitalInputPort(Device.Pins.D05);
+
+            var state = false;
+
+            while(true)
+            {
+                state = !state;
+                output.State = state;
+                Console.WriteLine($"state: {input.State}");
+                Thread.Sleep(1000);
+            }
+        }
+
+        public void WatchInputs()
+        {
+            var d05 = new DigitalInputPort(Device.Pins.D05, false, ResistorMode.Disabled);
+
+            while(true)
+            {
+                Console.WriteLine($"D05: {d05.State}");
+                Thread.Sleep(500);
             }
         }
 

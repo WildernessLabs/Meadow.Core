@@ -149,6 +149,9 @@ namespace Meadow.Core.Interop
 
                 InputInterruptEnable = 1 << 8,
 
+                // *** IMPORTANT DEV NOTE ***
+                // These should never change, but if they do, you *must* modify the 
+                // PinDesignator enum to match
                 PortA = 0 << GPIO_PORT_SHIFT,
                 PortB = 1 << GPIO_PORT_SHIFT,
                 PortC = 2 << GPIO_PORT_SHIFT,
@@ -182,34 +185,34 @@ namespace Meadow.Core.Interop
             [Flags]
             public enum PinDesignator
             {
-                PortA = 0 << GPIO_PORT_SHIFT,
-                PortB = 1 << GPIO_PORT_SHIFT,
-                PortC = 2 << GPIO_PORT_SHIFT,
-                PortD = 3 << GPIO_PORT_SHIFT,
-                PortE = 4 << GPIO_PORT_SHIFT,
-                PortF = 5 << GPIO_PORT_SHIFT,
-                PortG = 6 << GPIO_PORT_SHIFT,
-                PortH = 7 << GPIO_PORT_SHIFT,
-                PortI = 8 << GPIO_PORT_SHIFT,
-                PortJ = 8 << GPIO_PORT_SHIFT,
-                PortK = 10 << GPIO_PORT_SHIFT,
+                PortA = GPIOConfigFlags.PortA,
+                PortB = GPIOConfigFlags.PortB,
+                PortC = GPIOConfigFlags.PortC,
+                PortD = GPIOConfigFlags.PortD,
+                PortE = GPIOConfigFlags.PortE,
+                PortF = GPIOConfigFlags.PortF,
+                PortG = GPIOConfigFlags.PortG,
+                PortH = GPIOConfigFlags.PortH,
+                PortI = GPIOConfigFlags.PortI,
+                PortJ = GPIOConfigFlags.PortJ,
+                PortK = GPIOConfigFlags.PortK,
 
-                Pin0 = 0 << GPIO_PIN_SHIFT,
-                Pin1 = 1 << GPIO_PIN_SHIFT,
-                Pin2 = 2 << GPIO_PIN_SHIFT,
-                Pin3 = 3 << GPIO_PIN_SHIFT,
-                Pin4 = 4 << GPIO_PIN_SHIFT,
-                Pin5 = 5 << GPIO_PIN_SHIFT,
-                Pin6 = 6 << GPIO_PIN_SHIFT,
-                Pin7 = 7 << GPIO_PIN_SHIFT,
-                Pin8 = 8 << GPIO_PIN_SHIFT,
-                Pin9 = 9 << GPIO_PIN_SHIFT,
-                Pin10 = 10 << GPIO_PIN_SHIFT,
-                Pin11 = 11 << GPIO_PIN_SHIFT,
-                Pin12 = 12 << GPIO_PIN_SHIFT,
-                Pin13 = 13 << GPIO_PIN_SHIFT,
-                Pin14 = 14 << GPIO_PIN_SHIFT,
-                Pin15 = 15 << GPIO_PIN_SHIFT
+                Pin0 = GPIOConfigFlags.Pin0,
+                Pin1 = GPIOConfigFlags.Pin1,
+                Pin2 = GPIOConfigFlags.Pin2,
+                Pin3 = GPIOConfigFlags.Pin3,
+                Pin4 = GPIOConfigFlags.Pin4,
+                Pin5 = GPIOConfigFlags.Pin5,
+                Pin6 = GPIOConfigFlags.Pin6,
+                Pin7 = GPIOConfigFlags.Pin7,
+                Pin8 = GPIOConfigFlags.Pin8,
+                Pin9 = GPIOConfigFlags.Pin9,
+                Pin10 = GPIOConfigFlags.Pin10,
+                Pin11 = GPIOConfigFlags.Pin11,
+                Pin12 = GPIOConfigFlags.Pin12,
+                Pin13 = GPIOConfigFlags.Pin13,
+                Pin14 = GPIOConfigFlags.Pin14,
+                Pin15 = GPIOConfigFlags.Pin15,
             }
 
         }
