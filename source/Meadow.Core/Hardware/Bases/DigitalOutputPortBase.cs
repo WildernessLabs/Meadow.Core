@@ -1,9 +1,7 @@
 ﻿namespace Meadow.Hardware
 {
     /// <summary>
-    /// DigitalOutputPortBase inherits from DigitalPortBase and provides a 
-    /// base implementation for much of the common tasks of classes implementing 
-    /// IDigitalPort.
+    /// Provides a base implementation for digital output ports.
     /// </summary>
     public abstract class DigitalOutputPortBase : DigitalPortBase, IDigitalOutputPort
     {

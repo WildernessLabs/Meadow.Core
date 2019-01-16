@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Provides base implementation for IO pins.
+    /// </summary>
     public abstract class PinBase : IPin
     {
         public string Name { get; protected set; }

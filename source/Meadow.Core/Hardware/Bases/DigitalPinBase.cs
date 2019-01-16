@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Provides a base implementation for digital pins.
+    /// </summary>
     public abstract class DigitalPinBase : PinBase, IDigitalPin
     {
         protected DigitalPinBase(string name, object key, 

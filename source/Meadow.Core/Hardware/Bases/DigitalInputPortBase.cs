@@ -2,6 +2,9 @@
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Provides a base implementation for digital input ports.
+    /// </summary>
     public abstract class DigitalInputPortBase : DigitalPortBase
     {
         public event EventHandler<PortEventArgs> Changed = delegate { };

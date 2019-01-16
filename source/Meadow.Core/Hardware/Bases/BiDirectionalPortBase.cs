@@ -1,6 +1,10 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Provides a base implementation for BiDirectional Ports; digital ports 
+    /// that can be both input and output.
+    /// </summary>
     public abstract class BiDirectionalPortBase : IBiDirectionalPort, IDisposable
     {
         public event EventHandler<PortEventArgs> Changed;
