@@ -2,17 +2,21 @@
 
 namespace Meadow.Hardware.Communications
 {
+    /// <summary>
+    /// Represents an SPI communication bus for communicating to peripherals that 
+    /// implement the SPI protocol.
+    /// </summary>
     public class SPIBus : ICommunicationBus
     {
         #region Member variables / fields
 
         /// <summary>
-        ///     SPI bus object.
+        /// SPI bus object.
         /// </summary>
         private static Spi _spi;
 
         /// <summary>
-        ///     Configuration to use for this instance of the SPIBus.
+        /// Configuration to use for this instance of the SPIBus.
         /// </summary>
         private Spi.Configuration _configuration;
 
@@ -21,17 +25,17 @@ namespace Meadow.Hardware.Communications
         #region Constructor(s)
 
         /// <summary>
-        ///     Default constructor for the SPIBus.
+        /// Default constructor for the SPIBus.
         /// </summary>
         /// <remarks>
-        ///     This is private to prevent the programmer using it.
+        /// This is private to prevent the programmer using it.
         /// </remarks>
         private SPIBus()
         {
         }
 
         /// <summary>
-        ///     Create a new SPIBus object.
+        /// Create a new SPIBus object.
         /// </summary>
         /// <param name="configuration">SPI bus configuration.</param>
         public SPIBus(Spi.Configuration configuration)
@@ -41,7 +45,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Create a new SPIBus object using the requested clock phase and polarity.
+        /// Create a new SPIBus object using the requested clock phase and polarity.
         /// </summary>
         /// <param name="module">SPI module to configure.</param>
         /// <param name="chipSelect">Chip select pin.</param>
@@ -55,7 +59,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Create a new SPIBus operating in the specified mode.
+        /// Create a new SPIBus operating in the specified mode.
         /// </summary>
         /// <remarks>
         ///     Mode    CPOL    CPHA
@@ -98,7 +102,7 @@ namespace Meadow.Hardware.Communications
         #region Methods
 
         /// <summary>
-        ///     Work out how the SPI bus should be configured from the clock polarity and phase.
+        /// Works out how the SPI bus should be configured from the clock polarity and phase.
         /// </summary>
         /// <param name="module">SPI module to configure.</param>
         /// <param name="chipSelect">Chip select pin.</param>
@@ -128,7 +132,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a single byte to the device.
+        /// Write a single byte to the peripheral.
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
         public void WriteByte(byte value)
@@ -137,10 +141,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a number of bytes to the device.
+        /// Write a number of bytes to the peripheral.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written will be determined by the length of the byte array.
+        /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         public void WriteBytes(byte[] values)
@@ -150,7 +154,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write an unsigned short to the device.
+        /// Write an unsigned short to the peripheral.
         /// </summary>
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="value">Value to be written (16-bits).</param>
@@ -172,10 +176,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a number of unsigned shorts to the device.
+        /// Write a number of unsigned shorts to the peripheral.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written will be determined by the length of the byte array.
+        /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="values">Values to be written.</param>
@@ -200,7 +204,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data a register in the device.
+        /// Write data a register in the peripheral.
         /// </summary>
         /// <param name="address">Address of the register to write to.</param>
         /// <param name="value">Data to write into the register.</param>
@@ -210,7 +214,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data to one or more registers.
+        /// Write data to one or more registers.
         /// </summary>
         /// <param name="address">Address of the first register to write to.</param>
         /// <param name="data">Data to write into the registers.</param>
@@ -223,10 +227,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data to the device and also read some data from the device.
+        /// Write data to the peripheral and also read some data from the peripheral.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written and read will be determined by the length of the byte arrays.
+        /// The number of bytes to be written and read will be determined by the length of the byte arrays.
         /// </remarks>
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
@@ -239,7 +243,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read the specified number of bytes from the I2C device.
+        /// Read the specified number of bytes from the I2C peripheral.
         /// </summary>
         /// <returns>The bytes.</returns>
         /// <param name="numberOfBytes">Number of bytes.</param>
@@ -249,7 +253,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read a registers from the device.
+        /// Read a registers from the peripheral.
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
         public byte ReadRegister(byte address)
@@ -258,7 +262,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read one or more registers from the device.
+        /// Read one or more registers from the peripheral.
         /// </summary>
         /// <param name="address">Address of the first register to read.</param>
         /// <param name="length">Number of bytes to read from the device.</param>
@@ -268,7 +272,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read an unsigned short from a pair of registers.
+        /// Read an unsigned short from a pair of registers.
         /// </summary>
         /// <param name="address">Register address of the low byte (the high byte will follow).</param>
         /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
@@ -279,8 +283,8 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read the specified number of unsigned shorts starting at the register
-        ///     address specified.
+        /// Read the specified number of unsigned shorts starting at the register
+        /// address specified.
         /// </summary>
         /// <param name="address">First register address to read from.</param>
         /// <param name="number">Number of unsigned shorts to read.</param>

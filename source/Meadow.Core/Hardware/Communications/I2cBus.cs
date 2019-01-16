@@ -4,25 +4,24 @@ using System.Runtime.CompilerServices;
 namespace Meadow.Hardware.Communications
 {
     /// <summary>
-    ///     I2CBus object used to communicate with an I2C device using the ICommunicationBus
-    ///     interface methods.
+    /// Represents an I2C communication channel that conforms to the ICommunicationBus
+    /// contract.
     /// </summary>
     public class I2cBus : ICommunicationBus
     {
         #region Member variables / fields.
 
-        //    Config property of the I2CDevice.
         /// <summary>
-        ///     I2C bus used to communicate with a device (sensor etc.).
+        /// I2C bus used to communicate with a device (sensor etc.).
         /// </summary>
         /// <remarks>
-        ///     This I2CDevice is static and shared across all instances of the I2CBus.
-        ///     Communication with difference devices is made possible by changing the
+        /// This I2CDevice is static and shared across all instances of the I2CBus.
+        /// Communication with difference devices is made possible by changing the
         /// </remarks>
         private static I2cDevice _device;
 
         /// <summary>
-        ///     Configuration property for this I2CDevice.
+        /// Configuration property for this I2CDevice.
         /// </summary>
         private readonly I2cDevice.Configuration _configuration;
 
@@ -36,15 +35,15 @@ namespace Meadow.Hardware.Communications
         #region Constructors
 
         /// <summary>
-        ///     Default constructor for the I2CBus class.  This is private to prevent the
-        ///     developer from calling it.
+        /// Default constructor for the I2CBus class.  This is private to prevent the
+        /// developer from calling it.
         /// </summary>
         private I2cBus()
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="T:Meadow.Foundation.Core.I2CBus" /> class.
+        /// Initializes a new instance of the <see cref="T:Meadow.Foundation.Core.I2CBus" /> class.
         /// </summary>
         /// <param name="address">Address of the device.</param>
         /// <param name="speed">Bus speed in kHz.</param>
@@ -64,7 +63,7 @@ namespace Meadow.Hardware.Communications
         #region ICommunicationBus methods.
 
         /// <summary>
-        ///     Write a single byte to the device.
+        /// Write a single byte to the device.
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
         public void WriteByte(byte value)
@@ -74,10 +73,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a number of bytes to the device.
+        /// Write a number of bytes to the device.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written will be determined by the length of the byte array.
+        /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -100,7 +99,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write an unsigned short to the device.
+        /// Write an unsigned short to the device.
         /// </summary>
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="value">Value to be written (16-bits).</param>
@@ -122,10 +121,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a number of unsigned shorts to the device.
+        /// Write a number of unsigned shorts to the device.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written will be determined by the length of the byte array.
+        /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="values">Values to be written.</param>
@@ -150,10 +149,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data to the device and also read some data from the device.
+        /// Write data to the device and also read some data from the device.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written and read will be determined by the length of the byte arrays.
+        /// The number of bytes to be written and read will be determined by the length of the byte arrays.
         /// </remarks>
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
@@ -192,7 +191,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data into a single register.
+        /// Write data into a single register.
         /// </summary>
         /// <param name="address">Address of the register to write to.</param>
         /// <param name="value">Value to write into the register.</param>
@@ -203,11 +202,11 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data to one or more registers.
+        /// Write data to one or more registers.
         /// </summary>
         /// <remarks>
-        ///     This method assumes that the register address is written first followed by the data to be
-        ///     written into the first register followed by the data for subsequent registers.
+        /// This method assumes that the register address is written first followed by the data to be
+        /// written into the first register followed by the data for subsequent registers.
         /// </remarks>
         /// <param name="address">Address of the first register to write to.</param>
         /// <param name="data">Data to write into the registers.</param>
@@ -220,7 +219,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read the specified number of bytes from the I2C device.
+        ///  Read the specified number of bytes from the I2C device.
         /// </summary>
         /// <returns>The bytes.</returns>
         /// <param name="numberOfBytes">Number of bytes.</param>
@@ -246,7 +245,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read a register from the device.
+        /// Read a register from the device.
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
         public byte ReadRegister(byte address)
@@ -257,7 +256,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read one or more registers from the device.
+        /// Read one or more registers from the device.
         /// </summary>
         /// <param name="address">Address of the first register to read.</param>
         /// <param name="length">Number of bytes to read from the device.</param>
@@ -268,7 +267,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read an usingned short from a pair of registers.
+        /// Read an usingned short from a pair of registers.
         /// </summary>
         /// <param name="address">Register address of the low byte (the high byte will follow).</param>
         /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
@@ -289,8 +288,8 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read the specified number of unsigned shorts starting at the register
-        ///     address specified.
+        /// Read the specified number of unsigned shorts starting at the register
+        /// address specified.
         /// </summary>
         /// <param name="address">First register address to read from.</param>
         /// <param name="number">Number of unsigned shorts to read.</param>

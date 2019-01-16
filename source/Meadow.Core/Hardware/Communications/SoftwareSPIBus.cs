@@ -5,39 +5,39 @@ using System.Runtime.CompilerServices;
 namespace Meadow.Hardware.Communications
 {
     /// <summary>
-    ///     Implement a software version of the SPI communication protocol.
+    /// Implements a software version of the SPI communication protocol.
     /// </summary>
     public class SoftwareSPIBus : ICommunicationBus
     {
         #region Member variables / fields
 
         /// <summary>
-        ///     MOSI output port.
+        /// MOSI output port.
         /// </summary>
         private DigitalOutputPort _mosi;
 
         /// <summary>
-        ///     MISO Input port.
+        /// MISO Input port.
         /// </summary>
         private DigitalInputPort _miso;
 
         /// <summary>
-        ///     Clock output port.
+        /// Clock output port.
         /// </summary>
         private DigitalOutputPort _clock;
 
         /// <summary>
-        ///     Chip select port.
+        /// Chip select port.
         /// </summary>
         private DigitalOutputPort _chipSelect;
 
         /// <summary>
-        ///     Boolean representation of the clock polarity.
+        /// Boolean representation of the clock polarity.
         /// </summary>
         private readonly bool _polarity;
 
         /// <summary>
-        ///     Boolean representation of the clock phase.
+        /// Boolean representation of the clock phase.
         /// </summary>
         private readonly bool _phase;
 
@@ -46,14 +46,14 @@ namespace Meadow.Hardware.Communications
         #region Constructors
 
         /// <summary>
-        ///     Default constructor (private to prevent it from being used).
+        /// Default constructor (private to prevent it from being used).
         /// </summary>
         private SoftwareSPIBus()
         {
         }
 
         /// <summary>
-        ///     Create a new SoftwareSPIBus object using the specified pins.
+        /// Create a new SoftwareSPIBus object using the specified pins.
         /// </summary>
         /// <param name="mosi">MOSI pin.</param>
         /// <param name="miso">MISO pin</param>
@@ -85,7 +85,7 @@ namespace Meadow.Hardware.Communications
         #region Methods
 
         /// <summary>
-        ///     Write a single byte to the SPI bus.
+        /// Write a single byte to the SPI bus.
         /// </summary>
         /// <param name="value">Byte value to write to the SPI bus.</param>
         private void Write(byte value)
@@ -103,7 +103,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a single byte to the device.
+        /// Write a single byte to the peripheral.
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -115,10 +115,11 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a number of bytes to the device.
+        /// Write a number of bytes to the peripheral.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written will be determined by the length of the byte array.
+        /// The number of bytes to be written will be determined by the length 
+        /// of the byte array.
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -133,7 +134,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data a register in the device.
+        /// Write data a register in the peripheral.
         /// </summary>
         /// <param name="register">Address of the register to write to.</param>
         /// <param name="value">Data to write into the register.</param>
@@ -144,7 +145,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data to one or more registers.
+        /// Write data to one or more registers.
         /// </summary>
         /// <param name="address">Address of the first register to write to.</param>
         /// <param name="data">Data to write into the registers.</param>
@@ -156,7 +157,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write an unsigned short to the device.
+        /// Write an unsigned short to the peripheral.
         /// </summary>
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="value">Value to be written (16-bits).</param>
@@ -178,10 +179,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write a number of unsigned shorts to the device.
+        /// Write a number of unsigned shorts to the peripheral.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written will be determined by the length of the byte array.
+        /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="values">Values to be written.</param>
@@ -206,11 +207,11 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write and read a single byte.
+        /// Write and read a single byte.
         /// </summary>
         /// <remarks>
-        ///     This internal method assumes that CS has been asserted correctly
-        ///     before it is called.
+        /// This internal method assumes that CS has been asserted correctly
+        /// before it is called.
         /// </remarks>
         /// <param name="value">Value to write.</param>
         /// <returns>Byte read from the SPI interface.</returns>
@@ -246,10 +247,10 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Write data to the device and also read some data from the device.
+        /// Write data to the peripheral and also read some data from the peripheral.
         /// </summary>
         /// <remarks>
-        ///     The number of bytes to be written and read will be determined by the length of the byte arrays.
+        /// The number of bytes to be written and read will be determined by the length of the byte arrays.
         /// </remarks>
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
@@ -281,7 +282,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read the specified number of bytes from the SPI device.
+        /// Read the specified number of bytes from the SPI peripheral.
         /// </summary>
         /// <param name="numberOfBytes">Number of bytes.</param>
         /// <returns>The bytes read from the device.</returns>
@@ -296,7 +297,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read a register from the device.
+        /// Read a register from the peripheral.
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
         public byte ReadRegister(byte address)
@@ -305,7 +306,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read one or more registers from the device.
+        /// Read one or more registers from the peripheral.
         /// </summary>
         /// <param name="address">Address of the first register to read.</param>
         /// <param name="length">Number of bytes to read from the device.</param>
@@ -316,7 +317,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read an unsigned short from a pair of registers.
+        /// Read an unsigned short from a pair of registers.
         /// </summary>
         /// <param name="address">Register address of the low byte (the high byte will follow).</param>
         /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
@@ -337,8 +338,8 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Read the specified number of unsigned shorts starting at the register
-        ///     address specified.
+        /// Read the specified number of unsigned shorts starting at the register
+        /// address specified.
         /// </summary>
         /// <param name="address">First register address to read from.</param>
         /// <param name="number">Number of unsigned shorts to read.</param>

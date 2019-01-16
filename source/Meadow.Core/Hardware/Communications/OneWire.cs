@@ -3,6 +3,9 @@ using System.Collections;
 
 namespace Meadow.Hardware.Communications
 {
+    /// <summary>
+    /// Represents a peripheral that communicates via the OneWire protocol.
+    /// </summary>
     public class OneWire
     {
         public OneWire(DigitalOutputPort port) { throw new NotImplementedException(); }

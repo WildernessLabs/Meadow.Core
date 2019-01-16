@@ -4,19 +4,19 @@ using System.Collections;
 namespace Meadow.Hardware.Communications
 {
     /// <summary>
-    ///     Singleton class used to allow access to multiple OneWire devices on a single pin
-    ///     in a multi-threaded application.
+    /// Singleton class used to allow access to multiple OneWire peripherals on a single pin
+    /// in a multi-threaded application.
     /// </summary>
     /// <remarks>
-    ///     The OneWire class allows for a single bus to have one or more devices attached to it.
-    ///     It also allows for multiple OneWire devices to be connected to different pins on the
-    ///     Netduino.
+    /// The OneWire class allows for a single bus to have one or more peripherals attached to it.
+    /// It also allows for multiple OneWire peripherals to be connected to different pins on the
+    /// Meadow device.
     ///
-    ///     The multiple devices on different pins is not an issue in a multi-threaded environment.
+    /// The multiple peripherals on different pins is not an issue in a multi-threaded environment.
     ///
-    ///     Multiple devices attached to a single pin on a multi-threaded environment could be an
-    ///     issue as the command sequencing could clash.  Using this object with locking allows
-    ///     for this scenario to be implemented in a safe way.
+    /// Multiple peripherals attached to a single pin on a multi-threaded environment could be an
+    /// issue as the command sequencing could clash.  Using this object with locking allows
+    /// for this scenario to be implemented in a safe way.
     /// </remarks>
     public sealed class OneWireBus
     {
@@ -30,22 +30,22 @@ namespace Meadow.Hardware.Communications
             #region Properties
 
             /// <summary>
-            ///     Pin connected to the OneWire devices.
+            /// Pin connected to the OneWire peripherals.
             /// </summary>
             public IPin Pin { get; set; }
 
             /// <summary>
-            ///     OutputPoert object used to talk to the OneWire bus.
+            /// OutputPoert object used to talk to the OneWire bus.
             /// </summary>
             private DigitalOutputPort Port { get; set; }
 
             /// <summary>
-            ///     Object used to talk to the OneWire devices using the OneWire protocol.
+            /// Object used to talk to the OneWire peripheral using the OneWire protocol.
             /// </summary>
             public OneWire DeviceBus { get; set; }
 
             /// <summary>
-            ///     Device IS connected to this instance of the OneWire bus.
+            /// Device IS connected to this instance of the OneWire bus.
             /// </summary>
             public ArrayList DeviceIDs { get; set; }
 
@@ -54,14 +54,14 @@ namespace Meadow.Hardware.Communications
             #region Constructor
 
             /// <summary>
-            ///     Default constructor is private to prevent it being invoked.
+            /// Default constructor is private to prevent it being invoked.
             /// </summary>
             private Devices()
             {
             }
 
             /// <summary>
-            ///     Create a new instance of a OneWire Device object.
+            /// Create a new instance of a OneWire peripheral object.
             /// </summary>
             /// <param name="pin">Pin connected to the OneWire devices.</param>
             public Devices(IDigitalPin pin)
@@ -78,12 +78,12 @@ namespace Meadow.Hardware.Communications
             #region Methods
 
             /// <summary>
-            ///     Scan the specified device bus for OneWire devices.
+            /// Scan the specified device bus for OneWire peripherals.
             /// </summary>
             /// <remarks>
-            ///     The OneWire protocol allows for multiple OneWire devices to be
-            ///     attached to the same pin.  This method identifies all of the devices
-            ///     that are connected to the pin used to create this object.
+            /// The OneWire protocol allows for multiple OneWire peripherals to be
+            /// attached to the same pin.  This method identifies all of the peripherals
+            /// that are connected to the pin used to create this object.
             /// </remarks>
             private void ScanForDevices()
             {
@@ -117,12 +117,12 @@ namespace Meadow.Hardware.Communications
         #region Private member variables
 
         /// <summary>
-        ///     Static instance
+        /// Static instance
         /// </summary>
         private static readonly OneWireBus oneWireBus = new OneWireBus();
 
         /// <summary>
-        ///     List of all of the pins and the associates OneWire devices.
+        /// List of all of the pins and the associates OneWire peripherals.
         /// </summary>
         private static readonly ArrayList _devices = new ArrayList();
 
@@ -131,7 +131,7 @@ namespace Meadow.Hardware.Communications
         #region Properties
 
         /// <summary>
-        ///     Return the singleton object.
+        /// Return the singleton object.
         /// </summary>
         public static OneWireBus Instance { get { return oneWireBus; } }
 
@@ -144,7 +144,7 @@ namespace Meadow.Hardware.Communications
         }
 
         /// <summary>
-        ///     Default constructor is private to prevent it being invoked.
+        /// Default constructor is private to prevent it being invoked.
         /// </summary>
         private OneWireBus()
         {
@@ -155,7 +155,7 @@ namespace Meadow.Hardware.Communications
         #region Methods
 
         /// <summary>
-        ///     Add a new pin to the list of those with OneWire devices attached.
+        /// Add a new pin to the list of those with OneWire peripherals attached.
         /// </summary>
         /// <param name="pin">Pin number with the OneWire devices attached.</param>
         /// <returns><see cref="Devices"/> object for the specified pin.</returns>
