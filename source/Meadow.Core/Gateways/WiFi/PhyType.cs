@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Describes the type of PHYsical layer employed by a WiFi adapter.
+    /// </summary>
     public enum PhyType
     {
         /// <summary>

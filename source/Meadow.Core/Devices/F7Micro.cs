@@ -4,6 +4,10 @@ using Meadow.Gateway.WiFi;
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
+    /// capabilities and provides access to the various device-specific features.
+    /// </summary>
     public class F7Micro : DeviceBase
     {
         public List<WiFiAdapter> WiFiAdapters { get; }

@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Describes the status of a WiFi network connection.
+    /// </summary>
     public enum ConnectionStatus
     {
         /// <summary>

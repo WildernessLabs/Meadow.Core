@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Describes the WiFi network reconnection behavior.
+    /// </summary>
     public enum ReconnectionType
     {
         /// <summary>

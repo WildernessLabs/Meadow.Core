@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Represents a WiFi network.
+    /// </summary>
     public class WifiNetwork
     {
         /// <summary>

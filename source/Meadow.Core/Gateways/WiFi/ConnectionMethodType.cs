@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Descrbies the Wifi connection method type.
+    /// </summary>
     public enum ConnectionMethodType
     {
         /// <summary>

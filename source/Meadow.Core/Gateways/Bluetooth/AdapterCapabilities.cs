@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateways.Bluetooth
 {
+    /// <summary>
+    /// Describes the capabilities of the Bluetooth adapter.
+    /// </summary>
     public class AdapterCapabilities
     {
         public bool HasClassicSupport { get; protected set; }

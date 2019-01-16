@@ -5,9 +5,9 @@ using Meadow.Hardware;
 namespace Meadow
 {
     /// <summary>
-    /// TODO: internal?
+    /// TODO: make public at some point.
     /// </summary>
-    public abstract class DeviceBase : IDevice
+    internal abstract class DeviceBase : IDevice
     {
         public DeviceCapabilities Capabilities { get; protected set; }
         public IGPIOManager GPIOManager { get; protected set; }

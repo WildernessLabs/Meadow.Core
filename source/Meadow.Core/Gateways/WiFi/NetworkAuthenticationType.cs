@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Describes the type of WiFi network authentication.
+    /// </summary>
     public enum NetworkAuthenticationType
     {
         /// <summary>

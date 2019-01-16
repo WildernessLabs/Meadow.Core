@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Represents a WiFi network adapter.
+    /// </summary>
     public class WiFiAdapter
     {
         public ObservableCollection<WifiNetwork> Networks { get; set; }

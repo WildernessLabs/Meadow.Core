@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateways.Bluetooth
 {
+    /// <summary>
+    /// Represents the Bluetooth communications adapter on the Meadow device.
+    /// </summary>
     public class BluetoothAdapter
     {
         public string DeviceID { get; protected set; }

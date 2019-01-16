@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Gateway.WiFi
 {
+    /// <summary>
+    /// Describes the type of encryption employed by a WiFi network.
+    /// </summary>
     public enum NetworkEncryptionType
     {
         /// <summary>

@@ -2,10 +2,8 @@
 namespace Meadow
 {
     /// <summary>
-    /// TODO: Is this necessary? We've decided that we want to use the app model, 
-    /// as opposed to allowing users to create `Static void main()` implementations,
-    /// but if we type the App.Current to the user's app somehow, we can potentially
-    /// get rid of this.
+    /// Contract for Meadow applications. Provides a way for the Meadow OS to 
+    /// communicate with Meadow applications when system events are happening.
     /// </summary>
     public interface IApp
     {
