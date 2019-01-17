@@ -2,14 +2,18 @@
 
 namespace Meadow.Hardware
 {
-    public class I2cDevice : IDisposable
+    /// <summary>
+    /// Defines a contract for a peripheral that communicates via the IIC/I2C 
+    /// protocol.
+    /// </summary>
+    public class I2cPeripheral : IDisposable
     {
         public Configuration Config;
         protected bool m_disposed;
 
-        public I2cDevice(Configuration config) { throw new NotImplementedException(); }
+        public I2cPeripheral(Configuration config) { throw new NotImplementedException(); }
 
-        ~I2cDevice() { throw new NotImplementedException(); }
+        ~I2cPeripheral() { throw new NotImplementedException(); }
 
         public static I2CReadTransaction CreateReadTransaction(byte[] buffer) { throw new NotImplementedException(); }
         public static I2CWriteTransaction CreateWriteTransaction(byte[] buffer) { throw new NotImplementedException(); }

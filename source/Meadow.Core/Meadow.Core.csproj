@@ -77,7 +77,7 @@
     <Compile Include="Hardware\Communications\OneWireBus.cs" />
     <Compile Include="Hardware\Communications\SoftwareSPIBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.cs" />
-    <Compile Include="Hardware\Contracts\I2cDevice.cs" />
+    <Compile Include="Hardware\Contracts\I2cPeripheral.cs" />
     <Compile Include="Hardware\Contracts\IAnalogChannel.cs" />
     <Compile Include="Hardware\Contracts\IAnalogPin.cs" />
     <Compile Include="Hardware\Contracts\IAnalogPort.cs" />
