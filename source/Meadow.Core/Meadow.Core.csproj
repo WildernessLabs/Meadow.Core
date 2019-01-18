@@ -1,8 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Meadow</RootNamespace>
+    <Version>0.1.0</Version>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <Company>Wilderness Labs, Inc</Company>
+    <Product>Meadow</Product>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PackageId>Meadow</PackageId>
   </PropertyGroup>
 
   <ItemGroup> 
