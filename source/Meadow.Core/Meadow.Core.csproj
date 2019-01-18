@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>Meadow</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Authors>Wilderness Labs, Inc</Authors>
     <Company>Wilderness Labs, Inc</Company>
     <Product>Meadow</Product>
