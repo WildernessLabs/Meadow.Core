@@ -55,4 +55,6 @@ To trigger a new build:
 - Go to project properties in VS 2017  
 - in the `Package` tab, increment either the MAJOR or MINOR `Package version`.  
 
-The CI job will pick up the changes, pack, and push the Nuget package. [View the status of the build in Jenkins](http://jenkins.wildernesslabs.co/job/Meadow.Core/).
+The CI job will pick up the changes, pack, and push the Nuget package. 
+
+[![Build Status](http://jenkins.wildernesslabs.co/buildStatus/icon?job=Meadow.Core)](http://jenkins.wildernesslabs.co/job/Meadow.Core/)
