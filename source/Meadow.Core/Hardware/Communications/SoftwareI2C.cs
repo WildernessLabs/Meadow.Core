@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Threading;
-using Meadow.Hardware;
-using Meadow.Hardware.Communications;
-
-namespace Meadow.Foundation
+//
+//Work in progress
+//
+namespace Meadow.Hardware.Communications
 {
-    public class SoftI2C : ICommunicationBus
+    public class SoftwareI2C : ICommunicationBus
     {
         BiDirectionalPort sdaPort;
         BiDirectionalPort sclPort;
 
         static int DELAY = 4;
 
-        public SoftI2C(IDigitalPin pinSda, IDigitalPin pinScl)
+        public SoftwareI2C(IDigitalPin pinSda, IDigitalPin pinScl)
         {
             sdaPort = new BiDirectionalPort(pinSda, false, false, ResistorMode.PullUp);
             sclPort = new BiDirectionalPort(pinScl, false, false, ResistorMode.PullUp);
