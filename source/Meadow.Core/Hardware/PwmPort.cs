@@ -3,6 +3,10 @@ using System;
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a port that is capable of generating a Pulse-Width-Modulation
+    /// signal; which approximates an analog output via digital pulses.
+    /// </summary>
     public class PwmPort : IPwmPort, IDisposable
     {
         public PwmPort(IPwmChannel pin, double frequency = 100, double dutyCycle = 0, bool invert = false) {}

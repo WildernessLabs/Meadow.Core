@@ -2,6 +2,9 @@
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a port that is capable of reading digital input.
+    /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
         protected IDigitalPin _pin;

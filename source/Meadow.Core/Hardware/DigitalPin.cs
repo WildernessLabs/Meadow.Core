@@ -1,6 +1,10 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a pin that can is connected to a digital input and/or output
+    /// channel on the Meadow device.
+    /// </summary>
 	public class DigitalPin : DigitalPinBase
     {
         private IGPIOManager _manager;

@@ -2,7 +2,7 @@
 namespace Meadow.Hardware
 {
     /// <summary>
-    /// Represents a channel on the device such as a pin.
+    /// Represents a physical pin on the Meadow device.
     /// </summary>
     public class Pin : PinBase
     {

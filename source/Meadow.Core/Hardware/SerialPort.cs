@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
-//TODO - stub pulled from Microsoft.SPOT.Hardware
 
+//TODO - stub pulled from Microsoft.SPOT.Hardware
 namespace Meadow.Hardware
 {
    
@@ -28,7 +28,12 @@ namespace Meadow.Hardware
         RequestToSend = 6,
         XOnXOff = 24
     }
-       
+
+    /// <summary>
+    /// Represents a port that is capable of serial (UART) communications.
+    /// 
+    /// NOTE: This class is not yet implemented.
+    /// </summary>
     public class SerialPort : Stream
     {
         public Stream BaseStream { get; }

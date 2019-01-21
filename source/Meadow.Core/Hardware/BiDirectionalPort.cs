@@ -3,12 +3,12 @@
 namespace Meadow.Hardware
 {
     /// <summary>
-    /// Tristate port.
+    /// Represents a port that is capable of reading and writing digital input
+    /// and output.
     /// </summary>
-    /// <remarks>A tristate port is initially an input port</remarks>
     public class BiDirectionalPort : BiDirectionalPortBase
     {
-protected IDigitalPin _pin;
+        protected IDigitalPin _pin;
 
         public BiDirectionalPort(
             IDigitalPin pin, 

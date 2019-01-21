@@ -2,6 +2,9 @@
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a port that is capable of writing analog output.
+    /// </summary>
     public class DigitalOutputPort : DigitalOutputPortBase, IDisposable
     {
         protected IDigitalPin _pin;

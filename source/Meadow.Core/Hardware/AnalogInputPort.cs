@@ -2,6 +2,9 @@
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a port that is capable of reading analog input.
+    /// </summary>
     public class AnalogInputPort : IAnalogPort
     {
         readonly IAnalogChannel pin;
