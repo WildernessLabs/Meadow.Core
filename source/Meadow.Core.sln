@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDA0F516-977E-4F27-9434-9A0961EF91D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClockPInvoke.Test", "Tests\ClockPInvoke.Test\ClockPInvoke.Test.csproj", "{E4271183-8172-466F-8AF8-3ADDEBA64BB1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeadowApplication", "Tests\MeadowApplication\MeadowApplication.csproj", "{AFB28DDB-FFAD-4E25-A015-89865DC986F3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloLED", "Tests\HelloLED\HelloLED.csproj", "{E4E2339E-D040-4467-9EB2-A36143B90CB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E4271183-8172-466F-8AF8-3ADDEBA64BB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E4271183-8172-466F-8AF8-3ADDEBA64BB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4271183-8172-466F-8AF8-3ADDEBA64BB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{E4E2339E-D040-4467-9EB2-A36143B90CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4E2339E-D040-4467-9EB2-A36143B90CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4E2339E-D040-4467-9EB2-A36143B90CB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E4271183-8172-466F-8AF8-3ADDEBA64BB1} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}

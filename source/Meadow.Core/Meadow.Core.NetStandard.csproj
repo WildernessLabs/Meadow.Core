@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Meadow</RootNamespace>
+    <Version>0.0.0</Version>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <Company>Wilderness Labs, Inc</Company>
+    <Product>Meadow</Product>
+    <PackageId>Meadow</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup> 
+    <Folder Include="Utilities\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Devices\" />
+    <Folder Include="Hardware\Contracts\" />
+    <Folder Include="OSInterop\" />
+    <Folder Include="Enums\" />
+    <Folder Include="Gateways\" />
+    <Folder Include="Gateways\WiFi\" />
+    <Folder Include="Gateways\Bluetooth\" />
+    <Folder Include="Hardware\Communications\" />
+    <Folder Include="Hardware\Bases\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Hardware\Pins.cs" />
+  </ItemGroup>
+</Project>
