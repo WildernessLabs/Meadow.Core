@@ -9,8 +9,17 @@
     /// </summary>
     public enum TerminationType
     {
+        /// <summary>
+        /// Circuit is terminated at ground.
+        /// </summary>
         CommonGround,
+        /// <summary>
+        /// The circuit is terminated at VCC.
+        /// </summary>
         High,
+        /// <summary>
+        /// The circuit is not terminated.
+        /// </summary>
         Floating
     }
 }
