@@ -5,29 +5,9 @@
 namespace Meadow.Hardware
 {
    
-    public enum Parity
-    {
-        None = 0,
-        Odd = 1,
-        Even = 2,
-        Mark = 3,
-        Space = 4
-    }
+
 
     //TODO
-    public enum StopBits
-    {
-        None = 0,
-        One = 1,
-        Two = 2,
-        OnePointFive = 3
-    }
-    public enum Handshake
-    {
-        None = 0,
-        RequestToSend = 6,
-        XOnXOff = 24
-    }
 
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
@@ -41,11 +21,11 @@ namespace Meadow.Hardware
         public int BytesToRead { get; }
         public int BytesToWrite { get; }
         public int DataBits { get; set; }
-        public Handshake Handshake { get; set; }
+        public HandshakeType Handshake { get; set; }
         public bool IsOpen { get; }
-        public Parity Parity { get; set; }
+        public ParityType Parity { get; set; }
         public string PortName { get; }
-        public StopBits StopBits { get; set; }
+        public NumberOfStopBits StopBits { get; set; }
 
         public override bool CanRead => throw new System.NotImplementedException();
 
@@ -67,9 +47,9 @@ namespace Meadow.Hardware
 
         public SerialPort(string portName) { }
         public SerialPort(string portName, int baudRate) { }
-        public SerialPort(string portName, int baudRate, Parity parity) { }
-        public SerialPort(string portName, int baudRate, Parity parity, int dataBits) { }
-        public SerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) { }
+        public SerialPort(string portName, int baudRate, ParityType parity) { }
+        public SerialPort(string portName, int baudRate, ParityType parity, int dataBits) { }
+        public SerialPort(string portName, int baudRate, ParityType parity, int dataBits, NumberOfStopBits stopBits) { }
 
         public void DiscardInBuffer() { }
         public void DiscardOutBuffer() { }
