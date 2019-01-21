@@ -11,15 +11,15 @@ namespace Meadow.Hardware
         /// Describes the minimum frequency the PWM channel can generate.
         /// </summary>
         /// <value>The minimum frequency.</value>
-        public double MinimumFrequency { get; protected set; }
+        public float MinimumFrequency { get; protected set; }
         /// <summary>
         /// Describes the maximum frequency the PWM channel can generate.
         /// </summary>
         /// <value>The maximum frequency.</value>
-        public double MaximumFrequency { get; protected set; }
+        public float MaximumFrequency { get; protected set; }
 
-        protected PwmPinBase(string name, object key, 
-                             double minimumFrequency, double maximumFrequency) 
+        protected PwmPinBase(string name, object key,
+                             float minimumFrequency, float maximumFrequency) 
             : base(name, key)
         {
             this.MinimumFrequency = minimumFrequency;

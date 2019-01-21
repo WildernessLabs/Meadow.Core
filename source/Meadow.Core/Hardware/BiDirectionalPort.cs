@@ -14,8 +14,9 @@ namespace Meadow.Hardware
             IDigitalPin pin, 
             bool initialState = false, 
             bool glitchFilter = false, 
-            ResistorMode resistorMode = ResistorMode.Disabled)
-            : base (pin, initialState, glitchFilter, resistorMode)
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            PortDirectionType initialDirection = PortDirectionType.Input)
+            : base (pin, initialState, glitchFilter, resistorMode, initialDirection)
         {
             // attempt to reserve the pin
             var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -56,7 +57,7 @@ namespace Meadow.Hardware
         /// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
         public bool Active
         {
-            get => _currentDirection == PortDirectionType.Output ? true : false;
+            get => _direction == PortDirectionType.Output ? true : false;
             set
             {
                 if (value == Active) return;
@@ -70,7 +71,7 @@ namespace Meadow.Hardware
                     _pin.GPIOManager.ConfigureInput(_pin, GlitchFilter, Resistor, _interruptEnabled);
                 }
 
-                _currentDirection = value ? PortDirectionType.Output : PortDirectionType.Input;
+                _direction = value ? PortDirectionType.Output : PortDirectionType.Input;
             }
         }
 

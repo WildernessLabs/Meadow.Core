@@ -4,5 +4,6 @@ namespace Meadow.Hardware
 {
     public interface IAnalogPort : IPort
     {
+        IAnalogChannelInfo _channelInfo { get; }
     }
 }

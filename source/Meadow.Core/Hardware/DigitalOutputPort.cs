@@ -22,11 +22,11 @@ namespace Meadow.Hardware
             }
         }
 
-        // hidden constructors
-        protected DigitalOutputPort() : base(false)
-        {
-            //nothing goes here
-        }
+        //// hidden constructors
+        //protected DigitalOutputPort() : base(false)
+        //{
+        //    //nothing goes here
+        //}
 
         /// <summary>
         /// Creates a new DigitalOutputPort from a pin.
@@ -34,7 +34,7 @@ namespace Meadow.Hardware
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
         public DigitalOutputPort(IDigitalPin pin, bool initialState = false) 
-            : base(initialState)
+            : base(pin, initialState)
         {
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);

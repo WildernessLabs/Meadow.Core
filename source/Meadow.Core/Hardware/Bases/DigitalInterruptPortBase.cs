@@ -7,7 +7,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInterruptPortBase : DigitalInputPortBase, IDigitalInterruptPort
     {
-        public DigitalInterruptPortBase()
+        protected DigitalInterruptPortBase(IDigitalChannelInfo channelInfo) : base(channelInfo)
         {
         }
 

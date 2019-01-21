@@ -14,6 +14,7 @@ namespace Meadow.Hardware
         public ResistorMode Resistor { get; set; }
 
         public DigitalInputPort(IDigitalPin pin, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
+            : base(pin)
         {
             // attempt to reserve the pin
             var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);

@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public interface IDigitalChannel
+    public interface IDigitalChannelInfo
     {
         bool InterrruptCapable { get; }
         bool PullDownCapable { get; }

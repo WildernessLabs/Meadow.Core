@@ -13,7 +13,7 @@ namespace Meadow.Hardware
 
         public override float Voltage => throw new NotImplementedException();
 
-        public AnalogInputPort(IAnalogPin pin)
+        public AnalogInputPort(IAnalogPin pin) : base (pin)
         {
         }
 

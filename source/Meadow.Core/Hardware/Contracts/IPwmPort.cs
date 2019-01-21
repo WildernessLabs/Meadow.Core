@@ -1,18 +1,23 @@
 ﻿namespace Meadow.Hardware
 {
-    public interface IPwmPort : IPort
+    /// <summary>
+    /// Contract for a Port that has is capable of 
+    /// </summary>
+    public interface IPwmPort// : IDigitalPort
     {
+        IPwmChannelInfo ChannelInfo { get; }
+
         // TODO: these should return Task or Task<void> or whatever
         void Start();
         void Stop();
 
         // TODO: correct type? should be UInt?
-        double Duration { get; set; }
-        double Period { get; set; }
+        float Duration { get; set; }
+        float Period { get; set; }
 
+        float DutyCycle { get; set; }
         // TODO: correct type?
-        double DutyCycle { get; set; }
-        double Frequency { get; set; }
+        float Frequency { get; set; }
 
         bool Inverted { get; set; }
 

@@ -12,8 +12,8 @@
         public abstract bool InitialState { get; }
         protected readonly bool _initialState;
 
-        protected DigitalOutputPortBase(bool initialState) 
-            : base(PortDirectionType.Output)
+        protected DigitalOutputPortBase(IDigitalChannelInfo channelInfo, bool initialState) 
+            : base(channelInfo, PortDirectionType.Output)
         {
             _initialState = initialState;
             _state = initialState;

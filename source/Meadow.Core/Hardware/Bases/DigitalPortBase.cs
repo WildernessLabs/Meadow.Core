@@ -6,6 +6,12 @@
     /// </summary>
     public abstract class DigitalPortBase : IDigitalPort
     {
+        public IDigitalChannelInfo ChannelInfo
+        {
+            get => _channelinfo;
+        }
+        protected IDigitalChannelInfo _channelinfo;
+
         /// <summary>
         /// The PortDirectionType property is backed by the readonly _direction member. 
         /// This member must be set during the constructor and describes whether the 
@@ -15,7 +21,7 @@
         {
             get { return _direction; }
         }
-        protected readonly PortDirectionType _direction;
+        protected PortDirectionType _direction;
 
         /// <summary>
         /// The PortSignalType property returns PortSignalType.Digital.
@@ -32,8 +38,9 @@
         }
         protected bool _state = false;
 
-        protected DigitalPortBase(PortDirectionType direction)
+        protected DigitalPortBase(IDigitalChannelInfo channelInfo, PortDirectionType direction)
         {
+            _channelinfo = channelInfo;
             _direction = direction;
         }
     }
