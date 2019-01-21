@@ -4,27 +4,18 @@ namespace Meadow.Hardware
 {
     /// <summary>
     /// Represents a port that is capable of reading analog input.
+    /// 
+    /// Note: this class is not implemented.
     /// </summary>
-    public class AnalogInputPort : IAnalogPort
+    public class AnalogInputPort : AnalogInputPortBase
     {
-        readonly IAnalogChannel pin;
-        private Cpu.AnalogChannel analogPin;
+        public override float RawValue => throw new NotImplementedException();
 
-        public double Value { get; set; }
+        public override float Voltage => throw new NotImplementedException();
 
-        public AnalogInputPort(IAnalogChannel pin)
+        public AnalogInputPort(IAnalogPin pin)
         {
-            this.pin = pin;
         }
 
-        //TODO - remove this constructor
-        public AnalogInputPort(Cpu.AnalogChannel analogPin)
-        {
-            this.analogPin = analogPin;
-        }
-
-        public PortDirectionType Direction => throw new NotImplementedException();
-
-        public SignalType SignalType => throw new NotImplementedException();
     }
 }

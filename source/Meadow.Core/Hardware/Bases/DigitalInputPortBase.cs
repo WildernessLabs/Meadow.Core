@@ -15,8 +15,6 @@ namespace Meadow.Hardware
         }
         protected bool _interruptEnabled;
 
-        public abstract bool State { get; }
-
         protected DigitalInputPortBase(bool interruptEnabled = false) : base(PortDirectionType.Input)
         {
             _interruptEnabled = interruptEnabled;
