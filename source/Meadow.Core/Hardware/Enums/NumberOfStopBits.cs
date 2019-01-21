@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// The number of stop bits.
+    /// </summary>
     public enum NumberOfStopBits
     {
         None = 0,

@@ -1,18 +1,11 @@
 ﻿using System.IO;
 
-
-//TODO - stub pulled from Microsoft.SPOT.Hardware
 namespace Meadow.Hardware
 {
-   
-
-
-    //TODO
-
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// 
-    /// NOTE: This class is not yet implemented.
+    /// NOTE: This class is not yet implemented. 
     /// </summary>
     public class SerialPort : Stream
     {
@@ -21,7 +14,7 @@ namespace Meadow.Hardware
         public int BytesToRead { get; }
         public int BytesToWrite { get; }
         public int DataBits { get; set; }
-        public HandshakeType Handshake { get; set; }
+        public FlowControlType Handshake { get; set; }
         public bool IsOpen { get; }
         public ParityType Parity { get; set; }
         public string PortName { get; }
@@ -82,28 +75,4 @@ namespace Meadow.Hardware
         }
     }
 
-    public class SerialErrorReceivedEventArgs
-    {
-        public SerialError EventType { get; }
-    }
-
-    public enum SerialError
-    {
-        TXFull = 0,
-        RXOver = 1,
-        Overrun = 2,
-        RXParity = 3,
-        Frame = 4
-    }
-
-    public class SerialDataReceivedEventArgs
-    {
-        public SerialData EventType { get; }
-    }
-
-    public enum SerialData
-    {
-        Chars = 0,
-        Eof = 1
-    }
 }
