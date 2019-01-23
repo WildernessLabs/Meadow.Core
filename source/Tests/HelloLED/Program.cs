@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading;
-using Meadow;
+﻿using Meadow;
 
 namespace HelloLED
 {
-
     class MainClass
     {
         static IApp _app;
