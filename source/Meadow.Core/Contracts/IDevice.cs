@@ -9,6 +9,8 @@ namespace Meadow
     {
         DeviceCapabilities Capabilities { get; }
 
+        IPinDefinitions Pins { get; }
+
         IGPIOManager GPIOManager { get; }
     }
 }

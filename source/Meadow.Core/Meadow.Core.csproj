@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Meadow.Core</RootNamespace>
+    <RootNamespace>Meadow</RootNamespace>
     <AssemblyName>Meadow.Core</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
   </PropertyGroup>
@@ -35,7 +35,6 @@
     <Compile Include="MeadowOS.cs" />
     <Compile Include="WakeUpOptions.cs" />
     <Compile Include="Bases\AppBase.cs" />
-    <Compile Include="Bases\DeviceBase.cs" />
     <Compile Include="Contracts\IApp.cs" />
     <Compile Include="Contracts\IDevice.cs" />
     <Compile Include="Contracts\IGPIOManager.cs" />
@@ -127,6 +126,7 @@
     <Compile Include="Interop\Interop.open.cs" />
     <Compile Include="Utilities\BitHelpers.cs" />
     <Compile Include="Interop\Interop.timespec.cs" />
+    <Compile Include="Contracts\IPinDefinitions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Bases\" />

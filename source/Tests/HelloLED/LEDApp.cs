@@ -13,7 +13,7 @@ namespace HelloLED
         private DigitalOutputPort _greenLED;
         private DigitalOutputPort _d00;
 
-        public override void Run()
+        public void Run()
         {
             CreateOutputs();
             ShowLights();

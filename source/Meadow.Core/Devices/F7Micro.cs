@@ -8,33 +8,45 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public class F7Micro : DeviceBase
+    // TODO: Bryan: this is not my finest architecture, folks. Need to consider
+    // some simplifications.
+    public class F7Micro : IDevice
     {
-        public List<WiFiAdapter> WiFiAdapters { get; }
+        //public List<WiFiAdapter> WiFiAdapters { get; }
 
+        public DeviceCapabilities Capabilities { get; protected set; }
 
-        static F7Micro()
-        {
-        }
+        /// <summary>
+        /// Gets the pins.
+        /// </summary>
+        /// <value>The pins.</value>
+        public IPinDefinitions Pins => _pins;
+
+        public IGPIOManager GPIOManager { get; protected set; }
+
+        protected IPinDefinitions _pins;
+
+        // private static
+        static F7Micro() { }
 
         public F7Micro()
         {
             this.Capabilities = new DeviceCapabilities();
-            this.WiFiAdapters = new List<WiFiAdapter>
-            {
-                // TODO: stuff.
-                new WiFiAdapter()
-            };
+            //this.WiFiAdapters = new List<WiFiAdapter>
+            //{
+            //    // TODO: stuff.
+            //    new WiFiAdapter()
+            //};
 
             this.GPIOManager = new F7GPIOManager();
             this.GPIOManager.Initialize();
-            _pins = new PinDefinitions(GPIOManager);
+
+            // 
+            _pins = new F7MicroPinDefinitions(GPIOManager);
         }
 
-        protected PinDefinitions _pins;
-        public PinDefinitions Pins => _pins;
 
-        public class PinDefinitions
+        public class F7MicroPinDefinitions : IPinDefinitions
         {
             public readonly AnalogPin A01 = AnalogChannels.A01;
             public readonly AnalogPin A02 = AnalogChannels.A02;
@@ -63,7 +75,7 @@ namespace Meadow.Devices
             public readonly DigitalPin D14 = DigitalChannels.D14;
             public readonly DigitalPin D15 = DigitalChannels.D15;
 
-            public PinDefinitions(IGPIOManager manager)
+            public F7MicroPinDefinitions(IGPIOManager manager)
             {
                 OnboardLEDRed.GPIOManager = manager;
                 OnboardLEDGreen.GPIOManager = manager;
@@ -86,7 +98,32 @@ namespace Meadow.Devices
                     = D14.GPIOManager
                     = D15.GPIOManager
                     = manager;
+
+                _allPins.Add(this.A01);
+                _allPins.Add(this.A02);
+                _allPins.Add(this.A03);
+                _allPins.Add(this.A04);
+                _allPins.Add(this.A05);
+                _allPins.Add(this.D00);
+                _allPins.Add(this.D01);
+                _allPins.Add(this.D02);
+                _allPins.Add(this.D03);
+                _allPins.Add(this.D04);
+                _allPins.Add(this.D05);
+                _allPins.Add(this.D06);
+                _allPins.Add(this.D07);
+                _allPins.Add(this.D08);
+                _allPins.Add(this.D09);
+                _allPins.Add(this.D10);
+                _allPins.Add(this.D11);
+                _allPins.Add(this.D12);
+                _allPins.Add(this.D13);
+                _allPins.Add(this.D14);
+                _allPins.Add(this.D15);
             }
+
+            public IList<IPin> AllPins => _allPins;
+            protected IList<IPin> _allPins = new List<IPin>();
         }
 
         // NOTE: this are split into three different classes in the chance that 
@@ -123,21 +160,21 @@ namespace Meadow.Devices
 
         private static class PWMChannels
         {
-            public static readonly PwmPin Pwm01 = new PwmPin("Pwm01", 0x128);
-            public static readonly PwmPin Pwm02 = new PwmPin("Pwm02", 0x256);
-            public static readonly PwmPin Pwm03 = new PwmPin("Pwm03", 0x256);
-            public static readonly PwmPin Pwm04 = new PwmPin("Pwm04", 0x256);
-            public static readonly PwmPin Pwm05 = new PwmPin("Pwm05", 0x256);
-            public static readonly PwmPin Pwm06 = new PwmPin("Pwm06", 0x256);
-            public static readonly PwmPin Pwm07 = new PwmPin("Pwm07", 0x256);
-            public static readonly PwmPin Pwm08 = new PwmPin("Pwm08", 0x256);
-            public static readonly PwmPin Pwm09 = new PwmPin("Pwm09", 0x256);
-            public static readonly PwmPin Pwm10 = new PwmPin("Pwm10", 0x256);
-            public static readonly PwmPin Pwm11 = new PwmPin("Pwm11", 0x256);
-            public static readonly PwmPin Pwm12 = new PwmPin("Pwm12", 0x256);
-            public static readonly PwmPin Pwm13 = new PwmPin("Pwm13", 0x256);
-            public static readonly PwmPin Pwm14 = new PwmPin("Pwm14", 0x256);
-            public static readonly PwmPin Pwm15 = new PwmPin("Pwm15", 0x256);
+            //public static readonly PwmPin Pwm01 = new PwmPin("Pwm01", 0x128);
+            //public static readonly PwmPin Pwm02 = new PwmPin("Pwm02", 0x256);
+            //public static readonly PwmPin Pwm03 = new PwmPin("Pwm03", 0x256);
+            //public static readonly PwmPin Pwm04 = new PwmPin("Pwm04", 0x256);
+            //public static readonly PwmPin Pwm05 = new PwmPin("Pwm05", 0x256);
+            //public static readonly PwmPin Pwm06 = new PwmPin("Pwm06", 0x256);
+            //public static readonly PwmPin Pwm07 = new PwmPin("Pwm07", 0x256);
+            //public static readonly PwmPin Pwm08 = new PwmPin("Pwm08", 0x256);
+            //public static readonly PwmPin Pwm09 = new PwmPin("Pwm09", 0x256);
+            //public static readonly PwmPin Pwm10 = new PwmPin("Pwm10", 0x256);
+            //public static readonly PwmPin Pwm11 = new PwmPin("Pwm11", 0x256);
+            //public static readonly PwmPin Pwm12 = new PwmPin("Pwm12", 0x256);
+            //public static readonly PwmPin Pwm13 = new PwmPin("Pwm13", 0x256);
+            //public static readonly PwmPin Pwm14 = new PwmPin("Pwm14", 0x256);
+            //public static readonly PwmPin Pwm15 = new PwmPin("Pwm15", 0x256);
             public static readonly PwmPin OnboardLEDRed = new PwmPin("Pwm01", "PA2");
             public static readonly PwmPin OnboardLEDGreen = new PwmPin("Pwm01", "PA1");
             public static readonly PwmPin OnboardLEDBlue = new PwmPin("Pwm01", "PA0");

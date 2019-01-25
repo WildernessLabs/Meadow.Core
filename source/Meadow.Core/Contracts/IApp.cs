@@ -8,12 +8,6 @@ namespace Meadow
     public interface IApp
     {
         /// <summary>
-        /// Called the first time the application is started.
-        /// TODO: Is this necessary? Why not just use the ctor?
-        /// </summary>
-        void Run();
-
-        /// <summary>
         /// Called when the application is going to be sleep.
         /// </summary>
         void WillSleep();

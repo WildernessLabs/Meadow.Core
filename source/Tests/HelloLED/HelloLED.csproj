@@ -36,7 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj">
-      <Project>{E3CB9443-6F76-43D7-9B17-CB01C67C35B7}</Project>
+      <Project>{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}</Project>
       <Name>Meadow.Core</Name>
     </ProjectReference>
   </ItemGroup>

@@ -17,7 +17,7 @@ namespace MeadowApplication
             var goo = MyApp.Current;
         }
 
-        public override void Run()
+        public void Run()
         {
             StartDoingSomeStuff();
         }
