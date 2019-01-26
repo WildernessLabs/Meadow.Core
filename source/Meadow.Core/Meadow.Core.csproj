@@ -30,6 +30,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
     <Compile Include="Peripherals\Leds\IPwmLed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeviceCapabilities.cs" />
