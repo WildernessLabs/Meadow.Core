@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Meadow</id>
+    <version>$version$</version>
+    <authors>Wilderness Labs, Inc</authors>
+    <description>Meadow</description>
+  </metadata>
+</package>
