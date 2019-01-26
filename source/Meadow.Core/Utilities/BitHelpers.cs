@@ -3,7 +3,7 @@ namespace Meadow.Utilities
 {
     public static class BitHelpers
     {
-/// <summary>
+        /// <summary>
         /// Returns a new byte mask based on the input mask, with a single 
         /// bit set. To the passed in value.
         /// </summary>
