@@ -14,7 +14,7 @@ namespace GpioInterrogation
 
                 switch (pin) {
                     case IAnalogPin a:
-                        Console.WriteLine("Pin is an analog pin.");
+                        Console.WriteLine("Pin is an analog pin w precision: " + a.Precision.ToString());
                         break;
                     case IDigitalPin d:
                         Console.WriteLine("Pin is a digtial pin.");

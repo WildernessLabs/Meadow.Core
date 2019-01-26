@@ -127,6 +127,7 @@
     <Compile Include="Utilities\BitHelpers.cs" />
     <Compile Include="Interop\Interop.timespec.cs" />
     <Compile Include="Contracts\IPinDefinitions.cs" />
+    <Compile Include="Peripherals\Leds\ILed.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Bases\" />
@@ -144,6 +145,8 @@
     <Folder Include="Hardware\Internals\" />
     <Folder Include="Interop\" />
     <Folder Include="Utilities\" />
+    <Folder Include="Peripherals\" />
+    <Folder Include="Peripherals\Leds\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
