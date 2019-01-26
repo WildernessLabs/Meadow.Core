@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -30,6 +30,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Peripherals\Leds\IPwmLed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
@@ -129,25 +130,7 @@
     <Compile Include="Contracts\IPinDefinitions.cs" />
     <Compile Include="Peripherals\Leds\ILed.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Bases\" />
-    <Folder Include="Contracts\" />
-    <Folder Include="Devices\" />
-    <Folder Include="Enums\" />
-    <Folder Include="Gateways\" />
-    <Folder Include="Gateways\Bluetooth\" />
-    <Folder Include="Gateways\WiFi\" />
-    <Folder Include="Hardware\" />
-    <Folder Include="Hardware\Bases\" />
-    <Folder Include="Hardware\Communications\" />
-    <Folder Include="Hardware\Contracts\" />
-    <Folder Include="Hardware\Enums\" />
-    <Folder Include="Hardware\Internals\" />
-    <Folder Include="Interop\" />
-    <Folder Include="Utilities\" />
-    <Folder Include="Peripherals\" />
-    <Folder Include="Peripherals\Leds\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
   </ItemGroup>
