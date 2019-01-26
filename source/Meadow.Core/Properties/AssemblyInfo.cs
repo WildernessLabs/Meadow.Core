@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 // Information about this assembly is defined by the following attributes. 
 // Change them to the values specific to your project.
 
-[assembly: AssemblyTitle("Meadow.Core")]
-[assembly: AssemblyDescription("Meadow.Core")]
+[assembly: AssemblyTitle("Meadow")]
+[assembly: AssemblyDescription("Meadow")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Wilderness Labs, Inc")]
 [assembly: AssemblyProduct("Meadow")]
