@@ -38,6 +38,8 @@
     <Compile Include="Peripherals\Motors\IDCMotor.cs" />
     <Compile Include="Peripherals\Relays\IRelay.cs" />
     <Compile Include="Peripherals\Relays\RelayType.cs" />
+    <Compile Include="Peripherals\Sensors\Atmospheric\IBarometricPressure.cs" />
+    <Compile Include="Peripherals\Sensors\Atmospheric\IHumiditySensor.cs" />
     <Compile Include="Peripherals\Sensors\Buttons\IButton.cs" />
     <Compile Include="Peripherals\Sensors\Image\ICamera.cs" />
     <Compile Include="Peripherals\Sensors\ISensor.cs" />
@@ -151,9 +153,7 @@
     <Compile Include="Contracts\IPinDefinitions.cs" />
     <Compile Include="Peripherals\Leds\ILed.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Peripherals\Sensors\Atmospheric\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
   </ItemGroup>
