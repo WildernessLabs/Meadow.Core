@@ -46,6 +46,7 @@
     <Compile Include="Peripherals\Sensors\Rotary\IRotaryEncoderWithButton.cs" />
     <Compile Include="Peripherals\Sensors\Rotary\RotaryTurnedEventArgs.cs" />
     <Compile Include="Peripherals\Sensors\Rotary\RotationDirection.cs" />
+    <Compile Include="Peripherals\Switches\ISwitch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
