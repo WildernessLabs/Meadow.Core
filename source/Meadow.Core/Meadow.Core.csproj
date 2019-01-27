@@ -40,6 +40,7 @@
     <Compile Include="Peripherals\Relays\RelayType.cs" />
     <Compile Include="Peripherals\Sensors\Buttons\IButton.cs" />
     <Compile Include="Peripherals\Sensors\Light\IAmbientLightSensor.cs" />
+    <Compile Include="Peripherals\Sensors\Motion\IAccelerometer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
