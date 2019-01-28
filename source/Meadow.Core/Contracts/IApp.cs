@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow
+﻿namespace Meadow
 {
     /// <summary>
     /// Contract for Meadow applications. Provides a way for the Meadow OS to 
