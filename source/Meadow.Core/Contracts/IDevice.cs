@@ -11,11 +11,6 @@
         DeviceCapabilities Capabilities { get; }
 
         /// <summary>
-        /// Gets the pins.
-        /// </summary>
-        IPinDefinitions Pins { get; }
-
-        /// <summary>
         /// Gets the GPIO Manager.
         /// </summary>
         IGPIOManager GPIOManager { get; }

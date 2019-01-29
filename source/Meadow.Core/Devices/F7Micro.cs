@@ -11,7 +11,7 @@ namespace Meadow.Devices
     // TODO: Bryan: this is not my finest architecture, folks. Need to consider
     // some simplifications.
     public class F7Micro : IDevice
-    {
+    { 
         //public List<WiFiAdapter> WiFiAdapters { get; }
 
         public DeviceCapabilities Capabilities { get; protected set; }
@@ -20,11 +20,11 @@ namespace Meadow.Devices
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public IPinDefinitions Pins => _pins;
+        public F7MicroPinDefinitions Pins => _pins;
+        protected F7MicroPinDefinitions _pins;
 
-        public IGPIOManager GPIOManager { get; protected set; }
+        public IGPIOManager GPIOManager { get; protected set; }     
 
-        protected IPinDefinitions _pins;
 
         // private static
         static F7Micro() { }
