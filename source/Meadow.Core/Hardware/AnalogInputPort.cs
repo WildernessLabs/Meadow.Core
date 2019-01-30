@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of reading analog input.
     /// 
-    /// Note: this class is not implemented.
+    /// Note: this class is not yet implemented.
     /// </summary>
     public class AnalogInputPort : AnalogInputPortBase
     {
