@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -9,13 +11,12 @@ namespace Meadow.Hardware
     {
         public override PortDirectionType Direction => PortDirectionType.Input;
 
-        public abstract float RawValue { get; }
-
-        public abstract float Voltage { get; }
-
         protected AnalogInputPortBase(IAnalogChannelInfo channelInfo)
             : base (channelInfo)
         {
         }
+
+        public abstract Task<byte> Read(int sampleCount, int sampleInterval);
+        public abstract Task<byte> ReadVoltage(int sampleCount, int sampleInterval, float referenceVoltage);
     }
 }
