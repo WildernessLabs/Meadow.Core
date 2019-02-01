@@ -3,7 +3,7 @@
     /// <summary>
     /// Audio tones generator that plays tones at a given frequency.
     /// </summary>
-    interface IToneGenerator
+    public interface IToneGenerator
     {
         /// <summary>
         /// Plays the tone with a especified frequency and duration.
