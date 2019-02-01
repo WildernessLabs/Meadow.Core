@@ -34,6 +34,7 @@
     <Compile Include="Peripherals\Displays\IDisplay.cs" />
     <Compile Include="Peripherals\Displays\ITextDisplay.cs" />
     <Compile Include="Peripherals\Displays\TextDisplayConfig.cs" />
+    <Compile Include="Peripherals\Speakers\IToneGenerator.cs" />
     <Compile Include="Peripherals\Leds\IPwmLed.cs" />
     <Compile Include="Peripherals\Motors\IDCMotor.cs" />
     <Compile Include="Peripherals\Relays\IRelay.cs" />
