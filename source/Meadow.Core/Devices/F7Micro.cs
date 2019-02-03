@@ -75,6 +75,15 @@ namespace Meadow.Devices
             public readonly DigitalPin D14 = DigitalChannels.D14;
             public readonly DigitalPin D15 = DigitalChannels.D15;
 
+            public readonly DigitalPin ESP_MOSI = DigitalChannels.ESP_MOSI;
+            public readonly DigitalPin ESP_MISO = DigitalChannels.ESP_MISO;
+            public readonly DigitalPin ESP_CLK = DigitalChannels.ESP_CLK;
+            public readonly DigitalPin ESP_CS = DigitalChannels.ESP_CS;
+            public readonly DigitalPin ESP_BOOT = DigitalChannels.ESP_BOOT;
+            public readonly DigitalPin ESP_RST = DigitalChannels.ESP_RST;
+            public readonly DigitalPin ESP_UART_RX = DigitalChannels.ESP_UART_RX;
+            public readonly DigitalPin ESP_UART_TX = DigitalChannels.ESP_UART_TX;
+
             public F7MicroPinDefinitions(IGPIOManager manager)
             {
                 OnboardLEDRed.GPIOManager = manager;
@@ -97,6 +106,14 @@ namespace Meadow.Devices
                     = D13.GPIOManager
                     = D14.GPIOManager
                     = D15.GPIOManager
+                    = ESP_MOSI.GPIOManager
+                    = ESP_MISO.GPIOManager
+                    = ESP_CLK.GPIOManager
+                    = ESP_CS.GPIOManager
+                    = ESP_BOOT.GPIOManager
+                    = ESP_RST.GPIOManager
+                    = ESP_UART_RX.GPIOManager
+                    = ESP_UART_TX.GPIOManager
                     = manager;
 
                 _allPins.Add(this.A01);
@@ -120,6 +137,14 @@ namespace Meadow.Devices
                 _allPins.Add(this.D13);
                 _allPins.Add(this.D14);
                 _allPins.Add(this.D15);
+                _allPins.Add(this.ESP_MOSI);
+                _allPins.Add(this.ESP_MISO);
+                _allPins.Add(this.ESP_CLK);
+                _allPins.Add(this.ESP_CS);
+                _allPins.Add(this.ESP_BOOT);
+                _allPins.Add(this.ESP_RST);
+                _allPins.Add(this.ESP_UART_RX);
+                _allPins.Add(this.ESP_UART_TX);
             }
 
             public IList<IPin> AllPins => _allPins;
@@ -156,6 +181,15 @@ namespace Meadow.Devices
             public static readonly DigitalPin D13 = new DigitalPin("D13", "PB15");
             public static readonly DigitalPin D14 = new DigitalPin("D14", "PG3");
             public static readonly DigitalPin D15 = new DigitalPin("D15", "PE3");
+
+            public static readonly DigitalPin ESP_MOSI = new DigitalPin("ESP_MOSI", "PI3");
+            public static readonly DigitalPin ESP_MISO = new DigitalPin("ESP_MISO", "PI2");
+            public static readonly DigitalPin ESP_CLK = new DigitalPin("ESP_CLK", "PD3");
+            public static readonly DigitalPin ESP_CS = new DigitalPin("ESP_CS", "PI0");
+            public static readonly DigitalPin ESP_BOOT = new DigitalPin("ESP_BOOT", "PI10");
+            public static readonly DigitalPin ESP_RST = new DigitalPin("ESP_RST", "PF7");
+            public static readonly DigitalPin ESP_UART_RX = new DigitalPin("ESP_UART_RX", "PD2");
+            public static readonly DigitalPin ESP_UART_TX = new DigitalPin("ESP_UART_TX", "PB13");
         }
 
         private static class PWMChannels

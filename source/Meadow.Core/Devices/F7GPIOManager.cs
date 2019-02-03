@@ -258,7 +258,7 @@ namespace Meadow.Devices
 
             // all port pins seem to be inverse on this board
 
-            // these are the "unallocated pin on the meadow
+            // these are the "unallocated" pins on the meadow
             var pi9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
             var ph13 = GPIOConfigFlags.Pin13 | GPIOConfigFlags.PortH | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
             var pc6 = GPIOConfigFlags.Pin6 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
@@ -292,6 +292,25 @@ namespace Meadow.Devices
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb15);
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pg3);
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pe3);
+
+            // these are signals that run to the ESP32
+            var pi3 = GPIOConfigFlags.Pin3 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pi2 = GPIOConfigFlags.Pin2 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pd3 = GPIOConfigFlags.Pin3 | GPIOConfigFlags.PortD | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pi0 = GPIOConfigFlags.Pin0 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pi10 = GPIOConfigFlags.Pin10 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pf7 = GPIOConfigFlags.Pin7 | GPIOConfigFlags.PortF | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pd2 = GPIOConfigFlags.Pin2 | GPIOConfigFlags.PortD | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var pb13 = GPIOConfigFlags.Pin13 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pi3);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pi2);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pd3);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pi0);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pi10);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pf7);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pd2);
+            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb13);
         }
     }
 
@@ -327,5 +346,15 @@ namespace Meadow.Devices
         LED_B       PA0
         LED_G       PA1
         LED_R       PA2
+
+ESP32
+        MOSI        PI3
+        MISO        PI2
+        CLK         PD3
+        CS          PI0
+        BOOT        PI10
+        RST         PF7
+        UART_RX     PD2
+        UART_TX     PB13       
     */
 }
