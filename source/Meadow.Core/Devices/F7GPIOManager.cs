@@ -46,7 +46,7 @@ namespace Meadow.Devices
             var designator = GetPinDesignator(pin);
 
             // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
-            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz;
 
             flags |= GPIOConfigFlags.ModeInput;
 

@@ -12,7 +12,7 @@ namespace ESP32ConnectionTest
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Testing the ESP32 MISO pin in output mode");
+            Console.WriteLine("Testing the ESP32 UART Rx pin in output mode");
 
             application.Run();
         }
