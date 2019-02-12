@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using Meadow;
 using Meadow.Devices;
@@ -54,6 +55,24 @@ namespace HelloLED
                 _d00.State = state;
                 Thread.Sleep(200);
             }
+        }
+
+        public void ListenToAnalogInput()
+        {
+            var analogPort = new AnalogInputPort(Device.Pins.A01);
+
+            analogPort.Samples.CollectionChanged += (s,e) =>
+            {
+
+            };
+
+            analogPort.StartSampling(0, 20, 10, x => x > 0);
+
+        }
+
+        private void SampleBuffer_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public void LoopbackTest()

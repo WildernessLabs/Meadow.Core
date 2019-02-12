@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace Meadow.Hardware
 {
@@ -52,16 +53,15 @@ namespace Meadow.Hardware
 
         protected object _lock = new object();
 
+        
+
         /// <summary>
         /// Gets a value indicating whether the analog input port is currently
         /// sampling the ADC. Call StartSampling() to spin up the sampling process.
         /// </summary>
         /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
-        public bool Sampling
-        {
-            get => _sampling;
-        } protected bool _sampling = false;
-
+        public bool IsSampling { get; protected set; } = false;
+        
         /// <summary>
         /// Gets the average value of the values in the buffer. Use in conjunction
         /// with StartSampling() for long-running analog sampling. For occasional
@@ -71,7 +71,7 @@ namespace Meadow.Hardware
         public byte AverageBufferValue
         { 
             get { //heh. may be a faster way to do this. 
-                return ((byte)(_buffer.Select(x => (decimal)x).Sum() / _buffer.Count()));
+                return ((byte)(Samples.Select(x => (decimal)x).Sum() / Samples.Count()));
             }
         }
 
@@ -92,8 +92,9 @@ namespace Meadow.Hardware
         /// use.
         /// </summary>
         /// <value>The sample buffer.</value>
-        public IList<byte> SampleBuffer { get => _buffer; }
-        protected IList<byte> _buffer = new List<byte>();
+        public ObservableRangeCollection<byte> Samples { get; protected set; } = new ObservableRangeCollection<byte>();
+
+        private CancellationTokenSource SamplingTokenSource;
 
         /// <summary>
         /// Starts sampling the ADC. To access the voltage readings, use 
@@ -102,13 +103,47 @@ namespace Meadow.Hardware
         /// 0, will sample forever.</param>
         /// <param name="sampleInterval">The interval, in milliseconds, between
         /// sample readings.</param>
-        public void StartSampling(int sampleCount = 0, int sampleInterval = 40) {
-            lock (_lock) {
-                if (_sampling) return;
-                // start (TODO:@CTACKE)
+        public void StartSampling(int sampleCount = 0, int sampleInterval = 40, int minSamplesForNotifications = 1, Predicate<byte> filter = null)
+        {
+            lock (_lock)
+            {
+                if (IsSampling) return;
+
+                byte[] buffer = new byte[minSamplesForNotifications];
+                int bufferPos = 0;
+
+                SamplingTokenSource = new CancellationTokenSource();
+                CancellationToken ct = SamplingTokenSource.Token;
+
+                Task.Factory.StartNew(() =>
+                {
+                    while (true)
+                    {
+                        // get sample value (TODO:@CTACKE)
+                        byte val = default(byte);
+
+                        if (filter(val))
+                        {
+                            buffer[bufferPos] = val;
+                            bufferPos++;
+
+                            if (bufferPos == minSamplesForNotifications)
+                            {
+                                Samples.AddRange(buffer);
+                                bufferPos = 0;
+                            }
+                        }
+
+                        if (ct.IsCancellationRequested)
+                        {
+                            // do task clean up here
+                        }
+                    }
+
+                }, SamplingTokenSource.Token);
 
                 // state muh-cheen
-                _sampling = true;
+                IsSampling = true;
             }
         }
 
@@ -120,11 +155,17 @@ namespace Meadow.Hardware
         {
             lock (_lock)
             {
-                if (!_sampling) return;
+                if (!IsSampling) return;
                 // stop (TODO:@CTACKE)
 
+                if(SamplingTokenSource != null)
+                {
+                    SamplingTokenSource.Cancel();
+                }
+                
+
                 // state muh-cheen
-                _sampling = false;
+                IsSampling = false;
             }
         }
 
@@ -142,12 +183,12 @@ namespace Meadow.Hardware
         public override async Task<byte> Read(int sampleCount = 10, int sampleInterval = 40)
         {
             //TODO: @CTACKE spin up a task to do:
-            if (!_sampling) { StartSampling(); }
+            if (!IsSampling) { StartSampling(); }
 
             // 
 
             StopSampling();
-            return SampleBuffer.FirstOrDefault<byte>();
+            return Samples.FirstOrDefault<byte>();
         }
 
         /// <summary>

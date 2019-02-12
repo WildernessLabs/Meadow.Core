@@ -60,6 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
+    <Compile Include="Utilities\ObservableRangeCollection.cs" />
     <Compile Include="WakeUpOptions.cs" />
     <Compile Include="Bases\AppBase.cs" />
     <Compile Include="Contracts\IApp.cs" />
