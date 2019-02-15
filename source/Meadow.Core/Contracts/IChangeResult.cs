@@ -3,8 +3,8 @@ namespace Meadow
 {
     public interface IChangeResult<T>
     {
-        T Current { get; set; }
-        T Previous { get; set; }
+        T New { get; set; }
+        T Old { get; set; }
         T Delta { get; }
     }
 

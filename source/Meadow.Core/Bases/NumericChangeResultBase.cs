@@ -3,8 +3,8 @@ namespace Meadow
 {
     public abstract class NumericChangeResultBase<T> : INumericChangeResult<T>
     {
-        public T Current { get; set; }
-        public T Previous { get; set; }
+        public T New { get; set; }
+        public T Old { get; set; }
 
         public abstract T Delta { get; }
         public abstract T DeltaPercent { get; }

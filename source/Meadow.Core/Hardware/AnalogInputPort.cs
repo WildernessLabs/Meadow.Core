@@ -101,8 +101,8 @@ namespace Meadow.Hardware
 
                         // create a result set
                         FloatChangeResult result = new FloatChangeResult {
-                            Current = voltage,
-                            Previous = _previousVoltageReading,
+                            New = voltage,
+                            Old = _previousVoltageReading,
                         };
 
                         // notify observers

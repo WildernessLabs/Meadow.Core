@@ -4,10 +4,10 @@ namespace Meadow
     public class FloatChangeResult : NumericChangeResultBase<float>
     {
         public override float Delta {
-            get => Current - Previous;
+            get => New - Old;
         }
         public override float DeltaPercent {
-            get => (Delta / Previous) * 100;
+            get => (Delta / Old) * 100;
         }
     }
 }

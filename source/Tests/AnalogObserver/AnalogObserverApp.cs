@@ -31,15 +31,15 @@ namespace AnalogObserver
             observer.Subscribe(_analog01,
                 filter: result => { return true; }, //( true ),
                 handler: result => {
-                Debug.WriteLine("Previous Value: " + result.Previous);
-                    Debug.WriteLine("New Value: " + result.Current);
+                Debug.WriteLine("Previous Value: " + result.Old);
+                    Debug.WriteLine("New Value: " + result.New);
                 });
 
             // absolute: notify me when the temperature hits 75º
             observer.Subscribe(_analog01,
-                filter: result => (result.Current > 75),
+                filter: result => (result.New > 75),
                 handler: avgValue => {
-                    Debug.WriteLine("New value: " + avgValue.Current);
+                    Debug.WriteLine("New value: " + avgValue.New);
                     // TODO: unsubscribe - how? @BRIANK
                 });
 
