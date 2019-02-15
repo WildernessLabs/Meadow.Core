@@ -13,7 +13,7 @@ namespace Meadow.Hardware
     //    be oversampled to get an accurate reading.
     //
     //    ```
-    //    ReadVoltage();
+    //    Read();
     //    ```
     //
     //  * User needs to take contuinous voltage readings. Most likely getting
@@ -54,7 +54,7 @@ namespace Meadow.Hardware
         /// <param name="pin">Pin.</param>
         public AnalogInputPort(IAnalogPin pin, float voltageReference = 3.3f) : base(pin)
         {
-            _voltageReference = 3.3f;
+            _voltageReference = voltageReference;
         }
 
         protected object _lock = new object();
@@ -95,7 +95,7 @@ namespace Meadow.Hardware
                 Task.Factory.StartNew(async () => {
                     // loop until we're supposed to stop
                     while (true) {
-                        float voltage = await Read();
+                        float voltage = await Read(sampleSize, sampleIntervalDuration);
 
                         // create a result set
                         AnalogInputSampleResult result = new AnalogInputSampleResult {
@@ -113,8 +113,9 @@ namespace Meadow.Hardware
                         // go to sleep for a while
                         await Task.Delay(sampleSleepDuration);
 
-                        // check for cancel TODO: @BRIANK: shouldn't this go in the while?
-                        // e.g. (while(!ct.IsCancellationRequested)
+                        // check for cancel (doing this here instead of 
+                        // while(!ct.IsCancellationRequested), so we can perform 
+                        // cleanup
                         if (ct.IsCancellationRequested) {
                             // do task clean up here
                             break;
@@ -155,7 +156,7 @@ namespace Meadow.Hardware
         /// average (oversample). Must be greater than 0. Pass 1 for no oversampling.</param>
         /// <param name="sampleInterval">The interval, in milliseconds, between
         /// sample readings. Recommended > 20.</param>
-        /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
+        /// <returns></returns>
         public override async Task<float> Read(
             int sampleCount = 10,
             int sampleInterval = 40)
@@ -166,10 +167,6 @@ namespace Meadow.Hardware
             // if we're not sampling already, we need to spin up
             if (!IsSampling) { StartSampling(); }
 
-            //TODO: decide how we want to handle STOP()
-            // will kill subscribers. maybe only stop if no subs
-            if(_observers.Count == 0) { StopSampling(); }
-
             // take samples
             // value mockup
             // TODO: get ADC bit depth from Device.Capabilities.Analog or maybe the underlying channel info
@@ -178,6 +175,10 @@ namespace Meadow.Hardware
                 sampleBuffer[i] = GenerateRawVoltageSample(512, 10, _adcMaxValue); // 1.65V +/- 10%;
                 await Task.Delay(sampleInterval);
             }
+
+            //TODO: decide how we want to handle STOP()
+            // will kill subscribers. maybe only stop if no subs
+            if (_observers.Count == 0) { StopSampling(); }
 
             // convert samples to voltage reading:
             //  a. get the average (casting int to byte), then 

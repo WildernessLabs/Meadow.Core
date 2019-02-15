@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
+    // TODO: ChangeResult<T> : where T is mathable
     public class AnalogInputSampleResult
     {
         public float NewValue { get; set; }

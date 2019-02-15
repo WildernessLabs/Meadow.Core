@@ -43,9 +43,6 @@ namespace Meadow.Bases
             }
         }
 
-        // TODO: @BRYANC @BRIANK this is fine for AnalogInputPort; does it apply to DigitalInput? It might.
-        public abstract void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
-
         public  class ObserverContext
         {
             public ObserverContext(Predicate<T> filter)
