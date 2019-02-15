@@ -32,7 +32,7 @@ namespace AnalogObserver
                     Debug.WriteLine("New Value: " + result.New);
                 });
 
-            disposer.Dispose();
+            //disposer.Dispose();
 
             // simple average
             var simple = _analog01.Subscribe(
@@ -42,7 +42,7 @@ namespace AnalogObserver
                     Debug.WriteLine("New Value: " + result.New);
                 });
 
-            simple.Dispose();
+            //simple.Dispose();
 
             // absolute: notify me when the temperature hits 75º
             _absoluteObserver = _analog01.Subscribe(
@@ -64,7 +64,7 @@ namespace AnalogObserver
                     Debug.WriteLine("Changed value: " + result.Delta);
                 });
 
-            relative.Dispose();
+            //relative.Dispose();
 
             // relative percentage change
             _analog01.Subscribe(
@@ -73,6 +73,7 @@ namespace AnalogObserver
                     Debug.WriteLine("Percentage changed: " + result.Delta);
                 });
 
+            // spin up the ADC sampling engine
             _analog01.StartSampling();
 
         }
