@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -17,6 +17,11 @@ namespace Meadow.Hardware
         {
             this.Name = name;
             this.Key = key;
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
         }
     }
 }

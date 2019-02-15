@@ -156,6 +156,7 @@
     <Compile Include="Interop\Interop.timespec.cs" />
     <Compile Include="Contracts\IPinDefinitions.cs" />
     <Compile Include="Peripherals\Leds\ILed.cs" />
+    <Compile Include="Hardware\Contracts\IChannelInfo.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

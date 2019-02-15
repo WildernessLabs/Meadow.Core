@@ -25,6 +25,11 @@ namespace F7_Micro_Board_Diagnostics
 
         protected bool TestBluetooth() { return false; }
 
+        /// <summary>
+        /// Tests the digital IO ports by performing write/reads on paired ports
+        /// and seeing if nothing is shorted.
+        /// </summary>
+        /// <returns>Whether or not the digital IO passed.</returns>
         protected Tuple<bool, List<PortTestResult>> TestDigitalIO ()
         {
             List<PortTestResult> portTestResults = new List<PortTestResult>();
@@ -88,23 +93,28 @@ namespace F7_Micro_Board_Diagnostics
 
                 // loop through all the ports and check to see if they're reading 
                 // low except for the other end of the high pin.
+                bool portSuccess = true;
                 foreach (var port in testDigitalPorts) {
 
                     // if we're not the high port, or the paired port
                     if(port != testDigitalPorts[i] && port != pairedEndpointPort) {
                         if (port.State) {
                             // FAILURE: if this port is high, something is wrong.
-                            success = false;
+                            success = portSuccess = false;
                             portTestResults.Add(new PortTestResult("", false)); // TODO: Name
                             Debug.WriteLine("Port Failure: [need .name property], should be low, but is HIGH. Short detected.");
                         }
                     } // if it's the port on the other 
                     else if (port != testDigitalPorts[i] && port == pairedEndpointPort) { 
                         if (!port.State) {
-                            success = false;
+                            success = portSuccess = false;
                             portTestResults.Add(new PortTestResult("", false)); // TODO: Name
                             Debug.WriteLine("Port Failure: [name] pair should be HIGH, but it's LOW. Endpoint port read failure.");
                         }
+                    }
+
+                    if (portSuccess) {
+                        Debug.WriteLine("port [name] test success.");
                     }
                 }
             }

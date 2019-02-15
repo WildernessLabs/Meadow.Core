@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 namespace Meadow.Hardware
 {
     /// <summary>
     /// Contract for a pin on the Meadow board.
     /// </summary>
-    public interface IPin
+    public interface IPin : IChannelInfo
     {
-        string Name { get; }
+        //string Name { get; }
         object Key { get; }
     }
 }
