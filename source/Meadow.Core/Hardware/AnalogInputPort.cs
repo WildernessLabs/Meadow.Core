@@ -143,8 +143,10 @@ namespace Meadow.Hardware
                             sampleBuffer.Clear();
                             Thread.Sleep(sampleSleepDuration);
                         }
-
-                        Thread.Sleep(sampleIntervalDuration);
+                        else
+                        {
+                            Thread.Sleep(sampleIntervalDuration);
+                        }
 
                         if (ct.IsCancellationRequested)
                         {
