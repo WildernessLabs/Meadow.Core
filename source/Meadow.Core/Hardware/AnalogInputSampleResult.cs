@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +9,13 @@ namespace Meadow.Hardware
     public class AnalogInputSampleResult
     {
         public float NewValue { get; set; }
-        public float ChangedValue { get; set; }
         public float PreviousValue { get; set; }
-        public float PercentageChanged { get; set; }
+
+        public float Delta {
+            get => NewValue - PreviousValue;
+        }
+        public float PercentChange {
+            get => (Delta / PreviousValue) * 100;
+        }
     }
 }

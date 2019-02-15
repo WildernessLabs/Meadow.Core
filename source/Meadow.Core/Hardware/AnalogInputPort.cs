@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
@@ -44,12 +44,17 @@ namespace Meadow.Hardware
     /// </summary>
     public class AnalogInputPort : AnalogInputPortBase
     {
+        protected float _voltageReference;
+        protected float _previousVoltageReading = 0;
+        protected int _adcMaxValue = 1023; //TODO: Get this from bit depth from Device.Capabilities.Analog or maybe the underlying channel info
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Meadow.Hardware.AnalogInputPort"/> class.
         /// </summary>
         /// <param name="pin">Pin.</param>
-        public AnalogInputPort(IAnalogPin pin) : base (pin)
+        public AnalogInputPort(IAnalogPin pin, float voltageReference = 3.3f) : base(pin)
         {
+            _voltageReference = 3.3f;
         }
 
         protected object _lock = new object();
@@ -72,65 +77,45 @@ namespace Meadow.Hardware
         /// </param>
         public override void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
         {
-            lock (_lock)
-            {
+            // thread safety
+            lock (_lock) {
                 if (IsSampling) return;
 
                 // state muh-cheen
                 IsSampling = true;
 
-                List<float> sampleBuffer = new List<float>();
+                //
+                // TODO: @CTACKE Turn on sampling under the hood
+                //
 
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
-                Task.Factory.StartNew(async () =>
-                {
-                    float previousSampleValue = 0;
+                // sampling happens on a background thread
+                Task.Factory.StartNew(async () => {
+                    // loop until we're supposed to stop
+                    while (true) {
+                        float voltage = await Read();
 
-                    while (true)
-                    {
-                        var val = await ReadVoltage();
+                        // create a result set
+                        AnalogInputSampleResult result = new AnalogInputSampleResult {
+                            NewValue = voltage,
+                            PreviousValue = _previousVoltageReading,
+                        };
 
-                        sampleBuffer.Add(val);
-
-                        if (sampleBuffer.Count == sampleSize)
-                        {
-                            var avg = sampleBuffer.Average();
-
-                            if (previousSampleValue == 0)
-                            {
-                                previousSampleValue = avg;
+                        // notify observers
+                        foreach (var observer in _observers) {
+                            if (observer.Value.Filter(result)) {
+                                observer.Key.OnNext(result);
                             }
-                            else
-                            {
-                                AnalogInputSampleResult result = new AnalogInputSampleResult
-                                {
-                                    NewValue = avg,
-                                    PreviousValue = previousSampleValue,
-                                    ChangedValue = avg - previousSampleValue,
-                                    PercentageChanged = ((avg - previousSampleValue) / previousSampleValue) * 100
-                                };
-
-                                foreach (var observer in observers)
-                                {
-                                    if (observer.Value.Filter(result))
-                                    {
-                                        observer.Key.OnNext(result);
-                                    }
-                                }
-                            }
-
-                            sampleBuffer.Clear();
-                            Thread.Sleep(sampleSleepDuration);
-                        }
-                        else
-                        {
-                            Thread.Sleep(sampleIntervalDuration);
                         }
 
-                        if (ct.IsCancellationRequested)
-                        {
+                        // go to sleep for a while
+                        await Task.Delay(sampleSleepDuration);
+
+                        // check for cancel TODO: @BRIANK: shouldn't this go in the while?
+                        // e.g. (while(!ct.IsCancellationRequested)
+                        if (ct.IsCancellationRequested) {
                             // do task clean up here
                             break;
                         }
@@ -146,13 +131,11 @@ namespace Meadow.Hardware
         /// </summary>
         public void StopSampling()
         {
-            lock (_lock)
-            {
+            lock (_lock) {
                 if (!IsSampling) return;
                 // stop (TODO:@CTACKE)
 
-                if(SamplingTokenSource != null)
-                {
+                if (SamplingTokenSource != null) {
                     SamplingTokenSource.Cancel();
                 }
 
@@ -162,49 +145,63 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Convenience method to get the raw voltage value. Starts sampling 
+        /// Convenience method to get the voltage value. Starts sampling 
         /// if not already doing so, and will stop sampling after the read. For
         /// frequent reads, use StartSampling() and StopSampling() in conjunction
-        /// with the SampleBuffer.
+        /// with the SampleBuffer. Automatically oversamples (takes multiple readings 
+        /// and averages them).  
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. 
-        /// must be greater than 0.</param>
+        /// <param name="sampleCount">The number of sample readings to take and 
+        /// average (oversample). Must be greater than 0. Pass 1 for no oversampling.</param>
         /// <param name="sampleInterval">The interval, in milliseconds, between
-        /// sample readings.</param>
+        /// sample readings. Recommended > 20.</param>
         /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
-        public override async Task<byte> Read(int sampleCount = 10, int sampleInterval = 40)
+        public override async Task<float> Read(
+            int sampleCount = 10,
+            int sampleInterval = 40)
         {
-            throw new NotImplementedException();
-            ////TODO: @CTACKE spin up a task to do:
-            //if (!IsSampling) { StartSampling(); }
+            // buffer of x samples
+            int[] sampleBuffer = new int[sampleCount];
 
-            //// 
+            // if we're not sampling already, we need to spin up
+            if (!IsSampling) { StartSampling(); }
 
-            //StopSampling();
-            //return Samples.FirstOrDefault<byte>();
+            //TODO: decide how we want to handle STOP()
+            // will kill subscribers. maybe only stop if no subs
+            if(_observers.Count == 0) { StopSampling(); }
+
+            // take samples
+            // value mockup
+            // TODO: get ADC bit depth from Device.Capabilities.Analog or maybe the underlying channel info
+            float voltage = 0f;
+            for (int i = 0; i < sampleCount; i++) {
+                sampleBuffer[i] = GenerateRawVoltageSample(512, 10, _adcMaxValue); // 1.65V +/- 10%;
+                await Task.Delay(sampleInterval);
+            }
+
+            // convert samples to voltage reading:
+            //  a. get the average (casting int to byte), then 
+            //  b. % of read * voltageMax = V
+            voltage = (float)(sampleBuffer.Average(x => x) / _adcMaxValue) * _voltageReference;
+
+            // voltage out!
+            return voltage;
         }
 
+        private Random _rnd = new Random();
         /// <summary>
-        /// Convenience method to get the voltage reading. Starts sampling 
-        /// if not already doing so, and will stop sampling after the read. For
-        /// frequent reads, use StartSampling() and StopSampling() in conjunction
-        /// with the SampleBuffer.
+        /// Generates a psuedo random raw voltage reading based on targe and deviation
         /// </summary>
-        /// <returns>The voltage.</returns>
-        /// <param name="sampleCount">The number of sample readings to take. 
-        /// must be greater than 0.</param>
-        /// <param name="sampleInterval">The interval, in milliseconds, between
-        /// sample readings.</param>
-        /// <param name="referenceVoltage">The maximum voltage value to compare 
-        /// against.</param>
-        public override async Task<float> ReadVoltage(
-            int sampleCount = 10, 
-            int sampleInterval = 40,
-            float referenceVoltage = 3.3f)
+        /// <returns>The raw voltage sample.</returns>
+        private int GenerateRawVoltageSample(int targetValue, byte percentDeviation, int maxValue)
         {
-            throw new NotImplementedException();
-
-            //TODO: Call Read() and automatically convert to voltage
+            int value = (int)_rnd.Next(
+                targetValue - (targetValue / percentDeviation), // min
+                targetValue + (targetValue / percentDeviation)  // max
+                ); // + or - x% deviation
+            if (value > maxValue) { return maxValue; }
+            if (value < 0) { return 0; }
+            return value;
         }
     }
 }

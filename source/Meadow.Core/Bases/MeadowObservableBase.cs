@@ -1,4 +1,4 @@
-﻿using Meadow.Contracts;
+using Meadow.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,21 +9,21 @@ namespace Meadow.Bases
 {
     public abstract class MeadowObservableBase<T> : IMeadowObservable<T>
     {
-        public Dictionary<IMeadowObserver<T>, ObserverContext> observers;
+        public Dictionary<IMeadowObserver<T>, ObserverContext> _observers;
 
         public MeadowObservableBase()
         {
-            observers = new Dictionary<IMeadowObserver<T>, ObserverContext>();
+            _observers = new Dictionary<IMeadowObserver<T>, ObserverContext>();
         }
 
         public IDisposable Subscribe(IMeadowObserver<T> observer, Predicate<T> filter)
         {
-            if (!observers.ContainsKey(observer))
+            if (!_observers.ContainsKey(observer))
             {
-                observers.Add(observer, new ObserverContext(filter));
+                _observers.Add(observer, new ObserverContext(filter));
             }
 
-            return new Unsubscriber(observers, observer);
+            return new Unsubscriber(_observers, observer);
         }
 
         private class Unsubscriber : IDisposable
@@ -43,6 +43,7 @@ namespace Meadow.Bases
             }
         }
 
+        // TODO: @BRYANC @BRIANK this is fine for AnalogInputPort; does it apply to DigitalInput? It might.
         public abstract void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
 
         public  class ObserverContext

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 namespace Meadow.Hardware
@@ -8,10 +8,6 @@ namespace Meadow.Hardware
     /// </summary>
     public interface IAnalogInputPort : IAnalogPort
     {
-        Task<byte> Read(int sampleCount, int sampleInterval);
-        Task<float> ReadVoltage(
-            int sampleCount,
-            int sampleInterval,
-            float referenceVoltage);
+        Task<float> Read(int sampleCount, int sampleInterval);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 namespace Meadow.Hardware
@@ -16,7 +16,7 @@ namespace Meadow.Hardware
         {
         }
 
-        public abstract Task<byte> Read(int sampleCount, int sampleInterval);
-        public abstract Task<float> ReadVoltage(int sampleCount, int sampleInterval, float referenceVoltage);
+        public abstract Task<float> Read(int sampleCount, int sampleInterval);
+        //public abstract Task<float> ReadVoltage(int sampleCount, int sampleInterval, float referenceVoltage);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Threading;
@@ -58,46 +58,6 @@ namespace HelloLED
                 _d00.State = state;
                 Thread.Sleep(200);
             }
-        }
-
-        public void ListenToAnalogInput()
-        {
-            var analogPort = new AnalogInputPort(Device.Pins.A01);
-            var observer = new MeadowObserver<AnalogInputSampleResult>();
-
-            // absolute
-            observer.Subscribe(analogPort,  
-                filter: result => result.NewValue > 75,
-                handler: avgValue =>
-                {
-                    Debug.WriteLine("New value: " + avgValue.NewValue);
-                });
-
-            // relative
-            observer.Subscribe(analogPort,
-                filter: result => result.ChangedValue > 1 || result.ChangedValue < 1,
-                handler: result =>
-                {
-                    Debug.WriteLine("Changed value: " + result.ChangedValue);
-                });
-
-            // percentage
-            observer.Subscribe(analogPort,
-                filter: result => result.PercentageChanged > 10 || result.PercentageChanged < 10,
-                handler: result =>
-                {
-                    Debug.WriteLine("Percentage changed: " + result.PercentageChanged);
-                });
-
-            analogPort.StartSampling();
-
-            observer.Unsubscribe();
-
-        }
-
-        private void SampleBuffer_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         public void LoopbackTest()

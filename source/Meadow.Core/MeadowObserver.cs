@@ -1,4 +1,4 @@
-﻿using Meadow.Bases;
+using Meadow.Bases;
 using Meadow.Contracts;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,6 @@ namespace Meadow
         /// Subscribe to changes and get notified based on filters.
         /// </summary>
         /// <param name="provider">The MeadowObservable to subscribe to.</param>
-        /// <param name="subscriptionMode">Mode to toggle which value to filter on.</param>
         /// <param name="filter">Predicate to filter notifications.</param>
         /// <param name="handler">Handler to process notifications.</param>
         public virtual void Subscribe(IMeadowObservable<T> provider, Predicate<T> filter, Action<T> handler)
