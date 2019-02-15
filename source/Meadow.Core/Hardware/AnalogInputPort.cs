@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
-    // Common USE CASES:
+    // Common USE CASES: TODO: update
     //
     //  * User needs to take an occasional voltage reading. Most likely it should 
     //    be oversampled to get an accurate reading.
@@ -20,20 +20,13 @@ namespace Meadow.Hardware
     //    oversampled readings each time for accuracy.
     //
     //    ```
-    //    StartSampling();
-    //    Task(() => while (_running) { 
-    //      var voltage = analogPort.CalculateAverageBufferVoltageValue();
-    //      Task.Delay(4000);
-    //    }.Start();
     //    ```
     //
     //  * User wants to take continuous voltage readings and wants to be notified
-    //    //TODO: think through some notifcation configuration
     //    ```
     //    analogPort.VoltageChanged += (float newVoltage){ /*do something*/ };
-
     //    StartSampling();
-    //    ConfigureNotifications();
+    //    
     //    ```
 
 
