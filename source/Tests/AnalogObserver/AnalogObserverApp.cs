@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using Meadow;
 using Meadow.Devices;
@@ -9,6 +9,8 @@ namespace AnalogObserver
     public class AnalogObserverApp : AppBase<F7Micro, AnalogObserverApp>
     {
         protected AnalogInputPort _analog01;
+
+        protected IDisposable _absoluteObserver = null;
 
         public AnalogObserverApp()
         {
@@ -36,20 +38,23 @@ namespace AnalogObserver
             var simple = _analog01.Subscribe(
                 filter: result => { return true; }, //( true ),
                 handler: result => {
-                Debug.WriteLine("Previous Value: " + result.Old);
+                    Debug.WriteLine("Previous Value: " + result.Old);
                     Debug.WriteLine("New Value: " + result.New);
                 });
 
             simple.Dispose();
 
             // absolute: notify me when the temperature hits 75º
-            var absolute = _analog01.Subscribe(
+            _absoluteObserver = _analog01.Subscribe(
                 filter: result => (result.New > 75),
                 handler: avgValue => {
                     Debug.WriteLine("New value: " + avgValue.New);
-                    // TODO: unsubscribe - how? @BRIANK
+                    // unsubscribe when we hit it
+                    if (_absoluteObserver != null) {
+                        _absoluteObserver.Dispose();
+                    }
                 });
-            absolute.Dispose();
+
 
             // relative, static comparison; e.g if change is > 1º
             float oneDegreeC = 3.3f / 100f; // TMP35DZ: 0º = 0V, 100º = 3.3V
