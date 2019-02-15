@@ -25,21 +25,21 @@ namespace AnalogObserver
         {
             // TODO: @BRIANK: Can we automatically create this somehow?
             // then the API would be _analog01.Subscribe(x, y, z);
-            var observer = new MeadowObserver<AnalogInputSampleResult>();
+            var observer = new MeadowObserver<FloatChangeResult>();
 
             // simple average
             observer.Subscribe(_analog01,
                 filter: result => { return true; }, //( true ),
                 handler: result => {
-                Debug.WriteLine("Previous Value: " + result.PreviousValue);
-                    Debug.WriteLine("New Value: " + result.NewValue);
+                Debug.WriteLine("Previous Value: " + result.Previous);
+                    Debug.WriteLine("New Value: " + result.Current);
                 });
 
             // absolute: notify me when the temperature hits 75º
             observer.Subscribe(_analog01,
-                filter: result => (result.NewValue > 75),
+                filter: result => (result.Current > 75),
                 handler: avgValue => {
-                    Debug.WriteLine("New value: " + avgValue.NewValue);
+                    Debug.WriteLine("New value: " + avgValue.Current);
                     // TODO: unsubscribe - how? @BRIANK
                 });
 
@@ -53,9 +53,9 @@ namespace AnalogObserver
 
             // relative percentage change
             observer.Subscribe(_analog01,
-                filter: result => (result.PercentChange > 10 || result.PercentChange < 10),
+                filter: result => (result.DeltaPercent > 10 || result.DeltaPercent < 10),
                 handler: result => {
-                    Debug.WriteLine("Percentage changed: " + result.PercentChange);
+                    Debug.WriteLine("Percentage changed: " + result.Delta);
                 });
 
             _analog01.StartSampling();

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meadow.Bases
+namespace Meadow
 {
     public abstract class MeadowObservableBase<T> : IMeadowObservable<T>
     {

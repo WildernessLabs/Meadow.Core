@@ -33,7 +33,6 @@
     <Compile Include="Bases\MeadowObservableBase.cs" />
     <Compile Include="Contracts\IMeadowObservable.cs" />
     <Compile Include="Contracts\IMeadowObserver.cs" />
-    <Compile Include="Hardware\AnalogInputSampleResult.cs" />
     <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
     <Compile Include="Peripherals\Displays\IDisplay.cs" />
     <Compile Include="Peripherals\Displays\ITextDisplay.cs" />
@@ -160,6 +159,9 @@
     <Compile Include="Interop\Interop.timespec.cs" />
     <Compile Include="Contracts\IPinDefinitions.cs" />
     <Compile Include="Peripherals\Leds\ILed.cs" />
+    <Compile Include="Contracts\IChangeResult.cs" />
+    <Compile Include="Bases\FloatChangeResult.cs" />
+    <Compile Include="Bases\NumericChangeResultBase.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -1,4 +1,3 @@
-﻿using Meadow.Bases;
 using System;
 namespace Meadow.Hardware
 {
@@ -6,7 +5,7 @@ namespace Meadow.Hardware
     /// Provides a base implementation for much of the common tasks of 
     /// implementing IAnalogPort
     /// </summary>
-    public abstract class AnalogPortBase : MeadowObservableBase<AnalogInputSampleResult>, IAnalogPort
+    public abstract class AnalogPortBase : MeadowObservableBase<FloatChangeResult>, IAnalogPort
     {
         public SignalType SignalType => SignalType.Analog;
 

@@ -48,6 +48,8 @@ namespace Meadow.Hardware
         protected float _previousVoltageReading = 0;
         protected int _adcMaxValue = 1023; //TODO: Get this from bit depth from Device.Capabilities.Analog or maybe the underlying channel info
 
+        public event EventHandler<FloatChangeResult> Changed = delegate { };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Meadow.Hardware.AnalogInputPort"/> class.
         /// </summary>
@@ -75,7 +77,7 @@ namespace Meadow.Hardware
         /// <param name="sampleSleepDuration">The duration, in milliseconds, to sleep
         /// before taking another sample set.
         /// </param>
-        public override void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
+        public void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
         {
             // thread safety
             lock (_lock) {
@@ -98,9 +100,9 @@ namespace Meadow.Hardware
                         float voltage = await Read(sampleSize, sampleIntervalDuration);
 
                         // create a result set
-                        AnalogInputSampleResult result = new AnalogInputSampleResult {
-                            NewValue = voltage,
-                            PreviousValue = _previousVoltageReading,
+                        FloatChangeResult result = new FloatChangeResult {
+                            Current = voltage,
+                            Previous = _previousVoltageReading,
                         };
 
                         // notify observers
@@ -109,6 +111,10 @@ namespace Meadow.Hardware
                                 observer.Key.OnNext(result);
                             }
                         }
+
+                        // raise the classic event (if there are any)
+                        // TODO: Decide if this is a good idea.
+                        Changed?.Invoke(this, result);
 
                         // go to sleep for a while
                         await Task.Delay(sampleSleepDuration);

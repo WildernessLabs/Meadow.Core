@@ -17,6 +17,5 @@ namespace Meadow.Hardware
         }
 
         public abstract Task<float> Read(int sampleCount, int sampleInterval);
-        //public abstract Task<float> ReadVoltage(int sampleCount, int sampleInterval, float referenceVoltage);
     }
 }
