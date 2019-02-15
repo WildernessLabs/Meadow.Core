@@ -9,7 +9,7 @@ namespace Meadow.Contracts
 {
     public interface IMeadowObserver<T>
     {
-        void Subscribe(IMeadowObservable<T> provider, SubscriptionMode subscriptionMode, Predicate<T> filter, Action<T> handler);
+        void Subscribe(IMeadowObservable<T> provider, Predicate<T> filter, Action<T> handler);
         void Unsubscribe();
         void OnNext(T value);
     }

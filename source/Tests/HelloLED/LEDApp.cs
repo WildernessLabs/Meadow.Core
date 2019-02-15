@@ -63,27 +63,30 @@ namespace HelloLED
         public void ListenToAnalogInput()
         {
             var analogPort = new AnalogInputPort(Device.Pins.A01);
-            var observer = new MeadowObserver<float>();
+            var observer = new MeadowObserver<AnalogInputSampleResult>();
 
-            observer.Subscribe(analogPort, Meadow.Bases.SubscriptionMode.Absolute, 
-                filter: voltage => voltage >= 75, 
+            // absolute
+            observer.Subscribe(analogPort,  
+                filter: result => result.NewValue > 75,
                 handler: avgValue =>
                 {
-                    Debug.WriteLine("New value: " + avgValue);
+                    Debug.WriteLine("New value: " + avgValue.NewValue);
                 });
 
-            observer.Subscribe(analogPort, Meadow.Bases.SubscriptionMode.Relative,
-                filter: delta => delta < .1 || delta > .1,
-                handler: avgValue =>
+            // relative
+            observer.Subscribe(analogPort,
+                filter: result => result.ChangedValue > 1 || result.ChangedValue < 1,
+                handler: result =>
                 {
-                    Debug.WriteLine("New value: " + avgValue);
+                    Debug.WriteLine("Changed value: " + result.ChangedValue);
                 });
 
-            observer.Subscribe(analogPort, Meadow.Bases.SubscriptionMode.Percentage,
-                filter: delta => delta < 5 || delta > 5,
-                handler: avgValue =>
+            // percentage
+            observer.Subscribe(analogPort,
+                filter: result => result.PercentageChanged > 10 || result.PercentageChanged < 10,
+                handler: result =>
                 {
-                    Debug.WriteLine("New value: " + avgValue);
+                    Debug.WriteLine("Percentage changed: " + result.PercentageChanged);
                 });
 
             analogPort.StartSampling();

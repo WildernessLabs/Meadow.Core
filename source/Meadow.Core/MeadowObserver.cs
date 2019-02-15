@@ -20,9 +20,9 @@ namespace Meadow
         /// <param name="subscriptionMode">Mode to toggle which value to filter on.</param>
         /// <param name="filter">Predicate to filter notifications.</param>
         /// <param name="handler">Handler to process notifications.</param>
-        public virtual void Subscribe(IMeadowObservable<T> provider, SubscriptionMode subscriptionMode, Predicate<T> filter, Action<T> handler)
+        public virtual void Subscribe(IMeadowObservable<T> provider, Predicate<T> filter, Action<T> handler)
         {
-            unsubscriber = provider.Subscribe(this, subscriptionMode, filter);
+            unsubscriber = provider.Subscribe(this, filter);
             Handler = handler;
         }
         

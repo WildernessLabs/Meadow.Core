@@ -16,11 +16,11 @@ namespace Meadow.Bases
             observers = new Dictionary<IMeadowObserver<T>, ObserverContext>();
         }
 
-        public IDisposable Subscribe(IMeadowObserver<T> observer, SubscriptionMode subscriptionMode, Predicate<T> filter)
+        public IDisposable Subscribe(IMeadowObserver<T> observer, Predicate<T> filter)
         {
             if (!observers.ContainsKey(observer))
             {
-                observers.Add(observer, new ObserverContext(subscriptionMode, filter));
+                observers.Add(observer, new ObserverContext(filter));
             }
 
             return new Unsubscriber(observers, observer);
@@ -47,20 +47,11 @@ namespace Meadow.Bases
 
         public  class ObserverContext
         {
-            public ObserverContext(SubscriptionMode subscriptionMode, Predicate<T> filter)
+            public ObserverContext(Predicate<T> filter)
             {
-                SubscriptionMode = subscriptionMode;
                 Filter = filter;
             }
-            public SubscriptionMode SubscriptionMode { get; set; }
             public Predicate<T> Filter { get; set; }
         }
-    }
-
-    public enum SubscriptionMode
-    {
-        Absolute,
-        Relative,
-        Percentage
     }
 }

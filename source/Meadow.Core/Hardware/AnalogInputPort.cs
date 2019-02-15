@@ -86,7 +86,7 @@ namespace Meadow.Hardware
 
                 Task.Factory.StartNew(async () =>
                 {
-                    float lastSampleValue = 0;
+                    float previousSampleValue = 0;
 
                     while (true)
                     {
@@ -98,45 +98,26 @@ namespace Meadow.Hardware
                         {
                             var avg = sampleBuffer.Average();
 
-                            foreach (var observer in observers)
+                            if (previousSampleValue == 0)
                             {
-                                switch (observer.Value.SubscriptionMode)
+                                previousSampleValue = avg;
+                            }
+                            else
+                            {
+                                AnalogInputSampleResult result = new AnalogInputSampleResult
                                 {
-                                    case Bases.SubscriptionMode.Absolute:
-                                        if (observer.Value.Filter(avg))
-                                        {
-                                            observer.Key.OnNext(avg);
-                                        }
-                                        break;
-                                    case Bases.SubscriptionMode.Relative:
-                                        if (lastSampleValue == 0)
-                                        {
-                                            lastSampleValue = avg;
-                                        }
-                                        else
-                                        {
-                                            var delta = sampleBuffer.Average() - lastSampleValue;
-                                            if (observer.Value.Filter(avg))
-                                            {
-                                                observer.Key.OnNext(avg);
-                                            }
-                                        }
-                                        break;
-                                    case Bases.SubscriptionMode.Percentage:
-                                        if (lastSampleValue == 0)
-                                        {
-                                            lastSampleValue = avg;
-                                        }
-                                        else
-                                        {
-                                            var delta = sampleBuffer.Average() - lastSampleValue;
-                                            var percentChange = (delta / lastSampleValue) * 100;
-                                            if (observer.Value.Filter(avg))
-                                            {
-                                                observer.Key.OnNext(avg);
-                                            }
-                                        }
-                                        break;
+                                    NewValue = avg,
+                                    PreviousValue = previousSampleValue,
+                                    ChangedValue = avg - previousSampleValue,
+                                    PercentageChanged = ((avg - previousSampleValue) / previousSampleValue) * 100
+                                };
+
+                                foreach (var observer in observers)
+                                {
+                                    if (observer.Value.Filter(result))
+                                    {
+                                        observer.Key.OnNext(result);
+                                    }
                                 }
                             }
 
