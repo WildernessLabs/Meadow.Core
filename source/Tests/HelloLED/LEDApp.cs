@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Collections;
 using System.Threading;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Utilities;
+using System.Diagnostics;
 
 namespace HelloLED
 {
@@ -60,13 +63,32 @@ namespace HelloLED
         public void ListenToAnalogInput()
         {
             var analogPort = new AnalogInputPort(Device.Pins.A01);
+            var observer = new MeadowObserver<float>();
 
-            analogPort.Samples.CollectionChanged += (s,e) =>
-            {
+            observer.Subscribe(analogPort, Meadow.Bases.SubscriptionMode.Absolute, 
+                filter: voltage => voltage >= 75, 
+                handler: avgValue =>
+                {
+                    Debug.WriteLine("New value: " + avgValue);
+                });
 
-            };
+            observer.Subscribe(analogPort, Meadow.Bases.SubscriptionMode.Relative,
+                filter: delta => delta < .1 || delta > .1,
+                handler: avgValue =>
+                {
+                    Debug.WriteLine("New value: " + avgValue);
+                });
 
-            analogPort.StartSampling(0, 20, 10, x => x > 0);
+            observer.Subscribe(analogPort, Meadow.Bases.SubscriptionMode.Percentage,
+                filter: delta => delta < 5 || delta > 5,
+                handler: avgValue =>
+                {
+                    Debug.WriteLine("New value: " + avgValue);
+                });
+
+            analogPort.StartSampling();
+
+            observer.Unsubscribe();
 
         }
 

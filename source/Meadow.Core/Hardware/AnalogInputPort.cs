@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
@@ -52,8 +53,7 @@ namespace Meadow.Hardware
         }
 
         protected object _lock = new object();
-
-        
+        private CancellationTokenSource SamplingTokenSource;
 
         /// <summary>
         /// Gets a value indicating whether the analog input port is currently
@@ -61,89 +61,99 @@ namespace Meadow.Hardware
         /// </summary>
         /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
         public bool IsSampling { get; protected set; } = false;
-        
-        /// <summary>
-        /// Gets the average value of the values in the buffer. Use in conjunction
-        /// with StartSampling() for long-running analog sampling. For occasional
-        /// sampling, use Read().
-        /// </summary>
-        /// <value>The average buffer value.</value>
-        public byte AverageBufferValue
-        { 
-            get { //heh. may be a faster way to do this. 
-                return ((byte)(Samples.Select(x => (decimal)x).Sum() / Samples.Count()));
-            }
-        }
-
-        /// <summary>
-        /// Gets the average voltage value of the values in the buffer. Use in conjunction
-        /// with StartSampling() for long-running analog sampling. For occasional
-        /// sampling, use Read(). Calculates against the reference voltageVoltage.
-        /// </summary>
-        /// <value>The average buffer value.</value>
-        public byte CalculateAverageBufferVoltageValue(float referenceVoltage = 3.3f)
-        {
-            // TODO: @CTACKE: return (AverageBufferValue / int.Max) * referenceVoltage or whatever
-            return 0;
-        }
-
-        /// <summary>
-        /// Gets the sample buffer. Make sure to call StartSampling() before 
-        /// use.
-        /// </summary>
-        /// <value>The sample buffer.</value>
-        public ObservableRangeCollection<byte> Samples { get; protected set; } = new ObservableRangeCollection<byte>();
-
-        private CancellationTokenSource SamplingTokenSource;
 
         /// <summary>
         /// Starts sampling the ADC. To access the voltage readings, use 
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. If
-        /// 0, will sample forever.</param>
-        /// <param name="sampleInterval">The interval, in milliseconds, between
+        /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
         /// sample readings.</param>
-        public void StartSampling(int sampleCount = 0, int sampleInterval = 40, int minSamplesForNotifications = 1, Predicate<byte> filter = null)
+        /// <param name="sampleSleepDuration">The duration, in milliseconds, to sleep
+        /// before taking another sample set.
+        /// </param>
+        public override void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
         {
             lock (_lock)
             {
                 if (IsSampling) return;
 
-                byte[] buffer = new byte[minSamplesForNotifications];
-                int bufferPos = 0;
+                // state muh-cheen
+                IsSampling = true;
+
+                List<float> sampleBuffer = new List<float>();
 
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
-                Task.Factory.StartNew(() =>
+                Task.Factory.StartNew(async () =>
                 {
+                    float lastSampleValue = 0;
+
                     while (true)
                     {
-                        // get sample value (TODO:@CTACKE)
-                        byte val = default(byte);
+                        var val = await ReadVoltage();
 
-                        if (filter(val))
+                        sampleBuffer.Add(val);
+
+                        if (sampleBuffer.Count == sampleSize)
                         {
-                            buffer[bufferPos] = val;
-                            bufferPos++;
+                            var avg = sampleBuffer.Average();
 
-                            if (bufferPos == minSamplesForNotifications)
+                            foreach (var observer in observers)
                             {
-                                Samples.AddRange(buffer);
-                                bufferPos = 0;
+                                switch (observer.Value.SubscriptionMode)
+                                {
+                                    case Bases.SubscriptionMode.Absolute:
+                                        if (observer.Value.Filter(avg))
+                                        {
+                                            observer.Key.OnNext(avg);
+                                        }
+                                        break;
+                                    case Bases.SubscriptionMode.Relative:
+                                        if (lastSampleValue == 0)
+                                        {
+                                            lastSampleValue = avg;
+                                        }
+                                        else
+                                        {
+                                            var delta = sampleBuffer.Average() - lastSampleValue;
+                                            if (observer.Value.Filter(avg))
+                                            {
+                                                observer.Key.OnNext(avg);
+                                            }
+                                        }
+                                        break;
+                                    case Bases.SubscriptionMode.Percentage:
+                                        if (lastSampleValue == 0)
+                                        {
+                                            lastSampleValue = avg;
+                                        }
+                                        else
+                                        {
+                                            var delta = sampleBuffer.Average() - lastSampleValue;
+                                            var percentChange = (delta / lastSampleValue) * 100;
+                                            if (observer.Value.Filter(avg))
+                                            {
+                                                observer.Key.OnNext(avg);
+                                            }
+                                        }
+                                        break;
+                                }
                             }
+
+                            sampleBuffer.Clear();
+                            Thread.Sleep(sampleSleepDuration);
                         }
+
+                        Thread.Sleep(sampleIntervalDuration);
 
                         if (ct.IsCancellationRequested)
                         {
                             // do task clean up here
+                            break;
                         }
                     }
 
-                }, SamplingTokenSource.Token);
-
-                // state muh-cheen
-                IsSampling = true;
+                }, SamplingTokenSource.Token).Wait();
             }
         }
 
@@ -162,7 +172,6 @@ namespace Meadow.Hardware
                 {
                     SamplingTokenSource.Cancel();
                 }
-                
 
                 // state muh-cheen
                 IsSampling = false;
@@ -182,13 +191,14 @@ namespace Meadow.Hardware
         /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
         public override async Task<byte> Read(int sampleCount = 10, int sampleInterval = 40)
         {
-            //TODO: @CTACKE spin up a task to do:
-            if (!IsSampling) { StartSampling(); }
+            throw new NotImplementedException();
+            ////TODO: @CTACKE spin up a task to do:
+            //if (!IsSampling) { StartSampling(); }
 
-            // 
+            //// 
 
-            StopSampling();
-            return Samples.FirstOrDefault<byte>();
+            //StopSampling();
+            //return Samples.FirstOrDefault<byte>();
         }
 
         /// <summary>
@@ -204,12 +214,12 @@ namespace Meadow.Hardware
         /// sample readings.</param>
         /// <param name="referenceVoltage">The maximum voltage value to compare 
         /// against.</param>
-        public override async Task<byte> ReadVoltage(
+        public override async Task<float> ReadVoltage(
             int sampleCount = 10, 
             int sampleInterval = 40,
             float referenceVoltage = 3.3f)
         {
-            return 0;
+            throw new NotImplementedException();
 
             //TODO: Call Read() and automatically convert to voltage
         }

@@ -9,7 +9,7 @@ namespace Meadow.Hardware
     public interface IAnalogInputPort : IAnalogPort
     {
         Task<byte> Read(int sampleCount, int sampleInterval);
-        Task<byte> ReadVoltage(
+        Task<float> ReadVoltage(
             int sampleCount,
             int sampleInterval,
             float referenceVoltage);

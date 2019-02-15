@@ -30,6 +30,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bases\MeadowObservableBase.cs" />
+    <Compile Include="Contracts\IMeadowObservable.cs" />
+    <Compile Include="Contracts\IMeadowObserver.cs" />
+    <Compile Include="Hardware\VoltageSampleSet.cs" />
     <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
     <Compile Include="Peripherals\Displays\IDisplay.cs" />
     <Compile Include="Peripherals\Displays\ITextDisplay.cs" />
@@ -60,7 +64,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
-    <Compile Include="Utilities\ObservableRangeCollection.cs" />
+    <Compile Include="MeadowObserver.cs" />
     <Compile Include="WakeUpOptions.cs" />
     <Compile Include="Bases\AppBase.cs" />
     <Compile Include="Contracts\IApp.cs" />
