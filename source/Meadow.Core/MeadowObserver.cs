@@ -9,28 +9,7 @@ namespace Meadow
 {
     public class MeadowObserver<T> : IMeadowObserver<T>
     {
-        private IDisposable unsubscriber;
-        private Action<T> Handler;
-
-        /// <summary>
-        /// Subscribe to changes and get notified based on filters.
-        /// </summary>
-        /// <param name="provider">The MeadowObservable to subscribe to.</param>
-        /// <param name="filter">Predicate to filter notifications.</param>
-        /// <param name="handler">Handler to process notifications.</param>
-        public virtual void Subscribe(IMeadowObservable<T> provider, Predicate<T> filter, Action<T> handler)
-        {
-            unsubscriber = provider.Subscribe(this, filter);
-            Handler = handler;
-        }
-        
-        /// <summary>
-        /// Unsubscribe from the MeadowObservable
-        /// </summary>
-        public virtual void Unsubscribe()
-        {
-            unsubscriber.Dispose();
-        }
+        public Action<T> Handler { get; set; }
 
         /// <summary>
         /// Notification method which invokes the Handler.

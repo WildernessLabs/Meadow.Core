@@ -7,17 +7,20 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    public abstract class MeadowObservableBase<T> : IMeadowObservable<T>
+    public abstract class MeadowObservableBase<T, U> : IMeadowObservable<T> where U: IMeadowObserver<T>
     {
-        public Dictionary<IMeadowObserver<T>, ObserverContext> _observers;
+        protected Dictionary<IMeadowObserver<T>, ObserverContext> _observers;
 
         public MeadowObservableBase()
         {
             _observers = new Dictionary<IMeadowObserver<T>, ObserverContext>();
         }
 
-        public IDisposable Subscribe(IMeadowObserver<T> observer, Predicate<T> filter)
+        public IDisposable Subscribe(Predicate<T> filter, Action<T> handler)
         {
+            U observer = Activator.CreateInstance<U>();
+            observer.Handler = handler;
+
             if (!_observers.ContainsKey(observer))
             {
                 _observers.Add(observer, new ObserverContext(filter));

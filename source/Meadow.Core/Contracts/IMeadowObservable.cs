@@ -8,6 +8,6 @@ namespace Meadow.Contracts
 {
     public interface IMeadowObservable<T>
     {
-        IDisposable Subscribe(IMeadowObserver<T> observer, Predicate<T> filter);
+        IDisposable Subscribe(Predicate<T> filter, Action<T> handler);
     }
 }

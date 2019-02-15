@@ -8,8 +8,7 @@ namespace Meadow.Contracts
 {
     public interface IMeadowObserver<T>
     {
-        void Subscribe(IMeadowObservable<T> provider, Predicate<T> filter, Action<T> handler);
-        void Unsubscribe();
+        Action<T> Handler { get; set; }
         void OnNext(T value);
     }
 }
