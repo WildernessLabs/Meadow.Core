@@ -25,7 +25,7 @@ namespace AnalogObserver
 
         public void WireUpObservers()
         {
-            var disposer = _analog01.Subscribe(
+            var firehoseSubscriber = _analog01.Subscribe(
                 filter: result => { return true; },
                 handler: result => {
                     Debug.WriteLine("Previous Value: " + result.Old);
@@ -45,10 +45,11 @@ namespace AnalogObserver
             //simple.Dispose();
 
             // absolute: notify me when the temperature hits 75º
+            float seventyFiveDegrees = (3.3f / 100f) * 75;
             _absoluteObserver = _analog01.Subscribe(
-                filter: result => (result.New > 75),
+                filter: result => (result.New > seventyFiveDegrees),
                 handler: avgValue => {
-                    Debug.WriteLine("New value: " + avgValue.New);
+                    Debug.WriteLine("We've hit 75º!");
                     // unsubscribe when we hit it
                     if (_absoluteObserver != null) {
                         _absoluteObserver.Dispose();
