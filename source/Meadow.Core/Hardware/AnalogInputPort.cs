@@ -171,10 +171,8 @@ namespace Meadow.Hardware
                 await Task.Delay(sampleInterval);
             }
 
-            //TODO: decide how we want to handle STOP()
-            // will kill subscribers. maybe only stop if no subs
-            if (_observers.Count == 0) { StopSampling(); }
-
+            //TODO: decide how we want to handle STOP()             // will kill subscribers. maybe only stop if no subs             if (_observers.Count == 0 && Changed.GetInvocationList().Count() <= 1) { // TODO: is there always one because of the delegate {}?
+                StopSampling();             }  
             // convert samples to voltage reading:
             //  a. get the average (casting int to byte), then 
             //  b. % of read * voltageMax = V
