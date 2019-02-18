@@ -1,4 +1,3 @@
-using Meadow.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,17 +6,25 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    public class MeadowObserver<T> : IMeadowObserver<T>
+    public class MeadowObserver<T> : IObserver<T>
     {
-        public Action<T> Handler { get; set; }
-
         /// <summary>
         /// Notification method which invokes the Handler.
         /// </summary>
         /// <param name="value"></param>
         public void OnNext(T value)
         {
-            Handler.Invoke(value);
+            Console.WriteLine("MeadowObserver Action called with value: " + value.ToString());
+        }
+
+        public void OnError(Exception ex)
+        {
+            Console.WriteLine("MeadowObserver error: " + ex.Message);
+        }
+
+        public void OnCompleted()
+        {
+            Console.WriteLine("MeadowObserver completed");
         }
     }
 }

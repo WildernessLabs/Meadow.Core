@@ -99,11 +99,7 @@ namespace Meadow.Hardware
                         };
 
                         // notify observers
-                        foreach (var observer in _observers) {
-                            if (observer.Value.Filter(result)) {
-                                observer.Key.OnNext(result);
-                            }
-                        }
+                        NotifyObservers(result);
 
                         // raise the classic event (if there are any)
                         // TODO: Decide if this is a good idea.
