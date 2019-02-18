@@ -33,19 +33,9 @@ namespace AnalogObserver
 
             //firehoseSubscriber.Dispose();
 
-            // simple average
-            var simple = _analog01.Subscribe(
-                handler: result => {
-                    Debug.WriteLine("Previous Value: " + result.Old);
-                    Debug.WriteLine("New Value: " + result.New);
-                });
-
-            //simple.Dispose();
-
             // absolute: notify me when the temperature hits 75º
             float seventyFiveDegrees = (3.3f / 100f) * 75;
             _absoluteObserver = _analog01.Subscribe(
-                observer: new MeadowObserver<FloatChangeResult>(),
                 filter: result => (result.New > seventyFiveDegrees),
                 handler: avgValue => {
                     Debug.WriteLine("We've hit 75º!");
