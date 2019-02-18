@@ -20,14 +20,9 @@ namespace Meadow
             return AddObserver(observer, null, null);
         }
 
-        public IDisposable Subscribe(IObserver<T> observer, Predicate<T> filter = null, Action<T> handler = null)
+        public IDisposable Subscribe(IObserver<T> observer = null, Predicate<T> filter = null, Action<T> handler = null)
         {
-            return AddObserver(observer, filter, handler);
-        }
-
-        public IDisposable Subscribe<U>(Predicate<T> filter = null, Action<T> handler = null) where U: IObserver<T>
-        {
-            U observer = Activator.CreateInstance<U>();
+            if (observer == null) { observer = new MeadowObserver<T>(); }
             return AddObserver(observer, filter, handler);
         }
 
