@@ -82,20 +82,16 @@ namespace Meadow
             }
         }
 
-        public  class ObserverContext
+        public class ObserverContext
         {
-            public ObserverContext()
-            {
-            }
-
             public ObserverContext(Predicate<T> filter, Action<T> handler)
             {
                 Filter = filter;
                 Handler = handler;
             }
 
-            public Predicate<T> Filter { get; set; } = null;
-            public Action<T> Handler { get; set; } = null;
+            public Predicate<T> Filter { get; protected set; } = null;
+            public Action<T> Handler { get; protected set; } = null;
         }
     }
 }
