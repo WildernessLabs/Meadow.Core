@@ -20,7 +20,7 @@ namespace Meadow.Devices
             DriverHandle = Interop.Nuttx.open(GPIODriverName, Interop.Nuttx.DriverFlags.ReadOnly);
         }
 
-        public void ConfigureOutput(IDigitalPin pin, bool initialState)
+        public void ConfigureOutput(IPin pin, bool initialState)
         {
             var designator = GetPinDesignator(pin);
 
@@ -41,7 +41,7 @@ namespace Meadow.Devices
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
         }
 
-        public void ConfigureInput(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
+        public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
         {
             var designator = GetPinDesignator(pin);
 
@@ -77,7 +77,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pin">Pin.</param>
         /// <param name="value">If set to <c>true</c> value.</param>
-        void IGPIOManager.SetDiscrete(IDigitalPin pin, bool value)
+        void IGPIOManager.SetDiscrete(IPin pin, bool value)
         {
             // generate a PinState for the desired pin and value
             var state = new GPIOPinState();
@@ -233,7 +233,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
         /// <param name="pin">Pin.</param>
-        public bool GetDiscrete(IDigitalPin pin)
+        public bool GetDiscrete(IPin pin)
         {
             var designator = (int)GetPinDesignator(pin);
 

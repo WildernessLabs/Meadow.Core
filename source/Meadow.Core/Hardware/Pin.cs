@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -6,7 +8,8 @@ namespace Meadow.Hardware
     /// </summary>
     public class Pin : PinBase
     {
-        public Pin(string name, uint address) : base (name, address)
+        public Pin(string name, object key, IList<IChannel> supportedChannels = null) 
+            : base (name, key, supportedChannels)
         {
         }
     }

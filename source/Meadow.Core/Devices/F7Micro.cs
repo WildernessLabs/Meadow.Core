@@ -8,8 +8,6 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    // TODO: Bryan: this is not my finest architecture, folks. Need to consider
-    // some simplifications.
     public class F7Micro : IDevice
     { 
         //public List<WiFiAdapter> WiFiAdapters { get; }
@@ -20,11 +18,9 @@ namespace Meadow.Devices
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public F7MicroPinDefinitions Pins => _pins;
-        protected F7MicroPinDefinitions _pins;
+        public F7MicroPinDefinitions Pins { get; protected set; }
 
-        public IGPIOManager GPIOManager { get; protected set; }     
-
+        internal IGPIOManager GPIOManager { get; private set; }
 
         // private static
         static F7Micro() { }
@@ -42,154 +38,284 @@ namespace Meadow.Devices
             this.GPIOManager.Initialize();
 
             // 
-            _pins = new F7MicroPinDefinitions(GPIOManager);
+            this.Pins = new F7MicroPinDefinitions();
         }
 
 
         public class F7MicroPinDefinitions : IPinDefinitions
         {
-            public readonly AnalogPin A01 = AnalogChannels.A01;
-            public readonly AnalogPin A02 = AnalogChannels.A02;
-            public readonly AnalogPin A03 = AnalogChannels.A03;
-            public readonly AnalogPin A04 = AnalogChannels.A04;
-            public readonly AnalogPin A05 = AnalogChannels.A05;
+            public IList<IPin> AllPins { get; } = new List<IPin>();
 
-            public readonly DigitalPin OnboardLEDRed = DigitalChannels.OnboardLEDRed;
-            public readonly DigitalPin OnboardLEDGreen = DigitalChannels.OnboardLEDGreen;
-            public readonly DigitalPin OnboardLEDBlue = DigitalChannels.OnboardLEDBlue;
+            // OnboardLEDBlue
+            // TIM2_CH1/TIM2_ETR, TIM5_CH1, TIM8_ETR, USART2_CTS, UART4_TX, SAI2_SD_B, ETH_MII_CRS, EVENTOUT
+            // ADC1_IN0, ADC2_IN0, ADC3_IN0, WKUP1
+            public readonly IPin OnboardLEDBlue = new Pin(
+                "OnboardLEDBlue", "PA0",
+                new List<IChannel> {
+                    new DigitalChannel("PA0"),
+                    new PwmChannel("TIM2_CH1"), //?? many to choose from
+                }
+            );
+            // OnboardLEDGreen
+            // TIM2_CH2, TIM5_CH2, USART2_RTS, UART4_RX, QUADSPI_BK1_IO3, SAI2_MCLK_B, ETH_MII_RX_CLK/ETH_R MII_REF_CLK, LCD_R2, EVENTOUT
+            // ADC1_IN1, ADC2_IN1, ADC3_IN1
+            public readonly IPin OnboardLEDGreen = new Pin(
+                "OnboardLEDGreen", "PA1",
+                new List<IChannel> {
+                    new DigitalChannel("PA1"),
+                    new PwmChannel("TIM2_CH2"), //?? many to choose from
+                }
+            );
+            // OnboardLEDRed
+            // TIM2_CH3, TIM5_CH3, TIM9_CH1, USART2_TX, SAI2_SCK_B, ETH_MDIO, MDIOS_MDIO, LCD_R1, EVENTOUT
+            // ADC1_IN2, ADC2_IN2, ADC3_IN2, WKUP2
+            public readonly IPin OnboardLEDRed = new Pin(
+                "OnboardLEDGreen", "PA2",
+                new List<IChannel> {
+                    new DigitalChannel("PA2"),
+                    new PwmChannel("TIM2_CH3"), //?? many to choose from
+                }
+            );
 
-            public readonly DigitalPin D00 = DigitalChannels.D00;
-            public readonly DigitalPin D01 = DigitalChannels.D01;
-            public readonly DigitalPin D02 = DigitalChannels.D02;
-            public readonly DigitalPin D03 = DigitalChannels.D03;
-            public readonly DigitalPin D04 = DigitalChannels.D04;
-            public readonly DigitalPin D05 = DigitalChannels.D05;
-            public readonly DigitalPin D06 = DigitalChannels.D06;
-            public readonly DigitalPin D07 = DigitalChannels.D07;
-            public readonly DigitalPin D08 = DigitalChannels.D08;
-            public readonly DigitalPin D09 = DigitalChannels.D09;
-            public readonly DigitalPin D10 = DigitalChannels.D10;
-            public readonly DigitalPin D11 = DigitalChannels.D11;
-            public readonly DigitalPin D12 = DigitalChannels.D12;
-            public readonly DigitalPin D13 = DigitalChannels.D13;
-            public readonly DigitalPin D14 = DigitalChannels.D14;
-            public readonly DigitalPin D15 = DigitalChannels.D15;
+            // D00
+            // UART4_RX, CAN1_RX, FMC_D30, LCD_VSYNC, EVENTOUT
+            public readonly IPin D00 = new Pin(
+                "D00", "PI9",
+                new List<IChannel> {
+                    new DigitalChannel("PI9"),
+                    new UartChannel("UART4_RX", SerialDirectionType.Receive)
+                }
+            );
+            // D01
+            // TIM8_CH1N, UART4_TX, CAN1_TX, FMC_D21, LCD_G2, EVENTOUT
+            public readonly IPin D01 = new Pin(
+                "D01", "PH13",
+                new List<IChannel> {
+                    new DigitalChannel("PH13"),
+                    new PwmChannel("TIM8_CH1N"),
+                    new UartChannel("UART4_TX", SerialDirectionType.Transmit)
+                }
+            );
+            // D02
+            // TIM3_CH1, TIM8_CH1, I2S2_MCK, DFSDM_CKIN3, USART6_TX, FMC_NWAIT, SDMMC2_D6, SDMMC1_D6, DCMI_D0, LCD_HSYNC, EVENTOUT
+            public readonly IPin D02 = new Pin(
+                "D02", "PC6",
+                new List<IChannel> {
+                    new DigitalChannel("PC6"),
+                    new PwmChannel("TIM3_CH1"), // OR TIM8_CH1. Not sure which we're using
+                }
+            );
+            // D03
+            // I2C4_SCL, TIM4_CH3, TIM10_CH1, I2C1_SCL, DFSDM_CKIN7, UART5_RX, CAN1_RX, SDMMC2_D4, ETH_MII_TXD3, SDMMC1_D4, DCMI_D6, LCD_B6, EVENTOUT
+            public readonly IPin D03 = new Pin(
+                "D03", "PC6",
+                new List<IChannel> {
+                    new DigitalChannel("PC6"),
+                    new PwmChannel("TIM4_CH3"), // OR TIM10_CH1. Not sure which we're using
+                    new CanChannel("CAN1_RX", SerialDirectionType.Receive)
+                }
+            );
+            // D04
+            // I2C4_SDA, TIM4_CH4, TIM11_CH1, I2C1_SDA, SPI2_NSS/I2S2_WS, DFSDM_DATIN7, UART5_TX, CAN1_TX, SDMMC2_D5, I2C4_SMBA, SDMMC1_D5, DCMI_D7, LCD_B7, EVENTOUT
+            public readonly IPin D04 = new Pin(
+                "D04", "PB9",
+                new List<IChannel> {
+                    new DigitalChannel("PB9"),
+                    new PwmChannel("TIM4_CH3"), // OR TIM10_CH1. Not sure which we're using
+                    new CanChannel("CAN1_RX", SerialDirectionType.Receive)
+                }
+            );
+            // D05
+            // TIM3_CH2, TIM8_CH2, I2S3_MCK, DFSDM_DATIN3, USART6_RX, FMC_NE1, SDMMC2_D7, SDMMC1_D7, DCMI_D1, LCD_G6, EVENTOUT
+            public readonly IPin D05 = new Pin(
+                "D05", "PC7",
+                new List<IChannel> {
+                    new DigitalChannel("PB8"),
+                    new PwmChannel("TIM3_CH2"), // OR TIM8_CH2. Not sure which we're using
+                }
+            );
+            // D06
+            // TIM1_CH2N, TIM3_CH3, TIM8_CH2N, DFSDM_CKOUT, UART4_CTS, LCD_R3, OTG_HS_ULPI_D1, ETH_MII_RXD2, LCD_G1, EVENTOUT
+            // ADC1_IN8, ADC2_IN8
+            public readonly IPin D06 = new Pin(
+                "D06", "PB0",
+                new List<IChannel> {
+                    new DigitalChannel("PB0"),
+                    new PwmChannel("TIM1_CH2N"), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
+                    new AnalogChannel("ADC1_IN8", 12) // or ADC2_IN8?
+                }
+            );
+            // D07
+            // TIM4_CH2, I2C1_SDA, DFSDM_CKIN5, USART1_RX, I2C4_SDA, FMC_NL, DCMI_VSYNC, EVENTOUT
+            public readonly IPin D07 = new Pin(
+                "D07", "PB7",
+                new List<IChannel> {
+                    new DigitalChannel("PB7"),
+                    new PwmChannel("TIM4_CH2"), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
+                    new I2cChannel("I2C1_SDA", I2cChannelFunctionType.Data) // or I2C4_SDA
+                }
+            );
+            // D08
+            // UART5_TX, TIM4_CH1, HDMI_CEC, I2C1_SCL, DFSDM_DATIN5, USART1_TX, CAN2_TX, QUADSPI_BK1_NCS, I2C4_SCL, FMC_SDNE1, DCMI_D5, EVENTOUT
+            public readonly IPin D08 = new Pin(
+                "D08", "PB6",
+                new List<IChannel> {
+                    new DigitalChannel("PB6"),
+                    new PwmChannel("TIM4_CH1"),
+                    new I2cChannel("I2C1_SCL", I2cChannelFunctionType.Clock ) // or I2C4_SCL
+                }
+            );
+            // D09
+            // TIM1_CH3N, TIM3_CH4, TIM8_CH3N, DFSDM_DATIN1, LCD_R6, OTG_HS_ULPI_D2, ETH_MII_RXD3, LCD_G0, EVENTOUT
+            // ADC1_IN9, ADC2_IN9
+            public readonly IPin D09 = new Pin(
+                "D09", "PB1",
+                new List<IChannel> {
+                    new DigitalChannel("PB1"),
+                    new PwmChannel("TIM1_CH3N"),
+                    new AnalogChannel("ADC1_IN9", 12) // or ADC2_IN9
+                }
+            );
+            // D10
+            // TIM5_CH1, I2C4_SMBA, FMC_D18, DCMI_D1, LCD_R4, EVENTOUT
+            public readonly IPin D10 = new Pin(
+                "D10", "PH10",
+                new List<IChannel> {
+                    new DigitalChannel("PH10"),
+                    new PwmChannel("TIM5_CH1"),
+                }
+            );
+            // D11
+            // MCO2, TIM3_CH4, TIM8_CH4, I2C3_SDA, I2S_CKIN, UART5_CTS, QUADSPI_BK1_IO0, LCD_G3, SDMMC1_D1, DCMI_D3, LCD_B2, EVENTOUT   
+            public readonly IPin D11 = new Pin(
+                "D11", "PC9",
+                new List<IChannel> {
+                    new DigitalChannel("PC9"),
+                    new PwmChannel("TIM3_CH4"), //or TIM8_CH4
+                }
+            );
+            // D12
+            // TIM1_CH2N, TIM8_CH2N, USART1_TX, SPI2_MISO, DFSDM_DATIN2, USART3_RTS, UART4_RTS, TIM12_CH1, SDMMC2_D0, OTG_HS_DM, EVENTOUT
+            public readonly IPin D12 = new Pin(
+                "D12", "PB14",
+                new List<IChannel> {
+                    new DigitalChannel("PB14"),
+                    new PwmChannel("TIM1_CH2N"), //or TIM8_CH2N
+                    new UartChannel("USART1_TX", SerialDirectionType.Transmit)
+                }
+            );
+            // D13
+            // RTC_REFIN, TIM1_CH3N, TIM8_CH3N, USART1_RX, SPI2_MOSI/I2S2_SD, DFSDM_CKIN2, UART4_CTS, TIM12_CH2, SDMMC2_D1, OTG_HS_DP, EVENTOUT
+            public readonly IPin D13 = new Pin(
+                "D13", "PB15",
+                new List<IChannel> {
+                    new DigitalChannel("PB15"),
+                    new PwmChannel("TIM1_CH3N"), //or TIM8_CH3N
+                    new UartChannel("USART1_RX", SerialDirectionType.Receive)
+                }
+            );
+            // D14
+            // FMC_A13, EVENTOUT
+            public readonly IPin D14 = new Pin(
+                "D14", "PG3",
+                new List<IChannel> {
+                    new DigitalChannel("PG3"),
+                }
+            );
+            // D15
+            // TRACED0, SAI1_SD_B, FMC_A19, EVENTOUT
+            public readonly IPin D15 = new Pin(
+                "D15", "PE3",
+                new List<IChannel> {
+                    new DigitalChannel("PE3"),
+                }
+            );
 
-            public F7MicroPinDefinitions(IGPIOManager manager)
+            // A00
+            // SPI1_NSS/I2S1_WS, SPI3_NSS/I2S3_WS, USART2_CK, SPI6_NSS, OTG_HS_SOF, DCMI_HSYNC, LCD_VSYNC, EVENTOUT
+            // ADC1_IN4, ADC2_IN4, DAC_OUT1
+            public readonly IPin A00 = new Pin(
+                "A00", "PA4",
+                new List<IChannel> {
+                    new AnalogChannel("ADC1_IN4", 12)
+                }
+            );
+            // A01
+            // TIM2_CH1/TIM2_ETR, TIM8_CH1N, SPI1_SCK/I2S1_CK, SPI6_SCK, OTG_HS_ULPI_CK, LCD_R4, EVENTOUT
+            // ADC1_IN5, ADC2_IN5, DAC_OUT2
+            public readonly IPin A01 = new Pin(
+                "A01", "PA5",
+                new List<IChannel> {
+                    new AnalogChannel("ADC1_IN5", 12)
+                }
+            );
+            // A02
+            // TIM2_CH4, TIM5_CH4, TIM9_CH2, USART2_RX, LCD_B2, OTG_HS_ULPI_D0, ETH_MII_COL, LCD_B5, EVENTOUT
+            // ADC1_IN3, ADC2_IN3, ADC3_IN3
+            public readonly IPin A02 = new Pin(
+                "A02", "PA3",
+                new List<IChannel> {
+                    new AnalogChannel("ADC1_IN3", 12)
+                }
+            );
+            // A03
+            // TIM1_CH1N, TIM3_CH2, TIM8_CH1N, SPI1_MOSI/I2S1_SD, SPI6_MOSI, TIM14_CH1, ETH_MII_RX_DV/ETH_RM II_CRS_DV, FMC_SDNWE, EVENTOUT
+            // ADC1_IN7, ADC2_IN7
+            public readonly IPin A03 = new Pin(
+                "A03", "PA7",
+                new List<IChannel> {
+                    new AnalogChannel("ADC1_IN7", 12)
+                }
+            );
+            // A04
+            // DFSDM_CKIN0, DFSDM_DATIN4, SAI2_FS_B, OTG_HS_ULPI_STP, FMC_SDNWE, LCD_R5, EVENTOUT
+            // ADC1_IN10, ADC2_IN10, ADC3_IN10
+            public readonly IPin A04 = new Pin(
+                "A04", "PC0",
+                new List<IChannel> {
+                    new AnalogChannel("ADC1_IN10", 12)
+                }
+            );
+            // A05
+            // TRACED0, DFSDM_DATIN0, SPI2_MOSI/I2S2_SD, SAI1_SD_A, DFSDM_CKIN4, ETH_MDC, MDIOS_MDC, EVENTOUT
+            // ADC1_IN11, ADC2_IN11, ADC3_IN11, RTC_TAMP3/ WKUP3
+            public readonly IPin A05 = new Pin(
+                "A05", "PC1",
+                new List<IChannel> {
+                    new AnalogChannel("ADC1_IN11", 12)
+                }
+            );
+
+            public F7MicroPinDefinitions()
             {
-                OnboardLEDRed.GPIOManager = manager;
-                OnboardLEDGreen.GPIOManager = manager;
-                OnboardLEDBlue.GPIOManager = manager;
+                // add all our pins to the collection
+                AllPins.Add(this.A01);
+                AllPins.Add(this.A02);
+                AllPins.Add(this.A03);
+                AllPins.Add(this.A04);
+                AllPins.Add(this.A05);
+                AllPins.Add(this.D00);
+                AllPins.Add(this.D01);
+                AllPins.Add(this.D02);
+                AllPins.Add(this.D03);
+                AllPins.Add(this.D04);
+                AllPins.Add(this.D05);
+                AllPins.Add(this.D06);
+                AllPins.Add(this.D07);
+                AllPins.Add(this.D08);
+                AllPins.Add(this.D09);
+                AllPins.Add(this.D10);
+                AllPins.Add(this.D11);
+                AllPins.Add(this.D12);
+                AllPins.Add(this.D13);
+                AllPins.Add(this.D14);
+                AllPins.Add(this.D15);
+                AllPins.Add(this.OnboardLEDRed);
+                AllPins.Add(this.OnboardLEDGreen);
+                AllPins.Add(this.OnboardLEDBlue);
 
-                D00.GPIOManager
-                    = D01.GPIOManager
-                    = D02.GPIOManager
-                    = D03.GPIOManager
-                    = D04.GPIOManager
-                    = D05.GPIOManager
-                    = D06.GPIOManager
-                    = D07.GPIOManager
-                    = D08.GPIOManager
-                    = D09.GPIOManager
-                    = D10.GPIOManager
-                    = D11.GPIOManager
-                    = D12.GPIOManager
-                    = D13.GPIOManager
-                    = D14.GPIOManager
-                    = D15.GPIOManager
-                    = manager;
-
-                _allPins.Add(this.A01);
-                _allPins.Add(this.A02);
-                _allPins.Add(this.A03);
-                _allPins.Add(this.A04);
-                _allPins.Add(this.A05);
-                _allPins.Add(this.D00);
-                _allPins.Add(this.D01);
-                _allPins.Add(this.D02);
-                _allPins.Add(this.D03);
-                _allPins.Add(this.D04);
-                _allPins.Add(this.D05);
-                _allPins.Add(this.D06);
-                _allPins.Add(this.D07);
-                _allPins.Add(this.D08);
-                _allPins.Add(this.D09);
-                _allPins.Add(this.D10);
-                _allPins.Add(this.D11);
-                _allPins.Add(this.D12);
-                _allPins.Add(this.D13);
-                _allPins.Add(this.D14);
-                _allPins.Add(this.D15);
             }
 
-            public IList<IPin> AllPins => _allPins;
-            protected IList<IPin> _allPins = new List<IPin>();
         }
-
-        // NOTE: this are split into three different classes in the chance that 
-        // we decide to expose them as groups, as in;
-        // Device.PwmChannels, Device.DigitalPins, etc.
-
-        private static class DigitalChannels
-        {
-            // example for boards that have digital pins that don't have PWM timers
-            // enabled on them.
-            //public static readonly DigitalPin D99 = new DigitalPin("D99", 0x128);
-
-            public static readonly DigitalPin OnboardLEDBlue = new DigitalPin("OnboardLEDBlue", "PA0");
-            public static readonly DigitalPin OnboardLEDGreen = new DigitalPin("OnboardLEDGreen", "PA1");
-            public static readonly DigitalPin OnboardLEDRed = new DigitalPin("OnboardLEDRed", "PA2");
-
-            public static readonly DigitalPin D00 = new DigitalPin("D00", "PI9");
-            public static readonly DigitalPin D01 = new DigitalPin("D01", "PH13");
-            public static readonly DigitalPin D02 = new DigitalPin("D02", "PC6");
-            public static readonly DigitalPin D03 = new DigitalPin("D03", "PB8");
-            public static readonly DigitalPin D04 = new DigitalPin("D04", "PB9");
-            public static readonly DigitalPin D05 = new DigitalPin("D05", "PC7");
-            public static readonly DigitalPin D06 = new DigitalPin("D06", "PB0");
-            public static readonly DigitalPin D07 = new DigitalPin("D07", "PB7");
-            public static readonly DigitalPin D08 = new DigitalPin("D08", "PB6");
-            public static readonly DigitalPin D09 = new DigitalPin("D09", "PB1");
-            public static readonly DigitalPin D10 = new DigitalPin("D10", "PH10");
-            public static readonly DigitalPin D11 = new DigitalPin("D11", "PC9");
-            public static readonly DigitalPin D12 = new DigitalPin("D12", "PB14");
-            public static readonly DigitalPin D13 = new DigitalPin("D13", "PB15");
-            public static readonly DigitalPin D14 = new DigitalPin("D14", "PG3");
-            public static readonly DigitalPin D15 = new DigitalPin("D15", "PE3");
-        }
-
-        private static class PWMChannels
-        {
-            //public static readonly PwmPin Pwm01 = new PwmPin("Pwm01", 0x128);
-            //public static readonly PwmPin Pwm02 = new PwmPin("Pwm02", 0x256);
-            //public static readonly PwmPin Pwm03 = new PwmPin("Pwm03", 0x256);
-            //public static readonly PwmPin Pwm04 = new PwmPin("Pwm04", 0x256);
-            //public static readonly PwmPin Pwm05 = new PwmPin("Pwm05", 0x256);
-            //public static readonly PwmPin Pwm06 = new PwmPin("Pwm06", 0x256);
-            //public static readonly PwmPin Pwm07 = new PwmPin("Pwm07", 0x256);
-            //public static readonly PwmPin Pwm08 = new PwmPin("Pwm08", 0x256);
-            //public static readonly PwmPin Pwm09 = new PwmPin("Pwm09", 0x256);
-            //public static readonly PwmPin Pwm10 = new PwmPin("Pwm10", 0x256);
-            //public static readonly PwmPin Pwm11 = new PwmPin("Pwm11", 0x256);
-            //public static readonly PwmPin Pwm12 = new PwmPin("Pwm12", 0x256);
-            //public static readonly PwmPin Pwm13 = new PwmPin("Pwm13", 0x256);
-            //public static readonly PwmPin Pwm14 = new PwmPin("Pwm14", 0x256);
-            //public static readonly PwmPin Pwm15 = new PwmPin("Pwm15", 0x256);
-            public static readonly PwmPin OnboardLEDRed = new PwmPin("Pwm01", "PA2");
-            public static readonly PwmPin OnboardLEDGreen = new PwmPin("Pwm01", "PA1");
-            public static readonly PwmPin OnboardLEDBlue = new PwmPin("Pwm01", "PA0");
-        }
-
-        private static class AnalogChannels
-        {
-            public static readonly AnalogPin A01 = new AnalogPin("A01", 0x0);
-            public static readonly AnalogPin A02 = new AnalogPin("A02", 0x0);
-            public static readonly AnalogPin A03 = new AnalogPin("A03", 0x0);
-            public static readonly AnalogPin A04 = new AnalogPin("A04", 0x0);
-            public static readonly AnalogPin A05 = new AnalogPin("A05", 0x0);
-        }
-
-
     }
-
 }

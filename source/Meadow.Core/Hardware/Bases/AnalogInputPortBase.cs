@@ -11,7 +11,7 @@ namespace Meadow.Hardware
     {
         public override PortDirectionType Direction => PortDirectionType.Input;
 
-        protected AnalogInputPortBase(IAnalogChannelInfo channelInfo)
+        protected AnalogInputPortBase(IAnalogChannel channelInfo)
             : base (channelInfo)
         {
         }

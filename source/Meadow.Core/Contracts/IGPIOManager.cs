@@ -17,21 +17,21 @@ namespace Meadow
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="value"></param>
-        void SetDiscrete(IDigitalPin pin, bool value);
+        void SetDiscrete(IPin pin, bool value);
 
         /// <summary>
         /// Gets the value of a discrete (digital input)
         /// </summary>
         /// <param name="pin"></param>
         /// <returns></returns>
-        bool GetDiscrete(IDigitalPin pin);
+        bool GetDiscrete(IPin pin);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        void ConfigureOutput(IDigitalPin pin, bool initialState);
+        void ConfigureOutput(IPin pin, bool initialState);
 
         /// <summary>
         /// 
@@ -40,6 +40,6 @@ namespace Meadow
         /// <param name="glitchFilter"></param>
         /// <param name="resistorMode"></param>
         /// <param name="interruptEnabled"></param>
-        void ConfigureInput(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled);
+        void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled);
     }
 }

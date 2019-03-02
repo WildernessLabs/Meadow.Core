@@ -5,7 +5,7 @@
     /// </summary>
     public interface IPwmPort// : IDigitalPort
     {
-        IPwmChannelInfo ChannelInfo { get; }
+        IPwmChannel ChannelInfo { get; }
 
         // TODO: these should return Task or Task<void> or whatever
         void Start();

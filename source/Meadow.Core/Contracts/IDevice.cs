@@ -13,6 +13,6 @@
         /// <summary>
         /// Gets the GPIO Manager.
         /// </summary>
-        IGPIOManager GPIOManager { get; }
+        //IGPIOManager GPIOManager { get; }
     }
 }

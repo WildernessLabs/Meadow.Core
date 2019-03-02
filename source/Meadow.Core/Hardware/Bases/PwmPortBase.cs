@@ -3,14 +3,14 @@ namespace Meadow.Hardware
 {
     public abstract class PwmPortBase : IPwmPort
     {
-        public IPwmChannelInfo ChannelInfo {
+        public IPwmChannel ChannelInfo {
             get => _channelinfo;
-        } protected IPwmChannelInfo _channelinfo;
+        } protected IPwmChannel _channelinfo;
 
         public PortDirectionType Direction => PortDirectionType.Output;
         public SignalType SignalType => SignalType.Digital;
 
-        protected PwmPortBase(IPwmChannelInfo channelInfo)
+        protected PwmPortBase(IPwmChannel channelInfo)
         {
             _channelinfo = channelInfo;
         }
