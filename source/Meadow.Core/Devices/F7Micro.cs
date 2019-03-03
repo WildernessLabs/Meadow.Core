@@ -8,7 +8,7 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public class F7Micro : IDevice<F7MicroPinDefinitions>
+    public class F7Micro : IDevice
     { 
         //public List<WiFiAdapter> WiFiAdapters { get; }
 
@@ -18,7 +18,8 @@ namespace Meadow.Devices
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public F7MicroPinDefinitions Pins { get; protected set; }
+        public new F7MicroPinDefinitions Pins { get; protected set; }
+        //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
 
         internal IGPIOManager GPIOManager { get; private set; }
 

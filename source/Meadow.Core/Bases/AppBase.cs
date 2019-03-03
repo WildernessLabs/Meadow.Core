@@ -6,10 +6,9 @@ namespace Meadow
     /// class for Meadow applications to get strongly-typed access to the current
     /// device information.
     /// </summary>
-    public abstract class AppBase<D, A> 
-        : IApp where A : class
-        , IApp where D : class
-        , IDevice<P> where P : IPinDefinitions
+    public abstract class AppBase<D, A> : IApp 
+        where A : class, IApp 
+        where D : class, IDevice//<P> where P : IPinDefinitions
     {
         /// <summary>
         /// </summary>
