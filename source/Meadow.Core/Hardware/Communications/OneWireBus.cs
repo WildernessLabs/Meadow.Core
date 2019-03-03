@@ -64,7 +64,7 @@ namespace Meadow.Hardware.Communications
             /// Create a new instance of a OneWire peripheral object.
             /// </summary>
             /// <param name="pin">Pin connected to the OneWire devices.</param>
-            public Devices(IDigitalPin pin)
+            public Devices(IPin pin)
             {
                 Pin = pin;
                 Port = new DigitalOutputPort(pin, false);
@@ -159,7 +159,7 @@ namespace Meadow.Hardware.Communications
         /// </summary>
         /// <param name="pin">Pin number with the OneWire devices attached.</param>
         /// <returns><see cref="Devices"/> object for the specified pin.</returns>
-        public static Devices Add(IDigitalPin pin)
+        public static Devices Add(IPin pin)
         {
             Devices result = null;
             foreach (Devices device in _devices)

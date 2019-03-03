@@ -13,10 +13,10 @@ namespace Meadow.Hardware
         string Name { get; }
         object Key { get; }
 
-        IChannelInfo ActiveChannel { get; }
+        //IChannelInfo ActiveChannel { get; }
 
-        void ReserveChannel<C>(); // TODO: should this return Task<bool>? (true if reserved)
-        void ReleaseChannel();
+        //void ReserveChannel<C>(); // TODO: should this return Task<bool>? (true if reserved)
+        //void ReleaseChannel();
 
     }
 }

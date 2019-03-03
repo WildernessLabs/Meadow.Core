@@ -7,13 +7,13 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
-        protected IDigitalPin _pin;
+        protected IPin _pin;
         protected bool _disposed;
 
         public bool GlitchFilter { get; set; }
         public ResistorMode Resistor { get; set; }
 
-        public DigitalInputPort(IDigitalPin pin, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
+        public DigitalInputPort(IPin pin, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
             : base(pin)
         {
             // attempt to reserve the pin

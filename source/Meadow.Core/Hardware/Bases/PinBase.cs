@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         /// <value>The key.</value>
         public object Key { get; protected set; }
 
-        public abstract IChannelInfo ActiveChannel { get; protected set; }
+        //public abstract IChannelInfo ActiveChannel { get; protected set; }
 
         protected PinBase(string name, object key, IList<IChannelInfo> supportedChannels)
         {

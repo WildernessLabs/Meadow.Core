@@ -103,7 +103,6 @@
     <Compile Include="Hardware\Bases\DigitalOutputPortBase.cs" />
     <Compile Include="Hardware\Bases\DigitalPortBase.cs" />
     <Compile Include="Hardware\Bases\PinBase.cs" />
-    <Compile Include="Hardware\Bases\PwmPinBase.cs" />
     <Compile Include="Hardware\Bases\PwmPortBase.cs" />
     <Compile Include="Hardware\Communications\I2cBus.cs" />
     <Compile Include="Hardware\Communications\ICommunicationBus.cs" />

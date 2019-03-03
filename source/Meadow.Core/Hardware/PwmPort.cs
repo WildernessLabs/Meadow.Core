@@ -11,7 +11,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class PwmPort : PwmPortBase
     {
-        public PwmPort(IPwmPin pin, float frequency = 100, float dutyCycle = 0, bool invert = false) : base (pin)
+        public PwmPort(IPin pin, float frequency = 100, float dutyCycle = 0, bool invert = false) : base (pin)
         {
             this.Frequency = frequency;
             this.DutyCycle = dutyCycle;

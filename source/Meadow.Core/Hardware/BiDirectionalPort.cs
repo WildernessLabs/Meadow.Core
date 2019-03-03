@@ -8,10 +8,10 @@ namespace Meadow.Hardware
     /// </summary>
     public class BiDirectionalPort : BiDirectionalPortBase
     {
-        protected IDigitalPin _pin;
+        protected IPin _pin;
 
         public BiDirectionalPort(
-            IDigitalPin pin, 
+            IPin pin, 
             bool initialState = false, 
             bool glitchFilter = false, 
             ResistorMode resistorMode = ResistorMode.Disabled,

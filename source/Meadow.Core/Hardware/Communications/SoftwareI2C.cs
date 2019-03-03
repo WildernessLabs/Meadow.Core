@@ -12,7 +12,7 @@ namespace Meadow.Hardware.Communications
 
         static int DELAY = 4;
 
-        public SoftwareI2C(IDigitalPin pinSda, IDigitalPin pinScl)
+        public SoftwareI2C(IPin pinSda, IPin pinScl)
         {
             sdaPort = new BiDirectionalPort(pinSda, false, false, ResistorMode.PullUp);
             sclPort = new BiDirectionalPort(pinScl, false, false, ResistorMode.PullUp);

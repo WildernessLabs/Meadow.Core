@@ -21,7 +21,7 @@ namespace Meadow.Hardware
         public ResistorMode Resistor { get; }
 
         protected BiDirectionalPortBase(
-            IDigitalPin pin,
+            IPin pin,
             bool initialState = false,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled,
