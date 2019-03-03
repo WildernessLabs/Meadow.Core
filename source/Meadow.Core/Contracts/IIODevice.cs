@@ -3,7 +3,7 @@
     /// <summary>
     /// Contract for Meadow devices.
     /// </summary>
-    public interface IDevice//<P> where P : IPinDefinitions
+    public interface IIODevice//<P> where P : IPinDefinitions
     {
         /// <summary>
         /// Gets the device capabilities.

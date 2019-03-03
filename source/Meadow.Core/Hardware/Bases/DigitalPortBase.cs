@@ -4,16 +4,9 @@
     /// DigitalPortBase provides a base implementation for much of the 
     /// common tasks of classes implementing IDigitalPort.
     /// </summary>
-    public abstract class DigitalPortBase : PortBase<DigitalChannelInfo>, IDigitalPort
+    public abstract class DigitalPortBase : PortBase<IDigitalChannelInfo>, IDigitalPort
     {
         public new IDigitalChannelInfo Channel { get; protected set; }
-
-        /// <summary>
-        /// The PortDirectionType property is backed by the readonly _direction member. 
-        /// This member must be set during the constructor and describes whether the 
-        /// port in an input or output port.
-        /// </summary>
-        public override PortDirectionType Direction { get; protected set; }
 
         /// <summary>
         /// The PortSignalType property returns PortSignalType.Digital.
@@ -23,18 +16,17 @@
         /// <summary>
         /// Gets or sets the port state, either high (true), or low (false).
         /// </summary>
-        public virtual bool State
-        {
-            get { return _state; }
-            set { _state = value; }
-        }
-        protected bool _state = false;
+        //public abstract bool State { get; protected set; }
+        //{
+        //    get { return _state; }
+        //    set { _state = value; }
+        //}
+        //protected bool _state = false;
 
-        protected DigitalPortBase(IPin pin, PortDirectionType direction)
-            : base(pin)
+        protected DigitalPortBase(IPin pin, IDigitalChannelInfo channel)
+            : base(pin, channel)
         {
-            //this.Channel = channel;
-            this.Direction = direction;
+            this.Channel = channel;
         }
     }
 }

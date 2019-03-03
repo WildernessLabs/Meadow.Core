@@ -8,7 +8,7 @@ namespace Meadow
     /// </summary>
     public abstract class AppBase<D, A> : IApp 
         where A : class, IApp 
-        where D : class, IDevice//<P> where P : IPinDefinitions
+        where D : class, IIODevice//<P> where P : IPinDefinitions
     {
         /// <summary>
         /// </summary>

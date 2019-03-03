@@ -1,7 +1,8 @@
-﻿namespace Meadow.Hardware
+﻿using System;
+
+namespace Meadow.Hardware
 {
-    //TODO: add IDisposable
-    public interface IPort<C> where C : IChannelInfo //: IDisposable
+    public interface IPort<C> : IDisposable where C : IChannelInfo
     {
         PortDirectionType Direction { get; }
         SignalType SignalType { get; }

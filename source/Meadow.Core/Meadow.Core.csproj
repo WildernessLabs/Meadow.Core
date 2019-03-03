@@ -64,7 +64,7 @@
     <Compile Include="WakeUpOptions.cs" />
     <Compile Include="Bases\AppBase.cs" />
     <Compile Include="Contracts\IApp.cs" />
-    <Compile Include="Contracts\IDevice.cs" />
+    <Compile Include="Contracts\IIODevice.cs" />
     <Compile Include="Contracts\IGPIOManager.cs" />
     <Compile Include="Devices\F7GPIOManager.cs" />
     <Compile Include="Devices\F7Micro.cs" />
@@ -163,10 +163,14 @@
     <Compile Include="Hardware\CanChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\ISerialCommunicationChannelInfo.cs" />
     <Compile Include="Hardware\Bases\PortBase.cs" />
+    <Compile Include="Devices\Definitions\F7MicroPinDefinitions.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Devices\Definitions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

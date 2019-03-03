@@ -9,14 +9,17 @@
         /// The InitialState property is backed by the readonly bool 
         /// _initialState member and should be during the constructor.
         /// </summary>
-        public abstract bool InitialState { get; }
-        protected readonly bool _initialState;
+        public bool InitialState { get; protected set; }
 
-        protected DigitalOutputPortBase(IDigitalChannelInfo channelInfo, bool initialState) 
-            : base(channelInfo, PortDirectionType.Output)
+        public override PortDirectionType Direction => PortDirectionType.Output;
+
+        public abstract bool State { get; set; }
+
+        protected DigitalOutputPortBase(IPin pin, IDigitalChannelInfo channel, bool initialState) 
+            : base(pin, channel)
         {
-            _initialState = initialState;
-            _state = initialState;
+            this.InitialState = initialState;
+            //_state = initialState;
         }
     }
 }

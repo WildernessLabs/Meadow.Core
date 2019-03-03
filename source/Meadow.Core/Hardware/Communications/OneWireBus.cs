@@ -1,183 +1,183 @@
-using System;
-using System.Collections;
+//using System;
+//using System.Collections;
 
-namespace Meadow.Hardware.Communications
-{
-    /// <summary>
-    /// Singleton class used to allow access to multiple OneWire peripherals on a single pin
-    /// in a multi-threaded application.
-    /// </summary>
-    /// <remarks>
-    /// The OneWire class allows for a single bus to have one or more peripherals attached to it.
-    /// It also allows for multiple OneWire peripherals to be connected to different pins on the
-    /// Meadow device.
-    ///
-    /// The multiple peripherals on different pins is not an issue in a multi-threaded environment.
-    ///
-    /// Multiple peripherals attached to a single pin on a multi-threaded environment could be an
-    /// issue as the command sequencing could clash.  Using this object with locking allows
-    /// for this scenario to be implemented in a safe way.
-    /// </remarks>
-    public sealed class OneWireBus
-    {
-        #region Classes
+//namespace Meadow.Hardware.Communications
+//{
+//    /// <summary>
+//    /// Singleton class used to allow access to multiple OneWire peripherals on a single pin
+//    /// in a multi-threaded application.
+//    /// </summary>
+//    /// <remarks>
+//    /// The OneWire class allows for a single bus to have one or more peripherals attached to it.
+//    /// It also allows for multiple OneWire peripherals to be connected to different pins on the
+//    /// Meadow device.
+//    ///
+//    /// The multiple peripherals on different pins is not an issue in a multi-threaded environment.
+//    ///
+//    /// Multiple peripherals attached to a single pin on a multi-threaded environment could be an
+//    /// issue as the command sequencing could clash.  Using this object with locking allows
+//    /// for this scenario to be implemented in a safe way.
+//    /// </remarks>
+//    public sealed class OneWireBus
+//    {
+//        #region Classes
 
-        /// <summary>
-        ///     Hold information about the devices that are attached to a single pin.
-        /// </summary>
-        public class Devices
-        {
-            #region Properties
+//        /// <summary>
+//        ///     Hold information about the devices that are attached to a single pin.
+//        /// </summary>
+//        public class Devices
+//        {
+//            #region Properties
 
-            /// <summary>
-            /// Pin connected to the OneWire peripherals.
-            /// </summary>
-            public IPin Pin { get; set; }
+//            /// <summary>
+//            /// Pin connected to the OneWire peripherals.
+//            /// </summary>
+//            public IPin Pin { get; set; }
 
-            /// <summary>
-            /// OutputPoert object used to talk to the OneWire bus.
-            /// </summary>
-            private DigitalOutputPort Port { get; set; }
+//            /// <summary>
+//            /// OutputPoert object used to talk to the OneWire bus.
+//            /// </summary>
+//            private DigitalOutputPort Port { get; set; }
 
-            /// <summary>
-            /// Object used to talk to the OneWire peripheral using the OneWire protocol.
-            /// </summary>
-            public OneWire DeviceBus { get; set; }
+//            /// <summary>
+//            /// Object used to talk to the OneWire peripheral using the OneWire protocol.
+//            /// </summary>
+//            public OneWire DeviceBus { get; set; }
 
-            /// <summary>
-            /// Device IS connected to this instance of the OneWire bus.
-            /// </summary>
-            public ArrayList DeviceIDs { get; set; }
+//            /// <summary>
+//            /// Device IS connected to this instance of the OneWire bus.
+//            /// </summary>
+//            public ArrayList DeviceIDs { get; set; }
 
-            #endregion Properties
+//            #endregion Properties
 
-            #region Constructor
+//            #region Constructor
 
-            /// <summary>
-            /// Default constructor is private to prevent it being invoked.
-            /// </summary>
-            private Devices()
-            {
-            }
+//            /// <summary>
+//            /// Default constructor is private to prevent it being invoked.
+//            /// </summary>
+//            private Devices()
+//            {
+//            }
 
-            /// <summary>
-            /// Create a new instance of a OneWire peripheral object.
-            /// </summary>
-            /// <param name="pin">Pin connected to the OneWire devices.</param>
-            public Devices(IPin pin)
-            {
-                Pin = pin;
-                Port = new DigitalOutputPort(pin, false);
-                DeviceBus = new OneWire(Port);
-                DeviceIDs = new ArrayList();
-                ScanForDevices();
-            }
+//            /// <summary>
+//            /// Create a new instance of a OneWire peripheral object.
+//            /// </summary>
+//            /// <param name="pin">Pin connected to the OneWire devices.</param>
+//            public Devices(IPin pin)
+//            {
+//                Pin = pin;
+//                Port = new DigitalOutputPort(pin, false);
+//                DeviceBus = new OneWire(Port);
+//                DeviceIDs = new ArrayList();
+//                ScanForDevices();
+//            }
 
-            #endregion Constructor
+//            #endregion Constructor
 
-            #region Methods
+//            #region Methods
 
-            /// <summary>
-            /// Scan the specified device bus for OneWire peripherals.
-            /// </summary>
-            /// <remarks>
-            /// The OneWire protocol allows for multiple OneWire peripherals to be
-            /// attached to the same pin.  This method identifies all of the peripherals
-            /// that are connected to the pin used to create this object.
-            /// </remarks>
-            private void ScanForDevices()
-            {
-                ArrayList deviceList;
-                lock (DeviceBus)
-                {
-                    DeviceBus.TouchReset();
-                    deviceList = DeviceBus.FindAllDevices();
-                }
+//            /// <summary>
+//            /// Scan the specified device bus for OneWire peripherals.
+//            /// </summary>
+//            /// <remarks>
+//            /// The OneWire protocol allows for multiple OneWire peripherals to be
+//            /// attached to the same pin.  This method identifies all of the peripherals
+//            /// that are connected to the pin used to create this object.
+//            /// </remarks>
+//            private void ScanForDevices()
+//            {
+//                ArrayList deviceList;
+//                lock (DeviceBus)
+//                {
+//                    DeviceBus.TouchReset();
+//                    deviceList = DeviceBus.FindAllDevices();
+//                }
 
-                for (var device = 0; device < deviceList.Count; device++)
-                {
-                    UInt64 deviceID = 0;
-                    byte[] deviceIDArray = ((byte[])deviceList[device]);
-                    for (var index = 0; index < 8; index++)
-                    {
-                        int places = 8 * index;
-                        byte value = deviceIDArray[index];
-                        deviceID |= ((UInt64)value) << places;
-                    }
+//                for (var device = 0; device < deviceList.Count; device++)
+//                {
+//                    UInt64 deviceID = 0;
+//                    byte[] deviceIDArray = ((byte[])deviceList[device]);
+//                    for (var index = 0; index < 8; index++)
+//                    {
+//                        int places = 8 * index;
+//                        byte value = deviceIDArray[index];
+//                        deviceID |= ((UInt64)value) << places;
+//                    }
 
-                    DeviceIDs.Add(deviceID);
-                }
-            }
+//                    DeviceIDs.Add(deviceID);
+//                }
+//            }
 
-            #endregion Methods
-        };
+//            #endregion Methods
+//        };
 
-        #endregion Classes
+//        #endregion Classes
 
-        #region Private member variables
+//        #region Private member variables
 
-        /// <summary>
-        /// Static instance
-        /// </summary>
-        private static readonly OneWireBus oneWireBus = new OneWireBus();
+//        /// <summary>
+//        /// Static instance
+//        /// </summary>
+//        private static readonly OneWireBus oneWireBus = new OneWireBus();
 
-        /// <summary>
-        /// List of all of the pins and the associates OneWire peripherals.
-        /// </summary>
-        private static readonly ArrayList _devices = new ArrayList();
+//        /// <summary>
+//        /// List of all of the pins and the associates OneWire peripherals.
+//        /// </summary>
+//        private static readonly ArrayList _devices = new ArrayList();
 
-        #endregion Private member variables
+//        #endregion Private member variables
 
-        #region Properties
+//        #region Properties
 
-        /// <summary>
-        /// Return the singleton object.
-        /// </summary>
-        public static OneWireBus Instance { get { return oneWireBus; } }
+//        /// <summary>
+//        /// Return the singleton object.
+//        /// </summary>
+//        public static OneWireBus Instance { get { return oneWireBus; } }
 
-        #endregion Properties
+//        #endregion Properties
 
-        #region Constructor(s)
+//        #region Constructor(s)
 
-        static OneWireBus()
-        {
-        }
+//        static OneWireBus()
+//        {
+//        }
 
-        /// <summary>
-        /// Default constructor is private to prevent it being invoked.
-        /// </summary>
-        private OneWireBus()
-        {
-        }
+//        /// <summary>
+//        /// Default constructor is private to prevent it being invoked.
+//        /// </summary>
+//        private OneWireBus()
+//        {
+//        }
 
-        #endregion Constructors
+//        #endregion Constructors
 
-        #region Methods
+//        #region Methods
 
-        /// <summary>
-        /// Add a new pin to the list of those with OneWire peripherals attached.
-        /// </summary>
-        /// <param name="pin">Pin number with the OneWire devices attached.</param>
-        /// <returns><see cref="Devices"/> object for the specified pin.</returns>
-        public static Devices Add(IPin pin)
-        {
-            Devices result = null;
-            foreach (Devices device in _devices)
-            {
-                if (device.Pin == pin)
-                {
-                    result = device;
-                }
-            }
+//        /// <summary>
+//        /// Add a new pin to the list of those with OneWire peripherals attached.
+//        /// </summary>
+//        /// <param name="pin">Pin number with the OneWire devices attached.</param>
+//        /// <returns><see cref="Devices"/> object for the specified pin.</returns>
+//        public static Devices Add(IPin pin)
+//        {
+//            Devices result = null;
+//            foreach (Devices device in _devices)
+//            {
+//                if (device.Pin == pin)
+//                {
+//                    result = device;
+//                }
+//            }
 
-            if (result == null)
-            {
-                result = new Devices(pin);
-                _devices.Add(result);
-            }
-            return result;
-        }
+//            if (result == null)
+//            {
+//                result = new Devices(pin);
+//                _devices.Add(result);
+//            }
+//            return result;
+//        }
 
-        #endregion Methods
-    }
-}
+//        #endregion Methods
+//    }
+//}
