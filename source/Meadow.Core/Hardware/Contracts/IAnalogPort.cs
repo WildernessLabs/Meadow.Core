@@ -2,8 +2,8 @@
 
 namespace Meadow.Hardware
 {
-    public interface IAnalogPort : IPort
+    public interface IAnalogPort : IPort<IAnalogChannelInfo>
     {
-        IAnalogChannel _channelInfo { get; }
+        IAnalogChannelInfo _channelInfo { get; }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class SpiChannel : DigitalChannelBase, ISpiChannel
+    public class SpiChannelInfo : DigitalChannelIInfoBase, ISpiChannelInfo
     {
-        public SpiChannel(string name,
+        public SpiChannelInfo(string name,
         bool pullDownCapable = false,
         bool pullUpCapable = false)
             : base (

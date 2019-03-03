@@ -4,9 +4,9 @@ namespace Meadow.Hardware
     /// <summary>
     /// Digital port.
     /// </summary>
-    public interface IDigitalPort : IPort
+    public interface IDigitalPort : IPort<IDigitalChannelInfo>
     {
-        new IDigitalChannel Channel { get; }
+        new IDigitalChannelInfo Channel { get; }
 
         /// <summary>
         /// Gets or sets the port state, either high (true), or low (false).

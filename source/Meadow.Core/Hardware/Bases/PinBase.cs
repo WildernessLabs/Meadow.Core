@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
@@ -8,7 +9,7 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class PinBase : IPin
     {
-        public IList<IChannel> SupportedChannels { get; protected set; }
+        public IList<IChannelInfo> SupportedChannels { get; protected set; }
 
         public string Name { get; protected set; }
         /// <summary>
@@ -17,7 +18,9 @@ namespace Meadow.Hardware
         /// <value>The key.</value>
         public object Key { get; protected set; }
 
-        protected PinBase(string name, object key, IList<IChannel> supportedChannels)
+        public abstract IChannelInfo ActiveChannel { get; protected set; }
+
+        protected PinBase(string name, object key, IList<IChannelInfo> supportedChannels)
         {
             this.Name = name;
             this.Key = key;
@@ -31,6 +34,13 @@ namespace Meadow.Hardware
         public override string ToString()
         {
             return this.Name;
+        }
+
+        public void ReserveChannel<C>() { 
+        
+        }
+        public void ReleaseChannel() { 
+        
         }
     }
 }

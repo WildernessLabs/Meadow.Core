@@ -4,11 +4,11 @@ namespace Meadow.Hardware
     /// <summary>
     /// Provides base functionality for channel types.
     /// </summary>
-    public abstract class ChannelBase
+    public abstract class ChannelInfoBase
     {
         public string Name { get; protected set; }
 
-        protected ChannelBase(string name)
+        protected ChannelInfoBase(string name)
         {
             this.Name = name;
         }

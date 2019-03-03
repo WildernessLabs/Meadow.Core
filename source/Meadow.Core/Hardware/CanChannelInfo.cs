@@ -1,11 +1,11 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class CanChannel : DigitalChannelBase, ICanChannel
+    public class CanChannelInfo : DigitalChannelIInfoBase, ICanChannelInfo
     {
         public SerialDirectionType SerialDirection { get; protected set; }
 
-        public CanChannel(string name, SerialDirectionType serialDirection) 
+        public CanChannelInfo(string name, SerialDirectionType serialDirection) 
             : base(name, true, true, true, true, true)
         {
             this.SerialDirection = serialDirection;

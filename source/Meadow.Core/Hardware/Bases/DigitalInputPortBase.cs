@@ -9,16 +9,18 @@ namespace Meadow.Hardware
     {
         public event EventHandler<PortEventArgs> Changed = delegate { };
 
-        public bool InterruptEnabled
-        {
-            get { return _interruptEnabled; }
-        }
-        protected bool _interruptEnabled;
+        public new IDigitalChannelInfo Channel { get; protected set; }
 
-        protected DigitalInputPortBase(IDigitalChannel channelInfo, bool interruptEnabled = false) 
-            : base(channelInfo, PortDirectionType.Input)
+        public bool InterruptEnabled { get; protected set; }
+
+        protected DigitalInputPortBase(IPin pin, bool interruptEnabled = false) 
+            : base(pin, PortDirectionType.Input)
         {
-            _interruptEnabled = interruptEnabled;
+            this.InterruptEnabled = interruptEnabled;
+
+            //TODO: set the channel
+            //if(pin.SupportedChannels.Contains())
+
         }
 
         protected void RaiseChanged(bool value)

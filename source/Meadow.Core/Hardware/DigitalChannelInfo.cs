@@ -1,9 +1,9 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class DigitalChannel : DigitalChannelBase
+    public class DigitalChannelInfo : DigitalChannelIInfoBase
     {
-        public DigitalChannel(
+        public DigitalChannelInfo(
             string name,
             bool inputCapable = true,
             bool outputCapable = true,

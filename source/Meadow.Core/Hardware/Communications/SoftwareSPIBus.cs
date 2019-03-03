@@ -61,7 +61,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="chipSelect">Chip select pin.</param>
         /// <param name="cpha">Clock phase (0 or 1, default is 0).</param>
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
-        public SoftwareSPIBus(IDigitalPin mosi, IDigitalPin miso, IDigitalPin clock, IDigitalPin chipSelect, byte cpha = 0, byte cpol = 0)
+        public SoftwareSPIBus(IPin mosi, IPin miso, IPin clock, IPin chipSelect, byte cpha = 0, byte cpol = 0)
         {
             if (mosi == null)
             {

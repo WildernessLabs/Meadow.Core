@@ -1,12 +1,12 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class PwmChannel : DigitalChannelBase, IPwmChannel
+    public class PwmChannelInfo : DigitalChannelIInfoBase, IPwmChannelInfo
     {
         public float MinimumFrequency { get; protected set; }
         public float MaximumFrequency { get; protected set; }
 
-        public PwmChannel(string name,
+        public PwmChannelInfo(string name,
             float minimumFrequency = 0,
             float maximumFrequency = 100000,
             bool pullDownCapable = false, // does this mean anything in PWM?

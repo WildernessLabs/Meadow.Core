@@ -46,7 +46,7 @@ namespace Meadow.Hardware
         /// Initializes a new instance of the <see cref="T:Meadow.Hardware.AnalogInputPort"/> class.
         /// </summary>
         /// <param name="pin">Pin.</param>
-        public AnalogInputPort(IAnalogPin pin) : base (pin)
+        public AnalogInputPort(IPin pin) : base (pin)
         {
         }
 

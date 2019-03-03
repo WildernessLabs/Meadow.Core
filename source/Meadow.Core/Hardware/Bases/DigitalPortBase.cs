@@ -4,9 +4,9 @@
     /// DigitalPortBase provides a base implementation for much of the 
     /// common tasks of classes implementing IDigitalPort.
     /// </summary>
-    public abstract class DigitalPortBase : PortBase, IDigitalPort
+    public abstract class DigitalPortBase : PortBase<DigitalChannelInfo>, IDigitalPort
     {
-        public new IDigitalChannel Channel { get; protected set; }
+        public new IDigitalChannelInfo Channel { get; protected set; }
 
         /// <summary>
         /// The PortDirectionType property is backed by the readonly _direction member. 
@@ -30,10 +30,10 @@
         }
         protected bool _state = false;
 
-        protected DigitalPortBase(IPin pin, IDigitalChannel channel, PortDirectionType direction)
+        protected DigitalPortBase(IPin pin, PortDirectionType direction)
             : base(pin)
         {
-            this.Channel = channel;
+            //this.Channel = channel;
             this.Direction = direction;
         }
     }

@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     /// Minimum contract to describes a GPIO channel type or protocol on a 
     /// Meadow device such as Analog, Digital, or I2C.
     /// </summary>
-    public interface IChannel
+    public interface IChannelInfo
     {
         /// <summary>
         /// Gets the name of the channel.

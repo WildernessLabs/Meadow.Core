@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Describes the capabilities of a Pulse-Width-Modulation channel
     /// </summary>
-    public interface IPwmChannel : IDigitalChannel
+    public interface IPwmChannelInfo : IDigitalChannelInfo
     {
         /// <summary>
         /// Gets the minimum frequency that the underlying PWM generator is 

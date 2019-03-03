@@ -4,7 +4,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for analog communication channels.
     /// </summary>
-    public interface IAnalogChannel : IChannel
+    public interface IAnalogChannelInfo : IChannelInfo
     {
         byte Precision { get; }
     }

@@ -9,17 +9,17 @@ namespace Meadow.Hardware
     {
         public SignalType SignalType => SignalType.Analog;
 
-        public IAnalogChannel ChannelInfo
+        public IAnalogChannelInfo ChannelInfo
         {
             get => _channelinfo;
         }
-        protected IAnalogChannel _channelinfo;
+        protected IAnalogChannelInfo _channelinfo;
 
         public abstract PortDirectionType Direction { get; }
 
-        public IAnalogChannel _channelInfo => throw new NotImplementedException();
+        public IAnalogChannelInfo _channelInfo => throw new NotImplementedException();
 
-        protected AnalogPortBase(IAnalogChannel channelInfo)
+        protected AnalogPortBase(IAnalogChannelInfo channelInfo)
         {
             _channelinfo = channelInfo;
         }

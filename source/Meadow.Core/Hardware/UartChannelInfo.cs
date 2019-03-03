@@ -1,13 +1,12 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    //TODO: what else should this have? allowed speeds?
-    public class I2cChannel : DigitalChannelBase
+    public class UartChannelInfo : DigitalChannelIInfoBase, ISpiChannelInfo
     {
-        public I2cChannelFunctionType ChannelFunction { get; protected set; }
+        public SerialDirectionType SerialDirection { get; protected set; }
 
-        public I2cChannel(string name,
-            I2cChannelFunctionType channelFunction,
+        public UartChannelInfo(string name,
+            SerialDirectionType serialDirection,
             bool pullDownCapable = false,
             bool pullUpCapable = false)
             : base(
@@ -18,13 +17,7 @@ namespace Meadow.Hardware
                 pullDownCapable: pullDownCapable,
                 pullUpCapable: pullUpCapable) //TODO: switch to C# 7.2+ to get rid of trailing names
         {
-            this.ChannelFunction = channelFunction;
+            this.SerialDirection = serialDirection;
         }
-    }
-
-    public enum I2cChannelFunctionType
-    { 
-        Data,
-        Clock
     }
 }

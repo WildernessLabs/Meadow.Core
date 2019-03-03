@@ -7,7 +7,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalOutputPort : DigitalOutputPortBase, IDisposable
     {
-        protected IDigitalPin _pin;
+        protected IPin _pin;
         protected bool _disposed;
 
         public override bool InitialState => base._initialState;
@@ -33,7 +33,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) 
+        public DigitalOutputPort(IPin pin, bool initialState = false) 
             : base(pin, initialState)
         {
             // attempt to reserve

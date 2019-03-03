@@ -4,7 +4,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for a GPIO channel that supports digital communications.
     /// </summary>
-    public interface IDigitalChannel : IChannel
+    public interface IDigitalChannelInfo : IChannelInfo
     {
         /// <summary>
         /// Whether or not the channel is capable of reading input.

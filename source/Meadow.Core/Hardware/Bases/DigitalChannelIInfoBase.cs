@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class DigitalChannelBase : ChannelBase, IDigitalChannel
+    public class DigitalChannelIInfoBase : ChannelInfoBase, IDigitalChannelInfo
     {
         public bool InputCapable { get; protected set; }
         public bool OutputCapable { get; protected set; } // TODO: do we need IDigitalOutputChannel?
@@ -9,7 +9,7 @@ namespace Meadow.Hardware
         public bool PullDownCapable { get; protected set; }
         public bool PullUpCapable { get; protected set; }
 
-        protected DigitalChannelBase(
+        protected DigitalChannelIInfoBase(
             string name,
             bool inputCapable,
             bool outputCapable,
