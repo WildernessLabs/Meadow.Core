@@ -43,7 +43,7 @@ namespace Meadow.Devices
         }
 
 
-        //public IPort<C> CreatePort<P>(P portConfig) where P : IPortConfig {}
+        //public C CreatePort<C>(P portConfig) where P : IPortConfig, where C : IPort {}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin, 
