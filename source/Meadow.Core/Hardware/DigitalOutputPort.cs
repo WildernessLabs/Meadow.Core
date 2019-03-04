@@ -10,6 +10,8 @@ namespace Meadow.Hardware
     {
         //public override bool InitialState => base._initialState;
 
+        protected IGPIOManager GpioController { get; set; }
+
         public override bool State 
         {
             get => _state;
@@ -32,9 +34,14 @@ namespace Meadow.Hardware
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
         protected DigitalOutputPort(
-            IPin pin, IDigitalChannelInfo channel, bool initialState) 
+            IPin pin,
+            IGPIOManager gpioController,
+            IDigitalChannelInfo channel, 
+            bool initialState) 
             : base(pin, channel, initialState)
         {
+            this.GpioController = gpioController;
+
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
             if (success.Item1)
@@ -51,12 +58,22 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static DigitalOutputPort From(IPin pin, bool initialState = false)
+        /// <summary>
+        /// From the specified pin and initialState.
+        /// </summary>
+        /// <returns>The from.</returns>
+        /// <param name="pin">Pin.</param>
+        /// <param name="initialState">If set to <c>true</c> initial state.</param>
+        internal static DigitalOutputPort From(
+            IPin pin,
+            IGPIOManager gpioController,
+            bool initialState = false
+            )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
             if(chan != null) {
                 //TODO: need other checks here.
-                return new DigitalOutputPort(pin, chan, initialState);
+                return new DigitalOutputPort(pin, gpioController, chan, initialState);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }

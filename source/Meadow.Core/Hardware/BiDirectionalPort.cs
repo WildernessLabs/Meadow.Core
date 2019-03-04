@@ -9,6 +9,8 @@ namespace Meadow.Hardware
     /// </summary>
     public class BiDirectionalPort : BiDirectionalPortBase
     {
+        protected IGPIOManager GpioController { get; set; }
+
         public override PortDirectionType Direction {
             get;
             set; // TODO: shouldn't the direction logic go here?
@@ -17,6 +19,7 @@ namespace Meadow.Hardware
 
         protected BiDirectionalPort(
             IPin pin,
+            IGPIOManager gpioController,
             IDigitalChannelInfo channel,
             bool initialState = false, 
             bool glitchFilter = false, 
@@ -40,6 +43,7 @@ namespace Meadow.Hardware
 
         public static BiDirectionalPort From(
             IPin pin,
+            IGPIOManager gpioController,
             bool initialState = false,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled,
@@ -48,7 +52,7 @@ namespace Meadow.Hardware
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
             if (chan != null) {
                 //TODO: need other checks here.
-                return new BiDirectionalPort(pin, chan, initialState, glitchFilter, resistorMode, initialDirection);
+                return new BiDirectionalPort(pin, gpioController, chan, initialState, glitchFilter, resistorMode, initialDirection);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }

@@ -21,7 +21,7 @@ namespace Meadow.Devices
         public new F7MicroPinDefinitions Pins { get; protected set; }
         //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
 
-        internal IGPIOManager GPIOManager { get; private set; }
+        internal IGPIOManager GpioController { get; private set; }
 
         // private static
         static F7Micro() { }
@@ -35,28 +35,28 @@ namespace Meadow.Devices
             //    new WiFiAdapter()
             //};
 
-            this.GPIOManager = new F7GPIOManager();
-            this.GPIOManager.Initialize();
+            this.GpioController = new F7GPIOManager();
+            this.GpioController.Initialize();
 
             // 
             this.Pins = new F7MicroPinDefinitions();
         }
 
-        public DigitalOutputPort CreateDigitalOutputPort(
+        public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin, 
             bool initialState = false)
         {
-            return DigitalOutputPort.From(pin, initialState);
+            return DigitalOutputPort.From(pin, this.GpioController, initialState);
         }
 
-        public DigitalInputPort CreateDigitalInputPort(
+        public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
             bool interruptEnabled = true,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled
             )
         {
-            return DigitalInputPort.From(pin, interruptEnabled, glitchFilter, resistorMode);
+            return DigitalInputPort.From(pin, this.GpioController, interruptEnabled, glitchFilter, resistorMode);
         }
     }
 

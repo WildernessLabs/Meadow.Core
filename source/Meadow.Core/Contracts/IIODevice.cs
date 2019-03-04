@@ -1,4 +1,6 @@
-﻿namespace Meadow
+﻿using Meadow.Hardware;
+
+namespace Meadow
 {
     /// <summary>
     /// Contract for Meadow devices.
@@ -17,5 +19,20 @@
         /// Gets the GPIO Manager.
         /// </summary>
         //IGPIOManager GPIOManager { get; }
+
+        // generic?
+        //IPort<C> CreatePort<P>(P portConfig); 
+
+        // TODO: consider specializing IIODevice
+        IDigitalOutputPort CreateDigitalOutputPort(
+            IPin pin,bool initialState = false);
+
+        IDigitalInputPort CreateDigitalInputPort(
+            IPin pin,
+            bool interruptEnabled = true,
+            bool glitchFilter = false,
+            ResistorMode resistorMode = ResistorMode.Disabled
+            );
+
     }
 }
