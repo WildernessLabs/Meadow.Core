@@ -9,7 +9,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class BiDirectionalPort : BiDirectionalPortBase
     {
-        protected IGPIOManager GpioController { get; set; }
+        protected IGpioController GpioController { get; set; }
 
         public override PortDirectionType Direction {
             get;
@@ -19,7 +19,7 @@ namespace Meadow.Hardware
 
         protected BiDirectionalPort(
             IPin pin,
-            IGPIOManager gpioController,
+            IGpioController gpioController,
             IDigitalChannelInfo channel,
             bool initialState = false, 
             bool glitchFilter = false, 
@@ -43,7 +43,7 @@ namespace Meadow.Hardware
 
         public static BiDirectionalPort From(
             IPin pin,
-            IGPIOManager gpioController,
+            IGpioController gpioController,
             bool initialState = false,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled,

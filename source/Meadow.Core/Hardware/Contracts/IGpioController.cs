@@ -1,11 +1,11 @@
 ﻿using Meadow.Hardware;
 
-namespace Meadow
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Defines the GPIO Manager
     /// </summary>
-    public interface IGPIOManager
+    public interface IGpioController
     {
         /// <summary>
         /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).

@@ -21,7 +21,7 @@ namespace Meadow.Devices
         public new F7MicroPinDefinitions Pins { get; protected set; }
         //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
 
-        internal IGPIOManager GpioController { get; private set; }
+        internal IGpioController GpioController { get; private set; }
 
         // private static
         static F7Micro() { }

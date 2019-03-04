@@ -10,7 +10,7 @@ namespace Meadow.Hardware
     {
         //public override bool InitialState => base._initialState;
 
-        protected IGPIOManager GpioController { get; set; }
+        protected IGpioController GpioController { get; set; }
 
         public override bool State 
         {
@@ -35,7 +35,7 @@ namespace Meadow.Hardware
         /// <param name="initialState"></param>
         protected DigitalOutputPort(
             IPin pin,
-            IGPIOManager gpioController,
+            IGpioController gpioController,
             IDigitalChannelInfo channel, 
             bool initialState) 
             : base(pin, channel, initialState)
@@ -66,7 +66,7 @@ namespace Meadow.Hardware
         /// <param name="initialState">If set to <c>true</c> initial state.</param>
         internal static DigitalOutputPort From(
             IPin pin,
-            IGPIOManager gpioController,
+            IGpioController gpioController,
             bool initialState = false
             )
         {

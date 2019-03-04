@@ -8,14 +8,14 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
-        protected IGPIOManager GpioController { get; set; }
+        protected IGpioController GpioController { get; set; }
 
         public bool GlitchFilter { get; set; }
         public ResistorMode Resistor { get; set; }
 
         protected DigitalInputPort(
             IPin pin,
-            IGPIOManager gpioController,
+            IGpioController gpioController,
             IDigitalChannelInfo channel,
             bool interruptEnabled = true,
             bool glitchFilter = false,
@@ -40,7 +40,7 @@ namespace Meadow.Hardware
 
         public static DigitalInputPort From(
             IPin pin,
-            IGPIOManager gpioController,
+            IGpioController gpioController,
             bool interruptEnabled = true,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled

@@ -1,6 +1,5 @@
-﻿using Meadow.Hardware;
-
-namespace Meadow
+﻿
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Contract for Meadow devices.

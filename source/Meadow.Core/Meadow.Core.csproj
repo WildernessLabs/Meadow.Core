@@ -64,8 +64,6 @@
     <Compile Include="WakeUpOptions.cs" />
     <Compile Include="Bases\AppBase.cs" />
     <Compile Include="Contracts\IApp.cs" />
-    <Compile Include="Contracts\IIODevice.cs" />
-    <Compile Include="Contracts\IGPIOManager.cs" />
     <Compile Include="Devices\F7GPIOManager.cs" />
     <Compile Include="Devices\F7Micro.cs" />
     <Compile Include="Enums\ByteOrder.cs" />
@@ -145,7 +143,6 @@
     <Compile Include="Interop\Interop.open.cs" />
     <Compile Include="Utilities\BitHelpers.cs" />
     <Compile Include="Interop\Interop.timespec.cs" />
-    <Compile Include="Contracts\IPinDefinitions.cs" />
     <Compile Include="Peripherals\Leds\ILed.cs" />
     <Compile Include="Hardware\Contracts\IChannelInfo.cs" />
     <Compile Include="Hardware\Bases\ChannelInfoBase.cs" />
@@ -164,6 +161,9 @@
     <Compile Include="Hardware\Contracts\ISerialCommunicationChannelInfo.cs" />
     <Compile Include="Hardware\Bases\PortBase.cs" />
     <Compile Include="Devices\Definitions\F7MicroPinDefinitions.cs" />
+    <Compile Include="Hardware\Contracts\IGpioController.cs" />
+    <Compile Include="Hardware\Contracts\IPinDefinitions.cs" />
+    <Compile Include="Hardware\Contracts\IIODevice.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

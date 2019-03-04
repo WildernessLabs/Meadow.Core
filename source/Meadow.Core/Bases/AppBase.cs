@@ -1,4 +1,6 @@
 ﻿using System;
+using Meadow.Hardware;
+
 namespace Meadow
 {
     /// <summary>
