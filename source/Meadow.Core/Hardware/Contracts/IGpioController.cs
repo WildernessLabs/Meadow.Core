@@ -2,6 +2,11 @@
 
 namespace Meadow.Hardware
 {
+    // TODO: Consider renaming to match MCP23008 driver: https://github.com/WildernessLabs/Netduino.Foundation/blob/master/Source/Peripheral_Libs/ICs.IOExpanders.MCP23008/Driver/MCP23008.cs
+    // Write(IPin pin, bool value)
+    // Write(IPin[] pin, byte value)? think about this. need 
+    // Read(pin)
+
     /// <summary>
     /// Defines the GPIO Manager
     /// </summary>
