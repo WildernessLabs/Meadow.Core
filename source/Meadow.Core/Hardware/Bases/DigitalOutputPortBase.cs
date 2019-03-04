@@ -11,7 +11,7 @@
         /// </summary>
         public bool InitialState { get; protected set; }
 
-        public override PortDirectionType Direction => PortDirectionType.Output;
+        public PortDirectionType Direction => PortDirectionType.Output;
 
         public abstract bool State { get; set; }
 

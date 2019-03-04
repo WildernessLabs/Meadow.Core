@@ -31,7 +31,8 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        protected DigitalOutputPort(IPin pin, IDigitalChannelInfo channel, bool initialState) 
+        protected DigitalOutputPort(
+            IPin pin, IDigitalChannelInfo channel, bool initialState) 
             : base(pin, channel, initialState)
         {
             // attempt to reserve
@@ -50,7 +51,7 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static DigitalOutputPort From(IPin pin, bool initialState)
+        internal static DigitalOutputPort From(IPin pin, bool initialState = false)
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
             if(chan != null) {

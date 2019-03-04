@@ -42,9 +42,21 @@ namespace Meadow.Devices
             this.Pins = new F7MicroPinDefinitions();
         }
 
-        public DigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false)
+        public DigitalOutputPort CreateDigitalOutputPort(
+            IPin pin, 
+            bool initialState = false)
         {
             return DigitalOutputPort.From(pin, initialState);
+        }
+
+        public DigitalInputPort CreateDigitalInputPort(
+            IPin pin,
+            bool interruptEnabled = true,
+            bool glitchFilter = false,
+            ResistorMode resistorMode = ResistorMode.Disabled
+            )
+        {
+            return DigitalInputPort.From(pin, interruptEnabled, glitchFilter, resistorMode);
         }
     }
 

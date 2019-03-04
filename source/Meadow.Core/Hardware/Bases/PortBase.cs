@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     {
         protected bool disposed = false;
 
-        public abstract PortDirectionType Direction { get; }
+        //public abstract PortDirectionType Direction { get; }
         public abstract SignalType SignalType { get; }
 
         public C Channel { get; }

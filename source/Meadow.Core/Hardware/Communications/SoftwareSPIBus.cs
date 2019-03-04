@@ -74,10 +74,10 @@ namespace Meadow.Hardware.Communications
 
             _phase = (cpha == 1);
             _polarity = (cpol == 1);
-            _mosi = new DigitalOutputPort(mosi, false);
-            _miso = miso == null ? null : new DigitalInputPort(miso, false, ResistorMode.Disabled);
-            _clock = new DigitalOutputPort(clock, _polarity);
-            _chipSelect = chipSelect == null ? null : new DigitalOutputPort(chipSelect, true);
+            _mosi = DigitalOutputPort.From(mosi, false);
+            _miso = miso == null ? null : DigitalInputPort.From(miso, true, false, ResistorMode.Disabled);
+            _clock = DigitalOutputPort.From(clock, _polarity);
+            _chipSelect = chipSelect == null ? null : DigitalOutputPort.From(chipSelect, true);
         }
 
         #endregion Constructors

@@ -18,7 +18,7 @@ namespace Meadow.Hardware
             IPin pin,
             IDigitalChannelInfo channel,
             bool interruptEnabled = true,
-            bool glitchFilter = false, 
+            bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled
             ) : base(pin, channel, interruptEnabled )
         {
@@ -38,7 +38,7 @@ namespace Meadow.Hardware
             //}
         }
 
-        public static DigitalInputPort FromPin(
+        public static DigitalInputPort From(
             IPin pin,
             bool interruptEnabled = true,
             bool glitchFilter = false,
@@ -62,11 +62,11 @@ namespace Meadow.Hardware
             //TODO: implement full pattern
         }
 
-        public bool State
+        public override bool State
         {
             //get => _pin.GPIOManager.GetDiscrete(_pin);
             get => false;
-            protected set { throw new Exception(); }
+            //protected set { throw new Exception(); }
         }
 
     }
