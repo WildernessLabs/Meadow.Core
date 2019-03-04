@@ -10,7 +10,7 @@ namespace Meadow.Hardware
     {
         //public override bool InitialState => base._initialState;
 
-        protected IGpioController GpioController { get; set; }
+        protected IIOController GpioController { get; set; }
 
         public override bool State 
         {
@@ -35,19 +35,19 @@ namespace Meadow.Hardware
         /// <param name="initialState"></param>
         protected DigitalOutputPort(
             IPin pin,
-            IGpioController gpioController,
+            IIOController ioController,
             IDigitalChannelInfo channel, 
             bool initialState) 
             : base(pin, channel, initialState)
         {
-            this.GpioController = gpioController;
+            this.GpioController = ioController;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
             if (success.Item1)
             {
-                //// make sure the pin is configured as a digital output with the proper state
-                //pin.GPIOManager.ConfigureOutput(pin, initialState);
+                // make sure the pin is configured as a digital output with the proper state
+                ioController.ConfigureOutput(pin, initialState);
 
                 //// initialize the output state
                 //pin.GPIOManager.SetDiscrete(pin, initialState);
@@ -66,14 +66,14 @@ namespace Meadow.Hardware
         /// <param name="initialState">If set to <c>true</c> initial state.</param>
         internal static DigitalOutputPort From(
             IPin pin,
-            IGpioController gpioController,
+            IIOController ioCongtroller,
             bool initialState = false
             )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
             if(chan != null) {
                 //TODO: need other checks here.
-                return new DigitalOutputPort(pin, gpioController, chan, initialState);
+                return new DigitalOutputPort(pin, ioCongtroller, chan, initialState);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }

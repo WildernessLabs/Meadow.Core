@@ -161,7 +161,7 @@
     <Compile Include="Hardware\Contracts\ISerialCommunicationChannelInfo.cs" />
     <Compile Include="Hardware\Bases\PortBase.cs" />
     <Compile Include="Devices\Definitions\F7MicroPinDefinitions.cs" />
-    <Compile Include="Hardware\Contracts\IGpioController.cs" />
+    <Compile Include="Hardware\Contracts\IIOController.cs" />
     <Compile Include="Hardware\Contracts\IPinDefinitions.cs" />
     <Compile Include="Hardware\Contracts\IIODevice.cs" />
   </ItemGroup>

@@ -8,9 +8,9 @@ namespace HelloLED
 {
     class LEDApp : AppBase<F7Micro, LEDApp>
     {
-        DigitalOutputPort _redLED;
-        DigitalOutputPort _blueLED;
-        DigitalOutputPort _greenLED;
+        IDigitalOutputPort _redLED;
+        IDigitalOutputPort _blueLED;
+        IDigitalOutputPort _greenLED;
         //private DigitalOutputPort _d00;
 
         public void Run()

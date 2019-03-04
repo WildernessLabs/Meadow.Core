@@ -6,7 +6,7 @@ using static Meadow.Core.Interop.Interop.Nuttx;
 
 namespace Meadow.Devices
 {
-    public class F7GPIOManager : IGpioController
+    public class F7GPIOManager : IIOController
     {
         private const string GPIODriverName = "/dev/gpio";
 
@@ -77,7 +77,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pin">Pin.</param>
         /// <param name="value">If set to <c>true</c> value.</param>
-        void IGpioController.SetDiscrete(IPin pin, bool value)
+        void IIOController.SetDiscrete(IPin pin, bool value)
         {
             // generate a PinState for the desired pin and value
             var state = new GPIOPinState();

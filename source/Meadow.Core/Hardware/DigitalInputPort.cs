@@ -8,14 +8,14 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
-        protected IGpioController GpioController { get; set; }
+        protected IIOController GpioController { get; set; }
 
         public bool GlitchFilter { get; set; }
         public ResistorMode Resistor { get; set; }
 
         protected DigitalInputPort(
             IPin pin,
-            IGpioController gpioController,
+            IIOController ioController,
             IDigitalChannelInfo channel,
             bool interruptEnabled = true,
             bool glitchFilter = false,
@@ -40,7 +40,7 @@ namespace Meadow.Hardware
 
         public static DigitalInputPort From(
             IPin pin,
-            IGpioController gpioController,
+            IIOController ioController,
             bool interruptEnabled = true,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled
@@ -52,7 +52,7 @@ namespace Meadow.Hardware
                 if(interruptEnabled && (!chan.InterrruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                return new DigitalInputPort(pin, gpioController, chan, interruptEnabled, glitchFilter, resistorMode);
+                return new DigitalInputPort(pin, ioController, chan, interruptEnabled, glitchFilter, resistorMode);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
