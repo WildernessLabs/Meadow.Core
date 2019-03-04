@@ -14,22 +14,22 @@ namespace Meadow.Hardware.Communications
         /// <summary>
         /// MOSI output port.
         /// </summary>
-        private DigitalOutputPort _mosi;
+        private IDigitalOutputPort _mosi;
 
         /// <summary>
         /// MISO Input port.
         /// </summary>
-        private DigitalInputPort _miso;
+        private IDigitalInputPort _miso;
 
         /// <summary>
         /// Clock output port.
         /// </summary>
-        private DigitalOutputPort _clock;
+        private IDigitalOutputPort _clock;
 
         /// <summary>
         /// Chip select port.
         /// </summary>
-        private DigitalOutputPort _chipSelect;
+        private IDigitalOutputPort _chipSelect;
 
         /// <summary>
         /// Boolean representation of the clock polarity.
@@ -61,7 +61,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="chipSelect">Chip select pin.</param>
         /// <param name="cpha">Clock phase (0 or 1, default is 0).</param>
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
-        public SoftwareSPIBus(IPin mosi, IPin miso, IPin clock, IPin chipSelect, byte cpha = 0, byte cpol = 0)
+        public SoftwareSPIBus(IIODevice device, IPin mosi, IPin miso, IPin clock, IPin chipSelect, byte cpha = 0, byte cpol = 0)
         {
             if (mosi == null)
             {
@@ -74,10 +74,10 @@ namespace Meadow.Hardware.Communications
 
             _phase = (cpha == 1);
             _polarity = (cpol == 1);
-            _mosi = DigitalOutputPort.From(mosi, false);
-            _miso = miso == null ? null : DigitalInputPort.From(miso, true, false, ResistorMode.Disabled);
-            _clock = DigitalOutputPort.From(clock, _polarity);
-            _chipSelect = chipSelect == null ? null : DigitalOutputPort.From(chipSelect, true);
+            _mosi = device.CreateDigitalOutputPort(mosi, false);
+            _miso = miso == null ? null : device.CreateDigitalInputPort(miso, true, false, ResistorMode.Disabled);
+            _clock = device.CreateDigitalOutputPort(clock, _polarity);
+            _chipSelect = chipSelect == null ? null : device.CreateDigitalOutputPort(chipSelect, true);
         }
 
         #endregion Constructors
