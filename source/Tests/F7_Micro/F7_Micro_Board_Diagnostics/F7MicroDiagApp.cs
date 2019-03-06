@@ -37,22 +37,22 @@ namespace F7_Micro_Board_Diagnostics
 
             // all the digitio IO pins to test
             List<IBiDirectionalPort> testDigitalPorts = new List<IBiDirectionalPort> {
-                new BiDirectionalPort(Device.Pins.D00, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D01, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D02, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D03, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D04, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D05, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D06, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D07, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D08, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D09, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D10, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D11, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D12, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D13, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D14, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D15, resistorMode : ResistorMode.PullDown)
+                Device.CreateBiDirectionalPort(Device.Pins.D00, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D01, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D02, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D03, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D04, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D05, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D06, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D07, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D08, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D09, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D10, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D11, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D12, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D13, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D14, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D15, resistorMode : ResistorMode.PullDown)
             };
 
             // ports that are connected together

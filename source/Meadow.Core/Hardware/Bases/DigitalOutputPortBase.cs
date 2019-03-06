@@ -11,15 +11,12 @@
         /// </summary>
         public bool InitialState { get; protected set; }
 
-        public PortDirectionType Direction => PortDirectionType.Output;
-
         public abstract bool State { get; set; }
 
         protected DigitalOutputPortBase(IPin pin, IDigitalChannelInfo channel, bool initialState) 
             : base(pin, channel)
         {
             this.InitialState = initialState;
-            //_state = initialState;
         }
     }
 }

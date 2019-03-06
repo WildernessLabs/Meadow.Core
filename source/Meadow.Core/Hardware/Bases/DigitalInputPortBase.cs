@@ -19,7 +19,6 @@ namespace Meadow.Hardware
         /// </summary>
         /// <value><c>true</c> if interrupt enabled; otherwise, <c>false</c>.</value>
         public bool InterruptEnabled { get; protected set; }
-        public PortDirectionType Direction => PortDirectionType.Output;
 
         public abstract bool State { get; }
 

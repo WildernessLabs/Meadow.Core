@@ -8,8 +8,6 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalOutputPort : DigitalOutputPortBase
     {
-        //public override bool InitialState => base._initialState;
-
         protected IIOController IOController { get; set; }
 
         /// <summary>

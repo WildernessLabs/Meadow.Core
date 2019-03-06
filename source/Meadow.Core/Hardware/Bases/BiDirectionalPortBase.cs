@@ -12,8 +12,6 @@ namespace Meadow.Hardware
         // internals
         protected bool _currentState;
         protected bool _interruptEnabled;
-        //protected PortDirectionType _currentDirection = PortDirectionType.Input;
-
 
         public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
@@ -30,6 +28,7 @@ namespace Meadow.Hardware
         {
             InitialState = initialState;
             Resistor = resistorMode;
+            Direction = initialDirection;
         }
 
         public override void Dispose()
@@ -52,10 +51,5 @@ namespace Meadow.Hardware
 
         public abstract bool State { get; set; }
         public abstract PortDirectionType Direction { get; set; }
-
-        // TODO: WAT??
-        PortDirectionType IDigitalInputPort.Direction => throw new NotImplementedException();
-
-        PortDirectionType IDigitalOutputPort.Direction => throw new NotImplementedException();
     }
 }
