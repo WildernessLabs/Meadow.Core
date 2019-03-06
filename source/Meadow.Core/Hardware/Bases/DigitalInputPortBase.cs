@@ -7,8 +7,17 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort
     {
+        /// <summary>
+        /// Occurs when the state is changed. To enable this, the `interruptEnabled`
+        /// parameter must be `true`.
+        /// </summary>
         public event EventHandler<PortEventArgs> Changed = delegate { };
 
+        /// <summary>
+        /// Gets or sets a value indicating whether or not this port will raise
+        /// events on state change.
+        /// </summary>
+        /// <value><c>true</c> if interrupt enabled; otherwise, <c>false</c>.</value>
         public bool InterruptEnabled { get; protected set; }
         public PortDirectionType Direction => PortDirectionType.Output;
 
@@ -18,7 +27,6 @@ namespace Meadow.Hardware
             : base(pin, channel)
         {
             this.InterruptEnabled = interruptEnabled;
-
         }
 
         protected void RaiseChanged(bool value)

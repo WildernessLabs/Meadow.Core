@@ -10,23 +10,21 @@ namespace Meadow.Hardware
     {
         //public override bool InitialState => base._initialState;
 
-        protected IIOController GpioController { get; set; }
+        protected IIOController IOController { get; set; }
 
+        /// <summary>
+        /// Gets or sets the state of the port.
+        /// </summary>
+        /// <value><c>true</c> for `HIGH`; otherwise, <c>false</c>, for `LOW`.</value>
         public override bool State 
         {
             get => _state;
             set
             {
-                //_pin.GPIOManager.SetDiscrete(_pin, value);
+                IOController.SetDiscrete(base.Pin, value);
                 _state = value;
             }
         } protected bool _state;
-
-        //// hidden constructors
-        //protected DigitalOutputPort() : base(false)
-        //{
-        //    //nothing goes here
-        //}
 
         /// <summary>
         /// Creates a new DigitalOutputPort from a pin.
@@ -40,7 +38,7 @@ namespace Meadow.Hardware
             bool initialState) 
             : base(pin, channel, initialState)
         {
-            this.GpioController = ioController;
+            this.IOController = ioController;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
@@ -49,8 +47,8 @@ namespace Meadow.Hardware
                 // make sure the pin is configured as a digital output with the proper state
                 ioController.ConfigureOutput(pin, initialState);
 
-                //// initialize the output state
-                //pin.GPIOManager.SetDiscrete(pin, initialState);
+                // initialize the output state
+                IOController.SetDiscrete(pin, initialState);
             }
             else
             {
@@ -97,6 +95,7 @@ namespace Meadow.Hardware
             {
                 if (disposing)
                 {
+                    //TODO: @CTACKE
                     //bool success = DeviceChannelManager.ReleasePin(_pin);
                 }
                 disposed = true;
