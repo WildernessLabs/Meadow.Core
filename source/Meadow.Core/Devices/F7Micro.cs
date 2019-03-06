@@ -18,7 +18,7 @@ namespace Meadow.Devices
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public new F7MicroPinDefinitions Pins { get; protected set; }
+        public F7MicroPinDefinitions Pins { get; protected set; }
         //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
 
         internal IIOController IoController { get; private set; }
@@ -60,6 +60,16 @@ namespace Meadow.Devices
             )
         {
             return DigitalInputPort.From(pin, this.IoController, interruptEnabled, glitchFilter, resistorMode);
+        }
+
+        public IBiDirectionalPort CreateBiDirectionalPort(
+            IPin pin,
+            bool initialState = false,
+            bool glitchFilter = false,
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            PortDirectionType initialDirection = PortDirectionType.Input)
+        {
+            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, resistorMode, initialDirection);
         }
     }
 
