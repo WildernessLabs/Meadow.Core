@@ -74,10 +74,9 @@ namespace F7_Micro_Board_Diagnostics
                 foreach(var port in testDigitalPorts) {
                     // turn them all input and pulled down, unless it's the high test pin
                     if (port == testDigitalPorts[i]) {
-                        // TODO: why can't i change direction?
-                        //port.Direction = PortDirectionType.Input;
+                        port.Direction = PortDirectionType.Input;
                     } else {
-                        //port.Direction = PortDirectionType.Output;
+                        port.Direction = PortDirectionType.Output;
                         port.State = true;
                     }
                 }
@@ -102,19 +101,19 @@ namespace F7_Micro_Board_Diagnostics
                             // FAILURE: if this port is high, something is wrong.
                             success = portSuccess = false;
                             portTestResults.Add(new PortTestResult("", false)); // TODO: Name
-                            Debug.WriteLine("Port Failure: [need .name property], should be low, but is HIGH. Short detected.");
+                            Debug.WriteLine("Port failure on pin: " + port.Pin.Name + ", channel: " + port.Channel.Name + "; should be LOW, but is HIGH. Short detected.");
                         }
                     } // if it's the port on the other 
                     else if (port != testDigitalPorts[i] && port == pairedEndpointPort) { 
                         if (!port.State) {
                             success = portSuccess = false;
                             portTestResults.Add(new PortTestResult("", false)); // TODO: Name
-                            Debug.WriteLine("Port Failure: [name] pair should be HIGH, but it's LOW. Endpoint port read failure.");
+                            Debug.WriteLine("Port failure on pin: " + port.Pin.Name + ", channel: " + port.Channel.Name + ";  [name] pair should be HIGH, but it's LOW. Endpoint port read failure.");
                         }
                     }
 
                     if (portSuccess) {
-                        Debug.WriteLine("port [name] test success.");
+                        Debug.WriteLine("port " + port.Pin.Name + ", channel: " + port.Channel.Name + " test success.");
                     }
                 }
             }
