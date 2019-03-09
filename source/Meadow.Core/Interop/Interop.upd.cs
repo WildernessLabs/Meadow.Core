@@ -26,6 +26,22 @@ namespace Meadow.Core.Interop
             public const int STM32_GPIO_IDR_OFFSET = 0x10;
             public const int STM32_GPIO_BSRR_OFFSET = 0x18;
 
+            public const int RCC_BASE = 0x40023800;
+            public const int STM32_RCC_APB2RSTR_OFFSET = 0x0024;
+            public const int STM32_RCC_APB2ENR_OFFSET = 0x0044;
+
+            public const int MEADOW_ADC1_BASE = 0x40012000;
+            public const int ADC_SR_OFFSET = 0x00;
+            public const int ADC_CR1_OFFSET = 0x04;
+            public const int ADC_CR2_OFFSET = 0x08;
+            public const int ADC_SMPR1_OFFSET = 0x0c;
+            public const int ADC_SMPR2_OFFSET = 0x10;
+            public const int ADC_SQR1_OFFSET = 0x2c;
+            public const int ADC_SQR2_OFFSET = 0x30;
+            public const int ADC_SQR3_OFFSET = 0x34;
+            public const int ADC_DR_OFFSET = 0x4c;
+            public const int ADC_CCR_OFFSET = 0x0304;
+
             public enum UpdIoctlFn
             {
                 SetRegister = 1,

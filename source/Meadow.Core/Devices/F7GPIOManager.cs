@@ -262,6 +262,156 @@ namespace Meadow.Devices
             return ConfigureGpio(port, pin, STM32GpioMode.Output, resistor, speed, type, initialState, false);
         }
 
+        private bool ConfigureADC(STM32GpioPort port, int pin)
+        {
+            // set up the pin for analog
+            ConfigureGpio(port, pin, STM32GpioMode.Analog, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_2MHz, STM32OutputType.PushPull, false, false);
+
+            // TODO: if it was non-analog, do we need to adjust any of the ADC registers?
+
+            return true;
+        }
+
+        private bool InitializeADC()
+        {
+            // do the grunt work to set up the ADC itself
+
+            // enable the ADC1 clock - all Meadow ADCs are in ADC1
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.RCC_BASE + Interop.STM32.STM32_RCC_APB2ENR_OFFSET, 0, (1u << 8));
+
+            // reset the ADC RCC clock - set the reset bit
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.RCC_BASE + Interop.STM32.STM32_RCC_APB2RSTR_OFFSET, 0, (1u << 8));
+            // clear the reset bit
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.RCC_BASE + Interop.STM32.STM32_RCC_APB2RSTR_OFFSET, (1u << 8), 0);
+
+            // clear the SR status register
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SR_OFFSET,
+                0x1f, 0);
+
+            // clear the CR1 control register.  This translates to:
+            //  Disable all interrupts
+            //  12-bit resolution
+            //  Watchdog disabled
+            //  Discontinuous mode disabled
+            //  Auto conversion disabled
+            //  scan mode disabled
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR1_OFFSET,
+                0x7c0ffffF, 0);
+
+            // Set up the CR2 control register.  This translates to:
+            //  external trigger disabled
+            //  data align right
+            //  set EOC at the end of each conversion
+            //  DMA disabled
+            //  single conversion mode
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
+                0x7f7f0b03, (1 << 10));
+
+            // Set up the SMPR1 sample time register.  This translates to:
+            //  112 samle cycles for channels 10 & 11 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SMPR1_OFFSET,
+                0x7ffffc0, 0x2d);
+
+            // Set up the SMPR2 sample time register.  This translates to:
+            //  112 samle cycles for channels 3 & 7 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SMPR2_OFFSET,
+                0x3f1ff1ff, 0xa00a00);
+
+            // Set up the SQR1 sequence register.  This translates to:
+            //  One (1) conversion 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR1_OFFSET,
+                0x00ffffff, 0);
+
+            // Set up the SQR2 sequence register.  This translates to:
+            //  no conversions 7-12 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR2_OFFSET,
+                0x03fffffff, 0);
+
+
+            // Set up the SQR3 sequence register.  This translates to:
+            //  no conversions 0-6 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
+                0x03fffffff, 0);
+                
+            // Set up the CCR common control register.  This translates to:
+            //  temp sensor disabled
+            //  vBAT disabled
+            //  prescaler PCLK2 / 4
+            //  DMA disabled
+            //  independent ADCs
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
+                0xc0ef1f, (1 << 16));
+                
+            return true;
+        }
+
+        public uint GetAnalog(IPin pin)
+        {
+            var designator = GetPortAndPin(pin);
+            // set up the GPIO
+            ConfigureADC(designator.port, designator.pin);
+
+            // adjust the SQR3 sequence register to tell it which channel to convert
+            // TODO: get this channel based on the pin
+            var channel = 3u;
+
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
+                channel, 0);
+
+            // enable the ADC via the CR2 register's ADON bit
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
+                1, 0);
+
+            // start a conversion via the CR2 SWSTART bit
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
+                1 << 30, 0);
+
+            // poll the status register - wait for conversion complete
+            var ready = false;
+            do
+            {
+                if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET, out uint register_sr))
+                {
+                    ready = (register_sr & (1 << 1)) != 0;
+                }
+                // TODO: we need a timeout here to prevent deadlock if the SR never comes on
+
+                // yield
+                System.Threading.Thread.Sleep(0);
+            } while (!ready);
+
+            // read the data register
+            if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_DR_OFFSET, out uint register_dr))
+            {
+                return register_dr;
+            }
+
+            throw new Exception("Conversion failed");
+        }
+
         private bool ConfigureGpio(IPin pin, STM32GpioMode mode, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type, bool initialState, bool enableInterrupts)
         {
             var designator = GetPortAndPin(pin);
