@@ -224,22 +224,20 @@ namespace Meadow.Hardware.Communications
             for (var index = 0; index < 8; index++)
             {
                 _mosi.State = ((value & mask) > 0);
+                bool data = false;
+                if (!_phase)
+                {
+                    data = _miso.State;
+                }
                 _clock.State = (!clock);
-                bool data;
                 if (_phase)
                 {
-                    _clock.State = (clock);
                     data = _miso.State;
                 }
-                else
-                {
-                    data = _miso.State;
-                    _clock.State = (clock);
-                }
-                result <<= 1;
+                _clock.State = (clock);
                 if (data)
                 {
-                    result |= 0x01;
+                    result |= mask;
                 }
                 mask >>= 1;
             }

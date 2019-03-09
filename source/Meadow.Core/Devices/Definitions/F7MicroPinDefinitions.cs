@@ -257,6 +257,63 @@ namespace Meadow.Devices
                 }
             );
 
+            // ESP_MOSI
+            public readonly IPin ESP_MOSI = new Pin(
+                "ESP_MOSI", "PI3",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PI3"),
+                }
+            );
+            // ESP_MISO
+            public readonly IPin ESP_MISO = new Pin(
+                "ESP_MISO", "PI2",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PI2"),
+                }
+            );
+            // ESP_CLK
+            public readonly IPin ESP_CLK = new Pin(
+                "ESP_CLK", "PD3",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PD3"),
+                }
+            );
+            // ESP_CS
+            public readonly IPin ESP_CS = new Pin(
+                "ESP_CS", "PI0",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PI0"),
+                }
+            );
+            // ESP_BOOT
+            public readonly IPin ESP_BOOT = new Pin(
+                "ESP_BOOT", "PI10",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PI10"),
+                }
+            );
+            // ESP_RST
+            public readonly IPin ESP_RST = new Pin(
+                "ESP_RST", "PF7",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PF7"),
+                }
+            );
+            // ESP_UART_RX
+            public readonly IPin ESP_UART_RX = new Pin(
+                "ESP_UART_RX", "PD2",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PD2"),
+                }
+            );
+            // ESP_UART_TX
+            public readonly IPin ESP_UART_TX = new Pin(
+                "ESP_UART_TX", "PB13",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PB13"),
+                }
+            );
+
             public F7MicroPinDefinitions()
             {
                 // add all our pins to the collection
@@ -284,6 +341,14 @@ namespace Meadow.Devices
                 AllPins.Add(this.OnboardLEDRed);
                 AllPins.Add(this.OnboardLEDGreen);
                 AllPins.Add(this.OnboardLEDBlue);
+                AllPins.Add(this.ESP_MOSI);
+                AllPins.Add(this.ESP_MISO);
+                AllPins.Add(this.ESP_CLK);
+                AllPins.Add(this.ESP_CS);
+                AllPins.Add(this.ESP_BOOT);
+                AllPins.Add(this.ESP_RST);
+                AllPins.Add(this.ESP_UART_RX);
+                AllPins.Add(this.ESP_UART_TX);
 
                 // TODO: no magic strings, also need lookup
                 this.PinGroups.Add("COM1", new IPin[] { this.D12, this.D13 });
