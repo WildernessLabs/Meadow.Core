@@ -88,8 +88,7 @@ namespace Meadow.Hardware
             {
                 if (disposing)
                 {
-                    //TODO: @CTACKE
-                    //bool success = DeviceChannelManager.ReleasePin(_pin);
+                    DeviceChannelManager.ReleasePin(Pin);
                 }
                 disposed = true;
             }

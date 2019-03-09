@@ -73,9 +73,9 @@ namespace Meadow.Devices
             // D03
             // I2C4_SCL, TIM4_CH3, TIM10_CH1, I2C1_SCL, DFSDM_CKIN7, UART5_RX, CAN1_RX, SDMMC2_D4, ETH_MII_TXD3, SDMMC1_D4, DCMI_D6, LCD_B6, EVENTOUT
             public readonly IPin D03 = new Pin(
-                "D03", "PC6",
+                "D03", "PB8",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC6"),
+                    new DigitalChannelInfo("PB8"),
                     new PwmChannelInfo("TIM4_CH3"), // OR TIM10_CH1. Not sure which we're using
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
@@ -202,6 +202,7 @@ namespace Meadow.Devices
             public readonly IPin A00 = new Pin(
                 "A00", "PA4",
                 new List<IChannelInfo> {
+                    new DigitalChannelInfo("PA4"),
                     new AnalogChannelInfo("ADC1_IN4", 12)
                 }
             );
@@ -211,6 +212,7 @@ namespace Meadow.Devices
             public readonly IPin A01 = new Pin(
                 "A01", "PA5",
                 new List<IChannelInfo> {
+                    new DigitalChannelInfo("PA5"),
                     new AnalogChannelInfo("ADC1_IN5", 12)
                 }
             );
@@ -220,6 +222,7 @@ namespace Meadow.Devices
             public readonly IPin A02 = new Pin(
                 "A02", "PA3",
                 new List<IChannelInfo> {
+                    new DigitalChannelInfo("PA3"),
                     new AnalogChannelInfo("ADC1_IN3", 12)
                 }
             );
@@ -229,6 +232,7 @@ namespace Meadow.Devices
             public readonly IPin A03 = new Pin(
                 "A03", "PA7",
                 new List<IChannelInfo> {
+                    new DigitalChannelInfo("PA7"),
                     new AnalogChannelInfo("ADC1_IN7", 12)
                 }
             );
@@ -238,6 +242,7 @@ namespace Meadow.Devices
             public readonly IPin A04 = new Pin(
                 "A04", "PC0",
                 new List<IChannelInfo> {
+                    new DigitalChannelInfo("PC0"),
                     new AnalogChannelInfo("ADC1_IN10", 12)
                 }
             );
@@ -247,6 +252,7 @@ namespace Meadow.Devices
             public readonly IPin A05 = new Pin(
                 "A05", "PC1",
                 new List<IChannelInfo> {
+                    new DigitalChannelInfo("PC1"),
                     new AnalogChannelInfo("ADC1_IN11", 12)
                 }
             );

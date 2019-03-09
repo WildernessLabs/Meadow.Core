@@ -5,8 +5,6 @@
     /// </summary>
     public enum ResistorMode
     {
-        // TODO: what about NONE?
-
         /// <summary>
         /// Internal pull-up/pull-down resistor is disabled.
         /// </summary>

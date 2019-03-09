@@ -15,10 +15,10 @@ namespace HelloLED
 
         public void Run()
         {
-            CreateOutputs();
-            ShowLights();
+//            CreateOutputs();
+//            ShowLights();
 
-            //WalkOutputs();
+            WalkOutputs();
 
             // WatchInputs();
 
@@ -84,64 +84,71 @@ namespace HelloLED
         //    }
         //}
 
-        //public void WalkOutputs()
-        //{
-        //    var p = 0;
+        public void WalkOutputs()
+        {
+            var p = 0;
 
-        //    while (true)
-        //    {
-        //        p = -3;
-        //        TogglePin(Device.Pins.OnboardLEDRed);
-        //        TogglePin(Device.Pins.OnboardLEDBlue);
-        //        TogglePin(Device.Pins.OnboardLEDGreen);
-        //        TogglePin(Device.Pins.D00);
-        //        TogglePin(Device.Pins.D01);
-        //        TogglePin(Device.Pins.D02);
-        //        TogglePin(Device.Pins.D03);
-        //        TogglePin(Device.Pins.D04);
-        //        TogglePin(Device.Pins.D05);
-        //        TogglePin(Device.Pins.D06);
-        //        TogglePin(Device.Pins.D07);
-        //        TogglePin(Device.Pins.D08);
-        //        TogglePin(Device.Pins.D09);
-        //        TogglePin(Device.Pins.D10);
-        //        TogglePin(Device.Pins.D11);
-        //        TogglePin(Device.Pins.D12);
-        //        TogglePin(Device.Pins.D13);
-        //        TogglePin(Device.Pins.D14);
-        //        TogglePin(Device.Pins.D15);
-        //        Console.WriteLine(string.Empty);
-        //    }
+            while (true)
+            {
+                p = -3;
+                TogglePin(Device.Pins.OnboardLEDRed);
+                TogglePin(Device.Pins.OnboardLEDBlue);
+                TogglePin(Device.Pins.OnboardLEDGreen);
+                // Meadow supports using the analog pins as digitals as well!
+                TogglePin(Device.Pins.A00);
+                TogglePin(Device.Pins.A01);
+                TogglePin(Device.Pins.A02);
+                TogglePin(Device.Pins.A03);
+                TogglePin(Device.Pins.A04);
+                TogglePin(Device.Pins.A05);
+                TogglePin(Device.Pins.D00);
+                TogglePin(Device.Pins.D01);
+                TogglePin(Device.Pins.D02);
+                TogglePin(Device.Pins.D03);
+                TogglePin(Device.Pins.D04);
+                TogglePin(Device.Pins.D05);
+                TogglePin(Device.Pins.D06);
+                TogglePin(Device.Pins.D07);
+                TogglePin(Device.Pins.D08);
+                TogglePin(Device.Pins.D09);
+                TogglePin(Device.Pins.D10);
+                TogglePin(Device.Pins.D11);
+                TogglePin(Device.Pins.D12);
+                TogglePin(Device.Pins.D13);
+                TogglePin(Device.Pins.D14);
+                TogglePin(Device.Pins.D15);
+                Console.WriteLine(string.Empty);
+            }
 
-        //    void TogglePin(DigitalPin pin)
-        //    {
-        //        switch (p)
-        //        {
-        //            case -3:
-        //                Console.Write("R");
-        //                break;
-        //            case -2:
-        //                Console.Write("B");
-        //                break;
-        //            case -1:
-        //                Console.Write("G");
-        //                break;
-        //            default:
-        //                Console.Write($"{p % 10}");
-        //                break;
-        //        }
+            void TogglePin(IPin pin)
+            {
+                switch (p)
+                {
+                    case -3:
+                        Console.Write("R");
+                        break;
+                    case -2:
+                        Console.Write("B");
+                        break;
+                    case -1:
+                        Console.Write("G");
+                        break;
+                    default:
+                        Console.Write($"{p % 10}");
+                        break;
+                }
 
-        //        // initialize on
-        //        using (var port = new DigitalOutputPort(pin, true))
+                // initialize on
+                using (var port = Device.CreateDigitalOutputPort(pin, true))
 
-        //        {
-        //            Thread.Sleep(1000);
+                {
+                    Thread.Sleep(1000);
 
-        //            // turn off
-        //            port.State = false;
-        //        }
-        //        p++;
-        //    }
-        //}
+                    // turn off
+                    port.State = false;
+                }
+                p++;
+            }
+        }
     }
 }
