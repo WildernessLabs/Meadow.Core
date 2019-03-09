@@ -44,9 +44,6 @@ namespace Meadow.Hardware
             {
                 // make sure the pin is configured as a digital output with the proper state
                 ioController.ConfigureOutput(pin, initialState);
-
-                // initialize the output state
-                IOController.SetDiscrete(pin, initialState);
             }
             else
             {

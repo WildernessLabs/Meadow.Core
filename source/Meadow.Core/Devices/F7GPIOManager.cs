@@ -8,7 +8,7 @@ namespace Meadow.Devices
 {
     public class F7GPIOManager : IIOController
     {
-        private const string GPIODriverName = "/dev/gpio";
+        private const string GPDDriverName = "/dev/upd";
 
         private object _cacheLock = new object();
         private Dictionary<string, PinDesignator> _designatorCache = new Dictionary<string, PinDesignator>();
@@ -17,10 +17,10 @@ namespace Meadow.Devices
 
         internal F7GPIOManager()
         {
-            DriverHandle = Interop.Nuttx.open(GPIODriverName, Interop.Nuttx.DriverFlags.ReadOnly);
+            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.ReadOnly);
         }
 
-        public void ConfigureOutput(IPin pin, bool initialState)
+        public void ConfigureOutput_old(IPin pin, bool initialState)
         {
             var designator = GetPinDesignator(pin);
 
@@ -77,13 +77,13 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pin">Pin.</param>
         /// <param name="value">If set to <c>true</c> value.</param>
-        void IIOController.SetDiscrete(IPin pin, bool value)
+        void SetDiscrete_old(IPin pin, bool value)
         {
             // generate a PinState for the desired pin and value
             var state = new GPIOPinState();
             state.PinDesignator = GetPinDesignator(pin);
 
-            switch(pin.Key.ToString())
+            switch (pin.Key.ToString())
             {
                 case "PA0":
                 case "PA1":
@@ -100,6 +100,9 @@ namespace Meadow.Devices
             // and ship it to the driver
             Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.GpioIoctlFn.Write, ref state);
         }
+
+
+
 
         private PinDesignator GetPinDesignator(IPin pin)
         {
@@ -245,7 +248,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).
         /// </summary>
-        public void Initialize()
+        public void Initialize_old()
         {
             // LEDs are inverse logic - initialize to high/off
             var ledBlueInit = GPIOConfigFlags.Pin0 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
@@ -293,10 +296,331 @@ namespace Meadow.Devices
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pg3);
             Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pe3);
         }
+
+
+
+
+
+
+
+
+
+        public void Initialize()
+        {
+            // LEDs are inverse logic - initialize to high/off
+            ConfigureGpio(STM32GpioPort.PortA, 0, STM32GpioMode.Output, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull);
+            ConfigureGpio(STM32GpioPort.PortA, 1, STM32GpioMode.Output, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull);
+            ConfigureGpio(STM32GpioPort.PortA, 2, STM32GpioMode.Output, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull);
+
+
+        }
+
+        /// <summary>
+        /// Sets the value out a discrete (digital output)
+        /// </summary>
+        /// <param name="pin">Pin.</param>
+        /// <param name="value">If set to <c>true</c> value.</param>
+        void IIOController.SetDiscrete(IPin pin, bool value)
+        {
+            var designator = GetPortAndPin(pin);
+
+            var register = new Interop.UpdRegisterValue();
+            register.Address = designator.address + Interop.STM32_GPIO_BSRR_OFFSET;
+
+            if(value)
+            {
+                register.Value = 1u << designator.pin;
+            }
+            else
+            {
+                register.Value = 1u << (designator.pin + 16);
+            }
+
+            // write the register
+            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+            var result = Interop.Nuttx.ioctl(DriverHandle, UpdIoctlFn.SetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Write failed: {result}");
+            }
+        }
+
+        private Dictionary<string, Tuple<STM32GpioPort, int, int>> _portPinCache = new Dictionary<string, Tuple<STM32GpioPort, int, int>>();
+
+        private (STM32GpioPort port, int pin, int address) GetPortAndPin(IPin pin)
+        {
+            var key = pin.Key.ToString();
+            STM32GpioPort port;
+            int address;
+
+            lock (_portPinCache)
+            {
+                if (_portPinCache.ContainsKey(key))
+                {
+                    return (_portPinCache[key].Item1, _portPinCache[key].Item2, _portPinCache[key].Item3);
+                }
+                switch (key[1])
+                {
+                    case 'A':
+                        port = STM32GpioPort.PortA;
+                        address = Interop.GPIOA_BASE;
+                        break;
+                    case 'B':
+                        port = STM32GpioPort.PortB;
+                        address = Interop.GPIOB_BASE;
+                        break;
+                    case 'C':
+                        port = STM32GpioPort.PortC;
+                        address = Interop.GPIOC_BASE;
+                        break;
+                    case 'D':
+                        port = STM32GpioPort.PortD;
+                        address = Interop.GPIOD_BASE;
+                        break;
+                    case 'E':
+                        port = STM32GpioPort.PortE;
+                        address = Interop.GPIOE_BASE;
+                        break;
+                    case 'F':
+                        port = STM32GpioPort.PortF;
+                        address = Interop.GPIOF_BASE;
+                        break;
+                    case 'G':
+                        port = STM32GpioPort.PortG;
+                        address = Interop.GPIOG_BASE;
+                        break;
+                    case 'H':
+                        port = STM32GpioPort.PortH;
+                        address = Interop.GPIOH_BASE;
+                        break;
+                    case 'I':
+                        port = STM32GpioPort.PortI;
+                        address = Interop.GPIOI_BASE;
+                        break;
+                    case 'J':
+                        port = STM32GpioPort.PortJ;
+                        address = Interop.GPIOJ_BASE;
+                        break;
+                    case 'K':
+                        port = STM32GpioPort.PortK;
+                        address = Interop.GPIOK_BASE;
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
+
+                if (int.TryParse(key.Substring(2), out int pinID))
+                {
+                    return (port, pinID, address);
+                }
+
+                throw new NotSupportedException();
+            }
+        }
+
+        public void ConfigureOutput(IPin pin, bool initialState)
+        {
+            ConfigureGpio(pin, STM32GpioMode.Output, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull);
+        }
+
+        private enum STM32GpioPort
+        {
+            PortA,
+            PortB,
+            PortC,
+            PortD,
+            PortE,
+            PortF,
+            PortG,
+            PortH,
+            PortI,
+            PortJ,
+            PortK,
+        }
+
+        private enum STM32GpioMode
+        {
+            Input = 0,
+            Output = 1,
+            AlternateFunction = 2,
+            Analog = 3
+        }
+
+        private enum STM32OutputType
+        {
+            PushPull = 0,
+            OpenDrain = 1
+        }
+
+        private enum STM32ResistorMode
+        {
+            Float = 0,
+            PullUp = 1,
+            PullDown = 2
+        }
+
+        private enum STM32GPIOSpeed
+        {
+            Speed_2MHz = 0,
+            Speed_25MHz = 1,
+            Speed_50MHz = 2,
+            Speed_100MHz = 3
+        }
+
+        private bool ConfigureGpio(IPin pin, STM32GpioMode mode, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type)
+        {
+            var designator = GetPortAndPin(pin);
+
+            return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type);
+        }
+
+        private bool ConfigureGpio(STM32GpioPort port, int pin, STM32GpioMode mode, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type) 
+        {
+            int setting = 0;
+            int base_addr = 0;
+            switch (port)
+            {
+                case STM32GpioPort.PortA: base_addr = Interop.GPIOA_BASE; break;
+                case STM32GpioPort.PortB: base_addr = Interop.GPIOB_BASE; break;
+                case STM32GpioPort.PortC: base_addr = Interop.GPIOC_BASE; break;
+                case STM32GpioPort.PortD: base_addr = Interop.GPIOD_BASE; break;
+                case STM32GpioPort.PortE: base_addr = Interop.GPIOE_BASE; break;
+                case STM32GpioPort.PortF: base_addr = Interop.GPIOF_BASE; break;
+                case STM32GpioPort.PortG: base_addr = Interop.GPIOG_BASE; break;
+                case STM32GpioPort.PortH: base_addr = Interop.GPIOH_BASE; break;
+                case STM32GpioPort.PortI: base_addr = Interop.GPIOI_BASE; break;
+                case STM32GpioPort.PortJ: base_addr = Interop.GPIOJ_BASE; break;
+                case STM32GpioPort.PortK: base_addr = Interop.GPIOK_BASE; break;
+                default: throw new ArgumentException();
+            }
+
+            ////// ====== MODE ======
+            // read the existing mode register
+            var register = new Interop.UpdRegisterValue();
+            register.Address = base_addr + Interop.STM32_GPIO_MODER_OFFSET;
+            Console.WriteLine($"Reading register: {register.Address:X}");
+            var result = Interop.Nuttx.ioctl(DriverHandle, UpdIoctlFn.GetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Read failed: {result}");
+                return false;
+            }
+            Console.WriteLine($"Value: {register.Value:X}");
+
+            // TODO: we probably need to disable interrupts here (enter critical section)
+
+            UpdateConfigRegister2Bit(base_addr + Interop.STM32_GPIO_MODER_OFFSET, (int)mode, pin);
+
+            ////// ====== RESISTOR ======
+            setting = 0;
+            if (mode != STM32GpioMode.Analog)
+            {
+                setting = (int)resistor;
+            }
+            UpdateConfigRegister2Bit(base_addr + Interop.STM32_GPIO_PUPDR_OFFSET, setting, pin);
+
+
+            if (mode == STM32GpioMode.AlternateFunction)
+            {
+                ////// ====== ALTERNATE FUNCTION ======
+                // TODO:
+            }
+
+            ////// ====== SPEED ======
+            setting = 0;
+            if (mode == STM32GpioMode.AlternateFunction || mode == STM32GpioMode.Output)
+            {
+                setting = (int)speed;
+            }
+            UpdateConfigRegister2Bit(base_addr + Interop.STM32_GPIO_OSPEED_OFFSET, setting, pin);
+
+            ////// ====== OUTPUT TYPE ======
+            if(mode == STM32GpioMode.Output || mode == STM32GpioMode.AlternateFunction)
+            {
+                UpdateConfigRegister1Bit(base_addr + Interop.STM32_GPIO_OTYPER_OFFSET, (type == STM32OutputType.OpenDrain), pin);
+            }
+            else
+            {
+                UpdateConfigRegister1Bit(base_addr + Interop.STM32_GPIO_OTYPER_OFFSET, false, pin);
+            }
+
+
+            // TODO INTERRUPTS
+
+            return true;
+        }
+
+        private bool UpdateConfigRegister1Bit(int address, bool value, int pin)
+        {
+            var register = new Interop.UpdRegisterValue();
+            register.Address = address;
+            Console.WriteLine($"Reading register: {register.Address:X}");
+            var result = Interop.Nuttx.ioctl(DriverHandle, UpdIoctlFn.GetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Read failed: {result}");
+                return false;
+            }
+            Console.WriteLine($"Value: {register.Value:X}");
+
+            var temp = register.Value;
+            if(value)
+            {
+                temp |= (1u << pin);
+            }
+            else
+            {
+                temp &= ~(1u << pin);
+            }
+            // write the register
+            register.Value = temp;
+            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+            result = Interop.Nuttx.ioctl(DriverHandle, UpdIoctlFn.SetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Write failed: {result}");
+                return false;
+            }
+            return true;
+        }
+
+        private bool UpdateConfigRegister2Bit(int address, int value, int pin)
+        {
+            var register = new Interop.UpdRegisterValue();
+            register.Address = address;
+            Console.WriteLine($"Reading register: {register.Address:X}");
+            var result = Interop.Nuttx.ioctl(DriverHandle, UpdIoctlFn.GetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Read failed: {result}");
+                return false;
+            }
+            Console.WriteLine($"Value: {register.Value:X}");
+
+            var temp = register.Value;
+            // mask off the bits we're interested in
+            temp &= ~(3u << pin);
+            // set the register bits
+            temp |= (uint)value << (pin << 1);
+            // write the register
+            register.Value = temp;
+            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+            result = Interop.Nuttx.ioctl(DriverHandle, UpdIoctlFn.SetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Write failed: {result}");
+                return false;
+            }
+            return true;
+        }
     }
 
     /* ===== MEADOW GPIO PIN MAP =====
         BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?
+        J301-1      RESET                       
+        J301-2      3.3                       
+        J301-3      VREF                       
+        J301-4      GND                       
         J301-5      DAC_OUT1        PA4         A0
         J301-6      DAC_OUT2        PA5         A1
         J301-7      ADC1_IN3        PA3         A2

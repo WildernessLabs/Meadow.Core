@@ -164,6 +164,7 @@
     <Compile Include="Hardware\Contracts\IIOController.cs" />
     <Compile Include="Hardware\Contracts\IPinDefinitions.cs" />
     <Compile Include="Hardware\Contracts\IIODevice.cs" />
+    <Compile Include="Interop\Interop.upd.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
