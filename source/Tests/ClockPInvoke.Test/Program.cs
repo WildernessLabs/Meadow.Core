@@ -4,17 +4,17 @@
 //using Meadow.Core.Interop;
 //using static Meadow.Core.Interop.Interop.Nuttx;
 
-//namespace ClockPInvoke.Test
-//{
-//    class MainClass
-//    {
-//        public static void Main(string[] args)
-//        {
+namespace ClockPInvoke.Test
+{
+    class MainClass
+    {
+        public static void Main(string[] args)
+        {
 //            Console.WriteLine("Program Started (console)!");
 
 ////            ClockTest();
 //            OnBoardLEDTest();
-//        }
+        }
 
 //        static void ClockTest()
 //        {
@@ -77,5 +77,5 @@
 //            }
 //        }
 
-//    }
-//}
+    }
+}
