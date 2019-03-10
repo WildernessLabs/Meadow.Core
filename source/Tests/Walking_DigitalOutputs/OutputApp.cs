@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
+using System.Diagnostics;
 
 namespace Walking_DigitalOutputs
 {
     public class OutputApp : AppBase<F7Micro, OutputApp>
     {
         IList<IDigitalOutputPort> _outs = new List<IDigitalOutputPort>();
+        IList<string> _outChans = new List<string>();
 
         public OutputApp()
         {
@@ -29,7 +31,11 @@ namespace Walking_DigitalOutputs
 
                     // if it's a digital channel, create a port.
                     if(channel is IDigitalChannelInfo) {
-                        _outs.Add(Device.CreateDigitalOutputPort(pin));
+                        if (!_outChans.Contains(channel.Name)) {
+                            _outs.Add(Device.CreateDigitalOutputPort(pin));
+                        } else {
+                            Debug.WriteLine("Cannot add pin " + pin.Name + ", as the digital channel, " + channel.Name + " exists on another pin");
+                        }
                     }
                 }
             }
