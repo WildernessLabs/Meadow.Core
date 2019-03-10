@@ -30,7 +30,10 @@ namespace Walking_DigitalOutputs
                     Console.WriteLine("Contains " + channel.Name + "channel.");
 
                     // if it's a digital channel, create a port.
-                    if(channel is IDigitalChannelInfo) {
+                    if(channel is IDigitalChannelInfo 
+                        && !(channel is ICommunicationChannelInfo)
+                        && !(channel is IPwmChannelInfo)
+                        ) {
                         if (!_outChans.Contains(channel.Name)) {
                             _outs.Add(Device.CreateDigitalOutputPort(pin));
                         } else {
