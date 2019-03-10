@@ -214,7 +214,6 @@ namespace Meadow.Core.Interop
                 Pin14 = GPIOConfigFlags.Pin14,
                 Pin15 = GPIOConfigFlags.Pin15,
             }
-
         }
     }
 }

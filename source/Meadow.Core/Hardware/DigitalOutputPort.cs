@@ -1,52 +1,49 @@
 ﻿using System;
+using System.Linq;
 
 namespace Meadow.Hardware
 {
     /// <summary>
     /// Represents a port that is capable of writing analog output.
     /// </summary>
-    public class DigitalOutputPort : DigitalOutputPortBase, IDisposable
+    public class DigitalOutputPort : DigitalOutputPortBase
     {
-        protected IDigitalPin _pin;
-        protected bool _disposed;
+        protected IIOController IOController { get; set; }
 
-        public override bool InitialState => base._initialState;
-
+        /// <summary>
+        /// Gets or sets the state of the port.
+        /// </summary>
+        /// <value><c>true</c> for `HIGH`; otherwise, <c>false</c>, for `LOW`.</value>
         public override bool State 
         {
             get => _state;
             set
             {
-                _pin.GPIOManager.SetDiscrete(_pin, value);
+                IOController.SetDiscrete(base.Pin, value);
                 _state = value;
             }
-        }
-
-        //// hidden constructors
-        //protected DigitalOutputPort() : base(false)
-        //{
-        //    //nothing goes here
-        //}
+        } protected bool _state;
 
         /// <summary>
         /// Creates a new DigitalOutputPort from a pin.
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        public DigitalOutputPort(IDigitalPin pin, bool initialState = false) 
-            : base(pin, initialState)
+        protected DigitalOutputPort(
+            IPin pin,
+            IIOController ioController,
+            IDigitalChannelInfo channel, 
+            bool initialState) 
+            : base(pin, channel, initialState)
         {
+            this.IOController = ioController;
+
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
             if (success.Item1)
             {
-                this._pin = pin;
-
                 // make sure the pin is configured as a digital output with the proper state
-                _pin.GPIOManager.ConfigureOutput(_pin, initialState);
-
-                // initialize the output state
-                _pin.GPIOManager.SetDiscrete(_pin, initialState);
+                ioController.ConfigureOutput(pin, initialState);
             }
             else
             {
@@ -54,8 +51,27 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// From the specified pin and initialState.
+        /// </summary>
+        /// <returns>The from.</returns>
+        /// <param name="pin">Pin.</param>
+        /// <param name="initialState">If set to <c>true</c> initial state.</param>
+        internal static DigitalOutputPort From(IPin pin, 
+            IIOController ioController,
+            bool initialState = false)
+        {
+            var channel = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
+            if(channel != null) {
+                //TODO: need other checks here.
+                return new DigitalOutputPort(pin, ioController, channel, initialState);
+            } else {
+                throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
+            }
+        }
+
         //Implement IDisposable.
-        public void Dispose()
+        public override void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -68,13 +84,13 @@ namespace Meadow.Hardware
             // but if we do it in here, we may need to check the _disposed field
             // elsewhere
 
-            if (!_disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
-                    bool success = DeviceChannelManager.ReleasePin(_pin);
+                    DeviceChannelManager.ReleasePin(Pin);
                 }
-                _disposed = true;
+                disposed = true;
             }
         }
 

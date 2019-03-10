@@ -8,17 +8,17 @@ namespace HelloLED
 {
     class LEDApp : AppBase<F7Micro, LEDApp>
     {
-        private DigitalOutputPort _redLED;
-        private DigitalOutputPort _blueLED;
-        private DigitalOutputPort _greenLED;
-        private DigitalOutputPort _d00;
+        IDigitalOutputPort _redLED;
+        IDigitalOutputPort _blueLED;
+        IDigitalOutputPort _greenLED;
+        //private DigitalOutputPort _d00;
 
         public void Run()
         {
-            CreateOutputs();
-            ShowLights();
+//            CreateOutputs();
+//            ShowLights();
 
-            //WalkOutputs();
+            WalkOutputs();
 
             // WatchInputs();
 
@@ -27,11 +27,11 @@ namespace HelloLED
 
         public void CreateOutputs()
         {
-            _redLED = new DigitalOutputPort(Device.Pins.OnboardLEDRed, false);
-            _blueLED = new DigitalOutputPort(Device.Pins.OnboardLEDBlue, false);
-            _greenLED = new DigitalOutputPort(Device.Pins.OnboardLEDGreen, false);
+            _redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
+            _blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue);
+            _greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
 
-            _d00 = new DigitalOutputPort(Device.Pins.D00, false);
+            //_d00 = new DigitalOutputPort(Device.Pins.D00, false);
         }
 
         public void ShowLights()
@@ -51,38 +51,38 @@ namespace HelloLED
                 _blueLED.State = state;
                 Thread.Sleep(200);
 
-                _d00.State = state;
-                Thread.Sleep(200);
+                //_d00.State = state;
+                //Thread.Sleep(200);
             }
         }
 
-        public void LoopbackTest()
-        {
-            // assumes D04 is tied directly to D05
-            var output = new DigitalOutputPort(Device.Pins.D04);
-            var input = new DigitalInputPort(Device.Pins.D05);
+        //public void LoopbackTest()
+        //{
+        //    // assumes D04 is tied directly to D05
+        //    var output = new DigitalOutputPort(Device.Pins.D04);
+        //    var input = new DigitalInputPort(Device.Pins.D05);
 
-            var state = false;
+        //    var state = false;
 
-            while(true)
-            {
-                state = !state;
-                output.State = state;
-                Console.WriteLine($"state: {input.State}");
-                Thread.Sleep(1000);
-            }
-        }
+        //    while(true)
+        //    {
+        //        state = !state;
+        //        output.State = state;
+        //        Console.WriteLine($"state: {input.State}");
+        //        Thread.Sleep(1000);
+        //    }
+        //}
 
-        public void WatchInputs()
-        {
-            var d05 = new DigitalInputPort(Device.Pins.D05, false, ResistorMode.Disabled);
+        //public void WatchInputs()
+        //{
+        //    var d05 = new DigitalInputPort(Device.Pins.D05, false, ResistorMode.Disabled);
 
-            while(true)
-            {
-                Console.WriteLine($"D05: {d05.State}");
-                Thread.Sleep(500);
-            }
-        }
+        //    while(true)
+        //    {
+        //        Console.WriteLine($"D05: {d05.State}");
+        //        Thread.Sleep(500);
+        //    }
+        //}
 
         public void WalkOutputs()
         {
@@ -94,6 +94,13 @@ namespace HelloLED
                 TogglePin(Device.Pins.OnboardLEDRed);
                 TogglePin(Device.Pins.OnboardLEDBlue);
                 TogglePin(Device.Pins.OnboardLEDGreen);
+                // Meadow supports using the analog pins as digitals as well!
+                TogglePin(Device.Pins.A00);
+                TogglePin(Device.Pins.A01);
+                TogglePin(Device.Pins.A02);
+                TogglePin(Device.Pins.A03);
+                TogglePin(Device.Pins.A04);
+                TogglePin(Device.Pins.A05);
                 TogglePin(Device.Pins.D00);
                 TogglePin(Device.Pins.D01);
                 TogglePin(Device.Pins.D02);
@@ -113,7 +120,7 @@ namespace HelloLED
                 Console.WriteLine(string.Empty);
             }
 
-            void TogglePin(DigitalPin pin)
+            void TogglePin(IPin pin)
             {
                 switch (p)
                 {
@@ -132,7 +139,7 @@ namespace HelloLED
                 }
 
                 // initialize on
-                using (var port = new DigitalOutputPort(pin, true))
+                using (var port = Device.CreateDigitalOutputPort(pin, true))
 
                 {
                     Thread.Sleep(1000);

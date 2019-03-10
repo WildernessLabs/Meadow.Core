@@ -14,22 +14,22 @@ namespace Meadow.Hardware.Communications
         /// <summary>
         /// MOSI output port.
         /// </summary>
-        private DigitalOutputPort _mosi;
+        private IDigitalOutputPort _mosi;
 
         /// <summary>
         /// MISO Input port.
         /// </summary>
-        private DigitalInputPort _miso;
+        private IDigitalInputPort _miso;
 
         /// <summary>
         /// Clock output port.
         /// </summary>
-        private DigitalOutputPort _clock;
+        private IDigitalOutputPort _clock;
 
         /// <summary>
         /// Chip select port.
         /// </summary>
-        private DigitalOutputPort _chipSelect;
+        private IDigitalOutputPort _chipSelect;
 
         /// <summary>
         /// Boolean representation of the clock polarity.
@@ -61,7 +61,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="chipSelect">Chip select pin.</param>
         /// <param name="cpha">Clock phase (0 or 1, default is 0).</param>
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
-        public SoftwareSPIBus(IDigitalPin mosi, IDigitalPin miso, IDigitalPin clock, IDigitalPin chipSelect, byte cpha = 0, byte cpol = 0)
+        public SoftwareSPIBus(IIODevice device, IPin mosi, IPin miso, IPin clock, IPin chipSelect, byte cpha = 0, byte cpol = 0)
         {
             if (mosi == null)
             {
@@ -74,10 +74,10 @@ namespace Meadow.Hardware.Communications
 
             _phase = (cpha == 1);
             _polarity = (cpol == 1);
-            _mosi = new DigitalOutputPort(mosi, false);
-            _miso = miso == null ? null : new DigitalInputPort(miso, false, ResistorMode.Disabled);
-            _clock = new DigitalOutputPort(clock, _polarity);
-            _chipSelect = chipSelect == null ? null : new DigitalOutputPort(chipSelect, true);
+            _mosi = device.CreateDigitalOutputPort(mosi, false);
+            _miso = miso == null ? null : device.CreateDigitalInputPort(miso, true, false, ResistorMode.Disabled);
+            _clock = device.CreateDigitalOutputPort(clock, _polarity);
+            _chipSelect = chipSelect == null ? null : device.CreateDigitalOutputPort(chipSelect, true);
         }
 
         #endregion Constructors
@@ -224,22 +224,20 @@ namespace Meadow.Hardware.Communications
             for (var index = 0; index < 8; index++)
             {
                 _mosi.State = ((value & mask) > 0);
+                bool data = false;
+                if (!_phase)
+                {
+                    data = _miso.State;
+                }
                 _clock.State = (!clock);
-                bool data;
                 if (_phase)
                 {
-                    _clock.State = (clock);
                     data = _miso.State;
                 }
-                else
-                {
-                    data = _miso.State;
-                    _clock.State = (clock);
-                }
-                result <<= 1;
+                _clock.State = (clock);
                 if (data)
                 {
-                    result |= 0x01;
+                    result |= mask;
                 }
                 mask >>= 1;
             }

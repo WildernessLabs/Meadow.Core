@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Meadow.Hardware;
 
-namespace Meadow
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Contract for device pin lists.

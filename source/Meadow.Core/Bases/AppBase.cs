@@ -1,4 +1,6 @@
 ﻿using System;
+using Meadow.Hardware;
+
 namespace Meadow
 {
     /// <summary>
@@ -6,7 +8,9 @@ namespace Meadow
     /// class for Meadow applications to get strongly-typed access to the current
     /// device information.
     /// </summary>
-    public abstract class AppBase<D, A> : IApp where A : class, IApp where D : class, IDevice
+    public abstract class AppBase<D, A> : IApp 
+        where A : class, IApp 
+        where D : class, IIODevice//<P> where P : IPinDefinitions
     {
         /// <summary>
         /// </summary>
