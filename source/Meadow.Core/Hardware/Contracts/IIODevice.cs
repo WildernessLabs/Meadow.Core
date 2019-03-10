@@ -33,5 +33,23 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled
             );
 
+        IBiDirectionalPort CreateBiDirectionalPort(
+            IPin pin,
+            bool initialState = false,
+            bool glitchFilter = false,
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            PortDirectionType initialDirection = PortDirectionType.Input);
+
+        IAnalogInputPort CreateAnalogInputPort(
+            IPin pin,
+            float voltageReference
+            );
+
+        IPwmPort CreatePwmPort(
+            IPin pin,
+            float frequency = 100, 
+            float dutyCycle = 0, 
+            bool invert = false
+        );
     }
 }

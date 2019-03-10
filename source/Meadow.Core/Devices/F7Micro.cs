@@ -71,7 +71,23 @@ namespace Meadow.Devices
         {
             return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, resistorMode, initialDirection);
         }
+
+        public IAnalogInputPort CreateAnalogInputPort(
+            IPin pin,
+            float voltageReference = 3.3f)
+        {
+            throw new System.NotImplementedException("These are not the ports you're looking for.");
+        }
+
+        public IPwmPort CreatePwmPort(
+            IPin pin,
+            float frequency = 100,
+            float dutyCycle = 0,
+            bool inverted = false)
+        {
+            return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted);
+        }
+
+
     }
-
-
 }
