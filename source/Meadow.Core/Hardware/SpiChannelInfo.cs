@@ -3,6 +3,8 @@ namespace Meadow.Hardware
 {
     public class SpiChannelInfo : DigitalChannelIInfoBase, ISpiChannelInfo
     {
+        public SerialDirectionType SerialDirection { get; protected set; }
+
         public SpiChannelInfo(string name,
         bool pullDownCapable = false,
         bool pullUpCapable = false)
