@@ -2,7 +2,7 @@
 namespace Meadow.Hardware
 {
     //TODO: what else should this have? allowed speeds?
-    public class I2cChannelInfo : DigitalChannelIInfoBase
+    public class I2cChannelInfo : DigitalChannelIInfoBase, II2cChannelInfo
     {
         public I2cChannelFunctionType ChannelFunction { get; protected set; }
 

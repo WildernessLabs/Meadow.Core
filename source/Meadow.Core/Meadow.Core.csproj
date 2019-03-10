@@ -165,6 +165,8 @@
     <Compile Include="Hardware\Contracts\IPinDefinitions.cs" />
     <Compile Include="Hardware\Contracts\IIODevice.cs" />
     <Compile Include="Interop\Interop.upd.cs" />
+    <Compile Include="Hardware\Contracts\II2cChannelInfo.cs" />
+    <Compile Include="Hardware\Contracts\ICommunicationChannelInfo.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
