@@ -210,6 +210,34 @@ namespace Meadow.Devices
             ConfigureInput(pin, mode32, interruptEnabled);
         }
 
+        public void ConfigureAnalogInput(IPin pin)
+        {
+            Console.WriteLine("+ConfigureAnalogInput");
+
+            // key will be in the format 'ADC1_INXX' where XX is the ADC channel
+            if(! int.TryParse(pin.Key.ToString().Substring(7), out int channel))
+            {
+                throw new NotSupportedException($"ADC Channel {pin.Key.ToString()} unknown or unsupported");
+            }
+
+            // set up the GPIO register to say this is now an anlog
+            // on the Meadow, all ADCs are in in ADC1
+            switch (channel)
+            {
+                case 3:
+                case 7:
+                    ConfigureADC(STM32GpioPort.PortA, channel);
+                    break;
+                case 10:
+                case 11:
+                    // channel 10 starts at C0 (see STM32F777xx pinouts, pg 68)
+                    ConfigureADC(STM32GpioPort.PortC, channel - 10);
+                    break;
+            }
+
+            // NOTE: ADC registers will be set when the channel is actually queried
+        }
+
         private enum STM32GpioPort
         {
             PortA,
@@ -377,24 +405,27 @@ namespace Meadow.Devices
             return true;
         }
 
-        public uint GetAnalog(IPin pin)
+        public int GetAnalogValue(IPin pin)
         {
-            var designator = GetPortAndPin(pin);
-            // set up the GPIO
-            ConfigureADC(designator.port, designator.pin);
+            // key will be in the format 'ADC1_INXX' where XX is the ADC channel
+            if (!int.TryParse(pin.Key.ToString().Substring(7), out int channel))
+            {
+                throw new NotSupportedException($"ADC Channel {pin.Key.ToString()} unknown or unsupported");
+            }
+
+            Console.WriteLine($"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert
-            // TODO: get this channel based on the pin
-            var channel = 3u;
-
             Interop.STM32.UpdateRegister(DriverHandle,
                 Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
-                channel, 0);
+                (uint)channel, 0);
 
             // enable the ADC via the CR2 register's ADON bit
             Interop.STM32.UpdateRegister(DriverHandle,
                 Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
                 1, 0);
+
+            Console.WriteLine($"Starting ADC Conversion...");
 
             // start a conversion via the CR2 SWSTART bit
             Interop.STM32.UpdateRegister(DriverHandle,
@@ -405,20 +436,29 @@ namespace Meadow.Devices
             var ready = false;
             do
             {
+                var tick = 0;
+
                 if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET, out uint register_sr))
                 {
                     ready = (register_sr & (1 << 1)) != 0;
                 }
-                // TODO: we need a timeout here to prevent deadlock if the SR never comes on
+                // we need a timeout here to prevent deadlock if the SR never comes on
+                if(tick++ > 200)
+                {
+                    // we've failed
+                    return -1;
+                }
 
                 // yield
                 System.Threading.Thread.Sleep(0);
             } while (!ready);
 
+            Console.WriteLine($"Conversion complete");
+
             // read the data register
             if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_DR_OFFSET, out uint register_dr))
             {
-                return register_dr;
+                return (int)register_dr;
             }
 
             throw new Exception("Conversion failed");

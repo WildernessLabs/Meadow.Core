@@ -46,5 +46,8 @@ namespace Meadow.Hardware
         /// <param name="resistorMode"></param>
         /// <param name="interruptEnabled"></param>
         void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled);
+
+        void ConfigureAnalogInput(IPin pin);
+        int GetAnalogValue(IPin pin);
     }
 }

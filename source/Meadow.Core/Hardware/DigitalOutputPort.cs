@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalOutputPort : DigitalOutputPortBase
     {
-        protected IIOController IOController { get; set; }
+        protected IIOController IOController { get; }
 
         /// <summary>
         /// Gets or sets the state of the port.

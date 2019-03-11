@@ -1,10 +1,10 @@
-﻿//using System;
-//using System.Linq;
+﻿using System;
+using System.Linq;
 //using System.Collections.Generic;
 //using System.Threading.Tasks;
 
-//namespace Meadow.Hardware
-//{
+namespace Meadow.Hardware
+{
 //    // Common USE CASES:
 //    //
 //    //  * User needs to take an occasional voltage reading. Most likely it should 
@@ -172,5 +172,69 @@
 
 //            //TODO: Call Read() and automatically convert to voltage
 //        }
-//    }
-//}
+
+    public class AnalogInputPort : IAnalogInputPort
+    {
+        // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
+        static object _analogSyncRoot = new object();
+
+        protected IIOController IOController { get; }
+
+        public IAnalogChannelInfo _channelInfo => throw new NotImplementedException();
+
+        public IAnalogChannelInfo Channel => throw new NotImplementedException();
+
+        public IPin Pin => throw new NotImplementedException();
+
+        protected AnalogInputPort(
+                    IPin pin,
+                    IIOController ioController,
+                    IAnalogChannelInfo channel)
+        {
+            this.IOController = ioController;
+
+            // attempt to reserve
+            Console.WriteLine("Reserving pin...");
+            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
+            if (success.Item1)
+            {
+                // make sure the pin is configured as an analog input
+                ioController.ConfigureAnalogInput(pin);
+            }
+            else
+            {
+                throw new PortInUseException();
+            }
+        }
+
+        internal static AnalogInputPort From(IPin pin,
+            IIOController ioController)
+        {
+            var channel = pin.SupportedChannels.OfType<IAnalogInputPort>().First();
+            if (channel != null)
+            {
+                //TODO: need other checks here.
+                return new AnalogInputPort(pin, ioController, null);
+            }
+            else
+            {
+                throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
+            }
+        }
+
+        public int Read()
+        {
+            lock(_analogSyncRoot)
+            {
+                Console.WriteLine("Read...");
+                // configure the processor for 
+                return this.IOController.GetAnalogValue(this.Pin);
+            }
+        }
+
+        public void Dispose()
+        {
+
+        }
+    }
+}
