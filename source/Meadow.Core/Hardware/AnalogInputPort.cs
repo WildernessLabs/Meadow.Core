@@ -42,7 +42,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class AnalogInputPort : AnalogInputPortBase
     {
-        protected object _lock = new object();
+        protected object Lock { get; set; } = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Meadow.Hardware.AnalogInputPort"/> class.
@@ -77,15 +77,10 @@ namespace Meadow.Hardware
         /// sampling the ADC. Call StartSampling() to spin up the sampling process.
         /// </summary>
         /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
-        public bool Sampling
-        {
-            get => _sampling;
-        } protected bool _sampling = false;
-
-
+        public bool Sampling { get; protected set; }
 
         public override void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0) { 
-            //lock (_lock) {
+            //lock (Lock) {
             //    if (_sampling) return;
             //    // start (TODO:@CTACKE)
             //    // state muh-cheen
@@ -99,7 +94,7 @@ namespace Meadow.Hardware
         /// </summary>
         public override void StopSampling()
         {
-            //lock (_lock)
+            //lock (Lock)
             //{
             //    if (!_sampling) return;
             //    // stop (TODO:@CTACKE)
