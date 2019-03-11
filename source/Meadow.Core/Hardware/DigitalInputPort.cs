@@ -46,7 +46,7 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled
             )
         {
-            var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
+            var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if (chan != null) {
                 //TODO: need other checks here.
                 if(interruptEnabled && (!chan.InterrruptCapable)) {

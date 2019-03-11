@@ -212,27 +212,21 @@ namespace Meadow.Devices
 
         public void ConfigureAnalogInput(IPin pin)
         {
-            Console.WriteLine("+ConfigureAnalogInput");
-
-            // key will be in the format 'ADC1_INXX' where XX is the ADC channel
-            if(! int.TryParse(pin.Key.ToString().Substring(7), out int channel))
-            {
-                throw new NotSupportedException($"ADC Channel {pin.Key.ToString()} unknown or unsupported");
-            }
+            var designator = GetPortAndPin(pin);
 
             // set up the GPIO register to say this is now an anlog
             // on the Meadow, all ADCs are in in ADC1
-            switch (channel)
+            switch (designator.port)
             {
-                case 3:
-                case 7:
-                    ConfigureADC(STM32GpioPort.PortA, channel);
+                case STM32GpioPort.PortA:
+                    ConfigureADC(designator.port, designator.pin);
                     break;
-                case 10:
-                case 11:
+                case STM32GpioPort.PortC:
                     // channel 10 starts at C0 (see STM32F777xx pinouts, pg 68)
-                    ConfigureADC(STM32GpioPort.PortC, channel - 10);
+                    ConfigureADC(designator.port, designator.pin + 10);
                     break;
+                default:
+                    throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
 
             // NOTE: ADC registers will be set when the channel is actually queried
@@ -407,30 +401,42 @@ namespace Meadow.Devices
 
         public int GetAnalogValue(IPin pin)
         {
-            // key will be in the format 'ADC1_INXX' where XX is the ADC channel
-            if (!int.TryParse(pin.Key.ToString().Substring(7), out int channel))
+            var designator = GetPortAndPin(pin);
+
+            int channel;
+
+            switch(designator.port)
             {
-                throw new NotSupportedException($"ADC Channel {pin.Key.ToString()} unknown or unsupported");
+                case STM32GpioPort.PortA:
+                    channel = designator.pin;
+                    break;
+                case STM32GpioPort.PortC:
+                    channel = designator.pin + 10;
+                    break;
+                default:
+                    throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
 
-            Console.WriteLine($"Starting process to get analog for channel {channel}");
+//            Console.WriteLine($"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert
             Interop.STM32.UpdateRegister(DriverHandle,
                 Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
-                (uint)channel, 0);
+                0, (uint)channel);
 
             // enable the ADC via the CR2 register's ADON bit
             Interop.STM32.UpdateRegister(DriverHandle,
                 Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
-                1, 0);
+                0, 1);
 
-            Console.WriteLine($"Starting ADC Conversion...");
+//            Console.WriteLine($"Starting ADC Conversion...");
 
             // start a conversion via the CR2 SWSTART bit
             Interop.STM32.UpdateRegister(DriverHandle,
                 Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
-                1 << 30, 0);
+                0, 1 << 30);
+
+//            Console.Write($"Polling status register...");
 
             // poll the status register - wait for conversion complete
             var ready = false;
@@ -438,22 +444,31 @@ namespace Meadow.Devices
             {
                 var tick = 0;
 
-                if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET, out uint register_sr))
+                if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SR_OFFSET, out uint register_sr))
                 {
                     ready = (register_sr & (1 << 1)) != 0;
                 }
-                // we need a timeout here to prevent deadlock if the SR never comes on
-                if(tick++ > 200)
+                else
                 {
-                    // we've failed
+                    // this should never occur if the driver exists
+                    Console.Write($"Conversion failed");
                     return -1;
                 }
 
-                // yield
-                System.Threading.Thread.Sleep(0);
+                // we need a timeout here to prevent deadlock if the SR never comes on
+                if (tick++ > 200)
+                {
+                    // we've failed
+                    Console.Write($"Conversion timed out");
+                    return -1;
+                }
+
+                // TODO: yield
+                // currently the OS hangs if I try to Sleep, so we'll spin.  BAD BAD BAD HACK
+                System.Threading.Thread.Sleep(1);
             } while (!ready);
 
-            Console.WriteLine($"Conversion complete");
+//            Console.WriteLine($"Conversion complete");
 
             // read the data register
             if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_DR_OFFSET, out uint register_dr))

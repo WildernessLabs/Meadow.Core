@@ -61,7 +61,7 @@ namespace Meadow.Hardware
             IIOController ioController,
             bool initialState = false)
         {
-            var channel = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
+            var channel = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if(channel != null) {
                 //TODO: need other checks here.
                 return new DigitalOutputPort(pin, ioController, channel, initialState);

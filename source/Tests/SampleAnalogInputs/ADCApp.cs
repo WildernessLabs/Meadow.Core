@@ -22,9 +22,9 @@ namespace SampleAnalogInputs
         {
             Console.WriteLine("Configuring inputs...");
             _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A02));
-//            _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A03));
-//            _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A04));
-//            _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A05));
+            _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A03));
+            _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A04));
+            _inputs.Add(Device.CreateAnalogInputPort(Device.Pins.A05));
         }
 
         private void ReadADCs()

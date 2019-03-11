@@ -180,21 +180,19 @@ namespace Meadow.Hardware
 
         protected IIOController IOController { get; }
 
-        public IAnalogChannelInfo _channelInfo => throw new NotImplementedException();
-
-        public IAnalogChannelInfo Channel => throw new NotImplementedException();
-
-        public IPin Pin => throw new NotImplementedException();
+        public IAnalogChannelInfo Channel { get; }
+        public IPin Pin { get; }
 
         protected AnalogInputPort(
                     IPin pin,
                     IIOController ioController,
                     IAnalogChannelInfo channel)
         {
+            this.Pin = pin;
             this.IOController = ioController;
+            this.Channel = channel;
 
             // attempt to reserve
-            Console.WriteLine("Reserving pin...");
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
             if (success.Item1)
             {
@@ -210,15 +208,17 @@ namespace Meadow.Hardware
         internal static AnalogInputPort From(IPin pin,
             IIOController ioController)
         {
-            var channel = pin.SupportedChannels.OfType<IAnalogInputPort>().First();
+            var channel = pin.SupportedChannels.OfType<IAnalogChannelInfo>().FirstOrDefault();
             if (channel != null)
             {
                 //TODO: need other checks here.
-                return new AnalogInputPort(pin, ioController, null);
+                return new AnalogInputPort(pin, ioController, channel);
             }
             else
             {
-                throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
+                var supported = pin.SupportedChannels.Select(c => c.Name);
+                var msg = $"Pin {pin.Name} does not support an analog input channel. It supports: {string.Join(",", supported)}";
+                throw new Exception(msg);
             }
         }
 
@@ -226,8 +226,6 @@ namespace Meadow.Hardware
         {
             lock(_analogSyncRoot)
             {
-                Console.WriteLine("Read...");
-                // configure the processor for 
                 return this.IOController.GetAnalogValue(this.Pin);
             }
         }
