@@ -76,7 +76,7 @@ namespace Meadow.Devices
             IPin pin,
             float voltageReference = 3.3f)
         {
-            throw new System.NotImplementedException("These are not the ports you're looking for.");
+            return AnalogInputPort.From(pin, this.IoController, voltageReference);
         }
 
         public IPwmPort CreatePwmPort(

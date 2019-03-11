@@ -1,27 +1,18 @@
-﻿//using System;
-//namespace Meadow.Hardware
-//{
-//    /// <summary>
-//    /// Provides a base implementation for much of the common tasks of 
-//    /// implementing IAnalogPort
-//    /// </summary>
-//    public abstract class AnalogPortBase : IAnalogPort
-//    {
-//        public SignalType SignalType => SignalType.Analog;
+﻿using System;
+namespace Meadow.Hardware
+{
+    /// <summary>
+    /// Provides a base implementation for much of the common tasks of 
+    /// implementing IAnalogPort
+    /// </summary>
+    public abstract class AnalogPortBase : PortBase<IAnalogChannelInfo>, IAnalogPort
+    {
+        public new IAnalogChannelInfo Channel { get; protected set; }
 
-//        public IAnalogChannelInfo ChannelInfo
-//        {
-//            get => _channelinfo;
-//        }
-//        protected IAnalogChannelInfo _channelinfo;
-
-//        public abstract PortDirectionType Direction { get; }
-
-//        public IAnalogChannelInfo _channelInfo => throw new NotImplementedException();
-
-//        protected AnalogPortBase(IAnalogChannelInfo channelInfo)
-//        {
-//            _channelinfo = channelInfo;
-//        }
-//    }
-//}
+        protected AnalogPortBase(IPin pin, IAnalogChannelInfo channel)
+            : base(pin, channel)
+        {
+            this.Channel = channel;
+        }
+    }
+}
