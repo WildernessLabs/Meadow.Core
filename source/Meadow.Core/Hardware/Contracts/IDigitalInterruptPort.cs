@@ -2,7 +2,7 @@
 
 namespace Meadow.Hardware
 {
-    public interface IDigitalInterruptPort : IDigitalInputPort
+    public interface IDigitalInterruptPort
     {
         event EventHandler<PortEventArgs> Changed;
 

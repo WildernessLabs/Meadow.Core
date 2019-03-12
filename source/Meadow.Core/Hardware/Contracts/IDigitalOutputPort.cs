@@ -7,6 +7,10 @@ namespace Meadow.Hardware
         /// Gets the port’s initial state, either low (false), or high (true), as typically configured during the port’s constructor.
         /// </summary>
         bool InitialState { get; }
-        new bool State { get; set; }
+        /// <summary>
+        /// Gets or sets the state of the port.
+        /// </summary>
+        /// <value><c>true</c> for `HIGH`; otherwise, <c>false</c>, for `LOW`.</value>
+        bool State { get; set; }
     }
 }

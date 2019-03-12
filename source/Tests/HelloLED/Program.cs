@@ -4,7 +4,7 @@ namespace HelloLED
 {
     class MainClass
     {
-        static IApp _app;
+        static LEDApp _app;
 
         static void Main(string[] args)
         {

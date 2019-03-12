@@ -1,5 +1,6 @@
 ﻿using Meadow.Hardware;
 using System;
+using System.Linq;
 
 namespace Meadow.Hardware
 {
@@ -11,11 +12,32 @@ namespace Meadow.Hardware
     /// </summary>
     public class PwmPort : PwmPortBase
     {
-        public PwmPort(IPwmPin pin, float frequency = 100, float dutyCycle = 0, bool invert = false) : base (pin)
+        protected PwmPort(
+            IPin pin,
+            IIOController ioController,
+            IPwmChannelInfo channel,
+            float frequency = 100, 
+            float dutyCycle = 0, 
+            bool inverted = false) 
+            : base (pin, channel, inverted)
         {
-            this.Frequency = frequency;
-            this.DutyCycle = dutyCycle;
-            this.Inverted = invert;
+        }
+
+        internal static PwmPort From(
+            IPin pin,
+            IIOController ioController,
+            float frequency = 100,
+            float dutyCycle = 0,
+            bool inverted = false)
+        {
+            var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
+            if (channel != null) {
+                //TODO: need other checks here.
+                return new PwmPort(pin, ioController, channel, frequency, dutyCycle, inverted);
+            } else {
+                throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
+            }
+
         }
 
         ~PwmPort() { throw new NotImplementedException(); }
@@ -24,13 +46,10 @@ namespace Meadow.Hardware
         public override float DutyCycle { get; set; }
         public override float Frequency { get; set; }
         public override float Period { get; set; }
-        public override bool Inverted { get; set; }
         //public IDigitalPin Pin { get; }
         public override TimeScaleFactor Scale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public override bool State => throw new NotImplementedException();
-
-        public void Dispose() { throw new NotImplementedException(); }
 
         public override void Start()
         {
@@ -44,5 +63,9 @@ namespace Meadow.Hardware
 
         protected void Dispose(bool disposing) { throw new NotImplementedException(); }
 
+        public override void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Contract for a Port that has is capable of 
     /// </summary>
-    public interface IPwmPort// : IDigitalPort
+    public interface IPwmPort : IDigitalPort
     {
         IPwmChannelInfo ChannelInfo { get; }
 
@@ -19,7 +19,7 @@
         // TODO: correct type?
         float Frequency { get; set; }
 
-        bool Inverted { get; set; }
+        bool Inverted { get; }
 
         TimeScaleFactor Scale { get; set; }
 

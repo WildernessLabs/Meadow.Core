@@ -11,15 +11,8 @@ namespace GpioInterrogation
         {
             foreach(var pin in Device.Pins.AllPins) {
                 Console.WriteLine("Found pin: " + pin.Name);
-
-                switch (pin) {
-                    case IAnalogPin a:
-                        Console.WriteLine("Pin is an analog pin w precision: " + a.Precision.ToString());
-                        break;
-                    case IDigitalPin d:
-                        Console.WriteLine("Pin is a digtial pin.");
-                        break;
-
+                foreach (var channel in pin.SupportedChannels) {
+                    Console.WriteLine("Contains " + channel.Name + "channel.");
                 }
             }
         }

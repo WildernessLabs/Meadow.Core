@@ -66,8 +66,6 @@
     <Compile Include="WakeUpOptions.cs" />
     <Compile Include="Bases\AppBase.cs" />
     <Compile Include="Contracts\IApp.cs" />
-    <Compile Include="Contracts\IDevice.cs" />
-    <Compile Include="Contracts\IGPIOManager.cs" />
     <Compile Include="Devices\F7GPIOManager.cs" />
     <Compile Include="Devices\F7Micro.cs" />
     <Compile Include="Enums\ByteOrder.cs" />
@@ -85,32 +83,26 @@
     <Compile Include="Gateways\WiFi\WiFiAdapter.cs" />
     <Compile Include="Gateways\WiFi\WiFiNetwork.cs" />
     <Compile Include="Hardware\AnalogInputPort.cs" />
-    <Compile Include="Hardware\AnalogPin.cs" />
     <Compile Include="Hardware\BiDirectionalPort.cs" />
     <Compile Include="Hardware\Cpu.cs" />
     <Compile Include="Hardware\DigitalInputPort.cs" />
     <Compile Include="Hardware\DigitalOutputPort.cs" />
-    <Compile Include="Hardware\DigitalPin.cs" />
     <Compile Include="Hardware\Pin.cs" />
     <Compile Include="Hardware\PortEventArgs.cs" />
     <Compile Include="Hardware\PortInUseException.cs" />
-    <Compile Include="Hardware\PwmPin.cs" />
     <Compile Include="Hardware\PwmPort.cs" />
     <Compile Include="Hardware\SerialDataReceivedEventArgs.cs" />
     <Compile Include="Hardware\SerialErrorReceivedEventArgs.cs" />
     <Compile Include="Hardware\SerialPort.cs" />
     <Compile Include="Hardware\Spi.cs" />
     <Compile Include="Hardware\Bases\AnalogInputPortBase.cs" />
-    <Compile Include="Hardware\Bases\AnalogPinBase.cs" />
     <Compile Include="Hardware\Bases\AnalogPortBase.cs" />
     <Compile Include="Hardware\Bases\BiDirectionalPortBase.cs" />
     <Compile Include="Hardware\Bases\DigitalInputPortBase.cs" />
     <Compile Include="Hardware\Bases\DigitalInterruptPortBase.cs" />
     <Compile Include="Hardware\Bases\DigitalOutputPortBase.cs" />
-    <Compile Include="Hardware\Bases\DigitalPinBase.cs" />
     <Compile Include="Hardware\Bases\DigitalPortBase.cs" />
     <Compile Include="Hardware\Bases\PinBase.cs" />
-    <Compile Include="Hardware\Bases\PwmPinBase.cs" />
     <Compile Include="Hardware\Bases\PwmPortBase.cs" />
     <Compile Include="Hardware\Communications\I2cBus.cs" />
     <Compile Include="Hardware\Communications\ICommunicationBus.cs" />
@@ -122,19 +114,16 @@
     <Compile Include="Hardware\Contracts\I2cPeripheral.cs" />
     <Compile Include="Hardware\Contracts\IAnalogChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\IAnalogInputPort.cs" />
-    <Compile Include="Hardware\Contracts\IAnalogPin.cs" />
     <Compile Include="Hardware\Contracts\IAnalogPort.cs" />
     <Compile Include="Hardware\Contracts\IBiDirectionalPort.cs" />
     <Compile Include="Hardware\Contracts\IDigitalChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\IDigitalInputPort.cs" />
     <Compile Include="Hardware\Contracts\IDigitalInterruptPort.cs" />
     <Compile Include="Hardware\Contracts\IDigitalOutputPort.cs" />
-    <Compile Include="Hardware\Contracts\IDigitalPin.cs" />
     <Compile Include="Hardware\Contracts\IDigitalPort.cs" />
     <Compile Include="Hardware\Contracts\IPin.cs" />
     <Compile Include="Hardware\Contracts\IPort.cs" />
     <Compile Include="Hardware\Contracts\IPwmChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\IPwmPin.cs" />
     <Compile Include="Hardware\Contracts\IPwmPort.cs" />
     <Compile Include="Hardware\Enums\FlowControlType.cs" />
     <Compile Include="Hardware\Enums\InteruptMode.cs" />
@@ -156,8 +145,30 @@
     <Compile Include="Interop\Interop.open.cs" />
     <Compile Include="Utilities\BitHelpers.cs" />
     <Compile Include="Interop\Interop.timespec.cs" />
-    <Compile Include="Contracts\IPinDefinitions.cs" />
     <Compile Include="Peripherals\Leds\ILed.cs" />
+    <Compile Include="Hardware\Contracts\IChannelInfo.cs" />
+    <Compile Include="Hardware\Bases\ChannelInfoBase.cs" />
+    <Compile Include="Hardware\DigitalChannelInfo.cs" />
+    <Compile Include="Hardware\Contracts\ISpiChannelInfo.cs" />
+    <Compile Include="Hardware\SpiChannelInfo.cs" />
+    <Compile Include="Hardware\Bases\DigitalChannelIInfoBase.cs" />
+    <Compile Include="Hardware\I2cChannelInfo.cs" />
+    <Compile Include="Hardware\Contracts\IUartChannelInfo.cs" />
+    <Compile Include="Hardware\UartChannelInfo.cs" />
+    <Compile Include="Hardware\PwmChannelInfo.cs" />
+    <Compile Include="Hardware\AnalogChannelInfo.cs" />
+    <Compile Include="Hardware\SerialDirectionType.cs" />
+    <Compile Include="Hardware\Contracts\ICanChannelInfo.cs" />
+    <Compile Include="Hardware\CanChannelInfo.cs" />
+    <Compile Include="Hardware\Contracts\ISerialCommunicationChannelInfo.cs" />
+    <Compile Include="Hardware\Bases\PortBase.cs" />
+    <Compile Include="Devices\Definitions\F7MicroPinDefinitions.cs" />
+    <Compile Include="Hardware\Contracts\IIOController.cs" />
+    <Compile Include="Hardware\Contracts\IPinDefinitions.cs" />
+    <Compile Include="Hardware\Contracts\IIODevice.cs" />
+    <Compile Include="Interop\Interop.upd.cs" />
+    <Compile Include="Hardware\Contracts\II2cChannelInfo.cs" />
+    <Compile Include="Hardware\Contracts\ICommunicationChannelInfo.cs" />
     <Compile Include="Contracts\IChangeResult.cs" />
     <Compile Include="Bases\FloatChangeResult.cs" />
     <Compile Include="Bases\NumericChangeResultBase.cs" />
@@ -165,6 +176,9 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="Interop\stm32_gpio.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Devices\Definitions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

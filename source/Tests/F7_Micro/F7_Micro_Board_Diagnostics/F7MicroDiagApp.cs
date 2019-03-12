@@ -25,6 +25,11 @@ namespace F7_Micro_Board_Diagnostics
 
         protected bool TestBluetooth() { return false; }
 
+        /// <summary>
+        /// Tests the digital IO ports by performing write/reads on paired ports
+        /// and seeing if nothing is shorted.
+        /// </summary>
+        /// <returns>Whether or not the digital IO passed.</returns>
         protected Tuple<bool, List<PortTestResult>> TestDigitalIO ()
         {
             List<PortTestResult> portTestResults = new List<PortTestResult>();
@@ -32,22 +37,22 @@ namespace F7_Micro_Board_Diagnostics
 
             // all the digitio IO pins to test
             List<IBiDirectionalPort> testDigitalPorts = new List<IBiDirectionalPort> {
-                new BiDirectionalPort(Device.Pins.D00, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D01, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D02, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D03, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D04, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D05, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D06, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D07, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D08, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D09, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D10, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D11, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D12, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D13, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D14, resistorMode : ResistorMode.PullDown),
-                new BiDirectionalPort(Device.Pins.D15, resistorMode : ResistorMode.PullDown)
+                Device.CreateBiDirectionalPort(Device.Pins.D00, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D01, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D02, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D03, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D04, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D05, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D06, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D07, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D08, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D09, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D10, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D11, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D12, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D13, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D14, resistorMode : ResistorMode.PullDown),
+                Device.CreateBiDirectionalPort(Device.Pins.D15, resistorMode : ResistorMode.PullDown)
             };
 
             // ports that are connected together
@@ -69,10 +74,9 @@ namespace F7_Micro_Board_Diagnostics
                 foreach(var port in testDigitalPorts) {
                     // turn them all input and pulled down, unless it's the high test pin
                     if (port == testDigitalPorts[i]) {
-                        // TODO: why can't i change direction?
-                        //port.Direction = PortDirectionType.Input;
+                        port.Direction = PortDirectionType.Input;
                     } else {
-                        //port.Direction = PortDirectionType.Output;
+                        port.Direction = PortDirectionType.Output;
                         port.State = true;
                     }
                 }
@@ -88,23 +92,28 @@ namespace F7_Micro_Board_Diagnostics
 
                 // loop through all the ports and check to see if they're reading 
                 // low except for the other end of the high pin.
+                bool portSuccess = true;
                 foreach (var port in testDigitalPorts) {
 
                     // if we're not the high port, or the paired port
                     if(port != testDigitalPorts[i] && port != pairedEndpointPort) {
                         if (port.State) {
                             // FAILURE: if this port is high, something is wrong.
-                            success = false;
+                            success = portSuccess = false;
                             portTestResults.Add(new PortTestResult("", false)); // TODO: Name
-                            Debug.WriteLine("Port Failure: [need .name property], should be low, but is HIGH. Short detected.");
+                            Debug.WriteLine("Port failure on pin: " + port.Pin.Name + ", channel: " + port.Channel.Name + "; should be LOW, but is HIGH. Short detected.");
                         }
                     } // if it's the port on the other 
                     else if (port != testDigitalPorts[i] && port == pairedEndpointPort) { 
                         if (!port.State) {
-                            success = false;
+                            success = portSuccess = false;
                             portTestResults.Add(new PortTestResult("", false)); // TODO: Name
-                            Debug.WriteLine("Port Failure: [name] pair should be HIGH, but it's LOW. Endpoint port read failure.");
+                            Debug.WriteLine("Port failure on pin: " + port.Pin.Name + ", channel: " + port.Channel.Name + ";  [name] pair should be HIGH, but it's LOW. Endpoint port read failure.");
                         }
+                    }
+
+                    if (portSuccess) {
+                        Debug.WriteLine("port " + port.Pin.Name + ", channel: " + port.Channel.Name + " test success.");
                     }
                 }
             }

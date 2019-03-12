@@ -47,11 +47,30 @@ namespace Meadow.Hardware
         /// Initializes a new instance of the <see cref="T:Meadow.Hardware.AnalogInputPort"/> class.
         /// </summary>
         /// <param name="pin">Pin.</param>
-        public AnalogInputPort(IAnalogPin pin, float voltageReference = 3.3f) : base(pin)
+        protected AnalogInputPort(
+            IPin pin,
+            IIOController ioController,
+            IAnalogChannelInfo channel,
+            float voltageReference = 3.3f
+            )
+            : base (pin, channel)
         {
             _voltageReference = voltageReference;
         }
 
+        public static AnalogInputPort From(
+            IPin pin,
+            IIOController ioController,
+            float voltageReference = 3.3f)
+        {
+            var chan = pin.SupportedChannels.OfType<IAnalogChannelInfo>().First();
+            if (chan != null) {
+                //TODO: need other checks here.
+                return new AnalogInputPort(pin, ioController, chan);
+            } else {
+                throw new Exception("Unable to create an analog input port on the pin, because it doesn't have an analog channel");
+            }
+        }
         protected object _lock = new object();
         private CancellationTokenSource SamplingTokenSource;
 
@@ -70,7 +89,7 @@ namespace Meadow.Hardware
         /// <param name="sampleSleepDuration">The duration, in milliseconds, to sleep
         /// before taking another sample set.
         /// </param>
-        public void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
+        public override void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
         {
             // thread safety
             lock (_lock) {
@@ -98,8 +117,9 @@ namespace Meadow.Hardware
                             Old = _previousVoltageReading,
                         };
 
+                        // TODO: need to chain in MeadowObservable Base
                         // notify observers
-                        NotifyObservers(result);
+                        //NotifyObservers(result);
 
                         // raise the classic event (if there are any)
                         // TODO: Decide if this is a good idea.
@@ -125,7 +145,7 @@ namespace Meadow.Hardware
         /// Spins down the process sampling the ADC. Any values in the 
         /// SampleBuffer will become stale after calling this method.
         /// </summary>
-        public void StopSampling()
+        public override void StopSampling()
         {
             lock (_lock) {
                 if (!IsSampling) return;
@@ -171,8 +191,13 @@ namespace Meadow.Hardware
                 await Task.Delay(sampleInterval);
             }
 
-            //TODO: decide how we want to handle STOP()             // will kill subscribers. maybe only stop if no subs             if (_observers.Count == 0 && Changed.GetInvocationList().Count() <= 1) { // TODO: is there always one because of the delegate {}?
-                StopSampling();             }  
+            //TODO: decide how we want to handle STOP()
+            // will kill subscribers. maybe only stop if no subs
+            //if (_observers.Count == 0 && Changed.GetInvocationList().Count() <= 1) { // TODO: is there always one because of the delegate {}?
+            //    StopSampling();
+            //}
+
+
             // convert samples to voltage reading:
             //  a. get the average (casting int to byte), then 
             //  b. % of read * voltageMax = V
@@ -196,6 +221,11 @@ namespace Meadow.Hardware
             if (value > maxValue) { return maxValue; }
             if (value < 0) { return 0; }
             return value;
+        }
+
+        public override void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

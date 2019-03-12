@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Meadow.Hardware
 {
@@ -7,34 +8,67 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
-        protected IDigitalPin _pin;
-        protected bool _disposed;
+        protected IIOController GpioController { get; set; }
 
         public bool GlitchFilter { get; set; }
         public ResistorMode Resistor { get; set; }
 
-        public DigitalInputPort(IDigitalPin pin, bool glitchFilter = false, ResistorMode resistorMode = ResistorMode.Disabled)
-            : base(pin)
+        protected DigitalInputPort(
+            IPin pin,
+            IIOController ioController,
+            IDigitalChannelInfo channel,
+            bool interruptEnabled = true,
+            bool glitchFilter = false,
+            ResistorMode resistorMode = ResistorMode.Disabled
+            ) : base(pin, channel, interruptEnabled )
         {
-            // attempt to reserve the pin
-            var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
+            //// attempt to reserve the pin
+            //var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
 
-            if(result.Item1)
-            {
-                this._pin = pin;
+            //if(result.Item1)
+            //{
+            //    this._pin = pin;
 
-                // make sure the pin is configured as a digital input
-                _pin.GPIOManager.ConfigureInput(_pin, glitchFilter, resistorMode, false);
+            //    // make sure the pin is configured as a digital input
+            //    _pin.GPIOManager.ConfigureInput(_pin, glitchFilter, resistorMode, false);
+            //}
+            //else
+            //{
+            //    throw new PortInUseException();
+            //}
+        }
+
+        public static DigitalInputPort From(
+            IPin pin,
+            IIOController ioController,
+            bool interruptEnabled = true,
+            bool glitchFilter = false,
+            ResistorMode resistorMode = ResistorMode.Disabled
+            )
+        {
+            var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
+            if (chan != null) {
+                //TODO: need other checks here.
+                if(interruptEnabled && (!chan.InterrruptCapable)) {
+                    throw new Exception("Unable to create input; channel is not capable of interrupts");
+                }
+                return new DigitalInputPort(pin, ioController, chan, interruptEnabled, glitchFilter, resistorMode);
+            } else {
+                throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
-            else
-            {
-                throw new PortInUseException();
-            }
+        }
+
+        public override void Dispose()
+        {
+            //TODO: implement full pattern
         }
 
         public override bool State
         {
-            get => _pin.GPIOManager.GetDiscrete(_pin);
+            //get => _pin.GPIOManager.GetDiscrete(_pin);
+            get => false;
+            //protected set { throw new Exception(); }
         }
+
     }
 }

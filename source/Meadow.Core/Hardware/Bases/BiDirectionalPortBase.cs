@@ -10,29 +10,28 @@ namespace Meadow.Hardware
         public event EventHandler<PortEventArgs> Changed;
 
         // internals
-        protected bool _disposed;
         protected bool _currentState;
         protected bool _interruptEnabled;
-        //protected PortDirectionType _currentDirection = PortDirectionType.Input;
-
 
         public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
         public ResistorMode Resistor { get; }
 
         protected BiDirectionalPortBase(
-            IDigitalPin pin,
-            bool initialState = false,
-            bool glitchFilter = false,
-            ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
-            : base(pin, initialDirection)
+            IPin pin,
+            IDigitalChannelInfo channel,
+            bool initialState,
+            bool glitchFilter,
+            ResistorMode resistorMode,
+            PortDirectionType initialDirection)
+            : base(pin, channel)
         {
             InitialState = initialState;
             Resistor = resistorMode;
+            Direction = initialDirection;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -49,5 +48,8 @@ namespace Meadow.Hardware
                 _interruptEnabled = value;
             }
         }
+
+        public abstract bool State { get; set; }
+        public abstract PortDirectionType Direction { get; set; }
     }
 }

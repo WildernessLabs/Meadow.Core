@@ -6,225 +6,96 @@ using static Meadow.Core.Interop.Interop.Nuttx;
 
 namespace Meadow.Devices
 {
-    public class F7GPIOManager : IGPIOManager
+    public class F7GPIOManager : IIOController
     {
-        private const string GPIODriverName = "/dev/gpio";
+        private const string GPDDriverName = "/dev/upd";
 
         private object _cacheLock = new object();
-        private Dictionary<string, PinDesignator> _designatorCache = new Dictionary<string, PinDesignator>();
+        private Dictionary<string, Tuple<STM32GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32GpioPort, int, uint>>();
 
         private IntPtr DriverHandle { get; }
 
         internal F7GPIOManager()
         {
-            DriverHandle = Interop.Nuttx.open(GPIODriverName, Interop.Nuttx.DriverFlags.ReadOnly);
+            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.ReadOnly);
+            if(DriverHandle == IntPtr.Zero || DriverHandle.ToInt32() == -1)
+            {
+                Console.Write("Failed to open UPD driver");
+            }
         }
 
-        public void ConfigureOutput(IDigitalPin pin, bool initialState)
+        public void Initialize()
         {
-            var designator = GetPinDesignator(pin);
+            Console.Write("Initializing GPIOs...");
 
-            // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
-            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            // LEDs are inverse logic - initialize to high/off
+            ConfigureOutput(STM32GpioPort.PortA, 0, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, true);
+            ConfigureOutput(STM32GpioPort.PortA, 1, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, true);
+            ConfigureOutput(STM32GpioPort.PortA, 2, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, true);
 
-            flags |= GPIOConfigFlags.ModeOutput;
+            // these are the "unallocated" pins on the meadow
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortI, 9, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortH, 13, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortC, 6, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortB, 8, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortB, 9, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortC, 7, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortB, 0, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortB, 1, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortH, 10, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortC, 9, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortB, 14, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortB, 15, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortG, 3, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortE, 3, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
 
-            if (initialState)
-            {
-                flags |= GPIOConfigFlags.OutputInitialValueHigh;
-            }
-            else
-            {
-                flags |= GPIOConfigFlags.OutputInitialValueLow;
-            }
+            // these are signals that run to the ESP32
+            ConfigureOutput(STM32GpioPort.PortI, 3, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortI, 2, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortD, 3, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortI, 0, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            Console.Write(".");
+            ConfigureOutput(STM32GpioPort.PortI, 10, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortF, 7, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortD, 2, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
+            ConfigureOutput(STM32GpioPort.PortB, 13, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, false);
 
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
-        }
-
-        public void ConfigureInput(IDigitalPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
-        {
-            var designator = GetPinDesignator(pin);
-
-            // this is a safe cast, as PinDesignator and GPIOConfigFlags overlap
-            var flags = (GPIOConfigFlags)designator | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-
-            flags |= GPIOConfigFlags.ModeInput;
-
-            switch (resistorMode)
-            {
-                case ResistorMode.Disabled:
-                    flags |= GPIOConfigFlags.ResistorFloat;
-                    break;
-                case ResistorMode.PullUp:
-                    flags |= GPIOConfigFlags.ResistorPullUp;
-                    break;
-                case ResistorMode.PullDown:
-                    flags |= GPIOConfigFlags.ResistorPullDown;
-                    break;
-            }
-
-            if (interruptEnabled)
-            {
-                flags |= GPIOConfigFlags.InputInterruptEnable;
-
-            }
-
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref flags);
+            Console.WriteLine("done");
         }
 
         /// <summary>
-        /// Sets the value out a discrete (digital output)
+        /// Sets the value of a discrete (digital output)
         /// </summary>
         /// <param name="pin">Pin.</param>
         /// <param name="value">If set to <c>true</c> value.</param>
-        void IGPIOManager.SetDiscrete(IDigitalPin pin, bool value)
+        void IIOController.SetDiscrete(IPin pin, bool value)
         {
-            // generate a PinState for the desired pin and value
-            var state = new GPIOPinState();
-            state.PinDesignator = GetPinDesignator(pin);
+            var designator = GetPortAndPin(pin);
 
-            switch(pin.Key.ToString())
+            var register = new Interop.STM32.UpdRegisterValue();
+            register.Address = designator.address + Interop.STM32.STM32_GPIO_BSRR_OFFSET;
+
+            if(value)
             {
-                case "PA0":
-                case "PA1":
-                case "PA2":
-                    // this device uses inverted logic for the LEDs, so invert the requested value
-                    state.State = !value;
-                    break;
-                default:
-                    state.State = value;
-                    break;
+                register.Value = 1u << designator.pin;
+            }
+            else
+            {
+                register.Value = 1u << (designator.pin + 16);
             }
 
-
-            // and ship it to the driver
-            Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.GpioIoctlFn.Write, ref state);
-        }
-
-        private PinDesignator GetPinDesignator(IPin pin)
-        {
-            var key = pin.Key.ToString();
-
-            lock (_cacheLock)
+            // write the register
+//            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+            var result = Interop.Nuttx.ioctl(DriverHandle, Interop.STM32.UpdIoctlFn.SetRegister, ref register);
+            if (result != 0)
             {
-                if (_designatorCache.ContainsKey(key))
-                {
-                    return _designatorCache[key];
-                }
-
-                // the key must be in the form 
-                // P[X][Y]
-                //  where
-                // X == port name A - K
-                // Y == 1 or 2 digit pin number. 0-15
-                if (key[0] == 'P')
-                {
-                    PinDesignator designator;
-
-                    switch (key[1])
-                    {
-                        case 'A':
-                            designator = PinDesignator.PortA;
-                            break;
-                        case 'B':
-                            designator = PinDesignator.PortB;
-                            break;
-                        case 'C':
-                            designator = PinDesignator.PortC;
-                            break;
-                        case 'D':
-                            designator = PinDesignator.PortD;
-                            break;
-                        case 'E':
-                            designator = PinDesignator.PortE;
-                            break;
-                        case 'F':
-                            designator = PinDesignator.PortF;
-                            break;
-                        case 'G':
-                            designator = PinDesignator.PortG;
-                            break;
-                        case 'H':
-                            designator = PinDesignator.PortH;
-                            break;
-                        case 'I':
-                            designator = PinDesignator.PortI;
-                            break;
-                        case 'J':
-                            designator = PinDesignator.PortJ;
-                            break;
-                        case 'K':
-                            designator = PinDesignator.PortK;
-                            break;
-                        default:
-                            throw new NotSupportedException();
-
-                    }
-
-                    if (int.TryParse(key.Substring(2), out int pinID))
-                    {
-                        switch (pinID)
-                        {
-                            case 0:
-                                designator |= PinDesignator.Pin0;
-                                break;
-                            case 1:
-                                designator |= PinDesignator.Pin1;
-                                break;
-                            case 2:
-                                designator |= PinDesignator.Pin2;
-                                break;
-                            case 3:
-                                designator |= PinDesignator.Pin3;
-                                break;
-                            case 4:
-                                designator |= PinDesignator.Pin4;
-                                break;
-                            case 5:
-                                designator |= PinDesignator.Pin5;
-                                break;
-                            case 6:
-                                designator |= PinDesignator.Pin6;
-                                break;
-                            case 7:
-                                designator |= PinDesignator.Pin7;
-                                break;
-                            case 8:
-                                designator |= PinDesignator.Pin8;
-                                break;
-                            case 9:
-                                designator |= PinDesignator.Pin9;
-                                break;
-                            case 10:
-                                designator |= PinDesignator.Pin10;
-                                break;
-                            case 11:
-                                designator |= PinDesignator.Pin11;
-                                break;
-                            case 12:
-                                designator |= PinDesignator.Pin12;
-                                break;
-                            case 13:
-                                designator |= PinDesignator.Pin13;
-                                break;
-                            case 14:
-                                designator |= PinDesignator.Pin14;
-                                break;
-                            case 15:
-                                designator |= PinDesignator.Pin15;
-                                break;
-                            default:
-                                throw new NotSupportedException();
-                        }
-                    }
-
-                    _designatorCache.Add(key, designator);
-                    return designator;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
+                Console.WriteLine($"Write failed: {result}");
             }
         }
 
@@ -233,70 +104,469 @@ namespace Meadow.Devices
         /// </summary>
         /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
         /// <param name="pin">Pin.</param>
-        public bool GetDiscrete(IDigitalPin pin)
+        public bool GetDiscrete(IPin pin)
         {
-            var designator = (int)GetPinDesignator(pin);
+            var designator = GetPortAndPin(pin);
 
-            var result = Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.GpioIoctlFn.Read, ref designator);
+            Interop.STM32.TryGetRegister(DriverHandle, designator.address + Interop.STM32.STM32_GPIO_IDR_OFFSET, out uint register);
 
-            return result != 0;
+            // each pin is a single bit in the register, check the bit associated with the pin number
+            return (register & (1 << designator.pin)) != 0;
         }
 
-        /// <summary>
-        /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).
-        /// </summary>
-        public void Initialize()
+        private (STM32GpioPort port, int pin, uint address) GetPortAndPin(IPin pin)
         {
-            // LEDs are inverse logic - initialize to high/off
-            var ledBlueInit = GPIOConfigFlags.Pin0 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var ledGreenInit = GPIOConfigFlags.Pin1 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var ledRedInit = GPIOConfigFlags.Pin2 | GPIOConfigFlags.PortA | GPIOConfigFlags.OutputInitialValueHigh | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+            var key = pin.Key.ToString();
+            STM32GpioPort port;
+            uint address;
 
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ledBlueInit);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ledGreenInit);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ledRedInit);
+            lock (_portPinCache)
+            {
+                if (_portPinCache.ContainsKey(key))
+                {
+                    return (_portPinCache[key].Item1, _portPinCache[key].Item2, _portPinCache[key].Item3);
+                }
+                switch (key[1])
+                {
+                    case 'A':
+                        port = STM32GpioPort.PortA;
+                        address = Interop.STM32.GPIOA_BASE;
+                        break;
+                    case 'B':
+                        port = STM32GpioPort.PortB;
+                        address = Interop.STM32.GPIOB_BASE;
+                        break;
+                    case 'C':
+                        port = STM32GpioPort.PortC;
+                        address = Interop.STM32.GPIOC_BASE;
+                        break;
+                    case 'D':
+                        port = STM32GpioPort.PortD;
+                        address = Interop.STM32.GPIOD_BASE;
+                        break;
+                    case 'E':
+                        port = STM32GpioPort.PortE;
+                        address = Interop.STM32.GPIOE_BASE;
+                        break;
+                    case 'F':
+                        port = STM32GpioPort.PortF;
+                        address = Interop.STM32.GPIOF_BASE;
+                        break;
+                    case 'G':
+                        port = STM32GpioPort.PortG;
+                        address = Interop.STM32.GPIOG_BASE;
+                        break;
+                    case 'H':
+                        port = STM32GpioPort.PortH;
+                        address = Interop.STM32.GPIOH_BASE;
+                        break;
+                    case 'I':
+                        port = STM32GpioPort.PortI;
+                        address = Interop.STM32.GPIOI_BASE;
+                        break;
+                    case 'J':
+                        port = STM32GpioPort.PortJ;
+                        address = Interop.STM32.GPIOJ_BASE;
+                        break;
+                    case 'K':
+                        port = STM32GpioPort.PortK;
+                        address = Interop.STM32.GPIOK_BASE;
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
 
-            // all port pins seem to be inverse on this board
+                if (int.TryParse(key.Substring(2), out int pinID))
+                {
+                    return (port, pinID, address);
+                }
 
-            // these are the "unallocated pin on the meadow
-            var pi9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortI | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var ph13 = GPIOConfigFlags.Pin13 | GPIOConfigFlags.PortH | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pc6 = GPIOConfigFlags.Pin6 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb8 = GPIOConfigFlags.Pin8 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pc7 = GPIOConfigFlags.Pin7 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb0 = GPIOConfigFlags.Pin0 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb7 = GPIOConfigFlags.Pin7 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb6 = GPIOConfigFlags.Pin6 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb1 = GPIOConfigFlags.Pin1 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var ph10 = GPIOConfigFlags.Pin10 | GPIOConfigFlags.PortH | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pc9 = GPIOConfigFlags.Pin9 | GPIOConfigFlags.PortC | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb14 = GPIOConfigFlags.Pin14 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pb15 = GPIOConfigFlags.Pin15 | GPIOConfigFlags.PortB | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pg3 = GPIOConfigFlags.Pin3 | GPIOConfigFlags.PortG | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
-            var pe3 = GPIOConfigFlags.Pin3 | GPIOConfigFlags.PortE | GPIOConfigFlags.OutputInitialValueLow | GPIOConfigFlags.Speed50MHz | GPIOConfigFlags.ModeOutput;
+                throw new NotSupportedException();
+            }
+        }
 
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pi9);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ph13);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pc6);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb8);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb9);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pc7);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb0);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb7);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb6);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb1);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref ph10);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pc9);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb14);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pb15);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pg3);
-            Interop.Nuttx.ioctl(DriverHandle, GpioIoctlFn.SetConfig, ref pe3);
+        public void ConfigureOutput(IPin pin, bool initialState)
+        {
+            ConfigureOutput(pin, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_50MHz, STM32OutputType.PushPull, initialState);
+        }
+
+        public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
+        {
+            // translate resistor mode
+            STM32ResistorMode mode32;
+            if (resistorMode == ResistorMode.Disabled)
+            {
+                mode32 = STM32ResistorMode.Float;
+            }
+            else if (resistorMode == ResistorMode.PullUp)
+            {
+                mode32 = STM32ResistorMode.PullUp;
+            }
+            else
+            {
+                mode32 = STM32ResistorMode.PullDown;
+            }
+
+            ConfigureInput(pin, mode32, interruptEnabled);
+        }
+
+        private enum STM32GpioPort
+        {
+            PortA,
+            PortB,
+            PortC,
+            PortD,
+            PortE,
+            PortF,
+            PortG,
+            PortH,
+            PortI,
+            PortJ,
+            PortK,
+        }
+
+        private enum STM32GpioMode
+        {
+            Input = 0,
+            Output = 1,
+            AlternateFunction = 2,
+            Analog = 3
+        }
+
+        private enum STM32OutputType
+        {
+            PushPull = 0,
+            OpenDrain = 1
+        }
+
+        private enum STM32ResistorMode
+        {
+            Float = 0,
+            PullUp = 1,
+            PullDown = 2
+        }
+
+        private enum STM32GPIOSpeed
+        {
+            Speed_2MHz = 0,
+            Speed_25MHz = 1,
+            Speed_50MHz = 2,
+            Speed_100MHz = 3
+        }
+
+        private bool ConfigureInput(IPin pin, STM32ResistorMode resistor, bool enableInterrupts)
+        {
+            return ConfigureGpio(pin, STM32GpioMode.Input, resistor, STM32GPIOSpeed.Speed_2MHz, STM32OutputType.PushPull, false, enableInterrupts);
+        }
+
+        private bool ConfigureInput(STM32GpioPort port, int pin, STM32ResistorMode resistor, bool enableInterrupts)
+        {
+            return ConfigureGpio(port, pin, STM32GpioMode.Input, resistor, STM32GPIOSpeed.Speed_2MHz, STM32OutputType.PushPull, false, enableInterrupts);
+        }
+
+        private bool ConfigureOutput(IPin pin, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type, bool initialState)
+        {
+            return ConfigureGpio(pin, STM32GpioMode.Output, resistor, speed, type, initialState, false);
+        }
+
+        private bool ConfigureOutput(STM32GpioPort port, int pin, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type, bool initialState)
+        {
+            return ConfigureGpio(port, pin, STM32GpioMode.Output, resistor, speed, type, initialState, false);
+        }
+
+        private bool ConfigureADC(STM32GpioPort port, int pin)
+        {
+            // set up the pin for analog
+            ConfigureGpio(port, pin, STM32GpioMode.Analog, STM32ResistorMode.Float, STM32GPIOSpeed.Speed_2MHz, STM32OutputType.PushPull, false, false);
+
+            // TODO: if it was non-analog, do we need to adjust any of the ADC registers?
+
+            return true;
+        }
+
+        private bool InitializeADC()
+        {
+            // do the grunt work to set up the ADC itself
+
+            // enable the ADC1 clock - all Meadow ADCs are in ADC1
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.RCC_BASE + Interop.STM32.STM32_RCC_APB2ENR_OFFSET, 0, (1u << 8));
+
+            // reset the ADC RCC clock - set the reset bit
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.RCC_BASE + Interop.STM32.STM32_RCC_APB2RSTR_OFFSET, 0, (1u << 8));
+            // clear the reset bit
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.RCC_BASE + Interop.STM32.STM32_RCC_APB2RSTR_OFFSET, (1u << 8), 0);
+
+            // clear the SR status register
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SR_OFFSET,
+                0x1f, 0);
+
+            // clear the CR1 control register.  This translates to:
+            //  Disable all interrupts
+            //  12-bit resolution
+            //  Watchdog disabled
+            //  Discontinuous mode disabled
+            //  Auto conversion disabled
+            //  scan mode disabled
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR1_OFFSET,
+                0x7c0ffffF, 0);
+
+            // Set up the CR2 control register.  This translates to:
+            //  external trigger disabled
+            //  data align right
+            //  set EOC at the end of each conversion
+            //  DMA disabled
+            //  single conversion mode
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
+                0x7f7f0b03, (1 << 10));
+
+            // Set up the SMPR1 sample time register.  This translates to:
+            //  112 samle cycles for channels 10 & 11 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle, 
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SMPR1_OFFSET,
+                0x7ffffc0, 0x2d);
+
+            // Set up the SMPR2 sample time register.  This translates to:
+            //  112 samle cycles for channels 3 & 7 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SMPR2_OFFSET,
+                0x3f1ff1ff, 0xa00a00);
+
+            // Set up the SQR1 sequence register.  This translates to:
+            //  One (1) conversion 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR1_OFFSET,
+                0x00ffffff, 0);
+
+            // Set up the SQR2 sequence register.  This translates to:
+            //  no conversions 7-12 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR2_OFFSET,
+                0x03fffffff, 0);
+
+
+            // Set up the SQR3 sequence register.  This translates to:
+            //  no conversions 0-6 
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
+                0x03fffffff, 0);
+                
+            // Set up the CCR common control register.  This translates to:
+            //  temp sensor disabled
+            //  vBAT disabled
+            //  prescaler PCLK2 / 4
+            //  DMA disabled
+            //  independent ADCs
+            // 
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
+                0xc0ef1f, (1 << 16));
+                
+            return true;
+        }
+
+        public uint GetAnalog(IPin pin)
+        {
+            var designator = GetPortAndPin(pin);
+            // set up the GPIO
+            ConfigureADC(designator.port, designator.pin);
+
+            // adjust the SQR3 sequence register to tell it which channel to convert
+            // TODO: get this channel based on the pin
+            var channel = 3u;
+
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_SQR3_OFFSET,
+                channel, 0);
+
+            // enable the ADC via the CR2 register's ADON bit
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
+                1, 0);
+
+            // start a conversion via the CR2 SWSTART bit
+            Interop.STM32.UpdateRegister(DriverHandle,
+                Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET,
+                1 << 30, 0);
+
+            // poll the status register - wait for conversion complete
+            var ready = false;
+            do
+            {
+                if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_CR2_OFFSET, out uint register_sr))
+                {
+                    ready = (register_sr & (1 << 1)) != 0;
+                }
+                // TODO: we need a timeout here to prevent deadlock if the SR never comes on
+
+                // yield
+                System.Threading.Thread.Sleep(0);
+            } while (!ready);
+
+            // read the data register
+            if (Interop.STM32.TryGetRegister(DriverHandle, Interop.STM32.MEADOW_ADC1_BASE + Interop.STM32.ADC_DR_OFFSET, out uint register_dr))
+            {
+                return register_dr;
+            }
+
+            throw new Exception("Conversion failed");
+        }
+
+        private bool ConfigureGpio(IPin pin, STM32GpioMode mode, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type, bool initialState, bool enableInterrupts)
+        {
+            var designator = GetPortAndPin(pin);
+
+            return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, enableInterrupts);
+        }
+
+        private bool ConfigureGpio(STM32GpioPort port, int pin, STM32GpioMode mode, STM32ResistorMode resistor, STM32GPIOSpeed speed, STM32OutputType type, bool initialState, bool enableInterrupts) 
+        {
+            int setting = 0;
+            uint base_addr = 0;
+
+            switch (port)
+            {
+                case STM32GpioPort.PortA: base_addr = Interop.STM32.GPIOA_BASE; break;
+                case STM32GpioPort.PortB: base_addr = Interop.STM32.GPIOB_BASE; break;
+                case STM32GpioPort.PortC: base_addr = Interop.STM32.GPIOC_BASE; break;
+                case STM32GpioPort.PortD: base_addr = Interop.STM32.GPIOD_BASE; break;
+                case STM32GpioPort.PortE: base_addr = Interop.STM32.GPIOE_BASE; break;
+                case STM32GpioPort.PortF: base_addr = Interop.STM32.GPIOF_BASE; break;
+                case STM32GpioPort.PortG: base_addr = Interop.STM32.GPIOG_BASE; break;
+                case STM32GpioPort.PortH: base_addr = Interop.STM32.GPIOH_BASE; break;
+                case STM32GpioPort.PortI: base_addr = Interop.STM32.GPIOI_BASE; break;
+                case STM32GpioPort.PortJ: base_addr = Interop.STM32.GPIOJ_BASE; break;
+                case STM32GpioPort.PortK: base_addr = Interop.STM32.GPIOK_BASE; break;
+                default: throw new ArgumentException();
+            }
+
+            // TODO: we probably need to disable interrupts here (enter critical section)
+
+            ////// ====== MODE ======
+            // if this is an output, set the initial state
+            if (mode == STM32GpioMode.Output)
+            {
+                var state = initialState ? 1u << pin : 1u << (16 + pin);
+
+                Interop.STM32.SetRegister(DriverHandle, base_addr + Interop.STM32.STM32_GPIO_BSRR_OFFSET, state);
+            }
+
+            UpdateConfigRegister2Bit(base_addr + Interop.STM32.STM32_GPIO_MODER_OFFSET, (int)mode, pin);
+
+            ////// ====== RESISTOR ======
+            setting = 0;
+            if (mode != STM32GpioMode.Analog)
+            {
+                setting = (int)resistor;
+            }
+            UpdateConfigRegister2Bit(base_addr + Interop.STM32.STM32_GPIO_PUPDR_OFFSET, setting, pin);
+
+
+            if (mode == STM32GpioMode.AlternateFunction)
+            {
+                ////// ====== ALTERNATE FUNCTION ======
+                // TODO:
+            }
+
+            ////// ====== SPEED ======
+            setting = 0;
+            if (mode == STM32GpioMode.AlternateFunction || mode == STM32GpioMode.Output)
+            {
+                setting = (int)speed;
+            }
+            UpdateConfigRegister2Bit(base_addr + Interop.STM32.STM32_GPIO_OSPEED_OFFSET, setting, pin);
+
+            ////// ====== OUTPUT TYPE ======
+            if(mode == STM32GpioMode.Output || mode == STM32GpioMode.AlternateFunction)
+            {
+                UpdateConfigRegister1Bit(base_addr + Interop.STM32.STM32_GPIO_OTYPER_OFFSET, (type == STM32OutputType.OpenDrain), pin);
+            }
+            else
+            {
+                UpdateConfigRegister1Bit(base_addr + Interop.STM32.STM32_GPIO_OTYPER_OFFSET, false, pin);
+            }
+
+
+            // TODO INTERRUPTS
+
+            return true;
+        }
+
+        private bool UpdateConfigRegister1Bit(uint address, bool value, int pin)
+        {
+            if(!Interop.STM32.TryGetRegister(DriverHandle, address, out uint register))
+            {
+                return false;
+            }
+
+            var temp = register;
+            if(value)
+            {
+                temp |= (1u << pin);
+            }
+            else
+            {
+                temp &= ~(1u << pin);
+            }
+
+            // write the register
+            return Interop.STM32.SetRegister(DriverHandle, address, temp);
+        }
+
+        private bool UpdateConfigRegister2Bit(uint address, int value, int pin)
+        {
+            return Interop.STM32.UpdateRegister(DriverHandle, address, 0, (uint)(value & 3) << (pin << 1));
+        }
+
+        private bool UpdateConfigRegister2Bit_old(uint address, int value, int pin)
+        {
+            var register = new Interop.STM32.UpdRegisterValue();
+            register.Address = address;
+//            Console.WriteLine($"Reading register: {register.Address:X}");
+            var result = Interop.Nuttx.ioctl(DriverHandle, Interop.STM32.UpdIoctlFn.GetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Read failed: {result}");
+                return false;
+            }
+//            Console.WriteLine($"Value: {register.Value:X}");
+
+            var temp = register.Value;
+            // mask off the bits we're interested in
+            temp &= ~(3u << pin);
+            // set the register bits
+            temp |= (uint)value << (pin << 1);
+            // write the register
+            register.Value = temp;
+//            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+            result = Interop.Nuttx.ioctl(DriverHandle, Interop.STM32.UpdIoctlFn.SetRegister, ref register);
+            if (result != 0)
+            {
+                Console.WriteLine($"Write failed: {result}");
+                return false;
+            }
+            return true;
         }
     }
 
     /* ===== MEADOW GPIO PIN MAP =====
         BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?
+        J301-1      RESET                       
+        J301-2      3.3                       
+        J301-3      VREF                       
+        J301-4      GND                       
         J301-5      DAC_OUT1        PA4         A0
         J301-6      DAC_OUT2        PA5         A1
         J301-7      ADC1_IN3        PA3         A2
