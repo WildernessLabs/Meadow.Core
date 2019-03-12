@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Meadow.Core.Interop
+namespace Meadow.Core
 {
     internal static partial class Interop
     {   // /dev/wdt
