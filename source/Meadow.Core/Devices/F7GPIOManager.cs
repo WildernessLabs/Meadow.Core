@@ -11,7 +11,7 @@ namespace Meadow.Devices
         private const string GPDDriverName = "/dev/upd";
 
         private object _cacheLock = new object();
-        private Dictionary<string, Tuple<STM32.STM32GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.STM32GpioPort, int, uint>>();
+        private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
         private IntPtr DriverHandle { get; }
 
@@ -29,42 +29,42 @@ namespace Meadow.Devices
             Console.Write("Initializing GPIOs...");
 
             // LEDs are inverse logic - initialize to high/off
-            ConfigureOutput(STM32.STM32GpioPort.PortA, 0, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
-            ConfigureOutput(STM32.STM32GpioPort.PortA, 1, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
-            ConfigureOutput(STM32.STM32GpioPort.PortA, 2, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
+            ConfigureOutput(STM32.GpioPort.PortA, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
+            ConfigureOutput(STM32.GpioPort.PortA, 1, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
+            ConfigureOutput(STM32.GpioPort.PortA, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
 
             // these are the "unallocated" pins on the meadow
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortI, 9, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortH, 13, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortC, 6, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortI, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortH, 13, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortC, 6, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 8, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 9, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortC, 7, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 8, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortC, 7, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 0, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 1, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortH, 10, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 1, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortH, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortC, 9, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 14, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 15, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortC, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 14, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 15, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortG, 3, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortE, 3, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortG, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortE, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
 
             // these are signals that run to the ESP32
-            ConfigureOutput(STM32.STM32GpioPort.PortI, 3, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortI, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortI, 2, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortD, 3, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortI, 0, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortI, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortD, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortI, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             Console.Write(".");
-            ConfigureOutput(STM32.STM32GpioPort.PortI, 10, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortF, 7, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortD, 2, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.STM32GpioPort.PortB, 13, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortI, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortF, 7, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortD, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureOutput(STM32.GpioPort.PortB, 13, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
 
             Console.WriteLine("done");
         }
@@ -116,10 +116,10 @@ namespace Meadow.Devices
             return (register & (1 << designator.pin)) != 0;
         }
 
-        private (STM32.STM32GpioPort port, int pin, uint address) GetPortAndPin(IPin pin)
+        private (STM32.GpioPort port, int pin, uint address) GetPortAndPin(IPin pin)
         {
             var key = pin.Key.ToString();
-            STM32.STM32GpioPort port;
+            STM32.GpioPort port;
             uint address;
 
             lock (_portPinCache)
@@ -131,47 +131,47 @@ namespace Meadow.Devices
                 switch (key[1])
                 {
                     case 'A':
-                        port = STM32.STM32GpioPort.PortA;
+                        port = STM32.GpioPort.PortA;
                         address = STM32.GPIOA_BASE;
                         break;
                     case 'B':
-                        port = STM32.STM32GpioPort.PortB;
+                        port = STM32.GpioPort.PortB;
                         address = STM32.GPIOB_BASE;
                         break;
                     case 'C':
-                        port = STM32.STM32GpioPort.PortC;
+                        port = STM32.GpioPort.PortC;
                         address = STM32.GPIOC_BASE;
                         break;
                     case 'D':
-                        port = STM32.STM32GpioPort.PortD;
+                        port = STM32.GpioPort.PortD;
                         address = STM32.GPIOD_BASE;
                         break;
                     case 'E':
-                        port = STM32.STM32GpioPort.PortE;
+                        port = STM32.GpioPort.PortE;
                         address = STM32.GPIOE_BASE;
                         break;
                     case 'F':
-                        port = STM32.STM32GpioPort.PortF;
+                        port = STM32.GpioPort.PortF;
                         address = STM32.GPIOF_BASE;
                         break;
                     case 'G':
-                        port = STM32.STM32GpioPort.PortG;
+                        port = STM32.GpioPort.PortG;
                         address = STM32.GPIOG_BASE;
                         break;
                     case 'H':
-                        port = STM32.STM32GpioPort.PortH;
+                        port = STM32.GpioPort.PortH;
                         address = STM32.GPIOH_BASE;
                         break;
                     case 'I':
-                        port = STM32.STM32GpioPort.PortI;
+                        port = STM32.GpioPort.PortI;
                         address = STM32.GPIOI_BASE;
                         break;
                     case 'J':
-                        port = STM32.STM32GpioPort.PortJ;
+                        port = STM32.GpioPort.PortJ;
                         address = STM32.GPIOJ_BASE;
                         break;
                     case 'K':
-                        port = STM32.STM32GpioPort.PortK;
+                        port = STM32.GpioPort.PortK;
                         address = STM32.GPIOK_BASE;
                         break;
                     default:
@@ -189,74 +189,74 @@ namespace Meadow.Devices
 
         public void ConfigureOutput(IPin pin, bool initialState)
         {
-            ConfigureOutput(pin, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, initialState);
+            ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, initialState);
         }
 
         public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
         {
             // translate resistor mode
-            STM32.STM32ResistorMode mode32;
+            STM32.ResistorMode mode32;
             if (resistorMode == ResistorMode.Disabled)
             {
-                mode32 = STM32.STM32ResistorMode.Float;
+                mode32 = STM32.ResistorMode.Float;
             }
             else if (resistorMode == ResistorMode.PullUp)
             {
-                mode32 = STM32.STM32ResistorMode.PullUp;
+                mode32 = STM32.ResistorMode.PullUp;
             }
             else
             {
-                mode32 = STM32.STM32ResistorMode.PullDown;
+                mode32 = STM32.ResistorMode.PullDown;
             }
 
             ConfigureInput(pin, mode32, interruptEnabled);
         }
 
-        private bool ConfigureInput(IPin pin, STM32.STM32ResistorMode resistor, bool enableInterrupts)
+        private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, bool enableInterrupts)
         {
-            return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.STM32GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
+            return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
         }
 
-        private bool ConfigureInput(STM32.STM32GpioPort port, int pin, STM32.STM32ResistorMode resistor, bool enableInterrupts)
+        private bool ConfigureInput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, bool enableInterrupts)
         {
-            return ConfigureGpio(port, pin, STM32.GpioMode.Input, resistor, STM32.STM32GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
+            return ConfigureGpio(port, pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
         }
 
-        private bool ConfigureOutput(IPin pin, STM32.STM32ResistorMode resistor, STM32.STM32GPIOSpeed speed, STM32.OutputType type, bool initialState)
+        private bool ConfigureOutput(IPin pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
             return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, false);
         }
 
-        private bool ConfigureOutput(STM32.STM32GpioPort port, int pin, STM32.STM32ResistorMode resistor, STM32.STM32GPIOSpeed speed, STM32.OutputType type, bool initialState)
+        private bool ConfigureOutput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
             return ConfigureGpio(port, pin, STM32.GpioMode.Output, resistor, speed, type, initialState, false);
         }
 
-        private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.STM32ResistorMode resistor, STM32.STM32GPIOSpeed speed, STM32.OutputType type, bool initialState, bool enableInterrupts)
+        private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, bool enableInterrupts)
         {
             var designator = GetPortAndPin(pin);
 
             return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, enableInterrupts);
         }
 
-        private bool ConfigureGpio(STM32.STM32GpioPort port, int pin, STM32.GpioMode mode, STM32.STM32ResistorMode resistor, STM32.STM32GPIOSpeed speed, STM32.OutputType type, bool initialState, bool enableInterrupts)
+        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, bool enableInterrupts)
         {
             int setting = 0;
             uint base_addr = 0;
 
             switch (port)
             {
-                case STM32.STM32GpioPort.PortA: base_addr = STM32.GPIOA_BASE; break;
-                case STM32.STM32GpioPort.PortB: base_addr = STM32.GPIOB_BASE; break;
-                case STM32.STM32GpioPort.PortC: base_addr = STM32.GPIOC_BASE; break;
-                case STM32.STM32GpioPort.PortD: base_addr = STM32.GPIOD_BASE; break;
-                case STM32.STM32GpioPort.PortE: base_addr = STM32.GPIOE_BASE; break;
-                case STM32.STM32GpioPort.PortF: base_addr = STM32.GPIOF_BASE; break;
-                case STM32.STM32GpioPort.PortG: base_addr = STM32.GPIOG_BASE; break;
-                case STM32.STM32GpioPort.PortH: base_addr = STM32.GPIOH_BASE; break;
-                case STM32.STM32GpioPort.PortI: base_addr = STM32.GPIOI_BASE; break;
-                case STM32.STM32GpioPort.PortJ: base_addr = STM32.GPIOJ_BASE; break;
-                case STM32.STM32GpioPort.PortK: base_addr = STM32.GPIOK_BASE; break;
+                case STM32.GpioPort.PortA: base_addr = STM32.GPIOA_BASE; break;
+                case STM32.GpioPort.PortB: base_addr = STM32.GPIOB_BASE; break;
+                case STM32.GpioPort.PortC: base_addr = STM32.GPIOC_BASE; break;
+                case STM32.GpioPort.PortD: base_addr = STM32.GPIOD_BASE; break;
+                case STM32.GpioPort.PortE: base_addr = STM32.GPIOE_BASE; break;
+                case STM32.GpioPort.PortF: base_addr = STM32.GPIOF_BASE; break;
+                case STM32.GpioPort.PortG: base_addr = STM32.GPIOG_BASE; break;
+                case STM32.GpioPort.PortH: base_addr = STM32.GPIOH_BASE; break;
+                case STM32.GpioPort.PortI: base_addr = STM32.GPIOI_BASE; break;
+                case STM32.GpioPort.PortJ: base_addr = STM32.GPIOJ_BASE; break;
+                case STM32.GpioPort.PortK: base_addr = STM32.GPIOK_BASE; break;
                 default: throw new ArgumentException();
             }
 

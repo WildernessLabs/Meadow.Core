@@ -16,10 +16,10 @@ namespace Meadow.Devices
             // on the Meadow, all ADCs are in in ADC1
             switch (designator.port)
             {
-                case STM32.STM32GpioPort.PortA:
+                case STM32.GpioPort.PortA:
                     ConfigureADC(designator.port, designator.pin);
                     break;
-                case STM32.STM32GpioPort.PortC:
+                case STM32.GpioPort.PortC:
                     // channel 10 starts at C0 (see STM32F777xx pinouts, pg 68)
                     ConfigureADC(designator.port, designator.pin + 10);
                     break;
@@ -30,10 +30,10 @@ namespace Meadow.Devices
             // NOTE: ADC registers will be set when the channel is actually queried
         }
 
-        private bool ConfigureADC(STM32.STM32GpioPort port, int pin)
+        private bool ConfigureADC(STM32.GpioPort port, int pin)
         {
             // set up the pin for analog
-            ConfigureGpio(port, pin, STM32.GpioMode.Analog, STM32.STM32ResistorMode.Float, STM32.STM32GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, false);
+            ConfigureGpio(port, pin, STM32.GpioMode.Analog, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, false);
 
             // TODO: if it was non-analog, do we need to adjust any of the ADC registers?
 
@@ -141,10 +141,10 @@ namespace Meadow.Devices
 
             switch (designator.port)
             {
-                case STM32.STM32GpioPort.PortA:
+                case STM32.GpioPort.PortA:
                     channel = designator.pin;
                     break;
-                case STM32.STM32GpioPort.PortC:
+                case STM32.GpioPort.PortC:
                     channel = designator.pin + 10;
                     break;
                 default:

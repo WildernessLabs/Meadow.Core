@@ -42,7 +42,7 @@ namespace Meadow.Core
             public const int ADC_DR_OFFSET = 0x4c;
             public const int ADC_CCR_OFFSET = 0x0304;
 
-            public enum STM32GpioPort
+            public enum GpioPort
             {
                 PortA,
                 PortB,
@@ -57,14 +57,14 @@ namespace Meadow.Core
                 PortK,
             }
 
-            public enum STM32ResistorMode
+            public enum ResistorMode
             {
                 Float = 0,
                 PullUp = 1,
                 PullDown = 2
             }
 
-            public enum STM32GPIOSpeed
+            public enum GPIOSpeed
             {
                 Speed_2MHz = 0,
                 Speed_25MHz = 1,
