@@ -30,6 +30,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bases\MeadowObservableBase.cs" />
+    <Compile Include="MeadowObserver.cs" />
     <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
     <Compile Include="Peripherals\Displays\IDisplay.cs" />
     <Compile Include="Peripherals\Displays\ITextDisplay.cs" />
@@ -167,6 +169,9 @@
     <Compile Include="Interop\Interop.upd.cs" />
     <Compile Include="Hardware\Contracts\II2cChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\ICommunicationChannelInfo.cs" />
+    <Compile Include="Contracts\IChangeResult.cs" />
+    <Compile Include="Bases\FloatChangeResult.cs" />
+    <Compile Include="Bases\NumericChangeResultBase.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
