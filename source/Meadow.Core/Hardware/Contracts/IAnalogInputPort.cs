@@ -8,12 +8,14 @@ namespace Meadow.Hardware
     /// </summary>
     public interface IAnalogInputPort : IAnalogPort
     {
+        // TODO: BrianK - uncomment after adding FloatChangeResult
+        //event EventHandler<FloatChangeResult> Changed;
+
+//        bool IsSampling { get; }
+
         int Read();
 
-//        Task<byte> Read(int sampleCount, int sampleInterval);
-//        Task<byte> ReadVoltage(
-//            int sampleCount,
-//            int sampleInterval,
-//            float referenceVoltage);
+//        void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
+//        void StopSampling();
     }
 }

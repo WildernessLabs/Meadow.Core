@@ -1,22 +1,26 @@
-﻿//using System;
-//using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
-//namespace Meadow.Hardware
-//{
-//    /// <summary>
-//    /// Provides a base implementation for much of the common tasks of 
-//    /// implementing IAnalogInputPort
-//    /// </summary>
-//    public abstract class AnalogInputPortBase : AnalogPortBase, IAnalogInputPort
-//    {
-//        public override PortDirectionType Direction => PortDirectionType.Input;
+namespace Meadow.Hardware
+{
+    /// <summary>
+    /// Provides a base implementation for much of the common tasks of 
+    /// implementing IAnalogInputPort
+    /// </summary>
+    public abstract class AnalogInputPortBase : AnalogPortBase, IAnalogInputPort
+    {
+//        public bool IsSampling { get; protected set; } = false;
 
-//        protected AnalogInputPortBase(IAnalogChannelInfo channelInfo)
-//            : base (channelInfo)
-//        {
-//        }
+        protected AnalogInputPortBase(IPin pin, IAnalogChannelInfo channel)
+            : base (pin, channel)
+        {
+        }
 
-//        public abstract Task<byte> Read(int sampleCount, int sampleInterval);
-//        public abstract Task<byte> ReadVoltage(int sampleCount, int sampleInterval, float referenceVoltage);
-//    }
-//}
+        public abstract int Read();
+//        public abstract Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
+
+//        public abstract void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
+
+//        public abstract void StopSampling();
+    }
+}

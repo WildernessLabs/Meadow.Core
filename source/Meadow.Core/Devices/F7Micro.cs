@@ -76,7 +76,7 @@ namespace Meadow.Devices
             IPin pin,
             float voltageReference = 3.3f)
         {
-            return AnalogInputPort.From(pin, this.IoController);
+            return AnalogInputPort.From(pin, this.IoController, voltageReference);
         }
 
         public IPwmPort CreatePwmPort(
