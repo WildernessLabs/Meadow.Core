@@ -12,7 +12,7 @@ namespace GpioInterrogation
             foreach(var pin in Device.Pins.AllPins) {
                 Console.WriteLine("Found pin: " + pin.Name);
                 foreach (var channel in pin.SupportedChannels) {
-                    Console.WriteLine("Contains " + channel.Name + "channel.");
+                    Console.WriteLine("Contains a " + channel.GetType() + "channel called: " + channel.Name + ".");
                 }
             }
         }
