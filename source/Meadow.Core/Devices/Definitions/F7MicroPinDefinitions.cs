@@ -256,58 +256,82 @@ namespace Meadow.Devices
                     new AnalogChannelInfo("ADC1_IN11", 12)
                 }
             );
+            // SCK
+            // SPI3_CLK
+            public readonly IPin SCK = new Pin(
+                "SCK", "PC10",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PC10")
+                }
+            );
+            // MOSI
+            // SPI3_MOSI
+            public readonly IPin MOSI = new Pin(
+                "MOSI", "PB5",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PB5")
+                }
+            );
+            // MISO
+            // SPI3_MISO
+            public readonly IPin MISO = new Pin(
+                "MISO", "PC11",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PC11")
+                }
+            );
 
             // ESP_MOSI
-            public readonly IPin ESP_MOSI = new Pin(
+            internal readonly IPin ESP_MOSI = new Pin(
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI3"),
                 }
             );
             // ESP_MISO
-            public readonly IPin ESP_MISO = new Pin(
+            internal readonly IPin ESP_MISO = new Pin(
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI2"),
                 }
             );
             // ESP_CLK
-            public readonly IPin ESP_CLK = new Pin(
+            internal readonly IPin ESP_CLK = new Pin(
                 "ESP_CLK", "PD3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD3"),
                 }
             );
             // ESP_CS
-            public readonly IPin ESP_CS = new Pin(
+            internal readonly IPin ESP_CS = new Pin(
                 "ESP_CS", "PI0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI0"),
                 }
             );
             // ESP_BOOT
-            public readonly IPin ESP_BOOT = new Pin(
+            internal readonly IPin ESP_BOOT = new Pin(
                 "ESP_BOOT", "PI10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI10"),
                 }
             );
             // ESP_RST
-            public readonly IPin ESP_RST = new Pin(
+            internal readonly IPin ESP_RST = new Pin(
                 "ESP_RST", "PF7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF7"),
                 }
             );
             // ESP_UART_RX
-            public readonly IPin ESP_UART_RX = new Pin(
+            internal readonly IPin ESP_UART_RX = new Pin(
                 "ESP_UART_RX", "PD2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD2"),
                 }
             );
             // ESP_UART_TX
-            public readonly IPin ESP_UART_TX = new Pin(
+            internal readonly IPin ESP_UART_TX = new Pin(
                 "ESP_UART_TX", "PB13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB13"),
@@ -322,6 +346,9 @@ namespace Meadow.Devices
                 AllPins.Add(this.A03);
                 AllPins.Add(this.A04);
                 AllPins.Add(this.A05);
+                AllPins.Add(this.SCK);
+                AllPins.Add(this.MOSI);
+                AllPins.Add(this.MISO);
                 AllPins.Add(this.D00);
                 AllPins.Add(this.D01);
                 AllPins.Add(this.D02);
