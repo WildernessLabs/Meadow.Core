@@ -6,8 +6,7 @@
     public abstract class DigitalOutputPortBase : DigitalPortBase, IDigitalOutputPort
     {
         /// <summary>
-        /// The InitialState property is backed by the readonly bool 
-        /// _initialState member and should be during the constructor.
+        /// The initial state of the port.
         /// </summary>
         public bool InitialState { get; protected set; }
 
