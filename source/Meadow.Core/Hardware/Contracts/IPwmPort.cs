@@ -19,7 +19,7 @@
         // TODO: correct type?
         float Frequency { get; set; }
 
-        bool Inverted { get; }
+        bool Inverted { get; set; }
 
         TimeScaleFactor Scale { get; set; }
 

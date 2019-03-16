@@ -17,9 +17,9 @@ namespace Meadow.Hardware
             IIOController ioController,
             IPwmChannelInfo channel,
             float frequency = 100, 
-            float dutyCycle = 0, 
-            bool inverted = false) 
-            : base (pin, channel, inverted)
+            float dutyCycle = 0
+            /*bool inverted = false*/) 
+            : base (pin, channel)
         {
         }
 
@@ -27,13 +27,13 @@ namespace Meadow.Hardware
             IPin pin,
             IIOController ioController,
             float frequency = 100,
-            float dutyCycle = 0,
-            bool inverted = false)
+            float dutyCycle = 0
+            /*bool inverted = false*/)
         {
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
             if (channel != null) {
                 //TODO: need other checks here.
-                return new PwmPort(pin, ioController, channel, frequency, dutyCycle, inverted);
+                return new PwmPort(pin, ioController, channel, frequency, dutyCycle);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
             }

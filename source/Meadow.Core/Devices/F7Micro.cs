@@ -82,10 +82,10 @@ namespace Meadow.Devices
         public IPwmPort CreatePwmPort(
             IPin pin,
             float frequency = 100,
-            float dutyCycle = 0,
-            bool inverted = false)
+            float dutyCycle = 0
+            /*bool inverted = false*/)
         {
-            return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted);
+            return PwmPort.From(pin, this.IoController, frequency, dutyCycle);
         }
 
 

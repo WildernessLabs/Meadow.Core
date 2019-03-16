@@ -5,15 +5,15 @@ namespace Meadow.Hardware
     {
         public IPwmChannelInfo ChannelInfo { get; protected set; }
 
-        public bool Inverted { get; protected set; }
+        public bool Inverted { get; set; } = false;
 
         protected PwmPortBase(
             IPin pin,
-            IPwmChannelInfo channelInfo,
-            bool inverted = false
+            IPwmChannelInfo channelInfo
+            //bool inverted = false
             ) : base (pin, channelInfo)
         {
-            this.Inverted = inverted;
+            //this.Inverted = inverted;
         }
 
         // TODO: review all these

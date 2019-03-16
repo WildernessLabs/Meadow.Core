@@ -8,6 +8,6 @@ namespace Meadow.Peripherals.Leds
     /// </summary>
     public interface IPwmLed : ILed
     {
-        new IPwmPort Port { get; }
+        //new IPwmPort Port { get; }
     }
 }
