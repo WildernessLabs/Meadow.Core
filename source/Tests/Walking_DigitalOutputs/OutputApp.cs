@@ -15,11 +15,15 @@ namespace Walking_DigitalOutputs
 
         public OutputApp()
         {
-            // create all our digital output ports
-            this.ConfigureOutputs();
-            // turn them on/off
-            this.WalkOutputs();
+            while (true) {
 
+                // create all our digital output ports
+                this.ConfigureOutputs();
+                // turn them on/off
+                this.WalkOutputs();
+                // tear down
+                this.DisposePorts();
+            }
         }
 
         protected void ConfigureOutputs()
@@ -46,14 +50,22 @@ namespace Walking_DigitalOutputs
 
         protected void WalkOutputs()
         {
-            while (true) {
-                // turn each one on for a bit.
-                foreach (var port in _outs) {
-                    port.State = true;
-                    Thread.Sleep(250);
-                    port.State = false;
-                }
+            // turn each one on for a bit.
+            foreach (var port in _outs) {
+                port.State = true;
+                Thread.Sleep(250);
+                port.State = false;
             }
         }
+
+        // tears down all the ports. for validation only.
+        protected void DisposePorts()
+        {
+            foreach (var port in _outs) {
+                port.Dispose();
+            }
+            _outs.Clear();
+        }
+
     }
 }

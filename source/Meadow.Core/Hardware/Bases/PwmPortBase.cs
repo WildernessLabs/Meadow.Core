@@ -3,17 +3,17 @@ namespace Meadow.Hardware
 {
     public abstract class PwmPortBase : DigitalPortBase, IPwmPort
     {
-        public IPwmChannelInfo ChannelInfo { get; protected set; }
+        public new IPwmChannelInfo Channel { get; protected set; }
 
-        public bool Inverted { get; protected set; }
+        public bool Inverted { get; set; } = false;
 
         protected PwmPortBase(
             IPin pin,
-            IPwmChannelInfo channelInfo,
-            bool inverted = false
+            IPwmChannelInfo channelInfo
+            //bool inverted = false
             ) : base (pin, channelInfo)
         {
-            this.Inverted = inverted;
+            //this.Inverted = inverted;
         }
 
         // TODO: review all these

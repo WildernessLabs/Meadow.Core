@@ -5,7 +5,7 @@
     /// </summary>
     public interface IPwmPort : IDigitalPort
     {
-        IPwmChannelInfo ChannelInfo { get; }
+        new IPwmChannelInfo Channel { get; }
 
         // TODO: these should return Task or Task<void> or whatever
         void Start();
@@ -19,7 +19,7 @@
         // TODO: correct type?
         float Frequency { get; set; }
 
-        bool Inverted { get; }
+        bool Inverted { get; set; }
 
         TimeScaleFactor Scale { get; set; }
 
