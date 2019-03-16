@@ -308,6 +308,21 @@ namespace Meadow.Devices
 
 
             // TODO INTERRUPTS
+            if(enableInterrupts)
+            {
+                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                {
+                    Enable = enableInterrupts,
+                    Port = (int)port,
+                    Pin = pin,
+                    RisingEdge = true,
+                    Irq = 42
+                };
+
+                Console.WriteLine("Calling ioctl to enable interrupts");
+
+                var result = Interop.Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+            }
 
             return true;
         }

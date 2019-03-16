@@ -12,7 +12,7 @@ namespace Meadow.Core
                 SetRegister = 1,
                 GetRegister = 2,
                 UpdateRegister = 3,
-                RegisterIrq = 5,
+                RegisterGpioIrq = 5,
             }
 
             public struct UpdRegisterValue
@@ -28,6 +28,38 @@ namespace Meadow.Core
                 public uint SetBits;
             }
 
+            public struct UpdGpioInterruptConfiguration
+            {
+                public int Irq;
+                public int Port;
+                public int Pin;
+                public bool Enable;
+                public bool RisingEdge;
+                public bool FallingEdge;
+            }
+
+            /*
+            struct gpio_int_config
+            {
+              uint32_t irq;
+              uint32_t port;
+              uint32_t pin;
+              bool enable;
+              bool risingEdge;
+              bool fallingEdge;
+            };
+
+            struct upd_config_interrupt
+            {
+              uint32_t interruptType;
+
+              union cfg
+              {
+                struct gpio_int_config gpio;
+                void *foo;
+              } cfg;
+            };
+            */
             public static bool TryGetRegister(IntPtr driverHandle, int address, out uint value)
             {
                 return TryGetRegister(driverHandle, (uint)address, out value);

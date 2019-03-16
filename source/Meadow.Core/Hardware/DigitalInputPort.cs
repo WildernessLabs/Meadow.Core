@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
-        protected IIOController GpioController { get; set; }
+        protected IIOController IOController { get; set; }
 
         public bool GlitchFilter { get; set; }
         public ResistorMode Resistor { get; set; }
@@ -22,20 +22,19 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled
             ) : base(pin, channel, interruptEnabled )
         {
-            //// attempt to reserve the pin
-            //var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
+            this.IOController = ioController;
 
-            //if(result.Item1)
-            //{
-            //    this._pin = pin;
-
-            //    // make sure the pin is configured as a digital input
-            //    _pin.GPIOManager.ConfigureInput(_pin, glitchFilter, resistorMode, false);
-            //}
-            //else
-            //{
-            //    throw new PortInUseException();
-            //}
+            // attempt to reserve
+            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
+            if (success.Item1)
+            {
+                // make sure the pin is configured as a digital output with the proper state
+                ioController.ConfigureInput(pin, glitchFilter, resistorMode, interruptEnabled);
+            }
+            else
+            {
+                throw new PortInUseException();
+            }
         }
 
         public static DigitalInputPort From(

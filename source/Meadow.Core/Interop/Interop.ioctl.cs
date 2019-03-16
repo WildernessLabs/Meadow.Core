@@ -54,6 +54,16 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdRegisterUpdate registerUpdate);
 
+            /// <summary>
+            /// Configures the Universal Platofrm Driver to catch GPIO interrupts
+            /// </summary>
+            /// <returns>0 on success, otherwise an error code</returns>
+            /// <param name="fd">Driver handle</param>
+            /// <param name="request">UPD Ioctl function constant - should be 5 in this case</param>
+            /// <param name="interruptConfig">A UpdGpioInterruptConfiguration struct describing the specific interrupt configuration desired</param>
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdGpioInterruptConfiguration interruptConfig);
+
 
             /// <summary>
             /// Configures a pin
