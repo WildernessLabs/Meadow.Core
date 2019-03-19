@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalOutputPort : DigitalOutputPortBase
     {
-        protected IIOController IOController { get; set; }
+        protected IIOController IOController { get; }
 
         /// <summary>
         /// Gets or sets the state of the port.
@@ -61,7 +61,7 @@ namespace Meadow.Hardware
             IIOController ioController,
             bool initialState = false)
         {
-            var channel = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
+            var channel = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if(channel != null) {
                 //TODO: need other checks here.
                 return new DigitalOutputPort(pin, ioController, channel, initialState);

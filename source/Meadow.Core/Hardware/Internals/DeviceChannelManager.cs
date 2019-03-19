@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Meadow.Core.Interop;
-using static Meadow.Core.Interop.Interop.Nuttx;
+using Meadow.Core;
+using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {

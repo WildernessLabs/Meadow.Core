@@ -172,6 +172,8 @@
     <Compile Include="Contracts\IChangeResult.cs" />
     <Compile Include="Bases\FloatChangeResult.cs" />
     <Compile Include="Bases\NumericChangeResultBase.cs" />
+    <Compile Include="Devices\F7GPIOManager_adc.cs" />
+    <Compile Include="Interop\Interop.stm32.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

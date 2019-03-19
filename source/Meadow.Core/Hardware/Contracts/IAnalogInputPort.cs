@@ -11,11 +11,11 @@ namespace Meadow.Hardware
         // TODO: BrianK - uncomment after adding FloatChangeResult
         //event EventHandler<FloatChangeResult> Changed;
 
-        bool IsSampling { get; }
+//        bool IsSampling { get; }
 
-        Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
+        int Read();
 
-        void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
-        void StopSampling();
+//        void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
+//        void StopSampling();
     }
 }

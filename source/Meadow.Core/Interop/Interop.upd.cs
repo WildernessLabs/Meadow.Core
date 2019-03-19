@@ -1,53 +1,18 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Meadow.Core.Interop
+namespace Meadow.Core
 {
     internal static partial class Interop
     {
-        public static partial class STM32
+        public static partial class Nuttx
         {
-            public const int GPIOA_BASE = 0x40020000;
-            public const int GPIOB_BASE = 0x40020400;
-            public const int GPIOC_BASE = 0x40020800;
-            public const int GPIOD_BASE = 0x40020c00;
-            public const int GPIOE_BASE = 0x40021000;
-            public const int GPIOF_BASE = 0x40021400;
-            public const int GPIOG_BASE = 0x40021800;
-            public const int GPIOH_BASE = 0x40021c00;
-            public const int GPIOI_BASE = 0x40022000;
-            public const int GPIOJ_BASE = 0x40022400;
-            public const int GPIOK_BASE = 0x40022800;
-
-            public const int STM32_GPIO_MODER_OFFSET = 0x00;
-            public const int STM32_GPIO_OTYPER_OFFSET = 0x04;
-            public const int STM32_GPIO_OSPEED_OFFSET = 0x08;
-            public const int STM32_GPIO_PUPDR_OFFSET = 0x0c;
-            public const int STM32_GPIO_IDR_OFFSET = 0x10;
-            public const int STM32_GPIO_BSRR_OFFSET = 0x18;
-
-            public const int RCC_BASE = 0x40023800;
-            public const int STM32_RCC_APB2RSTR_OFFSET = 0x0024;
-            public const int STM32_RCC_APB2ENR_OFFSET = 0x0044;
-
-            public const int MEADOW_ADC1_BASE = 0x40012000;
-            public const int ADC_SR_OFFSET = 0x00;
-            public const int ADC_CR1_OFFSET = 0x04;
-            public const int ADC_CR2_OFFSET = 0x08;
-            public const int ADC_SMPR1_OFFSET = 0x0c;
-            public const int ADC_SMPR2_OFFSET = 0x10;
-            public const int ADC_SQR1_OFFSET = 0x2c;
-            public const int ADC_SQR2_OFFSET = 0x30;
-            public const int ADC_SQR3_OFFSET = 0x34;
-            public const int ADC_DR_OFFSET = 0x4c;
-            public const int ADC_CCR_OFFSET = 0x0304;
-
             public enum UpdIoctlFn
             {
                 SetRegister = 1,
                 GetRegister = 2,
                 UpdateRegister = 3,
-                RegisterIrq = 5,
+                RegisterGpioIrq = 5,
             }
 
             public struct UpdRegisterValue
@@ -63,6 +28,38 @@ namespace Meadow.Core.Interop
                 public uint SetBits;
             }
 
+            public struct UpdGpioInterruptConfiguration
+            {
+                public int Irq;
+                public int Port;
+                public int Pin;
+                public bool Enable;
+                public bool RisingEdge;
+                public bool FallingEdge;
+            }
+
+            /*
+            struct gpio_int_config
+            {
+              uint32_t irq;
+              uint32_t port;
+              uint32_t pin;
+              bool enable;
+              bool risingEdge;
+              bool fallingEdge;
+            };
+
+            struct upd_config_interrupt
+            {
+              uint32_t interruptType;
+
+              union cfg
+              {
+                struct gpio_int_config gpio;
+                void *foo;
+              } cfg;
+            };
+            */
             public static bool TryGetRegister(IntPtr driverHandle, int address, out uint value)
             {
                 return TryGetRegister(driverHandle, (uint)address, out value);

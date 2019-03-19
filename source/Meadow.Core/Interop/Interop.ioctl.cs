@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Meadow.Core.Interop
+namespace Meadow.Core
 {
     internal static partial class Interop
     {
@@ -42,7 +42,7 @@ namespace Meadow.Core.Interop
             /// <param name="request">UPD Ioctl function constant</param>
             /// <param name="registerValue">A RegisterValue struct to use as either the value soure (for writes) or sink (for reads)</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int ioctl(IntPtr fd, STM32.UpdIoctlFn request, ref STM32.UpdRegisterValue registerValue);
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdRegisterValue registerValue);
 
             /// <summary>
             /// Reads or Writes a Universal Platform Driver register
@@ -52,7 +52,17 @@ namespace Meadow.Core.Interop
             /// <param name="request">UPD Ioctl function constant</param>
             /// <param name="registerUpdate">A RegisterUpdate struct describing which bits to set and clear in a single register</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int ioctl(IntPtr fd, STM32.UpdIoctlFn request, ref STM32.UpdRegisterUpdate registerUpdate);
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdRegisterUpdate registerUpdate);
+
+            /// <summary>
+            /// Configures the Universal Platofrm Driver to catch GPIO interrupts
+            /// </summary>
+            /// <returns>0 on success, otherwise an error code</returns>
+            /// <param name="fd">Driver handle</param>
+            /// <param name="request">UPD Ioctl function constant - should be 5 in this case</param>
+            /// <param name="interruptConfig">A UpdGpioInterruptConfiguration struct describing the specific interrupt configuration desired</param>
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdGpioInterruptConfiguration interruptConfig);
 
 
             /// <summary>
