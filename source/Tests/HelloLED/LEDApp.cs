@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using Meadow;
 using Meadow.Devices;
@@ -12,14 +13,16 @@ namespace HelloLED
         IDigitalOutputPort _blueLED;
         IDigitalOutputPort _greenLED;
 
-        public void Run()
+        public LEDApp()
         {
+            Console.WriteLine("Hello!");
             CreateOutputs();
             ShowLights();
         }
 
         public void CreateOutputs()
         {
+            Debug.WriteLine("Creating Outpus");
             _redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
             _blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue);
             _greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);

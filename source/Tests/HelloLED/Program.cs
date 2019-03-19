@@ -10,7 +10,6 @@ namespace HelloLED
         {
             // instantiate and run new meadow app
             _app = new LEDApp();
-            //_app.Run();
         }
     }
 }
