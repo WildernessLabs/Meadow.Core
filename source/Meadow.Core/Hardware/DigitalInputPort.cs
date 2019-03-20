@@ -23,6 +23,7 @@ namespace Meadow.Hardware
             ) : base(pin, channel, interruptEnabled )
         {
             this.IOController = ioController;
+            this.IOController.Interrupt += OnInterrupt;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -36,6 +37,15 @@ namespace Meadow.Hardware
                 throw new PortInUseException();
             }
         }
+
+        void OnInterrupt(IPin pin)
+        {
+            if(pin == this.Pin)
+            {
+                RaiseChanged(true);
+            }
+        }
+
 
         public static DigitalInputPort From(
             IPin pin,

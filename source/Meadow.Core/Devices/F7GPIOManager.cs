@@ -10,6 +10,8 @@ namespace Meadow.Devices
 {
     public partial class F7GPIOManager : IIOController
     {
+        public event InterruptHandler Interrupt;
+
         private const string GPDDriverName = "/dev/upd";
 
         private object _cacheLock = new object();
@@ -196,6 +198,8 @@ namespace Meadow.Devices
             ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, initialState);
         }
 
+        private Dictionary<string, IPin> _interruptPins = new Dictionary<string, IPin>();
+
         public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
         {
             // translate resistor mode
@@ -218,12 +222,19 @@ namespace Meadow.Devices
 
         private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, bool enableInterrupts)
         {
+            lock (_interruptPins)
+            {
+                var key = (string)pin.Key;
+                if (enableInterrupts && !_interruptPins.ContainsKey(key))
+                {
+                    _interruptPins.Add(key, pin);
+                }
+                else if (!enableInterrupts && _interruptPins.ContainsKey((string)pin.Key))
+                {
+                    _interruptPins.Remove(key);
+                }
+            }
             return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
-        }
-
-        private bool ConfigureInput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, bool enableInterrupts)
-        {
-            return ConfigureGpio(port, pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
         }
 
         private bool ConfigureOutput(IPin pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
@@ -337,6 +348,10 @@ namespace Meadow.Devices
                     _ist.Start();
                 }
             }
+            else
+            {
+                // TODO: disable interrupt if it was enabled
+            }
 
             return true;
         }
@@ -344,35 +359,30 @@ namespace Meadow.Devices
         private void InterruptServiceThreadProc(object o)
         {
             Console.WriteLine("IST Started");
-            var attribs = new Nuttx.QueueAttributes()
-            {
-                mq_maxmsg = 10, // no more than 10 messages
-                mq_msgsize = 16 // messages no longer than 16 bytes
-            };
-
-            Console.WriteLine($"INT mq_open");
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
-            Console.WriteLine($"result: {queue.ToInt32()}");
 
             var rx_buffer = new byte[16];
 
             while (true)
             {
-                Console.Write($"INT mq_receive ");
                 int priority = 0;
                 var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-                Console.WriteLine($"result: {result}");
 
-                if (result < 0)
-                {
-                }
-                else
+                if (result >= 0)
                 {
                     var irq = BitConverter.ToInt32(rx_buffer, 0);
-                    Console.WriteLine($"irq: {irq}");
-                }
+                    var port = irq >> 4;
+                    var pin = irq & 0xf;
+                    var key = $"P{(char)(65 + port)}{pin}";
 
-                Thread.Sleep(1000);
+                    lock (_interruptPins)
+                    {
+                        if (_interruptPins.ContainsKey(key))
+                        {
+                            Interrupt?.Invoke(_interruptPins[key]);
+                        }
+                    }
+                }
             }
         }
 
