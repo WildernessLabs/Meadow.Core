@@ -17,6 +17,7 @@ namespace InterruptTest
         private void ConfigureInterrupts()
         {
             _inputs.Add(Device.CreateDigitalInputPort(Device.Pins.D00, interruptEnabled: true));
+            _inputs.Add(Device.CreateDigitalInputPort(Device.Pins.D01, interruptEnabled: true));
         }
     }
 }

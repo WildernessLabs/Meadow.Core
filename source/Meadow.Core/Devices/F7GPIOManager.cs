@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using Meadow.Core;
 using Meadow.Hardware;
 using static Meadow.Core.Interop;
@@ -11,6 +13,8 @@ namespace Meadow.Devices
         private const string GPDDriverName = "/dev/upd";
 
         private object _cacheLock = new object();
+        private Thread _ist;
+
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
         private IntPtr DriverHandle { get; }
@@ -316,15 +320,60 @@ namespace Meadow.Devices
                     Port = (int)port,
                     Pin = pin,
                     RisingEdge = true,
-                    Irq = 42
+                    Irq = ((int)port << 4) | pin
                 };
 
                 Console.WriteLine("Calling ioctl to enable interrupts");
 
                 var result = Interop.Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+
+                if(_ist == null)
+                {
+                    _ist = new Thread(InterruptServiceThreadProc)
+                    {
+                        IsBackground = true
+                    };
+
+                    _ist.Start();
+                }
             }
 
             return true;
+        }
+
+        private void InterruptServiceThreadProc(object o)
+        {
+            Console.WriteLine("IST Started");
+            var attribs = new Nuttx.QueueAttributes()
+            {
+                mq_maxmsg = 10, // no more than 10 messages
+                mq_msgsize = 16 // messages no longer than 16 bytes
+            };
+
+            Console.WriteLine($"INT mq_open");
+            IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
+            Console.WriteLine($"result: {queue.ToInt32()}");
+
+            var rx_buffer = new byte[16];
+
+            while (true)
+            {
+                Console.Write($"INT mq_receive ");
+                int priority = 0;
+                var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+                Console.WriteLine($"result: {result}");
+
+                if (result < 0)
+                {
+                }
+                else
+                {
+                    var irq = BitConverter.ToInt32(rx_buffer, 0);
+                    Console.WriteLine($"irq: {irq}");
+                }
+
+                Thread.Sleep(1000);
+            }
         }
 
         private bool UpdateConfigRegister1Bit(uint address, bool value, int pin)
