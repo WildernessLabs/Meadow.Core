@@ -200,7 +200,7 @@ namespace Meadow.Devices
 
         private Dictionary<string, IPin> _interruptPins = new Dictionary<string, IPin>();
 
-        public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled)
+        public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, InterruptMode interruptMode)
         {
             // translate resistor mode
             STM32.ResistorMode mode32;
@@ -217,44 +217,44 @@ namespace Meadow.Devices
                 mode32 = STM32.ResistorMode.PullDown;
             }
 
-            ConfigureInput(pin, mode32, interruptEnabled);
+            ConfigureInput(pin, mode32, interruptMode);
         }
 
-        private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, bool enableInterrupts)
+        private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode)
         {
             lock (_interruptPins)
             {
                 var key = (string)pin.Key;
-                if (enableInterrupts && !_interruptPins.ContainsKey(key))
+                if (interruptMode != InterruptMode.None && !_interruptPins.ContainsKey(key))
                 {
                     _interruptPins.Add(key, pin);
                 }
-                else if (!enableInterrupts && _interruptPins.ContainsKey((string)pin.Key))
+                else if (interruptMode == InterruptMode.None && _interruptPins.ContainsKey((string)pin.Key))
                 {
                     _interruptPins.Remove(key);
                 }
             }
-            return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, enableInterrupts);
+            return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, interruptMode);
         }
 
         private bool ConfigureOutput(IPin pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
-            return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, false);
+            return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None);
         }
 
         private bool ConfigureOutput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
-            return ConfigureGpio(port, pin, STM32.GpioMode.Output, resistor, speed, type, initialState, false);
+            return ConfigureGpio(port, pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None);
         }
 
-        private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, bool enableInterrupts)
+        private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
         {
             var designator = GetPortAndPin(pin);
 
-            return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, enableInterrupts);
+            return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode);
         }
 
-        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, bool enableInterrupts)
+        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
         {
             int setting = 0;
             uint base_addr = 0;
@@ -323,20 +323,17 @@ namespace Meadow.Devices
 
 
             // TODO INTERRUPTS
-            if(enableInterrupts)
+            if(interruptMode != InterruptMode.None)
             {
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
-                    Enable = enableInterrupts,
+                    Enable = true,
                     Port = (int)port,
                     Pin = pin,
-                    RisingEdge = true,
+                    RisingEdge = interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth,
+                    FallingEdge = interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth,
                     Irq = ((int)port << 4) | pin
                 };
-
-                Console.WriteLine("Calling ioctl to enable interrupts");
-
-                var result = Interop.Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 
                 if(_ist == null)
                 {
@@ -347,6 +344,10 @@ namespace Meadow.Devices
 
                     _ist.Start();
                 }
+
+                Console.WriteLine("Calling ioctl to enable interrupts");
+
+                var result = Interop.Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
             else
             {
@@ -358,8 +359,8 @@ namespace Meadow.Devices
 
         private void InterruptServiceThreadProc(object o)
         {
-            Console.WriteLine("IST Started");
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
+            Console.WriteLine($"IST Started reading queue {queue.ToInt32():X}");
 
             var rx_buffer = new byte[16];
 
@@ -367,6 +368,7 @@ namespace Meadow.Devices
             {
                 int priority = 0;
                 var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+//                Console.WriteLine("queue data arrived");
 
                 if (result >= 0)
                 {
@@ -375,6 +377,7 @@ namespace Meadow.Devices
                     var pin = irq & 0xf;
                     var key = $"P{(char)(65 + port)}{pin}";
 
+//                    Console.WriteLine($"Interrupt on {key}");
                     lock (_interruptPins)
                     {
                         if (_interruptPins.ContainsKey(key))

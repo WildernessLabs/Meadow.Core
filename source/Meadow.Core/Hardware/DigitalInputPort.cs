@@ -17,10 +17,10 @@ namespace Meadow.Hardware
             IPin pin,
             IIOController ioController,
             IDigitalChannelInfo channel,
-            bool interruptEnabled = true,
+            InterruptMode interruptMode = InterruptMode.None,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled
-            ) : base(pin, channel, interruptEnabled )
+            ) : base(pin, channel, interruptMode)
         {
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
@@ -30,7 +30,7 @@ namespace Meadow.Hardware
             if (success.Item1)
             {
                 // make sure the pin is configured as a digital output with the proper state
-                ioController.ConfigureInput(pin, glitchFilter, resistorMode, interruptEnabled);
+                ioController.ConfigureInput(pin, glitchFilter, resistorMode, interruptMode);
             }
             else
             {
@@ -42,7 +42,24 @@ namespace Meadow.Hardware
         {
             if(pin == this.Pin)
             {
-                RaiseChanged(true);
+                var state = false;
+
+                switch(InterruptMode)
+                {
+                    case InterruptMode.EdgeRising:
+                    case InterruptMode.LevelHigh:
+                        state = true;
+                        break;
+                    case InterruptMode.EdgeFalling:
+                    case InterruptMode.LevelLow:
+                        state = false;
+                        break;
+                    case InterruptMode.EdgeBoth:
+                        // we could probably move this query lower to reduce latency risk
+                        state = State;
+                        break;
+                }
+                RaiseChanged(state);
             }
         }
 
@@ -50,7 +67,7 @@ namespace Meadow.Hardware
         public static DigitalInputPort From(
             IPin pin,
             IIOController ioController,
-            bool interruptEnabled = true,
+            InterruptMode interruptMode = InterruptMode.None,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled
             )
@@ -58,10 +75,10 @@ namespace Meadow.Hardware
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if (chan != null) {
                 //TODO: need other checks here.
-                if(interruptEnabled && (!chan.InterrruptCapable)) {
+                if(interruptMode != InterruptMode.None && (!chan.InterrruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                return new DigitalInputPort(pin, ioController, chan, interruptEnabled, glitchFilter, resistorMode);
+                return new DigitalInputPort(pin, ioController, chan, interruptMode, glitchFilter, resistorMode);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
@@ -74,9 +91,7 @@ namespace Meadow.Hardware
 
         public override bool State
         {
-            //get => _pin.GPIOManager.GetDiscrete(_pin);
-            get => false;
-            //protected set { throw new Exception(); }
+            get => this.IOController.GetDiscrete(this.Pin);
         }
 
     }

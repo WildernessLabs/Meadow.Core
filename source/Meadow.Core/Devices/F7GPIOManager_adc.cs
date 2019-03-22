@@ -33,7 +33,7 @@ namespace Meadow.Devices
         private bool ConfigureADC(STM32.GpioPort port, int pin)
         {
             // set up the pin for analog
-            ConfigureGpio(port, pin, STM32.GpioMode.Analog, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, false);
+            ConfigureGpio(port, pin, STM32.GpioMode.Analog, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
 
             // TODO: if it was non-analog, do we need to adjust any of the ADC registers?
 

@@ -14,18 +14,17 @@ namespace Meadow.Hardware
         public event EventHandler<PortEventArgs> Changed = delegate { };
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not this port will raise
-        /// events on state change.
+        /// Gets or sets a value indicating the type of interrupt monitoring this input.
         /// </summary>
         /// <value><c>true</c> if interrupt enabled; otherwise, <c>false</c>.</value>
-        public bool InterruptEnabled { get; protected set; }
+        public InterruptMode InterruptMode { get; protected set; }
 
         public abstract bool State { get; }
 
-        protected DigitalInputPortBase(IPin pin, IDigitalChannelInfo channel, bool interruptEnabled = false) 
+        protected DigitalInputPortBase(IPin pin, IDigitalChannelInfo channel, InterruptMode interruptMode = InterruptMode.None) 
             : base(pin, channel)
         {
-            this.InterruptEnabled = interruptEnabled;
+            this.InterruptMode = interruptMode;
         }
 
         protected void RaiseChanged(bool value)

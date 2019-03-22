@@ -11,24 +11,13 @@ namespace Meadow.Hardware
         /// </summary>
         DeviceCapabilities Capabilities { get; }
 
-        //P Pins { get; }
-        //IPinDefinitions Pins { get; }
-
-        /// <summary>
-        /// Gets the GPIO Manager.
-        /// </summary>
-        //IGPIOManager GPIOManager { get; }
-
-        // generic?
-        //IPort<C> CreatePort<P>(P portConfig); 
-
         // TODO: consider specializing IIODevice
         IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,bool initialState = false);
 
         IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
-            bool interruptEnabled = true,
+            InterruptMode interruptMode = InterruptMode.None,
             bool glitchFilter = false,
             ResistorMode resistorMode = ResistorMode.Disabled
         );
