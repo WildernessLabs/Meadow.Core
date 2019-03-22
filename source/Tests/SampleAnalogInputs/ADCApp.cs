@@ -33,8 +33,9 @@ namespace SampleAnalogInputs
             {
                 foreach (var input in _inputs)
                 {
+                    Console.Write($"Reading {input.Pin.Name}...");
                     var value = input.Read();
-                    Console.WriteLine($"{input.Pin.Name} = {value}");
+                    Console.WriteLine($"value = {value}");
                     Thread.Sleep(1000);
                 }
             }

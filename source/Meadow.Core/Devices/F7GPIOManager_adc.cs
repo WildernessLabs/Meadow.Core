@@ -151,34 +151,37 @@ namespace Meadow.Devices
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
 
-            //            Console.WriteLine($"Starting process to get analog for channel {channel}");
+//            Console.WriteLine($"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert
             Interop.Nuttx.UpdateRegister(DriverHandle,
                 STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
                 0, (uint)channel);
 
+//            Console.WriteLine($"SQR3 set to {channel}");
+
             // enable the ADC via the CR2 register's ADON bit
             Interop.Nuttx.UpdateRegister(DriverHandle,
                 STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
                 0, 1);
 
-            //            Console.WriteLine($"Starting ADC Conversion...");
+//            Console.WriteLine($"CR2 ADON is set.");
+//            Console.WriteLine($"Starting ADC Conversion...");
 
             // start a conversion via the CR2 SWSTART bit
             Interop.Nuttx.UpdateRegister(DriverHandle,
                 STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
                 0, 1 << 30);
 
-            //            Console.Write($"Polling status register...");
+//            Console.Write($"Polling status register...");
 
             // poll the status register - wait for conversion complete
             var ready = false;
+            var tick = 0;
             do
             {
-                var tick = 0;
-
-                if (Interop.Nuttx.TryGetRegister(DriverHandle, STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET, out uint register_sr))
+                var success = Interop.Nuttx.TryGetRegister(DriverHandle, STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET, out uint register_sr);
+                if (success)
                 {
                     ready = (register_sr & (1 << 1)) != 0;
                 }
@@ -202,7 +205,7 @@ namespace Meadow.Devices
                 System.Threading.Thread.Sleep(1);
             } while (!ready);
 
-            //            Console.WriteLine($"Conversion complete");
+//            Console.WriteLine($"Conversion complete. Reading DR");
 
             // read the data register
             if (Interop.Nuttx.TryGetRegister(DriverHandle, STM32.MEADOW_ADC1_BASE + STM32.ADC_DR_OFFSET, out uint register_dr))
