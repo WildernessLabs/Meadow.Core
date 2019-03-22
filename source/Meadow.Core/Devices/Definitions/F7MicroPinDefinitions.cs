@@ -282,56 +282,56 @@ namespace Meadow.Devices
             );
 
             // ESP_MOSI
-            internal readonly IPin ESP_MOSI = new Pin(
+            public /*internal*/ readonly IPin ESP_MOSI = new Pin(
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI3"),
                 }
             );
             // ESP_MISO
-            internal readonly IPin ESP_MISO = new Pin(
+            public /*internal*/ readonly IPin ESP_MISO = new Pin(
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI2"),
                 }
             );
             // ESP_CLK
-            internal readonly IPin ESP_CLK = new Pin(
+            public /*internal*/ readonly IPin ESP_CLK = new Pin(
                 "ESP_CLK", "PD3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD3"),
                 }
             );
             // ESP_CS
-            internal readonly IPin ESP_CS = new Pin(
+            public /*internal*/ readonly IPin ESP_CS = new Pin(
                 "ESP_CS", "PI0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI0"),
                 }
             );
             // ESP_BOOT
-            internal readonly IPin ESP_BOOT = new Pin(
+            public /*internal*/ readonly IPin ESP_BOOT = new Pin(
                 "ESP_BOOT", "PI10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI10"),
                 }
             );
             // ESP_RST
-            internal readonly IPin ESP_RST = new Pin(
+            public /*internal*/ readonly IPin ESP_RST = new Pin(
                 "ESP_RST", "PF7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF7"),
                 }
             );
             // ESP_UART_RX
-            internal readonly IPin ESP_UART_RX = new Pin(
+            public /*internal*/ readonly IPin ESP_UART_RX = new Pin(
                 "ESP_UART_RX", "PD2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD2"),
                 }
             );
             // ESP_UART_TX
-            internal readonly IPin ESP_UART_TX = new Pin(
+            public /*internal*/ readonly IPin ESP_UART_TX = new Pin(
                 "ESP_UART_TX", "PB13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB13"),
