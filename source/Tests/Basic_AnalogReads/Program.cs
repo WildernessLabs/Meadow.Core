@@ -11,6 +11,7 @@ namespace Basic_AnalogReads
         public static void Main(string[] args)
         {
             app = new AnalogReadApp();
+            Console.WriteLine("Got here 2.");
             Thread.Sleep(Timeout.Infinite);
         }
     }
