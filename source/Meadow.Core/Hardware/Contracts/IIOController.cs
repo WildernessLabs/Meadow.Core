@@ -2,6 +2,8 @@
 
 namespace Meadow.Hardware
 {
+    public delegate void InterruptHandler(IPin pin);
+
     // TODO: Consider renaming to match MCP23008 driver: https://github.com/WildernessLabs/Netduino.Foundation/blob/master/Source/Peripheral_Libs/ICs.IOExpanders.MCP23008/Driver/MCP23008.cs
     // Write(IPin pin, bool value)
     // Write(IPin[] pin, byte value)? think about this. need 
@@ -12,6 +14,8 @@ namespace Meadow.Hardware
     /// </summary>
     public interface IIOController
     {
+        event InterruptHandler Interrupt;
+
         /// <summary>
         /// Initializes the device pins to their default power-up status (outputs, low and pulled down where applicable).
         /// </summary>
@@ -44,8 +48,8 @@ namespace Meadow.Hardware
         /// <param name="pin"></param>
         /// <param name="glitchFilter"></param>
         /// <param name="resistorMode"></param>
-        /// <param name="interruptEnabled"></param>
-        void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, bool interruptEnabled);
+        /// <param name="interruptMode"></param>
+        void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, InterruptMode interruptMode);
 
         void ConfigureAnalogInput(IPin pin);
         int GetAnalogValue(IPin pin);

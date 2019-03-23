@@ -75,7 +75,7 @@ namespace Meadow.Hardware.Communications
             _phase = (cpha == 1);
             _polarity = (cpol == 1);
             _mosi = device.CreateDigitalOutputPort(mosi, false);
-            _miso = miso == null ? null : device.CreateDigitalInputPort(miso, true, false, ResistorMode.Disabled);
+            _miso = miso == null ? null : device.CreateDigitalInputPort(miso, InterruptMode.EdgeRising, false, ResistorMode.Disabled);
             _clock = device.CreateDigitalOutputPort(clock, _polarity);
             _chipSelect = chipSelect == null ? null : device.CreateDigitalOutputPort(chipSelect, true);
         }
