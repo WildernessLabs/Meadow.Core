@@ -26,12 +26,12 @@ namespace InterruptTest
             _inputs.Add(d1);
         }
 
-        void D0_Changed(object sender, PortEventArgs e)
+        void D0_Changed(object sender, DigitalInputPortEventArgs e)
         {
             Console.WriteLine("Rising Interrupt on D00");
         }
 
-        void D1_Changed(object sender, PortEventArgs e)
+        void D1_Changed(object sender, DigitalInputPortEventArgs e)
         {
             Console.WriteLine("Falling Interrupt on D01");
         }

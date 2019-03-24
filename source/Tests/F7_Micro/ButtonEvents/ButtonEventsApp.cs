@@ -15,9 +15,9 @@ namespace ButtonEvents
             _input.Changed += Input_Changed;
         }
 
-        private void Input_Changed(object sender, PortEventArgs e)
+        private void Input_Changed(object sender, DigitalInputPortEventArgs e)
         {
-            Console.WriteLine("Changed: " + e.Value.ToString());
+            Console.WriteLine("Changed: " + e.Value.ToString() + " Time: " + e.Time.ToString());
         }
     }
 }

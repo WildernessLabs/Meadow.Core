@@ -33,8 +33,8 @@ namespace Meadow.Hardware
             {
                 // make sure the pin is configured as a digital output with the proper state
                 ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchFilterCycleCount);
-                this.DebounceDuration = debounceDuration;
-                this.GlitchFilterCycleCount = glitchFilterCycleCount;
+                DebounceDuration = debounceDuration;
+                GlitchFilterCycleCount = glitchFilterCycleCount;
             }
             else
             {

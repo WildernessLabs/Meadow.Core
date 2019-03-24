@@ -88,7 +88,7 @@
     <Compile Include="Hardware\DigitalInputPort.cs" />
     <Compile Include="Hardware\DigitalOutputPort.cs" />
     <Compile Include="Hardware\Pin.cs" />
-    <Compile Include="Hardware\PortEventArgs.cs" />
+    <Compile Include="Hardware\DigitalInputPortEventArgs.cs" />
     <Compile Include="Hardware\PortInUseException.cs" />
     <Compile Include="Hardware\PwmPort.cs" />
     <Compile Include="Hardware\SerialDataReceivedEventArgs.cs" />

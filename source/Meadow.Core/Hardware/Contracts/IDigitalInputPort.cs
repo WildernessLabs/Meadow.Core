@@ -9,6 +9,6 @@ namespace Meadow.Hardware
         int DebounceDuration { get; set; }
         int GlitchFilterCycleCount { get; set; }
 
-        event EventHandler<PortEventArgs> Changed;
+        event EventHandler<DigitalInputPortEventArgs> Changed;
     }
 }

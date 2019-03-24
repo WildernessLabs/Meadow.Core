@@ -11,7 +11,7 @@ namespace Meadow.Hardware
         /// Occurs when the state is changed. To enable this, the `interruptEnabled`
         /// parameter must be `true`.
         /// </summary>
-        public event EventHandler<PortEventArgs> Changed = delegate { };
+        public event EventHandler<DigitalInputPortEventArgs> Changed = delegate { };
 
         /// <summary>
         /// Gets or sets a value indicating the type of interrupt monitoring this input.
@@ -35,7 +35,7 @@ namespace Meadow.Hardware
 
         protected void RaiseChanged(bool value)
         {
-            Changed(this, new PortEventArgs() { Value = value });
+            Changed(this, new DigitalInputPortEventArgs() { Value = value, Time = DateTime.Now });
         }
     }
 }

@@ -4,7 +4,7 @@ namespace Meadow.Hardware
 {
     public interface IDigitalInterruptPort
     {
-        event EventHandler<PortEventArgs> Changed;
+        event EventHandler<DigitalInputPortEventArgs> Changed;
 
         bool InterrupEnabled { get; set; }
     }
