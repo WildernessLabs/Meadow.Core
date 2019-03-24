@@ -20,8 +20,14 @@ namespace Meadow.Hardware
         public InterruptMode InterruptMode { get; protected set; }
 
         public abstract bool State { get; }
+        public abstract int DebounceDuration { get; set; }
+        public abstract int GlitchFilterCycleCount { get; set; }
 
-        protected DigitalInputPortBase(IPin pin, IDigitalChannelInfo channel, InterruptMode interruptMode = InterruptMode.None) 
+        protected DigitalInputPortBase(
+            IPin pin,
+            IDigitalChannelInfo channel,
+            InterruptMode interruptMode = InterruptMode.None
+            )
             : base(pin, channel)
         {
             this.InterruptMode = interruptMode;

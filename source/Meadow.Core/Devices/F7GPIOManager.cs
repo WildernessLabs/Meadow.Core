@@ -200,7 +200,13 @@ namespace Meadow.Devices
 
         private Dictionary<string, IPin> _interruptPins = new Dictionary<string, IPin>();
 
-        public void ConfigureInput(IPin pin, bool glitchFilter, ResistorMode resistorMode, InterruptMode interruptMode)
+        public void ConfigureInput(
+            IPin pin,
+            ResistorMode resistorMode,
+            InterruptMode interruptMode,
+            int debounceDuration,
+            int glitchFilterCycleCount
+            )
         {
             // translate resistor mode
             STM32.ResistorMode mode32;

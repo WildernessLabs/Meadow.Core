@@ -18,8 +18,9 @@ namespace Meadow.Hardware
         IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
-            bool glitchFilter = false,
-            ResistorMode resistorMode = ResistorMode.Disabled
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            int debounceDuration = 0,
+            int glitchFilterCycleCount = 0
         );
 
         IBiDirectionalPort CreateBiDirectionalPort(

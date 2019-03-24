@@ -6,6 +6,9 @@ namespace Meadow.Hardware
     {
         bool State { get; }
 
+        int DebounceDuration { get; set; }
+        int GlitchFilterCycleCount { get; set; }
+
         event EventHandler<PortEventArgs> Changed;
     }
 }

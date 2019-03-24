@@ -55,11 +55,12 @@ namespace Meadow.Devices
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
-            bool glitchFilter = false,
-            ResistorMode resistorMode = ResistorMode.Disabled
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            int debounceDuration = 0,
+            int glitchFilterCycleCount = 0
             )
         {
-            return DigitalInputPort.From(pin, this.IoController, interruptMode, glitchFilter, resistorMode);
+            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(
