@@ -21,7 +21,7 @@ namespace Meadow
         {
             if (_filter == null || _filter(value))
             {
-                _handler(value);
+                _handler?.Invoke(value);
             }
         }
 
