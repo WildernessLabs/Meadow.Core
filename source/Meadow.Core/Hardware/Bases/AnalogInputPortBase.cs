@@ -16,11 +16,8 @@ namespace Meadow.Hardware
         {
         }
 
-        public abstract int Read();
-//        public abstract Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
-
-//        public abstract void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
-
-//        public abstract void StopSampling();
+        public abstract float Read(int sampleCount = 10, int sampleInterval = 40);
+        public abstract void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
+        public abstract void StopSampling();
     }
 }

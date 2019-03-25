@@ -20,8 +20,8 @@ namespace AnalogObserver
 
         public void InitializeIO()
         {
-            // TODO
-            // _analog01 = new AnalogInputPort();
+            // TODO: how to instantiate?
+            //_analog01 = new AnalogInputPort();
         }
 
         public void WireUpObservers()
@@ -70,7 +70,7 @@ namespace AnalogObserver
 
             // spin up the ADC sampling engine
             // TODO
-            // _analog01.StartSampling();
+            _analog01.StartSampling();
 
         }
     }

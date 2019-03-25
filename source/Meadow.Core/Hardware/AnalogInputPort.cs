@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 //using System.Collections.Generic;
 //using System.Threading.Tasks;
 
@@ -186,6 +188,19 @@ namespace Meadow.Hardware
 
         private List<IObserver<FloatChangeResult>> _observers;
 
+        protected object _lock = new object();
+        private CancellationTokenSource SamplingTokenSource;
+
+        public event EventHandler<FloatChangeResult> Changed = delegate { };
+        /// <summary>
+        /// Gets a value indicating whether the analog input port is currently
+        /// sampling the ADC. Call StartSampling() to spin up the sampling process.
+        /// </summary>
+        /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
+        public bool IsSampling { get; protected set; } = false;
+
+        protected float _previousVoltageReading = 0;
+
         protected AnalogInputPort(
                     IPin pin,
                     IIOController ioController,
@@ -227,7 +242,85 @@ namespace Meadow.Hardware
             }
         }
 
-        public override int Read()
+        public override void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0)
+        {
+            // thread safety
+            lock (_lock)
+            {
+                if (IsSampling) return;
+
+                // state muh-cheen
+                IsSampling = true;
+
+                //
+                // TODO: @CTACKE Turn on sampling under the hood
+                //
+
+                SamplingTokenSource = new CancellationTokenSource();
+                CancellationToken ct = SamplingTokenSource.Token;
+
+                // sampling happens on a background thread
+                Task.Factory.StartNew(async () => {
+                    // loop until we're supposed to stop
+                    while (true)
+                    {
+                        float voltage = Read();
+
+                        // create a result set
+                        FloatChangeResult result = new FloatChangeResult
+                        {
+                            New = voltage,
+                            Old = _previousVoltageReading,
+                        };
+
+                        // notify each observer of the new result
+                        _observers.ForEach(x => x.OnNext(result));
+
+                        // raise the classic event (if there are any)
+                        // TODO: Decide if this is a good idea.
+                        Changed?.Invoke(this, result);
+
+                        // go to sleep for a while
+                        await Task.Delay(sampleSleepDuration);
+
+                        // check for cancel (doing this here instead of 
+                        // while(!ct.IsCancellationRequested), so we can perform 
+                        // cleanup
+                        if (ct.IsCancellationRequested)
+                        {
+                            // do task clean up here
+                            _observers.ForEach(x => x.OnCompleted());
+                            break;
+                        }
+                    }
+
+                }, SamplingTokenSource.Token).Wait();
+            }
+        }
+
+        /// <summary>
+        /// Spins down the process sampling the ADC. Any values in the 
+        /// SampleBuffer will become stale after calling this method.
+        /// </summary>
+        public override void StopSampling()
+        {
+            lock (_lock)
+            {
+                if (!IsSampling) return;
+                // stop (TODO:@CTACKE)
+
+                if (SamplingTokenSource != null)
+                {
+                    SamplingTokenSource.Cancel();
+                }
+
+                // state muh-cheen
+                IsSampling = false;
+            }
+        }
+
+
+        public override float Read(int sampleCount = 10, int sampleInterval = 40)
         {
             lock (_analogSyncRoot)
             {
