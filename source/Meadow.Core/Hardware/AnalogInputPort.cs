@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 //using System.Collections.Generic;
 //using System.Threading.Tasks;
@@ -173,7 +174,7 @@ namespace Meadow.Hardware
 //            //TODO: Call Read() and automatically convert to voltage
 //        }
 
-    public class AnalogInputPort : IAnalogInputPort
+    public class AnalogInputPort : AnalogInputPortBase, IObservable<FloatChangeResult>
     {
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
         static readonly object _analogSyncRoot = new object();
@@ -183,14 +184,18 @@ namespace Meadow.Hardware
         public IAnalogChannelInfo Channel { get; }
         public IPin Pin { get; }
 
+        private List<IObserver<FloatChangeResult>> _observers;
+
         protected AnalogInputPort(
                     IPin pin,
                     IIOController ioController,
-                    IAnalogChannelInfo channel)
+                    IAnalogChannelInfo channel) : base(pin, channel)
         {
+            
             this.Pin = pin;
             this.IOController = ioController;
             this.Channel = channel;
+            this._observers = new List<IObserver<FloatChangeResult>>();
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
@@ -222,17 +227,42 @@ namespace Meadow.Hardware
             }
         }
 
-        public int Read()
+        public override int Read()
         {
-            lock(_analogSyncRoot)
+            lock (_analogSyncRoot)
             {
                 return this.IOController.GetAnalogValue(this.Pin);
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            
+        }
 
+        public IDisposable Subscribe(IObserver<FloatChangeResult> observer)
+        {
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
+
+            return new Unsubscriber(_observers, observer);
+        }
+
+        private class Unsubscriber : IDisposable
+        {
+            private List<IObserver<FloatChangeResult>> _observers;
+            private IObserver<FloatChangeResult> _observer;
+
+            public Unsubscriber(List<IObserver<FloatChangeResult>> observers, IObserver<FloatChangeResult> observer)
+            {
+                this._observers = observers;
+                this._observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (!(_observer == null)) _observers.Remove(_observer);
+            }
         }
     }
 }
