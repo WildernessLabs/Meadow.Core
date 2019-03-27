@@ -33,9 +33,9 @@ namespace Meadow.Hardware
             this.InterruptMode = interruptMode;
         }
 
-        protected void RaiseChanged(bool value)
+        protected void RaiseChanged(bool value, DateTime time)
         {
-            Changed(this, new DigitalInputPortEventArgs() { Value = value, Time = DateTime.Now });
+            Changed(this, new DigitalInputPortEventArgs() { Value = value, Time = time });
         }
     }
 }

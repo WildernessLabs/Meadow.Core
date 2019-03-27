@@ -14,6 +14,8 @@ namespace Meadow.Hardware
         public override int GlitchFilterCycleCount { get; set; }
         public ResistorMode Resistor { get; set; }
 
+        protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
+
         protected DigitalInputPort(
             IPin pin,
             IIOController ioController,
@@ -67,6 +69,16 @@ namespace Meadow.Hardware
         {
             if(pin == this.Pin)
             {
+                var time = DateTime.Now;
+
+                // debounce timing checks
+                if (DebounceDuration > 0) {
+                    if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration) {
+                        //Console.WriteLine("Debounced.");
+                        return;
+                    }
+                }
+
                 var state = false;
 
                 switch(InterruptMode)
@@ -84,7 +96,8 @@ namespace Meadow.Hardware
                         state = State;
                         break;
                 }
-                RaiseChanged(state);
+                this.LastEventTime = time;
+                RaiseChanged(state, time);
             }
         }
 

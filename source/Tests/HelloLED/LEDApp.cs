@@ -22,7 +22,7 @@ namespace HelloLED
 
         public void CreateOutputs()
         {
-            Debug.WriteLine("Creating Outpus");
+            Console.WriteLine("Creating Outpus");
             _redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
             _blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue);
             _greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
