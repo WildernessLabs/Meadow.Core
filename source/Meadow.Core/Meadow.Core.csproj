@@ -30,7 +30,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bases\BoolChangeResult.cs" />
     <Compile Include="FilteredObserver.cs" />
     <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
     <Compile Include="Peripherals\Displays\IDisplay.cs" />

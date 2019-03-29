@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
     /// <summary>
     /// Provides a base implementation for digital input ports.
     /// </summary>
-    public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort
+    public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort, IObservable<DigitalInputPortEventArgs>
     {
         /// <summary>
         /// Occurs when the state is changed. To enable this, the `interruptEnabled`
@@ -23,6 +24,8 @@ namespace Meadow.Hardware
         public abstract int DebounceDuration { get; set; }
         public abstract int GlitchFilterCycleCount { get; set; }
 
+        protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
+
         protected DigitalInputPortBase(
             IPin pin,
             IDigitalChannelInfo channel,
@@ -33,9 +36,34 @@ namespace Meadow.Hardware
             this.InterruptMode = interruptMode;
         }
 
-        protected void RaiseChanged(bool value, DateTime time)
+        protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)
         {
-            Changed(this, new DigitalInputPortEventArgs() { Value = value, Time = time });
+            Changed(this, changeResult);
+            _observers.ForEach(x => x.OnNext(changeResult));
         }
+
+        public IDisposable Subscribe(IObserver<DigitalInputPortEventArgs> observer)
+        {
+            if (!_observers.Contains(observer)) _observers.Add(observer);
+            return new Unsubscriber(_observers, observer);
+        }
+
+        private class Unsubscriber : IDisposable
+        {
+            private List<IObserver<DigitalInputPortEventArgs>> _observers;
+            private IObserver<DigitalInputPortEventArgs> _observer;
+
+            public Unsubscriber(List<IObserver<DigitalInputPortEventArgs>> observers, IObserver<DigitalInputPortEventArgs> observer)
+            {
+                this._observers = observers;
+                this._observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (!(_observer == null)) _observers.Remove(_observer);
+            }
+        }
+
     }
 }

@@ -8,5 +8,13 @@ namespace Meadow.Hardware
     {
         public bool Value { get; set; }
         public DateTime Time { get; set; }
+
+
+        public DigitalInputPortEventArgs() { }
+
+        public DigitalInputPortEventArgs(bool value, DateTime time) {
+            this.Value = value;
+            this.Time = time;
+        }
     }
 }

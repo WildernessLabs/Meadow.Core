@@ -7,7 +7,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of reading digital input.
     /// </summary>
-    public class DigitalInputPort : DigitalInputPortBase, IObservable<BoolChangeResult>
+    public class DigitalInputPort : DigitalInputPortBase
     {
         protected IIOController IOController { get; set; }
 
@@ -16,8 +16,6 @@ namespace Meadow.Hardware
         public ResistorMode Resistor { get; set; }
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
-
-        private List<IObserver<BoolChangeResult>> _observers { get; set; } = new List<IObserver<BoolChangeResult>>();
 
         protected DigitalInputPort(
             IPin pin,
@@ -100,9 +98,9 @@ namespace Meadow.Hardware
                         break;
                 }
                 this.LastEventTime = time;
-                RaiseChanged(state, time);
-                var result = new BoolChangeResult(state, time);
-                _observers.ForEach(x => x.OnNext(result));
+
+                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, time));
+                
             }
         }
 
@@ -111,32 +109,10 @@ namespace Meadow.Hardware
             //TODO: implement full pattern
         }
 
-        public IDisposable Subscribe(IObserver<BoolChangeResult> observer)
-        {
-            if (!_observers.Contains(observer)) _observers.Add(observer);
-            return new Unsubscriber(_observers, observer);
-        }
-
         public override bool State
         {
             get => this.IOController.GetDiscrete(this.Pin);
         }
 
-        private class Unsubscriber : IDisposable
-        {
-            private List<IObserver<BoolChangeResult>> _observers;
-            private IObserver<BoolChangeResult> _observer;
-
-            public Unsubscriber(List<IObserver<BoolChangeResult>> observers, IObserver<BoolChangeResult> observer)
-            {
-                this._observers = observers;
-                this._observer = observer;
-            }
-
-            public void Dispose()
-            {
-                if (!(_observer == null)) _observers.Remove(_observer);
-            }
-        }
     }
 }
