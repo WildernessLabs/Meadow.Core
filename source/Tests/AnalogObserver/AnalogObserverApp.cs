@@ -26,7 +26,7 @@ namespace AnalogObserver
 
         public void WireUpObservers()
         {
-            var firehoseSubscriber = _analog01.Subscribe(new FilteredObserver<FloatChangeResult>(
+            var firehoseSubscriber = _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
                 handler: result =>
                 {
                     Debug.WriteLine("Previous Value: " + result.Old);
@@ -37,7 +37,7 @@ namespace AnalogObserver
 
             // absolute: notify me when the temperature hits 75º
             float seventyFiveDegrees = (3.3f / 100f) * 75;
-            _absoluteObserver = _analog01.Subscribe(new FilteredObserver<FloatChangeResult>(
+            _absoluteObserver = _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
                 filter: result => (result.New > seventyFiveDegrees),
                 handler: avgValue =>
                 {
@@ -51,7 +51,7 @@ namespace AnalogObserver
 
             // relative, static comparison; e.g if change is > 1º
             float oneDegreeC = 3.3f / 100f; // TMP35DZ: 0º = 0V, 100º = 3.3V
-            var relative = _analog01.Subscribe(new FilteredObserver<FloatChangeResult>(
+            var relative = _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
                 filter: result => (result.Delta > oneDegreeC || result.Delta < oneDegreeC),
                 handler: result =>
                 {
@@ -61,7 +61,7 @@ namespace AnalogObserver
             //relative.Dispose();
 
             // relative percentage change
-            _analog01.Subscribe(new FilteredObserver<FloatChangeResult>(
+            _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
                 filter: result => (result.DeltaPercent > 10 || result.DeltaPercent < 10),
                 handler: result =>
                 {

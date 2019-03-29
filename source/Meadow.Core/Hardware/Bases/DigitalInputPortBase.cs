@@ -6,7 +6,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Provides a base implementation for digital input ports.
     /// </summary>
-    public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort, IObservable<DigitalInputPortEventArgs>
+    public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort
     {
         /// <summary>
         /// Occurs when the state is changed. To enable this, the `interruptEnabled`

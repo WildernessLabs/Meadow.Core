@@ -30,7 +30,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FilteredObserver.cs" />
+    <Compile Include="FilterableObserver.cs" />
     <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
     <Compile Include="Peripherals\Displays\IDisplay.cs" />
     <Compile Include="Peripherals\Displays\ITextDisplay.cs" />

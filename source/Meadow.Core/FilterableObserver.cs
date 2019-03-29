@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    public class FilteredObserver<T> : IObserver<T>
+    public class FilterableObserver<T> : IObserver<T>
     {
         protected Predicate<T> _filter = null;
         protected Action<T> _handler = null;
 
-        public FilteredObserver(Predicate<T> filter = null, Action<T> handler = null)
+        public FilterableObserver(Action<T> handler = null, Predicate<T> filter = null)
         {
-            this._filter = filter;
             this._handler = handler;
+            this._filter = filter;
         }
 
         public void OnNext(T value)
@@ -35,4 +35,5 @@ namespace Meadow
             Console.WriteLine("Filtered Observer error: "+ error.Message);
         }
     }
+
 }

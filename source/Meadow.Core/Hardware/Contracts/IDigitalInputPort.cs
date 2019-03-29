@@ -2,7 +2,7 @@
 
 namespace Meadow.Hardware
 {
-    public interface IDigitalInputPort : IDigitalPort
+    public interface IDigitalInputPort : IDigitalPort, IObservable<DigitalInputPortEventArgs>
     {
         bool State { get; }
 
