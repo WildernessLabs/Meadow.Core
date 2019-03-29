@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Meadow.Hardware
@@ -6,7 +7,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of reading digital input.
     /// </summary>
-    public class DigitalInputPort : DigitalInputPortBase
+    public class DigitalInputPort : DigitalInputPortBase, IObservable<FloatChangeResult>
     {
         protected IIOController IOController { get; set; }
 
@@ -15,6 +16,8 @@ namespace Meadow.Hardware
         public ResistorMode Resistor { get; set; }
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
+
+        private List<IObserver<FloatChangeResult>> _observers;
 
         protected DigitalInputPort(
             IPin pin,
@@ -106,10 +109,34 @@ namespace Meadow.Hardware
             //TODO: implement full pattern
         }
 
+        public IDisposable Subscribe(IObserver<FloatChangeResult> observer)
+        {
+            if (!_observers.Contains(observer))
+                _observers.Add(observer);
+
+            return new Unsubscriber(_observers, observer);
+        }
+
         public override bool State
         {
             get => this.IOController.GetDiscrete(this.Pin);
         }
 
+        private class Unsubscriber : IDisposable
+        {
+            private List<IObserver<FloatChangeResult>> _observers;
+            private IObserver<FloatChangeResult> _observer;
+
+            public Unsubscriber(List<IObserver<FloatChangeResult>> observers, IObserver<FloatChangeResult> observer)
+            {
+                this._observers = observers;
+                this._observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (!(_observer == null)) _observers.Remove(_observer);
+            }
+        }
     }
 }
