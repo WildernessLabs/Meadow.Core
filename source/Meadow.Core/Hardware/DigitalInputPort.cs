@@ -7,7 +7,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of reading digital input.
     /// </summary>
-    public class DigitalInputPort : DigitalInputPortBase, IObservable<FloatChangeResult>
+    public class DigitalInputPort : DigitalInputPortBase, IObservable<BoolChangeResult>
     {
         protected IIOController IOController { get; set; }
 
@@ -17,7 +17,7 @@ namespace Meadow.Hardware
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
-        private List<IObserver<FloatChangeResult>> _observers;
+        private List<IObserver<BoolChangeResult>> _observers { get; set; } = new List<IObserver<BoolChangeResult>>();
 
         protected DigitalInputPort(
             IPin pin,
@@ -101,6 +101,8 @@ namespace Meadow.Hardware
                 }
                 this.LastEventTime = time;
                 RaiseChanged(state, time);
+                var result = new BoolChangeResult(state, time);
+                _observers.ForEach(x => x.OnNext(result));
             }
         }
 
@@ -109,11 +111,9 @@ namespace Meadow.Hardware
             //TODO: implement full pattern
         }
 
-        public IDisposable Subscribe(IObserver<FloatChangeResult> observer)
+        public IDisposable Subscribe(IObserver<BoolChangeResult> observer)
         {
-            if (!_observers.Contains(observer))
-                _observers.Add(observer);
-
+            if (!_observers.Contains(observer)) _observers.Add(observer);
             return new Unsubscriber(_observers, observer);
         }
 
@@ -124,10 +124,10 @@ namespace Meadow.Hardware
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<FloatChangeResult>> _observers;
-            private IObserver<FloatChangeResult> _observer;
+            private List<IObserver<BoolChangeResult>> _observers;
+            private IObserver<BoolChangeResult> _observer;
 
-            public Unsubscriber(List<IObserver<FloatChangeResult>> observers, IObserver<FloatChangeResult> observer)
+            public Unsubscriber(List<IObserver<BoolChangeResult>> observers, IObserver<BoolChangeResult> observer)
             {
                 this._observers = observers;
                 this._observer = observer;
