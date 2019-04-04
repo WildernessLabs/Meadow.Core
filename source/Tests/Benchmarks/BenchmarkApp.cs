@@ -18,6 +18,7 @@ namespace Benchmarks
         protected void RunIntegerListTests()
         {
             int total = 0;
+            int listCount = 1000;
 
             DateTime start = DateTime.Now;
 
@@ -26,7 +27,7 @@ namespace Benchmarks
             DateTime listInit = DateTime.Now;
 
             // add some numbers to it
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < listCount; i++) {
                 intList.Add(i);
             }
             DateTime listPopulated = DateTime.Now;
@@ -51,11 +52,11 @@ namespace Benchmarks
 
             // output
             Console.WriteLine("=======================================");
-            Console.WriteLine($"Integer List Test Results, int count: {intList.Count}:");
-            Console.WriteLine($"Time to initialize: {timeToInit.Milliseconds}ms");
-            Console.WriteLine($"Time to populate: {timeToPopulate.Milliseconds}ms");
-            Console.WriteLine($"Time to sum: {timeToSum.Milliseconds}ms");
-            Console.WriteLine($"Time to clear: {timeToClear.Milliseconds}ms");
+            Console.WriteLine($"Integer List Test Results, int count: {listCount}:");
+            Console.WriteLine($"Time to initialize: {timeToInit.TotalMilliseconds}ms");
+            Console.WriteLine($"Time to populate: {timeToPopulate.TotalMilliseconds}ms");
+            Console.WriteLine($"Time to sum: {timeToSum.TotalMilliseconds}ms");
+            Console.WriteLine($"Time to clear: {timeToClear.TotalMilliseconds}ms");
             Console.WriteLine("=======================================");
         }
 
@@ -63,6 +64,7 @@ namespace Benchmarks
         {
             DateTime start = DateTime.Now;
             bool state = false;
+            int writeLoopCount = 100;
 
             // init some ports
             IDigitalOutputPort red = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
@@ -71,7 +73,7 @@ namespace Benchmarks
             DateTime portsCreated = DateTime.Now;
 
             // write to the ports
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < writeLoopCount; i++) {
                 state = !state;
                 red.State = state;
                 green.State = state;
@@ -82,12 +84,14 @@ namespace Benchmarks
             // calculate times.
             TimeSpan timeToInit = portsCreated - start;
             TimeSpan timeToWrite = portsWritten - portsCreated;
+            float averageWriteTime = (float)timeToWrite.TotalMilliseconds / (float)(writeLoopCount * 3);
 
             // output
             Console.WriteLine("=======================================");
             Console.WriteLine($"Port Test Results:");
-            Console.WriteLine($"Time to initialize: {timeToInit.Milliseconds}ms");
-            Console.WriteLine($"Time to write: {timeToWrite.Milliseconds}ms");
+            Console.WriteLine($"Time to initialize: {timeToInit.TotalMilliseconds}ms");
+            Console.WriteLine($"Time to write: {timeToWrite.TotalMilliseconds}ms");
+            Console.WriteLine($"Average time per write: {averageWriteTime}ms");
             Console.WriteLine("=======================================");
 
         }
