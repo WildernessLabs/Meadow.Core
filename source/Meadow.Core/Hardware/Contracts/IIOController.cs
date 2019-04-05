@@ -2,7 +2,7 @@
 
 namespace Meadow.Hardware
 {
-    public delegate void InterruptHandler(IPin pin);
+    public delegate void InterruptHandler(IPin pin, bool state);
 
     // TODO: Consider renaming to match MCP23008 driver: https://github.com/WildernessLabs/Netduino.Foundation/blob/master/Source/Peripheral_Libs/ICs.IOExpanders.MCP23008/Driver/MCP23008.cs
     // Write(IPin pin, bool value)
