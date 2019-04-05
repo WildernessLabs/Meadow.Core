@@ -84,6 +84,21 @@ namespace Meadow.Devices
         {
             var designator = GetPortAndPin(pin);
 
+            // invert values for LEDs so they make human sense (low == on on the Meadow)
+            switch(designator.port)
+            {
+                case STM32.GpioPort.PortA:
+                    switch(designator.pin)
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                            value = !value;
+                            break;
+                    }
+                    break;
+            }
+
             var register = new Interop.Nuttx.UpdRegisterValue
             {
                 Address = designator.address + STM32.STM32_GPIO_BSRR_OFFSET
