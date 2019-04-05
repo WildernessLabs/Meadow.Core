@@ -54,7 +54,7 @@ namespace Meadow.Devices
 
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
-            InterruptMode interruptMode = InterruptMode.EdgeBoth,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             int debounceDuration = 0,
             int glitchFilterCycleCount = 0
