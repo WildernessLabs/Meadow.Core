@@ -175,6 +175,7 @@
     <Compile Include="Interop\Interop.stm32.cs" />
     <Compile Include="Interop\Interop.queue.cs" />
     <Compile Include="Interop\Interop.signal.cs" />
+    <Compile Include="Devices\F7GPIOManager_pwm.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

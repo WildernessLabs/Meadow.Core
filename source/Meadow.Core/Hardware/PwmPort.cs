@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices;
+using Meadow.Hardware;
 using System;
 using System.Linq;
 
@@ -12,6 +13,8 @@ namespace Meadow.Hardware
     /// </summary>
     public class PwmPort : PwmPortBase
     {
+        protected IIOController IOController { get; set; }
+
         protected PwmPort(
             IPin pin,
             IIOController ioController,
@@ -21,6 +24,10 @@ namespace Meadow.Hardware
             /*bool inverted = false*/) 
             : base (pin, channel)
         {
+            this.IOController = ioController;
+
+            // HACK HACK HACK
+            (ioController as F7GPIOManager).EnablePC6PWM();
         }
 
         internal static PwmPort From(
