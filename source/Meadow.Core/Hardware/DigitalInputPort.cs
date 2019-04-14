@@ -9,11 +9,12 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
+        private ResistorMode _resistorMode;
+
         protected IIOController IOController { get; set; }
 
         public override int DebounceDuration { get; set; }
         public override int GlitchFilterCycleCount { get; set; }
-        public ResistorMode Resistor { get; set; }
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
@@ -29,6 +30,7 @@ namespace Meadow.Hardware
         {
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
+            this._resistorMode = resistorMode;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -63,6 +65,16 @@ namespace Meadow.Hardware
                 return new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
+            }
+        }
+
+        public override ResistorMode Resistor
+        {
+            get => _resistorMode;
+            set
+            {
+                IOController.SetResistorMode(this.Pin, value);
+                _resistorMode = value;
             }
         }
 

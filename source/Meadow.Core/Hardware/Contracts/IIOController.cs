@@ -36,6 +36,13 @@ namespace Meadow.Hardware
         bool GetDiscrete(IPin pin);
 
         /// <summary>
+        /// Sets the resistor mode for the given Pin
+        /// </summary>
+        /// <param name="pin">Pin.</param>
+        /// <param name="mode">Mode.</param>
+        void SetResistorMode(IPin pin, ResistorMode mode);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="pin"></param>
