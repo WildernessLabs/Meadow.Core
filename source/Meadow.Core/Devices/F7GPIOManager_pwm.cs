@@ -135,10 +135,15 @@ namespace Meadow.Devices
             // time base config
             Nuttx.TryGetRegister(DriverHandle, timerBaseAddress + TIMx_CR1_OFFSET, out uint cr1);
 
+            // Select the Counter Mode
             cr1 &= ~(TIM_CR1_DIR | TIM_CR1_CMS);
             cr1 |= counterMode;
 
-            // Set tcr1_dirhe auto-reload preload
+            // Set the clock division
+            cr1 &= ~TIM_CR1_CKD;
+            cr1 |= TIM_CLOCKDIVISION_DIV1;
+
+            // Set the auto-reload preload
             cr1 &= ~(TIM_CR1_ARPE);
             cr1 |= autoReloadPreload;
 
@@ -504,61 +509,18 @@ namespace Meadow.Devices
             Nuttx.SetRegister(DriverHandle, STM32.GPIOC_BASE + STM32.STM32_GPIO_BSRR_OFFSET, gpioPin << 16);
 
             // set the alternate functions
-            ConfigureGpio(STM32.GpioPort.PortC, 2, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
-            ConfigureGpio(STM32.GpioPort.PortC, 5, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
-            ConfigureGpio(STM32.GpioPort.PortC, 6, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+            ConfigureGpio(STM32.GpioPort.PortC, 2, STM32.GpioMode.Output, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_100MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+            ConfigureGpio(STM32.GpioPort.PortC, 5, STM32.GpioMode.Output, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_100MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+            ConfigureGpio(STM32.GpioPort.PortC, 6, STM32.GpioMode.Output, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_100MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
 
             //// Base initialization
             TIMxInit(TIM3_BASE_ADDRESS, prescaler, period, counterMode, autoReloadPreload);
 
-
-
-
-
-            /*
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CR1_OFFSET, out uint cr1);
-            cr1 &= ~TIM_CR1_CKD;
-            cr1 |= TIM_CLOCKDIVISION_DIV1;
-
-            //MODIFY_REG(tmpcr1, TIM_CR1_ARPE, Structure->AutoReloadPreload);
-
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CR1_OFFSET, cr1);
-
-            // Set the Auto-reload value
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_ARR_OFFSET, period);
-
-            // Set the Prescaler value
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_PSC_OFFSET, prescaler);
-            */
-
-
             //// Configure Clock Source
             TIMxConfigClockSource(TIM3_BASE_ADDRESS);
-            /*
-            //  Reset the SMS, TS, ECE, ETPS and ETRF bits
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_SMCR_OFFSET, out uint smcr);
-            smcr &= ~(TIM_SMCR_SMS | TIM_SMCR_TS);
-            smcr &= ~(TIM_SMCR_ETF | TIM_SMCR_ETPS | TIM_SMCR_ECE | TIM_SMCR_ETP);
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_SMCR_OFFSET, smcr);
-            */
 
             //// MasterConfigSynchronization
             TIMxMasterConfigSynchronization(TIM3_BASE_ADDRESS, false);
-
-            /* these are all NOP (zeros)
-            /* Reset the MMS Bits 
-            cr2 &= ~TIM_CR2_MMS;
-            /* Select the TRGO source 
-            tcr2 |= sMasterConfig->MasterOutputTrigger;     
-
-            /* Reset the MSM Bit 
-            tmpsmcr &= ~TIM_SMCR_MSM;
-            /* Set master mode 
-            tmpsmcr |= sMasterConfig->MasterSlaveMode;
-            */
-
-
-
 
             //// HAL_TIM_PWM_ConfigChannel
             // TODO: different configs per channel?
@@ -569,96 +531,6 @@ namespace Meadow.Devices
             TIM_PWM_Start(TIM3_BASE_ADDRESS, TIM_CHANNEL_1, true);
             TIM_PWM_Start(TIM3_BASE_ADDRESS, TIM_CHANNEL_2, true);
             TIM_PWM_Start(TIM3_BASE_ADDRESS, TIM_CHANNEL_3, true);
-
-
-
-            // Get the TIMx CCER register value
-            /*
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCER_OFFSET, out uint ccer);
-
-            // Get the TIMx CR2 register value
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CR2_OFFSET, out uint cr2);
-
-            // Get the TIMx CCMR1 register value
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, out uint ccmr1);
-
-            // Disable the Channel 1: Reset the CC1E Bit
-            ccer &= ~TIM_CCER_CC1E;
-
-            // Reset the Output Compare Mode Bits
-            ccmr1 &= ~TIM_CCMR1_OC1M;
-            ccmr1 &= ~TIM_CCMR1_CC1S;
-            // Select the Output Compare Mode 
-            ccmr1 |= TIM_OCMODE_PWM1;
-
-            // Reset the Output Polarity level 
-            ccer &= ~TIM_CCER_CC1P;
-            // Set the Output Compare Polarity 
-            ccer |= TIM_OCPOLARITY_HIGH;
-
-
-            /* Write to TIMx CR2
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CR2_OFFSET, cr2);
-
-            /* Write to TIMx CCMR1
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, ccmr1);
-
-            /* Set the Capture Compare Register value
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCR1_OFFSET, pulse);
-
-            /* Write to TIMx CCER
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCER_OFFSET, ccer);
-
-
-
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, out ccmr1);
-            ccmr1 |= TIM_CCMR1_OC1PE;
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, ccmr1);
-
-            /* Configure the Output Fast mode
-            Nuttx.TryGetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, out ccmr1);
-            ccmr1 &= ~TIM_CCMR1_OC1FE;
-            ccmr1 |= TIM_OCFAST_DISABLE;
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, ccmr1);
-            */
-
-
-
-            /*
-
-            // 1) set the PWM frequency in TIMx_ARR
-            // right now 0xffff is just some unknown frequency.  I *think* slowest possible?
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_ARR_OFFSET, 0xffff);
-
-            // 2) set the duty cycle in TIMxCCR1
-            // right now 0xffff is just some unknown duty cycle.
-            Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCR1_OFFSET, 0xffff);
-
-            // 3) Set mode to PWM mode 1 by setting OC1M[2:0] (output compare mode bits) in TIMx_CCMR1 to '110'
-            uint update = PWM_MODE_1 << OC1M_SHIFT;
-            Nuttx.UpdateRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, 0, update);
-
-            // 4) Set polarity to active high in CCER by setting CC1P to 0
-            update = 1 << CC1P_SHIFT;
-            Nuttx.UpdateRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, update, 0);
-
-            // 5) Enable preload in CCMR1 by setting OC1PE to 1
-            update = 1 << OC1PE_SHIFT;
-            Nuttx.UpdateRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCMR1_OFFSET, 0, update);
-
-            // 6) Initialize registers to 0 by setting UG to 1 in TIMxEGR
-            update = 1 << UG_SHIFT;
-            Nuttx.UpdateRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_EGR_OFFSET, 0, update);
-
-            // 7) Turn on auto-preload in TIMx_CCR1 by setting ARPE to 1
-            update = 1 << ARPE_SHIFT;
-            Nuttx.UpdateRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CR1_OFFSET, 0, update);
-
-            // 8) Enable output in TIMx_CCER by setting CC1E to 1
-            update = 1 << CC1E_SHIFT;
-            Nuttx.UpdateRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_CCER_OFFSET, 0, update);
-            */
-
 
             Console.WriteLine("-EnablePC6PWM");
         }
