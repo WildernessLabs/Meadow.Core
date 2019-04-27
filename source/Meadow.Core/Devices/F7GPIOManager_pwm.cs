@@ -44,7 +44,8 @@ namespace Meadow.Devices
         private const int ARPE_SHIFT = 7;
 
         private const uint TIM_SMCR_SMS = ((1 << 16) | 7);
-        private const uint TIM_SMCR_TS = 0x70;
+        private const uint TIM_SMCR_TS = 7 << 4;
+        private const uint TIM_SMCR_MSM = 1 << 7;
         private const uint TIM_SMCR_ETF = 0x0f << 8;
         private const uint TIM_SMCR_ETPS = 0x03 << 12;
         private const uint TIM_SMCR_ECE = 1 << 14;  // external clock enable
@@ -65,6 +66,7 @@ namespace Meadow.Devices
         private const uint TIM_CR1_CKD = 3 << 8;
 
         private const uint TIM_CR2_MMS = 0x07 << 4;
+        private const uint TIM_CR2_MMS2 = 1 << 6;
 
         private const uint TIM_EGR_UG = 1 << 0;
 
@@ -74,6 +76,10 @@ namespace Meadow.Devices
         private const uint TIM_OCMODE_PWM1 = 0x06;
         private const uint TIM_OCPOLARITY_HIGH = 0;
         private const uint TIM_OCFAST_DISABLE = 0;
+        private const uint TIM_MASTERSLAVEMODE_DISABLE = 0;
+
+        private const uint TIM_TRGO_RESET = 0;
+        private const uint TIM_TRGO2_RESET = 0;
 
         private void TIMxInit(uint timerBaseAddress, uint prescaler, uint period, uint counterMode, uint autoReloadPreload)
         {
@@ -111,6 +117,41 @@ namespace Meadow.Devices
             // Disable slave mode to clock the prescaler directly with the internal clock
             Nuttx.TryGetRegister(DriverHandle, timerBaseAddress + TIMx_SMCR_OFFSET, out smcr);
             smcr &= ~TIM_SMCR_SMS;
+            Nuttx.SetRegister(DriverHandle, timerBaseAddress + TIMx_SMCR_OFFSET, smcr);
+        }
+
+        private void TIMxMasterConfigSynchronization(uint timerBaseAddress, bool isTIM1or8)
+        {
+            // Get the TIMx CR2 register value
+            Nuttx.TryGetRegister(DriverHandle, timerBaseAddress + TIMx_CR2_OFFSET, out uint cr2);
+
+            // Get the TIMx SMCR register value
+            Nuttx.TryGetRegister(DriverHandle, timerBaseAddress + TIMx_SMCR_OFFSET, out uint smcr);
+
+            // TODO: If the timer supports ADC synchronization through TRGO2, set the master mode selection 2 
+
+            if(isTIM1or8) // IS_TIM_TRGO2_INSTANCE // this is for TIM1 and TIM8 - TIM8 *is* used by Meadow
+            {
+                // Clear the MMS2 bits
+                cr2 &= ~TIM_CR2_MMS2;
+                // Select the TRGO2 source
+                cr2 |= TIM_TRGO2_RESET;
+            }
+
+            // Reset the MMS Bits
+            cr2 &= ~TIM_CR2_MMS;
+            // Select the TRGO source
+            cr2 |= TIM_TRGO_RESET;
+
+            // Reset the MSM Bit
+            smcr &= ~TIM_SMCR_MSM;
+            // Set master mode
+            smcr |= TIM_MASTERSLAVEMODE_DISABLE;
+
+            // Update TIMx CR2
+            Nuttx.SetRegister(DriverHandle, timerBaseAddress + TIMx_CR2_OFFSET, cr2);
+
+            // Update TIMx SMCR
             Nuttx.SetRegister(DriverHandle, timerBaseAddress + TIMx_SMCR_OFFSET, smcr);
         }
 
@@ -176,7 +217,10 @@ namespace Meadow.Devices
             smcr &= ~(TIM_SMCR_ETF | TIM_SMCR_ETPS | TIM_SMCR_ECE | TIM_SMCR_ETP);
             Nuttx.SetRegister(DriverHandle, TIM3_BASE_ADDRESS + TIMx_SMCR_OFFSET, smcr);
             */
+
             //// MasterConfigSynchronization
+            TIMxMasterConfigSynchronization(TIM3_BASE_ADDRESS, false);
+
             /* these are all NOP (zeros)
             /* Reset the MMS Bits 
             cr2 &= ~TIM_CR2_MMS;
@@ -188,6 +232,9 @@ namespace Meadow.Devices
             /* Set master mode 
             tmpsmcr |= sMasterConfig->MasterSlaveMode;
             */
+
+
+
 
             //// HAL_TIM_PWM_ConfigChannel
             // Get the TIMx CCER register value
