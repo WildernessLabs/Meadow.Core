@@ -15,5 +15,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <value>All the pins.</value>
         IList<IPin> AllPins { get; }
+
+        INamedPinGroups Groups { get; }
     }
 }

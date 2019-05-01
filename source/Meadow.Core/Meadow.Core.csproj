@@ -180,7 +180,8 @@
     <Compile Include="Hardware\Communications\II2cPeripheral.cs" />
     <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
     <Compile Include="Devices\Definitions\F7MicroPinDefinitions_NamedGroups.cs" />
-    <Compile Include="Devices\NamedPinGroup.cs" />
+    <Compile Include="Hardware\Contracts\INamedPinGroups.cs" />
+    <Compile Include="Hardware\NamedPinGroup.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

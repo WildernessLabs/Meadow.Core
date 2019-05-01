@@ -11,7 +11,7 @@ namespace ByteCommsAPIScratchPad
         public ByteCommsApp()
         {
             // create the SPI bus
-            ISpiBus spiBus2 = Device.Hubs.Spi.Create(Device.Pins.Groups.Spi);
+            ISpiBus spiBus2 = Device.Hubs.Spi.Create(Device.Pins.Groups.Spi1);
             ISpiBus spiBus2 = Device.Hubs.Spi.Create(); // default pins
             //II2cBus i2CBus = Device.Hubs.I2c.Create();
 

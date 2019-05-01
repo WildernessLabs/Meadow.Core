@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Meadow.Hardware;
 
-namespace Meadow.Devices
+namespace Meadow.Hardware
 {
     public class NamedPinGroup
     {

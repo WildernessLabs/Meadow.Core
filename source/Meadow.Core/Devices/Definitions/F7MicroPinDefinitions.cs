@@ -9,6 +9,7 @@ namespace Meadow.Devices
         public partial class F7MicroPinDefinitions : IPinDefinitions
         {
             public IList<IPin> AllPins { get; } = new List<IPin>();
+            public F7NamedPinGroups Groups { get; protected set; }
 
             // OnboardLEDBlue
             // TIM2_CH1/TIM2_ETR, TIM5_CH1, TIM8_ETR, USART2_CTS, UART4_TX, SAI2_SD_B, ETH_MII_CRS, EVENTOUT
@@ -339,6 +340,14 @@ namespace Meadow.Devices
 
             public F7MicroPinDefinitions()
             {
+
+                this.InitAllPins();
+                this.Groups = new F7NamedPinGroups(this);
+
+            }
+
+            protected void InitAllPins()
+            {
                 // add all our pins to the collection
                 AllPins.Add(this.A01);
                 AllPins.Add(this.A02);
@@ -375,8 +384,6 @@ namespace Meadow.Devices
                 AllPins.Add(this.ESP_RST);
                 AllPins.Add(this.ESP_UART_RX);
                 AllPins.Add(this.ESP_UART_TX);
-
-
 
             }
 
