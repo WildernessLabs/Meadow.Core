@@ -6,10 +6,9 @@ namespace Meadow.Devices
 {
     public partial class F7Micro
     {
-        public class F7MicroPinDefinitions : IPinDefinitions
+        public partial class F7MicroPinDefinitions : IPinDefinitions
         {
             public IList<IPin> AllPins { get; } = new List<IPin>();
-            public IDictionary<string, IPin[]> PinGroups { get; } = new Dictionary<string, IPin[]>();
 
             // OnboardLEDBlue
             // TIM2_CH1/TIM2_ETR, TIM5_CH1, TIM8_ETR, USART2_CTS, UART4_TX, SAI2_SD_B, ETH_MII_CRS, EVENTOUT
@@ -377,8 +376,8 @@ namespace Meadow.Devices
                 AllPins.Add(this.ESP_UART_RX);
                 AllPins.Add(this.ESP_UART_TX);
 
-                // TODO: no magic strings, also need lookup
-                this.PinGroups.Add("COM1", new IPin[] { this.D12, this.D13 });
+
+
             }
 
         }

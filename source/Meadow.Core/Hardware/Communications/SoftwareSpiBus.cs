@@ -7,7 +7,7 @@ namespace Meadow.Hardware.Communications
     /// <summary>
     /// Implements a software version of the SPI communication protocol.
     /// </summary>
-    public class SoftwareSPIBus : ICommunicationBus
+    public class SoftwareSPIBus : IByteCommunications
     {
         #region Member variables / fields
 

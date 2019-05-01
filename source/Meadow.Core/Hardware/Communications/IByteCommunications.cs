@@ -4,7 +4,7 @@ namespace Meadow.Hardware.Communications
     /// <summary>
     /// Define a contract for general peripheral communications classes.
     /// </summary>
-    public interface ICommunicationBus
+    public interface IByteCommunications
     {
         #region Methods
 
