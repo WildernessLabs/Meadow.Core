@@ -109,7 +109,7 @@ namespace Meadow.Devices
 
         public II2cBus CreateI2cBus(
             IPin[] pins,
-            ushort speed = 100
+            ushort speed
         )
         {
             return I2cBus.From(pins[0], pins[1], speed);

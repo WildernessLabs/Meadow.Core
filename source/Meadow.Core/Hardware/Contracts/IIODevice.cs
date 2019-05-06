@@ -45,24 +45,26 @@ namespace Meadow.Hardware
         );
 
         ISpiBus CreateSpiBus(
-            IPin[] pins
-            ushort speed = 1000
+            IPin[] pins,
+            ushort speed = 1000 // TODO: not sure about this
         );
 
         ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
             IPin miso,
-            ushort speed = 1000
+            ushort speed = 1000 // TODO: not sure about this
         );
 
         II2cBus CreateI2cBus(
-            IPin[] pins
+            IPin[] pins,
+            ushort speed = 100 // TODO: not sure about this
         );
 
         II2cBus CreateI2cBus(
             IPin clock,
-            IPin data
+            IPin data,
+            ushort speed = 100 // TODO: not sure about this
         );
     }
 }

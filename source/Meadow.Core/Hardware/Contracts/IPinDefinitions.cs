@@ -16,6 +16,9 @@ namespace Meadow.Hardware
         /// <value>All the pins.</value>
         IList<IPin> AllPins { get; }
 
-        INamedPinGroups Groups { get; }
+        // TODO: if we do this, we can't type the instance version
+        // so we won't get good autocomplete for specific devices, e.g.:
+        // f7Micro.Groups.I2c1
+        //INamedPinGroups Groups { get; } 
     }
 }

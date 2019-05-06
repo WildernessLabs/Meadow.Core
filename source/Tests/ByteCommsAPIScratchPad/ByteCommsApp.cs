@@ -30,7 +30,8 @@ namespace ByteCommsAPIScratchPad
             II2cPeripheral i2cPeripheral = new I2cPeripheral(i2cBus, 39);
 
             // write
-            //I2cPeripheral.W
+            i2cPeripheral.WriteByte(0x01);
+            i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
         }
     }
 }
