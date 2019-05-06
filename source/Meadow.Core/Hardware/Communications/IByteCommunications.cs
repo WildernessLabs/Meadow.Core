@@ -1,5 +1,5 @@
 ﻿
-namespace Meadow.Hardware.Communications
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Define a contract for general peripheral communications classes.

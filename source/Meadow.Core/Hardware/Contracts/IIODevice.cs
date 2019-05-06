@@ -1,4 +1,5 @@
 ﻿
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -41,6 +42,16 @@ namespace Meadow.Hardware
             float frequency = 100, 
             float dutyCycle = 0/*, 
             bool invert = false*/
+        );
+
+        ISpiBus CreateSpiBus(
+            NamedPinGroup pins
+        );
+
+        ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso
         );
     }
 }

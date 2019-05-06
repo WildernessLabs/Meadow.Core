@@ -27,7 +27,7 @@ namespace Meadow.Devices
                 protected void InitNamedPinGroups()
                 {
                     Com1 = new NamedPinGroup("COM1", new IPin[] { _parent.D12, _parent.D13 });
-                    Spi1 = new NamedPinGroup("SPI1", new IPin[] { _parent.SCK, _parent.MISO, _parent.MOSI });
+                    Spi1 = new NamedPinGroup("SPI1", new IPin[] { _parent.SCK, _parent.MOSI, _parent.MISO });
                     I2c1 = new NamedPinGroup("I2C1", new IPin[] { _parent.D08, _parent.D09 });
                 }
 

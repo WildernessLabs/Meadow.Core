@@ -1,8 +1,9 @@
 ﻿using System;
-namespace Meadow.Hardware.Communications
+namespace Meadow.Hardware
 {
-    public interface ISpiPeripheral : IReadWriteByteCommunications
+    public interface ISpiPeripheral : IByteCommunications
     {
         IDigitalOutputPort ChipSelect { get; }
+        ISpiBus Bus { get; }
     }
 }

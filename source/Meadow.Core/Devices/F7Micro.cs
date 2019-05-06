@@ -40,6 +40,8 @@ namespace Meadow.Devices
 
             // 
             this.Pins = new F7MicroPinDefinitions();
+
+            this.Hubs = new F7CommHubs();
         }
 
 
@@ -89,6 +91,18 @@ namespace Meadow.Devices
             return PwmPort.From(pin, this.IoController, frequency, dutyCycle);
         }
 
+        public ISpiBus CreateSpiBus(
+            NamedPinGroup pins
+        )
+        {
+            
+        }
+
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso
+        );
 
     }
 }

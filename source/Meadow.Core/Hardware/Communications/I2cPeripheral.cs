@@ -1,5 +1,4 @@
 ﻿using System;
-using Meadow.Hardware.Communications;
 
 namespace Meadow.Hardware
 {
@@ -10,103 +9,72 @@ namespace Meadow.Hardware
     public class I2cPeripheral : II2cPeripheral
     {
         public byte Address { get; protected set; }
+        public II2cBus Bus { get; protected set; }
 
-        public I2cPeripheral(byte address)
+        public I2cPeripheral(II2cBus bus, byte peripheralAddress)
         {
-            Address = address;
+            Bus = bus;
+            Address = peripheralAddress;
         }
-
-
-        //public Configuration Config;
-        //protected bool m_disposed;
-
-        //public I2cPeripheral(Configuration config) { throw new NotImplementedException(); }
-
-        //~I2cPeripheral() { throw new NotImplementedException(); }
-
-        //public static I2CReadTransaction CreateReadTransaction(byte[] buffer) { throw new NotImplementedException(); }
-        //public static I2CWriteTransaction CreateWriteTransaction(byte[] buffer) { throw new NotImplementedException(); }
-        //public void Dispose() { throw new NotImplementedException(); }
-        //public int Execute(I2CTransaction[] xActions, int timeout) { throw new NotImplementedException(); }
-
-        //public class Configuration
-        //{
-        //    public readonly ushort Address;
-        //    public readonly int ClockRateKhz;
-
-        //    public Configuration(ushort address, int clockRateKhz) { throw new NotImplementedException(); }
-        //}
-        //public sealed class I2CReadTransaction : I2CTransaction
-        //{
-        //}
-        //public class I2CTransaction
-        //{
-        //    public readonly byte[] Buffer;
-
-        //  //  protected I2CTransaction(byte[] buffer) { }
-        //}
-        //public sealed class I2CWriteTransaction : I2CTransaction
-        //{
-        //}
 
         public byte[] ReadBytes(ushort numberOfBytes)
         {
-            throw new NotImplementedException();
+            return this.Bus.ReadBytes(this.Address, numberOfBytes);
         }
 
         public byte ReadRegister(byte address)
         {
-            throw new NotImplementedException();
+            return this.Bus.ReadRegister(this.Address, address);
         }
 
         public byte[] ReadRegisters(byte address, ushort length)
         {
-            throw new NotImplementedException();
+            return this.Bus.ReadRegisters(this.Address, address, length);
         }
 
-        public ushort ReadUShort(byte address, ByteOrder order)
+        public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            return this.Bus.ReadUShort(this.Address, address, order);
         }
 
         public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            return this.Bus.ReadUShorts(this.Address, address, number, order);
         }
 
         public void WriteByte(byte value)
         {
-            throw new NotImplementedException();
+            this.Bus.WriteByte(this.Address, value);
         }
 
         public void WriteBytes(byte[] values)
         {
-            throw new NotImplementedException();
+            this.Bus.WriteBytes(this.Address, values);
         }
 
         public byte[] WriteRead(byte[] write, ushort length)
         {
-            throw new NotImplementedException();
+            return this.Bus.WriteRead(this.Address, write, length);
         }
 
         public void WriteRegister(byte address, byte value)
         {
-            throw new NotImplementedException();
+            this.Bus.WriteRegister(this.Address, address, value);
         }
 
         public void WriteRegisters(byte address, byte[] data)
         {
-            throw new NotImplementedException();
+            this.Bus.WriteRegisters(this.Address, address, data);
         }
 
         public void WriteUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            this.Bus.WriteUShort(this.Address, address, value, order);
         }
 
         public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            this.Bus.WriteUShorts(this.Address, address, values, order);
         }
     }
 }

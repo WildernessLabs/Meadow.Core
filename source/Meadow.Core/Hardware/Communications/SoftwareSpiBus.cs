@@ -2,12 +2,12 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Meadow.Hardware.Communications
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Implements a software version of the SPI communication protocol.
     /// </summary>
-    public class SoftwareSPIBus : IByteCommunications
+    public class SoftwareSPIBus : ISpiBus
     {
         #region Member variables / fields
 
@@ -25,11 +25,6 @@ namespace Meadow.Hardware.Communications
         /// Clock output port.
         /// </summary>
         private IDigitalOutputPort _clock;
-
-        /// <summary>
-        /// Chip select port.
-        /// </summary>
-        private IDigitalOutputPort _chipSelect;
 
         /// <summary>
         /// Boolean representation of the clock polarity.
@@ -58,10 +53,9 @@ namespace Meadow.Hardware.Communications
         /// <param name="mosi">MOSI pin.</param>
         /// <param name="miso">MISO pin</param>
         /// <param name="clock">Clock pin.</param>
-        /// <param name="chipSelect">Chip select pin.</param>
         /// <param name="cpha">Clock phase (0 or 1, default is 0).</param>
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
-        public SoftwareSPIBus(IIODevice device, IPin mosi, IPin miso, IPin clock, IPin chipSelect, byte cpha = 0, byte cpol = 0)
+        public SoftwareSPIBus(IIODevice device, IPin mosi, IPin miso, IPin clock/*, IPin chipSelect*/, byte cpha = 0, byte cpol = 0)
         {
             if (mosi == null)
             {
@@ -77,7 +71,7 @@ namespace Meadow.Hardware.Communications
             _mosi = device.CreateDigitalOutputPort(mosi, false);
             _miso = miso == null ? null : device.CreateDigitalInputPort(miso, InterruptMode.EdgeRising, ResistorMode.Disabled);
             _clock = device.CreateDigitalOutputPort(clock, _polarity);
-            _chipSelect = chipSelect == null ? null : device.CreateDigitalOutputPort(chipSelect, true);
+            //_chipSelect = chipSelect == null ? null : device.CreateDigitalOutputPort(chipSelect, true);
         }
 
         #endregion Constructors
@@ -107,11 +101,11 @@ namespace Meadow.Hardware.Communications
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteByte(byte value)
+        public void WriteByte(IDigitalOutputPort chipSelect, byte value)
         {
-            if (_chipSelect != null) _chipSelect.State = false;
+            chipSelect.State = false;
             Write(value);
-            if (_chipSelect != null) _chipSelect.State = true;
+            chipSelect.State = true;
         }
 
         /// <summary>
@@ -123,14 +117,14 @@ namespace Meadow.Hardware.Communications
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteBytes(byte[] values)
+        public void WriteBytes(IDigitalOutputPort chipSelect, byte[] values)
         {
-            if (_chipSelect != null) _chipSelect.State = false;
+            chipSelect.State = false;
             for (int index = 0; index < values.Length; index++)
             {
                 Write(values[index]);
             }
-            if (_chipSelect != null) _chipSelect.State = true;
+            chipSelect.State = true;
         }
 
         /// <summary>
@@ -138,10 +132,10 @@ namespace Meadow.Hardware.Communications
         /// </summary>
         /// <param name="register">Address of the register to write to.</param>
         /// <param name="value">Data to write into the register.</param>
-        public void WriteRegister(byte register, byte value)
+        public void WriteRegister(IDigitalOutputPort chipSelect, byte register, byte value)
         {
-            byte[] values = new byte[] { register, value};
-            WriteBytes(values);
+            byte[] values = { register, value};
+            WriteBytes(chipSelect, values);
         }
 
         /// <summary>
@@ -149,8 +143,10 @@ namespace Meadow.Hardware.Communications
         /// </summary>
         /// <param name="address">Address of the first register to write to.</param>
         /// <param name="data">Data to write into the registers.</param>
-        public void WriteRegisters(byte address, byte[] data)
+        public void WriteRegisters(IDigitalOutputPort chipSelect, byte address, byte[] data)
         {
+            //TODO: (Bryan for Mark) does this actually do anything?
+            // shouldn't it call a write?
             byte[] values = new byte[data.Length + 1];
             values[0] = address;
             Array.Copy(data, 0, values, 1, data.Length);
@@ -162,7 +158,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="value">Value to be written (16-bits).</param>
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteUShort(IDigitalOutputPort chipSelect, byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2];
             if (order == ByteOrder.LittleEndian)
@@ -175,7 +171,7 @@ namespace Meadow.Hardware.Communications
                 data[0] = (byte) ((value >> 8) & 0xff);
                 data[1] = (byte) (value & 0xff);
             }
-            WriteRegisters(address, data);
+            WriteRegisters(chipSelect, address, data);
         }
 
         /// <summary>
@@ -187,7 +183,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="values">Values to be written.</param>
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteUShorts(IDigitalOutputPort chipSelect, byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2 * values.Length];
             for (var index = 0; index < values.Length; index++)
@@ -203,7 +199,7 @@ namespace Meadow.Hardware.Communications
                     data[(2 * index) + 1] = (byte) (values[index] & 0xff);
                 }
             }
-            WriteRegisters(address, data);
+            WriteRegisters(chipSelect, address, data);
         }
 
         /// <summary>
@@ -253,7 +249,7 @@ namespace Meadow.Hardware.Communications
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public byte[] WriteRead(byte[] write, ushort length)
+        public byte[] WriteRead(IDigitalOutputPort chipSelect, byte[] write, ushort length)
         {
             if (length < write.Length)
             {
@@ -263,7 +259,7 @@ namespace Meadow.Hardware.Communications
             {
                 throw new InvalidOperationException("Cannot read from SPI bus when the MISO pin is set to None");
             }
-            if (_chipSelect != null) _chipSelect.State = false;
+            chipSelect.State = false;
             byte[] result = new byte[length];
             for (var index = 0; index < length; index++)
             {
@@ -274,7 +270,7 @@ namespace Meadow.Hardware.Communications
                 }
                 result[index] = WriteRead(value);
             }
-            if (_chipSelect != null) _chipSelect.State = true;
+            chipSelect.State = true;
             _mosi.State = (false);
             return(result);
         }
@@ -284,22 +280,25 @@ namespace Meadow.Hardware.Communications
         /// </summary>
         /// <param name="numberOfBytes">Number of bytes.</param>
         /// <returns>The bytes read from the device.</returns>
-        public byte[] ReadBytes(ushort numberOfBytes)
+        public byte[] ReadBytes(IDigitalOutputPort chipSelect, ushort numberOfBytes)
         {
             byte[] values = new byte[numberOfBytes];
             for (int index = 0; index < numberOfBytes; index++)
             {
                 values[index] = 0;
             }
-            return(WriteRead(values, numberOfBytes));
+            return(WriteRead(chipSelect, values, numberOfBytes));
         }
 
         /// <summary>
         /// Read a register from the peripheral.
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
-        public byte ReadRegister(byte address)
+        public byte ReadRegister(IDigitalOutputPort chipSelect, byte address)
         {
+            //TODO: @Mark, i think this needs a chip select call pull down/up
+            // if i unmderstand this correctly, the private methods assume
+            // chip select is already taken care of
             return(WriteRead(address));
         }
 
@@ -308,10 +307,10 @@ namespace Meadow.Hardware.Communications
         /// </summary>
         /// <param name="address">Address of the first register to read.</param>
         /// <param name="length">Number of bytes to read from the device.</param>
-        public byte[] ReadRegisters(byte address, ushort length)
+        public byte[] ReadRegisters(IDigitalOutputPort chipSelect, byte address, ushort length)
         {
             byte[] registerAddress = { address };
-            return WriteRead(registerAddress, length);
+            return WriteRead(chipSelect, registerAddress, length);
         }
 
         /// <summary>
@@ -320,9 +319,9 @@ namespace Meadow.Hardware.Communications
         /// <param name="address">Register address of the low byte (the high byte will follow).</param>
         /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
         /// <returns>Value read from the register.</returns>
-        public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
+        public ushort ReadUShort(IDigitalOutputPort chipSelect, byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
-            var data = ReadRegisters(address, 3);
+            var data = ReadRegisters(chipSelect, address, 3);
             ushort result = 0;
             if (order == ByteOrder.LittleEndian)
             {
@@ -343,9 +342,9 @@ namespace Meadow.Hardware.Communications
         /// <param name="number">Number of unsigned shorts to read.</param>
         /// <param name="order">Order of the bytes (Little or Big endian)</param>
         /// <returns>Array of unsigned shorts.</returns>
-        public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
+        public ushort[] ReadUShorts(IDigitalOutputPort chipSelect, byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
-            var data = ReadRegisters(address, (ushort) ((2 * number) & 0xffff));
+            var data = ReadRegisters(chipSelect, address, (ushort) ((2 * number) & 0xffff));
             var result = new ushort[number];
             for (var index = 0; index < number; index++)
             {

@@ -178,10 +178,11 @@
     <Compile Include="Hardware\Communications\Spi.cs" />
     <Compile Include="Hardware\Communications\ISpiPeripheral.cs" />
     <Compile Include="Hardware\Communications\II2cPeripheral.cs" />
-    <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
     <Compile Include="Devices\Definitions\F7MicroPinDefinitions_NamedGroups.cs" />
     <Compile Include="Hardware\Contracts\INamedPinGroups.cs" />
     <Compile Include="Hardware\NamedPinGroup.cs" />
+    <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
+    <Compile Include="Hardware\Communications\II2cBus.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

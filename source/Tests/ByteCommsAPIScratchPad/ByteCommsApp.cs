@@ -11,17 +11,16 @@ namespace ByteCommsAPIScratchPad
         public ByteCommsApp()
         {
             // create the SPI bus
-            ISpiBus spiBus2 = Device.Hubs.Spi.Create(Device.Pins.Groups.Spi1);
-            ISpiBus spiBus2 = Device.Hubs.Spi.Create(); // default pins
-            //II2cBus i2CBus = Device.Hubs.I2c.Create();
+            ISpiBus shortBus = Device.CreateSpiBus(Device.Pins.Groups.Spi1);
+            //II2cBus iBus = Device.CreateI2cBus(Device.Pins.Groups.I2c1);
 
             // add a device
             IDigitalOutputPort spiPeriphChipSelect = Device.CreateDigitalOutputPort(Device.Pins.D03);
-            ISpiPeripheral spiPeriph = new SpiPeripheral(spiPeriphChipSelect);
+            ISpiPeripheral spiPeriph = new SpiPeripheral(shortBus, spiPeriphChipSelect);
 
-            // hm. which, which?
-            //spiBus.Peripherals.Add(spiPeriph);
-            //spiBus.CreatePeripheral(spiPeriphChipSelect)
+            // Can write to the device either way:
+            spiPeriph.WriteByte(0x01);
+            shortBus.WriteByte(spiPeriph.ChipSelect, 0x01);
         }
     }
 }
