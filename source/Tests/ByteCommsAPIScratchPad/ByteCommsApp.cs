@@ -10,10 +10,8 @@ namespace ByteCommsAPIScratchPad
         public ByteCommsApp()
         {
             //==== SPI Example
-
             // create the SPI bus
             ISpiBus spiBus = Device.CreateSpiBus(Device.Pins.Groups.Spi1);
-            
 
             // add a device
             IDigitalOutputPort spiPeriphChipSelect = Device.CreateDigitalOutputPort(Device.Pins.D03);
@@ -29,7 +27,7 @@ namespace ByteCommsAPIScratchPad
             // add a device
             II2cPeripheral i2cPeripheral = new I2cPeripheral(i2cBus, 39);
 
-            // write
+            // write (same as SPI, can write directly to the peripheral or via the bus)
             i2cPeripheral.WriteByte(0x01);
             i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
         }
