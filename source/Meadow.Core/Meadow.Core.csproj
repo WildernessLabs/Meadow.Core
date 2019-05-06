@@ -183,6 +183,7 @@
     <Compile Include="Hardware\NamedPinGroup.cs" />
     <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
     <Compile Include="Hardware\Communications\II2cBus.cs" />
+    <Compile Include="Hardware\Communications\SpiBus.Configuration.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

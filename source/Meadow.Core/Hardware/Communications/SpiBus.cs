@@ -6,7 +6,7 @@ namespace Meadow.Hardware
     /// Represents an SPI communication bus for communicating to peripherals that 
     /// implement the SPI protocol.
     /// </summary>
-    public class SPIBus : ISpiBus
+    public partial class SpiBus : ISpiBus
     {
         ///// <summary>
         ///// SPI bus object.
@@ -16,7 +16,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Configuration to use for this instance of the SPIBus.
         /// </summary>
-        private Spi.Configuration _configuration;
+        public SpiBus.ConfigurationOptions Configuration { get; protected set; }
 
         /// <summary>
         /// Default constructor for the SPIBus.
@@ -24,116 +24,105 @@ namespace Meadow.Hardware
         /// <remarks>
         /// This is private to prevent the programmer using it.
         /// </remarks>
-        private SPIBus()
+        protected SpiBus()
         {
         }
 
-        /// <summary>
-        /// Create a new SPIBus object.
-        /// </summary>
-        /// <param name="configuration">SPI bus configuration.</param>
-        public SPIBus(Spi.Configuration configuration)
+        // TODO: Call from Device.CreateSpiBus
+        // TODO: use Spi.Configuration configuration?
+        internal static SpiBus From(IPin[] pins, ushort speed = 1000, byte cpha = 0, byte cpol = 0)
         {
-            _configuration = configuration;
-            _spi = new Spi(configuration);
-        }
-
-        public static From(IPin clock, IPin mosi, IPin miso, ushort speed = 1000, byte cpha = 0, byte cpol = 0)
-        {
-
+            return new SpiBus();
         }
 
 
-        /// <summary>
-        /// Create a new SPIBus object using the requested clock phase and polarity.
-        /// </summary>
-        /// <param name="module">SPI module to configure.</param>
-        /// <param name="chipSelect">Chip select pin.</param>
-        /// <param name="cpha">CPHA - Clock Phase (0 or 1).</param>
-        /// <param name="cpol">CPOL - Clock Polarity (0 or 1).</param>
-        /// <param name="speed">Speed of the SPI bus.</param>
-        protected SPIBus(Spi.SPI_module module, IPin chipSelect, ushort speed = 1000, byte cpha = 0, byte cpol = 0)
-        {
-            Configure(module, chipSelect, cpha, cpol, speed);
-            _spi = new Spi(_configuration);
-        }
+        ///// <summary>
+        ///// Create a new SPIBus object using the requested clock phase and polarity.
+        ///// </summary>
+        ///// <param name="cpha">CPHA - Clock Phase (0 or 1).</param>
+        ///// <param name="cpol">CPOL - Clock Polarity (0 or 1).</param>
+        ///// <param name="speed">Speed of the SPI bus.</param>
+        //protected SpiBus(ushort speed = 1000, byte cpha = 0, byte cpol = 0)
+        //{
+        //    Configure(module, chipSelect, cpha, cpol, speed);
+        //    //_spi = new Spi(Configuration);
+        //}
 
-        /// <summary>
-        /// Create a new SPIBus operating in the specified mode.
-        /// </summary>
-        /// <remarks>
-        ///     Mode    CPOL    CPHA
-        ///     0       0       0
-        ///     1       0       1
-        ///     2       1       0
-        ///     3       1       1
-        /// </remarks>
-        /// <param name="module">SPI module to configure.</param>
-        /// <param name="chipSelect">Chip select pin.</param>
-        /// <param name="mode">SPI Bus Mode - should be in the range 0 - 3.</param>
-        /// <param name="speed">Speed of the SPI bus.</param>
-        public SPIBus(Spi.SPI_module module, IPin chipSelect, byte mode, ushort speed)
-        {
-            if (mode > 3) {
-                throw new ArgumentException("SPI Mode should be in the range 0 - 3.");
-            }
-            byte cpha = 0;
-            byte cpol = 0;
-            switch (mode) {
-                case 1:
-                    cpha = 1;
-                    break;
-                case 2:
-                    cpol = 1;
-                    break;
-                case 3:
-                    cpol = 1;
-                    cpha = 1;
-                    break;
-            }
-            Configure(module, chipSelect, cpha, cpol, speed);
-            _spi = new Spi(_configuration);
-        }
+        ///// <summary>
+        ///// Create a new SPIBus operating in the specified mode.
+        ///// </summary>
+        ///// <remarks>
+        /////     Mode    CPOL    CPHA
+        /////     0       0       0
+        /////     1       0       1
+        /////     2       1       0
+        /////     3       1       1
+        ///// </remarks>
+        ///// <param name="module">SPI module to configure.</param>
+        ///// <param name="chipSelect">Chip select pin.</param>
+        ///// <param name="mode">SPI Bus Mode - should be in the range 0 - 3.</param>
+        ///// <param name="speed">Speed of the SPI bus.</param>
+        //public SpiBus(Spi.SPI_module module, IPin chipSelect, byte mode, ushort speed)
+        //{
+        //    if (mode > 3) {
+        //        throw new ArgumentException("SPI Mode should be in the range 0 - 3.");
+        //    }
+        //    byte cpha = 0;
+        //    byte cpol = 0;
+        //    switch (mode) {
+        //        case 1:
+        //            cpha = 1;
+        //            break;
+        //        case 2:
+        //            cpol = 1;
+        //            break;
+        //        case 3:
+        //            cpol = 1;
+        //            cpha = 1;
+        //            break;
+        //    }
+        //    Configure(module, chipSelect, cpha, cpol, speed);
+        //    _spi = new Spi(Configuration);
+        //}
 
-        #endregion Constructor(s)
 
         #region Methods
 
-        /// <summary>
-        /// Works out how the SPI bus should be configured from the clock polarity and phase.
-        /// </summary>
-        /// <param name="module">SPI module to configure.</param>
-        /// <param name="chipSelect">Chip select pin.</param>
-        /// <param name="cpha">CPHA - Clock phase (0 or 1).</param>
-        /// <param name="cpol">CPOL - Clock polarity (0 or 1).</param>
-        /// <param name="speed">Speed of the SPI bus.</param>
-        /// <returns>SPI Configuration object.</returns>
-        private void Configure(Spi.SPI_module module, IPin chipSelect, byte cpha, byte cpol,
-            ushort speed)
-        {
-            if (cpha > 1) {
-                throw new ArgumentException("Clock phase should be 0 to 1.");
-            }
-            if (cpol > 1) {
-                throw new ArgumentException("Clock polarity should be 0 to 1.");
-            }
-            _configuration = new Spi.Configuration(SPI_mod: module,
-                                               ChipSelect_Port: chipSelect,
-                                               ChipSelect_ActiveState: false,
-                                               ChipSelect_SetupTime: 0,
-                                               ChipSelect_HoldTime: 0,
-                                               Clock_IdleState: (cpol == 1),
-                                               Clock_Edge: (cpha == 1),
-                                               Clock_RateKHz: speed);
-        }
+        ///// <summary>
+        ///// Works out how the SPI bus should be configured from the clock polarity and phase.
+        ///// </summary>
+        ///// <param name="module">SPI module to configure.</param>
+        ///// <param name="chipSelect">Chip select pin.</param>
+        ///// <param name="cpha">CPHA - Clock phase (0 or 1).</param>
+        ///// <param name="cpol">CPOL - Clock polarity (0 or 1).</param>
+        ///// <param name="speed">Speed of the SPI bus.</param>
+        ///// <returns>SPI Configuration object.</returns>
+        //private void Configure(Spi.SPI_module module, IPin chipSelect, byte cpha, byte cpol,
+        //    ushort speed)
+        //{
+        //    if (cpha > 1) {
+        //        throw new ArgumentException("Clock phase should be 0 to 1.");
+        //    }
+        //    if (cpol > 1) {
+        //        throw new ArgumentException("Clock polarity should be 0 to 1.");
+        //    }
+        //    Configuration = new Spi.Configuration(SPI_mod: module,
+        //                                       ChipSelect_Port: chipSelect,
+        //                                       ChipSelect_ActiveState: false,
+        //                                       ChipSelect_SetupTime: 0,
+        //                                       ChipSelect_HoldTime: 0,
+        //                                       Clock_IdleState: (cpol == 1),
+        //                                       Clock_Edge: (cpha == 1),
+        //                                       Clock_RateKHz: speed);
+        //}
 
         /// <summary>
         /// Write a single byte to the peripheral.
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
-        public void WriteByte(byte value)
+        public void WriteByte(IDigitalOutputPort chipSelect, byte value)
         {
-            WriteBytes(new[] { value });
+            WriteBytes(chipSelect, new[] { value });
         }
 
         /// <summary>
@@ -143,10 +132,10 @@ namespace Meadow.Hardware
         /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="values">Values to be written.</param>
-        public void WriteBytes(byte[] values)
+        public void WriteBytes(IDigitalOutputPort chipSelect, byte[] values)
         {
-            _spi.Config = _configuration;
-            _spi.Write(values);
+            //_spi.Config = Configuration;
+            //_spi.Write(values);
         }
 
         /// <summary>
@@ -155,7 +144,8 @@ namespace Meadow.Hardware
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="value">Value to be written (16-bits).</param>
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteUShort(IDigitalOutputPort chipSelect, byte address, ushort value,
+            ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2];
             if (order == ByteOrder.LittleEndian) {
@@ -165,7 +155,7 @@ namespace Meadow.Hardware
                 data[0] = (byte)((value >> 8) & 0xff);
                 data[1] = (byte)(value & 0xff);
             }
-            WriteRegisters(address, data);
+            WriteRegisters(chipSelect, address, data);
         }
 
         /// <summary>
@@ -177,7 +167,8 @@ namespace Meadow.Hardware
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="values">Values to be written.</param>
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteUShorts(IDigitalOutputPort chipSelect, byte address, ushort[] values,
+            ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2 * values.Length];
             for (var index = 0; index < values.Length; index++) {
@@ -189,7 +180,7 @@ namespace Meadow.Hardware
                     data[(index * 2) + 1] = (byte)(values[index] & 0xff);
                 }
             }
-            WriteRegisters(address, data);
+            WriteRegisters(chipSelect, address, data);
         }
 
         /// <summary>
@@ -197,9 +188,9 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">Address of the register to write to.</param>
         /// <param name="value">Data to write into the register.</param>
-        public void WriteRegister(byte address, byte value)
+        public void WriteRegister(IDigitalOutputPort chipSelect, byte address, byte value)
         {
-            WriteRegisters(address, new[] { value });
+            WriteRegisters(chipSelect, address, new[] { value });
         }
 
         /// <summary>
@@ -207,12 +198,12 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">Address of the first register to write to.</param>
         /// <param name="data">Data to write into the registers.</param>
-        public void WriteRegisters(byte address, byte[] values)
+        public void WriteRegisters(IDigitalOutputPort chipSelect, byte address, byte[] values)
         {
             var data = new byte[values.Length + 1];
             data[0] = address;
             Array.Copy(values, 0, data, 1, values.Length);
-            WriteBytes(data);
+            WriteBytes(chipSelect, data);
         }
 
         /// <summary>
@@ -223,12 +214,13 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
-        public byte[] WriteRead(byte[] write, ushort length)
+        public byte[] WriteRead(IDigitalOutputPort chipSelect, byte[] write, ushort length)
         {
             var result = new byte[length];
-            _spi.Config = _configuration;
-            _spi.WriteRead(write, result);
-            return result;
+            //Config = Configuration;
+            //WriteRead(chipSelect, write, result);
+            //return result;
+            return new byte[] { 0 };
         }
 
         /// <summary>
@@ -236,7 +228,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <returns>The bytes.</returns>
         /// <param name="numberOfBytes">Number of bytes.</param>
-        public byte[] ReadBytes(ushort numberOfBytes)
+        public byte[] ReadBytes(IDigitalOutputPort chipSelect, ushort numberOfBytes)
         {
             throw new NotImplementedException();
         }
@@ -245,9 +237,9 @@ namespace Meadow.Hardware
         /// Read a registers from the peripheral.
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
-        public byte ReadRegister(byte address)
+        public byte ReadRegister(IDigitalOutputPort chipSelect, byte address)
         {
-            return WriteRead(new[] { address }, 1)[0];
+            return WriteRead(chipSelect, new[] { address }, 1)[0];
         }
 
         /// <summary>
@@ -255,9 +247,9 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">Address of the first register to read.</param>
         /// <param name="length">Number of bytes to read from the device.</param>
-        public byte[] ReadRegisters(byte address, ushort length)
+        public byte[] ReadRegisters(IDigitalOutputPort chipSelect, byte address, ushort length)
         {
-            return WriteRead(new[] { address }, length);
+            return WriteRead(chipSelect, new[] { address }, length);
         }
 
         /// <summary>
@@ -266,7 +258,8 @@ namespace Meadow.Hardware
         /// <param name="address">Register address of the low byte (the high byte will follow).</param>
         /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
         /// <returns>Value read from the register.</returns>
-        public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
+        public ushort ReadUShort(IDigitalOutputPort chipSelect, byte address,
+            ByteOrder order = ByteOrder.LittleEndian)
         {
             throw new NotImplementedException();
         }
@@ -279,7 +272,8 @@ namespace Meadow.Hardware
         /// <param name="number">Number of unsigned shorts to read.</param>
         /// <param name="order">Order of the bytes (Little or Big endian)</param>
         /// <returns>Array of unsigned shorts.</returns>
-        public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
+        public ushort[] ReadUShorts(IDigitalOutputPort chipSelect, byte address, ushort number,
+            ByteOrder order = ByteOrder.LittleEndian)
         {
             throw new NotImplementedException();
         }
