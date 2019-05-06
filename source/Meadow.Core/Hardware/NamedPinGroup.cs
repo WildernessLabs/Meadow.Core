@@ -19,5 +19,10 @@ namespace Meadow.Hardware
         {
             return Name;
         }
+
+        public static implicit operator IPin[](NamedPinGroup namedPinGroup)
+        {
+            return namedPinGroup.Pins;
+        }
     }
 }

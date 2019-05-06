@@ -1,6 +1,8 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    // TODO: @Mark; i don't love `peripheralAddress`, but we need a way to distinguish
+    // between peripheral and register addresses.
     public interface II2cBus
     {
         /// <summary>

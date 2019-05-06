@@ -45,13 +45,24 @@ namespace Meadow.Hardware
         );
 
         ISpiBus CreateSpiBus(
-            NamedPinGroup pins
+            IPin[] pins
+            ushort speed = 1000
         );
 
         ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
-            IPin miso
+            IPin miso,
+            ushort speed = 1000
+        );
+
+        II2cBus CreateI2cBus(
+            IPin[] pins
+        );
+
+        II2cBus CreateI2cBus(
+            IPin clock,
+            IPin data
         );
     }
 }

@@ -18,10 +18,10 @@ namespace Meadow.Hardware
         /// </remarks>
         private static I2cPeripheral _device;
 
-        /// <summary>
-        /// Configuration property for this I2CDevice.
-        /// </summary>
-        private readonly I2cPeripheral.Configuration _configuration;
+        ///// <summary>
+        ///// Configuration property for this I2CDevice.
+        ///// </summary>
+        //private readonly I2cPeripheral.Configuration _configuration;
 
         /// <summary>
         ///     Timeout for I2C transactions.
@@ -36,29 +36,35 @@ namespace Meadow.Hardware
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Meadow.Foundation.Core.I2CBus" /> class.
-        /// </summary>
-        /// <param name="address">Address of the device.</param>
-        /// <param name="speed">Bus speed in kHz.</param>
-        /// <param name="transactionTimeout">Transaction timeout in milliseconds.</param>
-        public I2cBus(byte peripheralAddress, byte peripheralAddress, byte address, ushort speed, ushort transactionTimeout = 100)
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="T:Meadow.Foundation.Core.I2CBus" /> class.
+        ///// </summary>
+        ///// <param name="address">Address of the device.</param>
+        ///// <param name="speed">Bus speed in kHz.</param>
+        ///// <param name="transactionTimeout">Transaction timeout in milliseconds.</param>
+        //public I2cBus(ushort speed, ushort transactionTimeout = 100)
+        //{
+        //    _configuration = new I2cPeripheral.Configuration(address, speed);
+        //    if (_device == null) {
+        //        _device = new I2cPeripheral(_configuration);
+        //    }
+        //    _transactionTimeout = transactionTimeout;
+        //}
+
+        // TODO: Speed should have default?
+        public static I2cBus From(IPin clock, IPin data, ushort speed, ushort transactionTimeout = 100)
         {
-            _configuration = new I2cPeripheral.Configuration(address, speed);
-            if (_device == null) {
-                _device = new I2cPeripheral(_configuration);
-            }
-            _transactionTimeout = transactionTimeout;
+            return new I2cBus();
         }
 
         /// <summary>
         /// Write a single byte to the device.
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
-        public void WriteByte(byte peripheralAddress, byte peripheralAddress, byte value)
+        public void WriteByte(byte peripheralAddress, byte value)
         {
             byte[] data = { value };
-            WriteBytes(data);
+            WriteBytes(peripheralAddress, data);
         }
 
         /// <summary>
@@ -69,20 +75,20 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteBytes(byte peripheralAddress, byte peripheralAddress, byte[] values)
+        public void WriteBytes(byte peripheralAddress, byte[] values)
         {
-            _device.Config = _configuration;
-            I2cPeripheral.I2CTransaction[] transaction =
-            {
-                I2cPeripheral.CreateWriteTransaction(values)
-            };
-            var retryCount = 0;
-            while (_device.Execute(transaction, _transactionTimeout) != values.Length) {
-                if (retryCount > 3) {
-                    throw new Exception("WriteBytes: Retry count exceeded.");
-                }
-                retryCount++;
-            }
+            ////_device.Config = _configuration;
+            //I2cPeripheral.I2CTransaction[] transaction =
+            //{
+            //    I2cPeripheral.CreateWriteTransaction(values)
+            //};
+            //var retryCount = 0;
+            //while (_device.Execute(transaction, _transactionTimeout) != values.Length) {
+            //    if (retryCount > 3) {
+            //        throw new Exception("WriteBytes: Retry count exceeded.");
+            //    }
+            //    retryCount++;
+            //}
         }
 
         /// <summary>
@@ -91,7 +97,7 @@ namespace Meadow.Hardware
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="value">Value to be written (16-bits).</param>
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShort(byte peripheralAddress, byte peripheralAddress, byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteUShort(byte peripheralAddress, byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2];
             if (order == ByteOrder.LittleEndian) {
@@ -101,7 +107,7 @@ namespace Meadow.Hardware
                 data[0] = (byte)((value >> 8) & 0xff);
                 data[1] = (byte)(value & 0xff);
             }
-            WriteRegisters(address, data);
+            WriteRegisters(peripheralAddress, address, data);
         }
 
         /// <summary>
@@ -113,7 +119,7 @@ namespace Meadow.Hardware
         /// <param name="address">Address to write the first byte to.</param>
         /// <param name="values">Values to be written.</param>
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShorts(byte peripheralAddress, byte peripheralAddress, byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteUShorts(byte peripheralAddress, byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2 * values.Length];
             for (var index = 0; index < values.Length; index++) {
@@ -125,7 +131,7 @@ namespace Meadow.Hardware
                     data[(2 * index) + 1] = (byte)(values[index] & 0xff);
                 }
             }
-            WriteRegisters(address, data);
+            WriteRegisters(peripheralAddress, address, data);
         }
 
         /// <summary>
@@ -137,35 +143,37 @@ namespace Meadow.Hardware
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public byte[] WriteRead(byte peripheralAddress, byte peripheralAddress, byte[] write, ushort length)
+        public byte[] WriteRead(byte peripheralAddress, byte[] write, ushort length)
         {
-            _device.Config = _configuration;
-            var read = new byte[length];
-            I2cPeripheral.I2CTransaction[] transaction =
-            {
-                I2cPeripheral.CreateWriteTransaction(write),
-                I2cPeripheral.CreateReadTransaction(read)
-            };
-            var bytesTransferred = 0;
-            var retryCount = 0;
-
-            while (_device.Execute(transaction, _transactionTimeout) != (write.Length + read.Length)) {
-                if (retryCount > 3) {
-                    throw new Exception("WriteRead: Retry count exceeded.");
-                }
-                retryCount++;
-            }
-
-            //while (bytesTransferred != (write.Length + read.Length))
+            //_device.Config = _configuration;
+            //var read = new byte[length];
+            //I2cPeripheral.I2CTransaction[] transaction =
             //{
-            //    if (retryCount > 3)
-            //    {
+            //    I2cPeripheral.CreateWriteTransaction(write),
+            //    I2cPeripheral.CreateReadTransaction(read)
+            //};
+            //var bytesTransferred = 0;
+            //var retryCount = 0;
+
+            //while (_device.Execute(transaction, _transactionTimeout) != (write.Length + read.Length)) {
+            //    if (retryCount > 3) {
             //        throw new Exception("WriteRead: Retry count exceeded.");
             //    }
             //    retryCount++;
-            //    bytesTransferred = _device.Execute(transaction, _transactionTimeout);
             //}
-            return read;
+
+            ////while (bytesTransferred != (write.Length + read.Length))
+            ////{
+            ////    if (retryCount > 3)
+            ////    {
+            ////        throw new Exception("WriteRead: Retry count exceeded.");
+            ////    }
+            ////    retryCount++;
+            ////    bytesTransferred = _device.Execute(transaction, _transactionTimeout);
+            ////}
+            //return read;
+
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -173,10 +181,10 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">Address of the register to write to.</param>
         /// <param name="value">Value to write into the register.</param>
-        public void WriteRegister(byte peripheralAddress, byte peripheralAddress, byte address, byte value)
+        public void WriteRegister(byte peripheralAddress, byte address, byte value)
         {
             byte[] data = { address, value };
-            WriteBytes(data);
+            WriteBytes(peripheralAddress, data);
         }
 
         /// <summary>
@@ -188,12 +196,12 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="address">Address of the first register to write to.</param>
         /// <param name="data">Data to write into the registers.</param>
-        public void WriteRegisters(byte peripheralAddress, byte peripheralAddress, byte address, byte[] data)
+        public void WriteRegisters(byte peripheralAddress, byte address, byte[] data)
         {
             var registerAndData = new byte[data.Length + 1];
             registerAndData[0] = address;
             Array.Copy(data, 0, registerAndData, 1, data.Length);
-            WriteBytes(registerAndData);
+            WriteBytes(peripheralAddress, registerAndData);
         }
 
         /// <summary>
@@ -202,32 +210,33 @@ namespace Meadow.Hardware
         /// <returns>The bytes.</returns>
         /// <param name="numberOfBytes">Number of bytes.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public byte[] ReadBytes(byte peripheralAddress, byte peripheralAddress, ushort numberOfBytes)
+        public byte[] ReadBytes(byte peripheralAddress, ushort numberOfBytes)
         {
-            _device.Config = _configuration;
-            var result = new byte[numberOfBytes];
-            I2cPeripheral.I2CTransaction[] transaction =
-            {
-                I2cPeripheral.CreateReadTransaction(result)
-            };
-            var retryCount = 0;
-            while (_device.Execute(transaction, _transactionTimeout) != numberOfBytes) {
-                if (retryCount > 3) {
-                    throw new Exception("ReadBytes: Retry count exceeded.");
-                }
-                retryCount++;
-            }
-            return result;
+            //_device.Config = _configuration;
+            //var result = new byte[numberOfBytes];
+            //I2cPeripheral.I2CTransaction[] transaction =
+            //{
+            //    I2cPeripheral.CreateReadTransaction(result)
+            //};
+            //var retryCount = 0;
+            //while (_device.Execute(transaction, _transactionTimeout) != numberOfBytes) {
+            //    if (retryCount > 3) {
+            //        throw new Exception("ReadBytes: Retry count exceeded.");
+            //    }
+            //    retryCount++;
+            //}
+            //return result;
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Read a register from the device.
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
-        public byte ReadRegister(byte peripheralAddress, byte peripheralAddress, byte address)
+        public byte ReadRegister(byte peripheralAddress, byte address)
         {
             byte[] registerAddress = { address };
-            var result = WriteRead(registerAddress, 1);
+            var result = WriteRead(peripheralAddress, registerAddress, 1);
             return result[0];
         }
 
@@ -236,10 +245,10 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">Address of the first register to read.</param>
         /// <param name="length">Number of bytes to read from the device.</param>
-        public byte[] ReadRegisters(byte peripheralAddress, byte peripheralAddress, byte address, ushort length)
+        public byte[] ReadRegisters(byte peripheralAddress, byte address, ushort length)
         {
             byte[] registerAddress = { address };
-            return WriteRead(registerAddress, length);
+            return WriteRead(peripheralAddress, registerAddress, length);
         }
 
         /// <summary>
@@ -248,9 +257,9 @@ namespace Meadow.Hardware
         /// <param name="address">Register address of the low byte (the high byte will follow).</param>
         /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
         /// <returns>Value read from the register.</returns>
-        public ushort ReadUShort(byte peripheralAddress, byte peripheralAddress, byte address, ByteOrder order = ByteOrder.LittleEndian)
+        public ushort ReadUShort(byte peripheralAddress, byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
-            var data = ReadRegisters(address, 2);
+            var data = ReadRegisters(peripheralAddress, address, 2);
             ushort result = 0;
             if (order == ByteOrder.LittleEndian) {
                 result = (ushort)((data[1] << 8) + data[0]);
@@ -268,9 +277,9 @@ namespace Meadow.Hardware
         /// <param name="number">Number of unsigned shorts to read.</param>
         /// <param name="order">Order of the bytes (Little or Big endian)</param>
         /// <returns>Array of unsigned shorts.</returns>
-        public ushort[] ReadUShorts(byte peripheralAddress, byte peripheralAddress, byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
+        public ushort[] ReadUShorts(byte peripheralAddress, byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
-            var data = ReadRegisters(address, (ushort)((2 * number) & 0xffff));
+            var data = ReadRegisters(peripheralAddress, address, (ushort)((2 * number) & 0xffff));
             var result = new ushort[number];
             for (var index = 0; index < number; index++) {
                 if (order == ByteOrder.LittleEndian) {

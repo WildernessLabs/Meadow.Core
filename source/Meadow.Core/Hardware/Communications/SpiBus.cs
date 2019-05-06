@@ -29,8 +29,15 @@ namespace Meadow.Hardware
         }
 
         // TODO: Call from Device.CreateSpiBus
-        // TODO: use Spi.Configuration configuration?
-        internal static SpiBus From(IPin[] pins, ushort speed = 1000, byte cpha = 0, byte cpol = 0)
+        // TODO: use Spi.Configuration configuration? don't we already know this, as its chip specific?
+        // TODO: we should already know clock phase and polarity, yeah?
+        internal static SpiBus From(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            ushort speed = 1000,
+            byte cpha = 0,
+            byte cpol = 0)
         {
             return new SpiBus();
         }
