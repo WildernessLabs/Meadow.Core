@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace Benchmarks
 {
-    public class BenchmarkApp : AppBase<F7Micro, BenchmarkApp>
+    public class BenchmarkApp : Appp<<F7Micro, BenchmarkApp>
     {
         public BenchmarkApp()
         {

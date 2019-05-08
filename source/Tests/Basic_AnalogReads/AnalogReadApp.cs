@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Basic_AnalogReads
 {
-    public class AnalogReadApp : AppBase<F7Micro, AnalogReadApp>
+    public class AnalogReadApp : Appp<<F7Micro, AnalogReadApp>
     {
         IAnalogInputPort analogIn;
 

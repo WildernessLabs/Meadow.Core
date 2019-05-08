@@ -5,7 +5,7 @@ using Meadow.Devices;
 
 namespace ByteCommsAPIScratchPad
 {
-    public class ByteCommsApp : AppBase<F7Micro, ByteCommsApp>
+    public class ByteCommsApp : App<F7Micro, ByteCommsApp>
     {
         public ByteCommsApp()
         {
@@ -30,6 +30,15 @@ namespace ByteCommsAPIScratchPad
             // write (same as SPI, can write directly to the peripheral or via the bus)
             i2cPeripheral.WriteByte(0x01);
             i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
+
+            // accessing the device from the core:
+            IPin[] spiPins;
+            switch (MeadowOS.CurrentDevice) {
+                case F7Micro f7:
+                    spiPins = f7.Pins.Groups.Spi1;
+                    // do whatever
+                    break;
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace AnalogObserver
 {
-    public class AnalogObserverApp : AppBase<F7Micro, AnalogObserverApp>
+    public class AnalogObserverApp : Appp<<F7Micro, AnalogObserverApp>
     {
         protected AnalogInputPort _analog01;
 

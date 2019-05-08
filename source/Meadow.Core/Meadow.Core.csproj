@@ -63,7 +63,7 @@
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
     <Compile Include="WakeUpOptions.cs" />
-    <Compile Include="Bases\AppBase.cs" />
+    <Compile Include="Bases\App.cs" />
     <Compile Include="Contracts\IApp.cs" />
     <Compile Include="Devices\F7GPIOManager.cs" />
     <Compile Include="Devices\F7Micro.cs" />
