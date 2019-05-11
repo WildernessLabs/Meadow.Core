@@ -8,7 +8,7 @@ using Meadow.Hardware.Communications;
 
 namespace SPITest
 {
-    public class SPITestApplication : AppBase<F7Micro, SPITestApplication>
+    public class SPITestApplication : Appp<<F7Micro, SPITestApplication>
     {
         private readonly IDigitalOutputPort _redLED;
         private readonly IDigitalOutputPort _blueLED;

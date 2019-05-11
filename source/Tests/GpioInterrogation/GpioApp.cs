@@ -5,7 +5,7 @@ using Meadow.Hardware;
 
 namespace GpioInterrogation
 {
-    public class GpioApp : AppBase<F7Micro, GpioApp>
+    public class GpioApp : Appp<<F7Micro, GpioApp>
     {
         public GpioApp()
         {

@@ -1,14 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E4271183-8172-466F-8AF8-3ADDEBA64BB1}</ProjectGuid>
+    <ProjectGuid>{CB756052-D824-40AC-8A54-C6E608DD83B7}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ClockPInvoke.Test</RootNamespace>
-    <AssemblyName>ClockPInvoke.Test</AssemblyName>
+    <RootNamespace>ByteCommsAPIScratchPad</RootNamespace>
+    <AssemblyName>App</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,6 +32,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ByteCommsApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj">
