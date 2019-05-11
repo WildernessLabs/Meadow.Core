@@ -438,12 +438,12 @@ namespace Meadow.Devices
                     var pin = irq & 0xf;
                     var key = $"P{(char)(65 + port)}{pin}";
 
-//                    Console.WriteLine($"Interrupt on {key}");
+//                    Console.WriteLine($"Interrupt on {key} state={rx_buffer[4]}");
                     lock (_interruptPins)
                     {
                         if (_interruptPins.ContainsKey(key))
                         {
-                            Interrupt?.Invoke(_interruptPins[key]);
+                            Interrupt?.Invoke(_interruptPins[key], rx_buffer[4] != 0);
                         }
                     }
                 }
