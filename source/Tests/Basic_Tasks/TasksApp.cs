@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace Basic_Tasks
 {
-    public class TasksApp : AppBase<F7Micro, TasksApp>
+    public class TasksApp : Appp<<F7Micro, TasksApp>
     {
         IDigitalOutputPort out1;
         IDigitalOutputPort out2;

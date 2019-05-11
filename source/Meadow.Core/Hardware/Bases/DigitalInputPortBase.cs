@@ -21,6 +21,7 @@ namespace Meadow.Hardware
         public InterruptMode InterruptMode { get; protected set; }
 
         public abstract bool State { get; }
+        public abstract ResistorMode Resistor { get; set; }
         public abstract int DebounceDuration { get; set; }
         public abstract int GlitchFilterCycleCount { get; set; }
 

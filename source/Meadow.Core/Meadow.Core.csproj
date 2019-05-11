@@ -63,7 +63,7 @@
     <Compile Include="DeviceCapabilities.cs" />
     <Compile Include="MeadowOS.cs" />
     <Compile Include="WakeUpOptions.cs" />
-    <Compile Include="Bases\AppBase.cs" />
+    <Compile Include="Bases\App.cs" />
     <Compile Include="Contracts\IApp.cs" />
     <Compile Include="Devices\F7GPIOManager.cs" />
     <Compile Include="Devices\F7Micro.cs" />
@@ -93,7 +93,6 @@
     <Compile Include="Hardware\SerialDataReceivedEventArgs.cs" />
     <Compile Include="Hardware\SerialErrorReceivedEventArgs.cs" />
     <Compile Include="Hardware\SerialPort.cs" />
-    <Compile Include="Hardware\Spi.cs" />
     <Compile Include="Hardware\Bases\AnalogInputPortBase.cs" />
     <Compile Include="Hardware\Bases\AnalogPortBase.cs" />
     <Compile Include="Hardware\Bases\BiDirectionalPortBase.cs" />
@@ -104,13 +103,11 @@
     <Compile Include="Hardware\Bases\PinBase.cs" />
     <Compile Include="Hardware\Bases\PwmPortBase.cs" />
     <Compile Include="Hardware\Communications\I2cBus.cs" />
-    <Compile Include="Hardware\Communications\ICommunicationBus.cs" />
     <Compile Include="Hardware\Communications\OneWire.cs" />
     <Compile Include="Hardware\Communications\OneWireBus.cs" />
     <Compile Include="Hardware\Communications\SoftwareI2c.cs" />
     <Compile Include="Hardware\Communications\SoftwareSpiBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.cs" />
-    <Compile Include="Hardware\Contracts\I2cPeripheral.cs" />
     <Compile Include="Hardware\Contracts\IAnalogChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\IAnalogInputPort.cs" />
     <Compile Include="Hardware\Contracts\IAnalogPort.cs" />
@@ -175,6 +172,18 @@
     <Compile Include="Interop\Interop.stm32.cs" />
     <Compile Include="Interop\Interop.queue.cs" />
     <Compile Include="Interop\Interop.signal.cs" />
+    <Compile Include="Hardware\Communications\IByteCommunications.cs" />
+    <Compile Include="Hardware\Communications\ISpiBus.cs" />
+    <Compile Include="Hardware\Communications\I2cPeripheral.cs" />
+    <Compile Include="Hardware\Communications\Spi.cs" />
+    <Compile Include="Hardware\Communications\ISpiPeripheral.cs" />
+    <Compile Include="Hardware\Communications\II2cPeripheral.cs" />
+    <Compile Include="Devices\Definitions\F7MicroPinDefinitions_NamedGroups.cs" />
+    <Compile Include="Hardware\Contracts\INamedPinGroups.cs" />
+    <Compile Include="Hardware\NamedPinGroup.cs" />
+    <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
+    <Compile Include="Hardware\Communications\II2cBus.cs" />
+    <Compile Include="Hardware\Communications\SpiBus.Configuration.cs" />
     <Compile Include="Devices\F7GPIOManager_pwm.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -1,4 +1,5 @@
 ﻿
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -41,6 +42,29 @@ namespace Meadow.Hardware
             float frequency = 100, 
             float dutyCycle = 0/*, 
             bool invert = false*/
+        );
+
+        ISpiBus CreateSpiBus(
+            IPin[] pins,
+            ushort speed = 1000 // TODO: not sure about this
+        );
+
+        ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            ushort speed = 1000 // TODO: not sure about this
+        );
+
+        II2cBus CreateI2cBus(
+            IPin[] pins,
+            ushort speed = 100 // TODO: not sure about this
+        );
+
+        II2cBus CreateI2cBus(
+            IPin clock,
+            IPin data,
+            ushort speed = 100 // TODO: not sure about this
         );
     }
 }

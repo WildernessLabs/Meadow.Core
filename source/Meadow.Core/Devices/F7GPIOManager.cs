@@ -307,16 +307,22 @@ namespace Meadow.Devices
                 Interop.Nuttx.SetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_BSRR_OFFSET, state);
             }
 
-            UpdateConfigRegister2Bit(base_addr + STM32.STM32_GPIO_MODER_OFFSET, (int)mode, pin);
+            Nuttx.TryGetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_MODER_OFFSET, out uint moder);
+            moder &= ~(3u << (pin * 2));
+            moder |= (uint)mode << (pin * 2);
+            Nuttx.SetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_MODER_OFFSET, moder);
 
             ////// ====== RESISTOR ======
             setting = 0;
             if (mode != STM32.GpioMode.Analog)
             {
+                SetResistorMode(base_addr, pin, 0);
                 setting = (int)resistor;
             }
-            UpdateConfigRegister2Bit(base_addr + STM32.STM32_GPIO_PUPDR_OFFSET, setting, pin);
-
+            else
+            {
+                SetResistorMode(base_addr, pin, (int)resistor);
+            }
 
             if (mode == STM32.GpioMode.AlternateFunction)
             {
@@ -328,9 +334,11 @@ namespace Meadow.Devices
             setting = 0;
             if (mode == STM32.GpioMode.AlternateFunction || mode == STM32.GpioMode.Output)
             {
-                setting = (int)speed;
+                Nuttx.TryGetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_OSPEED_OFFSET, out moder);
+                moder &= ~(3u << (pin * 2));
+                moder |= (uint)speed << (pin * 2);
+                Nuttx.SetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_OSPEED_OFFSET, moder);
             }
-            UpdateConfigRegister2Bit(base_addr + STM32.STM32_GPIO_OSPEED_OFFSET, setting, pin);
 
             ////// ====== OUTPUT TYPE ======
             if (mode == STM32.GpioMode.Output || mode == STM32.GpioMode.AlternateFunction)
@@ -378,6 +386,38 @@ namespace Meadow.Devices
             return true;
         }
 
+        public void SetResistorMode(IPin pin, ResistorMode mode)
+        {
+            Console.WriteLine($"SetResistorMode to {mode}");
+
+            var designator = GetPortAndPin(pin);
+            int setting = 0;
+            switch (mode)
+            {
+                case ResistorMode.PullDown:
+                    setting = (int)STM32.ResistorMode.PullDown;
+                    break;
+                case ResistorMode.PullUp:
+                    setting = (int)STM32.ResistorMode.PullUp;
+                    break;
+                default:
+                    setting = (int)STM32.ResistorMode.Float;
+                    break;
+            }
+            SetResistorMode(designator.address, designator.pin, setting);
+        }
+
+        private void SetResistorMode(uint address, int pin, int mode)
+        {
+            var addr = address + STM32.STM32_GPIO_PUPDR_OFFSET;
+            Nuttx.TryGetRegister(DriverHandle, addr, out uint regval);
+            regval &= (uint)~(3 << (pin << 1));
+            regval |= (uint)(mode << (pin << 1));
+            Nuttx.SetRegister(DriverHandle, addr, regval);
+            Nuttx.TryGetRegister(DriverHandle, addr, out uint verify);
+            Console.WriteLine($"PUPDR {addr:X}= {verify:X} expect {regval:X}");
+        }
+
         private void InterruptServiceThreadProc(object o)
         {
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
@@ -398,12 +438,12 @@ namespace Meadow.Devices
                     var pin = irq & 0xf;
                     var key = $"P{(char)(65 + port)}{pin}";
 
-//                    Console.WriteLine($"Interrupt on {key}");
+//                    Console.WriteLine($"Interrupt on {key} state={rx_buffer[4]}");
                     lock (_interruptPins)
                     {
                         if (_interruptPins.ContainsKey(key))
                         {
-                            Interrupt?.Invoke(_interruptPins[key]);
+                            Interrupt?.Invoke(_interruptPins[key], rx_buffer[4] != 0);
                         }
                     }
                 }
@@ -429,41 +469,6 @@ namespace Meadow.Devices
 
             // write the register
             return Interop.Nuttx.SetRegister(DriverHandle, address, temp);
-        }
-
-        private bool UpdateConfigRegister2Bit(uint address, int value, int pin)
-        {
-            return Interop.Nuttx.UpdateRegister(DriverHandle, address, 0, (uint)(value & 3) << (pin << 1));
-        }
-
-        private bool UpdateConfigRegister2Bit_old(uint address, int value, int pin)
-        {
-            var register = new Interop.Nuttx.UpdRegisterValue();
-            register.Address = address;
-            //            Console.WriteLine($"Reading register: {register.Address:X}");
-            var result = Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.UpdIoctlFn.GetRegister, ref register);
-            if (result != 0)
-            {
-                Console.WriteLine($"Read failed: {result}");
-                return false;
-            }
-            //            Console.WriteLine($"Value: {register.Value:X}");
-
-            var temp = register.Value;
-            // mask off the bits we're interested in
-            temp &= ~(3u << pin);
-            // set the register bits
-            temp |= (uint)value << (pin << 1);
-            // write the register
-            register.Value = temp;
-            //            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
-            result = Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.UpdIoctlFn.SetRegister, ref register);
-            if (result != 0)
-            {
-                Console.WriteLine($"Write failed: {result}");
-                return false;
-            }
-            return true;
         }
     }
 

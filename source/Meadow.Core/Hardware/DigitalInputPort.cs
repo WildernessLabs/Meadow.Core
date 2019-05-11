@@ -9,11 +9,12 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
+        private ResistorMode _resistorMode;
+
         protected IIOController IOController { get; set; }
 
         public override int DebounceDuration { get; set; }
         public override int GlitchFilterCycleCount { get; set; }
-        public ResistorMode Resistor { get; set; }
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
@@ -29,6 +30,7 @@ namespace Meadow.Hardware
         {
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
+            this._resistorMode = resistorMode;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -66,7 +68,17 @@ namespace Meadow.Hardware
             }
         }
 
-        void OnInterrupt(IPin pin)
+        public override ResistorMode Resistor
+        {
+            get => _resistorMode;
+            set
+            {
+                IOController.SetResistorMode(this.Pin, value);
+                _resistorMode = value;
+            }
+        }
+
+        void OnInterrupt(IPin pin, bool state)
         {
             if(pin == this.Pin)
             {
@@ -80,23 +92,6 @@ namespace Meadow.Hardware
                     }
                 }
 
-                var state = false;
-
-                switch(InterruptMode)
-                {
-                    case InterruptMode.EdgeRising:
-                    case InterruptMode.LevelHigh:
-                        state = true;
-                        break;
-                    case InterruptMode.EdgeFalling:
-                    case InterruptMode.LevelLow:
-                        state = false;
-                        break;
-                    case InterruptMode.EdgeBoth:
-                        // we could probably move this query lower to reduce latency risk
-                        state = State;
-                        break;
-                }
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = time;
 
