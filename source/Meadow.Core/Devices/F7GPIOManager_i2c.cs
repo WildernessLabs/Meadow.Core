@@ -28,43 +28,33 @@ namespace Meadow.Devices
                 // Configure pins
                 // #define GPIO_I2C1_SCL_1       (GPIO_ALT|GPIO_AF4 |GPIO_SPEED_50MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN6)
                 // #define GPIO_I2C1_SDA_1       (GPIO_ALT|GPIO_AF4 |GPIO_SPEED_50MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN7)
-                ConfigureGpio(GpioPort.PortB,
+                ConfigureAlternateFunction(GpioPort.PortB,
                     SCL_PIN,
-                    GpioMode.AlternateFunction,
-                    ResistorMode.Float,
                     GPIOSpeed.Speed_50MHz,
                     OutputType.OpenDrain,
-                    false,
-                    Hardware.InterruptMode.None);
+                    4);
 
-                ConfigureGpio(STM32.GpioPort.PortB,
+                ConfigureAlternateFunction(GpioPort.PortB,
                     SDA_PIN,
-                    GpioMode.AlternateFunction,
-                    ResistorMode.Float,
                     GPIOSpeed.Speed_50MHz,
                     OutputType.OpenDrain,
-                    false,
-                    Hardware.InterruptMode.None);
+                    4);
             }
             else
             { // make them outputs (we'll drive them manually, e.g. in a reset)
-                ConfigureGpio(GpioPort.PortB,
+                ConfigureOutput(GpioPort.PortB,
                     SCL_PIN,
-                    GpioMode.Output,
                     ResistorMode.Float,
                     GPIOSpeed.Speed_50MHz,
                     OutputType.OpenDrain,
-                    false,
-                    Hardware.InterruptMode.None);
+                    false);
 
-                ConfigureGpio(STM32.GpioPort.PortB,
+                ConfigureOutput(GpioPort.PortB,
                     SDA_PIN,
-                    GpioMode.Output,
                     ResistorMode.Float,
                     GPIOSpeed.Speed_50MHz,
                     OutputType.OpenDrain,
-                    false,
-                    Hardware.InterruptMode.None);
+                    false);
             }
         }
 

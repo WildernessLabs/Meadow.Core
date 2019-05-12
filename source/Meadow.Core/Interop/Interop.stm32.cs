@@ -26,12 +26,14 @@ namespace Meadow.Core
             public const int GPIOJ_BASE = 0x40022400;
             public const int GPIOK_BASE = 0x40022800;
 
-            public const int STM32_GPIO_MODER_OFFSET = 0x00;
-            public const int STM32_GPIO_OTYPER_OFFSET = 0x04;
-            public const int STM32_GPIO_OSPEED_OFFSET = 0x08;
-            public const int STM32_GPIO_PUPDR_OFFSET = 0x0c;
-            public const int STM32_GPIO_IDR_OFFSET = 0x10;
-            public const int STM32_GPIO_BSRR_OFFSET = 0x18;
+            public const int GPIO_MODER_OFFSET = 0x00;
+            public const int GPIO_OTYPER_OFFSET = 0x04;
+            public const int GPIO_OSPEED_OFFSET = 0x08;
+            public const int GPIO_PUPDR_OFFSET = 0x0c;
+            public const int GPIO_IDR_OFFSET = 0x10;
+            public const int GPIO_BSRR_OFFSET = 0x18;
+            public const int GPIO_AFRL_OFFSET = 0x20;
+            public const int GPIO_AFRH_OFFSET = 0x24;
 
             public const int RCC_BASE = 0x40023800;
             public const int STM32_RCC_APB2RSTR_OFFSET = 0x0024;
