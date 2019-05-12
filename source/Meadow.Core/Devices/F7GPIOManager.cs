@@ -83,12 +83,16 @@ namespace Meadow.Devices
         void IIOController.SetDiscrete(IPin pin, bool value)
         {
             var designator = GetPortAndPin(pin);
+            SetDiscrete(designator.address, designator.port, designator.pin, value);
+        }
 
+        private void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
+        { 
             // invert values for LEDs so they make human sense (low == on on the Meadow)
-            switch(designator.port)
+            switch(port)
             {
                 case STM32.GpioPort.PortA:
-                    switch(designator.pin)
+                    switch(pin)
                     {
                         case 0:
                         case 1:
@@ -101,16 +105,16 @@ namespace Meadow.Devices
 
             var register = new Interop.Nuttx.UpdRegisterValue
             {
-                Address = designator.address + STM32.STM32_GPIO_BSRR_OFFSET
+                Address = baseAddress + STM32.STM32_GPIO_BSRR_OFFSET
             };
 
             if (value)
             {
-                register.Value = 1u << designator.pin;
+                register.Value = 1u << pin;
             }
             else
             {
-                register.Value = 1u << (designator.pin + 16);
+                register.Value = 1u << (pin + 16);
             }
 
             // write the register
@@ -130,11 +134,15 @@ namespace Meadow.Devices
         public bool GetDiscrete(IPin pin)
         {
             var designator = GetPortAndPin(pin);
+            return GetDiscrete(designator.address, designator.port, designator.pin);
+        }
 
-            Interop.Nuttx.TryGetRegister(DriverHandle, designator.address + STM32.STM32_GPIO_IDR_OFFSET, out uint register);
+        private bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
+        {
+            Interop.Nuttx.TryGetRegister(DriverHandle, baseAddress + STM32.STM32_GPIO_IDR_OFFSET, out uint register);
 
             // each pin is a single bit in the register, check the bit associated with the pin number
-            return (register & (1 << designator.pin)) != 0;
+            return (register & (1 << pin)) != 0;
         }
 
         private (STM32.GpioPort port, int pin, uint address) GetPortAndPin(IPin pin)
