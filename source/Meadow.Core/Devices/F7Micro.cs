@@ -40,6 +40,7 @@ namespace Meadow.Devices
 
             // 
             this.Pins = new F7MicroPinDefinitions();
+            
         }
 
 
@@ -89,6 +90,40 @@ namespace Meadow.Devices
             return PwmPort.From(pin, this.IoController, frequency, dutyCycle);
         }
 
+        public ISpiBus CreateSpiBus(
+            IPin[] pins, ushort speed = 1000
+        )
+        {
+            return SpiBus.From(pins[0], pins[1], pins[2], speed);
+        }
+
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            ushort speed = 1000
+        )
+        {
+            return CreateSpiBus(clock, mosi, miso, speed);
+        }
+
+        public II2cBus CreateI2cBus(
+            IPin[] pins,
+            ushort speed
+        )
+        {
+            return I2cBus.From(pins[0], pins[1], speed);
+        }
+
+
+        public II2cBus CreateI2cBus(
+            IPin clock,
+            IPin data,
+            ushort speed
+        )
+        {
+            return I2cBus.From(clock, data, speed);
+        }
 
     }
 }

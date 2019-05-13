@@ -8,7 +8,7 @@ namespace Meadow
     /// class for Meadow applications to get strongly-typed access to the current
     /// device information.
     /// </summary>
-    public abstract class AppBase<D, A> : IApp 
+    public abstract class App<D, A> : IApp 
         where A : class, IApp 
         where D : class, IIODevice//<P> where P : IPinDefinitions
     {
@@ -20,10 +20,14 @@ namespace Meadow
             get { return _current; }
         } private static A _current;
 
-        protected AppBase()
+        protected App()
         {
             _current = this as A;
             _device = Activator.CreateInstance<D>();
+
+            // set our device on the MeadowOS class
+            MeadowOS.Init(_device);
+            
 
             // TODO: HACK HACK
             Console.WriteLine("==========================================================");
