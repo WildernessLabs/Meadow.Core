@@ -76,31 +76,6 @@ namespace Meadow.Hardware
             }
         }
 
-        /// <summary>
-        /// True if the port is currently an output; otherwise false
-        /// </summary>
-        /// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
-        public bool Active
-        {
-            get => this.Direction == PortDirectionType.Output ? true : false;
-            set
-            {
-                if (value == Active) return;
-
-                //if(value)
-                //{
-                //    this.Pin.GPIOManager.ConfigureOutput(this.Pin, _currentState);
-                //}
-                //else
-                //{
-                //    this.Pin.GPIOManager.ConfigureInput(this.Pin, GlitchFilter, Resistor, _interruptEnabled);
-                //}
-
-                this.Direction = value ? PortDirectionType.Output : PortDirectionType.Input;
-            }
-        }
-
-
         public override bool State
         {
             get
