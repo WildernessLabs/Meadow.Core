@@ -76,6 +76,35 @@ namespace Meadow.Core
 
             public const uint I2C_CR1_PE = 1 << 0;
 
+            public const int I2C_CR2_SADD10_SHIFT = (0);       /* Bits 0-9: Slave 10-bit address (master) */
+            public const uint I2C_CR2_SADD10_MASK = (0x3ff << I2C_CR2_SADD10_SHIFT);
+            public const int I2C_CR2_SADD7_SHIFT = (1);       /* Bits 1-7: Slave 7-bit address (master) */
+            public const uint I2C_CR2_SADD7_MASK = (0x7f << I2C_CR2_SADD7_SHIFT);
+            public const uint I2C_CR2_RD_WRN = (1 << 10); /* Bit 10: Transfer direction (master) */
+            public const uint I2C_CR2_ADD10 = (1 << 11); /* Bit 11: 10-bit addressing mode (master) */
+            public const uint I2C_CR2_HEAD10R = (1 << 12); /* Bit 12: 10-bit address header only read direction (master) */
+            public const uint I2C_CR2_START = (1 << 13); /* Bit 13: Start generation */
+            public const uint I2C_CR2_STOP = (1 << 14); /* Bit 14: Stop generation (master) */
+            public const uint I2C_CR2_NACK = (1 << 15); /* Bit 15: NACK generation (slave) */
+            public const int I2C_CR2_NBYTES_SHIFT = (16);      /* Bits 16-23: Number of bytes */
+            public const uint I2C_CR2_NBYTES_MASK = (0xff << I2C_CR2_NBYTES_SHIFT);
+            public const uint I2C_CR2_RELOAD = (1 << 24); /* Bit 24: NBYTES reload mode */
+            public const uint I2C_CR2_AUTOEND = (1 << 25); /* Bit 25: Automatic end mode (master) */
+            public const uint I2C_CR2_PECBYTE = (1 << 26); /* Bit 26: Packet error checking byte */
+
+            public const uint I2C_ISR_TXE = 1 << 0;
+            public const uint I2C_ISR_TXIS = 1 << 1;
+            public const uint I2C_ISR_RXNE = 1 << 2;
+            public const uint I2C_ISR_ADDR = 1 << 3;
+            public const uint I2C_ISR_NACKF = 1 << 4;
+            public const uint I2C_ISR_STOPF = 1 << 5;
+            public const uint I2C_ISR_TC = 1 << 6;
+            public const uint I2C_ISR_TCR = 1 << 7;
+            public const uint I2C_ISR_BERR = 1 << 8;
+            public const uint I2C_ISR_ARLO = 1 << 9;
+            public const uint I2C_ISR_TIMEOUT = 1 << 12;
+            public const uint I2C_ISR_BUSY = 1 << 15;
+
             public const int RCC_APB1RSTR_TIM2RST = (1 << 0);/* Bit 0:  TIM2 reset */
             public const int RCC_APB1RSTR_TIM3RST = (1 << 1);/* Bit 1:  TIM3 reset */
             public const int RCC_APB1RSTR_TIM4RST = (1 << 2);/* Bit 2:  TIM4 reset */

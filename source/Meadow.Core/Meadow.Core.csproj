@@ -184,7 +184,7 @@
     <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
     <Compile Include="Hardware\Communications\II2cBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.Configuration.cs" />
-    <Compile Include="Devices\F7GPIOManager_i2c.cs" />
+    <Compile Include="Devices\GPD.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -338,12 +338,19 @@ namespace Meadow.Devices
                 }
             );
 
+            // Aliases for user-friendlyness
+            public readonly IPin I2C_SDA;
+            public readonly IPin I2C_SCL;
+
+
             public F7MicroPinDefinitions()
             {
 
                 this.InitAllPins();
                 this.Groups = new F7NamedPinGroups(this);
 
+                I2C_SDA = D07;
+                I2C_SCL = D08;
             }
 
             protected void InitAllPins()
