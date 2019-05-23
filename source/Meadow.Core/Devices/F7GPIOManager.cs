@@ -23,6 +23,8 @@ namespace Meadow.Devices
 
         public void Initialize()
         {
+            GPD.DumpClockRegisters();
+
             Console.Write("Initializing GPIOs...");
 
             // LEDs are inverse logic - initialize to high/off

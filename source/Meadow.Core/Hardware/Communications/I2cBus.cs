@@ -301,6 +301,8 @@ namespace Meadow.Hardware
             uint stretch_count;
             uint frequency;
 
+            Console.WriteLine("+Reset");
+
             if (!_busSemaphore.Wait(1000))
             {
                 Console.WriteLine("-I2CReset A");
@@ -397,9 +399,15 @@ namespace Meadow.Hardware
 
         private void Set7BitDestinationAddress(byte address)
         {
+            // set the address mode to 7-bit
+            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+                STM32.I2C_CR2_ADD10,
+                0);
+
+            // set the address - in 7-bit it's left-shifted 1
             GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                 STM32.I2C_CR2_SADD7_MASK,
-                (uint)address & 0x7f << STM32.I2C_CR2_SADD7_SHIFT);
+                (uint)(address & 0x7f) << STM32.I2C_CR2_SADD7_SHIFT);
         }
 
         private uint GetBusStatus()
@@ -474,23 +482,6 @@ namespace Meadow.Hardware
             GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TXDR_OFFSET, value);
         }
 
-        private void DumpRegisters()
-        {
-            var cr1 = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET);
-            var cr2 = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
-            var timing = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET);
-            var enr = GPD.GetRegister(STM32.RCC_BASE + STM32.RCC_APB1ENR_OFFSET);
-            var rstr = GPD.GetRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET);
-
-            Console.WriteLine($"I2C_CR1:{cr1:X}");
-            Console.WriteLine($"I2C_CR2:{cr2:X}");
-            Console.WriteLine($"I2C_TIMINGR:{timing:X}");
-            Console.WriteLine($"RCC_APB1ENR:{enr:X}");
-            Console.WriteLine($"RCC_APB1RSTR:{rstr:X}");
-
-
-        }
-
         private byte SetRxRegister()
         {
             return (byte)GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_RXDR_OFFSET);
@@ -500,6 +491,9 @@ namespace Meadow.Hardware
 
         private void SetClock(uint frequency)
         {
+            GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, 0x00303D5B);
+
+            return;
             uint presc, scl_delay, sda_delay, scl_h_period, scl_l_period;
 
             //if (Frequency == frequency) return;
@@ -545,9 +539,7 @@ namespace Meadow.Hardware
               (scl_h_period << STM32.I2C_TIMINGR_SCLH_SHIFT) |
               (scl_l_period << STM32.I2C_TIMINGR_SCLL_SHIFT);
 
-            Console.WriteLine($"set TIMING: {timingr:X}");
             GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, timingr);
-            Console.WriteLine($"get TIMING: {GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET):X}");
 
             Frequency = frequency;
         }
@@ -591,7 +583,10 @@ namespace Meadow.Hardware
 
         private void Enable()
         {
-            ConfigureGPIOs(true);
+//            ConfigureGPIOs(true);
+
+            // set the I2C clock source to PCLCK1 (peripheral clock 1)
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET, 0, STM32.I2C1_SEL_PCLK1_CLK);
 
             // enable the peripheral clock
             GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1ENR_OFFSET, 0, STM32.RCC_APB1ENR_I2C1EN);
@@ -606,6 +601,24 @@ namespace Meadow.Hardware
             SetClock(100000);
 
             GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, 0, STM32.I2C_CR1_PE);
+
+            GPD.DumpClockRegisters();
+        }
+
+        private void BusScan()
+        {
+            for(byte i = 0; i < 128; i++)
+            {
+                var cr2 = 1u << i | STM32.I2C_CR2_START | STM32.I2C_CR2_AUTOEND & ~(STM32.I2C_CR2_RD_WRN);
+                GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET, cr2);
+
+                // wait for STOP, NACK or TIMEOUT
+                var isr = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
+                Console.WriteLine("ISR: {isr:X}");
+                Thread.Sleep(10);
+
+            }
+
         }
 
         private void Disable()
@@ -621,22 +634,25 @@ namespace Meadow.Hardware
                 // TODO: handle this - already data to go out .  amybe a semaphore?
             }
 
-            foreach(var b in data)
+            if (data != null)
             {
-                _transmitQueue.Enqueue(b);
+                foreach (var b in data)
+                {
+                    _transmitQueue.Enqueue(b);
+                }
             }
 
             // TODO: put this in a background thread
 
             var status = GetBusStatus();
-            Console.WriteLine($"{status:X}");
+            Console.WriteLine($"ISR: {status:X}");
 
-            DumpRegisters();
+            GPD.DumpI2CRegisters();
 
             // set address, data length, direction
             SendStart(data.Length, address, true);
 
-            DumpRegisters();
+            GPD.DumpI2CRegisters();
 
             Console.WriteLine($"Sending first byte of {_transmitQueue.Count}");
 
@@ -677,25 +693,39 @@ namespace Meadow.Hardware
         }
 
         private void SendStart(int byteCount, byte destination, bool write)
-        { 
-            // Set the number of bytes to transfer (I2C_CR2->NBYTES) to the number of
-            // bytes in the current message or 255, whichever is lower so as to not
-            // exceed the hardware maximum allowed.   
-            SetBytesToTransfer(byteCount);
+        {
+            Console.WriteLine($"+SendStart");
+
+            // ensure start is not set
+            var status = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
+            if((status & STM32.I2C_CR2_START) != 0)
+            {
+                // we can't set these if the start bit is on
+                Console.WriteLine($" SendStart sending stop");
+                SetStopBit();
+            }
 
             // Set the (7 bit) address.
             // 10 bit addressing is not yet supported.
             Set7BitDestinationAddress(destination);
 
+            Console.WriteLine($" SendStart A {write}");
             // The flag of the current message is used to determine the direction of
             // transfer required for the current message.
             SetTransferDirection(write);
 
+            Console.WriteLine($" SendStart B {byteCount}");
+            // Set the number of bytes to transfer (I2C_CR2->NBYTES) to the number of
+            // bytes in the current message or 255, whichever is lower so as to not
+            // exceed the hardware maximum allowed.   
+            SetBytesToTransfer(byteCount);
+
+            Console.WriteLine($" SendStart C");
             // Set the I2C_CR2->START bit to 1 to instruct the hardware to send the
             // START condition using the address and transfer direction data entered.
             SetStartBit();
 
-
+            Console.WriteLine($"-SendStart");
         }
 
         /*
@@ -833,6 +863,6 @@ namespace Meadow.Hardware
 
 
         }
-        */       
+        */
     }
 }

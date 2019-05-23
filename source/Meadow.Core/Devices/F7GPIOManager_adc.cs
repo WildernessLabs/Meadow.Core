@@ -45,12 +45,12 @@ namespace Meadow.Devices
             // do the grunt work to set up the ADC itself
 
             // enable the ADC1 clock - all Meadow ADCs are in ADC1
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.STM32_RCC_APB2ENR_OFFSET, 0, (1u << 8));
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0, (1u << 8));
 
             // reset the ADC RCC clock - set the reset bit
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.STM32_RCC_APB2RSTR_OFFSET, 0, (1u << 8));
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, 0, (1u << 8));
             // clear the reset bit
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.STM32_RCC_APB2RSTR_OFFSET, (1u << 8), 0);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, (1u << 8), 0);
 
             // clear the SR status register
             GPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET,

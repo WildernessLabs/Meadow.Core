@@ -35,10 +35,6 @@ namespace Meadow.Core
             public const int GPIO_AFRL_OFFSET = 0x20;
             public const int GPIO_AFRH_OFFSET = 0x24;
 
-            public const int RCC_BASE = 0x40023800;
-            public const int STM32_RCC_APB2RSTR_OFFSET = 0x0024;
-            public const int STM32_RCC_APB2ENR_OFFSET = 0x0044;
-
             public const int MEADOW_ADC1_BASE = 0x40012000;
             public const int ADC_SR_OFFSET = 0x00;
             public const int ADC_CR1_OFFSET = 0x04;
@@ -151,16 +147,37 @@ namespace Meadow.Core
             public const int RCC_APB1ENR_UART8EN = (1 << 31);/* Bit 31: UART8 clock enable */
 
 
-            public const int RCC_AHB1RSTR_OFFSET = 0x0010;  /* AHB1 peripheral reset register */
-            public const int RCC_AHB2RSTR_OFFSET = 0x0014;  /* AHB2 peripheral reset register */
-            public const int RCC_AHB3RSTR_OFFSET = 0x0018;  /* AHB3 peripheral reset register */
-            public const int RCC_APB1RSTR_OFFSET = 0x0020;  /* APB1 Peripheral reset register */
-            public const int RCC_APB2RSTR_OFFSET = 0x0024;  /* APB2 Peripheral reset register */
-            public const int RCC_AHB1ENR_OFFSET = 0x0030;  /* AHB1 Peripheral Clock enable register */
-            public const int RCC_AHB2ENR_OFFSET = 0x0034;  /* AHB2 Peripheral Clock enable register */
-            public const int RCC_AHB3ENR_OFFSET = 0x0038;  /* AHB3 Peripheral Clock enable register */
-            public const int RCC_APB1ENR_OFFSET = 0x0040;  /* APB1 Peripheral Clock enable register */
-            public const int RCC_APB2ENR_OFFSET = 0x0044;  /* APB2 Peripheral Clock enable register */
+            public const int RCC_BASE = 0x40023800;
+            public const int RCC_CR_OFFSET = 0x00;
+            public const int RCC_PLLCFGR_OFFSET = 0x04;
+            public const int RCC_CFGR_OFFSET = 0x08;
+            public const int RCC_CIR_OFFSET = 0x0C;
+            public const int RCC_AHB1RSTR_OFFSET = 0x10;  /* AHB1 peripheral reset register */
+            public const int RCC_AHB2RSTR_OFFSET = 0x14;  /* AHB2 peripheral reset register */
+            public const int RCC_AHB3RSTR_OFFSET = 0x18;  /* AHB3 peripheral reset register */
+            public const int RCC_APB1RSTR_OFFSET = 0x20;  /* APB1 Peripheral reset register */
+            public const int RCC_APB2RSTR_OFFSET = 0x24;  /* APB2 Peripheral reset register */
+            public const int RCC_AHB1ENR_OFFSET = 0x30;  /* AHB1 Peripheral Clock enable register */
+            public const int RCC_AHB2ENR_OFFSET = 0x34;  /* AHB2 Peripheral Clock enable register */
+            public const int RCC_AHB3ENR_OFFSET = 0x38;  /* AHB3 Peripheral Clock enable register */
+            public const int RCC_APB1ENR_OFFSET = 0x40;  /* APB1 Peripheral Clock enable register */
+            public const int RCC_APB2ENR_OFFSET = 0x44;  /* APB2 Peripheral Clock enable register */
+            public const int RCC_AHB1LPENR_OFFSET = 0x50;
+            public const int RCC_AHB2LPENR_OFFSET = 0x54;
+            public const int RCC_AHB3LPENR_OFFSET = 0x58;
+            public const int RCC_APB1LPENR_OFFSET = 0x60;
+            public const int RCC_APB2LPENR_OFFSET = 0x64;
+            public const int RCC_BDCR_OFFSET = 0x70;
+            public const int RCC_CSR_OFFSET = 0x74;
+            public const int RCC_SSCGR_OFFSET = 0x80;
+            public const int RCC_PLLI2SCFG_OFFSET = 0x84;
+            public const int RCC_PLLSAICFGR_OFFSET = 0x88;
+            public const int RCC_DCKCFGR1_OFFSET = 0x8C;
+            public const int RCC_DCKCFGR2_OFFSET = 0x90;
+
+            public const uint I2C1_SEL_PCLK1_CLK = 0 << 16;
+            public const uint I2C1_SEL_SYS_CLK = 1 << 16;
+            public const uint I2C1_SEL_PLL_CLK = 2 << 16;
 
             public const int IRQ_FIRST = 16;
             public const int IRQ_WWDG = (IRQ_FIRST + 0);/* 0:  Window Watchdog interrupt */
