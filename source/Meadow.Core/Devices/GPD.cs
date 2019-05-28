@@ -29,6 +29,7 @@ namespace Meadow.Devices
         public static void DumpClockRegisters()
         {
             var cr = GetRegister(STM32.RCC_BASE + STM32.RCC_CR_OFFSET);
+            var cfg = GetRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET);
             var pllcfg = GetRegister(STM32.RCC_BASE + STM32.RCC_PLLCFGR_OFFSET);
             var ahb1rst = GetRegister(STM32.RCC_BASE + STM32.RCC_AHB1RSTR_OFFSET);
             var ahb1en = GetRegister(STM32.RCC_BASE + STM32.RCC_AHB1ENR_OFFSET);
@@ -40,30 +41,33 @@ namespace Meadow.Devices
             var dckcfg2 = GetRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET);
 
             Console.WriteLine("Clock Registers");
-            Console.WriteLine($"\tRCC_CR: {cr:X}");
-            Console.WriteLine($"\tRCC_AHB1RSTR: {ahb1rst:X}");
-            Console.WriteLine($"\tRCC_AHB1ENR: {ahb1en:X}");
-            Console.WriteLine($"\tRCC_APB1RSTR: {apb1rst:X}");
-            Console.WriteLine($"\tRCC_APB1ENR: {apb1en:X}");
-            Console.WriteLine($"\tRCC_APB2RSTR: {apb2rst:X}");
-            Console.WriteLine($"\tRCC_APB2ENR: {apb2en:X}");
-            Console.WriteLine($"\tRCC_PLLCFGR: {pllcfg:X}");
-            Console.WriteLine($"\tRCC_DCKCFGR1: {dckcfg1:X}");
-            Console.WriteLine($"\tRCC_DCKCFGR2: {dckcfg2:X}");
+            Console.WriteLine($"\tRCC_CR:       {cr:X8}");
+            Console.WriteLine($"\tRCC_CFGR:     {cfg:X8}");
+            Console.WriteLine($"\tRCC_AHB1RSTR: {ahb1rst:X8}");
+            Console.WriteLine($"\tRCC_AHB1ENR:  {ahb1en:X8}");
+            Console.WriteLine($"\tRCC_APB1RSTR: {apb1rst:X8}");
+            Console.WriteLine($"\tRCC_APB1ENR:  {apb1en:X8}");
+            Console.WriteLine($"\tRCC_APB2RSTR: {apb2rst:X8}");
+            Console.WriteLine($"\tRCC_APB2ENR:  {apb2en:X8}");
+            Console.WriteLine($"\tRCC_PLLCFGR:  {pllcfg:X8}");
+            Console.WriteLine($"\tRCC_DCKCFGR1: {dckcfg1:X8}");
+            Console.WriteLine($"\tRCC_DCKCFGR2: {dckcfg2:X8}");
         }
 
         public static void DumpI2CRegisters()
         {
             var cr1 = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET);
             var cr2 = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
-            var timing = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET);
             var isr = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
+            var timing = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET);
+            var timeout = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMEOUTR_OFFSET);
 
             Console.WriteLine("I2C Registers");
-            Console.WriteLine($"I2C_CR1:{cr1:X}");
-            Console.WriteLine($"I2C_CR2:{cr2:X}");
-            Console.WriteLine($"I2C_ISR:{isr:X}");
-            Console.WriteLine($"I2C_TIMINGR:{timing:X}");
+            Console.WriteLine($"\tI2C_CR1:      {cr1:X8}");
+            Console.WriteLine($"\tI2C_CR2:      {cr2:X8}");
+            Console.WriteLine($"\tI2C_ISR:      {isr:X8}");
+            Console.WriteLine($"\tI2C_TIMINGR:  {timing:X8}");
+            Console.WriteLine($"\tI2C_TIMEOUTR: {timeout:X8}");
         }
 
         public static void SetRegister(uint address, uint value)

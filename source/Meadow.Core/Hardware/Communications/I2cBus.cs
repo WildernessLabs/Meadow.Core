@@ -581,9 +581,70 @@ namespace Meadow.Hardware
             }
         }
 
+        private void EnableClocks()
+        {
+            // Disable the GPIO port C clock - this has no affect
+            // GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_AHB1ENR_OFFSET, (1 << 2), 0);
+
+            /*
+            // Enable RCC_APB1ENR PWREN           
+            __HAL_RCC_PWR_CLK_ENABLE();
+
+
+              __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+              /**Initializes the CPU, AHB and APB busses clocks 
+              *
+            RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;              // 0x02
+            RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                // 1<<0
+            RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;     // 0x10
+            RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;                          // 0x00
+            if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+            {
+                Error_Handler();
+            }
+            /**Initializes the CPU, AHB and APB busses clocks 
+            *
+            RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK     // 0x02 | 0x01
+                                        | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;    // 0x04 | 0x08
+            RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                      // 0x00
+            RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                          // 0x00
+            RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                           // 0x00
+            RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+            if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)           
+            */
+
+            Console.WriteLine("Mucking about with the system clocks....");
+            // HSI TRIM clear 0x1F << 3
+            // HSI CAL set 0x10 << 8
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CR_OFFSET, (0x1F << 3), (0x10 << 8));
+
+            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_HCLK_DIV16);
+            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, (RCC_HCLK_DIV16 << 3));
+            // MODIFY_REG(RCC->CFGR, RCC_CFGR_HPRE, RCC_ClkInitStruct->AHBCLKDivider);
+            // MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, RCC_SYSCLKSOURCE_HSI)
+            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_ClkInitStruct->APB1CLKDivider);
+            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, ((RCC_ClkInitStruct->APB2CLKDivider) << 3));
+
+            uint clear = STM32.RCC_CFGR_PPRE1 | STM32.RCC_CFGR_PPRE2 | STM32.RCC_CFGR_HPRE | STM32.RCC_CFGR_SW;
+            uint set = STM32.RCC_HCLK_DIV16 | (STM32.RCC_HCLK_DIV16 << 3) | STM32.RCC_SYSCLK_DIV1 | STM32.RCC_SYSCLKSOURCE_HSI | STM32.RCC_HCLK_DIV1 | (STM32.RCC_HCLK_DIV1 << 3);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, clear, set);
+            /*
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE1, STM32.RCC_HCLK_DIV16);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE2, STM32.RCC_HCLK_DIV16 << 3);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_HPRE, STM32.RCC_SYSCLK_DIV1);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_SW, STM32.RCC_SYSCLKSOURCE_HSI);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE1, STM32.RCC_HCLK_DIV1);
+            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE2, STM32.RCC_HCLK_DIV1 << 3);
+            */
+        }
+
         private void Enable()
         {
-//            ConfigureGPIOs(true);
+            GPD.DumpClockRegisters();
+            EnableClocks();
+            GPD.DumpClockRegisters();
+
+            //            ConfigureGPIOs(true);
 
             // set the I2C clock source to PCLCK1 (peripheral clock 1)
             GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET, 0, STM32.I2C1_SEL_PCLK1_CLK);
@@ -645,7 +706,6 @@ namespace Meadow.Hardware
             // TODO: put this in a background thread
 
             var status = GetBusStatus();
-            Console.WriteLine($"ISR: {status:X}");
 
             GPD.DumpI2CRegisters();
 

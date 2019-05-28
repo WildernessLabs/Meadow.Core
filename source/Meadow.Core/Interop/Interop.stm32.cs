@@ -101,6 +101,16 @@ namespace Meadow.Core
             public const uint I2C_ISR_TIMEOUT = 1 << 12;
             public const uint I2C_ISR_BUSY = 1 << 15;
 
+            public const uint RCC_CFGR_PPRE1 = 0x07 << 10;
+            public const uint RCC_CFGR_PPRE2 = 0x07 << 13;
+            public const uint RCC_CFGR_HPRE = 0x0F << 4;
+            public const uint RCC_CFGR_SW = 0x03 << 0;
+
+            public const int RCC_HCLK_DIV16 = 0x00001C00;
+            public const int RCC_SYSCLK_DIV1 = 0x00;
+            public const int RCC_SYSCLKSOURCE_HSI = 0x00;
+            public const int RCC_HCLK_DIV1 = 0x00000000;
+
             public const int RCC_APB1RSTR_TIM2RST = (1 << 0);/* Bit 0:  TIM2 reset */
             public const int RCC_APB1RSTR_TIM3RST = (1 << 1);/* Bit 1:  TIM3 reset */
             public const int RCC_APB1RSTR_TIM4RST = (1 << 2);/* Bit 2:  TIM4 reset */
