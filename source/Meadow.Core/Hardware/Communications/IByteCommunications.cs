@@ -9,17 +9,14 @@ namespace Meadow.Hardware
         #region Methods
 
         /// <summary>
-        /// Write a single byte to the connected peripheral.
+        /// Write a single byte to the peripheral.
         /// </summary>
         /// <param name="value">Value to be written (8-bits).</param>
         void WriteByte(byte value);
 
         /// <summary>
-        /// Write a number of bytes to the peripheral.
+        /// Write an array of bytes to the peripheral.
         /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
         /// <param name="values">Values to be written.</param>
         void WriteBytes(byte[] values);
 

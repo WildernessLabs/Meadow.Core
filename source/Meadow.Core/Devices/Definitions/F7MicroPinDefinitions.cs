@@ -340,10 +340,8 @@ namespace Meadow.Devices
 
             public F7MicroPinDefinitions()
             {
-
-                this.InitAllPins();
-                this.Groups = new F7NamedPinGroups(this);
-
+                InitAllPins();
+                //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
             }
 
             protected void InitAllPins()
@@ -384,10 +382,7 @@ namespace Meadow.Devices
                 AllPins.Add(this.ESP_RST);
                 AllPins.Add(this.ESP_UART_RX);
                 AllPins.Add(this.ESP_UART_TX);
-
             }
-
         }
-
     }
 }

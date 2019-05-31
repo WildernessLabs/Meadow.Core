@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace HelloLED
 {
-    class LEDApp : Appp<<F7Micro, LEDApp>
+    class LEDApp : App<F7Micro, LEDApp>
     {
         IDigitalOutputPort _redLED;
         IDigitalOutputPort _blueLED;
