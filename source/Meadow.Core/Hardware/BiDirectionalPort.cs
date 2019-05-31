@@ -9,11 +9,26 @@ namespace Meadow.Hardware
     /// </summary>
     public class BiDirectionalPort : BiDirectionalPortBase
     {
-        protected IIOController GpioController { get; set; }
+        private PortDirectionType _currentDirection;
+
+        protected IIOController IOController { get; }
 
         public override PortDirectionType Direction {
-            get;
-            set; // TODO: shouldn't the direction logic go here?
+            get => _currentDirection;
+            set
+            {
+                // since we're overriding a virtual, which actually gets called in the base ctor, we need to ignore that ctor call (the IO Controller will be null)
+                if ((IOController == null) || (value == Direction)) return;
+                if (value == PortDirectionType.Input)
+                {
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None);
+                }
+                else
+                {
+                    this.IOController.ConfigureOutput(this.Pin, this.InitialState);
+                }
+                _currentDirection = value;
+            }
         }
 
 
@@ -27,13 +42,27 @@ namespace Meadow.Hardware
             PortDirectionType initialDirection = PortDirectionType.Input)
             : base (pin, channel, initialState, glitchFilter, resistorMode, initialDirection)
         {
-            // attempt to reserve the pin
-            var result = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
+            this.IOController = gpioController;
 
-            if (result.Item1)
+            // attempt to reserve the pin - we'll reserve it as an input even though we use it for bi-directional
+            // TODO: should we validate that it has both in and out caps?
+            var result = DeviceChannelManager.ReservePin(
+                this.Pin, 
+                ChannelConfigurationType.DigitalInput);
+
+            if(result.Item1)
             {
-                // make sure the pin is configured as a digital input
-                //this.Pin.GPIOManager.ConfigureInput(_pin, glitchFilter, resistorMode, false);
+                _currentDirection = initialDirection;
+
+                // make sure the pin direction (and state for outputs) is configured as desired
+                if (_currentDirection == PortDirectionType.Input)
+                {
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None);
+                }
+                else
+                {
+                    this.IOController.ConfigureOutput(this.Pin, this.InitialState);
+                }
             }
             else
             {
@@ -80,13 +109,13 @@ namespace Meadow.Hardware
         {
             get
             {
-                //return _pin.GPIOManager.GetDiscrete(_pin);
-                return false;
+                Direction = PortDirectionType.Input;
+                return IOController.GetDiscrete(this.Pin);
             }
-            set
+            set 
             {
-                //_pin.GPIOManager.SetDiscrete(_pin, value);
-                _currentState = value;
+                Direction = PortDirectionType.Output;
+                IOController.SetDiscrete(this.Pin, value);
             }
         }
 
