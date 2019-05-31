@@ -627,6 +627,9 @@ namespace Meadow.Hardware
 
             uint clear = STM32.RCC_CFGR_PPRE1 | STM32.RCC_CFGR_PPRE2 | STM32.RCC_CFGR_HPRE | STM32.RCC_CFGR_SW;
             uint set = STM32.RCC_HCLK_DIV16 | (STM32.RCC_HCLK_DIV16 << 3) | STM32.RCC_SYSCLK_DIV1 | STM32.RCC_SYSCLKSOURCE_HSI | STM32.RCC_HCLK_DIV1 | (STM32.RCC_HCLK_DIV1 << 3);
+
+            Console.WriteLine($"clear: {clear:X8}  set:{set:X8}");
+
             GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, clear, set);
             /*
             GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE1, STM32.RCC_HCLK_DIV16);
