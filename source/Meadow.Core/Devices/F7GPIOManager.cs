@@ -12,26 +12,19 @@ namespace Meadow.Devices
     {
         public event InterruptHandler Interrupt;
 
-        private const string GPDDriverName = "/dev/upd";
-
         private object _cacheLock = new object();
         private Thread _ist;
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
-        private IntPtr DriverHandle { get; }
-
         internal F7GPIOManager()
         {
-            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.ReadOnly);
-            if (DriverHandle == IntPtr.Zero || DriverHandle.ToInt32() == -1)
-            {
-                Console.Write("Failed to open UPD driver");
-            }
         }
 
         public void Initialize()
         {
+            GPD.DumpClockRegisters();
+
             Console.Write("Initializing GPIOs...");
 
             // LEDs are inverse logic - initialize to high/off
@@ -83,12 +76,16 @@ namespace Meadow.Devices
         void IIOController.SetDiscrete(IPin pin, bool value)
         {
             var designator = GetPortAndPin(pin);
+            SetDiscrete(designator.address, designator.port, designator.pin, value);
+        }
 
+        internal void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
+        { 
             // invert values for LEDs so they make human sense (low == on on the Meadow)
-            switch(designator.port)
+            switch(port)
             {
                 case STM32.GpioPort.PortA:
-                    switch(designator.pin)
+                    switch(pin)
                     {
                         case 0:
                         case 1:
@@ -101,21 +98,21 @@ namespace Meadow.Devices
 
             var register = new Interop.Nuttx.UpdRegisterValue
             {
-                Address = designator.address + STM32.STM32_GPIO_BSRR_OFFSET
+                Address = baseAddress + STM32.GPIO_BSRR_OFFSET
             };
 
             if (value)
             {
-                register.Value = 1u << designator.pin;
+                register.Value = 1u << pin;
             }
             else
             {
-                register.Value = 1u << (designator.pin + 16);
+                register.Value = 1u << (pin + 16);
             }
 
             // write the register
             //            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
-            var result = Interop.Nuttx.ioctl(DriverHandle, Interop.Nuttx.UpdIoctlFn.SetRegister, ref register);
+            var result = GPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
             if (result != 0)
             {
                 Console.WriteLine($"Write failed: {result}");
@@ -130,11 +127,15 @@ namespace Meadow.Devices
         public bool GetDiscrete(IPin pin)
         {
             var designator = GetPortAndPin(pin);
+            return GetDiscrete(designator.address, designator.port, designator.pin);
+        }
 
-            Interop.Nuttx.TryGetRegister(DriverHandle, designator.address + STM32.STM32_GPIO_IDR_OFFSET, out uint register);
+        internal bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
+        {
+            var register = GPD.GetRegister(baseAddress + STM32.GPIO_IDR_OFFSET);
 
             // each pin is a single bit in the register, check the bit associated with the pin number
-            return (register & (1 << designator.pin)) != 0;
+            return (register & (1 << pin)) != 0;
         }
 
         private (STM32.GpioPort port, int pin, uint address) GetPortAndPin(IPin pin)
@@ -263,9 +264,14 @@ namespace Meadow.Devices
             return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None);
         }
 
-        private bool ConfigureOutput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
+        internal bool ConfigureOutput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
             return ConfigureGpio(port, pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None);
+        }
+
+        internal bool ConfigureAlternateFunction(STM32.GpioPort port, int pin, STM32.GPIOSpeed speed, STM32.OutputType type, int alternateFunction)
+        {
+            return ConfigureGpio(port, pin, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, speed, type, false, InterruptMode.None, alternateFunction);
         }
 
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
@@ -275,7 +281,7 @@ namespace Meadow.Devices
             return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode);
         }
 
-        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
+        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
         {
             int setting = 0;
             uint base_addr = 0;
@@ -304,13 +310,13 @@ namespace Meadow.Devices
             {
                 var state = initialState ? 1u << pin : 1u << (16 + pin);
 
-                Interop.Nuttx.SetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_BSRR_OFFSET, state);
+                GPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
             }
 
-            Nuttx.TryGetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_MODER_OFFSET, out uint moder);
+            var moder = GPD.GetRegister(base_addr + STM32.GPIO_MODER_OFFSET);
             moder &= ~(3u << (pin * 2));
             moder |= (uint)mode << (pin * 2);
-            Nuttx.SetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_MODER_OFFSET, moder);
+            GPD.SetRegister(base_addr + STM32.GPIO_MODER_OFFSET, moder);
 
             ////// ====== RESISTOR ======
             setting = 0;
@@ -327,31 +333,54 @@ namespace Meadow.Devices
             if (mode == STM32.GpioMode.AlternateFunction)
             {
                 ////// ====== ALTERNATE FUNCTION ======
-                // TODO:
+                var p = (int)port;
+                var mask = 15u << p;
+                if (p < 8)
+                {
+                    var bits = (uint)alternateFunctionNumber << p;
+                    var afrl = GPD.GetRegister(base_addr + STM32.GPIO_AFRL_OFFSET);
+                    //clear anything that was there
+                    afrl &= ~mask;
+                    // set the AF
+                    afrl |= bits;
+                    // and write it out
+                    GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
+                }
+                else
+                {
+                    var bits = (uint)alternateFunctionNumber << (p - 8);
+                    var afrh = GPD.GetRegister(base_addr + STM32.GPIO_AFRH_OFFSET);
+                    //clear anything that was there
+                    afrh &= ~mask;
+                    // set the AF
+                    afrh |= bits;
+                    // and write it out
+                    GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
+                }
             }
 
             ////// ====== SPEED ======
             setting = 0;
             if (mode == STM32.GpioMode.AlternateFunction || mode == STM32.GpioMode.Output)
             {
-                Nuttx.TryGetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_OSPEED_OFFSET, out moder);
+                moder = GPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
                 moder &= ~(3u << (pin * 2));
                 moder |= (uint)speed << (pin * 2);
-                Nuttx.SetRegister(DriverHandle, base_addr + STM32.STM32_GPIO_OSPEED_OFFSET, moder);
+                GPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
             }
 
             ////// ====== OUTPUT TYPE ======
             if (mode == STM32.GpioMode.Output || mode == STM32.GpioMode.AlternateFunction)
             {
-                UpdateConfigRegister1Bit(base_addr + STM32.STM32_GPIO_OTYPER_OFFSET, (type == STM32.OutputType.OpenDrain), pin);
+                UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, (type == STM32.OutputType.OpenDrain), pin);
             }
             else
             {
-                UpdateConfigRegister1Bit(base_addr + STM32.STM32_GPIO_OTYPER_OFFSET, false, pin);
+                UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, false, pin);
             }
 
 
-            // TODO INTERRUPTS
+            // INTERRUPTS
             if(interruptMode != InterruptMode.None)
             {
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
@@ -376,7 +405,7 @@ namespace Meadow.Devices
 
                 Console.WriteLine("Calling ioctl to enable interrupts");
 
-                var result = Interop.Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+                var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
             else
             {
@@ -388,8 +417,6 @@ namespace Meadow.Devices
 
         public void SetResistorMode(IPin pin, ResistorMode mode)
         {
-            Console.WriteLine($"SetResistorMode to {mode}");
-
             var designator = GetPortAndPin(pin);
             int setting = 0;
             switch (mode)
@@ -409,13 +436,11 @@ namespace Meadow.Devices
 
         private void SetResistorMode(uint address, int pin, int mode)
         {
-            var addr = address + STM32.STM32_GPIO_PUPDR_OFFSET;
-            Nuttx.TryGetRegister(DriverHandle, addr, out uint regval);
+            var addr = address + STM32.GPIO_PUPDR_OFFSET;
+            var regval = GPD.GetRegister(addr);
             regval &= (uint)~(3 << (pin << 1));
             regval |= (uint)(mode << (pin << 1));
-            Nuttx.SetRegister(DriverHandle, addr, regval);
-            Nuttx.TryGetRegister(DriverHandle, addr, out uint verify);
-            Console.WriteLine($"PUPDR {addr:X}= {verify:X} expect {regval:X}");
+            GPD.SetRegister(addr, regval);
         }
 
         private void InterruptServiceThreadProc(object o)
@@ -450,12 +475,9 @@ namespace Meadow.Devices
             }
         }
 
-        private bool UpdateConfigRegister1Bit(uint address, bool value, int pin)
+        private void UpdateConfigRegister1Bit(uint address, bool value, int pin)
         {
-            if (!Interop.Nuttx.TryGetRegister(DriverHandle, address, out uint register))
-            {
-                return false;
-            }
+            var register = GPD.GetRegister(address);
 
             var temp = register;
             if (value)
@@ -468,7 +490,7 @@ namespace Meadow.Devices
             }
 
             // write the register
-            return Interop.Nuttx.SetRegister(DriverHandle, address, temp);
+            GPD.SetRegister(address, temp);
         }
     }
 

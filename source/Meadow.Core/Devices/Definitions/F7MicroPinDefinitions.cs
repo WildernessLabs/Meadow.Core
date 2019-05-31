@@ -338,10 +338,19 @@ namespace Meadow.Devices
                 }
             );
 
+            // Aliases for user-friendlyness
+            public readonly IPin I2C_SDA;
+            public readonly IPin I2C_SCL;
+
+
             public F7MicroPinDefinitions()
             {
-                InitAllPins();
-                //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
+
+                this.InitAllPins();
+                this.Groups = new F7NamedPinGroups(this);
+
+                I2C_SDA = D07;
+                I2C_SCL = D08;
             }
 
             protected void InitAllPins()
@@ -382,7 +391,10 @@ namespace Meadow.Devices
                 AllPins.Add(this.ESP_RST);
                 AllPins.Add(this.ESP_UART_RX);
                 AllPins.Add(this.ESP_UART_TX);
+
             }
+
         }
+
     }
 }

@@ -108,11 +108,18 @@ namespace Meadow.Devices
         }
 
         public II2cBus CreateI2cBus(
+            ushort speed = 1000
+        )
+        {
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, speed);
+        }
+
+        public II2cBus CreateI2cBus(
             IPin[] pins,
             ushort speed
         )
         {
-            return I2cBus.From(pins[0], pins[1], speed);
+            return CreateI2cBus(pins[0], pins[1], speed);
         }
 
 
@@ -122,7 +129,7 @@ namespace Meadow.Devices
             ushort speed
         )
         {
-            return I2cBus.From(clock, data, speed);
+            return I2cBus.From(this.IoController, clock, data, speed);
         }
 
     }
