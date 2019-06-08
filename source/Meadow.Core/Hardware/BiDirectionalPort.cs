@@ -12,6 +12,7 @@ namespace Meadow.Hardware
         private PortDirectionType _currentDirection;
 
         protected IIOController IOController { get; }
+        protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         public override PortDirectionType Direction {
             get => _currentDirection;
@@ -31,21 +32,34 @@ namespace Meadow.Hardware
             }
         }
 
-
         protected BiDirectionalPort(
             IPin pin,
             IIOController gpioController,
             IDigitalChannelInfo channel,
             bool initialState = false, 
-            bool glitchFilter = false, 
+            bool glitchFilter = false,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input)
-            : base (pin, channel, initialState, glitchFilter, resistorMode, initialDirection)
+            : base (pin, channel, initialState, glitchFilter, interruptMode, resistorMode, initialDirection)
         {
-            this.IOController = gpioController;
+            if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
+            {
+                throw new Exception("Unable to create port; channel is not capable of interrupts");
+            }
+            if (interruptMode != InterruptMode.None && (!channel.InputCapable))
+            {
+                throw new Exception("Unable to create port; channel is not capable of inputs");
+            }
+            if (interruptMode != InterruptMode.None && (!channel.OutputCapable))
+            {
+                throw new Exception("Unable to create port; channel is not capable of outputs");
+            }
+
+            this.IOController = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
+            this.IOController.Interrupt += OnInterrupt;
 
             // attempt to reserve the pin - we'll reserve it as an input even though we use it for bi-directional
-            // TODO: should we validate that it has both in and out caps?
             var result = DeviceChannelManager.ReservePin(
                 this.Pin, 
                 ChannelConfigurationType.DigitalInput);
@@ -75,17 +89,27 @@ namespace Meadow.Hardware
             IIOController ioController,
             bool initialState = false,
             bool glitchFilter = false,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input)
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
-            if (chan != null) {
-                //TODO: need other checks here.
-                return new BiDirectionalPort(pin, ioController, chan, initialState, glitchFilter, resistorMode, initialDirection);
-            } else {
+            if(chan == null) 
+            {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
+            return new BiDirectionalPort(pin, ioController, chan, initialState, glitchFilter, interruptMode, resistorMode, initialDirection);
+        }
 
+        ~BiDirectionalPort()
+        {
+            Dispose(false);
+        }
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected override void Dispose(bool disposing)
@@ -119,5 +143,28 @@ namespace Meadow.Hardware
             }
         }
 
+        void OnInterrupt(IPin pin, bool state)
+        {
+            if (pin == this.Pin)
+            {
+                var time = DateTime.Now;
+
+                // debounce timing checks
+                if (DebounceDuration > 0)
+                {
+                    if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration)
+                    {
+                        //Console.WriteLine("Debounced.");
+                        return;
+                    }
+                }
+
+                var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
+                this.LastEventTime = time;
+
+                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, time, capturedLastTime));
+
+            }
+        }
     }
 }

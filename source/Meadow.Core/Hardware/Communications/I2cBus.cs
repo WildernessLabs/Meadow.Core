@@ -494,6 +494,7 @@ namespace Meadow.Hardware
             GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, 0x00303D5B);
 
             return;
+
             uint presc, scl_delay, sda_delay, scl_h_period, scl_l_period;
 
             //if (Frequency == frequency) return;
@@ -644,7 +645,7 @@ namespace Meadow.Hardware
         private void Enable()
         {
             GPD.DumpClockRegisters();
-            EnableClocks();
+//            EnableClocks();
             GPD.DumpClockRegisters();
 
             //            ConfigureGPIOs(true);

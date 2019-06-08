@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -11,21 +13,36 @@ namespace Meadow.Hardware
 
         // internals
         protected bool _currentState;
-        protected bool _interruptEnabled;
+        private int _debounceDuration;
+        private int _glitchCycleCount;
 
         public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
         public ResistorMode Resistor { get; }
+        protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
+
+        public abstract bool State { get; set; }
+        public abstract PortDirectionType Direction { get; set; }
+
+        protected abstract void Dispose(bool disposing);
+
+        /// <summary>
+        /// Gets or sets a value indicating the type of interrupt monitoring this input.
+        /// </summary>
+        /// <value><c>true</c> if interrupt enabled; otherwise, <c>false</c>.</value>
+        public InterruptMode InterruptMode { get; protected set; }
 
         protected BiDirectionalPortBase(
             IPin pin,
             IDigitalChannelInfo channel,
             bool initialState,
             bool glitchFilter,
-            ResistorMode resistorMode,
-            PortDirectionType initialDirection)
+            InterruptMode interruptMode = InterruptMode.None,
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            PortDirectionType initialDirection = PortDirectionType.Input)
             : base(pin, channel)
         {
+            this.InterruptMode = interruptMode;
             InitialState = initialState;
             Resistor = resistorMode;
             Direction = initialDirection;
@@ -37,19 +54,31 @@ namespace Meadow.Hardware
             GC.SuppressFinalize(this);
         }
 
-        protected abstract void Dispose(bool disposing);
-
-        public bool InterrupEnabled
+        public int DebounceDuration 
         {
-            get => _interruptEnabled;
+            get => _debounceDuration; 
             set
             {
-                if (value == InterrupEnabled) return;
-                _interruptEnabled = value;
-            }
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                _debounceDuration = value;
+            } 
         }
 
-        public abstract bool State { get; set; }
-        public abstract PortDirectionType Direction { get; set; }
+        public int GlitchFilterCycleCount
+        {
+            get => _glitchCycleCount; 
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                _glitchCycleCount = value;
+            } 
+        }
+
+        protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)
+        {
+            Changed?.Invoke(this, changeResult);
+            // TODO: implement Subscribe patter (see DigitalInputPortBase)
+            // _observers.ForEach(x => x.OnNext(changeResult));
+        }
     }
 }

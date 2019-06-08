@@ -6,10 +6,5 @@ namespace Meadow.Hardware
     {
         bool State { get; }
         ResistorMode Resistor { get; set;  }
-
-        int DebounceDuration { get; set; }
-        int GlitchFilterCycleCount { get; set; }
-
-        event EventHandler<DigitalInputPortEventArgs> Changed;
     }
 }

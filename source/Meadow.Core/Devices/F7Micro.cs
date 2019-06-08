@@ -68,10 +68,11 @@ namespace Meadow.Devices
             IPin pin,
             bool initialState = false,
             bool glitchFilter = false,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input)
         {
-            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, resistorMode, initialDirection);
+            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, interruptMode, resistorMode, initialDirection);
         }
 
         public IAnalogInputPort CreateAnalogInputPort(
