@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace Basic_Tasks
 {
-    public class TasksApp : Appp<<F7Micro, TasksApp>
+    public class TasksApp : App<F7Micro, TasksApp>
     {
         IDigitalOutputPort out1;
         IDigitalOutputPort out2;
@@ -23,12 +23,12 @@ namespace Basic_Tasks
 
         public void StartATask()
         {
-            Task t = new Task(() => {
+            Task t = new Task(async () => {
                 while (true) {
                     out2.State = true;
-                    Task.Delay(250);
+                    await Task.Delay(250);
                     out2.State = false;
-                    Task.Delay(250);
+                    await Task.Delay(250);
                 }
             });
             t.Start();
