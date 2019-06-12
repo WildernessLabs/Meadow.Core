@@ -63,6 +63,8 @@ namespace Meadow.Hardware
             int glitchFilterCycleCount = 0
             );
 
+        bool UnconfigureGpio(IPin pin);
+
         void ConfigureAnalogInput(IPin pin);
         int GetAnalogValue(IPin pin);
     }

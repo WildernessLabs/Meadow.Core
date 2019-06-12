@@ -274,6 +274,12 @@ namespace Meadow.Devices
             return ConfigureGpio(port, pin, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, speed, type, false, InterruptMode.None, alternateFunction);
         }
 
+        public bool UnconfigureGpio(IPin pin)
+        {
+            var designator = GetPortAndPin(pin);
+            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input,  STM32.ResistorMode.Float,  STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+        }
+
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
         {
             var designator = GetPortAndPin(pin);
@@ -409,7 +415,17 @@ namespace Meadow.Devices
             }
             else
             {
-                // TODO: disable interrupt if it was enabled
+                // disable interrupt if it was enabled
+                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                {
+                    Enable = false,
+                    Port = (int)port,
+                    Pin = pin,
+                    RisingEdge = false,
+                    FallingEdge = false,
+                    Irq = ((int)port << 4) | pin
+                };
+                var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
 
             return true;

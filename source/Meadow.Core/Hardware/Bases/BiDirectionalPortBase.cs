@@ -13,6 +13,7 @@ namespace Meadow.Hardware
 
         // internals
         protected bool _currentState;
+        protected bool _isDisposed;
         private int _debounceDuration;
         private int _glitchCycleCount;
 
@@ -51,6 +52,7 @@ namespace Meadow.Hardware
         public override void Dispose()
         {
             Dispose(true);
+            _isDisposed = true;
             GC.SuppressFinalize(this);
         }
 
@@ -76,6 +78,8 @@ namespace Meadow.Hardware
 
         protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)
         {
+            if (_isDisposed) return;
+            
             Changed?.Invoke(this, changeResult);
             // TODO: implement Subscribe patter (see DigitalInputPortBase)
             // _observers.ForEach(x => x.OnNext(changeResult));

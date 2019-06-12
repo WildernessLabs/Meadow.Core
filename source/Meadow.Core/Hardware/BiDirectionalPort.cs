@@ -71,7 +71,7 @@ namespace Meadow.Hardware
                 // make sure the pin direction (and state for outputs) is configured as desired
                 if (_currentDirection == PortDirectionType.Input)
                 {
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None);
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode);
                 }
                 else
                 {
@@ -123,6 +123,7 @@ namespace Meadow.Hardware
             {
                 if (disposing)
                 {
+                    this.IOController.UnconfigureGpio(this.Pin);
                     bool success = DeviceChannelManager.ReleasePin(this.Pin);
                 }
                 disposed = true;
