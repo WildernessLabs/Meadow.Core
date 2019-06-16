@@ -7,7 +7,7 @@ using Meadow.Hardware;
 
 namespace Basic_Digital_Input
 {
-    class InputApp : AppBase<F7Micro, InputApp>
+    class InputApp : App<F7Micro, InputApp>
     {
         private List<IDigitalInputPort> _inputs = new List<IDigitalInputPort>();
 

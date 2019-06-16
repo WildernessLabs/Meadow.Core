@@ -8,7 +8,7 @@ using Meadow.Hardware;
 
 namespace SampleAnalogInputs
 {
-    class ADCApp : Appp<<F7Micro, ADCApp>
+    class ADCApp : App<F7Micro, ADCApp>
     {
         private IList<IAnalogInputPort> _inputs = new List<IAnalogInputPort>();
 
