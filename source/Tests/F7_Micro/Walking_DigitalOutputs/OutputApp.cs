@@ -34,7 +34,6 @@ namespace Walking_DigitalOutputs
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue));
-            /*
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D00));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D01));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D02));
@@ -57,7 +56,7 @@ namespace Walking_DigitalOutputs
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A03));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A04));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A05));
-            */
+
             Console.WriteLine("ok.");
         }
 
@@ -80,7 +79,7 @@ namespace Walking_DigitalOutputs
             foreach (var port in _outs) {
                 Console.Write($"{port.Pin.Name} ");
                 port.State = true;
-                Thread.Sleep(1000);
+                Thread.Sleep(250);
                 port.State = false;
             }
         }

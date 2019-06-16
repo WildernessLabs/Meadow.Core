@@ -67,7 +67,7 @@ namespace Meadow.Devices
 #if DEBUG
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
-            DebugFeatures = DebugFeature.GpioDetail;
+//            DebugFeatures = DebugFeature.GpioDetail;
 #endif
         }
 
@@ -476,7 +476,9 @@ namespace Meadow.Devices
             }
             else
             {
-                // disable interrupt if it was enabled
+                // TODO: disable interrupt if it was enabled
+                /*
+                 SOMETHING HERE IS BAD - CAUSES OS CRASHINESS!               
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
                     Enable = false,
@@ -489,6 +491,7 @@ namespace Meadow.Devices
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
                     "Calling ioctl to disable interrupts");
                 var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+                */
             }
 
             return true;
