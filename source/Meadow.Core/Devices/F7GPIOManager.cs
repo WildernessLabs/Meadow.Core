@@ -67,6 +67,7 @@ namespace Meadow.Devices
 #if DEBUG
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
+            DebugFeatures = DebugFeature.GpioDetail;
 #endif
         }
 
@@ -163,7 +164,9 @@ namespace Meadow.Devices
             }
 
             // write the register
-            //            Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, 
+                $"Writing {register.Value:X} to register: {register.Address:X}");
+
             var result = GPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
             if (result != 0)
             {
@@ -368,7 +371,7 @@ namespace Meadow.Devices
             {
                 var state = initialState ? 1u << pin : 1u << (16 + pin);
 
-                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} is an output.  Writing BSRR {state}");
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} is an output.  Writing BSRR {state:X8}");
                 GPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
             }
 
@@ -403,7 +406,7 @@ namespace Meadow.Devices
                     // set the AF
                     afrl |= bits;
                     // and write it out
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRL {afrl}");
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRL {afrl:X8}");
                     GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
                 }
                 else
@@ -415,7 +418,7 @@ namespace Meadow.Devices
                     // set the AF
                     afrh |= bits;
                     // and write it out
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRH {afrh}");
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRH {afrh:X8}");
                     GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
                 }
             }
@@ -427,7 +430,7 @@ namespace Meadow.Devices
                 moder = GPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
                 moder &= ~(3u << (pin * 2));
                 moder |= (uint)speed << (pin * 2);
-                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} speed {speed}.  Writing OSPEED {moder}");
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} speed {speed}.  Writing OSPEED {moder:X8}");
                 GPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
             }
 
@@ -516,7 +519,7 @@ namespace Meadow.Devices
             var regval = GPD.GetRegister(addr);
             regval &= (uint)~(3 << (pin << 1));
             regval |= (uint)(mode << (pin << 1));
-            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval}");
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval:X8}");
             GPD.SetRegister(addr, regval);
         }
 
