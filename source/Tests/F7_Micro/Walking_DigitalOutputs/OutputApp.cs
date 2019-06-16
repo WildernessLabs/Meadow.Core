@@ -29,9 +29,12 @@ namespace Walking_DigitalOutputs
         // creates output ports on all pins
         protected void ConfigureOutputs()
         {
+            Console.Write("Creating ports...");
+
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue));
+            /*
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D00));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D01));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D02));
@@ -54,23 +57,30 @@ namespace Walking_DigitalOutputs
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A03));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A04));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A05));
+            */
+            Console.WriteLine("ok.");
         }
 
         // tears down all the ports. for validation only.
         protected void DisposePorts()
-        { 
+        {
+            Console.Write("Disposing ports...");
+
             foreach (var port in _outs) {
                 port.Dispose();
             }
             _outs.Clear();
+
+            Console.WriteLine("ok.");
         }
 
         protected void WalkOutputs()
         {
             // turn each one on for a bit.
             foreach (var port in _outs) {
+                Console.Write($"{port.Pin.Name} ");
                 port.State = true;
-                Thread.Sleep(250);
+                Thread.Sleep(1000);
                 port.State = false;
             }
         }

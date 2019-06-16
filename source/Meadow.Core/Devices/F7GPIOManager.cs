@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using Meadow.Core;
@@ -8,6 +9,47 @@ using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
+    [Flags]
+    internal enum DebugFeature
+    {
+        None,
+        Startup = 1 << 0,
+        Clocks = 1 << 1,
+        PinInitilize = 1 << 2,
+        GpioDetail = 1 << 3,
+        Interrupts = 1 << 4
+
+    }
+
+    internal static class Output
+    {
+        public static void WriteIf(bool test, string value)
+        {
+            if (test)
+            {
+                Console.Write(value);
+                }
+        }
+
+        public static void WriteLineIf(bool test, string value)
+        {
+            if (test)
+            {
+                Console.WriteLine(value);
+            }
+        }
+
+        public static void Write(string value)
+        {
+            Console.Write(value);
+        }
+
+        public static void WriteLine(string value)
+        {
+            Console.WriteLine(value);
+        }
+    }
+
     public partial class F7GPIOManager : IIOController
     {
         public event InterruptHandler Interrupt;
@@ -17,15 +59,25 @@ namespace Meadow.Devices
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
+        internal DebugFeature DebugFeatures { get; set;  }
+
         internal F7GPIOManager()
         {
+            DebugFeatures = DebugFeature.None;
+#if DEBUG
+            // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
+            //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
+#endif
         }
 
         public void Initialize()
         {
-            GPD.DumpClockRegisters();
+            if((DebugFeatures & DebugFeature.Interrupts) != 0)
+            {
+                GPD.DumpClockRegisters();
+            }
 
-            Console.Write("Initializing GPIOs...");
+            Output.WriteLineIf((DebugFeatures & DebugFeature.PinInitilize) != 0, "Initializing GPIOs...");
 
             // LEDs are inverse logic - initialize to high/off
             ConfigureOutput(STM32.GpioPort.PortA, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
@@ -33,39 +85,39 @@ namespace Meadow.Devices
             ConfigureOutput(STM32.GpioPort.PortA, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
 
             // these are the "unallocated" pins on the meadow
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortI, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortH, 13, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortC, 6, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortB, 8, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortB, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortC, 7, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortB, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortB, 1, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortH, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortC, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortB, 14, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortB, 15, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortG, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortE, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
 
             // these are signals that run to the ESP32
             ConfigureOutput(STM32.GpioPort.PortI, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortI, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortD, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortI, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            Console.Write(".");
+            Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
             ConfigureOutput(STM32.GpioPort.PortI, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortF, 7, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortD, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortB, 13, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
 
-            Console.WriteLine("done");
+            Output.WriteLineIf((DebugFeatures & DebugFeature.PinInitilize) != 0, "done");
         }
 
         /// <summary>
@@ -316,6 +368,7 @@ namespace Meadow.Devices
             {
                 var state = initialState ? 1u << pin : 1u << (16 + pin);
 
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} is an output.  Writing BSRR {state}");
                 GPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
             }
 
@@ -350,6 +403,7 @@ namespace Meadow.Devices
                     // set the AF
                     afrl |= bits;
                     // and write it out
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRL {afrl}");
                     GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
                 }
                 else
@@ -361,6 +415,7 @@ namespace Meadow.Devices
                     // set the AF
                     afrh |= bits;
                     // and write it out
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRH {afrh}");
                     GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
                 }
             }
@@ -372,12 +427,14 @@ namespace Meadow.Devices
                 moder = GPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
                 moder &= ~(3u << (pin * 2));
                 moder |= (uint)speed << (pin * 2);
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} speed {speed}.  Writing OSPEED {moder}");
                 GPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
             }
 
             ////// ====== OUTPUT TYPE ======
             if (mode == STM32.GpioMode.Output || mode == STM32.GpioMode.AlternateFunction)
             {
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} open drain.");
                 UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, (type == STM32.OutputType.OpenDrain), pin);
             }
             else
@@ -409,7 +466,8 @@ namespace Meadow.Devices
                     _ist.Start();
                 }
 
-                Console.WriteLine("Calling ioctl to enable interrupts");
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                    "Calling ioctl to enable interrupts");
 
                 var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
@@ -425,6 +483,8 @@ namespace Meadow.Devices
                     FallingEdge = false,
                     Irq = ((int)port << 4) | pin
                 };
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                    "Calling ioctl to disable interrupts");
                 var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
 
@@ -456,21 +516,24 @@ namespace Meadow.Devices
             var regval = GPD.GetRegister(addr);
             regval &= (uint)~(3 << (pin << 1));
             regval |= (uint)(mode << (pin << 1));
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval}");
             GPD.SetRegister(addr, regval);
         }
 
         private void InterruptServiceThreadProc(object o)
         {
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
-            Console.WriteLine($"IST Started reading queue {queue.ToInt32():X}");
-
+            Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
+                $"IST Started reading queue {queue.ToInt32():X}");
+                
             var rx_buffer = new byte[16];
 
             while (true)
             {
                 int priority = 0;
                 var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-//                Console.WriteLine("queue data arrived");
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                    "queue data arrived");
 
                 if (result >= 0)
                 {
@@ -479,7 +542,9 @@ namespace Meadow.Devices
                     var pin = irq & 0xf;
                     var key = $"P{(char)(65 + port)}{pin}";
 
-//                    Console.WriteLine($"Interrupt on {key} state={rx_buffer[4]}");
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                        $"Interrupt on {key} state={rx_buffer[4]}");
+
                     lock (_interruptPins)
                     {
                         if (_interruptPins.ContainsKey(key))
