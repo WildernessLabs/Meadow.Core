@@ -75,7 +75,7 @@ namespace Meadow.Hardware
                 }
                 else
                 {
-                    this.IOController.ConfigureOutput(this.Pin, this.InitialState);
+                    this.IOController.ConfigureOutput(this.Pin, InverseLogic ? !this.InitialState : this.InitialState);
                 }
             }
             else
@@ -135,12 +135,13 @@ namespace Meadow.Hardware
             get
             {
                 Direction = PortDirectionType.Input;
-                return IOController.GetDiscrete(this.Pin);
+                var value = IOController.GetDiscrete(this.Pin);
+                return InverseLogic ? !value : value;
             }
             set 
             {
                 Direction = PortDirectionType.Output;
-                IOController.SetDiscrete(this.Pin, value);
+                IOController.SetDiscrete(this.Pin, InverseLogic ? !value : value);
             }
         }
 

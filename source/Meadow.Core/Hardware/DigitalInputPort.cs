@@ -135,7 +135,11 @@ namespace Meadow.Hardware
 
         public override bool State
         {
-            get => this.IOController.GetDiscrete(this.Pin);
+            get
+            {
+                var state = this.IOController.GetDiscrete(this.Pin);
+                return InverseLogic ? !state : state;
+            }
         }
 
         public override int DebounceDuration

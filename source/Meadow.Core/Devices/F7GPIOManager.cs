@@ -134,21 +134,6 @@ namespace Meadow.Devices
 
         internal void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
         { 
-            // invert values for LEDs so they make human sense (low == on on the Meadow)
-            switch(port)
-            {
-                case STM32.GpioPort.PortA:
-                    switch(pin)
-                    {
-                        case 0:
-                        case 1:
-                        case 2:
-                            value = !value;
-                            break;
-                    }
-                    break;
-            }
-
             var register = new Interop.Nuttx.UpdRegisterValue
             {
                 Address = baseAddress + STM32.GPIO_BSRR_OFFSET

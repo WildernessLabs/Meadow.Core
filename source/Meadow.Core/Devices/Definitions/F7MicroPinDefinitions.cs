@@ -17,7 +17,7 @@ namespace Meadow.Devices
             public readonly IPin OnboardLEDBlue = new Pin(
                 "OnboardLEDBlue", "PA0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA0"),
+                    new DigitalChannelInfo("PA0", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH1"), //?? many to choose from
                 }
             );
@@ -27,7 +27,7 @@ namespace Meadow.Devices
             public readonly IPin OnboardLEDGreen = new Pin(
                 "OnboardLEDGreen", "PA1",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA1"),
+                    new DigitalChannelInfo("PA1", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH2"), //?? many to choose from
                 }
             );
@@ -37,7 +37,7 @@ namespace Meadow.Devices
             public readonly IPin OnboardLEDRed = new Pin(
                 "OnboardLEDGreen", "PA2",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA2"),
+                    new DigitalChannelInfo("PA2", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH3"), //?? many to choose from
                 }
             );
