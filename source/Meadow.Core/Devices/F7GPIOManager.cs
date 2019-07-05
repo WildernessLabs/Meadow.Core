@@ -19,7 +19,7 @@ namespace Meadow.Devices
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
-        private IntPtr DriverHandle { get; }
+        internal IntPtr DriverHandle { get; }
 
         internal F7GPIOManager()
         {

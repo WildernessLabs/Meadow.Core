@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using System;
 using System.Linq;
+using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
@@ -15,6 +16,8 @@ namespace Meadow.Hardware
     {
         protected IIOController IOController { get; set; }
 
+        private IntPtr DriverHandle => (ioController as F7GPIOManager).DriverHandle;
+
         protected PwmPort(
             IPin pin,
             IIOController ioController,
@@ -25,9 +28,6 @@ namespace Meadow.Hardware
             : base (pin, channel)
         {
             this.IOController = ioController;
-
-            // HACK HACK HACK
-            (ioController as F7GPIOManager).EnablePC6PWM();
         }
 
         internal static PwmPort From(
@@ -60,12 +60,44 @@ namespace Meadow.Hardware
 
         public override void Start()
         {
-            throw new NotImplementedException();
+            var data = new Nuttx.UpdPwmCmd()
+            {
+                TimerId = pin.TimerChannel,
+                Frequency = (uint)Frequency,
+                Duty = (uint)DutyCycle
+            };
+
+            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmStart, data);
         }
 
         public override void Stop()
         {
-            throw new NotImplementedException();
+            var data = new Nuttx.UpdPwmCmd()
+            {
+                TimerId = pin.TimerChannel,
+            };
+
+            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmStop, data);
+        }
+
+        public void Setup()
+        {
+            var data = new Nuttx.UpdPwmCmd()
+            {
+                TimerId = pin.TimerChannel,
+            };
+
+            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmSetup, data);
+        }
+
+        public void Shutdown()
+        {
+            var data = new Nuttx.UpdPwmCmd()
+            {
+                TimerId = pin.TimerChannel,
+            };
+
+            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmShutdown, data);
         }
 
         protected void Dispose(bool disposing) { throw new NotImplementedException(); }

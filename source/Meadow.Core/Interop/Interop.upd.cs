@@ -13,6 +13,10 @@ namespace Meadow.Core
                 GetRegister = 2,
                 UpdateRegister = 3,
                 RegisterGpioIrq = 5,
+                PwmSetup = 10,
+                PwmShutdown = 11,
+                PwmStart = 12,
+                PwmStop = 13,
             }
 
             public struct UpdRegisterValue
@@ -36,6 +40,26 @@ namespace Meadow.Core
                 public bool Enable;
                 public bool RisingEdge;
                 public bool FallingEdge;
+            }
+
+            public struct UpdPwmCmd
+            {
+                /// <summary>
+                /// Timer Channel id (typical: 3)
+                /// </summary>
+                public uint TimerId;
+
+                // Members below only applicable for PwmStart cmd.
+
+                /// <summary>
+                /// Frequency (typical: 50)
+                /// </summary>
+                public uint Frequency;
+
+                /// <summary>
+                /// Duty cycle (typical: 32768)
+                /// </summary>
+                public uint Duty;
             }
 
             /*
@@ -130,6 +154,19 @@ namespace Meadow.Core
                 return true;
 
             }
+
+            public static bool PwmCmd(IntPtr driverHandle, UpdIoctlFn cmd, UpdPwmCmd data)
+            {
+                var result = Interop.Nuttx.ioctl(driverHandle, cmd, ref data);
+                if (result != 0)
+                {
+                    Console.WriteLine($"PWM setup failed: {result}");
+                    return false;
+                }
+
+                return true;
+            }
+
         }
     }
 }

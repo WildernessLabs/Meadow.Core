@@ -4,11 +4,11 @@ using Meadow.Devices;
 
 namespace Basic_PWM
 {
-    class PWMApp : AppBase<F7Micro, PWMApp>
+    class PWMApp : App<F7Micro, PWMApp>
     {
         public PWMApp()
         {
-            var pwm = Device.CreatePwmPort(Device.Pins.D02);
+            var pwm = Device.CreatePwmPort(Device.Pins.D05);
             var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             while(true)
