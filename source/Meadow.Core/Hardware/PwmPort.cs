@@ -9,14 +9,13 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of generating a Pulse-Width-Modulation
     /// signal; which approximates an analog output via digital pulses.
-    /// 
-    /// NOTE: This class has not been implemented.
     /// </summary>
     public class PwmPort : PwmPortBase
     {
         protected IIOController IOController { get; set; }
+        protected IPwmChannelInfo PwmChannelInfo { get; set; }
 
-        private IntPtr DriverHandle => (ioController as F7GPIOManager).DriverHandle;
+        private IntPtr DriverHandle => (IOController as F7GPIOManager).DriverHandle;
 
         protected PwmPort(
             IPin pin,
@@ -28,6 +27,7 @@ namespace Meadow.Hardware
             : base (pin, channel)
         {
             this.IOController = ioController;
+            this.PwmChannelInfo = channel;
         }
 
         internal static PwmPort From(
@@ -62,7 +62,7 @@ namespace Meadow.Hardware
         {
             var data = new Nuttx.UpdPwmCmd()
             {
-                TimerId = pin.TimerChannel,
+                TimerId = PwmChannelInfo.Timer,
                 Frequency = (uint)Frequency,
                 Duty = (uint)DutyCycle
             };
@@ -74,7 +74,7 @@ namespace Meadow.Hardware
         {
             var data = new Nuttx.UpdPwmCmd()
             {
-                TimerId = pin.TimerChannel,
+                TimerId = PwmChannelInfo.Timer,
             };
 
             Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmStop, data);
@@ -84,7 +84,7 @@ namespace Meadow.Hardware
         {
             var data = new Nuttx.UpdPwmCmd()
             {
-                TimerId = pin.TimerChannel,
+                TimerId = PwmChannelInfo.Timer,
             };
 
             Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmSetup, data);
@@ -94,7 +94,7 @@ namespace Meadow.Hardware
         {
             var data = new Nuttx.UpdPwmCmd()
             {
-                TimerId = pin.TimerChannel,
+                TimerId = PwmChannelInfo.Timer,
             };
 
             Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmShutdown, data);
