@@ -8,7 +8,7 @@ namespace Basic_PWM
     {
         public PWMApp()
         {
-            var pwm = Device.CreatePwmPort(Device.Pins.D05);
+            var pwm = Device.CreatePwmPort(Device.Pins.D05, 100, 50);
             var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             while(true)
