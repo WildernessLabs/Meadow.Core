@@ -39,7 +39,7 @@ namespace Meadow.Hardware
         /// </summary>
         private readonly ushort _transactionTimeout = 100;
 
-        private IIOController IOController { get;  }
+        private IIOController IOController { get; }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
@@ -104,10 +104,13 @@ namespace Meadow.Hardware
         public void WriteUShort(byte peripheralAddress, byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2];
-            if (order == ByteOrder.LittleEndian) {
+            if (order == ByteOrder.LittleEndian)
+            {
                 data[0] = (byte)(value & 0xff);
                 data[1] = (byte)((value >> 8) & 0xff);
-            } else {
+            }
+            else
+            {
                 data[0] = (byte)((value >> 8) & 0xff);
                 data[1] = (byte)(value & 0xff);
             }
@@ -126,11 +129,15 @@ namespace Meadow.Hardware
         public void WriteUShorts(byte peripheralAddress, byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new byte[2 * values.Length];
-            for (var index = 0; index < values.Length; index++) {
-                if (order == ByteOrder.LittleEndian) {
+            for (var index = 0; index < values.Length; index++)
+            {
+                if (order == ByteOrder.LittleEndian)
+                {
                     data[2 * index] = (byte)(values[index] & 0xff);
                     data[(2 * index) + 1] = (byte)((values[index] >> 8) & 0xff);
-                } else {
+                }
+                else
+                {
                     data[2 * index] = (byte)((values[index] >> 8) & 0xff);
                     data[(2 * index) + 1] = (byte)(values[index] & 0xff);
                 }
@@ -265,9 +272,12 @@ namespace Meadow.Hardware
         {
             var data = ReadRegisters(peripheralAddress, address, 2);
             ushort result = 0;
-            if (order == ByteOrder.LittleEndian) {
+            if (order == ByteOrder.LittleEndian)
+            {
                 result = (ushort)((data[1] << 8) + data[0]);
-            } else {
+            }
+            else
+            {
                 result = (ushort)((data[0] << 8) + data[1]);
             }
             return result;
@@ -285,10 +295,14 @@ namespace Meadow.Hardware
         {
             var data = ReadRegisters(peripheralAddress, address, (ushort)((2 * number) & 0xffff));
             var result = new ushort[number];
-            for (var index = 0; index < number; index++) {
-                if (order == ByteOrder.LittleEndian) {
+            for (var index = 0; index < number; index++)
+            {
+                if (order == ByteOrder.LittleEndian)
+                {
                     result[index] = (ushort)((data[(2 * index) + 1] << 8) + data[2 * index]);
-                } else {
+                }
+                else
+                {
                     result[index] = (ushort)((data[2 * index] << 8) + data[(2 * index) + 1]);
                 }
             }
@@ -392,40 +406,40 @@ namespace Meadow.Hardware
 
         private void SetBytesToTransfer(int count)
         {
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET, 
-                STM32.I2C_CR2_NBYTES_MASK, 
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+                STM32.I2C_CR2_NBYTES_MASK,
                 (uint)count << STM32.I2C_CR2_NBYTES_SHIFT);
         }
 
         private void Set7BitDestinationAddress(byte address)
         {
             // set the address mode to 7-bit
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                 STM32.I2C_CR2_ADD10,
                 0);
 
             // set the address - in 7-bit it's left-shifted 1
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                 STM32.I2C_CR2_SADD7_MASK,
                 (uint)(address & 0x7f) << STM32.I2C_CR2_SADD7_SHIFT);
         }
 
         private uint GetBusStatus()
         {
-            return GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
+            return UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
         }
 
         private void SetEnableBit(bool enable)
         {
             if (enable)
             {
-                GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET,
+                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET,
                     0,
                     STM32.I2C_CR1_PE);
             }
             else
             {
-                GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET,
+                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET,
                     STM32.I2C_CR1_PE,
                     0);
             }
@@ -435,13 +449,13 @@ namespace Meadow.Hardware
         {
             if (write)
             {
-                GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                     STM32.I2C_CR2_RD_WRN,
                     0);
             }
             else
             {
-                GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                     0,
                     STM32.I2C_CR2_RD_WRN);
             }
@@ -449,14 +463,14 @@ namespace Meadow.Hardware
 
         private void SetStartBit()
         {
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                 0,
                 STM32.I2C_CR2_START);
         }
 
         private void SetStopBit()
         {
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                 0,
                 STM32.I2C_CR2_STOP);
         }
@@ -465,13 +479,13 @@ namespace Meadow.Hardware
         {
             if (reload)
             {
-                GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                     0,
                     STM32.I2C_CR2_RELOAD);
             }
             else
             {
-                GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
+                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
                     STM32.I2C_CR2_RELOAD,
                     0);
             }
@@ -479,19 +493,19 @@ namespace Meadow.Hardware
 
         private void SetTxRegister(byte value)
         {
-            GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TXDR_OFFSET, value);
+            UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TXDR_OFFSET, value);
         }
 
         private byte SetRxRegister()
         {
-            return (byte)GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_RXDR_OFFSET);
+            return (byte)UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_RXDR_OFFSET);
         }
 
         public uint Frequency { get; private set; }
 
         private void SetClock(uint frequency)
         {
-            GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, 0x00303D5B);
+            UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, 0x00303D5B);
 
             return;
 
@@ -540,7 +554,7 @@ namespace Meadow.Hardware
               (scl_h_period << STM32.I2C_TIMINGR_SCLH_SHIFT) |
               (scl_l_period << STM32.I2C_TIMINGR_SCLL_SHIFT);
 
-            GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, timingr);
+            UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, timingr);
 
             Frequency = frequency;
         }
@@ -617,7 +631,7 @@ namespace Meadow.Hardware
             Console.WriteLine("Mucking about with the system clocks....");
             // HSI TRIM clear 0x1F << 3
             // HSI CAL set 0x10 << 8
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CR_OFFSET, (0x1F << 3), (0x10 << 8));
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CR_OFFSET, (0x1F << 3), (0x10 << 8));
 
             // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_HCLK_DIV16);
             // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, (RCC_HCLK_DIV16 << 3));
@@ -631,7 +645,7 @@ namespace Meadow.Hardware
 
             Console.WriteLine($"clear: {clear:X8}  set:{set:X8}");
 
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, clear, set);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, clear, set);
             /*
             GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE1, STM32.RCC_HCLK_DIV16);
             GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE2, STM32.RCC_HCLK_DIV16 << 3);
@@ -644,41 +658,41 @@ namespace Meadow.Hardware
 
         private void Enable()
         {
-            GPD.DumpClockRegisters();
-//            EnableClocks();
-            GPD.DumpClockRegisters();
+            UPD.DumpClockRegisters();
+            //            EnableClocks();
+            UPD.DumpClockRegisters();
 
             //            ConfigureGPIOs(true);
 
             // set the I2C clock source to PCLCK1 (peripheral clock 1)
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET, 0, STM32.I2C1_SEL_PCLK1_CLK);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET, 0, STM32.I2C1_SEL_PCLK1_CLK);
 
             // enable the peripheral clock
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1ENR_OFFSET, 0, STM32.RCC_APB1ENR_I2C1EN);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1ENR_OFFSET, 0, STM32.RCC_APB1ENR_I2C1EN);
 
             // pulse the reset bit
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET, 0, STM32.RCC_APB1RSTR_I2C1RST);
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET, STM32.RCC_APB1RSTR_I2C1RST, 0);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET, 0, STM32.RCC_APB1RSTR_I2C1RST);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET, STM32.RCC_APB1RSTR_I2C1RST, 0);
 
             // The TIMINGR can only be set when the PE bit == 0
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, STM32.I2C_CR1_PE, 0);
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, STM32.I2C_CR1_PE, 0);
 
             SetClock(100000);
 
-            GPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, 0, STM32.I2C_CR1_PE);
+            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, 0, STM32.I2C_CR1_PE);
 
-            GPD.DumpClockRegisters();
+            UPD.DumpClockRegisters();
         }
 
         private void BusScan()
         {
-            for(byte i = 0; i < 128; i++)
+            for (byte i = 0; i < 128; i++)
             {
                 var cr2 = 1u << i | STM32.I2C_CR2_START | STM32.I2C_CR2_AUTOEND & ~(STM32.I2C_CR2_RD_WRN);
-                GPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET, cr2);
+                UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET, cr2);
 
                 // wait for STOP, NACK or TIMEOUT
-                var isr = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
+                var isr = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
                 Console.WriteLine("ISR: {isr:X}");
                 Thread.Sleep(10);
 
@@ -711,12 +725,12 @@ namespace Meadow.Hardware
 
             var status = GetBusStatus();
 
-            GPD.DumpI2CRegisters();
+            UPD.DumpI2CRegisters();
 
             // set address, data length, direction
             SendStart(data.Length, address, true);
 
-            GPD.DumpI2CRegisters();
+            UPD.DumpI2CRegisters();
 
             Console.WriteLine($"Sending first byte of {_transmitQueue.Count}");
 
@@ -735,7 +749,7 @@ namespace Meadow.Hardware
                     status = GetBusStatus();
 
                     // TODO: add a timeout
-                    if(timeout++ %100 == 0)
+                    if (timeout++ % 100 == 0)
                     {
                         Console.WriteLine($"{status:X}");
                     }
@@ -761,8 +775,8 @@ namespace Meadow.Hardware
             Console.WriteLine($"+SendStart");
 
             // ensure start is not set
-            var status = GPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
-            if((status & STM32.I2C_CR2_START) != 0)
+            var status = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
+            if ((status & STM32.I2C_CR2_START) != 0)
             {
                 // we can't set these if the start bit is on
                 Console.WriteLine($" SendStart sending stop");

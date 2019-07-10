@@ -5,8 +5,12 @@ namespace Meadow.Hardware
     {
         public float MinimumFrequency { get; protected set; }
         public float MaximumFrequency { get; protected set; }
+        public uint Timer { get; protected set; }
+        public uint TimerChannel { get; protected set; }
 
         public PwmChannelInfo(string name,
+            uint timer,
+            uint timerChannel,
             float minimumFrequency = 0,
             float maximumFrequency = 100000,
             bool pullDownCapable = false, // does this mean anything in PWM?
@@ -20,6 +24,8 @@ namespace Meadow.Hardware
                 pullUpCapable: pullUpCapable,
                 inverseLogic: false) //TODO: switch to C# 7.2+ to get rid of trailing names
         {
+            this.Timer = timer;
+            this.TimerChannel = timerChannel;
             this.MinimumFrequency = minimumFrequency;
             this.MaximumFrequency = maximumFrequency;
         }

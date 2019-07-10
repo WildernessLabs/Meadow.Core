@@ -17,7 +17,8 @@ namespace Meadow.Devices
         Clocks = 1 << 1,
         PinInitilize = 1 << 2,
         GpioDetail = 1 << 3,
-        Interrupts = 1 << 4
+        Interrupts = 1 << 4,
+        PWM = 1 << 5
 
     }
 
@@ -75,7 +76,7 @@ namespace Meadow.Devices
         {
             if((DebugFeatures & DebugFeature.Interrupts) != 0)
             {
-                GPD.DumpClockRegisters();
+                UPD.DumpClockRegisters();
             }
 
             Output.WriteLineIf((DebugFeatures & DebugFeature.PinInitilize) != 0, "Initializing GPIOs...");
@@ -152,7 +153,7 @@ namespace Meadow.Devices
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, 
                 $"Writing {register.Value:X} to register: {register.Address:X}");
 
-            var result = GPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
             if (result != 0)
             {
                 Console.WriteLine($"Write failed: {result}");
@@ -172,7 +173,7 @@ namespace Meadow.Devices
 
         internal bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
         {
-            var register = GPD.GetRegister(baseAddress + STM32.GPIO_IDR_OFFSET);
+            var register = UPD.GetRegister(baseAddress + STM32.GPIO_IDR_OFFSET);
 
             // each pin is a single bit in the register, check the bit associated with the pin number
             return (register & (1 << pin)) != 0;
@@ -357,13 +358,13 @@ namespace Meadow.Devices
                 var state = initialState ? 1u << pin : 1u << (16 + pin);
 
                 Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} is an output.  Writing BSRR {state:X8}");
-                GPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
+                UPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
             }
 
-            var moder = GPD.GetRegister(base_addr + STM32.GPIO_MODER_OFFSET);
+            var moder = UPD.GetRegister(base_addr + STM32.GPIO_MODER_OFFSET);
             moder &= ~(3u << (pin * 2));
             moder |= (uint)mode << (pin * 2);
-            GPD.SetRegister(base_addr + STM32.GPIO_MODER_OFFSET, moder);
+            UPD.SetRegister(base_addr + STM32.GPIO_MODER_OFFSET, moder);
 
             ////// ====== RESISTOR ======
             setting = 0;
@@ -385,26 +386,26 @@ namespace Meadow.Devices
                 if (p < 8)
                 {
                     var bits = (uint)alternateFunctionNumber << p;
-                    var afrl = GPD.GetRegister(base_addr + STM32.GPIO_AFRL_OFFSET);
+                    var afrl = UPD.GetRegister(base_addr + STM32.GPIO_AFRL_OFFSET);
                     //clear anything that was there
                     afrl &= ~mask;
                     // set the AF
                     afrl |= bits;
                     // and write it out
                     Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRL {afrl:X8}");
-                    GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
+                    UPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
                 }
                 else
                 {
                     var bits = (uint)alternateFunctionNumber << (p - 8);
-                    var afrh = GPD.GetRegister(base_addr + STM32.GPIO_AFRH_OFFSET);
+                    var afrh = UPD.GetRegister(base_addr + STM32.GPIO_AFRH_OFFSET);
                     //clear anything that was there
                     afrh &= ~mask;
                     // set the AF
                     afrh |= bits;
                     // and write it out
                     Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRH {afrh:X8}");
-                    GPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
+                    UPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
                 }
             }
 
@@ -412,11 +413,11 @@ namespace Meadow.Devices
             setting = 0;
             if (mode == STM32.GpioMode.AlternateFunction || mode == STM32.GpioMode.Output)
             {
-                moder = GPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
+                moder = UPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
                 moder &= ~(3u << (pin * 2));
                 moder |= (uint)speed << (pin * 2);
                 Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} speed {speed}.  Writing OSPEED {moder:X8}");
-                GPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
+                UPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
             }
 
             ////// ====== OUTPUT TYPE ======
@@ -457,7 +458,7 @@ namespace Meadow.Devices
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
                     "Calling ioctl to enable interrupts");
 
-                var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
             else
             {
@@ -504,11 +505,11 @@ namespace Meadow.Devices
         private void SetResistorMode(uint address, int pin, int mode)
         {
             var addr = address + STM32.GPIO_PUPDR_OFFSET;
-            var regval = GPD.GetRegister(addr);
+            var regval = UPD.GetRegister(addr);
             regval &= (uint)~(3 << (pin << 1));
             regval |= (uint)(mode << (pin << 1));
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval:X8}");
-            GPD.SetRegister(addr, regval);
+            UPD.SetRegister(addr, regval);
         }
 
         private void InterruptServiceThreadProc(object o)
@@ -549,7 +550,7 @@ namespace Meadow.Devices
 
         private void UpdateConfigRegister1Bit(uint address, bool value, int pin)
         {
-            var register = GPD.GetRegister(address);
+            var register = UPD.GetRegister(address);
 
             var temp = register;
             if (value)
@@ -562,7 +563,7 @@ namespace Meadow.Devices
             }
 
             // write the register
-            GPD.SetRegister(address, temp);
+            UPD.SetRegister(address, temp);
         }
     }
 

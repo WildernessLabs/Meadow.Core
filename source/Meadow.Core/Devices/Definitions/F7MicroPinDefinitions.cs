@@ -18,7 +18,7 @@ namespace Meadow.Devices
                 "OnboardLEDBlue", "PA0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA0", inverseLogic: true),
-                    new PwmChannelInfo("TIM2_CH1"), //?? many to choose from
+                    new PwmChannelInfo("TIM2_CH1", 2, 1), //?? many to choose from
                 }
             );
             // OnboardLEDGreen
@@ -28,7 +28,7 @@ namespace Meadow.Devices
                 "OnboardLEDGreen", "PA1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA1", inverseLogic: true),
-                    new PwmChannelInfo("TIM2_CH2"), //?? many to choose from
+                    new PwmChannelInfo("TIM2_CH2", 2, 2), //?? many to choose from
                 }
             );
             // OnboardLEDRed
@@ -38,7 +38,7 @@ namespace Meadow.Devices
                 "OnboardLEDGreen", "PA2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA2", inverseLogic: true),
-                    new PwmChannelInfo("TIM2_CH3"), //?? many to choose from
+                    new PwmChannelInfo("TIM2_CH3", 2, 3), //?? many to choose from
                 }
             );
 
@@ -57,7 +57,7 @@ namespace Meadow.Devices
                 "D01", "PH13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH13"),
-                    new PwmChannelInfo("TIM8_CH1N"),
+                    new PwmChannelInfo("TIM8_CH1N", 8, 1),
                     new UartChannelInfo("UART4_TX", SerialDirectionType.Transmit)
                 }
             );
@@ -67,7 +67,7 @@ namespace Meadow.Devices
                 "D02", "PC6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC6"),
-                    new PwmChannelInfo("TIM3_CH1"), // OR TIM8_CH1. Not sure which we're using
+                    new PwmChannelInfo("TIM3_CH1", 3, 1), // OR TIM8_CH1. Not sure which we're using
                 }
             );
             // D03
@@ -76,7 +76,7 @@ namespace Meadow.Devices
                 "D03", "PB8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB8"),
-                    new PwmChannelInfo("TIM4_CH3"), // OR TIM10_CH1. Not sure which we're using
+                    new PwmChannelInfo("TIM4_CH3", 4, 3), // OR TIM10_CH1. Not sure which we're using
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
             );
@@ -86,7 +86,7 @@ namespace Meadow.Devices
                 "D04", "PB9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9"),
-                    new PwmChannelInfo("TIM4_CH3"), // OR TIM10_CH1. Not sure which we're using
+                    new PwmChannelInfo("TIM4_CH3", 4, 3), // OR TIM10_CH1. Not sure which we're using
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
             );
@@ -96,7 +96,7 @@ namespace Meadow.Devices
                 "D05", "PC7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB8"),
-                    new PwmChannelInfo("TIM3_CH2"), // OR TIM8_CH2. Not sure which we're using
+                    new PwmChannelInfo("TIM3_CH2", 3, 2), // OR TIM8_CH2. Not sure which we're using
                 }
             );
             // D06
@@ -106,7 +106,7 @@ namespace Meadow.Devices
                 "D06", "PB0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB0"),
-                    new PwmChannelInfo("TIM1_CH2N"), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
+                    new PwmChannelInfo("TIM1_CH2N", 1, 2), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
                     new AnalogChannelInfo("ADC1_IN8", 12) // or ADC2_IN8?
                 }
             );
@@ -116,7 +116,7 @@ namespace Meadow.Devices
                 "D07", "PB7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7"),
-                    new PwmChannelInfo("TIM4_CH2"), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
+                    new PwmChannelInfo("TIM4_CH2", 4, 2), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
                     new I2cChannelInfo("I2C1_SDA", I2cChannelFunctionType.Data) // or I2C4_SDA
                 }
             );
@@ -126,7 +126,7 @@ namespace Meadow.Devices
                 "D08", "PB6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB6"),
-                    new PwmChannelInfo("TIM4_CH1"),
+                    new PwmChannelInfo("TIM4_CH1", 4, 1),
                     new I2cChannelInfo("I2C1_SCL", I2cChannelFunctionType.Clock ) // or I2C4_SCL
                 }
             );
@@ -137,7 +137,7 @@ namespace Meadow.Devices
                 "D09", "PB1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB1"),
-                    new PwmChannelInfo("TIM1_CH3N"),
+                    new PwmChannelInfo("TIM1_CH3N", 1, 3),
                     new AnalogChannelInfo("ADC1_IN9", 12) // or ADC2_IN9
                 }
             );
@@ -147,7 +147,7 @@ namespace Meadow.Devices
                 "D10", "PH10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH10"),
-                    new PwmChannelInfo("TIM5_CH1"),
+                    new PwmChannelInfo("TIM5_CH1", 5, 1),
                 }
             );
             // D11
@@ -156,7 +156,7 @@ namespace Meadow.Devices
                 "D11", "PC9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC9"),
-                    new PwmChannelInfo("TIM3_CH4"), //or TIM8_CH4
+                    new PwmChannelInfo("TIM3_CH4", 3, 4), //or TIM8_CH4
                 }
             );
             // D12
@@ -165,7 +165,7 @@ namespace Meadow.Devices
                 "D12", "PB14",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB14"),
-                    new PwmChannelInfo("TIM1_CH2N"), //or TIM8_CH2N
+                    new PwmChannelInfo("TIM1_CH2N", 1, 2), //or TIM8_CH2N
                     new UartChannelInfo("USART1_TX", SerialDirectionType.Transmit)
                 }
             );
@@ -175,7 +175,7 @@ namespace Meadow.Devices
                 "D13", "PB15",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB15"),
-                    new PwmChannelInfo("TIM1_CH3N"), //or TIM8_CH3N
+                    new PwmChannelInfo("TIM1_CH3N", 1, 3), //or TIM8_CH3N
                     new UartChannelInfo("USART1_RX", SerialDirectionType.Receive)
                 }
             );
@@ -345,12 +345,8 @@ namespace Meadow.Devices
 
             public F7MicroPinDefinitions()
             {
-
-                this.InitAllPins();
-                this.Groups = new F7NamedPinGroups(this);
-
-                I2C_SDA = D07;
-                I2C_SCL = D08;
+                InitAllPins();
+                //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
             }
 
             protected void InitAllPins()
@@ -391,10 +387,7 @@ namespace Meadow.Devices
                 AllPins.Add(this.ESP_RST);
                 AllPins.Add(this.ESP_UART_RX);
                 AllPins.Add(this.ESP_UART_TX);
-
             }
-
         }
-
     }
 }

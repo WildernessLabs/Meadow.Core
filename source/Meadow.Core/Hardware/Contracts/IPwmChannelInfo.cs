@@ -8,6 +8,18 @@ namespace Meadow.Hardware
     public interface IPwmChannelInfo : IDigitalChannelInfo
     {
         /// <summary>
+        /// Gets the timer corresponding to the microcontroller timer associated
+        /// with this managed PWM channel.
+        /// </summary>
+        uint Timer { get; }
+
+        /// <summary>
+        /// Gets the timer channel corresponding to the microcontroller timer
+        /// channel associated with this managed PWM channel.
+        /// </summary>
+        uint TimerChannel { get; }
+
+        /// <summary>
         /// Gets the minimum frequency that the underlying PWM generator is 
         /// capable of.
         /// </summary>
