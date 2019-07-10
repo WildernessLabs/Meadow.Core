@@ -4,17 +4,17 @@ using System.Threading;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
-using Meadow.Hardware.Communications;
 
 namespace SPITest
 {
-    public class SPITestApplication : Appp<<F7Micro, SPITestApplication>
+    public class SPITestApplication : App<F7Micro, SPITestApplication>
     {
         private readonly IDigitalOutputPort _redLED;
         private readonly IDigitalOutputPort _blueLED;
         private readonly IDigitalOutputPort _greenLED;
         private readonly IDigitalOutputPort _reset;
         private readonly IDigitalOutputPort _boot;
+        private readonly IDigitalOutputPort _chipSelect;
 
         public SPITestApplication()
         {
@@ -23,6 +23,7 @@ namespace SPITest
             _greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
             _reset = Device.CreateDigitalOutputPort(Device.Pins.ESP_RST);
             _boot = Device.CreateDigitalOutputPort(Device.Pins.ESP_BOOT);
+            _chipSelect = Device.CreateDigitalOutputPort(Device.Pins.ESP_CS);
         }
 
         public void Run()
@@ -30,7 +31,7 @@ namespace SPITest
             _boot.State = true;
             _reset.State = false;
             _reset.State = true;
-            var esp32 = new SoftwareSPIBus(Device, Device.Pins.ESP_MOSI, Device.Pins.ESP_MISO, Device.Pins.ESP_CLK, Device.Pins.ESP_CS);
+            var esp32 = new SoftwareSPIBus(Device, Device.Pins.ESP_MOSI, Device.Pins.ESP_MISO, Device.Pins.ESP_CLK /*, Device.Pins.ESP_CS */);
             int counter = 0;
             while (true)
             {
@@ -52,7 +53,7 @@ namespace SPITest
                 Array.Clear(writeBuffer, 0, esp32BufferLength);
                 Array.Copy(buffer, writeBuffer, buffer.Length);
                 Console.WriteLine(DebugHelpers.PrintableBuffer(writeBuffer));
-                byte[] dataFromESP32 = esp32.WriteRead(writeBuffer, (ushort) writeBuffer.Length);
+                byte[] dataFromESP32 = esp32.WriteRead(_chipSelect, writeBuffer, (ushort) writeBuffer.Length);
                 //
                 Console.WriteLine("Message from ESP32:");
                 Console.WriteLine(Encoding.UTF8.GetString(dataFromESP32));

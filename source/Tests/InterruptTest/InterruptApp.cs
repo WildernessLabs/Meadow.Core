@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace InterruptTest
 {
-    class InterruptApp : Appp<<F7Micro, InterruptApp>
+    class InterruptApp : App<F7Micro, InterruptApp>
     {
         private List<IDigitalInputPort> _inputs = new List<IDigitalInputPort>();
 
@@ -24,6 +24,10 @@ namespace InterruptTest
             var d1 = Device.CreateDigitalInputPort(Device.Pins.D01, InterruptMode.EdgeFalling);
             d1.Changed += D1_Changed;
             _inputs.Add(d1);
+
+            var d2 = Device.CreateDigitalInputPort(Device.Pins.D02, InterruptMode.EdgeBoth);
+            d2.Changed += D2_Changed;
+            _inputs.Add(d1);
         }
 
         void D0_Changed(object sender, DigitalInputPortEventArgs e)
@@ -34,6 +38,11 @@ namespace InterruptTest
         void D1_Changed(object sender, DigitalInputPortEventArgs e)
         {
             Console.WriteLine("Falling Interrupt on D01");
+        }
+
+        void D2_Changed(object sender, DigitalInputPortEventArgs e)
+        {
+            Console.WriteLine($"{(e.Value ? "Rising" : "Falling")} Interrupt on D02");
         }
     }
 }

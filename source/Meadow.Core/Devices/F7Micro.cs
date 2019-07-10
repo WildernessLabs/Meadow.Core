@@ -55,7 +55,7 @@ namespace Meadow.Devices
 
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
-            InterruptMode interruptMode = InterruptMode.EdgeBoth,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             int debounceDuration = 0,
             int glitchFilterCycleCount = 0
@@ -68,10 +68,11 @@ namespace Meadow.Devices
             IPin pin,
             bool initialState = false,
             bool glitchFilter = false,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input)
         {
-            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, resistorMode, initialDirection);
+            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, interruptMode, resistorMode, initialDirection);
         }
 
         public IAnalogInputPort CreateAnalogInputPort(
@@ -108,11 +109,18 @@ namespace Meadow.Devices
         }
 
         public II2cBus CreateI2cBus(
+            ushort speed = 1000
+        )
+        {
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, speed);
+        }
+
+        public II2cBus CreateI2cBus(
             IPin[] pins,
             ushort speed
         )
         {
-            return I2cBus.From(pins[0], pins[1], speed);
+            return CreateI2cBus(pins[0], pins[1], speed);
         }
 
 
@@ -122,7 +130,7 @@ namespace Meadow.Devices
             ushort speed
         )
         {
-            return I2cBus.From(clock, data, speed);
+            return I2cBus.From(this.IoController, clock, data, speed);
         }
 
     }

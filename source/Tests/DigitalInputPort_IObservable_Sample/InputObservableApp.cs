@@ -12,7 +12,7 @@ namespace DigitalInputPort_IObservable_Sample
     /// not currently working, add a 10k pull-down resistor to the input side as illustrated in
     /// http://developer.wildernesslabs.co/Hardware/Tutorials/Electronics/Part4/PullUp_PullDown_Resistors/
     /// </summary>
-    public class InputObservableApp : Appp<<F7Micro, InputObservableApp>
+    public class InputObservableApp : App<F7Micro, InputObservableApp>
     {
         IDigitalInputPort _input;
 

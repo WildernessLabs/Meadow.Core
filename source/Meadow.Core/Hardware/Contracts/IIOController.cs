@@ -2,7 +2,7 @@
 
 namespace Meadow.Hardware
 {
-    public delegate void InterruptHandler(IPin pin);
+    public delegate void InterruptHandler(IPin pin, bool state);
 
     // TODO: Consider renaming to match MCP23008 driver: https://github.com/WildernessLabs/Netduino.Foundation/blob/master/Source/Peripheral_Libs/ICs.IOExpanders.MCP23008/Driver/MCP23008.cs
     // Write(IPin pin, bool value)
@@ -36,6 +36,13 @@ namespace Meadow.Hardware
         bool GetDiscrete(IPin pin);
 
         /// <summary>
+        /// Sets the resistor mode for the given Pin
+        /// </summary>
+        /// <param name="pin">Pin.</param>
+        /// <param name="mode">Mode.</param>
+        void SetResistorMode(IPin pin, ResistorMode mode);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="pin"></param>
@@ -55,6 +62,8 @@ namespace Meadow.Hardware
             int debounceDuration = 0,
             int glitchFilterCycleCount = 0
             );
+
+        bool UnconfigureGpio(IPin pin);
 
         void ConfigureAnalogInput(IPin pin);
         int GetAnalogValue(IPin pin);

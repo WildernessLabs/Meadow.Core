@@ -6,7 +6,7 @@ namespace Meadow.Hardware
         public SerialDirectionType SerialDirection { get; protected set; }
 
         public CanChannelInfo(string name, SerialDirectionType serialDirection) 
-            : base(name, true, true, true, true, true)
+            : base(name, true, true, true, true, true, false)
         {
             this.SerialDirection = serialDirection;
         }

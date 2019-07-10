@@ -183,9 +183,6 @@ namespace Meadow.Hardware
 
         protected IIOController IOController { get; }
 
-        public IAnalogChannelInfo Channel { get; }
-        public IPin Pin { get; }
-
         private List<IObserver<FloatChangeResult>> _observers;
 
         protected object _lock = new object();

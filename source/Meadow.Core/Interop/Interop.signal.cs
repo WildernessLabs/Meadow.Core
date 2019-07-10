@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace Meadow.Core
 {
+// we create some structs for P/Invoke that give 0649's.  It's non-applicable for these, so ignore
+#pragma warning disable 0649
     internal static partial class Interop
     {
         public static partial class Nuttx
@@ -151,5 +153,6 @@ namespace Meadow.Core
                 public IntPtr sigev_notify_attributes;
             }
         }
+#pragma warning restore 0649
     }
 }

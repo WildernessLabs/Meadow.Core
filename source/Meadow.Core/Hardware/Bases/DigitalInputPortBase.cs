@@ -6,11 +6,10 @@ namespace Meadow.Hardware
     /// <summary>
     /// Provides a base implementation for digital input ports.
     /// </summary>
-    public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort
+    public abstract class DigitalInputPortBase : DigitalPortBase, IDigitalInputPort, IDigitalInterruptPort
     {
         /// <summary>
-        /// Occurs when the state is changed. To enable this, the `interruptEnabled`
-        /// parameter must be `true`.
+        /// Occurs when the state is changed. To enable this, set the InterruptMode at construction
         /// </summary>
         public event EventHandler<DigitalInputPortEventArgs> Changed = delegate { };
 
@@ -21,6 +20,7 @@ namespace Meadow.Hardware
         public InterruptMode InterruptMode { get; protected set; }
 
         public abstract bool State { get; }
+        public abstract ResistorMode Resistor { get; set; }
         public abstract int DebounceDuration { get; set; }
         public abstract int GlitchFilterCycleCount { get; set; }
 
@@ -38,7 +38,7 @@ namespace Meadow.Hardware
 
         protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)
         {
-            Changed(this, changeResult);
+            Changed?.Invoke(this, changeResult);
             _observers.ForEach(x => x.OnNext(changeResult));
         }
 

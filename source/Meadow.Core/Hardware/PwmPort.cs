@@ -1,26 +1,29 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices;
+using Meadow.Hardware;
 using System;
 using System.Linq;
+using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
     /// <summary>
     /// Represents a port that is capable of generating a Pulse-Width-Modulation
     /// signal; which approximates an analog output via digital pulses.
-    /// 
-    /// NOTE: This class has not been implemented.
     /// </summary>
     public class PwmPort : PwmPortBase
     {
+        protected IIOController IOController { get; set; }
+        protected IPwmChannelInfo PwmChannelInfo { get; set; }
+
         protected PwmPort(
             IPin pin,
             IIOController ioController,
-            IPwmChannelInfo channel,
-            float frequency = 100, 
-            float dutyCycle = 0
+            IPwmChannelInfo channel
             /*bool inverted = false*/) 
             : base (pin, channel)
         {
+            this.IOController = ioController;
+            this.PwmChannelInfo = channel;
         }
 
         internal static PwmPort From(
@@ -33,8 +36,14 @@ namespace Meadow.Hardware
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
             if (channel != null) {
                 //TODO: need other checks here.
-                return new PwmPort(pin, ioController, channel, frequency, dutyCycle);
-            } else {
+                var port = new PwmPort(pin, ioController, channel);
+                port.Frequency = frequency;
+                port.DutyCycle = dutyCycle;
+
+                return port;
+
+            }
+            else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
             }
 
@@ -43,8 +52,8 @@ namespace Meadow.Hardware
         ~PwmPort() { throw new NotImplementedException(); }
 
         public override float Duration { get; set; }
-        public override float DutyCycle { get; set; }
-        public override float Frequency { get; set; }
+        //public override float DutyCycle { get; set; }
+        //public override float Frequency { get; set; }
         public override float Period { get; set; }
         //public IDigitalPin Pin { get; }
         public override TimeScaleFactor Scale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -53,19 +62,23 @@ namespace Meadow.Hardware
 
         public override void Start()
         {
-            throw new NotImplementedException();
+            UPD.PWM.Start(PwmChannelInfo.Timer, (uint)Frequency, DutyCycle);
         }
 
         public override void Stop()
         {
-            throw new NotImplementedException();
+            UPD.PWM.Stop(PwmChannelInfo.Timer);
         }
 
-        protected void Dispose(bool disposing) { throw new NotImplementedException(); }
+        protected void Dispose(bool disposing)
+        {
+            Stop();
+            UPD.PWM.Shutdown(PwmChannelInfo.Timer);
+        }
 
         public override void Dispose()
         {
-            throw new NotImplementedException();
+            Dispose(true);
         }
     }
 }

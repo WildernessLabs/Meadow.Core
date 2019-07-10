@@ -9,11 +9,11 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalInputPort : DigitalInputPortBase
     {
-        protected IIOController IOController { get; set; }
+        private ResistorMode _resistorMode;
+        private int _debounceDuration;
+        private int _glitchCycleCount;
 
-        public override int DebounceDuration { get; set; }
-        public override int GlitchFilterCycleCount { get; set; }
-        public ResistorMode Resistor { get; set; }
+        protected IIOController IOController { get; set; }
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
@@ -27,8 +27,14 @@ namespace Meadow.Hardware
             int glitchFilterCycleCount = 0
             ) : base(pin, channel, interruptMode)
         {
+            if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
+            {
+                throw new Exception("Unable to create port; channel is not capable of interrupts");
+            }
+
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
+            this._resistorMode = resistorMode;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -66,7 +72,17 @@ namespace Meadow.Hardware
             }
         }
 
-        void OnInterrupt(IPin pin)
+        public override ResistorMode Resistor
+        {
+            get => _resistorMode;
+            set
+            {
+                IOController.SetResistorMode(this.Pin, value);
+                _resistorMode = value;
+            }
+        }
+
+        void OnInterrupt(IPin pin, bool state)
         {
             if(pin == this.Pin)
             {
@@ -80,23 +96,6 @@ namespace Meadow.Hardware
                     }
                 }
 
-                var state = false;
-
-                switch(InterruptMode)
-                {
-                    case InterruptMode.EdgeRising:
-                    case InterruptMode.LevelHigh:
-                        state = true;
-                        break;
-                    case InterruptMode.EdgeFalling:
-                    case InterruptMode.LevelLow:
-                        state = false;
-                        break;
-                    case InterruptMode.EdgeBoth:
-                        // we could probably move this query lower to reduce latency risk
-                        state = State;
-                        break;
-                }
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = time;
 
@@ -107,13 +106,60 @@ namespace Meadow.Hardware
 
         public override void Dispose()
         {
-            //TODO: implement full pattern
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            // TODO: we should consider moving this logic to the finalizer
+            // but the problem with that is that we don't know when it'll be called
+            // but if we do it in here, we may need to check the _disposed field
+            // elsewhere
+
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    DeviceChannelManager.ReleasePin(Pin);
+                }
+                disposed = true;
+            }
+        }
+
+        // Finalizer
+        ~DigitalInputPort()
+        {
+            Dispose(false);
         }
 
         public override bool State
         {
-            get => this.IOController.GetDiscrete(this.Pin);
+            get
+            {
+                var state = this.IOController.GetDiscrete(this.Pin);
+                return InverseLogic ? !state : state;
+            }
         }
 
+        public override int DebounceDuration
+        {
+            get => _debounceDuration;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                _debounceDuration = value;
+            }
+        }
+
+        public override int GlitchFilterCycleCount
+        {
+            get => _glitchCycleCount;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                _glitchCycleCount = value;
+            }
+        }
     }
 }

@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Walking_DigitalOutputs
 {
-    public class OutputApp : Appp<<F7Micro, OutputApp>
+    public class OutputApp : App<F7Micro, OutputApp>
     {
         IList<IDigitalOutputPort> _outs = new List<IDigitalOutputPort>();
 
@@ -29,6 +29,8 @@ namespace Walking_DigitalOutputs
         // creates output ports on all pins
         protected void ConfigureOutputs()
         {
+            Console.Write("Creating ports...");
+
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue));
@@ -54,21 +56,28 @@ namespace Walking_DigitalOutputs
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A03));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A04));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.A05));
+
+            Console.WriteLine("ok.");
         }
 
         // tears down all the ports. for validation only.
         protected void DisposePorts()
-        { 
+        {
+            Console.Write("Disposing ports...");
+
             foreach (var port in _outs) {
                 port.Dispose();
             }
             _outs.Clear();
+
+            Console.WriteLine("ok.");
         }
 
         protected void WalkOutputs()
         {
             // turn each one on for a bit.
             foreach (var port in _outs) {
+                Console.Write($"{port.Pin.Name} ");
                 port.State = true;
                 Thread.Sleep(250);
                 port.State = false;

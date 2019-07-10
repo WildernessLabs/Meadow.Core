@@ -28,6 +28,7 @@ namespace Meadow.Hardware
             IPin pin,
             bool initialState = false,
             bool glitchFilter = false,
+            InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input
         );
