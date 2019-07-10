@@ -10,11 +10,10 @@ namespace Meadow.Hardware
     public class DigitalInputPort : DigitalInputPortBase
     {
         private ResistorMode _resistorMode;
+        private int _debounceDuration;
+        private int _glitchCycleCount;
 
         protected IIOController IOController { get; set; }
-
-        public override int DebounceDuration { get; set; }
-        public override int GlitchFilterCycleCount { get; set; }
 
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
@@ -28,6 +27,11 @@ namespace Meadow.Hardware
             int glitchFilterCycleCount = 0
             ) : base(pin, channel, interruptMode)
         {
+            if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
+            {
+                throw new Exception("Unable to create port; channel is not capable of interrupts");
+            }
+
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
             this._resistorMode = resistorMode;
@@ -102,13 +106,60 @@ namespace Meadow.Hardware
 
         public override void Dispose()
         {
-            //TODO: implement full pattern
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            // TODO: we should consider moving this logic to the finalizer
+            // but the problem with that is that we don't know when it'll be called
+            // but if we do it in here, we may need to check the _disposed field
+            // elsewhere
+
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    DeviceChannelManager.ReleasePin(Pin);
+                }
+                disposed = true;
+            }
+        }
+
+        // Finalizer
+        ~DigitalInputPort()
+        {
+            Dispose(false);
         }
 
         public override bool State
         {
-            get => this.IOController.GetDiscrete(this.Pin);
+            get
+            {
+                var state = this.IOController.GetDiscrete(this.Pin);
+                return InverseLogic ? !state : state;
+            }
         }
 
+        public override int DebounceDuration
+        {
+            get => _debounceDuration;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                _debounceDuration = value;
+            }
+        }
+
+        public override int GlitchFilterCycleCount
+        {
+            get => _glitchCycleCount;
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+                _glitchCycleCount = value;
+            }
+        }
     }
 }

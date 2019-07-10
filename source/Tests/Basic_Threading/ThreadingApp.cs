@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace Basic_Threading
 {
-    public class ThreadingApp : Appp<<F7Micro, ThreadingApp>
+    public class ThreadingApp : App<F7Micro, ThreadingApp>
     {
         IDigitalOutputPort out1;
         IDigitalOutputPort out2;

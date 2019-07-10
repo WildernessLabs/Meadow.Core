@@ -16,11 +16,11 @@ namespace Meadow.Hardware
         /// <value><c>true</c> for `HIGH`; otherwise, <c>false</c>, for `LOW`.</value>
         public override bool State 
         {
-            get => _state;
+            get => this.InverseLogic ? !_state : _state;
             set
             {
-                IOController.SetDiscrete(base.Pin, value);
-                _state = value;
+                _state = this.InverseLogic ? !value : value;
+                IOController.SetDiscrete(base.Pin, _state);
             }
         } protected bool _state;
 
@@ -42,8 +42,10 @@ namespace Meadow.Hardware
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
             if (success.Item1)
             {
+                _state = this.InverseLogic ? !initialState : initialState;
+
                 // make sure the pin is configured as a digital output with the proper state
-                ioController.ConfigureOutput(pin, initialState);
+                ioController.ConfigureOutput(pin, _state);
             }
             else
             {

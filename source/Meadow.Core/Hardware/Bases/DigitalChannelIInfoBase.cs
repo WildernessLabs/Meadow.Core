@@ -8,6 +8,7 @@ namespace Meadow.Hardware
         public bool InterrruptCapable { get; protected set; }
         public bool PullDownCapable { get; protected set; }
         public bool PullUpCapable { get; protected set; }
+        public bool InverseLogic { get; protected set; }
 
         protected DigitalChannelIInfoBase(
             string name,
@@ -15,7 +16,8 @@ namespace Meadow.Hardware
             bool outputCapable,
             bool interruptCapable,
             bool pullDownCapable,
-            bool pullUpCapable)
+            bool pullUpCapable,
+            bool inverseLogic)
             : base(name)
         {
             this.InputCapable = inputCapable;
@@ -23,6 +25,7 @@ namespace Meadow.Hardware
             this.InterrruptCapable = interruptCapable;
             this.PullDownCapable = pullDownCapable;
             this.PullUpCapable = pullUpCapable;
+            this.InverseLogic = inverseLogic;
         }
     }
 }

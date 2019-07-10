@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace InterruptTest
 {
-    class InterruptApp : Appp<<F7Micro, InterruptApp>
+    class InterruptApp : App<F7Micro, InterruptApp>
     {
         private List<IDigitalInputPort> _inputs = new List<IDigitalInputPort>();
 

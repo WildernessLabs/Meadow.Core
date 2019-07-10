@@ -6,6 +6,11 @@ namespace Meadow.Hardware
     public interface II2cBus
     {
         /// <summary>
+        /// Resets the bus
+        /// </summary>
+        void Reset();
+
+        /// <summary>
         /// Write a single byte to the device.
         /// </summary>
         /// <param name="peripheralAddress">Address of the I2C peripheral.</param>

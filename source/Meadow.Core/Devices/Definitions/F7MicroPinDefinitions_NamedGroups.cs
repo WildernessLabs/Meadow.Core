@@ -21,7 +21,8 @@ namespace Meadow.Devices
 
                 public F7NamedPinGroups(F7MicroPinDefinitions parentDefinitions)
                 {
-                    //this.InitNamedPinGroups();
+                    _parent = parentDefinitions;
+                    this.InitNamedPinGroups();
                 }
 
                 protected void InitNamedPinGroups()

@@ -12,7 +12,7 @@ namespace ButtonEvents
     /// not currently working, add a 10k pull-down resistor to the input side as illustrated in
     /// http://developer.wildernesslabs.co/Hardware/Tutorials/Electronics/Part4/PullUp_PullDown_Resistors/
     /// </summary>
-    public class ButtonEventsApp : Appp<<F7Micro, ButtonEventsApp>
+    public class ButtonEventsApp : App<F7Micro, ButtonEventsApp>
     {
         IDigitalInputPort _input;
 

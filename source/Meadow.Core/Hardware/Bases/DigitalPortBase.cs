@@ -8,9 +8,12 @@
     {
         public new IDigitalChannelInfo Channel { get; protected set; }
 
+        protected bool InverseLogic { get; }
+
         protected DigitalPortBase(IPin pin, IDigitalChannelInfo channel)
             : base(pin, channel)
         {
+            this.InverseLogic = channel.InverseLogic;
             this.Channel = channel;
         }
     }

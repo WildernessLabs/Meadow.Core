@@ -1,7 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Meadow;
 using Meadow.Devices;
-using Meadow.Hardware;
 
 namespace Basic_PWM
 {
@@ -9,16 +9,17 @@ namespace Basic_PWM
     {
         public PWMApp()
         {
-            var pwm = Device.CreatePwmPort(Device.Pins.D05, 50, 0x8000);
-            var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.D04);
+            Console.WriteLine("+PWMApp");
 
-            ((PwmPort)pwm).Setup();
+            var pwm = Device.CreatePwmPort(Device.Pins.D05, 100, 0.5f);
             pwm.Start();
+            var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
 
             while(true)
             {
                 heartbeat.State = !heartbeat.State;
                 Thread.Sleep(1000);
+                Console.Write(".");
             }
         }
     }

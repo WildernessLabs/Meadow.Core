@@ -15,5 +15,6 @@ namespace Meadow.Hardware
         bool InterrruptCapable { get; }
         bool PullDownCapable { get; }
         bool PullUpCapable { get; }
+        bool InverseLogic { get; }
     }
 }

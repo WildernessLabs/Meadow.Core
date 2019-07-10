@@ -15,16 +15,12 @@ namespace Meadow.Hardware
         protected IIOController IOController { get; set; }
         protected IPwmChannelInfo PwmChannelInfo { get; set; }
 
-        private IntPtr DriverHandle => (IOController as F7GPIOManager).DriverHandle;
-
         protected PwmPort(
             IPin pin,
             IIOController ioController,
-            IPwmChannelInfo channel,
-            float frequency = 100, 
-            float dutyCycle = 0
+            IPwmChannelInfo channel
             /*bool inverted = false*/) 
-            : base (pin, channel, frequency, dutyCycle)
+            : base (pin, channel)
         {
             this.IOController = ioController;
             this.PwmChannelInfo = channel;
@@ -40,8 +36,14 @@ namespace Meadow.Hardware
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
             if (channel != null) {
                 //TODO: need other checks here.
-                return new PwmPort(pin, ioController, channel, frequency, dutyCycle);
-            } else {
+                var port = new PwmPort(pin, ioController, channel);
+                port.Frequency = frequency;
+                port.DutyCycle = dutyCycle;
+
+                return port;
+
+            }
+            else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
             }
 
@@ -60,51 +62,23 @@ namespace Meadow.Hardware
 
         public override void Start()
         {
-            var data = new Nuttx.UpdPwmCmd()
-            {
-                TimerId = PwmChannelInfo.Timer,
-                Frequency = (uint)Frequency,
-                Duty = (uint)DutyCycle
-            };
-
-            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmStart, data);
+            UPD.PWM.Start(PwmChannelInfo.Timer, (uint)Frequency, DutyCycle);
         }
 
         public override void Stop()
         {
-            var data = new Nuttx.UpdPwmCmd()
-            {
-                TimerId = PwmChannelInfo.Timer,
-            };
-
-            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmStop, data);
+            UPD.PWM.Stop(PwmChannelInfo.Timer);
         }
 
-        public void Setup()
+        protected void Dispose(bool disposing)
         {
-            var data = new Nuttx.UpdPwmCmd()
-            {
-                TimerId = PwmChannelInfo.Timer,
-            };
-
-            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmSetup, data);
+            Stop();
+            UPD.PWM.Shutdown(PwmChannelInfo.Timer);
         }
-
-        public void Shutdown()
-        {
-            var data = new Nuttx.UpdPwmCmd()
-            {
-                TimerId = PwmChannelInfo.Timer,
-            };
-
-            Nuttx.PwmCmd(DriverHandle, Nuttx.UpdIoctlFn.PwmShutdown, data);
-        }
-
-        protected void Dispose(bool disposing) { throw new NotImplementedException(); }
 
         public override void Dispose()
         {
-            throw new NotImplementedException();
+            Dispose(true);
         }
     }
 }

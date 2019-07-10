@@ -155,18 +155,6 @@ namespace Meadow.Core
 
             }
 
-            public static bool PwmCmd(IntPtr driverHandle, UpdIoctlFn cmd, UpdPwmCmd data)
-            {
-                var result = Interop.Nuttx.ioctl(driverHandle, cmd, ref data);
-                if (result != 0)
-                {
-                    Console.WriteLine($"PWM setup failed: {result}");
-                    return false;
-                }
-
-                return true;
-            }
-
         }
     }
 }
