@@ -24,7 +24,7 @@ namespace Meadow.Hardware
             float frequency = 100, 
             float dutyCycle = 0
             /*bool inverted = false*/) 
-            : base (pin, channel)
+            : base (pin, channel, frequency, dutyCycle)
         {
             this.IOController = ioController;
             this.PwmChannelInfo = channel;
@@ -50,8 +50,8 @@ namespace Meadow.Hardware
         ~PwmPort() { throw new NotImplementedException(); }
 
         public override float Duration { get; set; }
-        public override float DutyCycle { get; set; }
-        public override float Frequency { get; set; }
+        //public override float DutyCycle { get; set; }
+        //public override float Frequency { get; set; }
         public override float Period { get; set; }
         //public IDigitalPin Pin { get; }
         public override TimeScaleFactor Scale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
