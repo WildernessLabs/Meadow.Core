@@ -347,6 +347,9 @@ namespace Meadow.Devices
             {
                 InitAllPins();
                 //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
+
+                I2C_SCL = this.D08;
+                I2C_SDA = this.D07;
             }
 
             protected void InitAllPins()
