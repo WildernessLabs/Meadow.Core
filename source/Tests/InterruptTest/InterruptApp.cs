@@ -27,7 +27,7 @@ namespace InterruptTest
 
             var d2 = Device.CreateDigitalInputPort(Device.Pins.D02, InterruptMode.EdgeBoth);
             d2.Changed += D2_Changed;
-            _inputs.Add(d1);
+            _inputs.Add(d2);
         }
 
         void D0_Changed(object sender, DigitalInputPortEventArgs e)
