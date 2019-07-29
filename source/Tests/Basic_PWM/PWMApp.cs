@@ -19,7 +19,7 @@ namespace Basic_PWM
             {
                 heartbeat.State = !heartbeat.State;
                 Thread.Sleep(1000);
-                Console.Write(".");
+                Console.WriteLine("tick");
             }
         }
     }

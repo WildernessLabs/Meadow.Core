@@ -54,7 +54,14 @@ namespace Meadow.Hardware
         public override float Duration { get; set; }
         //public override float DutyCycle { get; set; }
         //public override float Frequency { get; set; }
-        public override float Period { get; set; }
+        public override float Period
+        {
+            get => 1.0f / Frequency; 
+            set
+            {
+                Frequency = 1.0f / value;
+            }
+        }
         //public IDigitalPin Pin { get; }
         public override TimeScaleFactor Scale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

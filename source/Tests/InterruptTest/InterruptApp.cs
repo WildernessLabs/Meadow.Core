@@ -38,7 +38,7 @@ namespace InterruptTest
             d2.DebounceDuration = 1000;
             d2.Resistor = ResistorMode.PullDown;
             d2.Changed += D2_Changed;
-            _inputs.Add(d1);
+            _inputs.Add(d2);
         }
 
         void D0_Changed(object sender, DigitalInputPortEventArgs e)
