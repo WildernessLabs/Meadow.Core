@@ -378,8 +378,12 @@ namespace Meadow.Hardware
                     RxBuffer = IntPtr.Zero
                 };
 
-                Console.WriteLine(" +SendData");
-                UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Console.Write(" +SendData");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Console.WriteLine($" returned {result}");
+
+                // TODO: handle ioctl errors.  Common values:
+                // -116 = timeout                                           
             }
             finally
             {
