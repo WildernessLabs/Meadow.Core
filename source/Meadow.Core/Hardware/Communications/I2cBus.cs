@@ -362,6 +362,81 @@ namespace Meadow.Hardware
             UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
         }
 
+        private byte[] WriteReadData(byte address, byte[] sendData, byte readCount)
+        {
+            var rxBuffer = new byte[readCount];
+            var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+            var txGch = GCHandle.Alloc(sendData, GCHandleType.Pinned);
+
+            try
+            {
+                var command = new Nuttx.UpdI2CCommand()
+                {
+                    Address = address,
+                    Frequency = (int)this.Frequency,
+                    TxBufferLength = sendData.Length,
+                    TxBuffer = txGch.AddrOfPinnedObject(),
+                    RxBufferLength = rxBuffer.Length,
+                    RxBuffer = rxGch.AddrOfPinnedObject(),
+                };
+
+                Console.Write(" +ReadData");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Console.WriteLine($" returned {result}");
+
+                // TODO: handle ioctl errors.  Common values:
+                // -116 = timeout
+
+                return rxBuffer;
+            }
+            finally
+            {
+                if (rxGch.IsAllocated)
+                {
+                    rxGch.Free();
+                }
+                if (txGch.IsAllocated)
+                {
+                    txGch.Free();
+                }
+            }
+        }
+
+        private byte[] ReadData(byte address, byte count)
+        {
+            var rxBuffer = new byte[count];
+            var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+
+            try
+            {
+                var command = new Nuttx.UpdI2CCommand()
+                {
+                    Address = address,
+                    Frequency = (int)this.Frequency,
+                    TxBufferLength = 0,
+                    TxBuffer = IntPtr.Zero,
+                    RxBufferLength = rxBuffer.Length,
+                    RxBuffer = gch.AddrOfPinnedObject(),
+                };
+
+                Console.Write(" +ReadData");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Console.WriteLine($" returned {result}");
+
+                // TODO: handle ioctl errors.  Common values:
+                // -116 = timeout
+
+                return rxBuffer;
+            }
+            finally
+            {
+                if (gch.IsAllocated)
+                {
+                    gch.Free();
+                }
+            }
+        }
+
         private void SendData(byte address, byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -371,7 +446,7 @@ namespace Meadow.Hardware
                 var command = new Nuttx.UpdI2CCommand()
                 {
                     Address = address,
-                    Frequency = 4000000,
+                    Frequency = (int)this.Frequency,
                     TxBufferLength = data.Length,
                     TxBuffer = gch.AddrOfPinnedObject(),
                     RxBufferLength = 0,
