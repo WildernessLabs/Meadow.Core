@@ -11,31 +11,31 @@ namespace Meadow.Devices
             public IList<IPin> AllPins { get; } = new List<IPin>();
             public F7NamedPinGroups Groups { get; protected set; }
 
-            // OnboardLEDBlue
+            // OnboardLedBlue
             // TIM2_CH1/TIM2_ETR, TIM5_CH1, TIM8_ETR, USART2_CTS, UART4_TX, SAI2_SD_B, ETH_MII_CRS, EVENTOUT
             // ADC1_IN0, ADC2_IN0, ADC3_IN0, WKUP1
-            public readonly IPin OnboardLEDBlue = new Pin(
-                "OnboardLEDBlue", "PA0",
+            public readonly IPin OnboardLedBlue = new Pin(
+                "OnboardLedBlue", "PA0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA0", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH1", 2, 1), //?? many to choose from
                 }
             );
-            // OnboardLEDGreen
+            // OnboardLedGreen
             // TIM2_CH2, TIM5_CH2, USART2_RTS, UART4_RX, QUADSPI_BK1_IO3, SAI2_MCLK_B, ETH_MII_RX_CLK/ETH_R MII_REF_CLK, LCD_R2, EVENTOUT
             // ADC1_IN1, ADC2_IN1, ADC3_IN1
-            public readonly IPin OnboardLEDGreen = new Pin(
-                "OnboardLEDGreen", "PA1",
+            public readonly IPin OnboardLedGreen = new Pin(
+                "OnboardLedGreen", "PA1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA1", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH2", 2, 2), //?? many to choose from
                 }
             );
-            // OnboardLEDRed
+            // OnboardLedRed
             // TIM2_CH3, TIM5_CH3, TIM9_CH1, USART2_TX, SAI2_SCK_B, ETH_MDIO, MDIOS_MDIO, LCD_R1, EVENTOUT
             // ADC1_IN2, ADC2_IN2, ADC3_IN2, WKUP2
-            public readonly IPin OnboardLEDRed = new Pin(
-                "OnboardLEDGreen", "PA2",
+            public readonly IPin OnboardLedRed = new Pin(
+                "OnboardLedRed", "PA2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA2", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH3", 2, 3), //?? many to choose from
@@ -376,9 +376,9 @@ namespace Meadow.Devices
                 AllPins.Add(this.D13);
                 AllPins.Add(this.D14);
                 AllPins.Add(this.D15);
-                AllPins.Add(this.OnboardLEDRed);
-                AllPins.Add(this.OnboardLEDGreen);
-                AllPins.Add(this.OnboardLEDBlue);
+                AllPins.Add(this.OnboardLedRed);
+                AllPins.Add(this.OnboardLedGreen);
+                AllPins.Add(this.OnboardLedBlue);
                 AllPins.Add(this.ESP_MOSI);
                 AllPins.Add(this.ESP_MISO);
                 AllPins.Add(this.ESP_CLK);

@@ -31,9 +31,9 @@ namespace Walking_DigitalOutputs
         {
             Console.Write("Creating ports...");
 
-            _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed));
-            _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen));
-            _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue));
+            _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLedRed));
+            _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen));
+            _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.OnboardLedBlue));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D00));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D01));
             _outs.Add(Device.CreateDigitalOutputPort(Device.Pins.D02));

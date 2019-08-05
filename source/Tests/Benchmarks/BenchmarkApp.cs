@@ -67,9 +67,9 @@ namespace Benchmarks
             int writeLoopCount = 100;
 
             // init some ports
-            IDigitalOutputPort red = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
-            IDigitalOutputPort green = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
-            IDigitalOutputPort blue = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue);
+            IDigitalOutputPort red = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedRed);
+            IDigitalOutputPort green = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen);
+            IDigitalOutputPort blue = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedBlue);
             DateTime portsCreated = DateTime.Now;
 
             // write to the ports

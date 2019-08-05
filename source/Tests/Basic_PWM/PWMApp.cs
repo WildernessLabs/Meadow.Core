@@ -13,7 +13,7 @@ namespace Basic_PWM
 
             var pwm = Device.CreatePwmPort(Device.Pins.D05, 100, 0.5f);
             pwm.Start();
-            var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
+            var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen);
 
             while(true)
             {
