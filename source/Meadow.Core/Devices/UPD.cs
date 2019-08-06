@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Meadow.Core;
+using Meadow.Hardware;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -120,7 +121,7 @@ namespace Meadow.Devices
 
         public static class PWM
         {
-            private static List<uint> m_channelsInitialized = new List<uint>();
+            private static List<uint> m_timersInitialized = new List<uint>();
 
             public static bool PwmCmd(Nuttx.UpdIoctlFn request, Nuttx.UpdPwmCmd data)
             {
@@ -134,33 +135,33 @@ namespace Meadow.Devices
                 return true;
             }
 
-            public static bool Setup(uint channel)
+            public static bool Setup(uint timer)
             {
-                if(m_channelsInitialized.Contains(channel))
+                if(m_timersInitialized.Contains(timer))
                 {
                     return true;
                 }
 
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel,
+                    Timer = timer,
                 };
 
                 var result = PwmCmd(Nuttx.UpdIoctlFn.PwmSetup, data);
                 if(result)
                 {
-                    m_channelsInitialized.Add(channel);
+                    m_timersInitialized.Add(timer);
                 }
 
-                Output.WriteLineIf(true, $"Setup PWM {channel} returned {result}");
+                Output.WriteLineIf(true, $"Setup PWM {timer} returned {result}");
 
                 return result;
             }
 
-            public static bool Start(uint channel, uint frequency, float dutyCycle)
+            public static bool Start(IPwmChannelInfo pwmChannelInfo, uint frequency, float dutyCycle)
             {
                 // just make ssure we've been initialized
-                if(! Setup(channel))
+                if(! Setup(pwmChannelInfo.Timer))
                 {
                     return false;
                 }
@@ -171,25 +172,26 @@ namespace Meadow.Devices
                 // nuttx (well the processor) takes a 16-bit duty cycle, so 65536 == 100% == 1.0
                 var sixteenBitDuty = (((uint)(dutyCycle * 100)) << 16) / 100;
 
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel,
+                    Timer = pwmChannelInfo.Timer,
+                    Channel = pwmChannelInfo.TimerChannel,
                     Frequency = frequency,
                     Duty = sixteenBitDuty
                 };
 
                 var result = UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmStart, data);
 
-                Output.WriteLineIf(true, $"Start PWM {channel}:{frequency}:{dutyCycle} returned {result}");
+                Output.WriteLineIf(true, $"Start PWM {pwmChannelInfo.Timer}:{frequency}:{dutyCycle} returned {result}");
 
                 return result;
             }
 
             public static bool Stop(uint channel)
             {
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel
+                    Timer = channel
                 };
 
                 return UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmStop, data);
@@ -197,18 +199,18 @@ namespace Meadow.Devices
 
             public static bool Shutdown(uint channel)
             {
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel
+                    Timer = channel
                 };
 
                 var result = UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmShutdown, data);
 
                 if(result)
                 {
-                    if (m_channelsInitialized.Contains(channel))
+                    if (m_timersInitialized.Contains(channel))
                     {
-                        m_channelsInitialized.Remove(channel);
+                        m_timersInitialized.Remove(channel);
                     }
                 }
                 return result;

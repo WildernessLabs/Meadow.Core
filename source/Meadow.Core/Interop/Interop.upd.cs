@@ -44,21 +44,10 @@ namespace Meadow.Core
 
             public struct UpdPwmCmd
             {
-                /// <summary>
-                /// Timer Channel id (typical: 3)
-                /// </summary>
-                public uint TimerId;
-
+                public uint Timer;
+                public uint Channel;
                 // Members below only applicable for PwmStart cmd.
-
-                /// <summary>
-                /// Frequency (typical: 50)
-                /// </summary>
                 public uint Frequency;
-
-                /// <summary>
-                /// Duty cycle (typical: 32768)
-                /// </summary>
                 public uint Duty;
             }
 
