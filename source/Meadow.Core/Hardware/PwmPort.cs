@@ -69,7 +69,7 @@ namespace Meadow.Hardware
 
         public override void Start()
         {
-            UPD.PWM.Start(PwmChannelInfo.Timer, (uint)Frequency, DutyCycle);
+            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency, DutyCycle);
         }
 
         public override void Stop()

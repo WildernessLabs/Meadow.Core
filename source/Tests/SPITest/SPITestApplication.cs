@@ -18,9 +18,9 @@ namespace SPITest
 
         public SPITestApplication()
         {
-            _redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
-            _blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue);
-            _greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
+            _redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedRed);
+            _blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedBlue);
+            _greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen);
             _reset = Device.CreateDigitalOutputPort(Device.Pins.ESP_RST);
             _boot = Device.CreateDigitalOutputPort(Device.Pins.ESP_BOOT);
             _chipSelect = Device.CreateDigitalOutputPort(Device.Pins.ESP_CS);
