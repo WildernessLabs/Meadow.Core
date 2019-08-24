@@ -20,26 +20,9 @@ namespace Meadow.Hardware
         private const int SCL_PIN = 6;
         private const int SDA_PIN = 7;
 
-        /// <summary>
-        /// I2C bus used to communicate with a device (sensor etc.).
-        /// </summary>
-        /// <remarks>
-        /// This I2CDevice is static and shared across all instances of the I2CBus.
-        /// Communication with difference devices is made possible by changing the
-        /// </remarks>
-        private static I2cPeripheral _device;
-
-        ///// <summary>
-        ///// Configuration property for this I2CDevice.
-        ///// </summary>
-        //private readonly I2cPeripheral.Configuration _configuration;
-
-        /// <summary>
-        ///     Timeout for I2C transactions.
-        /// </summary>
-        private readonly ushort _transactionTimeout = 100;
-
         private IIOController IOController { get; }
+
+        public uint Frequency { get; private set; }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
@@ -55,23 +38,12 @@ namespace Meadow.Hardware
             ushort transactionTimeout = 100)
         {
             IOController = ioController;
-            this.Enable();
         }
 
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="T:Meadow.Foundation.Core.I2CBus" /> class.
-        ///// </summary>
-        ///// <param name="address">Address of the device.</param>
-        ///// <param name="speed">Bus speed in kHz.</param>
-        ///// <param name="transactionTimeout">Transaction timeout in milliseconds.</param>
-        //public I2cBus(ushort speed, ushort transactionTimeout = 100)
-        //{
-        //    _configuration = new I2cPeripheral.Configuration(address, speed);
-        //    if (_device == null) {
-        //        _device = new I2cPeripheral(_configuration);
-        //    }
-        //    _transactionTimeout = transactionTimeout;
-        //}
+        private void Disable()
+        {
+            UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
+        }
 
         // TODO: Speed should have default?
         public static I2cBus From(IIOController ioController, IPin clock, IPin data, ushort speed, ushort transactionTimeout = 100)
@@ -91,14 +63,84 @@ namespace Meadow.Hardware
             return new I2cBus(ioController, clock, clockChannel, data, dataChannel, speed, transactionTimeout);
         }
 
-        /// <summary>
-        /// Write a single byte to the device.
-        /// </summary>
-        /// <param name="value">Value to be written (8-bits).</param>
-        public void WriteByte(byte peripheralAddress, byte value)
+        public byte[] WriteReadData(byte peripheralAddress, int numberOfBytesToRead, params byte[] dataToWrite)
         {
-            byte[] data = { value };
-            WriteBytes(peripheralAddress, data);
+            var rxBuffer = new byte[numberOfBytesToRead];
+            var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+            var txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
+
+            try
+            {
+                var command = new Nuttx.UpdI2CCommand()
+                {
+                    Address = peripheralAddress,
+                    Frequency = (int)this.Frequency,
+                    TxBufferLength = dataToWrite.Length,
+                    TxBuffer = txGch.AddrOfPinnedObject(),
+                    RxBufferLength = rxBuffer.Length,
+                    RxBuffer = rxGch.AddrOfPinnedObject(),
+                };
+
+                //                Console.Write($" +WriteReadData. Sending {dataToWrite.Length} bytes, requesting {byteCountToRead}");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                //                Console.WriteLine($" returned {result}");
+
+                // TODO: handle ioctl errors.  Common values:
+                // -116 = timeout
+                // -112 = address not found
+
+                return rxBuffer;
+            }
+            finally
+            {
+                if (rxGch.IsAllocated)
+                {
+                    rxGch.Free();
+                }
+                if (txGch.IsAllocated)
+                {
+                    txGch.Free();
+                }
+            }
+        }
+
+        public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
+        {
+            var rxBuffer = new byte[numberOfBytes];
+            var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                var command = new Nuttx.UpdI2CCommand()
+                {
+                    Address = peripheralAddress,
+                    Frequency = (int)this.Frequency,
+                    TxBufferLength = 0,
+                    TxBuffer = IntPtr.Zero,
+                    RxBufferLength = rxBuffer.Length,
+                    RxBuffer = gch.AddrOfPinnedObject(),
+                };
+
+                Console.Write(" +ReadData");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Console.WriteLine($" returned {result}");
+
+                // TODO: handle ioctl errors.  Common values:
+                // -116 = timeout
+
+                return rxBuffer;
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (gch.IsAllocated)
+                {
+                    gch.Free();
+                }
+            }
         }
 
         /// <summary>
@@ -109,10 +151,75 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteBytes(byte peripheralAddress, params byte[] values)
+        public void WriteData(byte peripheralAddress, params byte[] values)
         {
             SendData(peripheralAddress, values);
         }
+
+        public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
+        {
+            SendData(peripheralAddress, data.ToArray());
+        }
+
+        private void SendData(byte address, byte[] data)
+        {
+            var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                var command = new Nuttx.UpdI2CCommand()
+                {
+                    Address = address,
+                    Frequency = (int)this.Frequency,
+                    TxBufferLength = data.Length,
+                    TxBuffer = gch.AddrOfPinnedObject(),
+                    RxBufferLength = 0,
+                    RxBuffer = IntPtr.Zero
+                };
+
+                Console.Write(" +SendData");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Console.WriteLine($" returned {result}");
+
+                // TODO: handle ioctl errors.  Common values:
+                // -116 = timeout                                           
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (gch.IsAllocated)
+                {
+                    gch.Free();
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+        /*
+
+
+
+
+
+        /// <summary>
+        /// Write a single byte to the device.
+        /// </summary>
+        /// <param name="value">Value to be written (8-bits).</param>
+        public void WriteByte(byte peripheralAddress, byte value)
+        {
+            byte[] data = { value };
+            WriteData(peripheralAddress, data);
+        }
+
 
         /// <summary>
         /// Write an unsigned short to the device.
@@ -214,7 +321,7 @@ namespace Meadow.Hardware
         public void WriteRegister(byte peripheralAddress, byte address, byte value)
         {
             byte[] data = { address, value };
-            WriteBytes(peripheralAddress, data);
+            WriteData(peripheralAddress, data);
         }
 
         /// <summary>
@@ -231,7 +338,7 @@ namespace Meadow.Hardware
             var registerAndData = new byte[data.Length + 1];
             registerAndData[0] = address;
             Array.Copy(data, 0, registerAndData, 1, data.Length);
-            WriteBytes(peripheralAddress, registerAndData);
+            WriteData(peripheralAddress, registerAndData);
         }
 
         /// <summary>
@@ -318,148 +425,8 @@ namespace Meadow.Hardware
         {
         }
 
-        public uint Frequency { get; private set; }
+        */
 
-        private void Enable()
-        {
-            // NOP for now (calling a read, write, etc initialized the bus the first time
-        }
 
-        private void BusScan()
-        {
-            for (byte i = 0; i < 128; i++)
-            {
-                var cr2 = 1u << i | STM32.I2C_CR2_START | STM32.I2C_CR2_AUTOEND & ~(STM32.I2C_CR2_RD_WRN);
-                UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET, cr2);
-
-                // wait for STOP, NACK or TIMEOUT
-                var isr = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
-                Console.WriteLine("ISR: {isr:X}");
-                Thread.Sleep(10);
-
-            }
-
-        }
-
-        private void Disable()
-        {            
-            UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
-        }
-
-        public byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite)
-        {
-            var rxBuffer = new byte[byteCountToRead];
-            var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-            var txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
-
-            try
-            {
-                var command = new Nuttx.UpdI2CCommand()
-                {
-                    Address = peripheralAddress,
-                    Frequency = (int)this.Frequency,
-                    TxBufferLength = dataToWrite.Length,
-                    TxBuffer = txGch.AddrOfPinnedObject(),
-                    RxBufferLength = rxBuffer.Length,
-                    RxBuffer = rxGch.AddrOfPinnedObject(),
-                };
-
-//                Console.Write($" +WriteReadData. Sending {dataToWrite.Length} bytes, requesting {byteCountToRead}");
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-//                Console.WriteLine($" returned {result}");
-
-                // TODO: handle ioctl errors.  Common values:
-                // -116 = timeout
-                // -112 = address not found
-
-                return rxBuffer;
-            }
-            finally
-            {
-                if (rxGch.IsAllocated)
-                {
-                    rxGch.Free();
-                }
-                if (txGch.IsAllocated)
-                {
-                    txGch.Free();
-                }
-            }
-        }
-
-        private byte[] ReadData(byte address, int count)
-        {
-            var rxBuffer = new byte[count];
-            var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-
-            _busSemaphore.Wait();
-
-            try
-            {
-                var command = new Nuttx.UpdI2CCommand()
-                {
-                    Address = address,
-                    Frequency = (int)this.Frequency,
-                    TxBufferLength = 0,
-                    TxBuffer = IntPtr.Zero,
-                    RxBufferLength = rxBuffer.Length,
-                    RxBuffer = gch.AddrOfPinnedObject(),
-                };
-
-                Console.Write(" +ReadData");
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                Console.WriteLine($" returned {result}");
-
-                // TODO: handle ioctl errors.  Common values:
-                // -116 = timeout
-
-                return rxBuffer;
-            }
-            finally
-            {
-                _busSemaphore.Release();
-
-                if (gch.IsAllocated)
-                {
-                    gch.Free();
-                }
-            }
-        }
-
-        private void SendData(byte address, byte[] data)
-        {
-            var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
-
-            _busSemaphore.Wait();
-
-            try
-            {
-                var command = new Nuttx.UpdI2CCommand()
-                {
-                    Address = address,
-                    Frequency = (int)this.Frequency,
-                    TxBufferLength = data.Length,
-                    TxBuffer = gch.AddrOfPinnedObject(),
-                    RxBufferLength = 0,
-                    RxBuffer = IntPtr.Zero
-                };
-
-                Console.Write(" +SendData");
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                Console.WriteLine($" returned {result}");
-
-                // TODO: handle ioctl errors.  Common values:
-                // -116 = timeout                                           
-            }
-            finally
-            {
-                _busSemaphore.Release();
-
-                if (gch.IsAllocated)
-                {
-                    gch.Free();
-                }
-            }
-        }
     }
 }

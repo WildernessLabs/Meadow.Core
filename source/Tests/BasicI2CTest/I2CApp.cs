@@ -46,7 +46,7 @@ namespace BasicI2CTest
 
                 Console.WriteLine($" Address: {addr}");
 
-                i2c.WriteBytes(addr, new byte[] { 0 });
+                i2c.WriteData(addr, new byte[] { 0 });
                 Thread.Sleep(2000);
             }
         }
@@ -78,7 +78,7 @@ namespace BasicI2CTest
 
         public void Wake()
         {
-            _bus.WriteBytes(Address, (byte)Registers.PowerManagement, 0);
+            _bus.WriteData(Address, (byte)Registers.PowerManagement, 0);
         }
 
         public void Refresh()
