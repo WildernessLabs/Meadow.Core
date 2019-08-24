@@ -123,8 +123,11 @@ namespace Meadow.Devices
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref I2cCommand);
 
-            Console.WriteLine($"ioctl returned {result}");
-
+            if (result != 0)
+            {
+                Console.WriteLine($"ioctl returned {result}");
+                return System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+            }
             return result;
         }
 

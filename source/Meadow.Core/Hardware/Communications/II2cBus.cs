@@ -25,7 +25,7 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
         /// <param name="values">Values to be written.</param>
-        void WriteBytes(byte peripheralAddress, byte[] values);
+        void WriteBytes(byte peripheralAddress, params byte[] values);
 
         /// <summary>
         /// Write an unsigned short to the device.
@@ -121,5 +121,7 @@ namespace Meadow.Hardware
         /// <param name="order">Order of the bytes (Little or Big endian)</param>
         /// <returns>Array of unsigned shorts.</returns>
         ushort[] ReadUShorts(byte peripheralAddress, byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian);
+
+        byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite);
     }
 }

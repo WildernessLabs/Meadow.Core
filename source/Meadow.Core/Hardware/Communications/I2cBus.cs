@@ -15,8 +15,6 @@ namespace Meadow.Hardware
     /// </summary>
     public class I2cBus : II2cBus
     {
-        private Queue<byte> _transmitQueue = new Queue<byte>();
-        private List<byte> _receiveBuffer = new List<byte>();
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
 
         private const int SCL_PIN = 6;
@@ -111,7 +109,7 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="values">Values to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteBytes(byte peripheralAddress, byte[] values)
+        public void WriteBytes(byte peripheralAddress, params byte[] values)
         {
             SendData(peripheralAddress, values);
         }
@@ -244,21 +242,7 @@ namespace Meadow.Hardware
         [MethodImpl(MethodImplOptions.Synchronized)]
         public byte[] ReadBytes(byte peripheralAddress, ushort numberOfBytes)
         {
-            //_device.Config = _configuration;
-            //var result = new byte[numberOfBytes];
-            //I2cPeripheral.I2CTransaction[] transaction =
-            //{
-            //    I2cPeripheral.CreateReadTransaction(result)
-            //};
-            //var retryCount = 0;
-            //while (_device.Execute(transaction, _transactionTimeout) != numberOfBytes) {
-            //    if (retryCount > 3) {
-            //        throw new Exception("ReadBytes: Retry count exceeded.");
-            //    }
-            //    retryCount++;
-            //}
-            //return result;
-            throw new NotImplementedException();
+            return ReadData(peripheralAddress, numberOfBytes);
         }
 
         /// <summary>
@@ -362,30 +346,31 @@ namespace Meadow.Hardware
             UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
         }
 
-        private byte[] WriteReadData(byte address, byte[] sendData, byte readCount)
+        public byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite)
         {
-            var rxBuffer = new byte[readCount];
+            var rxBuffer = new byte[byteCountToRead];
             var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-            var txGch = GCHandle.Alloc(sendData, GCHandleType.Pinned);
+            var txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
 
             try
             {
                 var command = new Nuttx.UpdI2CCommand()
                 {
-                    Address = address,
+                    Address = peripheralAddress,
                     Frequency = (int)this.Frequency,
-                    TxBufferLength = sendData.Length,
+                    TxBufferLength = dataToWrite.Length,
                     TxBuffer = txGch.AddrOfPinnedObject(),
                     RxBufferLength = rxBuffer.Length,
                     RxBuffer = rxGch.AddrOfPinnedObject(),
                 };
 
-                Console.Write(" +ReadData");
+//                Console.Write($" +WriteReadData. Sending {dataToWrite.Length} bytes, requesting {byteCountToRead}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                Console.WriteLine($" returned {result}");
+//                Console.WriteLine($" returned {result}");
 
                 // TODO: handle ioctl errors.  Common values:
                 // -116 = timeout
+                // -112 = address not found
 
                 return rxBuffer;
             }
@@ -402,10 +387,12 @@ namespace Meadow.Hardware
             }
         }
 
-        private byte[] ReadData(byte address, byte count)
+        private byte[] ReadData(byte address, int count)
         {
             var rxBuffer = new byte[count];
             var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
 
             try
             {
@@ -430,6 +417,8 @@ namespace Meadow.Hardware
             }
             finally
             {
+                _busSemaphore.Release();
+
                 if (gch.IsAllocated)
                 {
                     gch.Free();
@@ -440,6 +429,8 @@ namespace Meadow.Hardware
         private void SendData(byte address, byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
 
             try
             {
@@ -462,6 +453,8 @@ namespace Meadow.Hardware
             }
             finally
             {
+                _busSemaphore.Release();
+
                 if (gch.IsAllocated)
                 {
                     gch.Free();
