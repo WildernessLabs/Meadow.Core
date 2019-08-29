@@ -64,13 +64,19 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdGpioInterruptConfiguration interruptConfig);
 
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdI2CCommand I2cCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, IntPtr pData);
+
             /// <summary>
             /// Configures the Universal Platofrm Driver to set PWM APB clock.
             /// </summary>
             /// <returns>0 on success, otherwise an error code</returns>
             /// <param name="fd">Driver handle</param>
             /// <param name="request">UPD Ioctl function constant - should be 5 in this case</param>
-            /// <param name="interruptConfig">A UpdGpioInterruptConfiguration struct describing the specific interrupt configuration desired</param>
+            /// <param name="pwmCmd">A UpdPwmCmd struct describing the specific PWM command</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdPwmCmd pwmCmd);
 

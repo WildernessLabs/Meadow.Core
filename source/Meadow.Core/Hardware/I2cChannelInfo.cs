@@ -22,10 +22,4 @@ namespace Meadow.Hardware
             this.ChannelFunction = channelFunction;
         }
     }
-
-    public enum I2cChannelFunctionType
-    { 
-        Data,
-        Clock
-    }
 }

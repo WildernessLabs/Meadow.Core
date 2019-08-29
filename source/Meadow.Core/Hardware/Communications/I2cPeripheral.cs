@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Meadow.Hardware
 {
@@ -19,62 +21,116 @@ namespace Meadow.Hardware
 
         public byte[] ReadBytes(ushort numberOfBytes)
         {
-            return this.Bus.ReadBytes(this.Address, numberOfBytes);
+            return this.Bus.ReadData(this.Address, numberOfBytes);
         }
 
         public byte ReadRegister(byte address)
         {
-            return this.Bus.ReadRegister(this.Address, address);
+            return this.Bus.WriteReadData(this.Address, 1, address).First();
         }
 
         public byte[] ReadRegisters(byte address, ushort length)
         {
-            return this.Bus.ReadRegisters(this.Address, address, length);
+            return this.Bus.WriteReadData(this.Address, length, address);
         }
 
         public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
-            return this.Bus.ReadUShort(this.Address, address, order);
+            var data = this.Bus.WriteReadData(this.Address, 2, address);
+            if (order == ByteOrder.LittleEndian)
+            {
+                return (ushort)(data[0] | (data[1] << 8));
+            }
+            return (ushort)((data[0] << 8) | data[1]);
         }
 
         public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
-            return this.Bus.ReadUShorts(this.Address, address, number, order);
+            var data = this.Bus.WriteReadData(this.Address, number * 2, address);
+
+            var result = new ushort[number];
+            for (int i = 0; i < number; i++)
+            {
+                if (order == ByteOrder.LittleEndian)
+                {
+                    result[i] = (ushort)(data[i * 2] | (data[i * 2 + 1] << 8));
+                }
+                result[i] = (ushort)((data[i * 2] << 8) | data[i * 2 + 1]);
+            }
+
+            return result;
         }
 
         public void WriteByte(byte value)
         {
-            this.Bus.WriteByte(this.Address, value);
+            this.Bus.WriteData(this.Address, value);
         }
 
         public void WriteBytes(byte[] values)
         {
-            this.Bus.WriteBytes(this.Address, values);
+            this.Bus.WriteData(this.Address, values);
         }
 
         public byte[] WriteRead(byte[] write, ushort length)
         {
-            return this.Bus.WriteRead(this.Address, write, length);
+            return this.Bus.WriteReadData(this.Address, length, write);
         }
 
         public void WriteRegister(byte address, byte value)
         {
-            this.Bus.WriteRegister(this.Address, address, value);
+            this.Bus.WriteData(this.Address, address, value);
         }
 
         public void WriteRegisters(byte address, byte[] data)
         {
-            this.Bus.WriteRegisters(this.Address, address, data);
+            var temp = new List<byte>();
+            temp.Add(address);
+            temp.AddRange(data);
+
+            this.Bus.WriteData(this.Address, temp);
         }
 
         public void WriteUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            this.Bus.WriteUShort(this.Address, address, value, order);
+            var temp = new List<byte>();
+            temp.Add(address);
+
+            var b = BitConverter.GetBytes(value);
+
+            if (order == ByteOrder.LittleEndian)
+            {
+                temp.AddRange(b);
+            }
+            else
+            {
+                temp.Add(b[1]);
+                temp.Add(b[0]);
+            }
+
+            this.Bus.WriteData(this.Address, temp);
         }
 
         public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
-            this.Bus.WriteUShorts(this.Address, address, values, order);
+            var temp = new List<byte>();
+            temp.Add(address);
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                var b = BitConverter.GetBytes(values[i]);
+
+                if (order == ByteOrder.LittleEndian)
+                {
+                    temp.AddRange(b);
+                }
+                else
+                {
+                    temp.Add(b[1]);
+                    temp.Add(b[0]);
+                }
+            }
+
+            this.Bus.WriteData(this.Address, temp);
         }
     }
 }

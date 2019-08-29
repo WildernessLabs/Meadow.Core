@@ -109,9 +109,26 @@ namespace Meadow.Devices
             return Nuttx.ioctl(DriverHandle, request, ref registerUpdate);
         }
 
+        public static int Ioctl(Nuttx.UpdIoctlFn request)
+        {
+            return Nuttx.ioctl(DriverHandle, request, IntPtr.Zero);
+        }
+
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdGpioInterruptConfiguration interruptConfig)
         {
             return Nuttx.ioctl(DriverHandle, request, ref interruptConfig);
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdI2CCommand I2cCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref I2cCommand);
+
+            if (result != 0)
+            {
+                Console.WriteLine($"ioctl returned {result}");
+                return System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+            }
+            return result;
         }
 
         public static int Ioctl(Nuttx.GpioIoctlFn request, ref Nuttx.GPIOConfigFlags configFlags)

@@ -15,7 +15,7 @@ namespace Meadow.Hardware
 
         protected IIOController IOController { get; set; }
 
-        protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
+        private DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         protected DigitalInputPort(
             IPin pin,
@@ -27,6 +27,10 @@ namespace Meadow.Hardware
             int glitchFilterCycleCount = 0
             ) : base(pin, channel, interruptMode)
         {
+            // DEVELOPER NOTE:
+            // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
+            // Glitch filtering ignores the first stransition and waits a period of time and then looks at state to make sure the result is stable
+
             if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
             {
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
@@ -42,8 +46,6 @@ namespace Meadow.Hardware
             {
                 // make sure the pin is configured as a digital output with the proper state
                 ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchFilterCycleCount);
-                DebounceDuration = debounceDuration;
-                GlitchFilterCycleCount = glitchFilterCycleCount;
             }
             else
             {
@@ -66,7 +68,12 @@ namespace Meadow.Hardware
                 if (interruptMode != InterruptMode.None && (!chan.InterrruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                return new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
+                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
+                // set these here, not in a constructor because they are virtual
+                port.DebounceDuration = debounceDuration;
+                port.GlitchFilterCycleCount = glitchFilterCycleCount;
+                return port;
+
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
@@ -147,6 +154,7 @@ namespace Meadow.Hardware
             get => _debounceDuration;
             set
             {
+                Console.WriteLine($"Debounce duration on {this.Pin.Name} = {value}");
                 if (value < 0) throw new ArgumentOutOfRangeException();
                 _debounceDuration = value;
             }

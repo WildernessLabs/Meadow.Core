@@ -17,6 +17,9 @@ namespace Meadow.Core
                 PwmShutdown = 11,
                 PwmStart = 12,
                 PwmStop = 13,
+
+                I2CShutdown = 20,
+                I2CData = 21,
             }
 
             public struct UpdRegisterValue
@@ -40,6 +43,17 @@ namespace Meadow.Core
                 public bool Enable;
                 public bool RisingEdge;
                 public bool FallingEdge;
+            }
+
+            public struct UpdI2CCommand
+            {
+                public int Address;
+                public int Frequency;
+                public IntPtr TxBuffer;
+                public int TxBufferLength;
+                public IntPtr RxBuffer;
+                public int RxBufferLength;
+
             }
 
             public struct UpdPwmCmd
