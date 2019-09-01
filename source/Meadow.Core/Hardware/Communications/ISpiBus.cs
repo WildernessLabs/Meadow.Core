@@ -5,6 +5,12 @@ namespace Meadow.Hardware
 {
     public interface ISpiBus
     {
+        void SendData(IPin chipSelect, params byte[] data);
+        void SendData(IPin chipSelect, IEnumerable<byte> data);
+        byte[] ReceiveData(IPin chipSelect, int numberOfBytes);
+        byte[] ExchangeData(IPin chipSelect, params byte[] dataToWrite);
+
+        /*
         /// <summary>
         /// Write a single byte to the connected peripheral.
         /// </summary>
@@ -100,5 +106,6 @@ namespace Meadow.Hardware
         /// <param name="order">Order of the bytes (Little or Big endian)</param>
         /// <returns>Array of unsigned shorts.</returns>
         ushort[] ReadUShorts(IDigitalOutputPort chipSelect, byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian);
+        */
     }
 }

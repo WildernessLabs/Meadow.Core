@@ -20,6 +20,8 @@ namespace Meadow.Core
 
                 I2CShutdown = 20,
                 I2CData = 21,
+
+                SPIData = 31,
             }
 
             public struct UpdRegisterValue
@@ -54,6 +56,16 @@ namespace Meadow.Core
                 public IntPtr RxBuffer;
                 public int RxBufferLength;
 
+            }
+
+            public struct UpdSPICommand
+            {
+                public IntPtr TxBuffer;
+                public IntPtr RxBuffer;
+                /// <summary>
+                /// SPI requires both buffers be equal length
+                /// </summary>
+                public int BufferLength;
             }
 
             public struct UpdPwmCmd
