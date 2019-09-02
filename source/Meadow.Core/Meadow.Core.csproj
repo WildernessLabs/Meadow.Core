@@ -106,7 +106,7 @@
     <Compile Include="Hardware\Communications\OneWire.cs" />
     <Compile Include="Hardware\Communications\OneWireBus.cs" />
     <Compile Include="Hardware\Communications\SoftwareI2c.cs" />
-    <Compile Include="Hardware\Communications\SoftwareSpiBus.cs" />
+    <None Include="Hardware\Communications\SoftwareSpiBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.cs" />
     <Compile Include="Hardware\Contracts\IAnalogChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\IAnalogInputPort.cs" />
@@ -181,7 +181,7 @@
     <Compile Include="Devices\Definitions\F7MicroPinDefinitions_NamedGroups.cs" />
     <Compile Include="Hardware\Contracts\INamedPinGroups.cs" />
     <Compile Include="Hardware\NamedPinGroup.cs" />
-    <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
+    <None Include="Hardware\Communications\SpiPeripheral.cs" />
     <Compile Include="Hardware\Communications\II2cBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.Configuration.cs" />
     <Compile Include="Devices\UPD.cs" />

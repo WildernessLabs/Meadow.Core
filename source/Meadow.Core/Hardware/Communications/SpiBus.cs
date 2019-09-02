@@ -52,18 +52,13 @@ namespace Meadow.Hardware
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void SendData(IPin chipSelect, params byte[] data)
-        {
-            SendData(chipSelect, data);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SendData(IPin chipSelect, IEnumerable<byte> data)
         {
             SendData(chipSelect, data.ToArray());
         }
 
-        private void SendData(IPin chipSelect, byte[] data)
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SendData(IPin chipSelect, params byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
 
@@ -109,7 +104,7 @@ namespace Meadow.Hardware
                     RxBuffer = gch.AddrOfPinnedObject(),
                 };
 
-                Console.Write(" +ReadData");
+                Console.Write(" +ReceiveData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
                 Console.WriteLine($" returned {result}");
 
@@ -143,6 +138,7 @@ namespace Meadow.Hardware
                     RxBuffer = rxGch.AddrOfPinnedObject(),
                 };
 
+                Console.Write(" +ExchangeData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
 
                 return rxBuffer;
