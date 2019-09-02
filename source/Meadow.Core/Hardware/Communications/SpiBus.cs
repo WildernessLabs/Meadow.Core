@@ -52,13 +52,25 @@ namespace Meadow.Hardware
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void SendData(IPin chipSelect, IEnumerable<byte> data)
+        public void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data)
         {
-            SendData(chipSelect, data.ToArray());
+            SendData(chipSelect, ChipSelectMode.ActiveLow, data.ToArray());
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void SendData(IPin chipSelect, params byte[] data)
+        public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, IEnumerable<byte> data)
+        {
+            SendData(chipSelect, csMode, data.ToArray());
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SendData(IDigitalOutputPort chipSelect, params byte[] data)
+        {
+            SendData(chipSelect, ChipSelectMode.ActiveLow, data);
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
 
@@ -66,6 +78,12 @@ namespace Meadow.Hardware
 
             try
             {
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
                 var command = new Nuttx.UpdSPICommand()
                 {
                     BufferLength = data.Length,
@@ -73,9 +91,14 @@ namespace Meadow.Hardware
                     RxBuffer = IntPtr.Zero
                 };
 
-                Console.Write(" +SendData");
+                Console.WriteLine($" +SendData {BitConverter.ToString(data)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                Console.WriteLine($" returned {result}");
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                }
             }
             finally
             {
@@ -88,7 +111,12 @@ namespace Meadow.Hardware
             }
         }
 
-        public byte[] ReceiveData(IPin chipSelect, int numberOfBytes)
+        public byte[] ReceiveData(IDigitalOutputPort chipSelect, int numberOfBytes)
+        {
+            return ReceiveData(chipSelect, ChipSelectMode.ActiveLow, numberOfBytes);
+        }
+
+        public byte[] ReceiveData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, int numberOfBytes)
         {
             var rxBuffer = new byte[numberOfBytes];
             var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
@@ -97,6 +125,12 @@ namespace Meadow.Hardware
 
             try
             {
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
                 var command = new Nuttx.UpdSPICommand()
                 {
                     TxBuffer = IntPtr.Zero,
@@ -106,7 +140,13 @@ namespace Meadow.Hardware
 
                 Console.Write(" +ReceiveData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                Console.WriteLine($" returned {result}");
+                Console.WriteLine($" returned {BitConverter.ToString(rxBuffer)}");
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                }
 
                 return rxBuffer;
             }
@@ -121,7 +161,12 @@ namespace Meadow.Hardware
             }
         }
 
-        public byte[] ExchangeData(IPin chipSelect, params byte[] dataToWrite)
+        public byte[] ExchangeData(IDigitalOutputPort chipSelect, params byte[] dataToWrite)
+        {
+            return ExchangeData(chipSelect, ChipSelectMode.ActiveLow, dataToWrite);
+        }
+
+        public byte[] ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] dataToWrite)
         {
             var rxBuffer = new byte[dataToWrite.Length];
             var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
@@ -131,6 +176,12 @@ namespace Meadow.Hardware
 
             try
             {
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
                 var command = new Nuttx.UpdSPICommand()
                 {
                     BufferLength = dataToWrite.Length,
@@ -139,7 +190,15 @@ namespace Meadow.Hardware
                 };
 
                 Console.Write(" +ExchangeData");
+                Console.WriteLine($" Sending {BitConverter.ToString(dataToWrite)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                Console.WriteLine($" Received {BitConverter.ToString(rxBuffer)}");
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                }
 
                 return rxBuffer;
             }
