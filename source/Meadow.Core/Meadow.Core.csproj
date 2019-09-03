@@ -181,7 +181,7 @@
     <Compile Include="Devices\Definitions\F7MicroPinDefinitions_NamedGroups.cs" />
     <Compile Include="Hardware\Contracts\INamedPinGroups.cs" />
     <Compile Include="Hardware\NamedPinGroup.cs" />
-    <None Include="Hardware\Communications\SpiPeripheral.cs" />
+    <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
     <Compile Include="Hardware\Communications\II2cBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.Configuration.cs" />
     <Compile Include="Devices\UPD.cs" />
