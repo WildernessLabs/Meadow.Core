@@ -22,9 +22,9 @@ namespace BasicMeadowApp
         protected void ConfigurePorts()
         {
             // create ports for the onboard LED
-            redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDRed);
-            blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDBlue);
-            greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLEDGreen);
+            redLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedRed);
+            blueLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedBlue);
+            greenLED = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen);
         }
 
         protected Task BlinkLed()

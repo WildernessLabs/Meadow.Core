@@ -29,7 +29,7 @@ namespace ByteCommsAPIScratchPad
 
             // write (same as SPI, can write directly to the peripheral or via the bus)
             i2cPeripheral.WriteByte(0x01);
-            i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
+            //i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
 
             // accessing the device from the core:
             IPin[] spiPins;
