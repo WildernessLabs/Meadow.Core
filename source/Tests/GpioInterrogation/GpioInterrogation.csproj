@@ -1,10 +1,10 @@
-﻿<Project Sdk="Meadow.Sdk/1.0">
+﻿<Project Sdk="Meadow.Sdk/1">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <OutputType>Exe</OutputType>
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.1.0" />
+    <PackageReference Include="WildernessLabs.Meadow.Assemblies"/>
   </ItemGroup>
 </Project>
