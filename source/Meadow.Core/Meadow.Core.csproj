@@ -106,7 +106,7 @@
     <Compile Include="Hardware\Communications\OneWire.cs" />
     <Compile Include="Hardware\Communications\OneWireBus.cs" />
     <Compile Include="Hardware\Communications\SoftwareI2c.cs" />
-    <Compile Include="Hardware\Communications\SoftwareSpiBus.cs" />
+    <None Include="Hardware\Communications\SoftwareSpiBus.cs" />
     <Compile Include="Hardware\Communications\SpiBus.cs" />
     <Compile Include="Hardware\Contracts\IAnalogChannelInfo.cs" />
     <Compile Include="Hardware\Contracts\IAnalogInputPort.cs" />

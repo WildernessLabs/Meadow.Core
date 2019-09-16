@@ -92,6 +92,13 @@ namespace Meadow.Devices
         }
 
         public ISpiBus CreateSpiBus(
+            ushort speed = 1000
+        )
+        {
+            return SpiBus.From(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
+        }
+
+        public ISpiBus CreateSpiBus(
             IPin[] pins, ushort speed = 1000
         )
         {
