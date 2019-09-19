@@ -19,7 +19,9 @@ namespace ByteCommsAPIScratchPad
 
             // Can write to the device either way:
             spiPeriph.WriteByte(0x01);
-            spiBus.WriteByte(spiPeriph.ChipSelect, 0x01);
+
+            // TODO: This code needs to be fixed, commented to unbreak the build - Joao
+            //spiBus.WriteByte(spiPeriph.ChipSelect, 0x01);
 
             //==== I2C Example
             II2cBus i2cBus = Device.CreateI2cBus(Device.Pins.Groups.I2c1, 100); //TODO: should have a default speed

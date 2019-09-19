@@ -31,35 +31,36 @@ namespace SPITest
             _boot.State = true;
             _reset.State = false;
             _reset.State = true;
-            var esp32 = new SoftwareSPIBus(Device, Device.Pins.ESP_MOSI, Device.Pins.ESP_MISO, Device.Pins.ESP_CLK /*, Device.Pins.ESP_CS */);
-            int counter = 0;
-            while (true)
-            {
-                _blueLED.State = !_blueLED.State;
-                string message = $".NET Message number {counter}";
-                counter++;
-                Console.WriteLine($"Sending message: '{message}'");
-                byte[] buffer = Encoding.UTF8.GetBytes(message);
-                int esp32BufferLength = buffer.Length + 1;
-                //
-                //  The buffer should be a multiple of four bytes long.
-                //
-                if ((esp32BufferLength & 3) != 0)
-                {
-                    esp32BufferLength &= 0xfffc;
-                    esp32BufferLength += 4;
-                }
-                byte[] writeBuffer = new byte[esp32BufferLength];
-                Array.Clear(writeBuffer, 0, esp32BufferLength);
-                Array.Copy(buffer, writeBuffer, buffer.Length);
-                Console.WriteLine(DebugHelpers.PrintableBuffer(writeBuffer));
-                byte[] dataFromESP32 = esp32.WriteRead(_chipSelect, writeBuffer, (ushort) writeBuffer.Length);
-                //
-                Console.WriteLine("Message from ESP32:");
-                Console.WriteLine(Encoding.UTF8.GetString(dataFromESP32));
-                Console.WriteLine(DebugHelpers.PrintableBuffer(dataFromESP32));
-                Thread.Sleep(500);
-            }
+            // TODO: This code needs to be fixed, commented to unbreak the build - Joao
+            //var esp32 = new SoftwareSPIBus(Device, Device.Pins.ESP_MOSI, Device.Pins.ESP_MISO, Device.Pins.ESP_CLK /*, Device.Pins.ESP_CS */);
+            //int counter = 0;
+            //while (true)
+            //{
+            //    _blueLED.State = !_blueLED.State;
+            //    string message = $".NET Message number {counter}";
+            //    counter++;
+            //    Console.WriteLine($"Sending message: '{message}'");
+            //    byte[] buffer = Encoding.UTF8.GetBytes(message);
+            //    int esp32BufferLength = buffer.Length + 1;
+            //    //
+            //    //  The buffer should be a multiple of four bytes long.
+            //    //
+            //    if ((esp32BufferLength & 3) != 0)
+            //    {
+            //        esp32BufferLength &= 0xfffc;
+            //        esp32BufferLength += 4;
+            //    }
+            //    byte[] writeBuffer = new byte[esp32BufferLength];
+            //    Array.Clear(writeBuffer, 0, esp32BufferLength);
+            //    Array.Copy(buffer, writeBuffer, buffer.Length);
+            //    Console.WriteLine(DebugHelpers.PrintableBuffer(writeBuffer));
+            //    byte[] dataFromESP32 = esp32.WriteRead(_chipSelect, writeBuffer, (ushort) writeBuffer.Length);
+            //    //
+            //    Console.WriteLine("Message from ESP32:");
+            //    Console.WriteLine(Encoding.UTF8.GetString(dataFromESP32));
+            //    Console.WriteLine(DebugHelpers.PrintableBuffer(dataFromESP32));
+            //    Thread.Sleep(500);
+            //}
         }
     }
 }
