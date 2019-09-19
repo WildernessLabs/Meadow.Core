@@ -14,4 +14,5 @@ if [[ $(command -v msbuild) == "" ]]; then
     MSBUILD=/Library/Frameworks/Mono.framework/Versions/Current/bin/msbuild
 fi
 
+$MSBUILD /t:restore $SLN
 $MSBUILD $SLN
