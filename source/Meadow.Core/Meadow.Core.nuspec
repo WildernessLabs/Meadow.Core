@@ -4,6 +4,7 @@
     <id>Meadow</id>
     <version>$version$</version>
     <authors>Wilderness Labs, Inc</authors>
+    <iconUrl>https://github.com/WildernessLabs/Meadow.Core/blob/master/source/icon.png?raw=true</iconUrl>
     <description>Meadow</description>
   </metadata>
 </package>

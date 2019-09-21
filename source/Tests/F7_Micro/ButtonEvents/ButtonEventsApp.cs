@@ -18,8 +18,14 @@ namespace ButtonEvents
 
         public ButtonEventsApp()
         {
-            _input = Device.CreateDigitalInputPort(Device.Pins.D02, InterruptMode.EdgeBoth, debounceDuration: 20);
+            _input = Device.CreateDigitalInputPort(
+                Device.Pins.D00,
+                InterruptMode.EdgeBoth,
+                ResistorMode.PullDown,
+                debounceDuration: 20);
             _input.Changed += Input_Changed;
+
+            Console.WriteLine("App initialized.");
         }
 
         private void Input_Changed(object sender, DigitalInputPortEventArgs e)

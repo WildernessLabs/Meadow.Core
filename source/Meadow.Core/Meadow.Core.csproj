@@ -1,195 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Meadow</RootNamespace>
-    <AssemblyName>Meadow.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="FilterableObserver.cs" />
-    <Compile Include="Peripherals\Controllers\PID\IPidController.cs" />
-    <Compile Include="Peripherals\Displays\IDisplay.cs" />
-    <Compile Include="Peripherals\Displays\ITextDisplay.cs" />
-    <Compile Include="Peripherals\Displays\TextDisplayConfig.cs" />
-    <Compile Include="Peripherals\Sensors\Moisture\IMoistureSensor.cs" />
-    <Compile Include="Peripherals\Speakers\IToneGenerator.cs" />
-    <Compile Include="Peripherals\Leds\IPwmLed.cs" />
-    <Compile Include="Peripherals\Motors\IDCMotor.cs" />
-    <Compile Include="Peripherals\Relays\IRelay.cs" />
-    <Compile Include="Peripherals\Relays\RelayType.cs" />
-    <Compile Include="Peripherals\Sensors\Atmospheric\IBarometricPressure.cs" />
-    <Compile Include="Peripherals\Sensors\Atmospheric\IHumiditySensor.cs" />
-    <Compile Include="Peripherals\Sensors\Buttons\IButton.cs" />
-    <Compile Include="Peripherals\Sensors\Distance\DistanceEventArgs.cs" />
-    <Compile Include="Peripherals\Sensors\Image\ICamera.cs" />
-    <Compile Include="Peripherals\Sensors\ISensor.cs" />
-    <Compile Include="Peripherals\Sensors\Light\IAmbientLightSensor.cs" />
-    <Compile Include="Peripherals\Sensors\Light\ILightSensor.cs" />
-    <Compile Include="Peripherals\Sensors\Motion\IAccelerometer.cs" />
-    <Compile Include="Peripherals\Sensors\Proximity\IRangeFinder.cs" />
-    <Compile Include="Peripherals\Sensors\Rotary\IRotaryEncoder.cs" />
-    <Compile Include="Peripherals\Sensors\Rotary\IRotaryEncoderWithButton.cs" />
-    <Compile Include="Peripherals\Sensors\Rotary\RotaryTurnedEventArgs.cs" />
-    <Compile Include="Peripherals\Sensors\Rotary\RotationDirection.cs" />
-    <Compile Include="Peripherals\Sensors\SensorFloatEventArgs.cs" />
-    <Compile Include="Peripherals\Sensors\Switches\ISwitch.cs" />
-    <Compile Include="Peripherals\Sensors\Temperature\ITemperatureSensor.cs" />
-    <Compile Include="Peripherals\Sensors\Distance\IRangeFinder.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DeviceCapabilities.cs" />
-    <Compile Include="MeadowOS.cs" />
-    <Compile Include="WakeUpOptions.cs" />
-    <Compile Include="Bases\App.cs" />
-    <Compile Include="Contracts\IApp.cs" />
-    <Compile Include="Devices\F7GPIOManager.cs" />
-    <Compile Include="Devices\F7Micro.cs" />
-    <Compile Include="Enums\ByteOrder.cs" />
-    <Compile Include="Gateways\Bluetooth\AdapterCapabilities.cs" />
-    <Compile Include="Gateways\Bluetooth\BluetoothAdapter.cs" />
-    <Compile Include="Gateways\WiFi\ConnectionMethodType.cs" />
-    <Compile Include="Gateways\WiFi\ConnectionResult.cs" />
-    <Compile Include="Gateways\WiFi\ConnectionStatus.cs" />
-    <Compile Include="Gateways\WiFi\NetworkAuthenticationType.cs" />
-    <Compile Include="Gateways\WiFi\NetworkEncryptionType.cs" />
-    <Compile Include="Gateways\WiFi\NetworkSecuritySettings.cs" />
-    <Compile Include="Gateways\WiFi\NetworkType.cs" />
-    <Compile Include="Gateways\WiFi\PhyType.cs" />
-    <Compile Include="Gateways\WiFi\ReconnectionType.cs" />
-    <Compile Include="Gateways\WiFi\WiFiAdapter.cs" />
-    <Compile Include="Gateways\WiFi\WiFiNetwork.cs" />
-    <Compile Include="Hardware\AnalogInputPort.cs" />
-    <Compile Include="Hardware\BiDirectionalPort.cs" />
-    <Compile Include="Hardware\Cpu.cs" />
-    <Compile Include="Hardware\DigitalInputPort.cs" />
-    <Compile Include="Hardware\DigitalOutputPort.cs" />
-    <Compile Include="Hardware\Pin.cs" />
-    <Compile Include="Hardware\DigitalInputPortEventArgs.cs" />
-    <Compile Include="Hardware\PortInUseException.cs" />
-    <Compile Include="Hardware\PwmPort.cs" />
-    <Compile Include="Hardware\SerialDataReceivedEventArgs.cs" />
-    <Compile Include="Hardware\SerialErrorReceivedEventArgs.cs" />
-    <Compile Include="Hardware\SerialPort.cs" />
-    <Compile Include="Hardware\Bases\AnalogInputPortBase.cs" />
-    <Compile Include="Hardware\Bases\AnalogPortBase.cs" />
-    <Compile Include="Hardware\Bases\BiDirectionalPortBase.cs" />
-    <Compile Include="Hardware\Bases\DigitalInputPortBase.cs" />
-    <Compile Include="Hardware\Bases\DigitalInterruptPortBase.cs" />
-    <Compile Include="Hardware\Bases\DigitalOutputPortBase.cs" />
-    <Compile Include="Hardware\Bases\DigitalPortBase.cs" />
-    <Compile Include="Hardware\Bases\PinBase.cs" />
-    <Compile Include="Hardware\Bases\PwmPortBase.cs" />
-    <Compile Include="Hardware\Communications\I2cBus.cs" />
-    <Compile Include="Hardware\Communications\OneWire.cs" />
-    <Compile Include="Hardware\Communications\OneWireBus.cs" />
-    <Compile Include="Hardware\Communications\SoftwareI2c.cs" />
-    <None Include="Hardware\Communications\SoftwareSpiBus.cs" />
-    <Compile Include="Hardware\Communications\SpiBus.cs" />
-    <Compile Include="Hardware\Contracts\IAnalogChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\IAnalogInputPort.cs" />
-    <Compile Include="Hardware\Contracts\IAnalogPort.cs" />
-    <Compile Include="Hardware\Contracts\IBiDirectionalPort.cs" />
-    <Compile Include="Hardware\Contracts\IDigitalChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\IDigitalInputPort.cs" />
-    <Compile Include="Hardware\Contracts\IDigitalInterruptPort.cs" />
-    <Compile Include="Hardware\Contracts\IDigitalOutputPort.cs" />
-    <Compile Include="Hardware\Contracts\IDigitalPort.cs" />
-    <Compile Include="Hardware\Contracts\IPin.cs" />
-    <Compile Include="Hardware\Contracts\IPort.cs" />
-    <Compile Include="Hardware\Contracts\IPwmChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\IPwmPort.cs" />
-    <Compile Include="Hardware\Enums\FlowControlType.cs" />
-    <Compile Include="Hardware\Enums\InteruptMode.cs" />
-    <Compile Include="Hardware\Enums\NumberOfStopBits.cs" />
-    <Compile Include="Hardware\Enums\ParityType.cs" />
-    <Compile Include="Hardware\Enums\PortDirectionType.cs" />
-    <Compile Include="Hardware\Enums\ResistorMode.cs" />
-    <Compile Include="Hardware\Enums\SerialDataType.cs" />
-    <Compile Include="Hardware\Enums\SerialErrorType.cs" />
-    <Compile Include="Hardware\Enums\SignalType.cs" />
-    <Compile Include="Hardware\Enums\TerminationType.cs" />
-    <Compile Include="Hardware\Internals\DeviceChannelManager.cs" />
-    <Compile Include="Interop\Interop.clock_gettime.cs" />
-    <Compile Include="Interop\Interop.clock_settime.cs" />
-    <Compile Include="Interop\Interop.close.cs" />
-    <Compile Include="Interop\Interop.cs" />
-    <Compile Include="Interop\Interop.gpio.cs" />
-    <Compile Include="Interop\Interop.ioctl.cs" />
-    <Compile Include="Interop\Interop.open.cs" />
-    <Compile Include="Utilities\BitHelpers.cs" />
-    <Compile Include="Interop\Interop.timespec.cs" />
-    <Compile Include="Peripherals\Leds\ILed.cs" />
-    <Compile Include="Hardware\Contracts\IChannelInfo.cs" />
-    <Compile Include="Hardware\Bases\ChannelInfoBase.cs" />
-    <Compile Include="Hardware\DigitalChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\ISpiChannelInfo.cs" />
-    <Compile Include="Hardware\SpiChannelInfo.cs" />
-    <Compile Include="Hardware\Bases\DigitalChannelIInfoBase.cs" />
-    <Compile Include="Hardware\I2cChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\IUartChannelInfo.cs" />
-    <Compile Include="Hardware\UartChannelInfo.cs" />
-    <Compile Include="Hardware\PwmChannelInfo.cs" />
-    <Compile Include="Hardware\AnalogChannelInfo.cs" />
-    <Compile Include="Hardware\SerialDirectionType.cs" />
-    <Compile Include="Hardware\Contracts\ICanChannelInfo.cs" />
-    <Compile Include="Hardware\CanChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\ISerialCommunicationChannelInfo.cs" />
-    <Compile Include="Hardware\Bases\PortBase.cs" />
-    <Compile Include="Devices\Definitions\F7MicroPinDefinitions.cs" />
-    <Compile Include="Hardware\Contracts\IIOController.cs" />
-    <Compile Include="Hardware\Contracts\IPinDefinitions.cs" />
-    <Compile Include="Hardware\Contracts\IIODevice.cs" />
-    <Compile Include="Interop\Interop.upd.cs" />
-    <Compile Include="Hardware\Contracts\II2cChannelInfo.cs" />
-    <Compile Include="Hardware\Contracts\ICommunicationChannelInfo.cs" />
-    <Compile Include="Contracts\IChangeResult.cs" />
-    <Compile Include="Bases\FloatChangeResult.cs" />
-    <Compile Include="Bases\NumericChangeResultBase.cs" />
-    <Compile Include="Devices\F7GPIOManager_adc.cs" />
-    <Compile Include="Interop\Interop.stm32.cs" />
-    <Compile Include="Interop\Interop.queue.cs" />
-    <Compile Include="Interop\Interop.signal.cs" />
-    <Compile Include="Hardware\Communications\IByteCommunications.cs" />
-    <Compile Include="Hardware\Communications\ISpiBus.cs" />
-    <Compile Include="Hardware\Communications\I2cPeripheral.cs" />
-    <Compile Include="Hardware\Communications\Spi.cs" />
-    <Compile Include="Hardware\Communications\ISpiPeripheral.cs" />
-    <Compile Include="Hardware\Communications\II2cPeripheral.cs" />
-    <Compile Include="Devices\Definitions\F7MicroPinDefinitions_NamedGroups.cs" />
-    <Compile Include="Hardware\Contracts\INamedPinGroups.cs" />
-    <Compile Include="Hardware\NamedPinGroup.cs" />
-    <Compile Include="Hardware\Communications\SpiPeripheral.cs" />
-    <Compile Include="Hardware\Communications\II2cBus.cs" />
-    <Compile Include="Hardware\Communications\SpiBus.Configuration.cs" />
-    <Compile Include="Devices\UPD.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="Interop\stm32_gpio.h" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+﻿<Project Sdk="Meadow.Sdk/1.1">
+ <PropertyGroup>
+   <TargetFramework>net472</TargetFramework>
+   <OutputType>Library</OutputType>
+   <AssemblyName>Meadow</AssemblyName>   
+   <Company>Wilderness Labs, Inc</Company>
+   <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+   <PackageId>Meadow</PackageId>
+   <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
+   <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+   <PackageTags>Meadow</PackageTags>
+   <AssemblyVersion>0.7.0</AssemblyVersion>
+   <PackageVersion>0.7.0</PackageVersion>
+   <FileVersion>0.7.0</FileVersion>
+   <Version>0.7.0</Version>
+   <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+ </PropertyGroup>
+ <ItemGroup>
+   <Compile Remove="Hardware\Communications\SoftwareSpiBus.cs" />
+ </ItemGroup>
+ <ItemGroup>
+   <None Include="Hardware\Communications\SoftwareSpiBus.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+ </ItemGroup>
 </Project>
