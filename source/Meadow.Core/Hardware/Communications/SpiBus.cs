@@ -217,6 +217,67 @@ namespace Meadow.Hardware
             }
         }
 
+        private void SetBaudRate(long desiredSpeed)
+        {
+            // determine the actual supported speed
+            var speed = GetSupportedSpeed(desiredSpeed);
+            var divisor = SpeedToDivisor(speed);
+
+            // stop the SPI bus
+            UPD.UpdateRegister(STM32.MEADOW_SPI1_BASE + STM32.SPI_CR1_OFFSET, STM32.SPI_CR1_SPE, 0);
+            // change the speed
+            uint s = (divisor & STM32.SPI_BR_MASK) << STM32.SPI_BR_SHIFT;
+            UPD.UpdateRegister(STM32.MEADOW_SPI1_BASE + STM32.SPI_CR1_OFFSET, 0, s);
+            // re-start the SPI bus
+            UPD.UpdateRegister(STM32.MEADOW_SPI1_BASE + STM32.SPI_CR1_OFFSET, 0, STM32.SPI_CR1_SPE);
+        }
+
+        private long GetSupportedSpeed(long desiredSpeed)
+        {
+            /*
+             * Meadow's STM32 uses a clock divisor from the PCLK2 for speed.  
+             * PCLK2 (at the time of writing) is 96MHz and max SPI speed is PCLK2/2
+            48
+            24
+            12
+            6
+            3
+            1.5
+            0.75
+            0.375
+            */
+
+            var clockSpeed = 96000000L;
+            var divisor = 2;
+            while (divisor <= 256)
+            {
+                var test = clockSpeed / divisor;
+                if (desiredSpeed > test)
+                {
+                    return test;
+                }
+                divisor *= 2;
+            }
+            // return the slowest rate
+            return clockSpeed / 256;
+        }
+
+        private uint SpeedToDivisor(long speed)
+        {
+            var clockSpeed = 96000000L;
+            var divisor = clockSpeed / speed;
+            for (int i = 0; i <= 7; i++)
+            {
+                if ((2 << i) == divisor)
+                {
+                    return (uint)i;
+                }
+            }
+
+            return 0;
+        }
+
+
         ///// <summary>
         ///// Create a new SPIBus object using the requested clock phase and polarity.
         ///// </summary>
