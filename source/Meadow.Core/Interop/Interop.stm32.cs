@@ -47,6 +47,19 @@ namespace Meadow.Core
             public const int ADC_DR_OFFSET = 0x4c;
             public const int ADC_CCR_OFFSET = 0x0304;
 
+
+            public const int ADC_SMPR1_CH10_SHIFT = 0;
+            public const int ADC_SMPR1_CH11_SHIFT = 3;
+            public const int ADC_SMPR2_CH3_SHIFT = 9;
+            public const int ADC_SMPR2_CH7_SHIFT = 21;
+            public const int ADC_SAMPLING_112_CYCLES = 5; // (101 binary)
+
+            public const int ADC_CR2_EOCS = (1 << 10); // set EOC (end of conversion) bit
+
+            public const int ADC_CCR_ADCPRE_SHIFT = 16;
+            public const int ADC_CCR_PRESCALER_DIV2 = 0;
+            public const int ADC_CCR_PRESCALER_DIV4 = 1;
+
             public const int MEADOW_I2C1_BASE = 0x40005400;
             public const int MEADOW_I2C2_BASE = 0x40005800;
             public const int MEADOW_I2C3_BASE = 0x40005C00;
@@ -184,6 +197,9 @@ namespace Meadow.Core
             public const int RCC_PLLSAICFGR_OFFSET = 0x88;
             public const int RCC_DCKCFGR1_OFFSET = 0x8C;
             public const int RCC_DCKCFGR2_OFFSET = 0x90;
+
+            public const int RCC_APB2ENR_ADC1EN = (1 << 8); // adc1 enable
+            public const int RCC_APB2RSTR_ADCRST = (1 << 8); // adc reset
 
             public const uint I2C1_SEL_PCLK1_CLK = 0 << 16;
             public const uint I2C1_SEL_SYS_CLK = 1 << 16;

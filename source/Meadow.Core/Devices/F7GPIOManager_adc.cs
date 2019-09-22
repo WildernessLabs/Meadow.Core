@@ -62,12 +62,12 @@ namespace Meadow.Devices
             // do the grunt work to set up the ADC itself
 
             // enable the ADC1 clock - all Meadow ADCs are in ADC1
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0, (1u << 8));
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0,  STM32.RCC_APB2ENR_ADC1EN);
 
             // reset the ADC RCC clock - set the reset bit
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, 0, (1u << 8));
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, 0, STM32.RCC_APB2RSTR_ADCRST);
             // clear the reset bit
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, (1u << 8), 0);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, STM32.RCC_APB2RSTR_ADCRST, 0);
 
             // clear the SR status register
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET,
@@ -92,19 +92,21 @@ namespace Meadow.Devices
             //  single conversion mode
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0x7f7f0b03, (1 << 10));
+                0x7f7f0b03, STM32.ADC_CR2_EOCS);
 
             // Set up the SMPR1 sample time register.  This translates to:
             //  112 sample cycles for channels 10 & 11 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SMPR1_OFFSET,
-                0x7ffffc0, 0x2d);
+                0x7ffffc0, 
+                (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH10_SHIFT) | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH11_SHIFT));
 
             // Set up the SMPR2 sample time register.  This translates to:
             //  112 sample cycles for channels 3 & 7 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SMPR2_OFFSET,
-                0x3f1ff1ff, 0xa00a00);
+                0x3f1ff1ff,
+                (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH3_SHIFT) | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH7_SHIFT));
 
             // Set up the SQR1 sequence register.  This translates to:
             //  One (1) conversion 
@@ -132,8 +134,9 @@ namespace Meadow.Devices
             //  DMA disabled
             //  independent ADCs
             // 
-            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
-                0xc0ef1f, (1 << 16));
+            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET,
+                0xc0ef1f,
+                STM32.ADC_CCR_PRESCALER_DIV4 << STM32.ADC_CCR_ADCPRE_SHIFT);
 
             return true;
         }
