@@ -51,6 +51,8 @@ namespace Meadow.Core
             public const int ADC_SMPR1_CH10_SHIFT = 0;
             public const int ADC_SMPR1_CH11_SHIFT = 3;
             public const int ADC_SMPR2_CH3_SHIFT = 9;
+            public const int ADC_SMPR2_CH4_SHIFT = 12;
+            public const int ADC_SMPR2_CH5_SHIFT = 15;
             public const int ADC_SMPR2_CH7_SHIFT = 21;
             public const int ADC_SAMPLING_112_CYCLES = 5; // (101 binary)
 
