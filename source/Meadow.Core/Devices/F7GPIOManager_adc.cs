@@ -8,10 +8,15 @@ namespace Meadow.Devices
 {
     public partial class F7GPIOManager : IIOController
     {
+        private bool _debuggingADC = true;
         private bool _initialized = false;
 
         public void ConfigureAnalogInput(IPin pin)
         {
+#if !DEBUG
+            // make sure this is off in release
+            _debuggingADC = true;
+#endif
             if (!_initialized)
             {
                 InitializeADC();
@@ -40,6 +45,8 @@ namespace Meadow.Devices
 
         private bool ConfigureADC(STM32.GpioPort port, int pin)
         {
+            Output.WriteLineIf(_debuggingADC, $"Configuring GPIO for ADC {port}:{pin}");
+
             // set up the pin for analog
             ConfigureGpio(port, pin, STM32.GpioMode.Analog, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
 
@@ -50,7 +57,7 @@ namespace Meadow.Devices
 
         private bool InitializeADC()
         {
-            Console.WriteLine($"+InitializeADC");
+            Output.WriteLineIf(_debuggingADC, $"+InitializeADC");
 
             // do the grunt work to set up the ADC itself
 
@@ -149,26 +156,26 @@ namespace Meadow.Devices
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
 
-            Console.WriteLine($"Starting process to get analog for channel {channel}");
+            Output.WriteLineIf(_debuggingADC, $"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
                 0, (uint)channel);
 
-            Console.WriteLine($"SQR3 set to {channel}");
+            Output.WriteLineIf(_debuggingADC, $"SQR3 set to {channel}");
 
             // enable the ADC via the CR2 register's ADON bit
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
                 0, 1);
 
-            Console.WriteLine($"CR2 ADON is set.");
-            Console.WriteLine($"Starting ADC Conversion...");
+            Output.WriteLineIf(_debuggingADC, $"CR2 ADON is set.");
+            Output.WriteLineIf(_debuggingADC, $"Starting ADC Conversion...");
 
             // start a conversion via the CR2 SWSTART bit
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
                 0, 1 << 30);
 
-            Console.Write($"Polling status register...");
+            Output.WriteLineIf(_debuggingADC, $"Polling status register...");
 
             // poll the status register - wait for conversion complete
             var ready = false;
@@ -182,7 +189,7 @@ namespace Meadow.Devices
                 if (tick++ > 200)
                 {
                     // we've failed
-                    Console.Write($"Conversion timed out");
+                    Output.WriteLineIf(_debuggingADC, $"Conversion timed out");
                     return -1;
                 }
 
@@ -191,7 +198,7 @@ namespace Meadow.Devices
                 System.Threading.Thread.Sleep(1);
             } while (!ready);
 
-            Console.WriteLine($"Conversion complete. Reading DR");
+            Output.WriteLineIf(_debuggingADC, $"Conversion complete. Reading DR");
 
             // read the data register
             return (int)UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_DR_OFFSET);
