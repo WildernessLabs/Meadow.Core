@@ -102,11 +102,14 @@ namespace Meadow.Devices
                 (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH10_SHIFT) | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH11_SHIFT));
 
             // Set up the SMPR2 sample time register.  This translates to:
-            //  112 sample cycles for channels 3 & 7 
+            //  112 sample cycles for channels 3, 4, 5 & 7 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SMPR2_OFFSET,
                 0x3f1ff1ff,
-                (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH3_SHIFT) | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH7_SHIFT));
+                (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH3_SHIFT)
+                | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH4_SHIFT)
+                | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH5_SHIFT)
+                | (STM32.ADC_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH7_SHIFT));
 
             // Set up the SQR1 sequence register.  This translates to:
             //  One (1) conversion 
