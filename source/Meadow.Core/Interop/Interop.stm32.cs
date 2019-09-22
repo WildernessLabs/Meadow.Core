@@ -54,7 +54,14 @@ namespace Meadow.Core
             public const int ADC_SMPR2_CH7_SHIFT = 21;
             public const int ADC_SAMPLING_112_CYCLES = 5; // (101 binary)
 
+            public const int ADC_SR_OVR = (1 << 5); // overrun
+            public const int ADC_SR_STRT = (1 << 4); // regular channel start flag
+            public const int ADC_SR_EOC = (1 << 1); // end of regular conversion
+            public const int ADC_SR_AWD = (1 << 0); // analog watchdog
+
             public const int ADC_CR2_EOCS = (1 << 10); // set EOC (end of conversion) bit
+            public const int ADC_CR2_ADON = (1 << 0);
+            public const int ADC_CR2_SWSTART = (1 << 30); // starts regulare conversion.  ADON must be 1 otherwise it is ignored
 
             public const int ADC_CCR_ADCPRE_SHIFT = 16;
             public const int ADC_CCR_PRESCALER_DIV2 = 0;

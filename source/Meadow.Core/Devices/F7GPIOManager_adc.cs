@@ -161,22 +161,25 @@ namespace Meadow.Devices
 
             Output.WriteLineIf(_debuggingADC, $"Starting process to get analog for channel {channel}");
 
-            // adjust the SQR3 sequence register to tell it which channel to convert
+            // adjust the SQR3 sequence register to tell it which channel to convert - we're doing 1 conversion only right now
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
-                0, (uint)channel);
+                0, 
+                (uint)channel);
 
             Output.WriteLineIf(_debuggingADC, $"SQR3 set to {channel}");
 
             // enable the ADC via the CR2 register's ADON bit
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0, 1);
+                0, 
+                STM32.ADC_CR2_ADON);
 
             Output.WriteLineIf(_debuggingADC, $"CR2 ADON is set.");
             Output.WriteLineIf(_debuggingADC, $"Starting ADC Conversion...");
 
             // start a conversion via the CR2 SWSTART bit
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0, 1 << 30);
+                0, 
+                STM32.ADC_CR2_SWSTART);
 
             Output.WriteLineIf(_debuggingADC, $"Polling status register...");
 
@@ -186,7 +189,7 @@ namespace Meadow.Devices
             do
             {
                 var register_sr = UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET);
-                ready = (register_sr & (1 << 1)) != 0;
+                ready = (register_sr & STM32.ADC_SR_EOC) != 0;
 
                 // we need a timeout here to prevent deadlock if the SR never comes on
                 if (tick++ > 200)
@@ -196,8 +199,7 @@ namespace Meadow.Devices
                     return -1;
                 }
 
-                // TODO: yield
-                // currently the OS hangs if I try to Sleep, so we'll spin.  BAD BAD BAD HACK
+                // yield
                 System.Threading.Thread.Sleep(1);
             } while (!ready);
 
