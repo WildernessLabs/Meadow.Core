@@ -13,7 +13,7 @@ namespace Basic_AnalogReads
         public AnalogReadApp()
         {
             Console.WriteLine("Starting App");
-            analogIn = Device.CreateAnalogInputPort(Device.Pins.A02);
+            analogIn = Device.CreateAnalogInputPort(Device.Pins.A00);
             Console.WriteLine("Analog port created");
             this.StartReading();
         }
