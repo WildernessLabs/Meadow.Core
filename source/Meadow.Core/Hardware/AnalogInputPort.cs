@@ -153,11 +153,11 @@ namespace Meadow.Hardware
                             sampleBuffer[currentSampleCount] = ((float)rawValue / (float)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage;
                         }
 
-                        // increment our counter 
+                        // increment our counter
                         currentSampleCount++;
 
                         // if we still have more samples to take
-                        if (currentSampleCount <= sampleCount) {
+                        if (currentSampleCount < sampleCount) {
                             // go to sleep for a while
                             await Task.Delay(sampleSleepDuration);
                         }
