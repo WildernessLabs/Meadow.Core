@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Meadow.Hardware
@@ -8,7 +9,24 @@ namespace Meadow.Hardware
     /// </summary>
     public interface IAnalogInputPort : IAnalogPort
     {
-        float Read(int sampleCount = 10, int sampleInterval = 40);
+        /// <summary>
+        /// Raised when the value of the reading changes.
+        /// </summary>
+        event EventHandler<FloatChangeResult> Changed;
+
+        /// <summary>
+        /// Gets the sample buffer.
+        /// </summary>
+        /// <value>The sample buffer.</value>
+        IList<float> VoltageSampleBuffer { get; }
+
+        float ReferenceVoltage { get; }
+
+        float AverageVoltageBufferValue { get; }
+
+        IDisposable Subscribe(IObserver<FloatChangeResult> observer);
+
+        Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
         void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
         void StopSampling();
     }
