@@ -3,6 +3,7 @@ using Meadow;
 using Meadow.Hardware;
 using Meadow.Devices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Basic_AnalogReads
 {
@@ -18,13 +19,13 @@ namespace Basic_AnalogReads
             this.StartReading();
         }
 
-        protected void StartReading()
+        protected async void StartReading()
         {
             float voltage;
             for (int i = 0; i < 10; i++) {
                 Console.WriteLine(i);
             //while (true) {
-                voltage = analogIn.Read();
+                voltage = await analogIn.Read();
                 Console.WriteLine("Voltage: " + voltage.ToString());
                 Thread.Sleep(500);
             }
