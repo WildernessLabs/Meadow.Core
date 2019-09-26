@@ -134,7 +134,6 @@ namespace Meadow.Hardware
                     float[] sampleBuffer = new float[sampleCount];
                     // loop until we're supposed to stop
                     while (true) {
-
                         // TODO: someone please review; is this the correct
                         // place to do this?
                         // check for cancel (doing this here instead of 
@@ -178,6 +177,7 @@ namespace Meadow.Hardware
                                 New = AverageVoltageBufferValue,
                                 Old = _previousVoltageReading,
                             };
+
                             // raise our events and notify our subs
                             base.RaiseChangedAndNotify(result);
 
