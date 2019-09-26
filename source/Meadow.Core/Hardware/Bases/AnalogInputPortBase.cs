@@ -63,5 +63,29 @@ namespace Meadow.Hardware
             Changed?.Invoke(this, changeResult);
             _observers.ForEach(x => x.OnNext(changeResult));
         }
+
+        public IDisposable Subscribe(IObserver<FloatChangeResult> observer)
+        {
+            if (!_observers.Contains(observer)) _observers.Add(observer);
+            return new Unsubscriber(_observers, observer);
+        }
+
+        private class Unsubscriber : IDisposable
+        {
+            private List<IObserver<FloatChangeResult>> _observers;
+            private IObserver<FloatChangeResult> _observer;
+
+            public Unsubscriber(List<IObserver<FloatChangeResult>> observers, IObserver<FloatChangeResult> observer)
+            {
+                this._observers = observers;
+                this._observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (!(_observer == null)) _observers.Remove(_observer);
+            }
+        }
+
     }
 }

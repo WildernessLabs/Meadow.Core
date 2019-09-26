@@ -8,7 +8,7 @@ namespace Meadow.Devices
 {
     public partial class F7GPIOManager : IIOController
     {
-        private bool _debuggingADC = true;
+        private bool _debuggingADC = false;
         private bool _initialized = false;
 
         public void ConfigureAnalogInput(IPin pin)

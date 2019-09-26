@@ -24,6 +24,7 @@ namespace Meadow.Hardware
 
         float AverageVoltageBufferValue { get; }
 
+        IDisposable Subscribe(IObserver<FloatChangeResult> observer);
 
         Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
         void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
