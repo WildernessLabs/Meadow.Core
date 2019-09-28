@@ -2,6 +2,14 @@
 
 namespace Meadow.Hardware
 {
+    public class NixDriverBasedSerialPort : SerialPort
+    {
+        public NixDriverBasedSerialPort(string portName)
+            : base(portName)
+        {
+        }
+    }
+
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// 
