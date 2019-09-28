@@ -15,7 +15,9 @@ namespace Meadow.Hardware
     /// </summary>
     public partial class SpiBus : ISpiBus
     {
+        private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
+        internal int BusNumber { get; set; }
 
         ///// <summary>
         ///// SPI bus object.
@@ -35,6 +37,10 @@ namespace Meadow.Hardware
         /// </remarks>
         protected SpiBus()
         {
+#if !DEBUG
+            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            _showSpiDebug = false;
+#endif
         }
 
         // TODO: Call from Device.CreateSpiBus
@@ -48,6 +54,20 @@ namespace Meadow.Hardware
             byte cpha = 0,
             byte cpol = 0)
         {
+            // check for pin compatibility and availability
+            if (!clock.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.Clock) != SpiLineType.None))
+            {
+                throw new NotSupportedException($"Pin {clock.Name} does not support SPI Clock capability");
+            }
+            if (!mosi.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MOSI) != SpiLineType.None))
+            {
+                throw new NotSupportedException($"Pin {clock.Name} does not support SPI MOSI capability");
+            }
+            if (!miso.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MISO) != SpiLineType.None))
+            {
+                throw new NotSupportedException($"Pin {clock.Name} does not support SPI MISO capability");
+            }
+
             return new SpiBus();
         }
 
@@ -88,7 +108,8 @@ namespace Meadow.Hardware
                 {
                     BufferLength = data.Length,
                     TxBuffer = gch.AddrOfPinnedObject(),
-                    RxBuffer = IntPtr.Zero
+                    RxBuffer = IntPtr.Zero,
+                    BusNumber = BusNumber
                 };
 
                 //Console.WriteLine($" +SendData {BitConverter.ToString(data)}");
@@ -136,6 +157,7 @@ namespace Meadow.Hardware
                     TxBuffer = IntPtr.Zero,
                     BufferLength = rxBuffer.Length,
                     RxBuffer = gch.AddrOfPinnedObject(),
+                    BusNumber = BusNumber
                 };
 
                 //Console.Write(" +ReceiveData");
@@ -187,12 +209,13 @@ namespace Meadow.Hardware
                     BufferLength = dataToWrite.Length,
                     TxBuffer = txGch.AddrOfPinnedObject(),
                     RxBuffer = rxGch.AddrOfPinnedObject(),
+                    BusNumber = BusNumber
                 };
 
-                //Console.Write(" +ExchangeData");
-                //Console.WriteLine($" Sending {BitConverter.ToString(dataToWrite)}");
+                Output.WriteLineIf(_showSpiDebug, "+ExchangeData");
+                Output.WriteLineIf(_showSpiDebug, $" Sending {BitConverter.ToString(dataToWrite)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                //Console.WriteLine($" Received {BitConverter.ToString(rxBuffer)}");
+                Output.WriteLineIf(_showSpiDebug, $" Received {BitConverter.ToString(rxBuffer)}");
 
                 if (chipSelect != null)
                 {

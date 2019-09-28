@@ -66,6 +66,7 @@ namespace Meadow.Core
                 /// SPI requires both buffers be equal length
                 /// </summary>
                 public int BufferLength;
+                public int BusNumber;
             }
 
             public struct UpdPwmCmd

@@ -115,7 +115,26 @@ namespace Meadow.Devices
             ushort speed = 1000
         )
         {
-            return SpiBus.From(clock, mosi, miso, speed);
+            var bus = SpiBus.From(clock, mosi, miso, speed);
+            bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
+            return bus;
+        }
+
+        private int GetSpiBusNumberForPins(IPin clock, IPin mosi, IPin miso)
+        {
+            // we're only looking at clock pin.  
+            // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
+            if (clock == Pins.ESP_CLK)
+            {
+                return 2;
+            }
+            else if (clock == Pins.SCK)
+            {
+                return 3;
+            }
+
+            // this is an unsupported bus, but will get caught elsewhere
+            return -1;
         }
 
         public II2cBus CreateI2cBus(

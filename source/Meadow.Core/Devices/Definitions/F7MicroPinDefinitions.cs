@@ -260,7 +260,8 @@ namespace Meadow.Devices
             public readonly IPin SCK = new Pin(
                 "SCK", "PC10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC10")
+                    new DigitalChannelInfo("PC10"),
+                    new SpiChannelInfo("PC10", SpiLineType.Clock)
                 }
             );
             // MOSI
@@ -268,7 +269,8 @@ namespace Meadow.Devices
             public readonly IPin MOSI = new Pin(
                 "MOSI", "PB5",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB5")
+                    new DigitalChannelInfo("PB5"),
+                    new SpiChannelInfo("PB5", SpiLineType.MOSI)
                 }
             );
             // MISO
@@ -276,7 +278,8 @@ namespace Meadow.Devices
             public readonly IPin MISO = new Pin(
                 "MISO", "PC11",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC11")
+                    new DigitalChannelInfo("PC11"),
+                    new SpiChannelInfo("PC11", SpiLineType.MISO)
                 }
             );
 
@@ -285,6 +288,7 @@ namespace Meadow.Devices
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI3"),
+                    new SpiChannelInfo("PI3", SpiLineType.MOSI)
                 }
             );
             // ESP_MISO
@@ -292,6 +296,7 @@ namespace Meadow.Devices
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI2"),
+                    new SpiChannelInfo("PI2", SpiLineType.MISO)
                 }
             );
             // ESP_CLK
@@ -299,6 +304,7 @@ namespace Meadow.Devices
                 "ESP_CLK", "PD3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD3"),
+                    new SpiChannelInfo("PD3", SpiLineType.Clock)
                 }
             );
             // ESP_CS
@@ -306,6 +312,7 @@ namespace Meadow.Devices
                 "ESP_CS", "PI0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI0"),
+                    new SpiChannelInfo("PI10", SpiLineType.ChipSelect)
                 }
             );
             // ESP_BOOT
