@@ -28,7 +28,10 @@ namespace Meadow.Devices
 
         public F7Micro()
         {
-            this.Capabilities = new DeviceCapabilities();
+            this.Capabilities = new DeviceCapabilities(
+                new AnalogCapabilities(true, 12),
+                new NetworkCapabilities(true, true)
+                );
             //this.WiFiAdapters = new List<WiFiAdapter>
             //{
             //    // TODO: stuff.

@@ -91,7 +91,7 @@ namespace Meadow.Hardware
                     RxBuffer = IntPtr.Zero
                 };
 
-                Console.WriteLine($" +SendData {BitConverter.ToString(data)}");
+                //Console.WriteLine($" +SendData {BitConverter.ToString(data)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
 
                 if (chipSelect != null)
@@ -138,9 +138,9 @@ namespace Meadow.Hardware
                     RxBuffer = gch.AddrOfPinnedObject(),
                 };
 
-                Console.Write(" +ReceiveData");
+                //Console.Write(" +ReceiveData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                Console.WriteLine($" returned {BitConverter.ToString(rxBuffer)}");
+                //Console.WriteLine($" returned {BitConverter.ToString(rxBuffer)}");
 
                 if (chipSelect != null)
                 {
@@ -189,10 +189,10 @@ namespace Meadow.Hardware
                     RxBuffer = rxGch.AddrOfPinnedObject(),
                 };
 
-                Console.Write(" +ExchangeData");
-                Console.WriteLine($" Sending {BitConverter.ToString(dataToWrite)}");
+                //Console.Write(" +ExchangeData");
+                //Console.WriteLine($" Sending {BitConverter.ToString(dataToWrite)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                Console.WriteLine($" Received {BitConverter.ToString(rxBuffer)}");
+                //Console.WriteLine($" Received {BitConverter.ToString(rxBuffer)}");
 
                 if (chipSelect != null)
                 {
