@@ -98,14 +98,14 @@ namespace Meadow.Devices
             ushort speed = 1000
         )
         {
-            return SpiBus.From(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
+            return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
         }
 
         public ISpiBus CreateSpiBus(
             IPin[] pins, ushort speed = 1000
         )
         {
-            return SpiBus.From(pins[0], pins[1], pins[2], speed);
+            return CreateSpiBus(pins[0], pins[1], pins[2], speed);
         }
 
         public ISpiBus CreateSpiBus(
@@ -115,7 +115,7 @@ namespace Meadow.Devices
             ushort speed = 1000
         )
         {
-            return CreateSpiBus(clock, mosi, miso, speed);
+            return SpiBus.From(clock, mosi, miso, speed);
         }
 
         public II2cBus CreateI2cBus(
