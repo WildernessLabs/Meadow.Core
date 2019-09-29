@@ -74,7 +74,7 @@ namespace Meadow.Hardware
 
         public override void Stop()
         {
-            UPD.PWM.Stop(PwmChannelInfo.Timer);
+            UPD.PWM.Stop(PwmChannelInfo);
         }
 
         protected void Dispose(bool disposing)
