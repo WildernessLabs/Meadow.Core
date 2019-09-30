@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
@@ -30,8 +29,8 @@ namespace AnalogObserver
             var firehoseSubscriber = _analogIn.Subscribe(new FilterableObserver<FloatChangeResult>(
                 handler: result =>
                 {
-                    Debug.WriteLine("Previous Value: " + result.Old);
-                    Debug.WriteLine("New Value: " + result.New);
+                    Console.WriteLine("Previous Value: " + result.Old);
+                    Console.WriteLine("New Value: " + result.New);
                 }));
 
             //firehoseSubscriber.Dispose();
@@ -43,7 +42,7 @@ namespace AnalogObserver
                 filter: result => (result.New > seventyFiveDegreesVoltage),
                 handler: avgValue =>
                 {
-                    Debug.WriteLine("We've hit 75º!");
+                    Console.WriteLine("We've hit 75º!");
                     // unsubscribe when we hit it
                     if (_absoluteObserver != null)
                     {
@@ -57,7 +56,7 @@ namespace AnalogObserver
                 filter: result => (result.Delta > oneDegreeC || result.Delta < oneDegreeC),
                 handler: result =>
                 {
-                    Debug.WriteLine("Changed value: " + result.Delta);
+                    Console.WriteLine("Changed value: " + result.Delta);
                 }));
 
             //relative.Dispose();
@@ -67,7 +66,7 @@ namespace AnalogObserver
                 filter: result => (result.DeltaPercent > 10 || result.DeltaPercent < 10),
                 handler: result =>
                 {
-                    Debug.WriteLine("Percentage changed: " + result.Delta);
+                    Console.WriteLine("Percentage changed: " + result.Delta);
                 }));
 
             // spin up the ADC sampling engine

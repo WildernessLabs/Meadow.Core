@@ -11,7 +11,7 @@ namespace Basic_PWM
         {
             Console.WriteLine("+PWMApp");
 
-            var pwm = Device.CreatePwmPort(Device.Pins.D05, 100, 0.5f);
+            var pwm = Device.CreatePwmPort(Device.Pins.OnboardLedBlue, 100, 0.5f);
             pwm.Start();
             var heartbeat = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen);
 
