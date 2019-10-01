@@ -12,9 +12,12 @@
    <AssemblyVersion>0.8.2</AssemblyVersion>
    <PackageVersion>0.8.2</PackageVersion>
    <FileVersion>0.8.2</FileVersion>
-   <Version>0.8.2</Version>
+   <Version>0.8.3</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.1.1" />
+  </ItemGroup>
  <ItemGroup>
    <Compile Remove="Hardware\Communications\SoftwareSpiBus.cs" />
  </ItemGroup>
