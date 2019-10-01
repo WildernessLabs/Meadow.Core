@@ -13,10 +13,6 @@ namespace Meadow.Devices
 
         public void ConfigureAnalogInput(IPin pin)
         {
-#if !DEBUG
-            // make sure this is off in release
-            _debuggingADC = true;
-#endif
             if (!_initialized)
             {
                 InitializeADC();
