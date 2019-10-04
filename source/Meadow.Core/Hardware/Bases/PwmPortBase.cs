@@ -11,11 +11,11 @@ namespace Meadow.Hardware
             IPin pin,
             IPwmChannelInfo channelInfo,
             float frequency = 100,
-            float dutyCycle = 0
-            //bool inverted = false
+            float dutyCycle = 0,
+            bool inverted = false
             ) : base (pin, channelInfo)
         {
-            //this.Inverted = inverted;
+            this.Inverted = inverted;
             this.Frequency = frequency;
             this.DutyCycle = dutyCycle;
         }

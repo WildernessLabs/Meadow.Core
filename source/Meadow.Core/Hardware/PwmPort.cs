@@ -18,20 +18,21 @@ namespace Meadow.Hardware
         protected PwmPort(
             IPin pin,
             IIOController ioController,
-            IPwmChannelInfo channel
-            /*bool inverted = false*/) 
+            IPwmChannelInfo channel,
+            bool inverted = false) 
             : base (pin, channel)
         {
             this.IOController = ioController;
             this.PwmChannelInfo = channel;
+            this.Inverted = inverted;
         }
 
         internal static PwmPort From(
             IPin pin,
             IIOController ioController,
             float frequency = 100,
-            float dutyCycle = 0
-            /*bool inverted = false*/)
+            float dutyCycle = 0,
+            bool inverted = false)
         {
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
             if (channel != null) {
@@ -39,6 +40,7 @@ namespace Meadow.Hardware
                 var port = new PwmPort(pin, ioController, channel);
                 port.Frequency = frequency;
                 port.DutyCycle = dutyCycle;
+                port.Inverted = inverted;
 
                 return port;
 
@@ -52,8 +54,6 @@ namespace Meadow.Hardware
         ~PwmPort() { throw new NotImplementedException(); }
 
         public override float Duration { get; set; }
-        //public override float DutyCycle { get; set; }
-        //public override float Frequency { get; set; }
         public override float Period
         {
             get => 1.0f / Frequency; 
@@ -69,7 +69,7 @@ namespace Meadow.Hardware
 
         public override void Start()
         {
-            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency, DutyCycle);
+            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency, Inverted?(1.0f-DutyCycle):DutyCycle);
         }
 
         public override void Stop()
