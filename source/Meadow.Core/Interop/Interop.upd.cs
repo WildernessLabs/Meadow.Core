@@ -22,6 +22,12 @@ namespace Meadow.Core
                 I2CData = 21,
 
                 SPIData = 31,
+                SPISpeed = 32,
+
+                DirEnum = 41,
+
+                GetLastError = 51,
+                ClearLastError = 52,
             }
 
             public struct UpdRegisterValue
@@ -58,7 +64,7 @@ namespace Meadow.Core
 
             }
 
-            public struct UpdSPICommand
+            public struct UpdSPIDataCommand
             {
                 public IntPtr TxBuffer;
                 public IntPtr RxBuffer;
@@ -67,6 +73,26 @@ namespace Meadow.Core
                 /// </summary>
                 public int BufferLength;
                 public int BusNumber;
+            }
+
+            public struct UpdSPISpeedCommand
+            {
+                public int BusNumber;
+                /// <summary>
+                /// Raw frequency, in Hz
+                /// </summary>
+                /// <remarks>
+                /// STM32 Supports the following:
+                /// 48000000,
+                /// 24000000,
+                /// 12000000,
+                /// 6000000,
+                /// 3000000,
+                /// 1500000,
+                /// 750000,
+                /// 375000
+                /// </remarks>
+                public long Frequency;
             }
 
             public struct UpdPwmCmd

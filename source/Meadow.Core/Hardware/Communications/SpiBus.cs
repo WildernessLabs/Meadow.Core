@@ -17,6 +17,8 @@ namespace Meadow.Hardware
     {
         private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
+        private long _speed;
+
         internal int BusNumber { get; set; }
 
         ///// <summary>
@@ -50,7 +52,6 @@ namespace Meadow.Hardware
             IPin clock,
             IPin mosi,
             IPin miso,
-            ushort speed = 1000,
             byte cpha = 0,
             byte cpol = 0)
         {
@@ -68,28 +69,37 @@ namespace Meadow.Hardware
                 throw new NotSupportedException($"Pin {clock.Name} does not support SPI MISO capability");
             }
 
+            // we can't set the speed here yet because the caller has to set the bus number first
             return new SpiBus();
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
+        public long BusSpeed
+        {
+            get => _speed;
+            set
+            {
+                if (value == _speed) return;
+                Output.WriteIf(_showSpiDebug, $"Setting bus speed to {value}");
+                var actual = this.SetFrequency(value);
+                _speed = actual;
+            }
+        }
+
         public void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data)
         {
             SendData(chipSelect, ChipSelectMode.ActiveLow, data.ToArray());
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, IEnumerable<byte> data)
         {
             SendData(chipSelect, csMode, data.ToArray());
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SendData(IDigitalOutputPort chipSelect, params byte[] data)
         {
             SendData(chipSelect, ChipSelectMode.ActiveLow, data);
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
         public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -104,7 +114,7 @@ namespace Meadow.Hardware
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
-                var command = new Nuttx.UpdSPICommand()
+                var command = new Nuttx.UpdSPIDataCommand()
                 {
                     BufferLength = data.Length,
                     TxBuffer = gch.AddrOfPinnedObject(),
@@ -112,7 +122,7 @@ namespace Meadow.Hardware
                     BusNumber = BusNumber
                 };
 
-                //Console.WriteLine($" +SendData {BitConverter.ToString(data)}");
+                Output.WriteLineIf(_showSpiDebug, $" +SendData {BitConverter.ToString(data)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
 
                 if (chipSelect != null)
@@ -152,7 +162,7 @@ namespace Meadow.Hardware
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
-                var command = new Nuttx.UpdSPICommand()
+                var command = new Nuttx.UpdSPIDataCommand()
                 {
                     TxBuffer = IntPtr.Zero,
                     BufferLength = rxBuffer.Length,
@@ -204,7 +214,7 @@ namespace Meadow.Hardware
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
-                var command = new Nuttx.UpdSPICommand()
+                var command = new Nuttx.UpdSPIDataCommand()
                 {
                     BufferLength = dataToWrite.Length,
                     TxBuffer = txGch.AddrOfPinnedObject(),
@@ -240,19 +250,90 @@ namespace Meadow.Hardware
             }
         }
 
-        private void SetBaudRate(long desiredSpeed)
+        public long[] SupportedSpeeds
         {
+            get => new long[]
+                {
+                    375000,
+                    750000,
+                    1500000,
+                    3000000,
+                    6000000,
+                    12000000,
+                    24000000,
+                    48000000
+                };
+        }
+
+        private long SetFrequency(long desiredSpeed)
+        {
+            // TODO: move this to the F7
+            var speed = GetSupportedSpeed(desiredSpeed);
+
+            var command = new Nuttx.UpdSPISpeedCommand()
+            {
+                BusNumber = BusNumber,
+                Frequency = speed
+            };
+
+            Output.WriteLineIf(_showSpiDebug, "+SetFrequency");
+            Output.WriteLineIf(_showSpiDebug, $" setting speed to {desiredSpeed}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPISpeed, ref command);
+
+            return speed;
+            /*
+            switch (BusNumber)
+            {
+                case 2:
+                    spi_base = STM32.MEADOW_SPI2_BASE; // ESP
+                    break;
+                default:
+                    spi_base = STM32.MEADOW_SPI3_BASE; // external
+                    break;
+            }
+
             // determine the actual supported speed
             var speed = GetSupportedSpeed(desiredSpeed);
             var divisor = SpeedToDivisor(speed);
 
             // stop the SPI bus
-            UPD.UpdateRegister(STM32.MEADOW_SPI1_BASE + STM32.SPI_CR1_OFFSET, STM32.SPI_CR1_SPE, 0);
+            // shutdown per the STM32 Reference manual:
+            // wait for FTLVL == 0
+            var sr = UPD.GetRegister(spi_base + STM32.SPI_SR_OFFSET);
+            while((sr & (3 << 11)) != 0)
+            {
+                Thread.Sleep(1);
+            }
+            // wait for BSY == 0
+            
+            while ((sr & (1 << 7)) != 0)
+            {
+                Thread.Sleep(1);
+                sr = UPD.GetRegister(spi_base + STM32.SPI_SR_OFFSET);
+            }
+            // set SPE == 0
+            UPD.UpdateRegister(spi_base + STM32.SPI_CR1_OFFSET, STM32.SPI_CR1_SPE, 0);
+            // read data until FRLVL == 0
+            while ((sr & (3 << 9)) != 0)
+            {
+                Thread.Sleep(1);
+                var dr = UPD.GetRegister(spi_base + STM32.SPI_DR_OFFSET);
+                sr = UPD.GetRegister(spi_base + STM32.SPI_SR_OFFSET);
+            }
+
             // change the speed
             uint s = (divisor & STM32.SPI_BR_MASK) << STM32.SPI_BR_SHIFT;
-            UPD.UpdateRegister(STM32.MEADOW_SPI1_BASE + STM32.SPI_CR1_OFFSET, 0, s);
+            Output.WriteIf(_showSpiDebug, $"Setting SPI_CR1 bits {s:x} divisor={divisor}");
+            UPD.UpdateRegister(spi_base + STM32.SPI_CR1_OFFSET, 0, s);
+            if (_showSpiDebug)
+            {
+                var actual = UPD.GetRegister(spi_base + STM32.SPI_CR1_OFFSET);
+                Output.WriteIf(_showSpiDebug, $"SPI_CR1 = 0x{actual:x8}");
+            }
+
             // re-start the SPI bus
-            UPD.UpdateRegister(STM32.MEADOW_SPI1_BASE + STM32.SPI_CR1_OFFSET, 0, STM32.SPI_CR1_SPE);
+            UPD.UpdateRegister(spi_base + STM32.SPI_CR1_OFFSET, 0, STM32.SPI_CR1_SPE);
+            */
         }
 
         private long GetSupportedSpeed(long desiredSpeed)

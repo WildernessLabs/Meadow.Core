@@ -95,14 +95,15 @@ namespace Meadow.Devices
         }
 
         public ISpiBus CreateSpiBus(
-            ushort speed = 1000
+            long speed = 0 // this will default to the minimum capable speed
         )
         {
             return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
         }
 
         public ISpiBus CreateSpiBus(
-            IPin[] pins, ushort speed = 1000
+            IPin[] pins,
+            long speed = 0// this will default to the minimum capable speed
         )
         {
             return CreateSpiBus(pins[0], pins[1], pins[2], speed);
@@ -112,11 +113,12 @@ namespace Meadow.Devices
             IPin clock,
             IPin mosi,
             IPin miso,
-            ushort speed = 1000
+            long speed = 0// this will default to the minimum capable speed
         )
         {
-            var bus = SpiBus.From(clock, mosi, miso, speed);
+            var bus = SpiBus.From(clock, mosi, miso);
             bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
+            bus.BusSpeed = speed;
             return bus;
         }
 

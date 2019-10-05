@@ -131,7 +131,19 @@ namespace Meadow.Devices
             return result;
         }
 
-        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPICommand spiCommand)
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPIDataCommand spiCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
+
+            if (result != 0)
+            {
+                Console.WriteLine($"ioctl returned {result}");
+                return System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPISpeedCommand spiCommand)
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
 
