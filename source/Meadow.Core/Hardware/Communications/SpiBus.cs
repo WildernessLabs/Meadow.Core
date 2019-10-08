@@ -356,7 +356,7 @@ namespace Meadow.Hardware
             while (divisor <= 256)
             {
                 var test = clockSpeed / divisor;
-                if (desiredSpeed > test)
+                if (desiredSpeed >= test)
                 {
                     return test;
                 }
