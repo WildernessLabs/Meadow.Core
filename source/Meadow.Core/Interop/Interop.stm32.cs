@@ -123,6 +123,16 @@ namespace Meadow.Core
             public const uint I2C_ISR_TIMEOUT = 1 << 12;
             public const uint I2C_ISR_BUSY = 1 << 15;
 
+            public const int MEADOW_SPI1_BASE = 0x40013000;
+            public const int MEADOW_SPI2_BASE = 0x40003800;
+            public const int MEADOW_SPI3_BASE = 0x40003C00;
+            public const int SPI_CR1_OFFSET = 0x00;
+            public const int SPI_CR1_SPE = (1 << 6);
+            public const int SPI_BR_MASK = 0x07;
+            public const int SPI_BR_SHIFT = 0x03;
+            public const int SPI_SR_OFFSET = 0x08;
+            public const int SPI_DR_OFFSET = 0x0c;
+
             public const uint RCC_CFGR_PPRE1 = 0x07 << 10;
             public const uint RCC_CFGR_PPRE2 = 0x07 << 13;
             public const uint RCC_CFGR_HPRE = 0x0F << 4;

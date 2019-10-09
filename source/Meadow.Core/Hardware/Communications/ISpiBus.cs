@@ -11,6 +11,9 @@ namespace Meadow.Hardware
 
     public interface ISpiBus
     {
+        long[] SupportedSpeeds { get; }
+        long BusSpeed { get; set; }
+
         void SendData(IDigitalOutputPort chipSelect, params byte[] data);
         void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data);
         byte[] ReceiveData(IDigitalOutputPort chipSelect, int numberOfBytes);

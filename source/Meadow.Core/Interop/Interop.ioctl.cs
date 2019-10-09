@@ -68,8 +68,11 @@ namespace Meadow.Core
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdI2CCommand i2cCommand);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPICommand spiCommand);
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPIDataCommand spiCommand);
 
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPISpeedCommand spiCommand);
+            
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, IntPtr pData);
 
