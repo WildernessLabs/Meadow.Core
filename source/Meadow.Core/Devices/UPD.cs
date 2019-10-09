@@ -211,16 +211,17 @@ namespace Meadow.Devices
 
                 var result = UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmStart, data);
 
-                Output.WriteLineIf(true, $"Start PWM {pwmChannelInfo.Timer}:{frequency}:{dutyCycle} returned {result}");
+                //Output.WriteLineIf(true, $"Start PWM {pwmChannelInfo.Timer}:{frequency}:{dutyCycle} returned {result}");
 
                 return result;
             }
 
-            public static bool Stop(uint channel)
+            public static bool Stop(IPwmChannelInfo pwmChannelInfo)
             {
                 var data = new Nuttx.UpdPwmCmd
                 {
-                    Timer = channel
+                    Timer = pwmChannelInfo.Timer,
+                    Channel = pwmChannelInfo.TimerChannel
                 };
 
                 return UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmStop, data);
