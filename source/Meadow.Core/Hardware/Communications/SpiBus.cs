@@ -73,14 +73,20 @@ namespace Meadow.Hardware
             return new SpiBus();
         }
 
+        /// <summary>
+        ///  The SPI bus speed in kHz
+        ///  This will set the speed the closest of the following values:
+        ///  375kHz, 750kHz, 1.5MHz, 3Mhz, 6Mhz, 12Mhz, 24Mhz, 48Mhz
+        ///  Default value is 375kHz
+        /// </summary>
         public long BusSpeed
         {
-            get => _speed;
+            get => _speed / 1000;
             set
             {
                 if (value == _speed) return;
                 Output.WriteIf(_showSpiDebug, $"Setting bus speed to {value}");
-                var actual = this.SetFrequency(value);
+                var actual = this.SetFrequency(value * 1000);
                 _speed = actual;
             }
         }
