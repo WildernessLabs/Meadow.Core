@@ -1,17 +1,18 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.645
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDA0F516-977E-4F27-9434-9A0961EF91D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClockPInvoke.Test", "Tests\ClockPInvoke.Test\ClockPInvoke.Test.csproj", "{E4271183-8172-466F-8AF8-3ADDEBA64BB1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloLED", "Tests\HelloLED\HelloLED.csproj", "{E4E2339E-D040-4467-9EB2-A36143B90CB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GpioInterrogation", "Tests\GpioInterrogation\GpioInterrogation.csproj", "{1EBFD0E5-F32C-46CD-9A60-0143EB8B8FA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GpioInterrogation", "Tests\GpioInterrogation\GpioInterrogation.csproj", "{1EBFD0E5-F32C-46CD-9A60-0143EB8B8FA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnalogObserver", "Tests\AnalogObserver\AnalogObserver.csproj", "{8F45B165-1534-4160-A079-2B2E58A840B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalogObserver", "Tests\AnalogObserver\AnalogObserver.csproj", "{8F45B165-1534-4160-A079-2B2E58A840B5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "F7_Micro", "F7_Micro", "{713BD65C-881B-45B1-9729-42BD2B9593FB}"
 EndProject
@@ -25,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SPITest", "Tests\SPITest\SP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Walking_DigitalOutputs", "Tests\F7_Micro\Walking_DigitalOutputs\Walking_DigitalOutputs.csproj", "{E8407C33-AED5-44A4-96A5-974E7A954E11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleAnalogInputs", "Tests\SampleAnalogInputs\SampleAnalogInputs.csproj", "{D81924A3-B842-479B-875C-37D693E335A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleAnalogInputs", "Tests\SampleAnalogInputs\SampleAnalogInputs.csproj", "{D81924A3-B842-479B-875C-37D693E335A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterruptTest", "Tests\InterruptTest\InterruptTest.csproj", "{F9203F04-5AE8-4780-BA62-8CEB08EFC50F}"
 EndProject
@@ -33,9 +34,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic_Threading", "Tests\Ba
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic_Tasks", "Tests\Basic_Tasks\Basic_Tasks.csproj", "{67BD4E4C-9EB2-49CE-B071-D114CF77253A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic_AnalogReads", "Tests\Basic_AnalogReads\Basic_AnalogReads.csproj", "{A35784A6-CE91-4AAC-B861-9EA6B9411FEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic_AnalogReads", "Tests\Basic_AnalogReads\Basic_AnalogReads.csproj", "{A35784A6-CE91-4AAC-B861-9EA6B9411FEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ButtonEvents", "Tests\F7_Micro\ButtonEvents\ButtonEvents.csproj", "{7E145413-338D-45C0-B367-3D12D419519B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ButtonEvents", "Tests\F7_Micro\ButtonEvents\ButtonEvents.csproj", "{7E145413-338D-45C0-B367-3D12D419519B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalInputPort_IObservable_Sample", "Tests\DigitalInputPort_IObservable_Sample\DigitalInputPort_IObservable_Sample.csproj", "{4D228F7E-709A-4577-97A8-BD90EF62C496}"
 EndProject
@@ -146,6 +147,9 @@ Global
 		{00B22D2E-18A0-4BDC-A3D7-5FF33377ED70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00B22D2E-18A0-4BDC-A3D7-5FF33377ED70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E4271183-8172-466F-8AF8-3ADDEBA64BB1} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{E4E2339E-D040-4467-9EB2-A36143B90CB7} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
@@ -169,5 +173,8 @@ Global
 		{3173C381-839B-4458-A2E9-D2EF326ACF2D} = {713BD65C-881B-45B1-9729-42BD2B9593FB}
 		{71571663-A35C-403A-9511-F36FAE91694B} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{00B22D2E-18A0-4BDC-A3D7-5FF33377ED70} = {713BD65C-881B-45B1-9729-42BD2B9593FB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}
 	EndGlobalSection
 EndGlobal
