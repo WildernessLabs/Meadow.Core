@@ -78,14 +78,34 @@ namespace Meadow.Hardware
                     var actual = this.SetFrequency(value.SpeedKHz * 1000);
                 }
 
+                var modeChange = false;
+
                 if (value.Polarity != Configuration.Polarity)
                 {
-                    throw new NotImplementedException("SPI Clock Polarity is not yet implemented on this platform");
+                    modeChange = true;
                 }
 
                 if (value.Phase != Configuration.Phase)
                 {
-                    throw new NotImplementedException("SPI Clock Phase is not yet implemented on this platform");
+                    modeChange = true;
+                }
+
+                if (modeChange)
+                {
+                    var mode = 0;
+                    switch (Configuration.Phase)
+                    {
+                        case ClockPhase.CPHA_0:
+                            if (Configuration.Polarity == ClockPolarity.CPOL_0) mode = 0;
+                            else mode = 2;
+                            break;
+                        case ClockPhase.CPHA_1:
+                            if (Configuration.Polarity == ClockPolarity.CPOL_0) mode = 1;
+                            else mode = 3;
+                            break;
+                    }
+
+                    this.SetMode(mode);
                 }
 
                 _clockConfig = value;
@@ -332,6 +352,20 @@ namespace Meadow.Hardware
                     24000,
                     48000
                 };
+        }
+
+        private void SetMode(int mode)
+        {
+            var command = new Nuttx.UpdSPIModeCommand()
+            {
+                BusNumber = BusNumber,
+                Mode = mode
+            };
+
+            Output.WriteLineIf(_showSpiDebug, "+SetMode");
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} mode to {command.Mode}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIMode, ref command);
+            Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
         }
 
         private long SetFrequency(long desiredSpeed)
