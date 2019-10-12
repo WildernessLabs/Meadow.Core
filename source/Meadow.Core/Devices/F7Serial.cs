@@ -1,9 +1,15 @@
-﻿namespace Meadow.Devices
+﻿using System;
+using System.Text;
+
+namespace Meadow.Devices
 {
-    internal class F7Serial
+    public class F7Serial
     {
         public static string[] GetAvailablePorts()
         {
+            var sb = new StringBuilder(1024);
+            UPD.Ioctl(Core.Interop.Nuttx.UpdIoctlFn.DirEnum, sb);
+            Console.WriteLine($"ports: {sb}");
             return new string[0];
         }
     }

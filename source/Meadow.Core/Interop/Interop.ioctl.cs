@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Meadow.Core
 {
@@ -75,6 +76,9 @@ namespace Meadow.Core
             
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, IntPtr pData);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, StringBuilder sb);
 
             /// <summary>
             /// Configures the Universal Platofrm Driver to set PWM APB clock.

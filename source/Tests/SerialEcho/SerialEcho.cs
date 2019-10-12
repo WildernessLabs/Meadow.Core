@@ -15,6 +15,7 @@ namespace SerialEcho
 
         void Run()
         {
+            F7Serial.GetAvailablePorts();
         }
     }
 }
