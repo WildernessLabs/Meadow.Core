@@ -71,41 +71,37 @@ namespace Meadow.Hardware
             get => _clockConfig;
             internal set
             {
-                if (value == null) throw new ArgumentNullException();
+                if (value == null) { throw new ArgumentNullException(); }
 
                 if (value.SpeedKHz != Configuration.SpeedKHz)
                 {
-                    var actual = this.SetFrequency(value.SpeedKHz * 1000);
+                    SetFrequency(value.SpeedKHz * 1000);
+                    Configuration.SpeedKHz = value.SpeedKHz;
                 }
 
                 var modeChange = false;
 
-                if (value.Polarity != Configuration.Polarity)
-                {
-                    modeChange = true;
-                }
-
-                if (value.Phase != Configuration.Phase)
+                if(value.Polarity != Configuration.Polarity ||
+                        value.Phase != Configuration.Phase)
                 {
                     modeChange = true;
                 }
 
                 if (modeChange)
                 {
-                    var mode = 0;
-                    switch (Configuration.Phase)
+                    int mode = 0;
+
+                    switch (value.Phase)
                     {
                         case ClockPhase.CPHA_0:
-                            if (Configuration.Polarity == ClockPolarity.CPOL_0) mode = 0;
-                            else mode = 2;
+                            mode = (value.Polarity == ClockPolarity.CPOL_0) ? 0 : 2;
                             break;
                         case ClockPhase.CPHA_1:
-                            if (Configuration.Polarity == ClockPolarity.CPOL_0) mode = 1;
-                            else mode = 3;
+                            mode = (value.Polarity == ClockPolarity.CPOL_0) ? 1 : 3;
                             break;
                     }
 
-                    this.SetMode(mode);
+                    SetMode(mode);
                 }
 
                 _clockConfig = value;
@@ -354,8 +350,10 @@ namespace Meadow.Hardware
                 };
         }
 
-        private void SetMode(int mode)
+        public void SetMode(int mode)
         {
+            Console.WriteLine($"SetMode {mode}");
+
             var command = new Nuttx.UpdSPIModeCommand()
             {
                 BusNumber = BusNumber,
