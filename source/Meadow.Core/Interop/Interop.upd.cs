@@ -23,6 +23,7 @@ namespace Meadow.Core
 
                 SPIData = 31,
                 SPISpeed = 32,
+                SPIMode = 33,
 
                 DirEnum = 41,
 
@@ -93,6 +94,12 @@ namespace Meadow.Core
                 /// 375000
                 /// </remarks>
                 public long Frequency;
+            }
+
+            public struct UpdSPIModeCommand
+            {
+                public int BusNumber;
+                public int Mode;
             }
 
             public struct UpdPwmCmd

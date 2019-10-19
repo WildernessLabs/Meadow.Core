@@ -15,21 +15,11 @@ namespace Meadow.Hardware
     /// </summary>
     public partial class SpiBus : ISpiBus
     {
-        private bool _showSpiDebug = true;
+        private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private long _speed;
+        private ClockConfiguration _clockConfig = new ClockConfiguration();
 
         internal int BusNumber { get; set; }
-
-        ///// <summary>
-        ///// SPI bus object.
-        ///// </summary>
-        //private static Spi _spi;
-
-        /// <summary>
-        /// Configuration to use for this instance of the SPIBus.
-        /// </summary>
-        public SpiBus.ConfigurationOptions Configuration { get; protected set; }
 
         /// <summary>
         /// Default constructor for the SPIBus.
@@ -74,23 +64,47 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        ///  The SPI bus speed in kHz
-        ///  This will set the speed the closest of the following values:
-        ///  375kHz, 750kHz, 1.5MHz, 3Mhz, 6Mhz, 12Mhz, 24Mhz, 48Mhz
-        ///  Default value is 375kHz
+        /// Configuration to use for this instance of the SPIBus.
         /// </summary>
-        /// <remarks>
-        /// The set of supported speeds is programmatically available in the <b>SupportedSpeeds</b> property.
-        /// </remarks>
-        public long BusSpeed
+        public SpiBus.ClockConfiguration Configuration
         {
-            get => _speed / 1000;
-            set
+            get => _clockConfig;
+            internal set
             {
-                if (value == _speed) return;
-                Output.WriteIf(_showSpiDebug, $"Setting bus speed to {value}");
-                var actual = this.SetFrequency(value * 1000);
-                _speed = actual;
+                if (value == null) { throw new ArgumentNullException(); }
+
+                if (value.SpeedKHz != Configuration.SpeedKHz)
+                {
+                    SetFrequency(value.SpeedKHz * 1000);
+                    Configuration.SpeedKHz = value.SpeedKHz;
+                }
+
+                var modeChange = false;
+
+                if(value.Polarity != Configuration.Polarity ||
+                        value.Phase != Configuration.Phase)
+                {
+                    modeChange = true;
+                }
+
+                if (modeChange)
+                {
+                    int mode = 0;
+
+                    switch (value.Phase)
+                    {
+                        case ClockPhase.CPHA_0:
+                            mode = (value.Polarity == ClockPolarity.CPOL_0) ? 0 : 2;
+                            break;
+                        case ClockPhase.CPHA_1:
+                            mode = (value.Polarity == ClockPolarity.CPOL_0) ? 1 : 3;
+                            break;
+                    }
+
+                    SetMode(mode);
+                }
+
+                _clockConfig = value;
             }
         }
 
@@ -136,6 +150,7 @@ namespace Meadow.Hardware
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
 
             _busSemaphore.Wait();
+            Output.WriteLineIf(_showSpiDebug, $" +SendData");
 
             try
             {
@@ -153,8 +168,9 @@ namespace Meadow.Hardware
                     BusNumber = BusNumber
                 };
 
-                Output.WriteLineIf(_showSpiDebug, $" +SendData {BitConverter.ToString(data)}");
+                Output.WriteLineIf(_showSpiDebug, $" sending {data.Length} bytes: {BitConverter.ToString(data)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                Output.WriteLineIf(_showSpiDebug, $" send complete");
 
                 if (chipSelect != null)
                 {
@@ -170,6 +186,7 @@ namespace Meadow.Hardware
                 {
                     gch.Free();
                 }
+                Output.WriteLineIf(_showSpiDebug, $" -SendData");
             }
         }
 
@@ -333,6 +350,22 @@ namespace Meadow.Hardware
                 };
         }
 
+        public void SetMode(int mode)
+        {
+            Console.WriteLine($"SetMode {mode}");
+
+            var command = new Nuttx.UpdSPIModeCommand()
+            {
+                BusNumber = BusNumber,
+                Mode = mode
+            };
+
+            Output.WriteLineIf(_showSpiDebug, "+SetMode");
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} mode to {command.Mode}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIMode, ref command);
+            Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
+        }
+
         private long SetFrequency(long desiredSpeed)
         {
             // TODO: move this to the F7
@@ -345,8 +378,9 @@ namespace Meadow.Hardware
             };
 
             Output.WriteLineIf(_showSpiDebug, "+SetFrequency");
-            Output.WriteLineIf(_showSpiDebug, $" setting speed to {desiredSpeed}");
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} speed to {command.Frequency}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPISpeed, ref command);
+            Output.WriteLineIf(_showSpiDebug, $" speed set to {desiredSpeed}");
 
             return speed;
         }

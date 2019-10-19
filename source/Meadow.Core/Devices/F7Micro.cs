@@ -118,7 +118,20 @@ namespace Meadow.Devices
         {
             var bus = SpiBus.From(clock, mosi, miso);
             bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
-            bus.BusSpeed = speed;
+            bus.Configuration.SpeedKHz = speed;
+            return bus;
+        }
+
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            SpiBus.ClockConfiguration config
+        )
+        {
+            var bus = SpiBus.From(clock, mosi, miso);
+            bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
+            bus.Configuration = config;
             return bus;
         }
 
