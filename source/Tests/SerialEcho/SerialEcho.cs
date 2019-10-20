@@ -15,7 +15,13 @@ namespace SerialEcho
 
         void Run()
         {
-            F7Serial.GetAvailablePorts();
+            Console.WriteLine("Avaliable ports:");
+            var ports = F7Serial.GetAvailablePorts();
+            foreach (var p in ports)
+            {
+                Console.WriteLine($"\t{p}");
+            }
+            Console.WriteLine("Opening...");
         }
     }
 }

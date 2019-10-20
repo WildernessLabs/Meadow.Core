@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Meadow.Core
 {
@@ -109,6 +110,21 @@ namespace Meadow.Core
                 // Members below only applicable for PwmStart cmd.
                 public uint Frequency;
                 public uint Duty;
+            }
+
+            /*
+             struct upd_dir_enum_cmd
+             {
+                char* root,
+                char* result,
+                uint32_t resultlength
+             }
+            */
+            public struct UpdEnumDirCmd
+            {
+                public IntPtr RootFolder;
+                public IntPtr Buffer;
+                public int BufferLength;
             }
 
             /*

@@ -173,9 +173,9 @@ namespace Meadow.Devices
             return Nuttx.ioctl(DriverHandle, request, ref configFlags);
         }
 
-        public static int Ioctl(Nuttx.UpdIoctlFn request, StringBuilder sb)
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdEnumDirCmd cmd)
         {
-            return Nuttx.ioctl(DriverHandle, request, sb);
+            return Nuttx.ioctl(DriverHandle, request, ref cmd);
         }
 
         public static class PWM
