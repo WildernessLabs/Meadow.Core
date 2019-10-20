@@ -95,7 +95,7 @@ namespace Meadow.Devices
         }
 
         public ISpiBus CreateSpiBus(
-            long speed = 0 // this will default to the minimum capable speed
+            long speed = 375 // this will default to the minimum capable speed of 375kHz
         )
         {
             return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
@@ -103,7 +103,7 @@ namespace Meadow.Devices
 
         public ISpiBus CreateSpiBus(
             IPin[] pins,
-            long speed = 0// this will default to the minimum capable speed
+            long speed = 375// this will default to the minimum capable speed of 375kHz
         )
         {
             return CreateSpiBus(pins[0], pins[1], pins[2], speed);
@@ -113,12 +113,25 @@ namespace Meadow.Devices
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speed = 0// this will default to the minimum capable speed
+            long speed = 375// this will default to the minimum capable speed of 375kHz
         )
         {
             var bus = SpiBus.From(clock, mosi, miso);
             bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
-            bus.BusSpeed = speed;
+            bus.Configuration.SpeedKHz = speed;
+            return bus;
+        }
+
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            SpiBus.ClockConfiguration config
+        )
+        {
+            var bus = SpiBus.From(clock, mosi, miso);
+            bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
+            bus.Configuration = config;
             return bus;
         }
 
