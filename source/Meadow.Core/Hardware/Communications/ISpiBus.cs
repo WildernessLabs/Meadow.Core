@@ -13,7 +13,7 @@ namespace Meadow.Hardware
     {
         long[] SupportedSpeeds { get; }
 
-        SpiBus.ClockConfiguration Configuration { get; }
+        SpiClockConfiguration Configuration { get; }
 
         void SendData(IDigitalOutputPort chipSelect, params byte[] data);
         void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data);
