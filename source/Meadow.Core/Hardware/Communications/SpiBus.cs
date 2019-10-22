@@ -282,14 +282,18 @@ namespace Meadow.Hardware
         /// </remarks>
         public byte[] ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] dataToWrite)
         {
-            var rxBuffer = new byte[dataToWrite.Length];
-            var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-            var txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
-
             _busSemaphore.Wait();
+
+            var rxBuffer = new byte[dataToWrite.Length];
+
+            GCHandle rxGch = default(GCHandle);
+            GCHandle txGch = default(GCHandle);
 
             try
             {
+                rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+                txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
+
                 if (chipSelect != null)
                 {
                     // activate the chip select
