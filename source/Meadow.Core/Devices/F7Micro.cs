@@ -126,7 +126,7 @@ namespace Meadow.Devices
             IPin clock,
             IPin mosi,
             IPin miso,
-            SpiBus.ClockConfiguration config
+            SpiClockConfiguration config
         )
         {
             var bus = SpiBus.From(clock, mosi, miso);

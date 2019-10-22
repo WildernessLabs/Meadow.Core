@@ -17,7 +17,7 @@ namespace Meadow.Hardware
     {
         private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private ClockConfiguration _clockConfig = new ClockConfiguration();
+        private SpiClockConfiguration _clockConfig = new SpiClockConfiguration();
 
         internal int BusNumber { get; set; }
 
@@ -66,7 +66,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Configuration to use for this instance of the SPIBus.
         /// </summary>
-        public SpiBus.ClockConfiguration Configuration
+        public SpiClockConfiguration Configuration
         {
             get => _clockConfig;
             internal set
@@ -93,11 +93,11 @@ namespace Meadow.Hardware
 
                     switch (value.Phase)
                     {
-                        case ClockPhase.CPHA_0:
-                            mode = (value.Polarity == ClockPolarity.CPOL_0) ? 0 : 2;
+                        case SpiClockConfiguration.ClockPhase.Zero:
+                            mode = (value.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 0 : 2;
                             break;
-                        case ClockPhase.CPHA_1:
-                            mode = (value.Polarity == ClockPolarity.CPOL_0) ? 1 : 3;
+                        case SpiClockConfiguration.ClockPhase.One:
+                            mode = (value.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 1 : 3;
                             break;
                     }
 
