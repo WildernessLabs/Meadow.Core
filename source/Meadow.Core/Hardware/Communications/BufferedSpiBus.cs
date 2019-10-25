@@ -33,9 +33,9 @@ namespace Meadow.Hardware
             _rxBuffer = new byte[bufferSize];
             _rxGch = GCHandle.Alloc(_rxBuffer, GCHandleType.Pinned);
 
-            Configuration = config;
-
             BusNumber = GetSpiBusNumberForPinName(clock);
+
+            Configuration = config;
         }
 
         public void Dispose()
