@@ -336,6 +336,111 @@ namespace Meadow.Hardware
             }
         }
 
+        public unsafe void Exchange(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
+        {
+            if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
+            if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+            if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
+
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                fixed (byte* tx = sendBuffer)
+                fixed (byte* rx = receiveBuffer)
+                {
+                    var command = new Nuttx.UpdSPIDataCommand()
+                    {
+                        BufferLength = sendBuffer.Length,
+                        TxBuffer = (IntPtr)tx,
+                        RxBuffer = (IntPtr)rx,
+                        BusNumber = BusNumber
+                    };
+
+                    Output.WriteLineIf(_showSpiDebug, "+Exchange");
+                    Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                    Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
+
+                    if (chipSelect != null)
+                    {
+                        // deactivate the chip select
+                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                    }
+                }
+            }
+            finally
+            {
+                _busSemaphore.Release();
+            }
+        }
+
+        /*
+         * // same as above, but with GCHandle, not unsafe
+        public void Exchange(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
+        {
+            if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
+            if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+            if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
+
+            GCHandle rxGch = default(GCHandle);
+            GCHandle txGch = default(GCHandle);
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                rxGch = GCHandle.Alloc(sendBuffer, GCHandleType.Pinned);
+                txGch = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
+
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                var command = new Nuttx.UpdSPIDataCommand()
+                {
+                    BufferLength = sendBuffer.Length,
+                    TxBuffer = txGch.AddrOfPinnedObject(),
+                    RxBuffer = rxGch.AddrOfPinnedObject(),
+                    BusNumber = BusNumber
+                };
+
+                Output.WriteLineIf(_showSpiDebug, "+Exchange");
+                Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                }
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (rxGch.IsAllocated)
+                {
+                    rxGch.Free();
+                }
+                if (txGch.IsAllocated)
+                {
+                    txGch.Free();
+                }
+            }
+        }
+        */
+
         /// <summary>
         /// Gets an array of all of the speeds (in kHz) that the SPI bus supports.
         /// </summary>
