@@ -36,7 +36,7 @@ namespace Meadow.Hardware
 
         public void Open()
         {
-            var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite);
+            var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput);
             if (handle.ToInt32() < 0)
             {
                 // TODO: determine the reason for failure and pass that upstream
@@ -101,10 +101,13 @@ namespace Meadow.Hardware
             var buf = new byte[count];
 
             var result = Nuttx.read(_driverHandle, buf, buf.Length);
-            Console.WriteLine($"  rx result: {result}");
+
             if (result < 0)
             {
                 // TODO: handle error
+                var errno = Devices.UPD.GetLastError();
+                Console.WriteLine($"  rx result: {result} errno: {errno}");
+
                 return 0;
             }
             else
