@@ -12,6 +12,12 @@
    <Version>0.8.5</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
  </PropertyGroup>
+ <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+ </PropertyGroup>
+ <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+ </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.1.1" />
   </ItemGroup>
