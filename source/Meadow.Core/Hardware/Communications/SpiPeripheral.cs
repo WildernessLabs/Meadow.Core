@@ -71,10 +71,11 @@ namespace Meadow.Hardware
             var totalExchange = new byte[write.Length + length];
             Array.Copy(write, totalExchange, write.Length);
 
-            var rx = Bus.ExchangeData(ChipSelect, totalExchange);
+            var rxBuffer = new byte[totalExchange.Length];
+            Bus.ExchangeData(ChipSelect, ChipSelectMode.ActiveLow, write, rxBuffer);
 
             var result = new byte[length];
-            Array.ConstrainedCopy(rx, write.Length - 1, result, 0, result.Length);
+            Array.ConstrainedCopy(rxBuffer, write.Length - 1, result, 0, result.Length);
 
             return result;
         }
@@ -95,7 +96,7 @@ namespace Meadow.Hardware
             var buffer = new byte[length + 1];
             buffer[0] = address;
 
-            var rx = Bus.ExchangeData(ChipSelect, buffer);
+            var rx = WriteRead(new byte[] { address }, (ushort)(length + 1));
 
             // skip past the byte where we clocked out the register address
             var registerData = rx.Skip(1).Take(length).ToArray();

@@ -255,136 +255,18 @@ namespace Meadow.Hardware
         /// <summary>
         /// Does a data exchange on the SPI bus.
         /// </summary>
-        /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
-        /// <param name="dataToWrite">Data to be written</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  The length of the <b>dataToWrite</b> parameter dictates how many bytes will be exchanged.
-        /// The <b>dataToWrite</b> buffer will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
-        /// The data buffer returned from ExchangeData will be the same size as the <b>dataToWrite</b> parameter.  If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
-        /// </remarks>
-        public byte[] ExchangeData(IDigitalOutputPort chipSelect, params byte[] dataToWrite)
-        {
-            return ExchangeData(chipSelect, ChipSelectMode.ActiveLow, dataToWrite);
-        }
-
-        /// <summary>
-        /// Does a data exchange on the SPI bus.
-        /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
-        /// <param name="dataToWrite">Data to be written</param>
+        /// <param name="sendBuffer">Buffer holding data to be written</param>
+        /// <param name="receiveBuffer">Buffer where the received data will be written</param>
         /// <returns></returns>
         /// <remarks>
-        /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  The length of the <b>dataToWrite</b> parameter dictates how many bytes will be exchanged.
-        /// The <b>dataToWrite</b> buffer will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
-        /// The data buffer returned from ExchangeData will be the same size as the <b>dataToWrite</b> parameter.  If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
+        /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
+        /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
+        /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
+        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
         /// </remarks>
-        public byte[] ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] dataToWrite)
-        {
-            _busSemaphore.Wait();
-
-            var rxBuffer = new byte[dataToWrite.Length];
-
-            GCHandle rxGch = default(GCHandle);
-            GCHandle txGch = default(GCHandle);
-
-            try
-            {
-                rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-                txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
-
-                if (chipSelect != null)
-                {
-                    // activate the chip select
-                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
-                }
-
-                var command = new Nuttx.UpdSPIDataCommand()
-                {
-                    BufferLength = dataToWrite.Length,
-                    TxBuffer = txGch.AddrOfPinnedObject(),
-                    RxBuffer = rxGch.AddrOfPinnedObject(),
-                    BusNumber = BusNumber
-                };
-
-                Output.WriteLineIf(_showSpiDebug, "+ExchangeData");
-                Output.WriteLineIf(_showSpiDebug, $" Sending {BitConverter.ToString(dataToWrite)}");
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                Output.WriteLineIf(_showSpiDebug, $" Received {BitConverter.ToString(rxBuffer)}");
-
-                if (chipSelect != null)
-                {
-                    // deactivate the chip select
-                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
-                }
-
-                return rxBuffer;
-            }
-            finally
-            {
-                _busSemaphore.Release();
-
-                if (rxGch.IsAllocated)
-                {
-                    rxGch.Free();
-                }
-                if (txGch.IsAllocated)
-                {
-                    txGch.Free();
-                }
-            }
-        }
-
-        public unsafe void Exchange(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
-        {
-            if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
-            if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
-            if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
-
-
-            _busSemaphore.Wait();
-
-            try
-            {
-                if (chipSelect != null)
-                {
-                    // activate the chip select
-                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
-                }
-
-                fixed (byte* tx = sendBuffer)
-                fixed (byte* rx = receiveBuffer)
-                {
-                    var command = new Nuttx.UpdSPIDataCommand()
-                    {
-                        BufferLength = sendBuffer.Length,
-                        TxBuffer = (IntPtr)tx,
-                        RxBuffer = (IntPtr)rx,
-                        BusNumber = BusNumber
-                    };
-
-                    Output.WriteLineIf(_showSpiDebug, "+Exchange");
-                    Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
-                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                    Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
-
-                    if (chipSelect != null)
-                    {
-                        // deactivate the chip select
-                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
-                    }
-                }
-            }
-            finally
-            {
-                _busSemaphore.Release();
-            }
-        }
-
-        /*
-         * // same as above, but with GCHandle, not unsafe
-        public void Exchange(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
+        public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
         {
             if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
             if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
@@ -439,7 +321,6 @@ namespace Meadow.Hardware
                 }
             }
         }
-        */
 
         /// <summary>
         /// Gets an array of all of the speeds (in kHz) that the SPI bus supports.
