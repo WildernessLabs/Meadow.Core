@@ -152,7 +152,7 @@ namespace Meadow.Hardware
             Console.WriteLine($"  Control Flags: {settings.c_cflag}");
         }
 
-        private unsafe void SetPortSettings()
+        private void SetPortSettings()
         {
             var settings = new Nuttx.Termios();
             // get the current settings
@@ -211,7 +211,7 @@ namespace Meadow.Hardware
                 settings.c_speed = BaudRate;
 
                 Console.WriteLine($"  Setting port settings...");
-                result = Nuttx.ioctl(_driverHandle, TCSETS, (IntPtr)(&settings));
+                result = Nuttx.ioctl(_driverHandle, TCSETS, gch.AddrOfPinnedObject());
                 if (result < 0)
                 {
                     var errno = Devices.UPD.GetLastError();
