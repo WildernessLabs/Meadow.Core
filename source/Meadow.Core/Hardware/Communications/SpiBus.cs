@@ -279,8 +279,8 @@ namespace Meadow.Hardware
 
             try
             {
-                rxGch = GCHandle.Alloc(sendBuffer, GCHandleType.Pinned);
-                txGch = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
+                txGch = GCHandle.Alloc(sendBuffer, GCHandleType.Pinned);
+                rxGch = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
 
                 if (chipSelect != null)
                 {
