@@ -268,6 +268,26 @@ namespace Meadow.Hardware
         /// </remarks>
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
         {
+            ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
+        }
+
+        /// <summary>
+        /// Does a data exchange on the SPI bus.
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="sendBuffer">Buffer holding data to be written</param>
+        /// <param name="receiveBuffer">Buffer where the received data will be written</param>
+        /// <param name="bytesToExchange">The number of bytes to exchange, between 1 and the length of the buffer parameters</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
+        /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
+        /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
+        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
+        /// </remarks>
+        public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer, int bytesToExchange)
+        {
             if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
             if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
             if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
@@ -279,8 +299,8 @@ namespace Meadow.Hardware
 
             try
             {
-                rxGch = GCHandle.Alloc(sendBuffer, GCHandleType.Pinned);
-                txGch = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
+                txGch = GCHandle.Alloc(sendBuffer, GCHandleType.Pinned);
+                rxGch = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
 
                 if (chipSelect != null)
                 {
@@ -290,7 +310,7 @@ namespace Meadow.Hardware
 
                 var command = new Nuttx.UpdSPIDataCommand()
                 {
-                    BufferLength = sendBuffer.Length,
+                    BufferLength = bytesToExchange,
                     TxBuffer = txGch.AddrOfPinnedObject(),
                     RxBuffer = rxGch.AddrOfPinnedObject(),
                     BusNumber = BusNumber
