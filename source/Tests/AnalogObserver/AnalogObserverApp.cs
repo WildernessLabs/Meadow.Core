@@ -70,7 +70,6 @@ namespace AnalogObserver
                 }));
 
             // spin up the ADC sampling engine
-            // TODO
             _analogIn.StartSampling();
 
         }
