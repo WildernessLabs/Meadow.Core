@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines a generic proximity sensor
     /// </summary>
-    public interface IRangeFinder
+    public interface IRangeFinder : ISensor
     {
         /// <summary>
         /// Returns distance current value

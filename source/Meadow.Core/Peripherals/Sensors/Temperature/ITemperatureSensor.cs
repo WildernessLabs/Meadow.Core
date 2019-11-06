@@ -1,11 +1,12 @@
-﻿using Meadow.Peripherals.Sensors;
+﻿using System;
+using Meadow.Peripherals.Sensors;
 
 namespace Meadow.Peripherals.Temperature
 {
     /// <summary>
     /// Temperature sensor interface requirements.
     /// </summary>
-    public interface ITemperatureSensor : ISensor
+    public interface ITemperatureSensor : ISensor, IObservable<FloatChangeResult>
     {
         /// <summary>
         /// Last value read from the Temperature sensor.
@@ -13,15 +14,8 @@ namespace Meadow.Peripherals.Temperature
         float Temperature { get; }
 
         /// <summary>
-        /// Threshold value for the changed notification event.
+        /// Raised when a change in temperature is detected.
         /// </summary>
-        float TemperatureChangeNotificationThreshold { get; set; }
-
-        /// <summary>
-        /// The TemperatureChanged event will be raised when the difference (absolute value)
-        /// between the current Temperature reading and the last notified reading is greater
-        /// than the TemperatureChangeNotificationThreshold.
-        /// </summary>
-        event SensorFloatEventHandler TemperatureChanged;
+        event EventHandler<FloatChangeResult> TemperatureChanged;
     }
 }
