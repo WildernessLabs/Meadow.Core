@@ -27,7 +27,7 @@ namespace Meadow.Peripherals.Sensors.Moisture
         Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
 
         /// <summary>
-        /// Starts continuously sampling the temperature. Also triggers the
+        /// Starts continuously sampling the moisture level. Also triggers the
         /// events to fire, and IObservable subscribers to get notified.
         /// </summary>
         /// <param name="sampleCount"></param>
@@ -39,7 +39,7 @@ namespace Meadow.Peripherals.Sensors.Moisture
             int sampleSleepDuration = 0);
 
         /// <summary>
-        /// Stops sampling the temperature.
+        /// Stops sampling the moisture level.
         /// </summary>
         void StopUpdating();
     }
