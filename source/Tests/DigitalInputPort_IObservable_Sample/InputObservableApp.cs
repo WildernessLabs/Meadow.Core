@@ -23,21 +23,21 @@ namespace DigitalInputPort_IObservable_Sample
 
             // Traditional event
             _input.Changed += (object sender, DigitalInputPortEventArgs e) => {
-                Console.WriteLine($"Old school event raised; Time: {e.Time.Millisecond}, Value: {e.Value}");
+                Console.WriteLine($"Old school event raised; Time: {e.New.Millisecond}, Value: {e.Value}");
             };
 
             // this illustrates using a FilterableObserver. Note that the filter is an optional
             // parameter, if you're interested in all notifications, don't pass a filter/predicate.
             // in this case, we filter on events by time, and only notify if the new event is > 1 second from
             // the last event. 
-            _input.Subscribe(new FilterableObserver<DigitalInputPortEventArgs>(
+            _input.Subscribe(new FilterableObserver<DigitalInputPortEventArgs, DateTime>(
                 e => {
-                    Console.WriteLine($"Observer Observing the Observable, Observably speaking, Time: {e.Time.Millisecond}, Value: {e.Value}");
+                    Console.WriteLine($"Observer Observing the Observable, Observably speaking, Time: {e.New.Millisecond}, Value: {e.Value}");
                 },
                 // Optional filter paramter, showing a 1 second filter, i.e., only notify
                 // if the new event is > 1 second from last.
                 f => {
-                    return (f.Time - f.PreviousTime > new TimeSpan(0, 0, 0, 0, 1000));
+                    return (f.Delta > new TimeSpan(0, 0, 0, 0, 1000));
                 }));
 
             Console.WriteLine("Got here 3.");

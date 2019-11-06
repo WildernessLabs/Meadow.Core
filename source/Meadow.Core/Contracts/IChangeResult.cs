@@ -15,10 +15,10 @@ namespace Meadow
         /// Previous value.
         /// </summary>
         T Old { get; set; }
-        /// <summary>
-        /// Change in value between `New` and `Old`.
-        /// </summary>
-        T Delta { get; }
+        ///// <summary>
+        ///// Change in value between `New` and `Old`.
+        ///// </summary>
+        //object Delta { get; }
     }
 
     /// <summary>
@@ -31,5 +31,12 @@ namespace Meadow
         /// Change in value, as a percentage, between `New` and `Old`.
         /// </summary>
         T DeltaPercent { get; }
+
+        T Delta {get;}
+    }
+
+    public interface ITimeChangeResult : IChangeResult<DateTime>
+    {
+        TimeSpan Delta { get; }
     }
 }
