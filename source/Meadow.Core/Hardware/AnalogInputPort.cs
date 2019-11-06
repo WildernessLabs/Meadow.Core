@@ -172,14 +172,19 @@ namespace Meadow.Hardware
                                 base.VoltageSampleBuffer.Add(sampleBuffer[i]);
                             }
 
+                            var newVoltage = AverageVoltageBufferValue;
+
                             // create a result set
                             FloatChangeResult result = new FloatChangeResult {
-                                New = AverageVoltageBufferValue,
+                                New = newVoltage,
                                 Old = _previousVoltageReading,
                             };
 
                             // raise our events and notify our subs
                             base.RaiseChangedAndNotify(result);
+
+                            // save the previous voltage
+                            _previousVoltageReading = newVoltage;
 
                             // reset our counter
                             currentSampleCount = 0;
@@ -242,6 +247,7 @@ namespace Meadow.Hardware
             
         }
 
+        //TODO: these are in the base, so i think they need to be removed
         public IDisposable Subscribe(IObserver<FloatChangeResult> observer)
         {
             if (!_observers.Contains(observer))
