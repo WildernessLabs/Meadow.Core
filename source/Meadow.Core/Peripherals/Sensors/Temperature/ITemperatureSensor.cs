@@ -16,6 +16,6 @@ namespace Meadow.Peripherals.Temperature
         /// <summary>
         /// Raised when a change in temperature is detected.
         /// </summary>
-        event EventHandler<FloatChangeResult> TemperatureChanged;
+        event EventHandler<FloatChangeResult> Changed;
     }
 }
