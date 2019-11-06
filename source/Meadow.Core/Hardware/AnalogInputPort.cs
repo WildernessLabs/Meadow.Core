@@ -175,10 +175,7 @@ namespace Meadow.Hardware
                             var newVoltage = AverageVoltageBufferValue;
 
                             // create a result set
-                            FloatChangeResult result = new FloatChangeResult {
-                                New = newVoltage,
-                                Old = _previousVoltageReading,
-                            };
+                            FloatChangeResult result = new FloatChangeResult(newVoltage, _previousVoltageReading);
 
                             // raise our events and notify our subs
                             base.RaiseChangedAndNotify(result);

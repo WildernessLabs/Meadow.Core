@@ -8,5 +8,11 @@ namespace Meadow
 
         public abstract T Delta { get; }
         public abstract T DeltaPercent { get; }
+
+        public NumericChangeResultBase(T newValue, T oldValue)
+        {
+            New = newValue;
+            Old = oldValue;
+        }
     }
 }
