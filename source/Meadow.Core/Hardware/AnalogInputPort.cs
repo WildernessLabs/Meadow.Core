@@ -121,9 +121,9 @@ namespace Meadow.Hardware
             int sampleIntervalDuration = 40,
             int readIntervalDuration = 100)
         {
-            // thread safety
-            lock (_lock)
-            {
+            //// thread safety
+            //lock (_lock)
+            //{
                 if (IsSampling) return;
 
                 // state muh-cheen
@@ -193,12 +193,11 @@ namespace Meadow.Hardware
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            //Console.WriteLine($"Sleeping for {readIntervalDuration}ms");
                             await Task.Delay(readIntervalDuration);
                         }
                     }
-                }, SamplingTokenSource.Token).Wait();
-            }
+                }, SamplingTokenSource.Token);
+            //}
         }
 
         /// <summary>
