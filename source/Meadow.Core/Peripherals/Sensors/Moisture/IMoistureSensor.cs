@@ -43,7 +43,7 @@ namespace Meadow.Peripherals.Sensors.Moisture
         void StartUpdating(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int readIntervalDuration = 0);
+            int readIntervalDuration = 1000);
 
         /// <summary>
         /// Stops sampling the moisture level.
