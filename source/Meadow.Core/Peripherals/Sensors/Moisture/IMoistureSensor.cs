@@ -13,7 +13,7 @@ namespace Meadow.Peripherals.Sensors.Moisture
         /// <summary>
         /// Raised when a change in moisture is detected.
         /// </summary>
-        event EventHandler<FloatChangeResult> Changed;
+        event EventHandler<FloatChangeResult> MoistureChanged;
 
         /// <summary>
         /// Convenience method to get the current soil moisture. For frequent reads, use

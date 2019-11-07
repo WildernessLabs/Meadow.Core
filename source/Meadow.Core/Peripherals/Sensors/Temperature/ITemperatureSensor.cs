@@ -19,7 +19,7 @@ namespace Meadow.Peripherals.Temperature
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<FloatChangeResult> Changed;
+        event EventHandler<FloatChangeResult> TemperatureChanged;
 
         /// <summary>
         /// Convenience method to get the current temperature. For frequent reads, use
@@ -30,7 +30,7 @@ namespace Meadow.Peripherals.Temperature
         /// <param name="sampleIntervalDuration">The time, in milliseconds,
         /// to wait in between samples during a reading.</param>
         /// <returns>A float value that's ann average value of all the samples taken.</returns>
-        Task<float> Read(int sampleCount = 10, int sampleIntervalDuration = 40);
+        Task<float> ReadTemperature(int sampleCount = 10, int sampleIntervalDuration = 40);
 
         /// <summary>
         /// Starts continuously sampling the sensor.
