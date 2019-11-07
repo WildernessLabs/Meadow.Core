@@ -27,16 +27,23 @@ namespace Meadow.Peripherals.Sensors.Moisture
         Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
 
         /// <summary>
-        /// Starts continuously sampling the moisture level. Also triggers the
-        /// events to fire, and IObservable subscribers to get notified.
+        /// Starts continuously sampling the sensor.
+        ///
+        /// This method also starts raising `Changed` events and IObservable
+        /// subscribers getting notified. Use the `readIntervalDuration` parameter
+        /// to specify how often events and notifications are raised/sent.
         /// </summary>
-        /// <param name="sampleCount"></param>
-        /// <param name="sampleIntervalDuration"></param>
-        /// <param name="sampleSleepDuration"></param>
+        /// <param name="sampleCount">How many samples to take during a given
+        /// reading. These are automatically averaged to reduce noise.</param>
+        /// <param name="sampleIntervalDuration">The time, in milliseconds,
+        /// to wait in between samples during a reading.</param>
+        /// <param name="readIntervalDuration">The time, in milliseconds, to wait
+        /// between sets of sample readings. This value determines how often
+        /// `Changed` events are raised and `IObservable` consumers are notified.</param>
         void StartUpdating(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int sampleSleepDuration = 0);
+            int readIntervalDuration = 0);
 
         /// <summary>
         /// Stops sampling the moisture level.

@@ -103,15 +103,19 @@ namespace Meadow.Hardware
         /// When sampling, the AnalogInputPort will take multiple readings
         /// (samples); waiting for the `sampleIntervalDuration` in between them,
         /// and fill the sample buffer with those values, then sleep for the
-        /// duration specified in `sampleSleepDuration`.
+        /// duration specified in `readIntervalDuration`.
         ///
+        /// This method also starts the raising of events and IObservable
+        /// subscribers to get notified. Use the `readIntervalDuration` parameter
+        /// to specify how often events and notifications are raised/sent.
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. If
-        /// 0, will sample forever.</param>
+        /// <param name="sampleCount">The number of samples to take within any
+        /// given reading. If 0, it will sample forever.</param>
         /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
         /// sample readings.</param>
-        /// <param name="readIntervalDuration">The interval, in milliseconds, between groups
-        /// of readings.</param>
+        /// <param name="readIntervalDuration">The time, in milliseconds, to wait
+        /// between sets of sample readings. This value determines how often
+        /// `Changed` events are raised and `IObservable` consumers are notified.</param>
         public override void StartSampling(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
