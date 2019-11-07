@@ -110,12 +110,12 @@ namespace Meadow.Hardware
         /// 0, will sample forever.</param>
         /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
         /// sample readings.</param>
-        /// <param name="sampleSleepDuration">The interval, in milliseconds, between groups
+        /// <param name="readIntervalDuration">The interval, in milliseconds, between groups
         /// of readings.</param>
         public override void StartSampling(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int sampleSleepDuration = 0)
+            int readIntervalDuration = 100)
         {
             // thread safety
             lock (_lock)
@@ -128,6 +128,8 @@ namespace Meadow.Hardware
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
+                // BUGBUG: this method is not returning until this
+                // task runs at least one loop
                 // sampling happens on a background thread
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
@@ -158,7 +160,7 @@ namespace Meadow.Hardware
                         // if we still have more samples to take
                         if (currentSampleCount < sampleCount) {
                             // go to sleep for a while
-                            await Task.Delay(sampleSleepDuration);
+                            await Task.Delay(sampleIntervalDuration);
                         }
                         // if we've filled our temp sample buffer, dump it into
                         // the class one
@@ -187,7 +189,8 @@ namespace Meadow.Hardware
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            await Task.Delay(sampleSleepDuration);
+                            Console.WriteLine($"Sleeping for {readIntervalDuration}ms");
+                            await Task.Delay(readIntervalDuration);
                         }
                     }
                 }, SamplingTokenSource.Token).Wait();

@@ -15,7 +15,9 @@ namespace Meadow.Peripherals.Temperature
         float Temperature { get; }
 
         /// <summary>
-        /// Raised when a change in temperature is detected.
+        /// Raised when a new reading has been made. Events will only be raised
+        /// while the driver is updating. To start, call the `StartUpdating()`
+        /// method.
         /// </summary>
         event EventHandler<FloatChangeResult> Changed;
 
@@ -24,23 +26,27 @@ namespace Meadow.Peripherals.Temperature
         /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
         /// </summary>
         /// <param name="sampleCount">The number of sample readings to take. 
-        /// must be greater than 0.</param>
-        /// <param name="sampleInterval">The interval, in milliseconds, between
-        /// sample readings.</param>
-        /// <returns></returns>
-        Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
+        /// Must be greater than 0. These samples are automatically averaged.</param>
+        /// <param name="sampleIntervalDuration">The time, in milliseconds,
+        /// to wait in between samples during a reading.</param>
+        /// <returns>A float value that's ann average value of all the samples taken.</returns>
+        Task<float> Read(int sampleCount = 10, int sampleIntervalDuration = 40);
 
         /// <summary>
         /// Starts continuously sampling the temperature. Also triggers the
         /// events to fire, and IObservable subscribers to get notified.
         /// </summary>
-        /// <param name="sampleCount"></param>
-        /// <param name="sampleIntervalDuration"></param>
-        /// <param name="sampleSleepDuration"></param>
+        /// <param name="sampleCount">How many samples to take during a given
+        /// reading. These are automatically averaged to reduce noise.</param>
+        /// <param name="sampleIntervalDuration">The time, in milliseconds,
+        /// to wait in between samples during a reading.</param>
+        /// <param name="sampleSleepDuration">The time, in milliseconds, to wait
+        /// in between readings. This value determines how often `Changed`
+        /// events are raised and `IObservable` consumers are notified..</param>
         void StartUpdating(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int sampleSleepDuration = 0);
+            int sampleSleepDuration = 1000);
 
         /// <summary>
         /// Stops sampling the temperature.

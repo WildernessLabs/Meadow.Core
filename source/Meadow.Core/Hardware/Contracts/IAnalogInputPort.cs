@@ -27,7 +27,7 @@ namespace Meadow.Hardware
         IDisposable Subscribe(IObserver<FloatChangeResult> observer);
 
         Task<float> Read(int sampleCount = 10, int sampleInterval = 40);
-        void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int sampleSleepDuration = 0);
+        void StartSampling(int sampleSize = 10, int sampleIntervalDuration = 40, int readIntervalDuration = 100);
         void StopSampling();
     }
 }
