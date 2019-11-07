@@ -193,7 +193,7 @@ namespace Meadow.Hardware
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            Console.WriteLine($"Sleeping for {readIntervalDuration}ms");
+                            //Console.WriteLine($"Sleeping for {readIntervalDuration}ms");
                             await Task.Delay(readIntervalDuration);
                         }
                     }
