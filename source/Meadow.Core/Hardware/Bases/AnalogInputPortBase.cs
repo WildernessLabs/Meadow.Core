@@ -54,7 +54,7 @@ namespace Meadow.Hardware
         public abstract void StartSampling(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int readIntervalDuration = 100);
+            int standbyDuration = 100);
         public abstract void StopSampling();
 
 
