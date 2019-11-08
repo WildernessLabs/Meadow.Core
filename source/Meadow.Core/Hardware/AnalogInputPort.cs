@@ -121,9 +121,8 @@ namespace Meadow.Hardware
             int sampleIntervalDuration = 40,
             int standbyDuration = 100)
         {
-            //// thread safety
-            //lock (_lock)
-            //{
+            // thread safety
+            lock (_lock) {
                 if (IsSampling) return;
 
                 // state muh-cheen
@@ -132,9 +131,6 @@ namespace Meadow.Hardware
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
-                // BUGBUG: this method is not returning until this
-                // task runs at least one loop
-                // sampling happens on a background thread
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
                     float[] sampleBuffer = new float[sampleCount];
@@ -197,7 +193,7 @@ namespace Meadow.Hardware
                         }
                     }
                 }, SamplingTokenSource.Token);
-            //}
+            }
         }
 
         /// <summary>
