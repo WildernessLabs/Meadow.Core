@@ -113,13 +113,13 @@ namespace Meadow.Hardware
         /// given reading. If 0, it will sample forever.</param>
         /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
         /// sample readings.</param>
-        /// <param name="readIntervalDuration">The time, in milliseconds, to wait
+        /// <param name="standbyDuration">The time, in milliseconds, to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
         public override void StartSampling(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int readIntervalDuration = 100)
+            int standbyDuration = 100)
         {
             //// thread safety
             //lock (_lock)
@@ -193,7 +193,7 @@ namespace Meadow.Hardware
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            await Task.Delay(readIntervalDuration);
+                            await Task.Delay(standbyDuration);
                         }
                     }
                 }, SamplingTokenSource.Token);
