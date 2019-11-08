@@ -11,9 +11,9 @@ namespace Meadow.Peripherals.Sensors.Moisture
         float Moisture { get; }
 
         /// <summary>
-        /// Raised when a change in moisture is detected.
+        /// Raised when a new sensor reading has been made. To enable, call StartSampling().
         /// </summary>
-        event EventHandler<FloatChangeResult> MoistureChanged;
+        event EventHandler<FloatChangeResult> Updated;
 
         ///// <summary>
         ///// Convenience method to get the current soil moisture. For frequent reads, use
