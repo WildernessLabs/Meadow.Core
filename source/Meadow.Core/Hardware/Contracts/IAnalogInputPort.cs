@@ -21,9 +21,19 @@ namespace Meadow.Hardware
         /// <value>The sample buffer.</value>
         IList<float> VoltageSampleBuffer { get; }
 
+        /// <summary>
+        /// The maximum voltage that the Analog Port can read. Typically 3.3V.
+        /// This value is used to convert raw ADC values into voltage.
+        /// </summary>
         float ReferenceVoltage { get; }
 
-        float AverageVoltageBufferValue { get; }
+        /// <summary>
+        /// Gets the average value of the values in the buffer. Use in conjunction
+        /// with StartSampling() for long-running analog sampling. For occasional
+        /// sampling, use Read().
+        /// </summary>
+        /// <value>The average buffer value.</value>
+        float Voltage { get; }
 
         IDisposable Subscribe(IObserver<FloatChangeResult> observer);
 

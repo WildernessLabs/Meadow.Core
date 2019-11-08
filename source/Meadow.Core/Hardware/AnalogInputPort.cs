@@ -178,7 +178,7 @@ namespace Meadow.Hardware
                                 base.VoltageSampleBuffer.Add(sampleBuffer[i]);
                             }
 
-                            var newVoltage = AverageVoltageBufferValue;
+                            var newVoltage = Voltage;
 
                             // create a result set
                             FloatChangeResult result = new FloatChangeResult(newVoltage, _previousVoltageReading);

@@ -34,7 +34,7 @@ namespace Meadow.Hardware
         /// sampling, use Read().
         /// </summary>
         /// <value>The average buffer value.</value>
-        public float AverageVoltageBufferValue {
+        public float Voltage {
             get { //heh. may be a faster way to do this. 
                 return ((float)(VoltageSampleBuffer.Select(x => (float)x).Sum() / VoltageSampleBuffer.Count()));
             }
