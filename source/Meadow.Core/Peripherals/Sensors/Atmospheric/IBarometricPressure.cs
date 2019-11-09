@@ -13,10 +13,10 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
         float Pressure { get; }
 
         /// <summary>
-        /// The PressureChanged event will be raised when the difference (absolute value)
-        /// between the current Pressure reading and the last notified reading is greater
-        /// than the PressureChangeNotificationThreshold.
+        /// Raised when a new reading has been made. Events will only be raised
+        /// while the driver is updating. To start, call the `StartUpdating()`
+        /// method.
         /// </summary>
-        event EventHandler<FloatChangeResult> PressureChanged;
+        event EventHandler<FloatChangeResult> Updated;
     }
 }

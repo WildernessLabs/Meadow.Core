@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Meadow.Peripherals.Sensors;
 
-namespace Meadow.Peripherals.Temperature
+namespace Meadow.Peripherals.Sensors.Temperature
 {
     /// <summary>
     /// Temperature sensor interface requirements.
@@ -19,7 +18,7 @@ namespace Meadow.Peripherals.Temperature
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<FloatChangeResult> TemperatureChanged;
+        event EventHandler<FloatChangeResult> Updated;
 
         ///// <summary>
         ///// Convenience method to get the current temperature. For frequent reads, use
