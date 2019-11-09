@@ -60,6 +60,11 @@ namespace Meadow.Hardware
 
         public void Write(byte[] buffer, int offset, int count)
         {
+            if (!IsOpen)
+            {
+                throw new Exception("Cannot write to a closed port");
+            }
+
             if (buffer == null) throw new ArgumentNullException();
             if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available data");
             if (offset < 0) throw new ArgumentException("Invalid offset");
@@ -81,15 +86,44 @@ namespace Meadow.Hardware
             }
         }
 
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            if (!IsOpen)
+            {
+                throw new Exception("Cannot read from a closed port");
+            }
 
-//struct termios2 tio;
+            if (buffer == null) throw new ArgumentNullException();
+            if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available buffer size");
+            if (offset < 0) throw new ArgumentException("Invalid offset");
+            if (count == 0) return 0;
 
-//ioctl(fd, TCGETS2, &tio);
-//tio.c_cflag &= ~CBAUD;
-//tio.c_cflag |= BOTHER;
-//tio.c_ispeed = 12345;
-//tio.c_ospeed = 12345;
-//ioctl(fd, TCSETS2, &tio);
+            var buf = new byte[count];
+
+            var result = Nuttx.read(_driverHandle, buf, buf.Length);
+            Console.WriteLine($"  rx result: {result}");
+            if (result < 0)
+            {
+                // TODO: handle error
+                return 0;
+            }
+            else
+            {
+                Array.Copy(buf, 0, buffer, offset, result);
+            }
+
+            return result;
+
+        }
+
+        //struct termios2 tio;
+
+        //ioctl(fd, TCGETS2, &tio);
+        //tio.c_cflag &= ~CBAUD;
+        //tio.c_cflag |= BOTHER;
+        //tio.c_ispeed = 12345;
+        //tio.c_ospeed = 12345;
+        //ioctl(fd, TCSETS2, &tio);
 
         // ////////////////////////////////////////////////////////////////
         /*

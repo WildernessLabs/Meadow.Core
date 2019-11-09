@@ -38,10 +38,23 @@ namespace SerialEcho
                 Console.WriteLine("\tFailed to Open");
             }
 
+            var buffer = new byte[1024];
+
             while (true)
             {
                 Console.WriteLine("Writing data...");
                 port.Write(Encoding.ASCII.GetBytes("Hello Meadow!"));
+
+                var read = port.Read(buffer, 0, buffer.Length);
+
+                if (read == 0)
+                {
+                    Console.WriteLine($"Read {read} bytes");
+                }
+                else
+                {
+                    Console.WriteLine($"Read {read} bytes: {BitConverter.ToString(buffer, 0, read)}");
+                }
 
                 Thread.Sleep(2000);
             }
