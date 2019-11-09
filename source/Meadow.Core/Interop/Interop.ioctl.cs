@@ -81,6 +81,9 @@ namespace Meadow.Core
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, IntPtr pData);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref int dwData);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, StringBuilder sb);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]

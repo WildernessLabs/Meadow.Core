@@ -105,7 +105,7 @@ namespace Meadow.Hardware
             if (result < 0)
             {
                 // TODO: handle error
-                var errno = -1; // Devices.UPD.GetLastError();
+                var errno = Devices.UPD.GetLastError();
                 Console.WriteLine($"  rx result: {result} errno: {errno}");
 
                 return 0;

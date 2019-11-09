@@ -85,6 +85,13 @@ namespace Meadow.Devices
             return value;
         }
 
+        public static Nuttx.ErrorCode GetLastError()
+        {
+            int errno = 0;
+            Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.GetLastError, ref errno);
+            return (Nuttx.ErrorCode)errno;
+        }
+
         public static void UpdateRegister(uint address, uint clearBits, uint setBits)
         {
             Nuttx.UpdateRegister(DriverHandle, address, clearBits, setBits);
