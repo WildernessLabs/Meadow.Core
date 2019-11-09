@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Meadow.Core;
 using Meadow.Hardware;
 using static Meadow.Core.Interop;
@@ -170,6 +171,11 @@ namespace Meadow.Devices
         public static int Ioctl(Nuttx.GpioIoctlFn request, ref Nuttx.GPIOConfigFlags configFlags)
         {
             return Nuttx.ioctl(DriverHandle, request, ref configFlags);
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, StringBuilder sb)
+        {
+            return Nuttx.ioctl(DriverHandle, request, sb);
         }
 
         public static class PWM
