@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Meadow;
@@ -18,8 +19,12 @@ namespace SerialLoopback
 
         void Run()
         {
+            Console.WriteLine("Getting ports...");
+            var s = F7Serial.GetAvailablePorts();
+            Console.WriteLine($"Ports:\n\t{string.Join(' ', s)}");
+
             Console.WriteLine("Using 'ttyS1'...");
-            var port = new SerialPort("ttyS1", 115200);
+            var port = new SerialPort("ttyS1");
             Console.WriteLine("\tCreated");
             port.Open();
             if (port.IsOpen)
@@ -38,7 +43,7 @@ namespace SerialLoopback
                 Console.WriteLine("Writing data...");
                 port.Write(Encoding.ASCII.GetBytes("Hello Meadow!"));
 
-                var read = port.Read(buffer, 0, buffer.Length);
+                var read = 0;// port.Read(buffer, 0, buffer.Length);
 
                 if (read == 0)
                 {
