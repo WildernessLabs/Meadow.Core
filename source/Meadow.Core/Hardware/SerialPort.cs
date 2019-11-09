@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Meadow.Devices;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -29,6 +31,7 @@ namespace Meadow.Hardware
     public class SerialPort : IDisposable
     {
         private IntPtr _driverHandle = IntPtr.Zero;
+        private bool _showSerialDebug = false;
 
         public string PortName { get; }
         public bool IsOpen { get => _driverHandle != IntPtr.Zero; }
@@ -39,6 +42,10 @@ namespace Meadow.Hardware
 
         public SerialPort(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One)
         {
+#if !DEBUG
+            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            _showSerialDebug = false;
+#endif
             if (baudRate <= 0) throw new ArgumentOutOfRangeException("Invalid baud rate");
             if (dataBits < 5 || dataBits > 8) throw new ArgumentOutOfRangeException("Invalid dataBits");
 
@@ -65,7 +72,7 @@ namespace Meadow.Hardware
                     break;
             }
 
-            return $"{PortName},{DataBits},{p},{(StopBits == StopBits.Two ? 2 : 1)}";
+            return $"{PortName}: {BaudRate},{DataBits},{p},{(StopBits == StopBits.Two ? 2 : 1)}";
         }
 
         public void Dispose()
@@ -93,12 +100,12 @@ namespace Meadow.Hardware
             _driverHandle = IntPtr.Zero;
         }
 
-        public void Write(byte[] buffer)
+        public int Write(byte[] buffer)
         {
-            Write(buffer, 0, buffer.Length);
+            return Write(buffer, 0, buffer.Length);
         }
 
-        public void Write(byte[] buffer, int offset, int count)
+        public int Write(byte[] buffer, int offset, int count)
         {
             if (!IsOpen)
             {
@@ -108,21 +115,21 @@ namespace Meadow.Hardware
             if (buffer == null) throw new ArgumentNullException();
             if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available data");
             if (offset < 0) throw new ArgumentException("Invalid offset");
-            if (count == 0) return;
+            if (count == 0) return 0;
 
-            Console.WriteLine($"Writing {count} bytes to {PortName}...");
+            Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
             if (offset > 0)
             {
                 // we need to make a copy
                 var tmp = new byte[count];
                 Array.Copy(buffer, offset, tmp, 0, count);
                 var result = Nuttx.write(_driverHandle, tmp, count);
-                Console.WriteLine($"  result: {result}");
+                return result;
             }
             else
             {
                 var result = Nuttx.write(_driverHandle, buffer, count);
-                Console.WriteLine($"  result: {result}");
+                return result;
             }
         }
 
@@ -146,7 +153,7 @@ namespace Meadow.Hardware
             {
                 // TODO: handle error
                 var errno = Devices.UPD.GetLastError();
-                Console.WriteLine($"  rx result: {result} errno: {errno}");
+                Console.WriteLine($" Read port failed.  Error: {errno}");
 
                 return 0;
             }
@@ -159,8 +166,8 @@ namespace Meadow.Hardware
 
         }
 
-        private const int TCGETS = 1;
-        private const int TCSETS = 2;
+        private const int TCGETS = 0x0101;
+        private const int TCSETS = 0x0102;
 
         private void ShowSettings(Nuttx.Termios settings)
         {
@@ -179,15 +186,13 @@ namespace Meadow.Hardware
 
             try
             {
-                Console.WriteLine($"  Getting port settings...");
+                Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
                 var result = Nuttx.ioctl(_driverHandle, TCGETS, gch.AddrOfPinnedObject());
                 if (result < 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Console.WriteLine($"  ioctl: {result} errno: {errno}");
+                    Output.WriteLineIf(_showSerialDebug, $"  ioctl: {result} errno: {errno}");
                 }
-
-                ShowSettings(settings);
 
                 // clear stuff that should be off
                 settings.c_iflag &= ~(Nuttx.InputFlags.IGNBRK | Nuttx.InputFlags.BRKINT | Nuttx.InputFlags.PARMRK | Nuttx.InputFlags.ISTRIP | Nuttx.InputFlags.INLCR | Nuttx.InputFlags.IGNCR | Nuttx.InputFlags.ICRNL | Nuttx.InputFlags.IXON);
@@ -229,12 +234,19 @@ namespace Meadow.Hardware
 
                 settings.c_speed = BaudRate;
 
-                Console.WriteLine($"  Setting port settings...");
+                Output.WriteLineIf(_showSerialDebug, $"  Setting port settings...");
                 result = Nuttx.ioctl(_driverHandle, TCSETS, gch.AddrOfPinnedObject());
                 if (result < 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Console.WriteLine($"  ioctl: {result} errno: {errno}");
+                    Console.WriteLine($"Failed to set serial port settings. Error: {errno}");
+                }
+
+                if (_showSerialDebug)
+                {
+                    Console.WriteLine($"  Verifying...");
+                    result = Nuttx.ioctl(_driverHandle, TCGETS, gch.AddrOfPinnedObject());
+                    ShowSettings(settings);
                 }
             }
             finally
@@ -257,64 +269,6 @@ namespace Meadow.Hardware
         //tio.c_ispeed = 12345;
         //tio.c_ospeed = 12345;
         //ioctl(fd, TCSETS2, &tio);
-
-        // ////////////////////////////////////////////////////////////////
-        /*
-        public Stream BaseStream { get; }
-        public int BaudRate { get; set; }
-        public int BytesToRead { get; }
-        public int BytesToWrite { get; }
-        public int DataBits { get; set; }
-        public FlowControlType Handshake { get; set; }
-        public ParityType Parity { get; set; }
-        public NumberOfStopBits StopBits { get; set; }
-
-        public override bool CanRead => throw new System.NotImplementedException();
-
-        public override bool CanSeek => throw new System.NotImplementedException();
-
-        public override bool CanWrite => throw new System.NotImplementedException();
-
-        public override long Length => throw new System.NotImplementedException();
-
-        public override long Position { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-
-        public override int WriteTimeout { get; set; }
-
-        public delegate void SerialDataReceivedEventHandler(object sender, SerialDataReceivedEventArgs e);
-        public delegate void SerialErrorReceivedEventHandler(object sender, SerialErrorReceivedEventArgs e);
-
-        public event SerialDataReceivedEventHandler DataReceived;
-        public event SerialErrorReceivedEventHandler ErrorReceived;
-
-        public SerialPort(string portName, int baudRate) { }
-        public SerialPort(string portName, int baudRate, ParityType parity) { }
-        public SerialPort(string portName, int baudRate, ParityType parity, int dataBits) { }
-        public SerialPort(string portName, int baudRate, ParityType parity, int dataBits, NumberOfStopBits stopBits) { }
-
-        public void DiscardInBuffer() { }
-        public void DiscardOutBuffer() { }
-        
-        public override void Flush()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override void SetLength(long value)
-        {
-            throw new System.NotImplementedException();
-        }
-        */
     }
 
 }

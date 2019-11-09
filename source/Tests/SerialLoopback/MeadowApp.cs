@@ -41,8 +41,10 @@ namespace SerialLoopback
             while (true)
             {
                 Console.WriteLine("Writing data...");
-                port.Write(Encoding.ASCII.GetBytes("Hello Meadow!"));
+                var written = port.Write(Encoding.ASCII.GetBytes("Hello Meadow!"));
+                Console.WriteLine($"Wrote {written} bytes");
 
+                Console.WriteLine("Reading data...");
                 var read = port.Read(buffer, 0, buffer.Length);
 
                 if (read == 0)
