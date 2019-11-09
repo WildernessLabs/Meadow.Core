@@ -43,7 +43,7 @@ namespace SerialLoopback
                 Console.WriteLine("Writing data...");
                 port.Write(Encoding.ASCII.GetBytes("Hello Meadow!"));
 
-                var read = 0;// port.Read(buffer, 0, buffer.Length);
+                var read = port.Read(buffer, 0, buffer.Length);
 
                 if (read == 0)
                 {
