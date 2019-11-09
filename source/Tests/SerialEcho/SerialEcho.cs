@@ -18,15 +18,8 @@ namespace SerialEcho
 
         void Run()
         {
-            Console.WriteLine("Avaliable ports:");
-            var ports = F7Serial.GetAvailablePorts();
-            foreach (var p in ports)
-            {
-                Console.WriteLine($"\t{p}");
-            }
-
             Console.WriteLine("Using 'ttyS1'...");
-            var port = new SerialPort("ttyS1");
+            var port = new SerialPort("ttyS1", 115200);
             Console.WriteLine("\tCreated");
             port.Open();
             if (port.IsOpen)

@@ -295,7 +295,8 @@ namespace Meadow.Core
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.GetRegister, ref register);
                 if (result != 0)
                 {
-                    Console.WriteLine($"Read failed: {result}");
+                    var errno = Devices.UPD.GetLastError();
+                    Console.WriteLine($"GetRegister failed: {errno}");
                     value = (uint)result;
                     return false;
                 }
@@ -320,7 +321,8 @@ namespace Meadow.Core
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.SetRegister, ref register);
                 if (result != 0)
                 {
-                    Console.WriteLine($"Write failed: {result}");
+                    var errno = Devices.UPD.GetLastError();
+                    Console.WriteLine($"SetRegister failed: {errno}");
                     return false;
                 }
                 return true;

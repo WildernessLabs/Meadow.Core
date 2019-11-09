@@ -24,12 +24,12 @@ namespace SerialLoopback
             Console.WriteLine($"Ports:\n\t{string.Join(' ', s)}");
 
             Console.WriteLine("Using 'ttyS1'...");
-            var port = new SerialPort("ttyS1");
+            var port = new SerialPort("ttyS1", 115200);
             Console.WriteLine("\tCreated");
             port.Open();
             if (port.IsOpen)
             {
-                Console.WriteLine("\tOpened");
+                Console.WriteLine($"\tOpened {port}");
             }
             else
             {
