@@ -22,7 +22,7 @@ namespace Meadow.Devices
 
         static UPD()
         {
-            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.ReadOnly);
+            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.DontCare);
             if (DriverHandle == IntPtr.Zero || DriverHandle.ToInt32() == -1)
             {
                 Console.Write("Failed to open UPD driver");
