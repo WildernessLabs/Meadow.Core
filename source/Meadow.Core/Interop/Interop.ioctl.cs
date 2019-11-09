@@ -83,6 +83,9 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, StringBuilder sb);
 
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEnumDirCmd command);
+
             /// <summary>
             /// Configures the Universal Platofrm Driver to set PWM APB clock.
             /// </summary>
