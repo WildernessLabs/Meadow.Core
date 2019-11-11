@@ -16,6 +16,28 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
         /// The humidity, in percent relative humidity.
         /// </summary>
         public float Humidity { get; set; }
+
+        public AtmosphericConditions()
+        { }
+
+        public AtmosphericConditions(
+            float temperature,
+            float pressure,
+            float humidity)
+        {
+            this.Temperature = temperature;
+            this.Pressure = pressure;
+            this.Humidity = humidity;
+        }
+
+        public static AtmosphericConditions From(AtmosphericConditions conditions)
+        {
+            return new AtmosphericConditions(
+                conditions.Temperature,
+                conditions.Pressure,
+                conditions.Humidity
+                );
+        }
     }
 
     public class AtmosphericConditionChangeResult : IChangeResult<AtmosphericConditions>
