@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Meadow.Peripherals.Sensors;
 
 namespace Meadow.Peripherals.Sensors.Atmospheric
 {
-    /// <summary>
-    /// Humidity sensor interface requirements.
-    /// </summary>
-    public interface IHumiditySensor : ISensor, IObservable<AtmosphericConditionChangeResult>
+    public interface IAtmosphericSensor : ISensor, IObservable<AtmosphericConditionChangeResult>
     {
         /// <summary>
-        /// Last value read from the humidity sensor.
+        /// Last value read from the Temperature sensor.
         /// </summary>
-        float Humidity { get; }
+        AtmosphericConditions Conditions { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised

@@ -5,7 +5,7 @@ namespace Meadow.Peripherals.Sensors.Buttons
     /// <summary>
     /// Interface describing button classes.
     /// </summary>
-    public interface IButton
+    public interface IButton : ISensor
     {
         /// <summary>
         /// Raised when a press starts (the button is pushed down; circuit is closed).

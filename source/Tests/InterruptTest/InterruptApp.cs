@@ -43,17 +43,17 @@ namespace InterruptTest
 
         void D0_Changed(object sender, DigitalInputPortEventArgs e)
         {
-            Console.WriteLine($"Rising Interrupt on D00 @ {e.Time.ToString("s.fff")}");
+            Console.WriteLine($"Rising Interrupt on D00 @ {e.New.ToString("s.fff")}");
         }
 
         void D1_Changed(object sender, DigitalInputPortEventArgs e)
         {
-            Console.WriteLine($"Falling Interrupt on D01 @ {e.Time.Ticks}");
+            Console.WriteLine($"Falling Interrupt on D01 @ {e.New.Ticks}");
         }
 
         void D2_Changed(object sender, DigitalInputPortEventArgs e)
         {
-            Console.WriteLine($"{(e.Value ? "Rising" : "Falling")} Interrupt on D02 @ {e.Time.Ticks}");
+            Console.WriteLine($"{(e.Value ? "Rising" : "Falling")} Interrupt on D02 @ {e.New.Ticks}");
         }
     }
 }

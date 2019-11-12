@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -7,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class PortInUseException : Exception
     {
-        public PortInUseException()
+        internal PortInUseException()
         {
         }
     }

@@ -103,23 +103,26 @@ namespace Meadow.Hardware
         /// When sampling, the AnalogInputPort will take multiple readings
         /// (samples); waiting for the `sampleIntervalDuration` in between them,
         /// and fill the sample buffer with those values, then sleep for the
-        /// duration specified in `sampleSleepDuration`.
+        /// duration specified in `readIntervalDuration`.
         ///
+        /// This method also starts the raising of events and IObservable
+        /// subscribers to get notified. Use the `readIntervalDuration` parameter
+        /// to specify how often events and notifications are raised/sent.
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. If
-        /// 0, will sample forever.</param>
+        /// <param name="sampleCount">The number of samples to take within any
+        /// given reading. If 0, it will sample forever.</param>
         /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
         /// sample readings.</param>
-        /// <param name="sampleSleepDuration">The interval, in milliseconds, between groups
-        /// of readings.</param>
+        /// <param name="standbyDuration">The time, in milliseconds, to wait
+        /// between sets of sample readings. This value determines how often
+        /// `Changed` events are raised and `IObservable` consumers are notified.</param>
         public override void StartSampling(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
-            int sampleSleepDuration = 0)
+            int standbyDuration = 100)
         {
             // thread safety
-            lock (_lock)
-            {
+            lock (_lock) {
                 if (IsSampling) return;
 
                 // state muh-cheen
@@ -128,7 +131,6 @@ namespace Meadow.Hardware
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
-                // sampling happens on a background thread
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
                     float[] sampleBuffer = new float[sampleCount];
@@ -158,7 +160,7 @@ namespace Meadow.Hardware
                         // if we still have more samples to take
                         if (currentSampleCount < sampleCount) {
                             // go to sleep for a while
-                            await Task.Delay(sampleSleepDuration);
+                            await Task.Delay(sampleIntervalDuration);
                         }
                         // if we've filled our temp sample buffer, dump it into
                         // the class one
@@ -172,23 +174,25 @@ namespace Meadow.Hardware
                                 base.VoltageSampleBuffer.Add(sampleBuffer[i]);
                             }
 
+                            var newVoltage = Voltage;
+
                             // create a result set
-                            FloatChangeResult result = new FloatChangeResult {
-                                New = AverageVoltageBufferValue,
-                                Old = _previousVoltageReading,
-                            };
+                            FloatChangeResult result = new FloatChangeResult(newVoltage, _previousVoltageReading);
 
                             // raise our events and notify our subs
                             base.RaiseChangedAndNotify(result);
+
+                            // save the previous voltage
+                            _previousVoltageReading = newVoltage;
 
                             // reset our counter
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            await Task.Delay(sampleSleepDuration);
+                            await Task.Delay(standbyDuration);
                         }
                     }
-                }, SamplingTokenSource.Token).Wait();
+                }, SamplingTokenSource.Token);
             }
         }
 
@@ -240,31 +244,6 @@ namespace Meadow.Hardware
         public override void Dispose()
         {
             
-        }
-
-        public IDisposable Subscribe(IObserver<FloatChangeResult> observer)
-        {
-            if (!_observers.Contains(observer))
-                _observers.Add(observer);
-
-            return new Unsubscriber(_observers, observer);
-        }
-
-        private class Unsubscriber : IDisposable
-        {
-            private List<IObserver<FloatChangeResult>> _observers;
-            private IObserver<FloatChangeResult> _observer;
-
-            public Unsubscriber(List<IObserver<FloatChangeResult>> observers, IObserver<FloatChangeResult> observer)
-            {
-                this._observers = observers;
-                this._observer = observer;
-            }
-
-            public void Dispose()
-            {
-                if (!(_observer == null)) _observers.Remove(_observer);
-            }
         }
     }
 }

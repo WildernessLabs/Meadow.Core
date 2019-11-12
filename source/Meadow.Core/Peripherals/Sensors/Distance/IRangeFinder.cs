@@ -1,4 +1,6 @@
-﻿namespace Meadow.Peripherals.Sensors.Distance
+﻿using System;
+
+namespace Meadow.Peripherals.Sensors.Distance
 {
     /// <summary>
     /// Interface for distance sensors classes.
@@ -23,6 +25,6 @@
         /// <summary>
         /// Raised when detecting an obstacle.
         /// </summary>
-        event DistanceDetectedEventHandler DistanceDetected;
+        event EventHandler<DistanceEventArgs> DistanceDetected;
     }
 }
