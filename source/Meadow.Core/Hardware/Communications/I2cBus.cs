@@ -15,6 +15,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class I2cBus : II2cBus
     {
+        private bool _showI2cDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
 
         private IIOController IOController { get; }
@@ -35,6 +36,10 @@ namespace Meadow.Hardware
             ushort transactionTimeout = 100)
         {
             IOController = ioController;
+#if !DEBUG
+            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            _showI2cDebug = false;
+#endif
         }
 
         private void Disable()
@@ -123,9 +128,9 @@ namespace Meadow.Hardware
                     RxBuffer = gch.AddrOfPinnedObject(),
                 };
 
-                Console.Write(" +ReadData");
+                Output.WriteIf(_showI2cDebug, " +ReadData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                Console.WriteLine($" returned {result}");
+                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
 
                 // TODO: handle ioctl errors.  Common values:
                 // -116 = timeout
@@ -179,9 +184,9 @@ namespace Meadow.Hardware
                     RxBuffer = IntPtr.Zero
                 };
 
-                Console.Write(" +SendData");
+                Output.WriteIf(_showI2cDebug, " +SendData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                Console.WriteLine($" returned {result}");
+                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
 
                 // TODO: handle ioctl errors.  Common values:
                 // -116 = timeout                                           
