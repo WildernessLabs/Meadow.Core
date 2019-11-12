@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents a generic accelerometer sensor.
     /// </summary>
-    public interface IAccelerometer
+    public interface IAccelerometer : ISensor
     {
         /// <summary>
         /// Returns acceleration value in the X axis

@@ -19,11 +19,4 @@
             Distance = distance;
         }
     }
-
-    /// <summary>
-    /// Raised when an received a rebound trigger signal
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public delegate void DistanceDetectedEventHandler(object sender, DistanceEventArgs e);
 }
