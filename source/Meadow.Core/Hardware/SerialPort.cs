@@ -145,6 +145,17 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
+        /// Discards data from the serial driver's receive buffer.
+        /// </summary>
+        public void DiscardInBuffer()
+        {
+            if (_readBuffer != null)
+            {
+                _readBuffer.Clear();
+            }
+        }
+
+        /// <summary>
         /// Opens a new serial port connection.
         /// </summary>
         public void Open()
