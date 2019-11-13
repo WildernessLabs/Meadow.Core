@@ -1,7 +1,9 @@
 ﻿using Meadow.Devices;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
@@ -17,6 +19,8 @@ namespace Meadow.Hardware
     {
         private const int TCGETS = 0x0101;
         private const int TCSETS = 0x0102;
+        private const string DriverFolder = "/dev";
+        private const string SerialPortDriverPrefix = "tty";
 
         private IntPtr _driverHandle = IntPtr.Zero;
         private bool _showSerialDebug = false;
@@ -103,6 +107,25 @@ namespace Meadow.Hardware
             StopBits = stopBits;
             ReadTimeout = Timeout.Infinite;
             ReadBufferSize = readBufferSize;
+        }
+
+        /// <summary>
+        /// Gets an array of serial port names for the current device.
+        /// </summary>
+        /// <returns></returns>
+        public static string[] GetPortNames()
+        {
+            var allDevices = F7Micro.FileSystem.EnumDirectory(DriverFolder);
+            var list = new List<string>();
+            foreach (var s in allDevices)
+            {
+                if (s.StartsWith(SerialPortDriverPrefix))
+                {
+                    list.Add(s);
+                }
+            }
+
+            return list.ToArray();
         }
 
         /// <summary>
@@ -257,6 +280,38 @@ namespace Meadow.Hardware
 
                 Thread.Sleep(10);
             }
+        }
+
+        /// <summary>
+        /// Returns the next available by in the input buffer but does not consume it.
+        /// </summary>
+        /// <returns>The byte, cast to an Int32, or -1 if there is no data available in the input buffer.</returns>
+        public int Peek()
+        {
+            if (_readBuffer == null  || _readBuffer.Count == 0) return -1;
+            return _readBuffer.Peek();
+        }
+
+        /// <summary>
+        /// Reads bytes from the input buffer until a specified token is found
+        /// </summary>
+        /// <param name="token">The token to search for</param>
+        /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
+        public byte[] ReadToToken(byte token)
+        {
+            if (_readBuffer.Any(b => b == token))
+            {
+                var list = new List<byte>();
+                while (_readBuffer.Peek() != token)
+                {
+                    list.Add(_readBuffer.Dequeue());
+                }
+                // grab the token
+                list.Add(_readBuffer.Dequeue());
+                return list.ToArray();
+            }
+
+            return new byte[0];
         }
 
         /// <summary>
