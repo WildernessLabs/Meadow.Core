@@ -71,6 +71,14 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
+        /// Gets the number of bytes of data in the receive buffer.
+        /// </summary>
+        public int BytesToRead
+        {
+            get => _readBuffer == null ? 0 : _readBuffer.Count;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the SerialPort class.
         /// </summary>
         /// <param name="portName">The port to use (for example, 'ttyS1').</param>
@@ -235,6 +243,8 @@ namespace Meadow.Hardware
                     _readBuffer.Enqueue(readBuffer, 0, result);
                     DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
                 }
+
+                Thread.Sleep(10);
             }
         }
 
@@ -274,7 +284,6 @@ namespace Meadow.Hardware
 
             var read = 0;
 
-            var timeout = ReadTimeout;
             Stopwatch sw = null;
 
             if (ReadTimeout > 0)
