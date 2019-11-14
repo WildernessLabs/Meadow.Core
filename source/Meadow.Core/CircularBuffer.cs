@@ -313,8 +313,9 @@ namespace Meadow
         /// Find the next element that matches the provided function criteria starting with the head item.
         /// </summary>
         /// <param name="findFunction"></param>
+        /// <param name="defaultValue">The value to return if find function finds nothing</param>
         /// <returns></returns>
-        public T Last(Func<T, bool> findFunction)
+        public T Last(Func<T, bool> findFunction, T defaultValue = default(T))
         {
             lock (m_syncRoot)
             {
@@ -334,7 +335,7 @@ namespace Meadow
                     if (--index < 0) index = MaxElements - 1;
                 }
 
-                return default(T);
+                return defaultValue;
             }
         }
 
@@ -342,8 +343,9 @@ namespace Meadow
         /// Find the next element that matches the provided function criteria starting with the tail item.
         /// </summary>
         /// <param name="findFunction"></param>
+        /// <param name="defaultValue">The value to return if find function finds nothing</param>
         /// <returns></returns>
-        public T First(Func<T, bool> findFunction)
+        public T First(Func<T, bool> findFunction, T defaultValue = default(T))
         {
             lock (m_syncRoot)
             {
@@ -359,7 +361,7 @@ namespace Meadow
                     if (++index >= MaxElements - 1) index = 0;
                 }
 
-                return default(T);
+                return defaultValue;
             }
         }
 

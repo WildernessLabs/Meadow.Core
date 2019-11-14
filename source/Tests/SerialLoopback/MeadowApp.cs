@@ -20,12 +20,15 @@ namespace SerialLoopback
         void Run()
         {
             Console.WriteLine("Getting ports...");
-            var s = F7Serial.GetAvailablePorts();
+            var s = SerialPort.GetPortNames();
             Console.WriteLine($"Ports:\n\t{string.Join(' ', s)}");
 
-            Console.WriteLine("Using 'ttyS1'...");
-            var port = new SerialPort("ttyS1", 115200);
+            var portName = "ttyS1";
+
+            Console.WriteLine($"Using '{portName}'...");
+            var port = new SerialPort(portName, 115200);
             Console.WriteLine("\tCreated");
+            port.ReadTimeout = Timeout.Infinite;
             port.Open();
             if (port.IsOpen)
             {
@@ -37,6 +40,7 @@ namespace SerialLoopback
             }
 
             var buffer = new byte[1024];
+            port.DiscardInBuffer();
 
             while (true)
             {
@@ -45,7 +49,7 @@ namespace SerialLoopback
                 Console.WriteLine($"Wrote {written} bytes");
 
                 Console.WriteLine("Reading data...");
-                var read = port.Read(buffer, 0, buffer.Length);
+                var read = port.Read(buffer, 0, port.BytesToRead);
 
                 if (read == 0)
                 {
@@ -54,6 +58,8 @@ namespace SerialLoopback
                 else
                 {
                     Console.WriteLine($"Read {read} bytes: {BitConverter.ToString(buffer, 0, read)}");
+                    Console.WriteLine($"Read string {Encoding.ASCII.GetString(buffer, 0, read).Replace("\r\n", "[crlf]")}");
+
                 }
 
                 Thread.Sleep(2000);

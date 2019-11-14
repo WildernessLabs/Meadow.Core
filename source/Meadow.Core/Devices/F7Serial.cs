@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Meadow.Devices
 {
-    public class F7Serial
+    internal class F7Serial
     {
         private const string DriverFolder = "/dev";
         private const string SerialPortDriverPrefix = "tty";
