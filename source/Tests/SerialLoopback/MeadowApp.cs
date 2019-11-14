@@ -40,6 +40,7 @@ namespace SerialLoopback
             }
 
             var buffer = new byte[1024];
+            port.DiscardInBuffer();
 
             while (true)
             {
@@ -48,7 +49,7 @@ namespace SerialLoopback
                 Console.WriteLine($"Wrote {written} bytes");
 
                 Console.WriteLine("Reading data...");
-                var read = port.Read(buffer, 0, buffer.Length);
+                var read = port.Read(buffer, 0, port.BytesToRead);
 
                 if (read == 0)
                 {

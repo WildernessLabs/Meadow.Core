@@ -395,83 +395,80 @@ namespace Meadow.Hardware
             Console.WriteLine($"  Speed: {settings.c_speed}");
             Console.WriteLine($"  Input Flags: 0x{settings.c_iflag:x}");
             Console.WriteLine($"  OutputFlags: 0x{settings.c_oflag:x}");
-            Console.WriteLine($"  Local Flags: {settings.c_lflag}");
-            Console.WriteLine($"  Control Flags: {settings.c_cflag}");
+            Console.WriteLine($"  Local Flags: 0x{settings.c_lflag:x}");
+            Console.WriteLine($"  Control Flags: 0x{settings.c_cflag:x}");
         }
 
-        private void SetPortSettings()
+        private unsafe void SetPortSettings()
         {
             var settings = new Nuttx.Termios();
+
             // get the current settings
-            var gch = GCHandle.Alloc(settings, GCHandleType.Pinned);
+            var p = (IntPtr)(&settings);
 
-            try
+            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
+            var result = Nuttx.ioctl(_driverHandle, TCGETS, p);
+            if (result < 0)
             {
-                Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
-                var result = Nuttx.ioctl(_driverHandle, TCGETS, gch.AddrOfPinnedObject());
-                if (result < 0)
-                {
-                    var errno = Devices.UPD.GetLastError();
-                    Output.WriteLineIf(_showSerialDebug, $"  ioctl: {result} errno: {errno}");
-                }
-
-                // clear stuff that should be off
-                settings.c_iflag &= ~(Nuttx.InputFlags.IGNBRK | Nuttx.InputFlags.BRKINT | Nuttx.InputFlags.PARMRK | Nuttx.InputFlags.ISTRIP | Nuttx.InputFlags.INLCR | Nuttx.InputFlags.IGNCR | Nuttx.InputFlags.ICRNL | Nuttx.InputFlags.IXON);
-                settings.c_oflag &= ~Nuttx.OutputFlags.OPOST;
-                settings.c_lflag &= ~(Nuttx.LocalFlags.ECHO | Nuttx.LocalFlags.ECHONL | Nuttx.LocalFlags.ICANON | Nuttx.LocalFlags.ISIG | Nuttx.LocalFlags.IEXTEN);
-                settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
-
-                // now set the user-requested settings
-                switch (DataBits)
-                {
-                    case 5:
-                        settings.c_cflag |= Nuttx.ControlFlags.CS5;
-                        break;
-                    case 6:
-                        settings.c_cflag |= Nuttx.ControlFlags.CS6;
-                        break;
-                    case 7:
-                        settings.c_cflag |= Nuttx.ControlFlags.CS7;
-                        break;
-                    case 8:
-                        settings.c_cflag |= Nuttx.ControlFlags.CS8;
-                        break;
-                }
-                switch (Parity)
-                {
-                    case Parity.Odd:
-                        settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
-                        break;
-                    case Parity.Even:
-                        settings.c_cflag |= Nuttx.ControlFlags.PARENB;
-                        break;
-                }
-                switch (StopBits)
-                {
-                    case StopBits.Two:
-                        settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
-                        break;
-                }
-
-                settings.c_speed = BaudRate;
-
-                Output.WriteLineIf(_showSerialDebug, $"  Setting port settings...");
-                result = Nuttx.ioctl(_driverHandle, TCSETS, gch.AddrOfPinnedObject());
-                if (result < 0)
-                {
-                    throw new NativeException(UPD.GetLastError());
-                }
-
-                if (_showSerialDebug)
-                {
-                    Console.WriteLine($"  Verifying...");
-                    result = Nuttx.ioctl(_driverHandle, TCGETS, gch.AddrOfPinnedObject());
-                    ShowSettings(settings);
-                }
+                var errno = Devices.UPD.GetLastError();
+                Output.WriteLineIf(_showSerialDebug, $"  ioctl: {result} errno: {errno}");
             }
-            finally
+
+            if (_showSerialDebug)
             {
-                if (gch.IsAllocated) gch.Free();
+                ShowSettings(settings);
+            }
+
+            // clear stuff that should be off
+            settings.c_iflag &= ~(Nuttx.InputFlags.IGNBRK | Nuttx.InputFlags.BRKINT | Nuttx.InputFlags.PARMRK | Nuttx.InputFlags.ISTRIP | Nuttx.InputFlags.INLCR | Nuttx.InputFlags.IGNCR | Nuttx.InputFlags.ICRNL | Nuttx.InputFlags.IXON);
+            settings.c_oflag &= ~Nuttx.OutputFlags.OPOST;
+            settings.c_lflag &= ~(Nuttx.LocalFlags.ECHO | Nuttx.LocalFlags.ECHONL | Nuttx.LocalFlags.ICANON | Nuttx.LocalFlags.ISIG | Nuttx.LocalFlags.IEXTEN);
+            settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
+
+            // now set the user-requested settings
+            switch (DataBits)
+            {
+                case 5:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS5;
+                    break;
+                case 6:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS6;
+                    break;
+                case 7:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS7;
+                    break;
+                case 8:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS8;
+                    break;
+            }
+            switch (Parity)
+            {
+                case Parity.Odd:
+                    settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
+                    break;
+                case Parity.Even:
+                    settings.c_cflag |= Nuttx.ControlFlags.PARENB;
+                    break;
+            }
+            switch (StopBits)
+            {
+                case StopBits.Two:
+                    settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
+                    break;
+            }
+
+            settings.c_speed = BaudRate;
+
+            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
+            if (_showSerialDebug)
+            {
+                ShowSettings(settings);
+            }
+
+            result = Nuttx.ioctl(_driverHandle, TCSETS, p);
+            if (result < 0)
+            {
+                throw new NativeException(UPD.GetLastError());
             }
         }
     }
