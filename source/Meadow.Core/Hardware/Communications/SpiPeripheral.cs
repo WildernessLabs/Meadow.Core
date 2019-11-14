@@ -96,7 +96,7 @@ namespace Meadow.Hardware
             var buffer = new byte[length + 1];
             buffer[0] = address;
 
-            var rx = WriteRead(new byte[] { address }, (ushort)(length + 1));
+            var rx = WriteRead(buffer, (ushort)buffer.Length);
 
             // skip past the byte where we clocked out the register address
             var registerData = rx.Skip(1).Take(length).ToArray();
