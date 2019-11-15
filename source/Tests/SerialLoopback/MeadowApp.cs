@@ -14,11 +14,6 @@ namespace SerialLoopback
         {
             Console.WriteLine("+SerialLoopback");
 
-            Run();
-        }
-
-        void Run()
-        {
             Console.WriteLine("Getting ports...");
             var s = SerialPort.GetPortNames();
             Console.WriteLine($"Ports:\n\t{string.Join(' ', s)}");
@@ -26,44 +21,102 @@ namespace SerialLoopback
             var portName = "ttyS1";
 
             Console.WriteLine($"Using '{portName}'...");
+
             var port = Device.CreateSerialPort(Device.SerialPortNames.Com4, 115200);
-            //var port = new SerialPort(portName, 115200);
+
             Console.WriteLine("\tCreated");
             port.ReadTimeout = Timeout.Infinite;
             port.Open();
-            if (port.IsOpen)
+
+            var testWithEvents = false;
+
+            if (testWithEvents)
             {
-                Console.WriteLine($"\tOpened {port}");
+                EventTestByTokenDelimter(port);
             }
             else
             {
-                Console.WriteLine("\tFailed to Open");
+                PollTestByTokenDelimter(port);
             }
+        }
 
-            var buffer = new byte[1024];
+        private string[] TestSentences = new string[]
+            {
+                "Hellow Meadow!",
+                "Ground control to Major Tom.",
+                "Those evil-natured robots, they're programmed to destroy us",
+                "Life, it seems, will fade away. Drifting further every day. Getting lost within myself, nothing matters, no one else.",
+                "It's gonna be a bright, bright, sun-shiny day!"
+            };
+
+        private static char DelimiterToken = '\n';
+        private static byte DelimiterByte = Convert.ToByte(DelimiterToken);
+
+
+        void EventTestByTokenDelimter(ISerialPort port)
+        {
+            // clear out anything already in the port buffer
+            Thread.Sleep(50);
+            port.DiscardInBuffer();
+
+            port.DataReceived += OnSerialDataReceived;
+
+            while (true)
+            {
+                foreach (var sentence in TestSentences)
+                {
+                    var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+                    var written = port.Write(dataToWrite);
+                    Console.WriteLine($"Wrote {written} bytes");
+
+                    Thread.Sleep(2000);
+                }
+            }
+        }
+    
+        private void OnSerialDataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            Console.WriteLine("Serial data received");
+
+            var port = sender as SerialPort;
+
+            // wait for all data (everything up to a token) to be read to the input buffer
+            var read = port.ReadToToken(DelimiterByte);
+            while (read.Length > 0)
+            {
+                // don't show the token
+                Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+            }
+        }
+
+        void PollTestByTokenDelimter(ISerialPort port)
+        {
+            // clear out anything already in the port buffer
+            Thread.Sleep(50);
             port.DiscardInBuffer();
 
             while (true)
             {
                 Console.WriteLine("Writing data...");
-                var written = port.Write(Encoding.ASCII.GetBytes("Hello Meadow!"));
-                Console.WriteLine($"Wrote {written} bytes");
-
-                Console.WriteLine("Reading data...");
-                var read = port.Read(buffer, 0, port.BytesToRead);
-
-                if (read == 0)
+                foreach(var sentence in TestSentences)
                 {
-                    Console.WriteLine($"Read {read} bytes");
-                }
-                else
-                {
-                    Console.WriteLine($"Read {read} bytes: {BitConverter.ToString(buffer, 0, read)}");
-                    Console.WriteLine($"Read string {Encoding.ASCII.GetString(buffer, 0, read).Replace("\r\n", "[crlf]")}");
+                    var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+                    var written = port.Write(dataToWrite);
+                    Console.WriteLine($"Wrote {written} bytes");
 
-                }
+                    // wait for all data (everything up to a token) to be read to the input buffer
+                    var read = port.ReadToToken(DelimiterByte);
+                    while(read.Length == 0)
+                    {
+                        Thread.Sleep(50);
+                        read = port.ReadToToken(DelimiterByte);
+                    }
 
-                Thread.Sleep(2000);
+                    // don't show the token
+                    Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+
+                    Thread.Sleep(2000);
+                }
             }
         }
     }

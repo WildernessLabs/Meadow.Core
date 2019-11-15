@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -322,16 +323,34 @@ namespace Meadow.Hardware
 
                 if (result < 0)
                 {
+                    Output.WriteLineIf(_showSerialDebug, $"Nuttx read returned {result}");
                     throw new NativeException(UPD.GetLastError());
                 }
                 else
                 {
+                    Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
                     _readBuffer.Enqueue(readBuffer, 0, result);
-                    DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
+
+                    // put on a worker thread, else if the handler goes into some wait, we'll never process data
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
+                            DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
+                        }
+                        catch (Exception ex)
+                        {
+                            // if the event handler throws, we don't want this to die
+                            Output.WriteLine($"Serial event handler threw: {ex.Message}");
+                        }
+                    });
                 }
 
-                Thread.Sleep(10);
+                Thread.Sleep(20);
             }
+
+            Output.WriteLineIf(_showSerialDebug, $"ReadThreadProc: port closed");
         }
 
         /// <summary>
@@ -351,7 +370,7 @@ namespace Meadow.Hardware
         /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
         public byte[] ReadToToken(byte token)
         {
-            if (_readBuffer.Any(b => b == token))
+            if (_readBuffer != null && _readBuffer.Any(b => b == token))
             {
                 var list = new List<byte>();
                 while (_readBuffer.Peek() != token)
@@ -362,6 +381,8 @@ namespace Meadow.Hardware
                 list.Add(_readBuffer.Dequeue());
                 return list.ToArray();
             }
+
+            Output.WriteLineIf(_showSerialDebug, $"ReadToToken returned 0");
 
             return new byte[0];
         }
