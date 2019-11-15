@@ -45,6 +45,14 @@ namespace Meadow.Hardware
             bool invert = false*/
         );
 
+        ISerialPort CreateSerialPort(
+            SerialPortName portName,
+            int baudRate,
+            Parity parity = Parity.None,
+            int dataBits = 8,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096);
+
         ISpiBus CreateSpiBus(
             IPin[] pins,
             long speed
