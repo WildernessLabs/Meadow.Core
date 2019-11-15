@@ -15,7 +15,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// </summary>
-    public class SerialPort : IDisposable
+    public class SerialPort : IDisposable, ISerialPort
     {
         private const int TCGETS = 0x0101;
         private const int TCSETS = 0x0102;
@@ -27,6 +27,7 @@ namespace Meadow.Hardware
         private CircularBuffer<byte> _readBuffer;
         private Thread _readThread;
         private int _readTimeout;
+        private int _baudRate;
 
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
@@ -41,10 +42,6 @@ namespace Meadow.Hardware
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
         public bool IsOpen { get => _driverHandle != IntPtr.Zero; }
-        /// <summary>
-        /// Gets or sets the serial baud rate.
-        /// </summary>
-        public int BaudRate { get; }
         /// <summary>
         /// Gets or sets the parity-checking protocol.
         /// </summary>
@@ -110,6 +107,22 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
+        /// Gets or sets the serial baud rate.
+        /// </summary>
+        public int BaudRate
+        {
+            get => _baudRate;
+            set
+            {
+                if (value == BaudRate) return;
+                if (value <= 0) throw new ArgumentOutOfRangeException();
+                if (IsOpen) throw new IOException("You cannot change BaudRate on an Open port");
+
+                _baudRate = value;
+            }
+        }
+
+        /// <summary>
         /// Gets an array of serial port names for the current device.
         /// </summary>
         /// <returns></returns>
@@ -126,6 +139,27 @@ namespace Meadow.Hardware
             }
 
             return list.ToArray();
+        }
+
+        /// <summary>
+        /// Gets an array of supported baud rates
+        /// </summary>
+        /// <returns></returns>
+        public int[] GetSupportedBaudRates()
+        {
+            return new int[]
+                {
+                    300,
+                    600,
+                    1200,
+                    2400,
+                    4800,
+                    9600,
+                    19200,
+                    38400,
+                    57600,
+                    115200
+                };
         }
 
         /// <summary>
