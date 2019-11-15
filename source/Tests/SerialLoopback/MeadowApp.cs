@@ -26,7 +26,8 @@ namespace SerialLoopback
             var portName = "ttyS1";
 
             Console.WriteLine($"Using '{portName}'...");
-            var port = new SerialPort(portName, 115200);
+            var port = Device.CreateSerialPort(Device.SerialPortNames.Com4, 115200);
+            //var port = new SerialPort(portName, 115200);
             Console.WriteLine("\tCreated");
             port.ReadTimeout = Timeout.Infinite;
             port.Open();

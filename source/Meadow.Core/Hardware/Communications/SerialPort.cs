@@ -79,6 +79,18 @@ namespace Meadow.Hardware
             get => _readBuffer == null ? 0 : _readBuffer.Count;
         }
 
+        internal static SerialPort From(
+            SerialPortName portName,
+            int baudRate,
+            Parity parity = Parity.None,
+            int dataBits = 8,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096) {
+
+            return new SerialPort(portName, baudRate, parity, dataBits, stopBits, readBufferSize);
+
+        }
+
         /// <summary>
         /// Initializes a new instance of the SerialPort class.
         /// </summary>
@@ -88,7 +100,13 @@ namespace Meadow.Hardware
         /// <param name="dataBits"></param>
         /// <param name="stopBits"></param>
         /// <param name="readBufferSize"></param>
-        public SerialPort(string portName, int baudRate, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One, int readBufferSize = 4096)
+        protected SerialPort(
+            SerialPortName portName,
+            int baudRate,
+            Parity parity = Parity.None,
+            int dataBits = 8,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096)
         {
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
@@ -97,7 +115,7 @@ namespace Meadow.Hardware
             if (baudRate <= 0) throw new ArgumentOutOfRangeException("Invalid baud rate");
             if (dataBits < 5 || dataBits > 8) throw new ArgumentOutOfRangeException("Invalid dataBits");
 
-            PortName = portName;
+            PortName = portName.SystemName;
             BaudRate = baudRate;
             Parity = Parity;
             DataBits = dataBits;

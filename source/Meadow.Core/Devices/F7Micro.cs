@@ -21,6 +21,11 @@ namespace Meadow.Devices
         public F7MicroPinDefinitions Pins { get; protected set; }
         //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
 
+
+        public SerialPortNameDefinitions SerialPortNames { get; protected set; }
+            = new SerialPortNameDefinitions();
+
+
         internal IIOController IoController { get; private set; }
 
         // private static
@@ -92,6 +97,17 @@ namespace Meadow.Devices
             /*bool inverted = false*/)
         {
             return PwmPort.From(pin, this.IoController, frequency, dutyCycle);
+        }
+
+        public ISerialPort CreateSerialPort(
+            SerialPortName portName,
+            int baudRate,
+            Parity parity = Parity.None,
+            int dataBits = 8,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096)
+        {
+            return SerialPort.From(portName, baudRate, parity, dataBits, stopBits, readBufferSize);
         }
 
         public ISpiBus CreateSpiBus(
