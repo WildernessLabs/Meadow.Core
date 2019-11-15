@@ -57,6 +57,13 @@ namespace Meadow.Hardware
             long speed
         );
 
+        ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            SpiClockConfiguration config
+        );
+
         II2cBus CreateI2cBus(
             IPin[] pins,
             ushort speed = 100 // TODO: not sure about this
