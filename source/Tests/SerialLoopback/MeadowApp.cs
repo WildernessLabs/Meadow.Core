@@ -14,9 +14,7 @@ namespace SerialLoopback
         {
             Console.WriteLine("+SerialLoopback");
 
-
             Console.WriteLine($"Using '{Device.SerialPortNames.Com4.FriendlyName}'...");
-
             var port = Device.CreateSerialPort(Device.SerialPortNames.Com4, 115200);
 
             Console.WriteLine("\tCreated");
@@ -46,26 +44,28 @@ namespace SerialLoopback
         private static char DelimiterToken = '\n';
         private static byte DelimiterByte = Convert.ToByte(DelimiterToken);
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="port"></param>
         void PollTestByTokenDelimter(ISerialPort port)
         {
             // clear out anything already in the port buffer
             Thread.Sleep(50);
-            port.DiscardInBuffer();
+            port.ClearInputBuffer();
 
-            while (true)
-            {
+            while (true) {
+
                 Console.WriteLine("Writing data...");
-                foreach(var sentence in TestSentences)
-                {
+                foreach(var sentence in TestSentences) {
+
                     var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
                     var written = port.Write(dataToWrite);
                     Console.WriteLine($"Wrote {written} bytes");
 
                     // wait for all data (everything up to a token) to be read to the input buffer
                     var read = port.ReadToToken(DelimiterByte);
-                    while(read.Length == 0)
-                    {
+                    while(read.Length == 0) {
                         Thread.Sleep(50);
                         read = port.ReadToToken(DelimiterByte);
                     }
@@ -76,8 +76,41 @@ namespace SerialLoopback
                     Thread.Sleep(2000);
                 }
             }
-
-
         }
+
+
+        void EventTestByTokenDelimter(ISerialPort port)
+        {
+            // clear out anything already in the port buffer
+            Thread.Sleep(50);
+            port.ClearInputBuffer();
+
+            port.DataReceived += OnSerialDataReceived;
+
+            while (true) {
+                foreach (var sentence in TestSentences) {
+                    var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+                    var written = port.Write(dataToWrite);
+                    Console.WriteLine($"Wrote {written} bytes");
+
+                    Thread.Sleep(2000);
+                }
+            }
+        }
+
+        private void OnSerialDataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            Console.WriteLine("Serial data received");
+
+            var port = sender as SerialPort;
+
+            // wait for all data (everything up to a token) to be read to the input buffer
+            var read = port.ReadToToken(DelimiterByte);
+            while (read.Length > 0) {
+                // don't show the token
+                Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+            }
+        }
+
     }
 }
