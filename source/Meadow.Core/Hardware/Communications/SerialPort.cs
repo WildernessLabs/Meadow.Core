@@ -62,10 +62,8 @@ namespace Meadow.Hardware
         public int ReadTimeout
         {
             get => _readTimeout;
-            set
-            {
-                if (value == 0 || value < -1)
-                {
+            set {
+                if (value == 0 || value < -1) {
                     throw new ArgumentOutOfRangeException();
                 }
                 _readTimeout = value;
@@ -131,8 +129,7 @@ namespace Meadow.Hardware
         public int BaudRate
         {
             get => _baudRate;
-            set
-            {
+            set {
                 if (value == BaudRate) return;
                 if (value <= 0) throw new ArgumentOutOfRangeException();
                 if (IsOpen) throw new IOException("You cannot change BaudRate on an Open port");
@@ -149,10 +146,8 @@ namespace Meadow.Hardware
         {
             var allDevices = F7Micro.FileSystem.EnumDirectory(DriverFolder);
             var list = new List<string>();
-            foreach (var s in allDevices)
-            {
-                if (s.StartsWith(SerialPortDriverPrefix))
-                {
+            foreach (var s in allDevices) {
+                if (s.StartsWith(SerialPortDriverPrefix)) {
                     list.Add(s);
                 }
             }
@@ -199,8 +194,7 @@ namespace Meadow.Hardware
         public override string ToString()
         {
             char p;
-            switch (Parity)
-            {
+            switch (Parity) {
                 case Parity.Even:
                     p = 'e';
                     break;
@@ -223,10 +217,9 @@ namespace Meadow.Hardware
         /// <summary>
         /// Discards data from the serial driver's receive buffer.
         /// </summary>
-        public void DiscardInBuffer()
+        public void ClearInputBuffer()
         {
-            if (_readBuffer != null)
-            {
+            if (_readBuffer != null) {
                 _readBuffer.Clear();
             }
         }
@@ -239,14 +232,12 @@ namespace Meadow.Hardware
             if (IsOpen) throw new InvalidOperationException("Port is already open");
 
             var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput);
-            if (handle.ToInt32() < 0)
-            {
+            if (handle.ToInt32() < 0) {
                 throw new NativeException(UPD.GetLastError());
             }
             _driverHandle = handle;
             SetPortSettings();
-            _readThread = new Thread(ReadThreadProc)
-            {
+            _readThread = new Thread(ReadThreadProc) {
                 IsBackground = true,
                 Name = "Serial Read Thread"
             };
@@ -294,20 +285,17 @@ namespace Meadow.Hardware
             if (count == 0) return 0;
 
             Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
-            if (offset > 0)
-            {
+            if (offset > 0) {
                 // we need to make a copy
                 var tmp = new byte[count];
                 Array.Copy(buffer, offset, tmp, 0, count);
                 var result = Nuttx.write(_driverHandle, tmp, count);
-                if (result < 0)
-                {
+                if (result < 0) {
                     throw new NativeException(UPD.GetLastError());
                 }
                 return result;
             }
-            else
-            {
+            else {
                 var result = Nuttx.write(_driverHandle, buffer, count);
                 return result;
             }
@@ -321,26 +309,21 @@ namespace Meadow.Hardware
             {
                 var result = Nuttx.read(_driverHandle, readBuffer, readBuffer.Length);
 
-                if (result < 0)
-                {
+                if (result < 0) {
                     Output.WriteLineIf(_showSerialDebug, $"Nuttx read returned {result}");
                     throw new NativeException(UPD.GetLastError());
                 }
-                else
-                {
+                else {
                     Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
                     _readBuffer.Enqueue(readBuffer, 0, result);
 
                     // put on a worker thread, else if the handler goes into some wait, we'll never process data
-                    Task.Run(() =>
-                    {
-                        try
-                        {
+                    Task.Run(() => {
+                        try {
                             Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
                             DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
                         }
-                        catch (Exception ex)
-                        {
+                        catch (Exception ex) {
                             // if the event handler throws, we don't want this to die
                             Output.WriteLine($"Serial event handler threw: {ex.Message}");
                         }
@@ -370,11 +353,9 @@ namespace Meadow.Hardware
         /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
         public byte[] ReadToToken(byte token)
         {
-            if (_readBuffer != null && _readBuffer.Any(b => b == token))
-            {
+            if (_readBuffer != null && _readBuffer.Any(b => b == token)) {
                 var list = new List<byte>();
-                while (_readBuffer.Peek() != token)
-                {
+                while (_readBuffer.Peek() != token) {
                     list.Add(_readBuffer.Dequeue());
                 }
                 // grab the token
@@ -393,8 +374,7 @@ namespace Meadow.Hardware
         /// <returns>The byte, cast to an Int32, or -1 if the end of the stream has been read.</returns>
         public int ReadByte()
         {
-            if (!IsOpen)
-            {
+            if (!IsOpen) {
                 throw new InvalidOperationException("Cannot read from a closed port");
             }
 
@@ -411,8 +391,7 @@ namespace Meadow.Hardware
         /// <returns>The number of bytes read.</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
-            if (!IsOpen)
-            {
+            if (!IsOpen) {
                 throw new InvalidOperationException("Cannot read from a closed port");
             }
 
@@ -425,37 +404,29 @@ namespace Meadow.Hardware
 
             Stopwatch sw = null;
 
-            if (ReadTimeout > 0)
-            {
-                while (_readBuffer.Count == 0)
-                {
-                    if (sw == null)
-                    {
+            if (ReadTimeout > 0) {
+                while (_readBuffer.Count == 0) {
+                    if (sw == null) {
                         sw = new Stopwatch();
                         sw.Start();
                     }
-                    else
-                    {
-                        if (sw.ElapsedMilliseconds > ReadTimeout)
-                        {
+                    else {
+                        if (sw.ElapsedMilliseconds > ReadTimeout) {
                             throw new TimeoutException("Serial port read timeout");
                         }
                     }
                     Thread.Sleep(10);
                 }
-                if (sw != null)
-                {
+                if (sw != null) {
                     sw.Stop();
                 }
             }
 
-            if (count < _readBuffer.Count)
-            {
+            if (count < _readBuffer.Count) {
                 read = count;
                 Array.Copy(_readBuffer.Dequeue(count), 0, buffer, offset, count);
             }
-            else
-            {
+            else {
                 read = _readBuffer.Count;
                 Array.Copy(_readBuffer.Dequeue(read), 0, buffer, offset, read);
             }
@@ -481,14 +452,12 @@ namespace Meadow.Hardware
 
             Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
             var result = Nuttx.ioctl(_driverHandle, TCGETS, p);
-            if (result < 0)
-            {
+            if (result < 0) {
                 var errno = Devices.UPD.GetLastError();
                 Output.WriteLineIf(_showSerialDebug, $"  ioctl: {result} errno: {errno}");
             }
 
-            if (_showSerialDebug)
-            {
+            if (_showSerialDebug) {
                 ShowSettings(settings);
             }
 
@@ -499,8 +468,7 @@ namespace Meadow.Hardware
             settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
 
             // now set the user-requested settings
-            switch (DataBits)
-            {
+            switch (DataBits) {
                 case 5:
                     settings.c_cflag |= Nuttx.ControlFlags.CS5;
                     break;
@@ -514,8 +482,7 @@ namespace Meadow.Hardware
                     settings.c_cflag |= Nuttx.ControlFlags.CS8;
                     break;
             }
-            switch (Parity)
-            {
+            switch (Parity) {
                 case Parity.Odd:
                     settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
                     break;
@@ -523,8 +490,7 @@ namespace Meadow.Hardware
                     settings.c_cflag |= Nuttx.ControlFlags.PARENB;
                     break;
             }
-            switch (StopBits)
-            {
+            switch (StopBits) {
                 case StopBits.Two:
                     settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
                     break;
@@ -533,14 +499,12 @@ namespace Meadow.Hardware
             settings.c_speed = BaudRate;
 
             Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            if (_showSerialDebug)
-            {
+            if (_showSerialDebug) {
                 ShowSettings(settings);
             }
 
             result = Nuttx.ioctl(_driverHandle, TCSETS, p);
-            if (result < 0)
-            {
+            if (result < 0) {
                 throw new NativeException(UPD.GetLastError());
             }
         }

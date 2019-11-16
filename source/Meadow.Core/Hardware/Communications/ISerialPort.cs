@@ -15,7 +15,7 @@
         event SerialDataReceivedEventHandler DataReceived;
 
         void Close();
-        void DiscardInBuffer();
+        void ClearInputBuffer();
         void Open();
         int Peek();
         int Read(byte[] buffer, int offset, int count);
