@@ -40,14 +40,13 @@ namespace SerialLoopback
             }
         }
 
-        private string[] TestSentences = new string[]
-            {
-                "Hellow Meadow!",
-                "Ground control to Major Tom.",
-                "Those evil-natured robots, they're programmed to destroy us",
-                "Life, it seems, will fade away. Drifting further every day. Getting lost within myself, nothing matters, no one else.",
-                "It's gonna be a bright, bright, sun-shiny day!"
-            };
+        private string[] TestSentences = {
+            "Hellow Meadow!",
+            "Ground control to Major Tom.",
+            "Those evil-natured robots, they're programmed to destroy us",
+            "Life, it seems, will fade away. Drifting further every day. Getting lost within myself, nothing matters, no one else.",
+            "It's gonna be a bright, bright, sun-shiny day!"
+        };
 
         private static char DelimiterToken = '\n';
         private static byte DelimiterByte = Convert.ToByte(DelimiterToken);
