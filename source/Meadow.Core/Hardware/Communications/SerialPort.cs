@@ -81,12 +81,12 @@ namespace Meadow.Hardware
         internal static SerialPort From(
             SerialPortName portName,
             int baudRate,
-            Parity parity = Parity.None,
             int dataBits = 8,
+            Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096) {
 
-            return new SerialPort(portName, baudRate, parity, dataBits, stopBits, readBufferSize);
+            return new SerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
 
         }
 
@@ -102,8 +102,8 @@ namespace Meadow.Hardware
         protected SerialPort(
             SerialPortName portName,
             int baudRate,
-            Parity parity = Parity.None,
             int dataBits = 8,
+            Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096)
         {

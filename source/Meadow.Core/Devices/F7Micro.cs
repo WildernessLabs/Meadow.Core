@@ -102,12 +102,12 @@ namespace Meadow.Devices
         public ISerialPort CreateSerialPort(
             SerialPortName portName,
             int baudRate,
-            Parity parity = Parity.None,
             int dataBits = 8,
+            Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096)
         {
-            return SerialPort.From(portName, baudRate, parity, dataBits, stopBits, readBufferSize);
+            return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
         public ISpiBus CreateSpiBus(

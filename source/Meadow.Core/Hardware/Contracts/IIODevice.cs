@@ -48,8 +48,8 @@ namespace Meadow.Hardware
         ISerialPort CreateSerialPort(
             SerialPortName portName,
             int baudRate,
-            Parity parity = Parity.None,
             int dataBits = 8,
+            Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096);
 
