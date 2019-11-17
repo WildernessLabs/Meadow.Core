@@ -52,7 +52,7 @@ namespace SerialLoopback
         {
             // clear out anything already in the port buffer
             Thread.Sleep(50);
-            port.ClearInputBuffer();
+            port.ClearReceiveBuffer();
 
             while (true) {
 
@@ -83,7 +83,7 @@ namespace SerialLoopback
         {
             // clear out anything already in the port buffer
             Thread.Sleep(50);
-            port.ClearInputBuffer();
+            port.ClearReceiveBuffer();
 
             port.DataReceived += OnSerialDataReceived;
 

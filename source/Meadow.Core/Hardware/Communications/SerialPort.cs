@@ -120,7 +120,7 @@ namespace Meadow.Hardware
             DataBits = dataBits;
             StopBits = stopBits;
             ReadTimeout = Timeout.Infinite;
-            ReadBufferSize = readBufferSize;
+            ReceiveBufferSize = readBufferSize;
         }
 
         /// <summary>
@@ -179,12 +179,12 @@ namespace Meadow.Hardware
         /// <summary>
         /// The buffer size, in bytes.
         /// </summary>
-        public int ReadBufferSize
+        public int ReceiveBufferSize
         {
             get => _readBuffer == null ? 0 : _readBuffer.MaxElements;
             private set
             {
-                if (value == ReadBufferSize) return;
+                if (value == ReceiveBufferSize) return;
                 // TODO: if there are events wired, we need to handle that.
                 // for now this is private to prevent resizing
                 _readBuffer = new CircularBuffer<byte>(value);
@@ -217,7 +217,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Discards data from the serial driver's receive buffer.
         /// </summary>
-        public void ClearInputBuffer()
+        public void ClearReceiveBuffer()
         {
             if (_readBuffer != null) {
                 _readBuffer.Clear();

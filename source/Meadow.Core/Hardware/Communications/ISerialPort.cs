@@ -36,9 +36,10 @@
         string PortName { get; }
 
         /// <summary>
-        /// The buffer size, in bytes.
+        /// The size, in bytes, of the receive buffer that caches message data from
+        /// the attached peripheral.
         /// </summary>
-        int ReadBufferSize { get; }
+        int ReceiveBufferSize { get; }
 
         /// <summary>
         /// The number of milliseconds before a time-out occurs when a read operation does not finish.
@@ -64,7 +65,7 @@
         /// <summary>
         /// Discards data from the serial driver's receive buffer.
         /// </summary>
-        void ClearInputBuffer();
+        void ClearReceiveBuffer();
 
         /// <summary>
         /// Opens a new serial port connection.
