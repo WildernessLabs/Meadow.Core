@@ -8,6 +8,11 @@ using Meadow.Hardware;
 
 namespace SerialLoopback
 {
+    /// <summary>
+    /// Simple app that illustrates basic features of the SerialPort. To use,
+    /// connect ports `D00` and `D01` with a jumper to create a serial "loopback"
+    /// so that data transmitted on the TX pin is received on the RX pin.
+    /// </summary>
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
         public MeadowApp()
