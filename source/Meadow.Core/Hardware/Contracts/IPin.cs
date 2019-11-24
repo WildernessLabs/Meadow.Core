@@ -18,5 +18,9 @@ namespace Meadow.Hardware
         //void ReserveChannel<C>(); // TODO: should this return Task<bool>? (true if reserved)
         //void ReleaseChannel();
 
+        // TODO: upgrade to C# 8 and do this:
+        //public override string ToString() {
+        //    return Name;
+        //}
     }
 }
