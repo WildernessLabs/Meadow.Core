@@ -93,7 +93,7 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input)
         {
-            var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().First();
+            var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if(chan == null) 
             {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");

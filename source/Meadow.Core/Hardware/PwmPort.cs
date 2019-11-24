@@ -34,9 +34,8 @@ namespace Meadow.Hardware
             float dutyCycle = 0,
             bool inverted = false)
         {
-            var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
+            var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().FirstOrDefault();
             if (channel != null) {
-                //TODO: need other checks here.
                 var port = new PwmPort(pin, ioController, channel);
                 port.Frequency = frequency;
                 port.DutyCycle = dutyCycle;
@@ -50,8 +49,6 @@ namespace Meadow.Hardware
             }
 
         }
-
-        ~PwmPort() { throw new NotImplementedException(); }
 
         public override float Duration { get; set; }
         public override float Period
