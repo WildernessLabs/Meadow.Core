@@ -31,7 +31,7 @@ namespace Meadow.Hardware
             // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
             // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
 
-            if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
+            if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
             {
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
             }
@@ -65,7 +65,7 @@ namespace Meadow.Hardware
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if (chan != null) {
                 //TODO: need other checks here.
-                if (interruptMode != InterruptMode.None && (!chan.InterrruptCapable)) {
+                if (interruptMode != InterruptMode.None && (!chan.InterruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
                 var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
