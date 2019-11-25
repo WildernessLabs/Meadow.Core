@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class PwmChannelInfo : DigitalChannelIInfoBase, IPwmChannelInfo
+    public class PwmChannelInfo : DigitalChannelInfoBase, IPwmChannelInfo
     {
         public float MinimumFrequency { get; protected set; }
         public float MaximumFrequency { get; protected set; }
