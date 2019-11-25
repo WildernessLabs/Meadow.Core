@@ -41,8 +41,8 @@ namespace Meadow.Hardware
         IPwmPort CreatePwmPort(
             IPin pin,
             float frequency = 100, 
-            float dutyCycle = 0/*, 
-            bool invert = false*/
+            float dutyCycle = 0.5f,
+            bool invert = false
         );
 
         ISerialPort CreateSerialPort(

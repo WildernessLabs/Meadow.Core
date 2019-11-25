@@ -50,13 +50,13 @@ namespace Meadow.Hardware
         // TODO: Speed should have default?
         public static I2cBus From(IIOController ioController, IPin clock, IPin data, ushort speed, ushort transactionTimeout = 100)
         {
-            var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().First();
+            var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
             {
                 throw new Exception($"Pin {clock.Name} does not have I2C Clock capabilities");
             }
 
-            var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().First();
+            var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (dataChannel == null || dataChannel.ChannelFunction != I2cChannelFunctionType.Data)
             {
                 throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");

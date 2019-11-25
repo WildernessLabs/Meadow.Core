@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Meadow.Core;
 
 namespace SPITest
@@ -7,12 +8,10 @@ namespace SPITest
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine();
-            Console.WriteLine("Testing Software SPI Communications");
-            Console.WriteLine();
-
             SPITestApplication application = new SPITestApplication();
             application.Run();
+
+            Thread.Sleep(Timeout.Infinite);
         }
     }
 }
