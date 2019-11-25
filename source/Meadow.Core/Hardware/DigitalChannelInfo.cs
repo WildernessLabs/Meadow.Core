@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class DigitalChannelInfo : DigitalChannelIInfoBase
+    public class DigitalChannelInfo : DigitalChannelInfoBase
     {
         public DigitalChannelInfo(
             string name,

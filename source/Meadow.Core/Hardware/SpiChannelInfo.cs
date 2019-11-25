@@ -1,6 +1,6 @@
 ﻿namespace Meadow.Hardware
 {
-    public class SpiChannelInfo : DigitalChannelIInfoBase, ISpiChannelInfo
+    public class SpiChannelInfo : DigitalChannelInfoBase, ISpiChannelInfo
     {
         public SpiLineType LineTypes { get; protected set; }
 
