@@ -12,7 +12,7 @@ namespace Meadow.Hardware
         /// <value><c>true</c> if input capable; otherwise, <c>false</c>.</value>
         bool InputCapable { get; }
         bool OutputCapable { get; }
-        bool InterrruptCapable { get; }
+        bool InterruptCapable { get; }
         bool PullDownCapable { get; }
         bool PullUpCapable { get; }
         bool InverseLogic { get; }

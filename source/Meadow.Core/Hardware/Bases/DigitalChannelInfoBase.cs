@@ -1,16 +1,16 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class DigitalChannelIInfoBase : ChannelInfoBase, IDigitalChannelInfo
+    public class DigitalChannelInfoBase : ChannelInfoBase, IDigitalChannelInfo
     {
         public bool InputCapable { get; protected set; }
         public bool OutputCapable { get; protected set; } // TODO: do we need IDigitalOutputChannel?
-        public bool InterrruptCapable { get; protected set; }
+        public bool InterruptCapable { get; protected set; }
         public bool PullDownCapable { get; protected set; }
         public bool PullUpCapable { get; protected set; }
         public bool InverseLogic { get; protected set; }
 
-        protected DigitalChannelIInfoBase(
+        protected DigitalChannelInfoBase(
             string name,
             bool inputCapable,
             bool outputCapable,
@@ -22,7 +22,7 @@ namespace Meadow.Hardware
         {
             this.InputCapable = inputCapable;
             this.OutputCapable = outputCapable;
-            this.InterrruptCapable = interruptCapable;
+            this.InterruptCapable = interruptCapable;
             this.PullDownCapable = pullDownCapable;
             this.PullUpCapable = pullUpCapable;
             this.InverseLogic = inverseLogic;

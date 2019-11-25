@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public class UartChannelInfo : DigitalChannelIInfoBase, IUartChannelInfo
+    public class UartChannelInfo : DigitalChannelInfoBase, IUartChannelInfo
     {
         public SerialDirectionType SerialDirection { get; protected set; }
 

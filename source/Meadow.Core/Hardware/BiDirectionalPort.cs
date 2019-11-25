@@ -43,7 +43,7 @@ namespace Meadow.Hardware
             PortDirectionType initialDirection = PortDirectionType.Input)
             : base (pin, channel, initialState, glitchFilter, interruptMode, resistorMode, initialDirection)
         {
-            if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
+            if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
             {
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
             }
