@@ -15,9 +15,11 @@
  </PropertyGroup>
  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+   <LangVersion>8.0</LangVersion>
  </PropertyGroup>
  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+   <LangVersion>8.0</LangVersion>
  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.1.1" />
