@@ -18,6 +18,9 @@
 
         bool Inverted { get; set; }
 
+        // Whether or not it's running
+        bool State { get; }
+
         TimeScale TimeScale { get; set; }
     }
 
