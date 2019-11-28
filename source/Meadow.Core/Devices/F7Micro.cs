@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Meadow.Hardware;
 using Meadow.Gateway.WiFi;
+using System;
 
 namespace Meadow.Devices
 {
@@ -9,7 +10,7 @@ namespace Meadow.Devices
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
     public partial class F7Micro : IIODevice
-    { 
+    {
         //public List<WiFiAdapter> WiFiAdapters { get; }
 
         public DeviceCapabilities Capabilities { get; protected set; }
@@ -48,14 +49,14 @@ namespace Meadow.Devices
 
             // 
             this.Pins = new F7MicroPinDefinitions();
-            
+
         }
 
 
         //public C CreatePort<C>(P portConfig) where P : IPortConfig, where C : IPort {}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
-            IPin pin, 
+            IPin pin,
             bool initialState = false)
         {
             return DigitalOutputPort.From(pin, this.IoController, initialState);
@@ -96,7 +97,23 @@ namespace Meadow.Devices
             float dutyCycle = 0.5f,
             bool inverted = false)
         {
-            return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted);
+            bool isOnboard = IsOnboardLed(pin);
+            return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted, isOnboard);
+        }
+
+        /// <summary>
+        /// Tests whether or not the pin passed in belongs to an onboard LED
+        /// component. Used for a dirty dirty hack.
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <returns>whether or no the pin belons to the onboard LED</returns>
+        protected bool IsOnboardLed(IPin pin)
+        {
+            return (
+                pin == Pins.OnboardLedBlue ||
+                pin == Pins.OnboardLedGreen ||
+                pin == Pins.OnboardLedRed
+                );
         }
 
         public ISerialPort CreateSerialPort(

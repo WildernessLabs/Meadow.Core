@@ -17,6 +17,9 @@ namespace Meadow.Hardware
         private float _dutyCycle;
         private bool _inverted;
 
+        // dirty dirty hack
+        internal bool IsOnboard { get; set; }
+
         protected IIOController IOController { get; set; }
         protected IPwmChannelInfo PwmChannelInfo { get; set; }
 
@@ -24,9 +27,11 @@ namespace Meadow.Hardware
             IPin pin,
             IIOController ioController,
             IPwmChannelInfo channel,
-            bool inverted = false)
+            bool inverted = false,
+            bool isOnboard = false)
             : base(pin, channel)
         {
+            this.IsOnboard = isOnboard;
             this.IOController = ioController;
             this.PwmChannelInfo = channel;
             this.Inverted = inverted;
@@ -37,21 +42,19 @@ namespace Meadow.Hardware
             IIOController ioController,
             float frequency = 100,
             float dutyCycle = 0.5f,
-            bool inverted = false)
+            bool inverted = false,
+            bool isOnboard = false)
         {
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().FirstOrDefault();
-            if (channel != null)
-            {
-                var port = new PwmPort(pin, ioController, channel);
+            if (channel != null) {
+                var port = new PwmPort(pin, ioController, channel, inverted, isOnboard);
                 port.TimeScale = TimeScale.Seconds;
                 port.Frequency = frequency;
                 port.DutyCycle = dutyCycle;
                 port.Inverted = inverted;
-
                 return port;
             }
-            else
-            {
+            else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
             }
         }
@@ -62,8 +65,7 @@ namespace Meadow.Hardware
         public override bool Inverted
         {
             get => _inverted;
-            set
-            {
+            set {
                 if (value == Inverted) return;
                 _inverted = value;
                 if (State)
@@ -79,17 +81,16 @@ namespace Meadow.Hardware
         public override float Frequency
         {
             get => _frequency;
-            set
-            {
-                if (value <= 0) throw new ArgumentOutOfRangeException();
+            set {
+                // clamp
+                if (value < 0) { value = 0; }
+                // TODO: add upper bound.
 
-                // TODO: do we have a lower or upper bound on this hardware?
-
+                // shortcut
                 if (value == Frequency) return;
 
                 _frequency = value;
-                if (State)
-                {
+                if (State) {
                     UpdateChannel();
                 }
             }
@@ -101,14 +102,20 @@ namespace Meadow.Hardware
         public override float DutyCycle
         {
             get => _dutyCycle;
-            set
-            {
-                if (value < 0.0 || value > 1.0) throw new ArgumentOutOfRangeException("Duty cycle must be between 0.0 and 1.0");
+            set {
+                // clamp
+                if (value < 0) { value = 0; }
+                if (value > 1) { value = 1; }
                 if (value == DutyCycle) return;
+                
+                // dirty dirty hack
+                // Onboard LED flatlines at PWM > 0.85ish.
+                if (IsOnboard && (value > 0.85f)) {
+                    value = 0.85f;
+                }
 
                 _dutyCycle = value;
-                if (State)
-                {
+                if (State) {
                     UpdateChannel();
                 }
             }
@@ -120,10 +127,10 @@ namespace Meadow.Hardware
         public override float Duration
         {
             get => DutyCycle * Period;
-            set
-            {
+            set {
                 if (value > Period) throw new ArgumentOutOfRangeException("Duration must be less than Period");
-                if (value < 0) throw new ArgumentOutOfRangeException("Duration cannot be negative");
+                // clamp
+                if (value < 0) { value = 0; }
 
                 DutyCycle = value / Period;
             }
@@ -135,8 +142,7 @@ namespace Meadow.Hardware
         public override float Period
         {
             get => 1.0f / Frequency * (float)TimeScale;
-            set
-            {
+            set {
                 Frequency = 1.0f / value / (float)TimeScale;
             }
         }
