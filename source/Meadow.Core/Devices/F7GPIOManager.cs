@@ -68,7 +68,7 @@ namespace Meadow.Devices
 #if DEBUG
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
-//            DebugFeatures = DebugFeature.GpioDetail;
+//            DebugFeatures = DebugFeature.Interrupts;
 #endif
         }
 
@@ -524,9 +524,11 @@ namespace Meadow.Devices
             {
                 int priority = 0;
                 var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    "queue data arrived");
 
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                    $"queue data arrived: {BitConverter.ToString(rx_buffer)}");
+
+                // we get in 4 bytes here that is the port.  We get no other info (e.g. state)
                 if (result >= 0)
                 {
                     var irq = BitConverter.ToInt32(rx_buffer, 0);
@@ -541,7 +543,9 @@ namespace Meadow.Devices
                     {
                         if (_interruptPins.ContainsKey(key))
                         {
-                            Interrupt?.Invoke(_interruptPins[key], rx_buffer[4] != 0);
+                            var ipin = _interruptPins[key];
+                            var state = GetDiscrete(ipin);
+                            Interrupt?.Invoke(ipin, state);
                         }
                     }
                 }
