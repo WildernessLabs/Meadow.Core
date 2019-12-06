@@ -68,7 +68,7 @@ namespace Meadow.Devices
 #if DEBUG
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
-//            DebugFeatures = DebugFeature.Interrupts;
+//            DebugFeatures = DebugFeature.GpioDetail;
 #endif
         }
 
@@ -265,7 +265,7 @@ namespace Meadow.Devices
             int glitchFilterCycleCount
             )
         {
-            // translate resistor mode
+            // translate resistor mode from Meadow to STM32 register bits
             STM32.ResistorMode mode32;
             if (resistorMode == ResistorMode.Disabled)
             {
@@ -279,6 +279,8 @@ namespace Meadow.Devices
             {
                 mode32 = STM32.ResistorMode.PullDown;
             }
+
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {pin.Name} for resistor {resistorMode} ({(int)mode32})");
 
             ConfigureInput(pin, mode32, interruptMode);
         }
@@ -370,12 +372,13 @@ namespace Meadow.Devices
             setting = 0;
             if (mode != STM32.GpioMode.Analog)
             {
-                SetResistorMode(base_addr, pin, 0);
+                SetResistorMode(base_addr, pin, (int)resistor);
                 setting = (int)resistor;
             }
             else
             {
-                SetResistorMode(base_addr, pin, (int)resistor);
+                // analogs don't need (or want!) a resistor
+                SetResistorMode(base_addr, pin, 0);
             }
 
             if (mode == STM32.GpioMode.AlternateFunction)
@@ -504,12 +507,22 @@ namespace Meadow.Devices
 
         private void SetResistorMode(uint address, int pin, int mode)
         {
+            // get the PUPDR register
             var addr = address + STM32.GPIO_PUPDR_OFFSET;
             var regval = UPD.GetRegister(addr);
+            // turn off the 2 bits for the pin we're looking at
             regval &= (uint)~(3 << (pin << 1));
+            // turn on the bits for our mode
             regval |= (uint)(mode << (pin << 1));
+            // and write it out
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval:X8}");
             UPD.SetRegister(addr, regval);
+
+            if ((DebugFeatures & DebugFeature.GpioDetail) != 0)
+            {
+                var verify = UPD.GetRegister(addr);
+                Output.WriteLine($"PUPD verify read: 0x{verify:X8}");
+            }
         }
 
         private void InterruptServiceThreadProc(object o)

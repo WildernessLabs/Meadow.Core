@@ -29,19 +29,19 @@ namespace Basic_Digital_Input
             var d7 = Device.CreateDigitalInputPort(Device.Pins.D07, resistorMode: ResistorMode.PullDown);
             _inputs.Add(d7);
 
+            var debounceDuration = 500;
             var d4 = Device.CreateDigitalInputPort(Device.Pins.D04, InterruptMode.EdgeBoth, ResistorMode.Disabled);
-            d4.DebounceDuration = 100;
+            d4.DebounceDuration = debounceDuration;
             d4.Changed += OnStateChangedHandler;
             _inputs.Add(d4);
             // since we're looking for falling, pull it up
             var d3 = Device.CreateDigitalInputPort(Device.Pins.D03, InterruptMode.EdgeFalling, ResistorMode.PullUp);
-            d3.DebounceDuration = 100;
-            d3.Resistor = ResistorMode.PullUp;
+            d3.DebounceDuration = debounceDuration;
             d3.Changed += OnStateChangedHandler;
             _inputs.Add(d3);
             // since we're looking for risinging, pull it down
             var d2 = Device.CreateDigitalInputPort(Device.Pins.D02, InterruptMode.EdgeRising, ResistorMode.PullDown);
-            d2.DebounceDuration = 100;
+            d2.DebounceDuration = debounceDuration;
             d2.Changed += OnStateChangedHandler;
             _inputs.Add(d2);
         }
