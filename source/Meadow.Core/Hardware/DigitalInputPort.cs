@@ -32,7 +32,7 @@ namespace Meadow.Hardware
             // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
 
             if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
-            {
+            {                
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
             }
 

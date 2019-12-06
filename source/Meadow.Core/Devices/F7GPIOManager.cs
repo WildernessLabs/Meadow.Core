@@ -265,7 +265,7 @@ namespace Meadow.Devices
             int glitchFilterCycleCount
             )
         {
-            // translate resistor mode
+            // translate resistor mode from Meadow to STM32 register bits
             STM32.ResistorMode mode32;
             if (resistorMode == ResistorMode.Disabled)
             {
@@ -279,6 +279,8 @@ namespace Meadow.Devices
             {
                 mode32 = STM32.ResistorMode.PullDown;
             }
+
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {pin.Name} for resistor {resistorMode} ({(int)mode32})");
 
             ConfigureInput(pin, mode32, interruptMode);
         }
@@ -370,12 +372,13 @@ namespace Meadow.Devices
             setting = 0;
             if (mode != STM32.GpioMode.Analog)
             {
-                SetResistorMode(base_addr, pin, 0);
+                SetResistorMode(base_addr, pin, (int)resistor);
                 setting = (int)resistor;
             }
             else
             {
-                SetResistorMode(base_addr, pin, (int)resistor);
+                // analogs don't need (or want!) a resistor
+                SetResistorMode(base_addr, pin, 0);
             }
 
             if (mode == STM32.GpioMode.AlternateFunction)
@@ -504,12 +507,22 @@ namespace Meadow.Devices
 
         private void SetResistorMode(uint address, int pin, int mode)
         {
+            // get the PUPDR register
             var addr = address + STM32.GPIO_PUPDR_OFFSET;
             var regval = UPD.GetRegister(addr);
+            // turn off the 2 bits for the pin we're looking at
             regval &= (uint)~(3 << (pin << 1));
+            // turn on the bits for our mode
             regval |= (uint)(mode << (pin << 1));
+            // and write it out
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval:X8}");
             UPD.SetRegister(addr, regval);
+
+            if ((DebugFeatures & DebugFeature.GpioDetail) != 0)
+            {
+                var verify = UPD.GetRegister(addr);
+                Output.WriteLine($"PUPD verify read: 0x{verify:X8}");
+            }
         }
 
         private void InterruptServiceThreadProc(object o)
@@ -524,9 +537,11 @@ namespace Meadow.Devices
             {
                 int priority = 0;
                 var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    "queue data arrived");
 
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                    $"queue data arrived: {BitConverter.ToString(rx_buffer)}");
+
+                // we get in 4 bytes here that is the port.  We get no other info (e.g. state)
                 if (result >= 0)
                 {
                     var irq = BitConverter.ToInt32(rx_buffer, 0);
@@ -541,7 +556,9 @@ namespace Meadow.Devices
                     {
                         if (_interruptPins.ContainsKey(key))
                         {
-                            Interrupt?.Invoke(_interruptPins[key], rx_buffer[4] != 0);
+                            var ipin = _interruptPins[key];
+                            var state = GetDiscrete(ipin);
+                            Interrupt?.Invoke(ipin, state);
                         }
                     }
                 }
