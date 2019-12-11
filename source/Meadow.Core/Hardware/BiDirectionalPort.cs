@@ -156,7 +156,6 @@ namespace Meadow.Hardware
                 {
                     if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration)
                     {
-                        //Console.WriteLine("Debounced.");
                         return;
                     }
                 }

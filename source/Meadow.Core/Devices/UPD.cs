@@ -25,7 +25,7 @@ namespace Meadow.Devices
             DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.DontCare);
             if (DriverHandle == IntPtr.Zero || DriverHandle.ToInt32() == -1)
             {
-                Console.Write("Failed to open UPD driver");
+                throw new NativeException("Failed to open UPD driver");
             }
         }
 

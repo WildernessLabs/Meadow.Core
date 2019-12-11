@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Hardware;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,7 +29,12 @@ namespace Meadow.Devices
                     cmd.Buffer = gch2.AddrOfPinnedObject();
                     cmd.BufferLength = buffer2.Length;
 
-                    UPD.Ioctl(Core.Interop.Nuttx.UpdIoctlFn.DirEnum, ref cmd);
+                    var result = UPD.Ioctl(Core.Interop.Nuttx.UpdIoctlFn.DirEnum, ref cmd);
+                    if (result != 0)
+                    {
+                        var error = UPD.GetLastError();
+                        throw new NativeException(error);
+                    }
 
                     var all = Encoding.ASCII.GetString(buffer2).TrimEnd('\0');
 

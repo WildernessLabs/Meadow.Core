@@ -68,7 +68,7 @@ namespace Meadow.Devices
 #if DEBUG
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
-//            DebugFeatures = DebugFeature.GpioDetail;
+            DebugFeatures = DebugFeature.GpioDetail;
 #endif
         }
 
@@ -156,7 +156,8 @@ namespace Meadow.Devices
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
             if (result != 0)
             {
-                Console.WriteLine($"Write failed: {result}");
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
             }
         }
 
@@ -260,9 +261,7 @@ namespace Meadow.Devices
         public void ConfigureInput(
             IPin pin,
             ResistorMode resistorMode,
-            InterruptMode interruptMode,
-            int debounceDuration,
-            int glitchFilterCycleCount
+            InterruptMode interruptMode
             )
         {
             // translate resistor mode from Meadow to STM32 register bits
@@ -283,6 +282,8 @@ namespace Meadow.Devices
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {pin.Name} for resistor {resistorMode} ({(int)mode32})");
 
             ConfigureInput(pin, mode32, interruptMode);
+
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{pin.Name} configured");
         }
 
         private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode)
@@ -383,6 +384,8 @@ namespace Meadow.Devices
 
             if (mode == STM32.GpioMode.AlternateFunction)
             {
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {port.ToString()} pin {pin} alternate function.");
+
                 ////// ====== ALTERNATE FUNCTION ======
                 var p = (int)port;
                 var mask = 15u << p;
@@ -458,10 +461,17 @@ namespace Meadow.Devices
                     _ist.Start();
                 }
 
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
                     "Calling ioctl to enable interrupts");
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+
+                if (result != 0)
+                {
+                    var err = UPD.GetLastError();
+
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"failed to register interrupts: {err}");
+                }
             }
             else
             {

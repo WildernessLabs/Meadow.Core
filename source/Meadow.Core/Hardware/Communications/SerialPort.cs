@@ -452,9 +452,10 @@ namespace Meadow.Hardware
 
             Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
             var result = Nuttx.ioctl(_driverHandle, TCGETS, p);
-            if (result < 0) {
-                var errno = Devices.UPD.GetLastError();
-                Output.WriteLineIf(_showSerialDebug, $"  ioctl: {result} errno: {errno}");
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
             }
 
             if (_showSerialDebug) {
@@ -504,7 +505,7 @@ namespace Meadow.Hardware
             }
 
             result = Nuttx.ioctl(_driverHandle, TCSETS, p);
-            if (result < 0) {
+            if (result != 0) {
                 throw new NativeException(UPD.GetLastError());
             }
         }

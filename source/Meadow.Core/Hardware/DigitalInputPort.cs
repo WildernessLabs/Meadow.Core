@@ -45,7 +45,7 @@ namespace Meadow.Hardware
             if (success.Item1)
             {
                 // make sure the pin is configured as a digital output with the proper state
-                ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchFilterCycleCount);
+                ioController.ConfigureInput(pin, resistorMode, interruptMode);
             }
             else
             {
@@ -68,7 +68,7 @@ namespace Meadow.Hardware
                 if (interruptMode != InterruptMode.None && (!chan.InterruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
+                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode);
                 // set these here, not in a constructor because they are virtual
                 port.DebounceDuration = debounceDuration;
                 port.GlitchFilterCycleCount = glitchFilterCycleCount;
@@ -98,7 +98,6 @@ namespace Meadow.Hardware
                 // debounce timing checks
                 if (DebounceDuration > 0) {
                     if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration) {
-                        //Console.WriteLine("Debounced.");
                         return;
                     }
                 }
@@ -154,7 +153,6 @@ namespace Meadow.Hardware
             get => _debounceDuration;
             set
             {
-                Console.WriteLine($"Debounce duration on {this.Pin.Name} = {value}");
                 if (value < 0) throw new ArgumentOutOfRangeException();
                 _debounceDuration = value;
             }
