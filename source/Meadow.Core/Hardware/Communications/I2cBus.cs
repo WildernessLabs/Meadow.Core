@@ -44,7 +44,12 @@ namespace Meadow.Hardware
 
         private void Disable()
         {
-            UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
         }
 
         // TODO: Speed should have default?
@@ -85,8 +90,13 @@ namespace Meadow.Hardware
                     RxBuffer = rxGch.AddrOfPinnedObject(),
                 };
 
-                //                Console.Write($" +WriteReadData. Sending {dataToWrite.Length} bytes, requesting {byteCountToRead}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
 
                 // TODO: handle ioctl errors.  Common values:
                 // -116 = timeout
@@ -130,6 +140,11 @@ namespace Meadow.Hardware
 
                 Output.WriteIf(_showI2cDebug, " +ReadData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
                 Output.WriteLineIf(_showI2cDebug, $" returned {result}");
 
                 // TODO: handle ioctl errors.  Common values:
@@ -186,6 +201,11 @@ namespace Meadow.Hardware
 
                 Output.WriteIf(_showI2cDebug, " +SendData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
                 Output.WriteLineIf(_showI2cDebug, $" returned {result}");
 
                 // TODO: handle ioctl errors.  Common values:

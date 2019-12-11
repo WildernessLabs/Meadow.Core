@@ -291,7 +291,7 @@ namespace Meadow.Core
                 {
                     Address = address
                 };
-                //                Console.WriteLine($"Reading register: {register.Address:X}");
+
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.GetRegister, ref register);
                 if (result != 0)
                 {
@@ -300,7 +300,7 @@ namespace Meadow.Core
                     value = (uint)result;
                     return false;
                 }
-//                Console.WriteLine($"Value: {register.Value:X}");
+
                 value = register.Value;
                 return true;
             }
@@ -317,7 +317,7 @@ namespace Meadow.Core
                     Address = address,
                     Value = value
                 };
-                //                Console.WriteLine($"Writing {register.Value:X} to register: {register.Address:X}");
+
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.SetRegister, ref register);
                 if (result != 0)
                 {
@@ -342,7 +342,7 @@ namespace Meadow.Core
                     ClearBits = clearBits,
                     SetBits = setBits
                 };
-//                Console.WriteLine($"Updating register: {update.Address:X} clearing {update.ClearBits:X} setting {update.SetBits:X}");
+
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.UpdateRegister, ref update);
                 if (result != 0)
                 {

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 namespace Meadow
 {
     public class FilterableObserver<C, T> : IObserver<C> where C : IChangeResult<T>
-    //public class FilterableObserver<C> : IObserver<C>
     {
         protected Predicate<C> _filter = null;
         protected Action<C> _handler = null;

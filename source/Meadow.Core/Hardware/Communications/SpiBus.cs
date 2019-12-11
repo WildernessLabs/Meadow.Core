@@ -170,6 +170,11 @@ namespace Meadow.Hardware
 
                 Output.WriteLineIf(_showSpiDebug, $" sending {data.Length} bytes: {BitConverter.ToString(data)}");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
                 Output.WriteLineIf(_showSpiDebug, $" send complete");
 
                 if (chipSelect != null)
@@ -229,9 +234,12 @@ namespace Meadow.Hardware
                     BusNumber = BusNumber
                 };
 
-                //Console.Write(" +ReceiveData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                //Console.WriteLine($" returned {BitConverter.ToString(rxBuffer)}");
+                if(result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
 
                 if (chipSelect != null)
                 {
@@ -319,6 +327,11 @@ namespace Meadow.Hardware
                 Output.WriteLineIf(_showSpiDebug, "+Exchange");
                 Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
                 Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
 
                 if (chipSelect != null)
@@ -362,8 +375,6 @@ namespace Meadow.Hardware
 
         public void SetMode(int mode)
         {
-            Console.WriteLine($"SetMode {mode}");
-
             var command = new Nuttx.UpdSPIModeCommand()
             {
                 BusNumber = BusNumber,
@@ -373,6 +384,11 @@ namespace Meadow.Hardware
             Output.WriteLineIf(_showSpiDebug, "+SetMode");
             Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} mode to {command.Mode}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIMode, ref command);
+            if(result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
             Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
         }
 
@@ -390,6 +406,11 @@ namespace Meadow.Hardware
             Output.WriteLineIf(_showSpiDebug, "+SetFrequency");
             Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} speed to {command.Frequency}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPISpeed, ref command);
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
             Output.WriteLineIf(_showSpiDebug, $" speed set to {desiredSpeed}");
 
             return speed;
