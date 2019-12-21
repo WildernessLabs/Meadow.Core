@@ -24,6 +24,7 @@ namespace Meadow.Devices
 
     internal static class Output
     {
+        [Conditional("DEBUG")]
         public static void WriteIf(bool test, string value)
         {
             if (test)
@@ -32,6 +33,7 @@ namespace Meadow.Devices
                 }
         }
 
+        [Conditional("DEBUG")]
         public static void WriteLineIf(bool test, string value)
         {
             if (test)
@@ -40,11 +42,13 @@ namespace Meadow.Devices
             }
         }
 
+        [Conditional("DEBUG")]
         public static void Write(string value)
         {
             Console.Write(value);
         }
 
+        [Conditional("DEBUG")]
         public static void WriteLine(string value)
         {
             Console.WriteLine(value);
@@ -57,6 +61,7 @@ namespace Meadow.Devices
 
         private object _cacheLock = new object();
         private Thread _ist;
+        private bool DirectRegisterAccess { get; set; } = true;
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
@@ -65,10 +70,11 @@ namespace Meadow.Devices
         internal F7GPIOManager()
         {
             DebugFeatures = DebugFeature.None;
+            Console.WriteLine($"DirectRegisterAccess = {DirectRegisterAccess}");
 #if DEBUG
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
-//            DebugFeatures = DebugFeature.GpioDetail;
+            //            DebugFeatures = DebugFeature.GpioDetail;
 #endif
         }
 
@@ -133,21 +139,22 @@ namespace Meadow.Devices
             SetDiscrete(designator.address, designator.port, designator.pin, value);
         }
 
-        internal void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
-        { 
+        internal unsafe void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
+        {
+            var targetAddress = baseAddress + STM32.GPIO_BSRR_OFFSET;
+            var targetValue = value ? 1u << pin : 1u << (pin + 16);
+
+            if (DirectRegisterAccess)
+            {
+                *(uint*)targetAddress = targetValue;
+                return;
+            }
+
             var register = new Interop.Nuttx.UpdRegisterValue
             {
-                Address = baseAddress + STM32.GPIO_BSRR_OFFSET
+                Address = targetAddress,
+                Value = targetValue
             };
-
-            if (value)
-            {
-                register.Value = 1u << pin;
-            }
-            else
-            {
-                register.Value = 1u << (pin + 16);
-            }
 
             // write the register
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, 
@@ -172,9 +179,19 @@ namespace Meadow.Devices
             return GetDiscrete(designator.address, designator.port, designator.pin);
         }
 
-        internal bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
+        internal unsafe bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
         {
-            var register = UPD.GetRegister(baseAddress + STM32.GPIO_IDR_OFFSET);
+            var targetAddress = baseAddress + STM32.GPIO_IDR_OFFSET;
+            uint register;
+
+            if (DirectRegisterAccess)
+            {
+                register = *(uint*)targetAddress;
+            }
+            else
+            {
+                register = UPD.GetRegister(targetAddress);
+            }
 
             // each pin is a single bit in the register, check the bit associated with the pin number
             return (register & (1 << pin)) != 0;
