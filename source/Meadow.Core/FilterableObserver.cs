@@ -24,7 +24,8 @@ namespace Meadow
         public void OnNext(C result)
         {
             // first time through, save initial state
-            if (!_isInitialized) {
+            if (!_isInitialized)
+            {
                 _lastNotifedValue = result.New;
                 _isInitialized = true;
             }
@@ -43,7 +44,6 @@ namespace Meadow
 
         public void OnCompleted()
         {
-            Console.WriteLine("Filtered Observer completed");
         }
 
         public void OnError(Exception error)
