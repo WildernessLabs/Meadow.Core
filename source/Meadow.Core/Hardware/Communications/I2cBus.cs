@@ -32,10 +32,11 @@ namespace Meadow.Hardware
             II2cChannelInfo clockChannel,
             IPin data,
             II2cChannelInfo dataChannel,
-          ushort speed,
+          ushort frequency,
             ushort transactionTimeout = 100)
         {
             IOController = ioController;
+            Frequency = frequency;
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
             _showI2cDebug = false;
