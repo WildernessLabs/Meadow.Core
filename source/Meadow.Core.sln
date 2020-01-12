@@ -1,12 +1,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.645
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDA0F516-977E-4F27-9434-9A0961EF91D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClockPInvoke.Test", "Tests\ClockPInvoke.Test\ClockPInvoke.Test.csproj", "{E4271183-8172-466F-8AF8-3ADDEBA64BB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloLED", "Tests\HelloLED\HelloLED.csproj", "{E4E2339E-D040-4467-9EB2-A36143B90CB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HelloLED", "Tests\HelloLED\HelloLED.csproj", "{E4E2339E-D040-4467-9EB2-A36143B90CB7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
 EndProject
