@@ -8,7 +8,7 @@ namespace Meadow.Devices
 {
     public partial class F7GPIOManager : IIOController
     {
-        private bool _debuggingADC = true;
+        private bool _debuggingADC = false;
         private bool _initialized = false;
 
         public void ConfigureAnalogInput(IPin pin)
@@ -139,13 +139,28 @@ namespace Meadow.Devices
                 STM32.ADC_CCR_PRESCALER_DIV4 << STM32.ADC_CCR_ADCPRE_SHIFT);
 
             // enable the ADC via the CR2 register's ADON bit
-            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0,
-                STM32.ADC_CR2_ADON);
+            A2DPower(true);
 
             Output.WriteLineIf(_debuggingADC, $"CR2 ADON is set.");
 
             return true;
+        }
+
+        private void A2DPower(bool on)
+        {
+            if (on)
+            {
+                UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
+                    0,
+                    STM32.ADC_CR2_ADON);
+            }
+            else
+            {
+                // enable the ADC via the CR2 register's ADON bit
+                UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
+                    STM32.ADC_CR2_ADON,
+                    0);
+            }
         }
 
         public int GetAnalogValue(IPin pin)
@@ -165,16 +180,16 @@ namespace Meadow.Devices
                 default:
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
-
+            
             Output.WriteLineIf(_debuggingADC, $"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert - we're doing 1 conversion only right now
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
-                0, 
+                STM32.ADC_SQRx_CHANNEL_MASK << STM32.ADC_SQR3_SQ1_SHIFT, // clear last channel
                 (uint)channel << STM32.ADC_SQR3_SQ1_SHIFT);
 
             Output.WriteLineIf(_debuggingADC, $"SQR3::SQ1 set to {channel}");
-
+            
             // make sure EOC is cleared
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET,
                 STM32.ADC_SR_EOC,

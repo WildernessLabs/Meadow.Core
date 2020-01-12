@@ -84,6 +84,8 @@ namespace Meadow.Core
             public const int ADC_SQR2_NON_RESERVED_MASK = 0x3FFFFFFF;
 
             public const int ADC_SQR3_NON_RESERVED_MASK = 0x3FFFFFFF;
+
+            public const int ADC_SQRx_CHANNEL_MASK = 0x1F; // 5 bits
             public const int ADC_SQR3_SQ1_SHIFT = 0;
 
             public const int ADC_SR_OVR = (1 << 5); // overrun
