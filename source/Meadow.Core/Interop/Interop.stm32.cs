@@ -47,24 +47,51 @@ namespace Meadow.Core
             public const int ADC_DR_OFFSET = 0x4c;
             public const int ADC_CCR_OFFSET = 0x0304;
 
+            public const int ADC_CR1_NON_RESERVED_MASK = 0x07c0ffff;
+            public const int ADC_CR1_OVRIE = (1 << 26);     // overrun interrupt enable
+            public const int ADC_CR1_RES_SHIFT = 24;        // resolution
+            public const int ADC_CR1_AWDEN = (1 << 23);     // watchdog enable
+            public const int ADC_CR1_JAWDEN = (1 << 22);    // injected watchdog enable
+            public const int ADC_CR1_DISCNUM_SHIFT = 13;    // discontinuous channel count
+            public const int ADC_CR1_JDISCEN = (1 << 12);   // injected discontinuous mode enable
+            public const int ADC_CR1_DISCEN = (1 << 11);    // discontinuous mode enable
+            public const int ADC_CR1_JAUTO = (1 << 10);     // automatic injected conversion
+            public const int ADC_CR1_AWDSGL = (1 << 9);     // single channel, scan mode watchdog
+            public const int ADC_CR1_SCAN = (1 << 8);       // scan mode
+            public const int ADC_CR1_JEOCIE = (1 << 7);
+            public const int ADC_CR1_AWDIE = (1 << 6);
+            public const int ADC_CR1_EOCIE = (1 << 5);
+            public const int ADC_CR1_AWDCH_SHIFT = (1 << 0);
 
+            public const int ADC_CR2_NON_RESERVED_MASK = 0x3f7f0f03;
+            public const int ADC_CR2_SWSTART = (1 << 30); // starts regulare conversion.  ADON must be 1 otherwise it is ignored
+            public const int ADC_CR2_EOCS = (1 << 10); // set EOC (end of conversion) bit
+            public const int ADC_CR2_CONT = (1 << 1);
+            public const int ADC_CR2_ADON = (1 << 0);
+
+            public const int ADC_SMPR1_NON_RESERVED_MASK = 0x07FFFFFF;
             public const int ADC_SMPR1_CH10_SHIFT = 0;
             public const int ADC_SMPR1_CH11_SHIFT = 3;
             public const int ADC_SMPR2_CH3_SHIFT = 9;
             public const int ADC_SMPR2_CH4_SHIFT = 12;
             public const int ADC_SMPR2_CH5_SHIFT = 15;
             public const int ADC_SMPR2_CH7_SHIFT = 21;
-            public const int ADC_SAMPLING_112_CYCLES = 5; // (101 binary)
+
+            public const int ADC_SMPx_SAMPLING_112_CYCLES = 5; // (101 binary)
+
+            public const int ADC_SMPR2_NON_RESERVED_MASK = 0x3fffffff;
+            public const int ADC_SQR1_NON_RESERVED_MASK = 0x00FFFFFF;
+            public const int ADC_SQR2_NON_RESERVED_MASK = 0x3FFFFFFF;
+
+            public const int ADC_SQR3_NON_RESERVED_MASK = 0x3FFFFFFF;
+            public const int ADC_SQR3_SQ1_SHIFT = 0;
 
             public const int ADC_SR_OVR = (1 << 5); // overrun
             public const int ADC_SR_STRT = (1 << 4); // regular channel start flag
             public const int ADC_SR_EOC = (1 << 1); // end of regular conversion
             public const int ADC_SR_AWD = (1 << 0); // analog watchdog
 
-            public const int ADC_CR2_EOCS = (1 << 10); // set EOC (end of conversion) bit
-            public const int ADC_CR2_ADON = (1 << 0);
-            public const int ADC_CR2_SWSTART = (1 << 30); // starts regulare conversion.  ADON must be 1 otherwise it is ignored
-
+            public const int ADC_CCR_NON_RESERVED_MASK = 0x00c3ef1f;
             public const int ADC_CCR_ADCPRE_SHIFT = 16;
             public const int ADC_CCR_PRESCALER_DIV2 = 0;
             public const int ADC_CCR_PRESCALER_DIV4 = 1;

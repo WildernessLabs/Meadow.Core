@@ -22,9 +22,9 @@ namespace Basic_AnalogReads
         protected async void StartReading()
         {
             float voltage;
+
             for (int i = 0; i < 10; i++) {
                 Console.WriteLine(i);
-            //while (true) {
                 voltage = await analogIn.Read();
                 Console.WriteLine("Voltage: " + voltage.ToString());
                 Thread.Sleep(500);
