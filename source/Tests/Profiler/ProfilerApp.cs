@@ -4,6 +4,7 @@ using Meadow.Hardware;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Profiler
 {
@@ -15,22 +16,24 @@ namespace Profiler
 
         public void Run()
         {
-            // create the port to have core initialize all of the non-state stuff
-            _d04 = Device.CreateDigitalOutputPort(Device.Pins.D04);
-
             //DirectRegisterHighLow();
             //WriteUseCoreObject();
-            ReadUseCoreObject();
-            //MethodCall();
+            //ReadUseCoreObject();
+            MethodCall();
             //ObjectCreation();
+            //InterruptToOutput();
         }
 
         public unsafe void DirectRegisterHighLow()
         {
             // RESULTS - time between transitions (or time spent in one state)
             // beta 3.5     1.12us [Debug]
+            // beta 3.7     0.27us
 
             Console.WriteLine($"Test 1");
+
+            // create the port to have core initialize all of the non-state stuff
+            _d04 = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             while (true)
             {
@@ -45,8 +48,12 @@ namespace Profiler
             // beta 3.5     15.6ms [Debug]
             // beta 3.5     15.5ms [Release]
             // beta 3.6      4.1ms [Debug]
+            // beta 3.7      0.43ms
 
             Console.WriteLine($"Test 2w");
+
+            // create the port to have core initialize all of the non-state stuff
+            _d04 = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             while (true)
             {
@@ -60,9 +67,12 @@ namespace Profiler
             // RESULTS - time between transitions (or time spent in one state)
             // beta 3.5     10000 took 930ms [Debug]
             // beta 3.6     10000 took 900ms [Debug]
-
+            // beta 3.7     10000 took 31ms [Debug]
             Console.WriteLine($"Test 2r");
             var iterations = 10000;
+
+            // create the port to have core initialize all of the non-state stuff
+            _d04 = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             var state = false;
             while (true)
@@ -83,10 +93,13 @@ namespace Profiler
         public void MethodCall()
         {
             // RESULTS - time between transitions (or time spent in one state)
-            // beta 3.5     0.020ms [Debug]
-            // beta 3.5     0.021ms [Release]
-
+            // beta 3.5     20us [Debug]
+            // beta 3.5     21us [Release]
+            // beta 3.7     0.27us
             Console.WriteLine($"Test 3");
+
+            // create the port to have core initialize all of the non-state stuff
+            _d04 = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             while (true)
             {
@@ -109,8 +122,11 @@ namespace Profiler
         {
             // RESULTS - time between transitions (or time spent in one state)
             // beta 3.5     0.066ms [Debug]
-
+            // beta 3.7     11.5us
             Console.WriteLine($"Test 4");
+
+            // create the port to have core initialize all of the non-state stuff
+            _d04 = Device.CreateDigitalOutputPort(Device.Pins.D04);
 
             while (true)
             {
@@ -122,6 +138,42 @@ namespace Profiler
                 *(uint*)GPIOB_STATE_ADDR = 0;
                 var b = new TestObject();
             }
+        }
+
+        public void InterruptToOutput()
+        {
+            // this test uses two pins.
+            // D03 is an input from a button
+            // D05 is an output
+            // On a rising interrupt on D03, D05 is set high for a period.
+            // This allows using a scope to see the time from the input going high to the output going high
+            // so measuring the delta from the rising edge on D03 to the rising edge on D05
+
+            // RESULTS - time between transitions (or time spent in one state)
+            // beta 3.6     ~50ms
+            // beta 3.7     ~3.5ms
+
+            var input = Device.CreateDigitalInputPort(
+                Device.Pins.D03, 
+                InterruptMode.EdgeRising);
+
+            var output = Device.CreateDigitalOutputPort(
+                Device.Pins.D05, false);
+
+            Console.WriteLine($"Test 5");
+
+            var count = 0;
+
+            input.Changed += async (s, o) =>
+            {
+                output.State = true;
+                count++;
+                await Task.Delay(1000);
+                output.State = false;
+                Console.WriteLine($"click {count}");
+            };
+
+
         }
     }
 

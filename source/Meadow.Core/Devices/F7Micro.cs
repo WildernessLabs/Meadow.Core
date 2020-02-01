@@ -93,7 +93,7 @@ namespace Meadow.Devices
 
         public IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = 100,
+            float frequency = 100f,
             float dutyCycle = 0.5f,
             bool inverted = false)
         {

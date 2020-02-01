@@ -49,7 +49,7 @@ namespace Meadow.Hardware
             }
             else
             {
-                throw new PortInUseException();
+                throw new PortInUseException(success.Item2);
             }
         }
 

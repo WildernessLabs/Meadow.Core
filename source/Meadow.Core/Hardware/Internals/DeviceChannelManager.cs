@@ -13,10 +13,12 @@ namespace Meadow.Hardware
         /// </summary>
         private static IDictionary<IPin, ChannelConfig> _channelStates;
         private static readonly object _channelLock = new object();
+        private static IDictionary<uint, float> _pwmTimerFrequencies;
 
         static DeviceChannelManager()
         {
             _channelStates = new Dictionary<IPin, ChannelConfig>();
+            _pwmTimerFrequencies = new Dictionary<uint, float>();
         }
 
         /// <summary>
@@ -53,6 +55,41 @@ namespace Meadow.Hardware
             }
         }
 
+        internal static Tuple<bool, string> ReservePwm(IPin pin, IPwmChannelInfo channelInfo, float frequency)
+        {
+            lock (_channelLock)
+            {
+                // if the config exists in the collection
+                if (_channelStates.ContainsKey(pin))
+                {
+                    // if the channel is already in use
+                    if (_channelStates[pin].State == ChannelState.InUse)
+                    {
+                        // bail out
+                        return new Tuple<bool, string>(false, "Channel already in use.");
+                    }
+                    else
+                    { // if it's not, probably need to do some cleanup
+                        _channelStates.Remove(pin);
+                    }
+                }
+
+                // PWMs on a single timer must have the same frequency (but can have different duty cycles)
+                if (_pwmTimerFrequencies.ContainsKey(channelInfo.Timer))
+                {
+                    var currentFrequency = _pwmTimerFrequencies[channelInfo.Timer];
+                    if (currentFrequency != frequency)
+                    {
+                        return new Tuple<bool, string>(false, $"PWM Timer frequency cannot be different between separate channels. PWM Timer {channelInfo.Timer} is already set to {currentFrequency} Hz");
+                    }
+                }
+                else
+                {
+                    _pwmTimerFrequencies.Add(channelInfo.Timer, frequency);
+                }
+                return new Tuple<bool, string>(true, "Success");
+            }
+        }
         // TODO: do we want to message back any information?
         internal static bool ReleasePin(IPin pin)
         {

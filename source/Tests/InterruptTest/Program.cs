@@ -13,11 +13,7 @@ namespace InterruptTest
             // instantiate and run new meadow app
             _app = new InterruptApp();
 
-            while (true)
-            {
-                Thread.Sleep(1000);
-                Console.Write(".");
-            }
+            Thread.Sleep(Timeout.Infinite);
         }
     }
 }
