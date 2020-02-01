@@ -20,7 +20,7 @@ namespace Meadow.Hardware
 
         private IIOController IOController { get; }
 
-        public uint Frequency { get; private set; }
+        public uint Frequency { get; set; }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
