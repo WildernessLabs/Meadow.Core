@@ -11,5 +11,10 @@ namespace Meadow.Hardware
         internal PortInUseException()
         {
         }
+
+        internal PortInUseException(string message)
+            : base(message)
+        {
+        }
     }
 }

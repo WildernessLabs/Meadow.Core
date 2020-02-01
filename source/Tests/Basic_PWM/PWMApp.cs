@@ -12,9 +12,22 @@ namespace Basic_PWM
         {
             Console.WriteLine("+PWMApp");
 
-            var pwm = Device.CreatePwmPort(Device.Pins.D04, 100, 0.5f);
+            var f = 100;
+            Console.WriteLine($"DeviceCreatePwmPort {f} Hz");
+            try
+            {
+                var pwmA = Device.CreatePwmPort(Device.Pins.D11, f, 0.5f);
+                var pwmB = Device.CreatePwmPort(Device.Pins.D12, 200, 0.5f);
+                var pwmC = Device.CreatePwmPort(Device.Pins.D13, 400, 0.25f);
 
-            DurationChecks(pwm);
+                pwmA.Start();
+                pwmB.Start();
+                pwmC.Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         private void FrequencyChecks(IPwmPort pwm)

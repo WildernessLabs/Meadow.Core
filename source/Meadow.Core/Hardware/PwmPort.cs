@@ -40,21 +40,32 @@ namespace Meadow.Hardware
         internal static PwmPort From(
             IPin pin,
             IIOController ioController,
-            float frequency = 100,
+            float frequency = 100f,
             float dutyCycle = 0.5f,
             bool inverted = false,
             bool isOnboard = false)
         {
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().FirstOrDefault();
-            if (channel != null) {
-                var port = new PwmPort(pin, ioController, channel, inverted, isOnboard);
-                port.TimeScale = TimeScale.Seconds;
-                port.Frequency = frequency;
-                port.DutyCycle = dutyCycle;
-                port.Inverted = inverted;
-                return port;
+            if (channel != null)
+            {
+                var success = DeviceChannelManager.ReservePwm(pin, channel, frequency);
+
+                if (success.Item1)
+                {
+                    var port = new PwmPort(pin, ioController, channel, inverted, isOnboard);
+                    port.TimeScale = TimeScale.Seconds;
+                    port.Frequency = frequency;
+                    port.DutyCycle = dutyCycle;
+                    port.Inverted = inverted;
+                    return port;
+                }
+                else
+                {
+                    throw new PortInUseException(success.Item2);
+                }
             }
-            else {
+            else
+            {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
             }
         }
