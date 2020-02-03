@@ -108,7 +108,7 @@ namespace Meadow.Hardware
 
             // create a buffer for both directions
             var txBuffer = new byte[write.Length + length];
-            //                           output^^        ^^input
+            //                       output^^        ^^input
 
             // copy the output to the beginning of the buffer
             Array.Copy(write, txBuffer, write.Length);
@@ -121,7 +121,7 @@ namespace Meadow.Hardware
 
             // copy the result to "left align" it in an array
             var result = new byte[length];
-            Array.ConstrainedCopy(rxBuffer, write.Length - 1, result, 0, result.Length);
+            Array.ConstrainedCopy(rxBuffer, write.Length, result, 0, result.Length);
 
             // and return it
             return result;
@@ -155,7 +155,8 @@ namespace Meadow.Hardware
         /// <returns>Data read from the device</returns>
         public byte[] ReadRegisters(byte address, ushort length)
         {
-            var buffer = new byte[address];
+            var buffer = new byte[length];
+            buffer[0] = address;
 
             return WriteRead(buffer, length);
         }
