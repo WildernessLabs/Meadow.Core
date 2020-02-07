@@ -69,43 +69,46 @@ namespace Meadow.Hardware
         public SpiClockConfiguration Configuration
         {
             get => _clockConfig;
-            set
+            internal set
             {
                 if (value == null) { throw new ArgumentNullException(); }
 
-                if (value.SpeedKHz != Configuration.SpeedKHz)
+                if(_clockConfig != null)
                 {
-                    var actual = SetFrequency(value.SpeedKHz * 1000);
-                    Configuration.SpeedKHz = actual;
-                }
-
-                var modeChange = false;
-
-                if(value.Polarity != Configuration.Polarity ||
-                        value.Phase != Configuration.Phase)
-                {
-                    modeChange = true;
-                }
-
-                if (modeChange)
-                {
-                    int mode = 0;
-
-                    switch (value.Phase)
-                    {
-                        case SpiClockConfiguration.ClockPhase.Zero:
-                            mode = (value.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 0 : 2;
-                            break;
-                        case SpiClockConfiguration.ClockPhase.One:
-                            mode = (value.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 1 : 3;
-                            break;
-                    }
-
-                    SetMode(mode);
+                    _clockConfig.Changed -= OnConfigChanged;
                 }
 
                 _clockConfig = value;
+
+                HandleConfigChange();
+
+                _clockConfig.Changed += OnConfigChanged;
             }
+        }
+
+        private void OnConfigChanged(object sender, EventArgs e)
+        {
+            HandleConfigChange();
+        }
+
+        private void HandleConfigChange()
+        {
+            var actual = SetFrequency(Configuration.SpeedKHz * 1000);
+            Configuration.SetActualSpeedKHz(actual);
+
+            int mode = 0;
+
+            switch (Configuration.Phase)
+            {
+                case SpiClockConfiguration.ClockPhase.Zero:
+                    mode = (Configuration.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 0 : 2;
+                    break;
+                case SpiClockConfiguration.ClockPhase.One:
+                    mode = (Configuration.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 1 : 3;
+                    break;
+            }
+
+            SetMode(mode);
         }
 
         /// <summary>
