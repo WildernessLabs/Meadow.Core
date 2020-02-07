@@ -69,14 +69,14 @@ namespace Meadow.Hardware
         public SpiClockConfiguration Configuration
         {
             get => _clockConfig;
-            internal set
+            set
             {
                 if (value == null) { throw new ArgumentNullException(); }
 
                 if (value.SpeedKHz != Configuration.SpeedKHz)
                 {
-                    SetFrequency(value.SpeedKHz * 1000);
-                    Configuration.SpeedKHz = value.SpeedKHz;
+                    var actual = SetFrequency(value.SpeedKHz * 1000);
+                    Configuration.SpeedKHz = actual;
                 }
 
                 var modeChange = false;
