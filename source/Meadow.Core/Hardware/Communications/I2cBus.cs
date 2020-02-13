@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Meadow.Devices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Meadow.Devices;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -20,7 +20,10 @@ namespace Meadow.Hardware
 
         private IIOController IOController { get; }
 
-        public uint Frequency { get; set; }
+        /// <summary>
+        /// Bus Clock speed in kHz
+        /// </summary>
+        public int Frequency { get; set; }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
@@ -32,11 +35,11 @@ namespace Meadow.Hardware
             II2cChannelInfo clockChannel,
             IPin data,
             II2cChannelInfo dataChannel,
-          ushort frequency,
+            int frequencyHz,
             ushort transactionTimeout = 100)
         {
             IOController = ioController;
-            Frequency = frequency;
+            Frequency = frequencyHz;
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
             _showI2cDebug = false;
@@ -53,8 +56,16 @@ namespace Meadow.Hardware
             }
         }
 
-        // TODO: Speed should have default?
-        public static I2cBus From(IIOController ioController, IPin clock, IPin data, ushort speed, ushort transactionTimeout = 100)
+        /// <summary>
+        /// Creates an I2C bus for a set of given pins and parameters
+        /// </summary>
+        /// <param name="ioController">The Meadow IO Controller</param>
+        /// <param name="clock">Clock (SCL) pin</param>
+        /// <param name="data">Data (SDA) pin</param>
+        /// <param name="frequencyHz">Bus clock speed, in Hz</param>
+        /// <param name="transactionTimeout">Bus transaction timeout</param>
+        /// <returns>An I2CBus instance</returns>
+        public static I2cBus From(IIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
         {
             var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
@@ -68,9 +79,16 @@ namespace Meadow.Hardware
                 throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
             }
 
-            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, speed, transactionTimeout);
+            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, frequencyHz, transactionTimeout);
         }
 
+        /// <summary>
+        /// Writes data to a specified I2C bus address and reads data back from the same address
+        /// </summary>
+        /// <param name="peripheralAddress">Peripheral address</param>
+        /// <param name="numberOfBytesToRead">Bytes to read after writing</param>
+        /// <param name="dataToWrite">Data to write</param>
+        /// <returns>Data received from peripheral</returns>
         public byte[] WriteReadData(byte peripheralAddress, int numberOfBytesToRead, params byte[] dataToWrite)
         {
             var rxBuffer = new byte[numberOfBytesToRead];
@@ -84,7 +102,7 @@ namespace Meadow.Hardware
                 var command = new Nuttx.UpdI2CCommand()
                 {
                     Address = peripheralAddress,
-                    Frequency = (int)this.Frequency,
+                    Frequency = this.Frequency,
                     TxBufferLength = dataToWrite.Length,
                     TxBuffer = txGch.AddrOfPinnedObject(),
                     RxBufferLength = rxBuffer.Length,
@@ -120,6 +138,12 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Reads the specified number of bytes from a peripheral
+        /// </summary>
+        /// <param name="peripheralAddress">The I2C Address to read</param>
+        /// <param name="numberOfBytes">The number of bytes/octets to read</param>
+        /// <returns></returns>
         public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
         {
             var rxBuffer = new byte[numberOfBytes];
@@ -132,7 +156,7 @@ namespace Meadow.Hardware
                 var command = new Nuttx.UpdI2CCommand()
                 {
                     Address = peripheralAddress,
-                    Frequency = (int)this.Frequency,
+                    Frequency = this.Frequency,
                     TxBufferLength = 0,
                     TxBuffer = IntPtr.Zero,
                     RxBufferLength = rxBuffer.Length,
@@ -165,18 +189,25 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Write a number of bytes to the device.
+        /// Writes a number of bytes to the device.
         /// </summary>
         /// <remarks>
         /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
-        /// <param name="values">Values to be written.</param>
+        /// <param name="data">Data to be written.</param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteData(byte peripheralAddress, params byte[] values)
+        public void WriteData(byte peripheralAddress, params byte[] data)
         {
-            SendData(peripheralAddress, values);
+            SendData(peripheralAddress, data);
         }
 
+        /// <summary>
+        /// Writes a number of bytes to the device.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="data">Data to be written.</param>
         public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
         {
             SendData(peripheralAddress, data.ToArray());
@@ -193,7 +224,7 @@ namespace Meadow.Hardware
                 var command = new Nuttx.UpdI2CCommand()
                 {
                     Address = address,
-                    Frequency = (int)this.Frequency,
+                    Frequency = this.Frequency,
                     TxBufferLength = data.Length,
                     TxBuffer = gch.AddrOfPinnedObject(),
                     RxBufferLength = 0,
