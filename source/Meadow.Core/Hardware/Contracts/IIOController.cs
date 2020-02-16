@@ -65,5 +65,6 @@ namespace Meadow.Hardware
 
         void ConfigureAnalogInput(IPin pin);
         int GetAnalogValue(IPin pin);
+        void ReassertConfig(IPin pin);
     }
 }
