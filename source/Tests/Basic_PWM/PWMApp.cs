@@ -15,9 +15,6 @@ namespace Basic_PWM
 
             try
             {
-                var pwm04 = Device.CreatePwmPort(Device.Pins.D04, 2, 0.5f);
-                TimeScaleChecks(pwm04);
-
                 PwmWithGpio();
             }
             catch (Exception ex)
