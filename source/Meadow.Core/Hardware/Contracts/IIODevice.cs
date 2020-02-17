@@ -65,15 +65,34 @@ namespace Meadow.Hardware
             long speed
         );
 
-        II2cBus CreateI2cBus(
-            IPin[] pins,
-            int speed
+        /// <summary>
+        /// Creates a I2C bus instance for the default Meadow F7 pins (SCL and SDA) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <returns>And instance of an I2cBus</returns>
+        public II2cBus CreateI2cBus(
+            int frequencyHz
         );
 
+        /// <summary>
+        /// Creates a I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <returns>And instance of an I2cBus</returns>
+        II2cBus CreateI2cBus(
+            IPin[] pins,
+            int frequencyHz
+        );
+
+        /// <summary>
+        /// Creates a I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <returns>And instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            int speed
+            int frequencyHz
         );
     }
 }

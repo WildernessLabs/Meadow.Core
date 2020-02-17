@@ -12,9 +12,13 @@ namespace Meadow.Devices
     public partial class F7Micro : IIODevice
     {
         /// <summary>
-        /// The default I2C Bus speed used when speed parameters are not provided
+        /// The default I2C Bus speed, in Hz, used when speed parameters are not provided
         /// </summary>
         public const int DefaultI2cBusSpeed = 100000;
+        /// <summary>
+        /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
+        /// </summary>
+        public const int DefaultSpiBusSpeed = 375;
 
         public DeviceCapabilities Capabilities { get; protected set; }
 
@@ -23,8 +27,6 @@ namespace Meadow.Devices
         /// </summary>
         /// <value>The pins.</value>
         public F7MicroPinDefinitions Pins { get; protected set; }
-        //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
-
 
         public SerialPortNameDefinitions SerialPortNames { get; protected set; }
             = new SerialPortNameDefinitions();
@@ -41,22 +43,12 @@ namespace Meadow.Devices
                 new AnalogCapabilities(true, 12),
                 new NetworkCapabilities(true, true)
                 );
-            //this.WiFiAdapters = new List<WiFiAdapter>
-            //{
-            //    // TODO: stuff.
-            //    new WiFiAdapter()
-            //};
 
             this.IoController = new F7GPIOManager();
             this.IoController.Initialize();
 
-            // 
             this.Pins = new F7MicroPinDefinitions();
-
         }
-
-
-        //public C CreatePort<C>(P portConfig) where P : IPortConfig, where C : IPort {}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
@@ -149,7 +141,7 @@ namespace Meadow.Devices
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speed = 375// this will default to the minimum capable speed of 375kHz
+            long speed = DefaultSpiBusSpeed
         )
         {
             var bus = SpiBus.From(clock, mosi, miso);
