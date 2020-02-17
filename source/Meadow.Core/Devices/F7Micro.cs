@@ -19,6 +19,13 @@ namespace Meadow.Devices
         /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
         /// </summary>
         public const int DefaultSpiBusSpeed = 375;
+        /// <summary>
+        /// The default resolution for analog inputs
+        /// </summary>
+        public const int DefaultA2DResolution = 12;
+        public const float DefaultA2DReferenceVoltage = 3.3f;
+        public const float DefaultPwmFrequency = 100f;
+        public const float DefaultPwmDutyCycle = 0.5f;
 
         public DeviceCapabilities Capabilities { get; protected set; }
 
@@ -34,13 +41,12 @@ namespace Meadow.Devices
 
         internal IIOController IoController { get; private set; }
 
-        // private static
         static F7Micro() { }
 
         public F7Micro()
         {
             this.Capabilities = new DeviceCapabilities(
-                new AnalogCapabilities(true, 12),
+                new AnalogCapabilities(true, DefaultA2DResolution),
                 new NetworkCapabilities(true, true)
                 );
 
@@ -81,15 +87,15 @@ namespace Meadow.Devices
 
         public IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            float voltageReference = 3.3f)
+            float voltageReference = DefaultA2DReferenceVoltage)
         {
             return AnalogInputPort.From(pin, this.IoController, voltageReference);
         }
 
         public IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = 100f,
-            float dutyCycle = 0.5f,
+            float frequency = DefaultPwmFrequency,
+            float dutyCycle = DefaultPwmDutyCycle,
             bool inverted = false)
         {
             bool isOnboard = IsOnboardLed(pin);
@@ -122,34 +128,61 @@ namespace Meadow.Devices
             return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, MOSI and MISO
+        /// </summary>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
-            long speed = 375 // this will default to the minimum capable speed of 375kHz
+            long speedkHz = DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
+            return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speedkHz);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="pins">IPint instances used for (in this order) CLK, MOSI, MISO</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin[] pins,
-            long speed = 375// this will default to the minimum capable speed of 375kHz
+            long speedkHz = DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus(pins[0], pins[1], pins[2], speed);
+            return CreateSpiBus(pins[0], pins[1], pins[2], speedkHz);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speed = DefaultSpiBusSpeed
+            long speedkHz = DefaultSpiBusSpeed
         )
         {
             var bus = SpiBus.From(clock, mosi, miso);
             bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
-            bus.Configuration.SpeedKHz = speed;
+            bus.Configuration.SpeedKHz = speedkHz;
             return bus;
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="config">The bus clock configuration parameters</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
@@ -181,10 +214,10 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Creates a I2C bus instance for the default Meadow F7 pins (SCL and SDA) and the requested bus speed
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL and SDA) and the requested bus speed
         /// </summary>
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
-        /// <returns>And instance of an I2cBus</returns>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             int frequencyHz = DefaultI2cBusSpeed
         )
@@ -193,10 +226,10 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Creates a I2C bus instance for the requested pins and bus speed
+        /// Creates an I2C bus instance for the requested pins and bus speed
         /// </summary>
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
-        /// <returns>And instance of an I2cBus</returns>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
             int frequencyHz = DefaultI2cBusSpeed
@@ -206,10 +239,10 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Creates a I2C bus instance for the requested pins and bus speed
+        /// Creates an I2C bus instance for the requested pins and bus speed
         /// </summary>
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
-        /// <returns>And instance of an I2cBus</returns>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
