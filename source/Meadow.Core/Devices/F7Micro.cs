@@ -11,7 +11,10 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7Micro : IIODevice
     {
-        //public List<WiFiAdapter> WiFiAdapters { get; }
+        /// <summary>
+        /// The default I2C Bus speed used when speed parameters are not provided
+        /// </summary>
+        public const int DefaultI2cBusSpeed = 100000;
 
         public DeviceCapabilities Capabilities { get; protected set; }
 
@@ -185,29 +188,43 @@ namespace Meadow.Devices
             return -1;
         }
 
+        /// <summary>
+        /// Creates a I2C bus instance for the default Meadow F7 pins (SCL and SDA) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>And instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
-            ushort speed = 1000
+            int frequencyHz = DefaultI2cBusSpeed
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, speed);
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequencyHz);
         }
 
+        /// <summary>
+        /// Creates a I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>And instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
-            ushort speed
+            int frequencyHz = DefaultI2cBusSpeed
         )
         {
-            return CreateI2cBus(pins[0], pins[1], speed);
+            return CreateI2cBus(pins[0], pins[1], frequencyHz);
         }
 
-
+        /// <summary>
+        /// Creates a I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>And instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            ushort speed
+            int frequencyHz = DefaultI2cBusSpeed
         )
         {
-            return I2cBus.From(this.IoController, clock, data, speed);
+            return I2cBus.From(this.IoController, clock, data, frequencyHz);
         }
 
     }

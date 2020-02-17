@@ -67,13 +67,13 @@ namespace Meadow.Hardware
 
         II2cBus CreateI2cBus(
             IPin[] pins,
-            ushort speed = 100 // TODO: not sure about this
+            int speed
         );
 
         II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            ushort speed = 100 // TODO: not sure about this
+            int speed
         );
     }
 }
