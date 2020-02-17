@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using Meadow.Core;
@@ -66,7 +65,7 @@ namespace Meadow.Devices
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
-        internal DebugFeature DebugFeatures { get; set; }
+        internal DebugFeature DebugFeatures { get; set;  }
 
         internal F7GPIOManager()
         {
@@ -81,7 +80,7 @@ namespace Meadow.Devices
 
         public void Initialize()
         {
-            if ((DebugFeatures & DebugFeature.Interrupts) != 0)
+            if((DebugFeatures & DebugFeature.Interrupts) != 0)
             {
                 UPD.DumpClockRegisters();
             }
@@ -158,7 +157,7 @@ namespace Meadow.Devices
             };
 
             // write the register
-            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, 
                 $"Writing {register.Value:X} to register: {register.Address:X}");
 
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
@@ -339,7 +338,7 @@ namespace Meadow.Devices
         public bool UnconfigureGpio(IPin pin)
         {
             var designator = GetPortAndPin(pin);
-            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input,  STM32.ResistorMode.Float,  STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
         }
 
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
@@ -347,61 +346,6 @@ namespace Meadow.Devices
             var designator = GetPortAndPin(pin);
 
             return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode);
-        }
-
-        private class GpioConfig
-        {
-            public STM32.GpioPort Port { get; set; }
-            public int Pin { get; set; }
-            public STM32.GpioMode Mode { get; set; }
-            public STM32.ResistorMode Resistor { get; set; }
-            public STM32.GPIOSpeed Speed { get; set; }
-            public STM32.OutputType Type { get; set; }
-            public bool InitialState { get; set; }
-            public InterruptMode InterruptMode { get; set; }
-            public int AlternateFunctionNumber { get; set; }
-        }
-
-        private List<GpioConfig> _currentConfigs = new List<GpioConfig>();
-
-        internal void ReassertConfig(IPin pin)
-        {
-            var designator = GetPortAndPin(pin);
-            var cfg = _currentConfigs.FirstOrDefault(c => c.Port == designator.port && c.Pin == designator.pin);
-            if (cfg != null)
-            {
-                ConfigureGpio(designator.port, designator.pin, cfg.Mode, cfg.Resistor, cfg.Speed, cfg.Type, cfg.InitialState, cfg.InterruptMode);
-            }
-        }
-
-        private void RegisterConfig(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
-        {
-            var cfg = _currentConfigs.FirstOrDefault(c => c.Port == port && c.Pin == pin);
-            if (cfg == null)
-            {
-                cfg = new GpioConfig
-                {
-                    Port = port,
-                    Pin = pin,
-                    Mode = mode,
-                    Resistor = resistor,
-                    Speed = speed,
-                    Type = type,
-                    InitialState = initialState,
-                    InterruptMode = interruptMode,
-                    AlternateFunctionNumber = alternateFunctionNumber
-                };
-            }
-            else
-            {
-                cfg.Mode = mode;
-                cfg.Resistor = resistor;
-                cfg.Speed = speed;
-                cfg.Type = type;
-                cfg.InitialState = initialState;
-                cfg.InterruptMode = interruptMode;
-                cfg.AlternateFunctionNumber = alternateFunctionNumber;
-            }
         }
 
         private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
@@ -565,8 +509,6 @@ namespace Meadow.Devices
                 var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
                 */
             }
-
-            RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
 
             return true;
         }
