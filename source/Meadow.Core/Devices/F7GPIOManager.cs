@@ -56,7 +56,7 @@ namespace Meadow.Devices
         }
     }
 
-    public partial class F7GPIOManager : IIOController, INuttxIOController
+    public partial class F7GPIOManager : IIOController
     {
         public event InterruptHandler Interrupt;
 
@@ -347,61 +347,6 @@ namespace Meadow.Devices
             var designator = GetPortAndPin(pin);
 
             return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode);
-        }
-
-        private class GpioConfig
-        {
-            public STM32.GpioPort Port { get; set; }
-            public int Pin { get; set; }
-            public STM32.GpioMode Mode { get; set; }
-            public STM32.ResistorMode Resistor { get; set; }
-            public STM32.GPIOSpeed Speed { get; set; }
-            public STM32.OutputType Type { get; set; }
-            public bool InitialState { get; set; }
-            public InterruptMode InterruptMode { get; set; }
-            public int AlternateFunctionNumber { get; set; }
-        }
-
-        private List<GpioConfig> _currentConfigs = new List<GpioConfig>();
-
-        public void ReassertConfig(IPin pin)
-        {
-            var designator = GetPortAndPin(pin);
-            var cfg = _currentConfigs.FirstOrDefault(c => c.Port == designator.port && c.Pin == designator.pin);
-            if (cfg != null)
-            {
-                ConfigureGpio(designator.port, designator.pin, cfg.Mode, cfg.Resistor, cfg.Speed, cfg.Type, cfg.InitialState, cfg.InterruptMode);
-            }
-        }
-
-        private void RegisterConfig(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
-        {
-            var cfg = _currentConfigs.FirstOrDefault(c => c.Port == port && c.Pin == pin);
-            if (cfg == null)
-            {
-                cfg = new GpioConfig
-                {
-                    Port = port,
-                    Pin = pin,
-                    Mode = mode,
-                    Resistor = resistor,
-                    Speed = speed,
-                    Type = type,
-                    InitialState = initialState,
-                    InterruptMode = interruptMode,
-                    AlternateFunctionNumber = alternateFunctionNumber
-                };
-            }
-            else
-            {
-                cfg.Mode = mode;
-                cfg.Resistor = resistor;
-                cfg.Speed = speed;
-                cfg.Type = type;
-                cfg.InitialState = initialState;
-                cfg.InterruptMode = interruptMode;
-                cfg.AlternateFunctionNumber = alternateFunctionNumber;
-            }
         }
 
         private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
