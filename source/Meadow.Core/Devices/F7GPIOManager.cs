@@ -364,7 +364,7 @@ namespace Meadow.Devices
 
         private List<GpioConfig> _currentConfigs = new List<GpioConfig>();
 
-        internal void ReassertConfig(IPin pin)
+        public void ReassertConfig(IPin pin)
         {
             var designator = GetPortAndPin(pin);
             var cfg = _currentConfigs.FirstOrDefault(c => c.Port == designator.port && c.Pin == designator.pin);
