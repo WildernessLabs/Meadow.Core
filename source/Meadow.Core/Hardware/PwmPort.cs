@@ -177,7 +177,9 @@ namespace Meadow.Hardware
         /// </summary>
         public override void Start()
         {
+            DeviceChannelManager.BeforeStartPwm(this.PwmChannelInfo);
             UpdateChannel();
+            DeviceChannelManager.AfterStartPwm(this.PwmChannelInfo, this.IOController);
             _isRunning = true;
         }
 
