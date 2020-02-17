@@ -56,7 +56,7 @@ namespace Meadow.Devices
         }
     }
 
-    public partial class F7GPIOManager : IIOController
+    public partial class F7GPIOManager : IIOController, INuttxIOController
     {
         public event InterruptHandler Interrupt;
 
