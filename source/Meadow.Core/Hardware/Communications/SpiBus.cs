@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
@@ -35,15 +34,10 @@ namespace Meadow.Hardware
 #endif
         }
 
-        // TODO: Call from Device.CreateSpiBus
-        // TODO: use Spi.Configuration configuration? don't we already know this, as its chip specific?
-        // TODO: we should already know clock phase and polarity, yeah?
         internal static SpiBus From(
             IPin clock,
             IPin mosi,
-            IPin miso,
-            byte cpha = 0,
-            byte cpol = 0)
+            IPin miso)
         {
             // check for pin compatibility and availability
             if (!clock.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.Clock) != SpiLineType.None))
@@ -376,7 +370,7 @@ namespace Meadow.Hardware
                 };
         }
 
-        public void SetMode(int mode)
+        private void SetMode(int mode)
         {
             var command = new Nuttx.UpdSPIModeCommand()
             {
