@@ -87,7 +87,9 @@ namespace Meadow.Hardware
 
         private void HandleConfigChange()
         {
+            // try setting the clock frequency.  Actual frequency comes back (based on clock divisor)
             var actual = SetFrequency(Configuration.SpeedKHz * 1000);
+            // update the config with what we actually set so it's readable
             Configuration.SetActualSpeedKHz(actual);
 
             int mode = 0;
