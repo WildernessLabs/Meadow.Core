@@ -11,7 +11,21 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7Micro : IIODevice
     {
-        //public List<WiFiAdapter> WiFiAdapters { get; }
+        /// <summary>
+        /// The default I2C Bus speed, in Hz, used when speed parameters are not provided
+        /// </summary>
+        public const int DefaultI2cBusSpeed = 100000;
+        /// <summary>
+        /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
+        /// </summary>
+        public const int DefaultSpiBusSpeed = 375;
+        /// <summary>
+        /// The default resolution for analog inputs
+        /// </summary>
+        public const int DefaultA2DResolution = 12;
+        public const float DefaultA2DReferenceVoltage = 3.3f;
+        public const float DefaultPwmFrequency = 100f;
+        public const float DefaultPwmDutyCycle = 0.5f;
 
         public DeviceCapabilities Capabilities { get; protected set; }
 
@@ -20,8 +34,6 @@ namespace Meadow.Devices
         /// </summary>
         /// <value>The pins.</value>
         public F7MicroPinDefinitions Pins { get; protected set; }
-        //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
-
 
         public SerialPortNameDefinitions SerialPortNames { get; protected set; }
             = new SerialPortNameDefinitions();
@@ -29,31 +41,20 @@ namespace Meadow.Devices
 
         internal IIOController IoController { get; private set; }
 
-        // private static
         static F7Micro() { }
 
         public F7Micro()
         {
             this.Capabilities = new DeviceCapabilities(
-                new AnalogCapabilities(true, 12),
+                new AnalogCapabilities(true, DefaultA2DResolution),
                 new NetworkCapabilities(true, true)
                 );
-            //this.WiFiAdapters = new List<WiFiAdapter>
-            //{
-            //    // TODO: stuff.
-            //    new WiFiAdapter()
-            //};
 
             this.IoController = new F7GPIOManager();
             this.IoController.Initialize();
 
-            // 
             this.Pins = new F7MicroPinDefinitions();
-
         }
-
-
-        //public C CreatePort<C>(P portConfig) where P : IPortConfig, where C : IPort {}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
@@ -86,15 +87,15 @@ namespace Meadow.Devices
 
         public IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            float voltageReference = 3.3f)
+            float voltageReference = DefaultA2DReferenceVoltage)
         {
             return AnalogInputPort.From(pin, this.IoController, voltageReference);
         }
 
         public IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = 100f,
-            float dutyCycle = 0.5f,
+            float frequency = DefaultPwmFrequency,
+            float dutyCycle = DefaultPwmDutyCycle,
             bool inverted = false)
         {
             bool isOnboard = IsOnboardLed(pin);
@@ -127,34 +128,61 @@ namespace Meadow.Devices
             return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, MOSI and MISO
+        /// </summary>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
-            long speed = 375 // this will default to the minimum capable speed of 375kHz
+            long speedkHz = DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speed);
+            return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speedkHz);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="pins">IPint instances used for (in this order) CLK, MOSI, MISO</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin[] pins,
-            long speed = 375// this will default to the minimum capable speed of 375kHz
+            long speedkHz = DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus(pins[0], pins[1], pins[2], speed);
+            return CreateSpiBus(pins[0], pins[1], pins[2], speedkHz);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speed = 375// this will default to the minimum capable speed of 375kHz
+            long speedkHz = DefaultSpiBusSpeed
         )
         {
             var bus = SpiBus.From(clock, mosi, miso);
             bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
-            bus.Configuration.SpeedKHz = speed;
+            bus.Configuration.SpeedKHz = speedkHz;
             return bus;
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="config">The bus clock configuration parameters</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
@@ -185,29 +213,43 @@ namespace Meadow.Devices
             return -1;
         }
 
+        /// <summary>
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
-            ushort speed = 1000
+            int frequencyHz = DefaultI2cBusSpeed
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, speed);
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequencyHz);
         }
 
+        /// <summary>
+        /// Creates an I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
-            ushort speed
+            int frequencyHz = DefaultI2cBusSpeed
         )
         {
-            return CreateI2cBus(pins[0], pins[1], speed);
+            return CreateI2cBus(pins[0], pins[1], frequencyHz);
         }
 
-
+        /// <summary>
+        /// Creates an I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            ushort speed
+            int frequencyHz = DefaultI2cBusSpeed
         )
         {
-            return I2cBus.From(this.IoController, clock, data, speed);
+            return I2cBus.From(this.IoController, clock, data, frequencyHz);
         }
 
     }

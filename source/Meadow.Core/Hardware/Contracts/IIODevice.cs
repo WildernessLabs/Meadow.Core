@@ -35,13 +35,13 @@ namespace Meadow.Hardware
 
         IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            float voltageReference = 3.3f
+            float voltageReference
         );
 
         IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = 100, 
-            float dutyCycle = 0.5f,
+            float frequency,
+            float dutyCycle,
             bool invert = false
         );
 
@@ -53,27 +53,55 @@ namespace Meadow.Hardware
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096);
 
-        ISpiBus CreateSpiBus(
-            IPin[] pins,
-            long speed
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="config">The bus clock configuration parameters</param>
+        /// <returns>An instance of an IISpiBus</returns>
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            SpiClockConfiguration config
         );
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speed
+            long speedkHz
         );
 
+        /// <summary>
+        /// Creates an I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin[] pins,
-            ushort speed = 100 // TODO: not sure about this
+            int frequencyHz
         );
 
+        /// <summary>
+        /// Creates an I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            ushort speed = 100 // TODO: not sure about this
+            int frequencyHz
         );
     }
 }
