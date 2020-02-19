@@ -12,13 +12,47 @@ namespace BasicI2CTest
         {
             Console.WriteLine("+I2CApp");
 
-            var i2c = Device.CreateI2cBus();
-
-            GY521Test(i2c);
+            SpeedChangeTest();
         }
 
-        private void GY521Test(II2cBus i2c)
+        private void SpeedChangeTest()
         {
+            Console.WriteLine("+GY521 Speed Change Test");
+
+            var i2c = Device.CreateI2cBus();
+
+            var gyro = new GY521(i2c);
+
+            Console.WriteLine(" Wake");
+            gyro.Wake();
+
+            var count = 0;
+
+            while (true)
+            {
+                Console.WriteLine($" Reading @{i2c.Frequency / 1000} kHz...");
+                gyro.Refresh();
+
+                Console.WriteLine($" ({gyro.AccelerationX:X4},{gyro.AccelerationY:X4},{gyro.AccelerationZ:X4}) ({gyro.GyroX:X4},{gyro.GyroY:X4},{gyro.GyroZ:X4}) {gyro.Temperature}");
+
+                Thread.Sleep(2000);
+
+                switch (count++ % 2)
+                {
+                    case 0:
+                        i2c.Frequency = 100000;
+                        break;
+                    case 1:
+                        i2c.Frequency = 400000;
+                        break;
+                }
+            }
+        }
+
+        private void GY521Test()
+        {
+            var i2c = Device.CreateI2cBus();
+
             Console.WriteLine("+GY521 Test");
 
             var gyro = new GY521(i2c);

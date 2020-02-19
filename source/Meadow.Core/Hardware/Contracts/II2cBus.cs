@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
-    // TODO: @Mark; i don't love `peripheralAddress`, but we need a way to distinguish
-    // between peripheral and register addresses.
     public interface II2cBus
     {
+        /// <summary>
+        /// Bus Clock speed in Hz
+        /// </summary>
+        int Frequency { get; set; }
+
         /// <summary>
         /// Write a number of bytes to the device.
         /// </summary>

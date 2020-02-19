@@ -21,7 +21,7 @@ namespace Meadow.Hardware
         private IIOController IOController { get; }
 
         /// <summary>
-        /// Bus Clock speed in kHz
+        /// Bus Clock speed in Hz
         /// </summary>
         public int Frequency { get; set; }
 
