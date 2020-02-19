@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
@@ -12,22 +13,51 @@ namespace Basic_PWM
         {
             Console.WriteLine("+PWMApp");
 
-            var f = 100;
-            Console.WriteLine($"DeviceCreatePwmPort {f} Hz");
             try
             {
-                var pwmA = Device.CreatePwmPort(Device.Pins.D11, f, 0.5f);
-                var pwmB = Device.CreatePwmPort(Device.Pins.D12, 200, 0.5f);
-                var pwmC = Device.CreatePwmPort(Device.Pins.D13, 400, 0.25f);
-
-                pwmA.Start();
-                pwmB.Start();
-                pwmC.Start();
+                PwmWithGpio();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
+        }
+
+
+        private void PwmWithGpio()
+        {
+            var pwm04 = Device.CreatePwmPort(Device.Pins.D04, 2, 0.5f);
+
+            var d03 = Device.CreateDigitalOutputPort(Device.Pins.D03);
+
+            Task.Run(async () =>
+            {
+                var c = 0;
+
+                while (true)
+                {
+                    d03.State = !d03.State;
+                    await Task.Delay(1000);
+                }
+            });
+
+            Thread.Sleep(5000);
+
+            pwm04.Start();
+        }
+
+        private void MultiplePwms()
+        {
+            var f = 100;
+            Console.WriteLine($"DeviceCreatePwmPort {f} Hz");
+
+            var pwmA = Device.CreatePwmPort(Device.Pins.D11, f, 0.5f);
+            var pwmB = Device.CreatePwmPort(Device.Pins.D12, 200, 0.5f);
+            var pwmC = Device.CreatePwmPort(Device.Pins.D13, 400, 0.25f);
+
+            pwmA.Start();
+            pwmB.Start();
+            pwmC.Start();
         }
 
         private void FrequencyChecks(IPwmPort pwm)

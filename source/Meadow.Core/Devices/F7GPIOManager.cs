@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Meadow.Core;
@@ -65,7 +66,7 @@ namespace Meadow.Devices
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
-        internal DebugFeature DebugFeatures { get; set;  }
+        internal DebugFeature DebugFeatures { get; set; }
 
         internal F7GPIOManager()
         {
@@ -80,7 +81,7 @@ namespace Meadow.Devices
 
         public void Initialize()
         {
-            if((DebugFeatures & DebugFeature.Interrupts) != 0)
+            if ((DebugFeatures & DebugFeature.Interrupts) != 0)
             {
                 UPD.DumpClockRegisters();
             }
@@ -157,7 +158,7 @@ namespace Meadow.Devices
             };
 
             // write the register
-            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, 
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
                 $"Writing {register.Value:X} to register: {register.Address:X}");
 
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
@@ -338,7 +339,7 @@ namespace Meadow.Devices
         public bool UnconfigureGpio(IPin pin)
         {
             var designator = GetPortAndPin(pin);
-            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input,  STM32.ResistorMode.Float,  STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
         }
 
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
@@ -509,6 +510,8 @@ namespace Meadow.Devices
                 var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
                 */
             }
+
+            RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
 
             return true;
         }
