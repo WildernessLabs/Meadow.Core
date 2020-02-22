@@ -16,7 +16,7 @@ namespace Meadow.Hardware
     {
         private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private SpiClockConfiguration _clockConfig = new SpiClockConfiguration();
+        private SpiClockConfiguration _clockConfig;
 
         internal int BusNumber { get; set; }
 
@@ -52,7 +52,7 @@ namespace Meadow.Hardware
             {
                 throw new NotSupportedException($"Pin {clock.Name} does not support SPI MISO capability");
             }
-
+            
             // we can't set the speed here yet because the caller has to set the bus number first
             return new SpiBus();
         }
@@ -62,7 +62,14 @@ namespace Meadow.Hardware
         /// </summary>
         public SpiClockConfiguration Configuration
         {
-            get => _clockConfig;
+            get
+            {
+                if(_clockConfig == null)
+                {
+                    Configuration = new SpiClockConfiguration(375, SpiClockConfiguration.Mode.Mode0);
+                }
+                return _clockConfig;
+            }
             internal set
             {
                 if (value == null) { throw new ArgumentNullException(); }
