@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
@@ -17,7 +16,7 @@ namespace Meadow.Hardware
     {
         private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private SpiClockConfiguration _clockConfig = new SpiClockConfiguration();
+        private SpiClockConfiguration _clockConfig;
 
         internal int BusNumber { get; set; }
 
@@ -35,15 +34,10 @@ namespace Meadow.Hardware
 #endif
         }
 
-        // TODO: Call from Device.CreateSpiBus
-        // TODO: use Spi.Configuration configuration? don't we already know this, as its chip specific?
-        // TODO: we should already know clock phase and polarity, yeah?
         internal static SpiBus From(
             IPin clock,
             IPin mosi,
-            IPin miso,
-            byte cpha = 0,
-            byte cpol = 0)
+            IPin miso)
         {
             // check for pin compatibility and availability
             if (!clock.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.Clock) != SpiLineType.None))
@@ -58,7 +52,7 @@ namespace Meadow.Hardware
             {
                 throw new NotSupportedException($"Pin {clock.Name} does not support SPI MISO capability");
             }
-
+            
             // we can't set the speed here yet because the caller has to set the bus number first
             return new SpiBus();
         }
@@ -68,7 +62,14 @@ namespace Meadow.Hardware
         /// </summary>
         public SpiClockConfiguration Configuration
         {
-            get => _clockConfig;
+            get
+            {
+                if(_clockConfig == null)
+                {
+                    Configuration = new SpiClockConfiguration(375, SpiClockConfiguration.Mode.Mode0);
+                }
+                return _clockConfig;
+            }
             internal set
             {
                 if (value == null) { throw new ArgumentNullException(); }
@@ -93,7 +94,9 @@ namespace Meadow.Hardware
 
         private void HandleConfigChange()
         {
+            // try setting the clock frequency.  Actual frequency comes back (based on clock divisor)
             var actual = SetFrequency(Configuration.SpeedKHz * 1000);
+            // update the config with what we actually set so it's readable
             Configuration.SetActualSpeedKHz(actual);
 
             int mode = 0;
@@ -376,7 +379,7 @@ namespace Meadow.Hardware
                 };
         }
 
-        public void SetMode(int mode)
+        private void SetMode(int mode)
         {
             var command = new Nuttx.UpdSPIModeCommand()
             {

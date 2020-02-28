@@ -1,6 +1,9 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Encapsulates properties of a SPI Bus Clock
+    /// </summary>
     public class SpiClockConfiguration
     {
         private long _speed;
@@ -9,30 +12,54 @@ namespace Meadow.Hardware
 
         internal event EventHandler Changed;
 
+        /// <summary>
+        /// SPI Bus Clock Polarity (CPOL)
+        /// </summary>
         public enum ClockPolarity
         {
             Normal = 0,
             Inverted = 1
         }
 
+        /// <summary>
+        /// SPI Bus Clock Phase (CPHA)
+        /// </summary>
         public enum ClockPhase
         {
             Zero = 0,
             One = 1
         }
 
+        /// <summary>
+        /// Mode (combination of Phase and Polarity) of a SPI bus clock
+        /// </summary>
         public enum Mode
         {
+            /// <summary>
+            /// Normal (0) Polarity, and Phase 0
+            /// </summary>
             Mode0,
+            /// <summary>
+            /// Normal (0) Polarity, and Phase 1
+            /// </summary>
             Mode1,
+            /// <summary>
+            /// Inverted (1) Polarity, and Phase 0
+            /// </summary>
             Mode2,
+            /// <summary>
+            /// Inverted (1) Polarity, and Phase 1
+            /// </summary>
             Mode3
         }
 
+        /// <summary>
+        /// Gets or sets the current Polarity of the SPI bus clock
+        /// </summary>
         public ClockPolarity Polarity 
         {
             get => _polarity;
-            internal set
+            set
             {
                 if (value == Polarity) return;
                 _polarity = value;
@@ -40,10 +67,13 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Gets or sets the current Phase of the SPI bus clock
+        /// </summary>
         public ClockPhase Phase 
         {
             get => _phase;
-            internal set
+            set
             {
                 if (value == Phase) return;
                 _phase = value;
@@ -52,7 +82,7 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// The desired bus clock speed.
+        /// Sets the desired speed or gets the actual speed of the SPI bus clock.
         /// </summary>
         /// <remarks>
         /// The set of supported speeds is programmatically available from the bus in the <b>SupportedSpeeds</b> property.
@@ -60,7 +90,7 @@ namespace Meadow.Hardware
         public long SpeedKHz 
         {
             get => _speed;
-            internal set
+            set
             {
                 if (value == SpeedKHz) return;
                 _speed = value;
@@ -81,6 +111,12 @@ namespace Meadow.Hardware
         {
         }
 
+        /// <summary>
+        /// Creates a SpiClockConfiguration instance
+        /// </summary>
+        /// <param name="speedKHz">Bus clock speed, in kHz</param>
+        /// <param name="polarity">Bus clock polarity</param>
+        /// <param name="phase">Bus clock phase</param>
         public SpiClockConfiguration(
             long speedKHz,
             ClockPolarity polarity = ClockPolarity.Normal,
@@ -92,6 +128,11 @@ namespace Meadow.Hardware
             this.Phase = phase;
         }
 
+        /// <summary>
+        /// Creates a SpiClockConfiguration instance
+        /// </summary>
+        /// <param name="speedKHz">Bus clock speed, in kHz</param>
+        /// <param name="mode">Bus Mode (phase and polarity)</param>
         public SpiClockConfiguration(
             long speedKHz,
             Mode mode
