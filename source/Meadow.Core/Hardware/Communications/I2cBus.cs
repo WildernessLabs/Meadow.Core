@@ -113,13 +113,8 @@ namespace Meadow.Hardware
 
                 if (result != 0)
                 {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    DecipherI2CError(UPD.GetLastError());
                 }
-
-                // TODO: handle ioctl errors.  Common values:
-                // -116 = timeout
-                // -112 = address not found
 
                 return rxBuffer;
             }
@@ -167,13 +162,9 @@ namespace Meadow.Hardware
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
                 if (result != 0)
                 {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    DecipherI2CError(UPD.GetLastError());
                 }
                 Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-
-                // TODO: handle ioctl errors.  Common values:
-                // -116 = timeout
 
                 return rxBuffer;
             }
@@ -233,15 +224,11 @@ namespace Meadow.Hardware
 
                 Output.WriteIf(_showI2cDebug, " +SendData");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
                 if (result != 0)
                 {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    DecipherI2CError(UPD.GetLastError());
                 }
-                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-
-                // TODO: handle ioctl errors.  Common values:
-                // -116 = timeout                                           
             }
             finally
             {
@@ -251,6 +238,23 @@ namespace Meadow.Hardware
                 {
                     gch.Free();
                 }
+            }
+        }
+
+        private void DecipherI2CError(Nuttx.ErrorCode ec)
+        {
+            switch(ec)
+            {
+                case (Nuttx.ErrorCode)125:
+                    throw new NativeException("Communication error.  Verify address and that SCL and SDA are not reversed.");
+                case (Nuttx.ErrorCode)116:
+                    throw new NativeException("Communication error.  Verify SCL Is Connected.");
+                case (Nuttx.ErrorCode)112:
+                    throw new NativeException("Communication error.  No device found at requested address.");
+                case Nuttx.ErrorCode.TryAgain:
+                    throw new NativeException("Communication error.  Verify SDA Is Connected.");
+                default:
+                    throw new NativeException($"Communication error.  Error code {(int)ec}");
             }
         }
     }
