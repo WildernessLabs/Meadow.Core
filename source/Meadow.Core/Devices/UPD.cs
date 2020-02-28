@@ -176,7 +176,6 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
                 return (int)err;
             }
             return result;

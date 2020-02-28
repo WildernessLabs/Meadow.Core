@@ -248,7 +248,7 @@ namespace Meadow.Hardware
                 case (Nuttx.ErrorCode)125:
                     throw new NativeException("Communication error.  Verify address and that SCL and SDA are not reversed.");
                 case (Nuttx.ErrorCode)116:
-                    throw new NativeException("Communication error.  Verify SCL Is Connected.");
+                    throw new NativeException("Communication error.  Verify device is powered and that SCL is Connected.");
                 case (Nuttx.ErrorCode)112:
                     throw new NativeException("Communication error.  No device found at requested address.");
                 case Nuttx.ErrorCode.TryAgain:
