@@ -178,8 +178,7 @@ namespace Meadow.Hardware
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
                 if (result != 0)
                 {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    DecipherSPIError(UPD.GetLastError());
                 }
                 Output.WriteLineIf(_showSpiDebug, $" send complete");
 
@@ -241,10 +240,9 @@ namespace Meadow.Hardware
                 };
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                if(result != 0)
+                if (result != 0)
                 {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    DecipherSPIError(UPD.GetLastError());
                 }
 
                 if (chipSelect != null)
@@ -335,8 +333,7 @@ namespace Meadow.Hardware
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
                 if (result != 0)
                 {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    DecipherSPIError(UPD.GetLastError());
                 }
                 Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
 
@@ -390,10 +387,9 @@ namespace Meadow.Hardware
             Output.WriteLineIf(_showSpiDebug, "+SetMode");
             Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} mode to {command.Mode}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIMode, ref command);
-            if(result != 0)
+            if (result != 0)
             {
-                var error = UPD.GetLastError();
-                throw new NativeException(error);
+                DecipherSPIError(UPD.GetLastError());
             }
             Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
         }
@@ -414,8 +410,7 @@ namespace Meadow.Hardware
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPISpeed, ref command);
             if (result != 0)
             {
-                var error = UPD.GetLastError();
-                throw new NativeException(error);
+                DecipherSPIError(UPD.GetLastError());
             }
             Output.WriteLineIf(_showSpiDebug, $" speed set to {desiredSpeed}");
 
@@ -465,6 +460,16 @@ namespace Meadow.Hardware
             }
 
             return 0;
+        }
+
+        private void DecipherSPIError(Nuttx.ErrorCode ec)
+        {
+            // This is highly unlikely to ever get called.  The underlying Nuttx SPI driver does no error checking and therefore is incapable of returning error codes. Yay.
+            switch (ec)
+            {
+                default:
+                    throw new NativeException($"Communication error.  Error code {(int)ec}");
+            }
         }
     }
 }
