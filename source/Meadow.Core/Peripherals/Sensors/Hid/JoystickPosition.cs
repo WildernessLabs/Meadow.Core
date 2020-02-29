@@ -2,7 +2,7 @@
 
 namespace Meadow.Peripherals.Sensors.Hid
 {
-    public class JoystickConditions
+    public class JoystickPosition
     {
         /// <summary>
         /// 
@@ -14,40 +14,40 @@ namespace Meadow.Peripherals.Sensors.Hid
         /// </summary>
         public float VerticalValue { get; set; }
 
-        public JoystickConditions() { }
+        public JoystickPosition() { }
 
-        public JoystickConditions(float horizontalValue, float verticalValue) 
+        public JoystickPosition(float horizontalValue, float verticalValue) 
         {
             HorizontalValue = horizontalValue;
             VerticalValue = verticalValue;
         }
 
-        public static JoystickConditions From(JoystickConditions conditions) 
+        public static JoystickPosition From(JoystickPosition conditions) 
         {
-            return new JoystickConditions(
+            return new JoystickPosition(
                 conditions.HorizontalValue,
                 conditions.VerticalValue
                 );
         }
     }
 
-    public class JoystickConditionChangeResult : IChangeResult<JoystickConditions>
+    public class JoystickPositionChangeResult : IChangeResult<JoystickPosition>
     {
-        public JoystickConditions New 
+        public JoystickPosition New 
         { 
             get => _newValue; 
             set { _newValue = value;  } 
-        } protected JoystickConditions _newValue = new JoystickConditions();
+        } protected JoystickPosition _newValue = new JoystickPosition();
         
-        public JoystickConditions Old 
+        public JoystickPosition Old 
         { 
             get => throw new NotImplementedException(); 
             set => throw new NotImplementedException();
-        } protected JoystickConditions _oldValue = new JoystickConditions();
+        } protected JoystickPosition _oldValue = new JoystickPosition();
 
-        public JoystickConditions Delta { get; protected set; } = new JoystickConditions();
+        public JoystickPosition Delta { get; protected set; } = new JoystickPosition();
 
-        public JoystickConditionChangeResult(JoystickConditions newValue, JoystickConditions oldValue) 
+        public JoystickPositionChangeResult(JoystickPosition newValue, JoystickPosition oldValue) 
         {
             New = newValue;
             Old = oldValue;
@@ -55,7 +55,7 @@ namespace Meadow.Peripherals.Sensors.Hid
 
         protected void RecalcDelta() 
         {
-            JoystickConditions delta = new JoystickConditions();
+            JoystickPosition delta = new JoystickPosition();
             delta.HorizontalValue = New.HorizontalValue - Old.HorizontalValue;
             delta.VerticalValue = New.VerticalValue - Old.VerticalValue;
             Delta = delta;
