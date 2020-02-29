@@ -8,6 +8,18 @@ namespace Meadow.Hardware
     public interface IIODevice//<P> where P : IPinDefinitions
     {
         /// <summary>
+        /// The default I2C Bus speed, in Hz, used when speed parameters are not provided
+        /// </summary>
+        public const int DefaultI2cBusSpeed = 100000;
+        /// <summary>
+        /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
+        /// </summary>
+        public const int DefaultSpiBusSpeed = 375;
+        public const float DefaultA2DReferenceVoltage = 3.3f;
+        public const float DefaultPwmFrequency = 100f;
+        public const float DefaultPwmDutyCycle = 0.5f;
+
+        /// <summary>
         /// Gets the device capabilities.
         /// </summary>
         DeviceCapabilities Capabilities { get; }
@@ -35,13 +47,13 @@ namespace Meadow.Hardware
 
         IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            float voltageReference
+            float voltageReference = DefaultA2DReferenceVoltage
         );
 
         IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency,
-            float dutyCycle,
+            float frequency = DefaultPwmFrequency,
+            float dutyCycle = DefaultPwmDutyCycle,
             bool invert = false
         );
 
@@ -80,7 +92,7 @@ namespace Meadow.Hardware
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speedkHz
+            long speedkHz = DefaultSpiBusSpeed
         );
 
         /// <summary>
@@ -90,7 +102,7 @@ namespace Meadow.Hardware
         /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin[] pins,
-            int frequencyHz
+            int frequencyHz = DefaultI2cBusSpeed
         );
 
         /// <summary>
@@ -101,7 +113,7 @@ namespace Meadow.Hardware
         II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            int frequencyHz
+            int frequencyHz = DefaultI2cBusSpeed
         );
     }
 }

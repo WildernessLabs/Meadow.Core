@@ -12,20 +12,9 @@ namespace Meadow.Devices
     public partial class F7Micro : IIODevice
     {
         /// <summary>
-        /// The default I2C Bus speed, in Hz, used when speed parameters are not provided
-        /// </summary>
-        public const int DefaultI2cBusSpeed = 100000;
-        /// <summary>
-        /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
-        /// </summary>
-        public const int DefaultSpiBusSpeed = 375;
-        /// <summary>
         /// The default resolution for analog inputs
         /// </summary>
         public const int DefaultA2DResolution = 12;
-        public const float DefaultA2DReferenceVoltage = 3.3f;
-        public const float DefaultPwmFrequency = 100f;
-        public const float DefaultPwmDutyCycle = 0.5f;
 
         public DeviceCapabilities Capabilities { get; protected set; }
 
@@ -87,15 +76,15 @@ namespace Meadow.Devices
 
         public IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            float voltageReference = DefaultA2DReferenceVoltage)
+            float voltageReference = IIODevice.DefaultA2DReferenceVoltage)
         {
             return AnalogInputPort.From(pin, this.IoController, voltageReference);
         }
 
         public IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = DefaultPwmFrequency,
-            float dutyCycle = DefaultPwmDutyCycle,
+            float frequency = IIODevice.DefaultPwmFrequency,
+            float dutyCycle = IIODevice.DefaultPwmDutyCycle,
             bool inverted = false)
         {
             bool isOnboard = IsOnboardLed(pin);
@@ -134,7 +123,7 @@ namespace Meadow.Devices
         /// <param name="speedkHz">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
-            long speedkHz = DefaultSpiBusSpeed
+            long speedkHz = IIODevice.DefaultSpiBusSpeed
         )
         {
             return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speedkHz);
@@ -148,7 +137,7 @@ namespace Meadow.Devices
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin[] pins,
-            long speedkHz = DefaultSpiBusSpeed
+            long speedkHz = IIODevice.DefaultSpiBusSpeed
         )
         {
             return CreateSpiBus(pins[0], pins[1], pins[2], speedkHz);
@@ -166,7 +155,7 @@ namespace Meadow.Devices
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speedkHz = DefaultSpiBusSpeed
+            long speedkHz = IIODevice.DefaultSpiBusSpeed
         )
         {
             var bus = SpiBus.From(clock, mosi, miso);
@@ -219,7 +208,7 @@ namespace Meadow.Devices
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
-            int frequencyHz = DefaultI2cBusSpeed
+            int frequencyHz = IIODevice.DefaultI2cBusSpeed
         )
         {
             return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequencyHz);
@@ -232,7 +221,7 @@ namespace Meadow.Devices
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
-            int frequencyHz = DefaultI2cBusSpeed
+            int frequencyHz = IIODevice.DefaultI2cBusSpeed
         )
         {
             return CreateI2cBus(pins[0], pins[1], frequencyHz);
@@ -246,7 +235,7 @@ namespace Meadow.Devices
         public II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            int frequencyHz = DefaultI2cBusSpeed
+            int frequencyHz = IIODevice.DefaultI2cBusSpeed
         )
         {
             return I2cBus.From(this.IoController, clock, data, frequencyHz);
