@@ -42,8 +42,8 @@ namespace Meadow.Devices
                     _ist.Start();
                 }
 
-                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
-                    "Calling ioctl to enable interrupts");
+                Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
+                    $"Calling ioctl to enable interrupts {cfg.Port}::{cfg.Pin}::{cfg.Irq}");
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 
@@ -51,7 +51,8 @@ namespace Meadow.Devices
                 {
                     var err = UPD.GetLastError();
 
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"failed to register interrupts: {err}");
+                    Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
+                            $"failed to register interrupts: {err}");
                 }
             }
             else
