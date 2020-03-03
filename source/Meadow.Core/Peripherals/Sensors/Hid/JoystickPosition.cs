@@ -41,8 +41,8 @@ namespace Meadow.Peripherals.Sensors.Hid
         
         public JoystickPosition Old 
         { 
-            get => throw new NotImplementedException(); 
-            set => throw new NotImplementedException();
+            get => _oldValue;
+            set { _oldValue = value; }
         } protected JoystickPosition _oldValue = new JoystickPosition();
 
         public JoystickPosition Delta { get; protected set; } = new JoystickPosition();
