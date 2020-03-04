@@ -11,7 +11,7 @@ namespace Meadow.Hardware
         int Frequency { get; set; }
 
         /// <summary>
-        /// Write a number of bytes to the device.
+        /// Writes a number of bytes to the bus.
         /// </summary>
         /// <remarks>
         /// The number of bytes to be written will be determined by the length of the byte array.
@@ -20,7 +20,25 @@ namespace Meadow.Hardware
         /// <param name="data">Data to be written.</param>
         void WriteData(byte peripheralAddress, params byte[] data);
 
+        /// <summary>
+        /// Writes a number of bytes to the bus.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
+        /// <param name="data">Data to be written.</param>
         void WriteData(byte peripheralAddress, IEnumerable<byte> data);
+
+        /// <summary>
+        /// Writes a number of bytes to the bus.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
+        /// <param name="data">Data to be written.</param>
+        void WriteData(byte peripheralAddress, Span<byte> data);
 
         /// <summary>
         /// Writes data to the bus, followed by a restart and then reads a specified number of bytes

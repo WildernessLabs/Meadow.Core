@@ -17,13 +17,49 @@ namespace Meadow.Hardware
     {
         private bool _showI2cDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
+        private int _frequency;
 
         private IIOController IOController { get; }
 
         /// <summary>
         /// Bus Clock speed in Hz
         /// </summary>
-        public int Frequency { get; set; }
+        public int Frequency 
+        {
+            get => _frequency;
+            set
+            {
+                switch (value)
+                {
+                    case 100000:
+                    case 400000:
+                    case 1000000:
+                        _frequency = value;
+                        break;
+                    default:
+                        int actual;
+
+                        // always round down (except if we're below the floor)
+                        if (value > 1000000)
+                        {
+                            actual = 1000000;
+                        }
+                        else if (value > 400000)
+                        {
+                            actual = 400000;
+                        }
+                        else
+                        {
+                            actual = 100000;
+                        }
+
+                        Console.WriteLine($"Warning: Invalid I2C Frequency of {value}. Adjusting to {actual}");
+                        _frequency = actual;
+                        break;
+
+                }
+            }
+        }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
@@ -54,6 +90,20 @@ namespace Meadow.Hardware
                 var error = UPD.GetLastError();
                 throw new NativeException(error);
             }
+        }
+
+        /// <summary>
+        /// Creates an I2C bus for a set of given pins and parameters
+        /// </summary>
+        /// <param name="ioController">The Meadow IO Controller</param>
+        /// <param name="clock">Clock (SCL) pin</param>
+        /// <param name="data">Data (SDA) pin</param>
+        /// <param name="frequencyHz">Bus clock speed, in Hz</param>
+        /// <param name="transactionTimeout">Bus transaction timeout</param>
+        /// <returns>An I2CBus instance</returns>
+        public static I2cBus From(IIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
+        {
+            return From(ioController, clock, data, (int)busSpeed, transactionTimeout);
         }
 
         /// <summary>
@@ -204,40 +254,48 @@ namespace Meadow.Hardware
             SendData(peripheralAddress, data.ToArray());
         }
 
-        private void SendData(byte address, byte[] data)
+        /// <summary>
+        /// Writes a number of bytes to the device.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="data">Data to be written.</param>
+        public void WriteData(byte peripheralAddress, Span<byte> data)
         {
-            var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
+            SendData(peripheralAddress, data.ToArray());
+        }
 
+        private unsafe void SendData(byte address, Span<byte> data)
+        {
             _busSemaphore.Wait();
 
             try
             {
-                var command = new Nuttx.UpdI2CCommand()
+                fixed (byte* pData = &data.GetPinnableReference())
                 {
-                    Address = address,
-                    Frequency = this.Frequency,
-                    TxBufferLength = data.Length,
-                    TxBuffer = gch.AddrOfPinnedObject(),
-                    RxBufferLength = 0,
-                    RxBuffer = IntPtr.Zero
-                };
+                    var command = new Nuttx.UpdI2CCommand()
+                    {
+                        Address = address,
+                        Frequency = this.Frequency,
+                        TxBufferLength = data.Length,
+                        TxBuffer = (IntPtr)pData,
+                        RxBufferLength = 0,
+                        RxBuffer = IntPtr.Zero
+                    };
 
-                Output.WriteIf(_showI2cDebug, " +SendData");
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-                if (result != 0)
-                {
-                    DecipherI2CError(UPD.GetLastError());
+                    Output.WriteIf(_showI2cDebug, " +SendData");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
+                    if (result != 0)
+                    {
+                        DecipherI2CError(UPD.GetLastError());
+                    }
                 }
             }
             finally
             {
                 _busSemaphore.Release();
-
-                if (gch.IsAllocated)
-                {
-                    gch.Free();
-                }
             }
         }
 
