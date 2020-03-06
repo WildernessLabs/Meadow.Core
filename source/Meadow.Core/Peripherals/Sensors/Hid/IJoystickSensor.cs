@@ -2,7 +2,7 @@
 
 namespace Meadow.Peripherals.Sensors.Hid
 {
-    public interface IJoystickSensor : ISensor, IObservable<JoystickConditionChangeResult>
+    public interface IJoystickSensor : ISensor, IObservable<JoystickPositionChangeResult>
     {
         /// <summary>
         /// Last horizontal value read from the Joystick.
@@ -19,6 +19,6 @@ namespace Meadow.Peripherals.Sensors.Hid
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<JoystickConditionChangeResult> Updated;
+        event EventHandler<JoystickPositionChangeResult> Updated;
     }
 }
