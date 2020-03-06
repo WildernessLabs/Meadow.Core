@@ -112,6 +112,7 @@ namespace Meadow.Hardware
             }
 
             SetMode(mode);
+            SetBitsPerWord(Configuration.BitsPerWord);
         }
 
         /// <summary>
@@ -374,6 +375,27 @@ namespace Meadow.Hardware
                     24000,
                     48000
                 };
+        }
+
+        private void SetBitsPerWord(int bitsPerWord)
+        {
+            if(bitsPerWord < 4 || bitsPerWord > 16)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            var command = new Nuttx.UpdSPIBitsCommand()
+            {
+                BusNumber = BusNumber,
+                BitsPerWord = bitsPerWord
+            };
+
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} bits per word to {command.BitsPerWord}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIBits, ref command);
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
         }
 
         private void SetMode(int mode)

@@ -30,22 +30,35 @@ namespace BasicI2CTest
 
             while (true)
             {
-                Console.WriteLine($" Reading @{i2c.Frequency / 1000} kHz...");
-                gyro.Refresh();
+                try
+                {
+                    Console.WriteLine($" Reading @{i2c.Frequency / 1000} kHz...");
+                    gyro.Refresh();
 
-                Console.WriteLine($" ({gyro.AccelerationX:X4},{gyro.AccelerationY:X4},{gyro.AccelerationZ:X4}) ({gyro.GyroX:X4},{gyro.GyroY:X4},{gyro.GyroZ:X4}) {gyro.Temperature}");
+                    Console.WriteLine($" ({gyro.AccelerationX:X4},{gyro.AccelerationY:X4},{gyro.AccelerationZ:X4}) ({gyro.GyroX:X4},{gyro.GyroY:X4},{gyro.GyroZ:X4}) {gyro.Temperature}");
+
+                    switch (count++ % 4)
+                    {
+                        case 0:
+                            i2c.Frequency = 100000;
+                            break;
+                        case 1:
+                            i2c.Frequency = 400000;
+                            break;
+                        case 2:
+                            i2c.Frequency = 1000000;
+                            break;
+                        case 3:
+                            i2c.Frequency = 3400000;
+                            break;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($" Error: {ex.Message}");
+                }
 
                 Thread.Sleep(2000);
-
-                switch (count++ % 2)
-                {
-                    case 0:
-                        i2c.Frequency = 100000;
-                        break;
-                    case 1:
-                        i2c.Frequency = 400000;
-                        break;
-                }
             }
         }
 
@@ -115,10 +128,15 @@ namespace BasicI2CTest
             _bus.WriteData(Address, (byte)Registers.PowerManagement, 0);
         }
 
+        int c = 0;
+
         public void Refresh()
         {
             // tell it to send us 14 bytes (each value is 2-bytes), starting at 0x3b
-            var data = _bus.WriteReadData(Address, 14, (byte)Registers.AccelerometerX);
+            byte address = c++ % 10 == 0 ? (byte)(Address + 1) : Address;
+
+            // cause occasional errors
+            var data = _bus.WriteReadData(address, 14, (byte)Registers.AccelerometerX);
 
 //            Console.WriteLine($" Got {data.Length} bytes");
 //            Console.WriteLine($" {BitConverter.ToString(data)}");

@@ -217,6 +217,19 @@ namespace Meadow.Devices
             return result;
         }
 
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPIBitsCommand spiCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
+
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
+        }
+
         public static int Ioctl(Nuttx.GpioIoctlFn request, ref Nuttx.GPIOConfigFlags configFlags)
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref configFlags);
