@@ -6,7 +6,8 @@ namespace Meadow.Hardware
     /// </summary>
     public class SpiClockConfiguration
     {
-        private long _speed;
+        private long _speedKHz;
+        private int _bitsPerWord;
         private ClockPhase _phase;
         private ClockPolarity _polarity;
 
@@ -89,11 +90,24 @@ namespace Meadow.Hardware
         /// </remarks>
         public long SpeedKHz 
         {
-            get => _speed;
+            get => _speedKHz;
             set
             {
                 if (value == SpeedKHz) return;
-                _speed = value;
+                _speedKHz = value;
+                Changed?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public int BitsPerWord
+        {
+            get => _bitsPerWord;
+            set
+            {
+                if (value == BitsPerWord) return;
+                if (value < 4 || value > 16) throw new ArgumentOutOfRangeException();
+
+                _bitsPerWord = value;
                 Changed?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -104,7 +118,7 @@ namespace Meadow.Hardware
         /// <param name="speed"></param>
         internal void SetActualSpeedKHz(long speed)
         {
-            _speed = speed;
+            _speedKHz = speed;
         }
 
         internal SpiClockConfiguration()
@@ -121,11 +135,13 @@ namespace Meadow.Hardware
             long speedKHz,
             ClockPolarity polarity = ClockPolarity.Normal,
             ClockPhase phase = ClockPhase.Zero
+            
         )
         {
             this.SpeedKHz = speedKHz;
             this.Polarity = polarity;
             this.Phase = phase;
+            this.BitsPerWord = 8;
         }
 
         /// <summary>
@@ -139,6 +155,7 @@ namespace Meadow.Hardware
         )
         {
             this.SpeedKHz = speedKHz;
+            this.BitsPerWord = 8;
             switch (mode) {
                 case Mode.Mode0:
                     this.Polarity = ClockPolarity.Normal;
