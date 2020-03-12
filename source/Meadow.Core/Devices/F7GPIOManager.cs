@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Meadow.Core;
@@ -24,6 +25,7 @@ namespace Meadow.Devices
 
     internal static class Output
     {
+        [Conditional("DEBUG")]
         public static void WriteIf(bool test, string value)
         {
             if (test)
@@ -32,6 +34,7 @@ namespace Meadow.Devices
                 }
         }
 
+        [Conditional("DEBUG")]
         public static void WriteLineIf(bool test, string value)
         {
             if (test)
@@ -40,11 +43,13 @@ namespace Meadow.Devices
             }
         }
 
+        [Conditional("DEBUG")]
         public static void Write(string value)
         {
             Console.Write(value);
         }
 
+        [Conditional("DEBUG")]
         public static void WriteLine(string value)
         {
             Console.WriteLine(value);
@@ -53,28 +58,27 @@ namespace Meadow.Devices
 
     public partial class F7GPIOManager : IIOController
     {
-        public event InterruptHandler Interrupt;
-
-        private object _cacheLock = new object();
-        private Thread _ist;
+        private bool DirectRegisterAccess { get; set; } = true;
+        private object _syncRoot = new object();
 
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
-        internal DebugFeature DebugFeatures { get; set;  }
+        internal DebugFeature DebugFeatures { get; set; }
 
         internal F7GPIOManager()
         {
             DebugFeatures = DebugFeature.None;
 #if DEBUG
+            //Console.WriteLine($"DirectRegisterAccess = {DirectRegisterAccess}");
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
-//            DebugFeatures = DebugFeature.GpioDetail;
+            //            DebugFeatures = DebugFeature.GpioDetail;
 #endif
         }
 
         public void Initialize()
         {
-            if((DebugFeatures & DebugFeature.Interrupts) != 0)
+            if ((DebugFeatures & DebugFeature.Interrupts) != 0)
             {
                 UPD.DumpClockRegisters();
             }
@@ -133,30 +137,32 @@ namespace Meadow.Devices
             SetDiscrete(designator.address, designator.port, designator.pin, value);
         }
 
-        internal void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
-        { 
+        internal unsafe void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
+        {
+            var targetAddress = baseAddress + STM32.GPIO_BSRR_OFFSET;
+            var targetValue = value ? 1u << pin : 1u << (pin + 16);
+
+            if (DirectRegisterAccess)
+            {
+                *(uint*)targetAddress = targetValue;
+                return;
+            }
+
             var register = new Interop.Nuttx.UpdRegisterValue
             {
-                Address = baseAddress + STM32.GPIO_BSRR_OFFSET
+                Address = targetAddress,
+                Value = targetValue
             };
 
-            if (value)
-            {
-                register.Value = 1u << pin;
-            }
-            else
-            {
-                register.Value = 1u << (pin + 16);
-            }
-
             // write the register
-            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, 
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
                 $"Writing {register.Value:X} to register: {register.Address:X}");
 
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SetRegister, ref register);
             if (result != 0)
             {
-                Console.WriteLine($"Write failed: {result}");
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
             }
         }
 
@@ -171,9 +177,19 @@ namespace Meadow.Devices
             return GetDiscrete(designator.address, designator.port, designator.pin);
         }
 
-        internal bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
+        internal unsafe bool GetDiscrete(uint baseAddress, STM32.GpioPort port, int pin)
         {
-            var register = UPD.GetRegister(baseAddress + STM32.GPIO_IDR_OFFSET);
+            var targetAddress = baseAddress + STM32.GPIO_IDR_OFFSET;
+            uint register;
+
+            if (DirectRegisterAccess)
+            {
+                register = *(uint*)targetAddress;
+            }
+            else
+            {
+                register = UPD.GetRegister(targetAddress);
+            }
 
             // each pin is a single bit in the register, check the bit associated with the pin number
             return (register & (1 << pin)) != 0;
@@ -260,12 +276,10 @@ namespace Meadow.Devices
         public void ConfigureInput(
             IPin pin,
             ResistorMode resistorMode,
-            InterruptMode interruptMode,
-            int debounceDuration,
-            int glitchFilterCycleCount
+            InterruptMode interruptMode
             )
         {
-            // translate resistor mode
+            // translate resistor mode from Meadow to STM32 register bits
             STM32.ResistorMode mode32;
             if (resistorMode == ResistorMode.Disabled)
             {
@@ -280,7 +294,11 @@ namespace Meadow.Devices
                 mode32 = STM32.ResistorMode.PullDown;
             }
 
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {pin.Name} for resistor {resistorMode} ({(int)mode32})");
+
             ConfigureInput(pin, mode32, interruptMode);
+
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{pin.Name} configured");
         }
 
         private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode)
@@ -318,7 +336,7 @@ namespace Meadow.Devices
         public bool UnconfigureGpio(IPin pin)
         {
             var designator = GetPortAndPin(pin);
-            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input,  STM32.ResistorMode.Float,  STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+            return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
         }
 
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
@@ -330,157 +348,116 @@ namespace Meadow.Devices
 
         private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
         {
-            int setting = 0;
-            uint base_addr = 0;
-
-            switch (port)
+            lock (_syncRoot)
             {
-                case STM32.GpioPort.PortA: base_addr = STM32.GPIOA_BASE; break;
-                case STM32.GpioPort.PortB: base_addr = STM32.GPIOB_BASE; break;
-                case STM32.GpioPort.PortC: base_addr = STM32.GPIOC_BASE; break;
-                case STM32.GpioPort.PortD: base_addr = STM32.GPIOD_BASE; break;
-                case STM32.GpioPort.PortE: base_addr = STM32.GPIOE_BASE; break;
-                case STM32.GpioPort.PortF: base_addr = STM32.GPIOF_BASE; break;
-                case STM32.GpioPort.PortG: base_addr = STM32.GPIOG_BASE; break;
-                case STM32.GpioPort.PortH: base_addr = STM32.GPIOH_BASE; break;
-                case STM32.GpioPort.PortI: base_addr = STM32.GPIOI_BASE; break;
-                case STM32.GpioPort.PortJ: base_addr = STM32.GPIOJ_BASE; break;
-                case STM32.GpioPort.PortK: base_addr = STM32.GPIOK_BASE; break;
-                default: throw new ArgumentException();
-            }
+                uint base_addr = 0;
 
-            // TODO: we probably need to disable interrupts here (enter critical section)
-
-            ////// ====== MODE ======
-            // if this is an output, set the initial state
-            if (mode == STM32.GpioMode.Output)
-            {
-                var state = initialState ? 1u << pin : 1u << (16 + pin);
-
-                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} is an output.  Writing BSRR {state:X8}");
-                UPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
-            }
-
-            var moder = UPD.GetRegister(base_addr + STM32.GPIO_MODER_OFFSET);
-            moder &= ~(3u << (pin * 2));
-            moder |= (uint)mode << (pin * 2);
-            UPD.SetRegister(base_addr + STM32.GPIO_MODER_OFFSET, moder);
-
-            ////// ====== RESISTOR ======
-            setting = 0;
-            if (mode != STM32.GpioMode.Analog)
-            {
-                SetResistorMode(base_addr, pin, 0);
-                setting = (int)resistor;
-            }
-            else
-            {
-                SetResistorMode(base_addr, pin, (int)resistor);
-            }
-
-            if (mode == STM32.GpioMode.AlternateFunction)
-            {
-                ////// ====== ALTERNATE FUNCTION ======
-                var p = (int)port;
-                var mask = 15u << p;
-                if (p < 8)
+                switch (port)
                 {
-                    var bits = (uint)alternateFunctionNumber << p;
-                    var afrl = UPD.GetRegister(base_addr + STM32.GPIO_AFRL_OFFSET);
-                    //clear anything that was there
-                    afrl &= ~mask;
-                    // set the AF
-                    afrl |= bits;
-                    // and write it out
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRL {afrl:X8}");
-                    UPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
+                    case STM32.GpioPort.PortA: base_addr = STM32.GPIOA_BASE; break;
+                    case STM32.GpioPort.PortB: base_addr = STM32.GPIOB_BASE; break;
+                    case STM32.GpioPort.PortC: base_addr = STM32.GPIOC_BASE; break;
+                    case STM32.GpioPort.PortD: base_addr = STM32.GPIOD_BASE; break;
+                    case STM32.GpioPort.PortE: base_addr = STM32.GPIOE_BASE; break;
+                    case STM32.GpioPort.PortF: base_addr = STM32.GPIOF_BASE; break;
+                    case STM32.GpioPort.PortG: base_addr = STM32.GPIOG_BASE; break;
+                    case STM32.GpioPort.PortH: base_addr = STM32.GPIOH_BASE; break;
+                    case STM32.GpioPort.PortI: base_addr = STM32.GPIOI_BASE; break;
+                    case STM32.GpioPort.PortJ: base_addr = STM32.GPIOJ_BASE; break;
+                    case STM32.GpioPort.PortK: base_addr = STM32.GPIOK_BASE; break;
+                    default: throw new ArgumentException();
+                }
+
+                // TODO: we probably need to disable interrupts here (enter critical section)
+
+                ////// ====== MODE ======
+                // if this is an output, set the initial state
+                if (mode == STM32.GpioMode.Output)
+                {
+                    var state = initialState ? 1u << pin : 1u << (16 + pin);
+
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} is an output.  Writing BSRR {state:X8}");
+                    UPD.SetRegister(base_addr + STM32.GPIO_BSRR_OFFSET, state);
+                }
+
+                var moder = UPD.GetRegister(base_addr + STM32.GPIO_MODER_OFFSET);
+                moder &= ~(3u << (pin * 2));
+                moder |= (uint)mode << (pin * 2);
+                UPD.SetRegister(base_addr + STM32.GPIO_MODER_OFFSET, moder);
+
+                ////// ====== RESISTOR ======
+                if (mode != STM32.GpioMode.Analog)
+                {
+                    SetResistorMode(base_addr, pin, (int)resistor);
                 }
                 else
                 {
-                    var bits = (uint)alternateFunctionNumber << (p - 8);
-                    var afrh = UPD.GetRegister(base_addr + STM32.GPIO_AFRH_OFFSET);
-                    //clear anything that was there
-                    afrh &= ~mask;
-                    // set the AF
-                    afrh |= bits;
-                    // and write it out
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRH {afrh:X8}");
-                    UPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
+                    // analogs don't need (or want!) a resistor
+                    SetResistorMode(base_addr, pin, 0);
                 }
-            }
 
-            ////// ====== SPEED ======
-            setting = 0;
-            if (mode == STM32.GpioMode.AlternateFunction || mode == STM32.GpioMode.Output)
-            {
-                moder = UPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
-                moder &= ~(3u << (pin * 2));
-                moder |= (uint)speed << (pin * 2);
-                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} speed {speed}.  Writing OSPEED {moder:X8}");
-                UPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
-            }
-
-            ////// ====== OUTPUT TYPE ======
-            if (mode == STM32.GpioMode.Output || mode == STM32.GpioMode.AlternateFunction)
-            {
-                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} open drain.");
-                UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, (type == STM32.OutputType.OpenDrain), pin);
-            }
-            else
-            {
-                UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, false, pin);
-            }
-
-
-            // INTERRUPTS
-            if(interruptMode != InterruptMode.None)
-            {
-                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                if (mode == STM32.GpioMode.AlternateFunction)
                 {
-                    Enable = true,
-                    Port = (int)port,
-                    Pin = pin,
-                    RisingEdge = interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth,
-                    FallingEdge = interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth,
-                    Irq = ((int)port << 4) | pin
-                };
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {port.ToString()} pin {pin} alternate function.");
 
-                if(_ist == null)
-                {
-                    _ist = new Thread(InterruptServiceThreadProc)
+                    ////// ====== ALTERNATE FUNCTION ======
+                    var p = (int)port;
+                    var mask = 15u << p;
+                    if (p < 8)
                     {
-                        IsBackground = true
-                    };
-
-                    _ist.Start();
+                        var bits = (uint)alternateFunctionNumber << p;
+                        var afrl = UPD.GetRegister(base_addr + STM32.GPIO_AFRL_OFFSET);
+                        //clear anything that was there
+                        afrl &= ~mask;
+                        // set the AF
+                        afrl |= bits;
+                        // and write it out
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRL {afrl:X8}");
+                        UPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrl);
+                    }
+                    else
+                    {
+                        var bits = (uint)alternateFunctionNumber << (p - 8);
+                        var afrh = UPD.GetRegister(base_addr + STM32.GPIO_AFRH_OFFSET);
+                        //clear anything that was there
+                        afrh &= ~mask;
+                        // set the AF
+                        afrh |= bits;
+                        // and write it out
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} alternate function.  Writing AFRH {afrh:X8}");
+                        UPD.SetRegister(base_addr + STM32.GPIO_AFRL_OFFSET, afrh);
+                    }
                 }
 
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    "Calling ioctl to enable interrupts");
-
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
-            }
-            else
-            {
-                // TODO: disable interrupt if it was enabled
-                /*
-                 SOMETHING HERE IS BAD - CAUSES OS CRASHINESS!               
-                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                ////// ====== SPEED ======
+                if (mode == STM32.GpioMode.AlternateFunction || mode == STM32.GpioMode.Output)
                 {
-                    Enable = false,
-                    Port = (int)port,
-                    Pin = pin,
-                    RisingEdge = false,
-                    FallingEdge = false,
-                    Irq = ((int)port << 4) | pin
-                };
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    "Calling ioctl to disable interrupts");
-                var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
-                */
-            }
+                    moder = UPD.GetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET);
+                    moder &= ~(3u << (pin * 2));
+                    moder |= (uint)speed << (pin * 2);
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} speed {speed}.  Writing OSPEED {moder:X8}");
+                    UPD.SetRegister(base_addr + STM32.GPIO_OSPEED_OFFSET, moder);
+                }
 
-            return true;
+                ////// ====== OUTPUT TYPE ======
+                if (mode == STM32.GpioMode.Output || mode == STM32.GpioMode.AlternateFunction)
+                {
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{port.ToString()} pin {pin} open drain.");
+                    UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, (type == STM32.OutputType.OpenDrain), pin);
+                }
+                else
+                {
+                    UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, false, pin);
+                }
+
+                // INTERRUPTS
+                WireInterrupt(port, pin, interruptMode);
+
+                // "remember" this configuration (part of the PWM hack)
+                RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
+
+                return true;
+            }
         }
 
         public void SetResistorMode(IPin pin, ResistorMode mode)
@@ -504,47 +481,21 @@ namespace Meadow.Devices
 
         private void SetResistorMode(uint address, int pin, int mode)
         {
+            // get the PUPDR register
             var addr = address + STM32.GPIO_PUPDR_OFFSET;
             var regval = UPD.GetRegister(addr);
+            // turn off the 2 bits for the pin we're looking at
             regval &= (uint)~(3 << (pin << 1));
+            // turn on the bits for our mode
             regval |= (uint)(mode << (pin << 1));
+            // and write it out
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"pin {pin} resistor mode {mode}.  Writing PUPDR {regval:X8}");
             UPD.SetRegister(addr, regval);
-        }
 
-        private void InterruptServiceThreadProc(object o)
-        {
-            IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
-            Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-                $"IST Started reading queue {queue.ToInt32():X}");
-                
-            var rx_buffer = new byte[16];
-
-            while (true)
+            if ((DebugFeatures & DebugFeature.GpioDetail) != 0)
             {
-                int priority = 0;
-                var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    "queue data arrived");
-
-                if (result >= 0)
-                {
-                    var irq = BitConverter.ToInt32(rx_buffer, 0);
-                    var port = irq >> 4;
-                    var pin = irq & 0xf;
-                    var key = $"P{(char)(65 + port)}{pin}";
-
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"Interrupt on {key} state={rx_buffer[4]}");
-
-                    lock (_interruptPins)
-                    {
-                        if (_interruptPins.ContainsKey(key))
-                        {
-                            Interrupt?.Invoke(_interruptPins[key], rx_buffer[4] != 0);
-                        }
-                    }
-                }
+                var verify = UPD.GetRegister(addr);
+                Output.WriteLine($"PUPD verify read: 0x{verify:X8}");
             }
         }
 

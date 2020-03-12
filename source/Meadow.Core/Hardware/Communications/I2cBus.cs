@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Meadow.Devices;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
-using Meadow.Devices;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -13,934 +15,305 @@ namespace Meadow.Hardware
     /// </summary>
     public class I2cBus : II2cBus
     {
-        private Queue<byte> _transmitQueue = new Queue<byte>();
-        private List<byte> _receiveBuffer = new List<byte>();
+        private bool _showI2cDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-
-        private const int SCL_PIN = 6;
-        private const int SDA_PIN = 7;
-
-        /// <summary>
-        /// I2C bus used to communicate with a device (sensor etc.).
-        /// </summary>
-        /// <remarks>
-        /// This I2CDevice is static and shared across all instances of the I2CBus.
-        /// Communication with difference devices is made possible by changing the
-        /// </remarks>
-        private static I2cPeripheral _device;
-
-        ///// <summary>
-        ///// Configuration property for this I2CDevice.
-        ///// </summary>
-        //private readonly I2cPeripheral.Configuration _configuration;
-
-        /// <summary>
-        ///     Timeout for I2C transactions.
-        /// </summary>
-        private readonly ushort _transactionTimeout = 100;
+        private int _frequency;
 
         private IIOController IOController { get; }
+
+        /// <summary>
+        /// Bus Clock speed in Hz
+        /// </summary>
+        public int Frequency 
+        {
+            get => _frequency;
+            set
+            {
+                switch (value)
+                {
+                    case 100000:
+                    case 400000:
+                    case 1000000:
+                        _frequency = value;
+                        break;
+                    default:
+                        int actual;
+
+                        // always round down (except if we're below the floor)
+                        if (value > 1000000)
+                        {
+                            actual = 1000000;
+                        }
+                        else if (value > 400000)
+                        {
+                            actual = 400000;
+                        }
+                        else
+                        {
+                            actual = 100000;
+                        }
+
+                        Console.WriteLine($"Warning: Invalid I2C Frequency of {value}. Adjusting to {actual}");
+                        _frequency = actual;
+                        break;
+
+                }
+            }
+        }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
         /// developer from calling it.
         /// </summary>
-        private I2cBus(IIOController ioController)
+        private I2cBus(
+            IIOController ioController,
+            IPin clock,
+            II2cChannelInfo clockChannel,
+            IPin data,
+            II2cChannelInfo dataChannel,
+            int frequencyHz,
+            ushort transactionTimeout = 100)
         {
             IOController = ioController;
-            this.Enable();
-        }
-
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="T:Meadow.Foundation.Core.I2CBus" /> class.
-        ///// </summary>
-        ///// <param name="address">Address of the device.</param>
-        ///// <param name="speed">Bus speed in kHz.</param>
-        ///// <param name="transactionTimeout">Transaction timeout in milliseconds.</param>
-        //public I2cBus(ushort speed, ushort transactionTimeout = 100)
-        //{
-        //    _configuration = new I2cPeripheral.Configuration(address, speed);
-        //    if (_device == null) {
-        //        _device = new I2cPeripheral(_configuration);
-        //    }
-        //    _transactionTimeout = transactionTimeout;
-        //}
-
-        // TODO: Speed should have default?
-        public static I2cBus From(IIOController ioController, IPin clock, IPin data, ushort speed, ushort transactionTimeout = 100)
-        {
-            return new I2cBus(ioController);
-        }
-
-        /// <summary>
-        /// Write a single byte to the device.
-        /// </summary>
-        /// <param name="value">Value to be written (8-bits).</param>
-        public void WriteByte(byte peripheralAddress, byte value)
-        {
-            byte[] data = { value };
-            WriteBytes(peripheralAddress, data);
-        }
-
-        /// <summary>
-        /// Write a number of bytes to the device.
-        /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
-        /// <param name="values">Values to be written.</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void WriteBytes(byte peripheralAddress, byte[] values)
-        {
-            SendData(peripheralAddress, values);
-        }
-
-        /// <summary>
-        /// Write an unsigned short to the device.
-        /// </summary>
-        /// <param name="address">Address to write the first byte to.</param>
-        /// <param name="value">Value to be written (16-bits).</param>
-        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShort(byte peripheralAddress, byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var data = new byte[2];
-            if (order == ByteOrder.LittleEndian)
-            {
-                data[0] = (byte)(value & 0xff);
-                data[1] = (byte)((value >> 8) & 0xff);
-            }
-            else
-            {
-                data[0] = (byte)((value >> 8) & 0xff);
-                data[1] = (byte)(value & 0xff);
-            }
-            WriteRegisters(peripheralAddress, address, data);
-        }
-
-        /// <summary>
-        /// Write a number of unsigned shorts to the device.
-        /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
-        /// <param name="address">Address to write the first byte to.</param>
-        /// <param name="values">Values to be written.</param>
-        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShorts(byte peripheralAddress, byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var data = new byte[2 * values.Length];
-            for (var index = 0; index < values.Length; index++)
-            {
-                if (order == ByteOrder.LittleEndian)
-                {
-                    data[2 * index] = (byte)(values[index] & 0xff);
-                    data[(2 * index) + 1] = (byte)((values[index] >> 8) & 0xff);
-                }
-                else
-                {
-                    data[2 * index] = (byte)((values[index] >> 8) & 0xff);
-                    data[(2 * index) + 1] = (byte)(values[index] & 0xff);
-                }
-            }
-            WriteRegisters(peripheralAddress, address, data);
-        }
-
-        /// <summary>
-        /// Write data to the device and also read some data from the device.
-        /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written and read will be determined by the length of the byte arrays.
-        /// </remarks>
-        /// <param name="write">Array of bytes to be written to the device.</param>
-        /// <param name="length">Amount of data to read from the device.</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public byte[] WriteRead(byte peripheralAddress, byte[] write, ushort length)
-        {
-            //_device.Config = _configuration;
-            //var read = new byte[length];
-            //I2cPeripheral.I2CTransaction[] transaction =
-            //{
-            //    I2cPeripheral.CreateWriteTransaction(write),
-            //    I2cPeripheral.CreateReadTransaction(read)
-            //};
-            //var bytesTransferred = 0;
-            //var retryCount = 0;
-
-            //while (_device.Execute(transaction, _transactionTimeout) != (write.Length + read.Length)) {
-            //    if (retryCount > 3) {
-            //        throw new Exception("WriteRead: Retry count exceeded.");
-            //    }
-            //    retryCount++;
-            //}
-
-            ////while (bytesTransferred != (write.Length + read.Length))
-            ////{
-            ////    if (retryCount > 3)
-            ////    {
-            ////        throw new Exception("WriteRead: Retry count exceeded.");
-            ////    }
-            ////    retryCount++;
-            ////    bytesTransferred = _device.Execute(transaction, _transactionTimeout);
-            ////}
-            //return read;
-
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Write data into a single register.
-        /// </summary>
-        /// <param name="address">Address of the register to write to.</param>
-        /// <param name="value">Value to write into the register.</param>
-        public void WriteRegister(byte peripheralAddress, byte address, byte value)
-        {
-            byte[] data = { address, value };
-            WriteBytes(peripheralAddress, data);
-        }
-
-        /// <summary>
-        /// Write data to one or more registers.
-        /// </summary>
-        /// <remarks>
-        /// This method assumes that the register address is written first followed by the data to be
-        /// written into the first register followed by the data for subsequent registers.
-        /// </remarks>
-        /// <param name="address">Address of the first register to write to.</param>
-        /// <param name="data">Data to write into the registers.</param>
-        public void WriteRegisters(byte peripheralAddress, byte address, byte[] data)
-        {
-            var registerAndData = new byte[data.Length + 1];
-            registerAndData[0] = address;
-            Array.Copy(data, 0, registerAndData, 1, data.Length);
-            WriteBytes(peripheralAddress, registerAndData);
-        }
-
-        /// <summary>
-        ///  Read the specified number of bytes from the I2C device.
-        /// </summary>
-        /// <returns>The bytes.</returns>
-        /// <param name="numberOfBytes">Number of bytes.</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public byte[] ReadBytes(byte peripheralAddress, ushort numberOfBytes)
-        {
-            //_device.Config = _configuration;
-            //var result = new byte[numberOfBytes];
-            //I2cPeripheral.I2CTransaction[] transaction =
-            //{
-            //    I2cPeripheral.CreateReadTransaction(result)
-            //};
-            //var retryCount = 0;
-            //while (_device.Execute(transaction, _transactionTimeout) != numberOfBytes) {
-            //    if (retryCount > 3) {
-            //        throw new Exception("ReadBytes: Retry count exceeded.");
-            //    }
-            //    retryCount++;
-            //}
-            //return result;
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Read a register from the device.
-        /// </summary>
-        /// <param name="address">Address of the register to read.</param>
-        public byte ReadRegister(byte peripheralAddress, byte address)
-        {
-            byte[] registerAddress = { address };
-            var result = WriteRead(peripheralAddress, registerAddress, 1);
-            return result[0];
-        }
-
-        /// <summary>
-        /// Read one or more registers from the device.
-        /// </summary>
-        /// <param name="address">Address of the first register to read.</param>
-        /// <param name="length">Number of bytes to read from the device.</param>
-        public byte[] ReadRegisters(byte peripheralAddress, byte address, ushort length)
-        {
-            byte[] registerAddress = { address };
-            return WriteRead(peripheralAddress, registerAddress, length);
-        }
-
-        /// <summary>
-        /// Read an usingned short from a pair of registers.
-        /// </summary>
-        /// <param name="address">Register address of the low byte (the high byte will follow).</param>
-        /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
-        /// <returns>Value read from the register.</returns>
-        public ushort ReadUShort(byte peripheralAddress, byte address, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var data = ReadRegisters(peripheralAddress, address, 2);
-            ushort result = 0;
-            if (order == ByteOrder.LittleEndian)
-            {
-                result = (ushort)((data[1] << 8) + data[0]);
-            }
-            else
-            {
-                result = (ushort)((data[0] << 8) + data[1]);
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Read the specified number of unsigned shorts starting at the register
-        /// address specified.
-        /// </summary>
-        /// <param name="address">First register address to read from.</param>
-        /// <param name="number">Number of unsigned shorts to read.</param>
-        /// <param name="order">Order of the bytes (Little or Big endian)</param>
-        /// <returns>Array of unsigned shorts.</returns>
-        public ushort[] ReadUShorts(byte peripheralAddress, byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var data = ReadRegisters(peripheralAddress, address, (ushort)((2 * number) & 0xffff));
-            var result = new ushort[number];
-            for (var index = 0; index < number; index++)
-            {
-                if (order == ByteOrder.LittleEndian)
-                {
-                    result[index] = (ushort)((data[(2 * index) + 1] << 8) + data[2 * index]);
-                }
-                else
-                {
-                    result[index] = (ushort)((data[2 * index] << 8) + data[(2 * index) + 1]);
-                }
-            }
-            return result;
-        }
-
-        public void Reset()
-        {
-            uint clock_count;
-            uint stretch_count;
-            uint frequency;
-
-            Console.WriteLine("+Reset");
-
-            if (!_busSemaphore.Wait(1000))
-            {
-                Console.WriteLine("-I2CReset A");
-                return;
-            }
-
-            try
-            {
-                // Save the current frequency
-                frequency = Frequency;
-
-                // TODO: De-init the port
-                //  stm32_i2c_deinit(priv);
-
-                // Use GPIO configuration to un-wedge the bus
-                ConfigureGPIOs(false);
-
-                // Let SDA go high
-                (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SDA_PIN, true);
-
-                // Clock the bus until any slaves currently driving it let it go.
-                clock_count = 0;
-
-                while (!(IOController as F7GPIOManager).GetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SDA_PIN))
-                {
-                    // Give up if we have tried too hard
-                    if (clock_count++ > 10)
-                    {
-                        Console.WriteLine("-I2CReset B");
-                        return;
-                    }
-
-                    // Sniff to make sure that clock stretching has finished.
-                    // If the bus never relaxes, the reset has failed.
-                    stretch_count = 0;
-                    while (!(IOController as F7GPIOManager).GetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SCL_PIN))
-                    {
-                        // Give up if we have tried too hard
-                        if (stretch_count++ > 10)
-                        {
-                            Console.WriteLine("-I2CReset C");
-                            return;
-                        }
-
-                        Thread.Sleep(10);
-                    }
-
-                    // Drive SCL low
-                    (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SCL_PIN, false);
-                    Thread.Sleep(10);
-
-                    // Drive SCL high again
-                    (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SCL_PIN, true);
-                    Thread.Sleep(10);
-
-                }
-
-                // Generate a start followed by a stop to reset slave
-                // state machines
-                (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SDA_PIN, false);
-                Thread.Sleep(10);
-                (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SCL_PIN, false);
-                Thread.Sleep(10);
-                (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SCL_PIN, true);
-                Thread.Sleep(10);
-                (IOController as F7GPIOManager).SetDiscrete(STM32.GPIOB_BASE, STM32.GpioPort.PortB, SDA_PIN, true);
-                Thread.Sleep(10);
-
-                // Revert the GPIO configuration.
-                ConfigureGPIOs(true);
-
-                // Re-init the port
-                Enable();
-
-                // Restore the frequency
-                SetClock(frequency);
-
-                return;
-
-            }
-            finally
-            {
-                _busSemaphore.Release();
-                Console.WriteLine("-Reset");
-            }
-        }
-
-        private void SetBytesToTransfer(int count)
-        {
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                STM32.I2C_CR2_NBYTES_MASK,
-                (uint)count << STM32.I2C_CR2_NBYTES_SHIFT);
-        }
-
-        private void Set7BitDestinationAddress(byte address)
-        {
-            // set the address mode to 7-bit
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                STM32.I2C_CR2_ADD10,
-                0);
-
-            // set the address - in 7-bit it's left-shifted 1
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                STM32.I2C_CR2_SADD7_MASK,
-                (uint)(address & 0x7f) << STM32.I2C_CR2_SADD7_SHIFT);
-        }
-
-        private uint GetBusStatus()
-        {
-            return UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
-        }
-
-        private void SetEnableBit(bool enable)
-        {
-            if (enable)
-            {
-                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET,
-                    0,
-                    STM32.I2C_CR1_PE);
-            }
-            else
-            {
-                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET,
-                    STM32.I2C_CR1_PE,
-                    0);
-            }
-        }
-
-        private void SetTransferDirection(bool write)
-        {
-            if (write)
-            {
-                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                    STM32.I2C_CR2_RD_WRN,
-                    0);
-            }
-            else
-            {
-                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                    0,
-                    STM32.I2C_CR2_RD_WRN);
-            }
-        }
-
-        private void SetStartBit()
-        {
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                0,
-                STM32.I2C_CR2_START);
-        }
-
-        private void SetStopBit()
-        {
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                0,
-                STM32.I2C_CR2_STOP);
-        }
-
-        private void EnableReloadMode(bool reload)
-        {
-            if (reload)
-            {
-                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                    0,
-                    STM32.I2C_CR2_RELOAD);
-            }
-            else
-            {
-                UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET,
-                    STM32.I2C_CR2_RELOAD,
-                    0);
-            }
-        }
-
-        private void SetTxRegister(byte value)
-        {
-            UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TXDR_OFFSET, value);
-        }
-
-        private byte SetRxRegister()
-        {
-            return (byte)UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_RXDR_OFFSET);
-        }
-
-        public uint Frequency { get; private set; }
-
-        private void SetClock(uint frequency)
-        {
-            UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, 0x00303D5B);
-
-            return;
-
-            uint presc, scl_delay, sda_delay, scl_h_period, scl_l_period;
-
-            //if (Frequency == frequency) return;
-
-            if (frequency == 100000)
-            {
-                presc = 0;
-                scl_delay = 5;
-                sda_delay = 0;
-                scl_h_period = 61;
-                scl_l_period = 89;
-
-            }
-            else if (frequency == 400000)
-            {
-                presc = 0;
-                scl_delay = 3;
-                sda_delay = 0;
-                scl_h_period = 6;
-                scl_l_period = 24;
-            }
-            else if (frequency == 1000000)
-            {
-                presc = 0;
-                scl_delay = 2;
-                sda_delay = 0;
-                scl_h_period = 1;
-                scl_l_period = 5;
-            }
-            else
-            {
-                presc = 7;
-                scl_delay = 0;
-                sda_delay = 0;
-                scl_h_period = 35;
-                scl_l_period = 162;
-            }
-
-            uint timingr =
-              (presc << STM32.I2C_TIMINGR_PRESC_SHIFT) |
-              (scl_delay << STM32.I2C_TIMINGR_SCLDEL_SHIFT) |
-              (sda_delay << STM32.I2C_TIMINGR_SDADEL_SHIFT) |
-              (scl_h_period << STM32.I2C_TIMINGR_SCLH_SHIFT) |
-              (scl_l_period << STM32.I2C_TIMINGR_SCLL_SHIFT);
-
-            UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET, timingr);
-
-            Frequency = frequency;
-        }
-
-        private void ConfigureGPIOs(bool forI2C)
-        {
-            if (forI2C)
-            {
-                // Configure pins
-                // #define GPIO_I2C1_SCL_1       (GPIO_ALT|GPIO_AF4 |GPIO_SPEED_50MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN6)
-                // #define GPIO_I2C1_SDA_1       (GPIO_ALT|GPIO_AF4 |GPIO_SPEED_50MHz|GPIO_OPENDRAIN|GPIO_PORTB|GPIO_PIN7)
-                (IOController as F7GPIOManager).ConfigureAlternateFunction(STM32.GpioPort.PortB,
-                    SCL_PIN,
-                    STM32.GPIOSpeed.Speed_50MHz,
-                    STM32.OutputType.OpenDrain,
-                    4);
-
-                (IOController as F7GPIOManager).ConfigureAlternateFunction(STM32.GpioPort.PortB,
-                    SDA_PIN,
-                    STM32.GPIOSpeed.Speed_50MHz,
-                    STM32.OutputType.OpenDrain,
-                    4);
-            }
-            else
-            { // make them outputs (we'll drive them manually, e.g. in a reset)
-                (IOController as F7GPIOManager).ConfigureOutput(STM32.GpioPort.PortB,
-                    SCL_PIN,
-                    STM32.ResistorMode.Float,
-                    STM32.GPIOSpeed.Speed_50MHz,
-                    STM32.OutputType.PushPull,
-                    false);
-
-                (IOController as F7GPIOManager).ConfigureOutput(STM32.GpioPort.PortB,
-                    SDA_PIN,
-                    STM32.ResistorMode.Float,
-                    STM32.GPIOSpeed.Speed_50MHz,
-                    STM32.OutputType.PushPull,
-                    false);
-            }
-        }
-
-        private void EnableClocks()
-        {
-            // Disable the GPIO port C clock - this has no affect
-            // GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_AHB1ENR_OFFSET, (1 << 2), 0);
-
-            /*
-            // Enable RCC_APB1ENR PWREN           
-            __HAL_RCC_PWR_CLK_ENABLE();
-
-
-              __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
-              /**Initializes the CPU, AHB and APB busses clocks 
-              *
-            RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;              // 0x02
-            RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                // 1<<0
-            RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;     // 0x10
-            RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;                          // 0x00
-            if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-            {
-                Error_Handler();
-            }
-            /**Initializes the CPU, AHB and APB busses clocks 
-            *
-            RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK     // 0x02 | 0x01
-                                        | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;    // 0x04 | 0x08
-            RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                      // 0x00
-            RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                          // 0x00
-            RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                           // 0x00
-            RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-            if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)           
-            */
-
-            Console.WriteLine("Mucking about with the system clocks....");
-            // HSI TRIM clear 0x1F << 3
-            // HSI CAL set 0x10 << 8
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CR_OFFSET, (0x1F << 3), (0x10 << 8));
-
-            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_HCLK_DIV16);
-            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, (RCC_HCLK_DIV16 << 3));
-            // MODIFY_REG(RCC->CFGR, RCC_CFGR_HPRE, RCC_ClkInitStruct->AHBCLKDivider);
-            // MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, RCC_SYSCLKSOURCE_HSI)
-            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE1, RCC_ClkInitStruct->APB1CLKDivider);
-            // MODIFY_REG(RCC->CFGR, RCC_CFGR_PPRE2, ((RCC_ClkInitStruct->APB2CLKDivider) << 3));
-
-            uint clear = STM32.RCC_CFGR_PPRE1 | STM32.RCC_CFGR_PPRE2 | STM32.RCC_CFGR_HPRE | STM32.RCC_CFGR_SW;
-            uint set = STM32.RCC_HCLK_DIV16 | (STM32.RCC_HCLK_DIV16 << 3) | STM32.RCC_SYSCLK_DIV1 | STM32.RCC_SYSCLKSOURCE_HSI | STM32.RCC_HCLK_DIV1 | (STM32.RCC_HCLK_DIV1 << 3);
-
-            Console.WriteLine($"clear: {clear:X8}  set:{set:X8}");
-
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, clear, set);
-            /*
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE1, STM32.RCC_HCLK_DIV16);
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE2, STM32.RCC_HCLK_DIV16 << 3);
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_HPRE, STM32.RCC_SYSCLK_DIV1);
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_SW, STM32.RCC_SYSCLKSOURCE_HSI);
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE1, STM32.RCC_HCLK_DIV1);
-            GPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_CFGR_OFFSET, STM32.RCC_CFGR_PPRE2, STM32.RCC_HCLK_DIV1 << 3);
-            */
-        }
-
-        private void Enable()
-        {
-            UPD.DumpClockRegisters();
-            //            EnableClocks();
-            UPD.DumpClockRegisters();
-
-            //            ConfigureGPIOs(true);
-
-            // set the I2C clock source to PCLCK1 (peripheral clock 1)
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET, 0, STM32.I2C1_SEL_PCLK1_CLK);
-
-            // enable the peripheral clock
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1ENR_OFFSET, 0, STM32.RCC_APB1ENR_I2C1EN);
-
-            // pulse the reset bit
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET, 0, STM32.RCC_APB1RSTR_I2C1RST);
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB1RSTR_OFFSET, STM32.RCC_APB1RSTR_I2C1RST, 0);
-
-            // The TIMINGR can only be set when the PE bit == 0
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, STM32.I2C_CR1_PE, 0);
-
-            SetClock(100000);
-
-            UPD.UpdateRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET, 0, STM32.I2C_CR1_PE);
-
-            UPD.DumpClockRegisters();
-        }
-
-        private void BusScan()
-        {
-            for (byte i = 0; i < 128; i++)
-            {
-                var cr2 = 1u << i | STM32.I2C_CR2_START | STM32.I2C_CR2_AUTOEND & ~(STM32.I2C_CR2_RD_WRN);
-                UPD.SetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET, cr2);
-
-                // wait for STOP, NACK or TIMEOUT
-                var isr = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_ISR_OFFSET);
-                Console.WriteLine("ISR: {isr:X}");
-                Thread.Sleep(10);
-
-            }
-
+            Frequency = frequencyHz;
+#if !DEBUG
+            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            _showI2cDebug = false;
+#endif
         }
 
         private void Disable()
         {
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CShutdown);
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
         }
 
-        private void SendData(byte address, byte[] data)
+        /// <summary>
+        /// Creates an I2C bus for a set of given pins and parameters
+        /// </summary>
+        /// <param name="ioController">The Meadow IO Controller</param>
+        /// <param name="clock">Clock (SCL) pin</param>
+        /// <param name="data">Data (SDA) pin</param>
+        /// <param name="frequencyHz">Bus clock speed, in Hz</param>
+        /// <param name="transactionTimeout">Bus transaction timeout</param>
+        /// <returns>An I2CBus instance</returns>
+        public static I2cBus From(IIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
         {
-            // TODO: we need to enable the ability to restart
+            return From(ioController, clock, data, (int)busSpeed, transactionTimeout);
+        }
 
-            if (_transmitQueue.Count > 0)
+        /// <summary>
+        /// Creates an I2C bus for a set of given pins and parameters
+        /// </summary>
+        /// <param name="ioController">The Meadow IO Controller</param>
+        /// <param name="clock">Clock (SCL) pin</param>
+        /// <param name="data">Data (SDA) pin</param>
+        /// <param name="frequencyHz">Bus clock speed, in Hz</param>
+        /// <param name="transactionTimeout">Bus transaction timeout</param>
+        /// <returns>An I2CBus instance</returns>
+        public static I2cBus From(IIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
+        {
+            var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
+            if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
             {
-                // TODO: handle this - already data to go out .  amybe a semaphore?
+                throw new Exception($"Pin {clock.Name} does not have I2C Clock capabilities");
             }
 
-            if (data != null)
+            var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
+            if (dataChannel == null || dataChannel.ChannelFunction != I2cChannelFunctionType.Data)
             {
-                foreach (var b in data)
+                throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
+            }
+
+            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, frequencyHz, transactionTimeout);
+        }
+
+        /// <summary>
+        /// Writes data to a specified I2C bus address and reads data back from the same address
+        /// </summary>
+        /// <param name="peripheralAddress">Peripheral address</param>
+        /// <param name="numberOfBytesToRead">Bytes to read after writing</param>
+        /// <param name="dataToWrite">Data to write</param>
+        /// <returns>Data received from peripheral</returns>
+        public byte[] WriteReadData(byte peripheralAddress, int numberOfBytesToRead, params byte[] dataToWrite)
+        {
+            var rxBuffer = new byte[numberOfBytesToRead];
+            var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+            var txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                var command = new Nuttx.UpdI2CCommand()
                 {
-                    _transmitQueue.Enqueue(b);
+                    Address = peripheralAddress,
+                    Frequency = this.Frequency,
+                    TxBufferLength = dataToWrite.Length,
+                    TxBuffer = txGch.AddrOfPinnedObject(),
+                    RxBufferLength = rxBuffer.Length,
+                    RxBuffer = rxGch.AddrOfPinnedObject(),
+                };
+
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+
+                if (result != 0)
+                {
+                    DecipherI2CError(UPD.GetLastError());
+                }
+
+                return rxBuffer;
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (rxGch.IsAllocated)
+                {
+                    rxGch.Free();
+                }
+                if (txGch.IsAllocated)
+                {
+                    txGch.Free();
                 }
             }
+        }
 
-            // TODO: put this in a background thread
+        /// <summary>
+        /// Reads the specified number of bytes from a peripheral
+        /// </summary>
+        /// <param name="peripheralAddress">The I2C Address to read</param>
+        /// <param name="numberOfBytes">The number of bytes/octets to read</param>
+        /// <returns></returns>
+        public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
+        {
+            var rxBuffer = new byte[numberOfBytes];
+            var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
 
-            var status = GetBusStatus();
+            _busSemaphore.Wait();
 
-            UPD.DumpI2CRegisters();
-
-            // set address, data length, direction
-            SendStart(data.Length, address, true);
-
-            UPD.DumpI2CRegisters();
-
-            Console.WriteLine($"Sending first byte of {_transmitQueue.Count}");
-
-            var timeout = 0;
-            while (_transmitQueue.Count > 0)
+            try
             {
-                // wait for ready
-                status = GetBusStatus();
-
-                Console.WriteLine($"{status:X}");
-
-                // while transmit empty is false
-                while ((status & STM32.I2C_ISR_TXE) == 0)
+                var command = new Nuttx.UpdI2CCommand()
                 {
-                    Thread.Sleep(1); // just a simple yield
-                    status = GetBusStatus();
+                    Address = peripheralAddress,
+                    Frequency = this.Frequency,
+                    TxBufferLength = 0,
+                    TxBuffer = IntPtr.Zero,
+                    RxBufferLength = rxBuffer.Length,
+                    RxBuffer = gch.AddrOfPinnedObject(),
+                };
 
-                    // TODO: add a timeout
-                    if (timeout++ % 100 == 0)
+                Output.WriteIf(_showI2cDebug, " +ReadData");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                if (result != 0)
+                {
+                    DecipherI2CError(UPD.GetLastError());
+                }
+                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
+
+                return rxBuffer;
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (gch.IsAllocated)
+                {
+                    gch.Free();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes a number of bytes to the device.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="data">Data to be written.</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void WriteData(byte peripheralAddress, params byte[] data)
+        {
+            SendData(peripheralAddress, data);
+        }
+
+        /// <summary>
+        /// Writes a number of bytes to the device.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="data">Data to be written.</param>
+        public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
+        {
+            SendData(peripheralAddress, data.ToArray());
+        }
+
+        /// <summary>
+        /// Writes a number of bytes to the device.
+        /// </summary>
+        /// <remarks>
+        /// The number of bytes to be written will be determined by the length of the byte array.
+        /// </remarks>
+        /// <param name="data">Data to be written.</param>
+        public void WriteData(byte peripheralAddress, Span<byte> data)
+        {
+            SendData(peripheralAddress, data.ToArray());
+        }
+
+        private unsafe void SendData(byte address, Span<byte> data)
+        {
+            _busSemaphore.Wait();
+
+            try
+            {
+                fixed (byte* pData = &data.GetPinnableReference())
+                {
+                    var command = new Nuttx.UpdI2CCommand()
                     {
-                        Console.WriteLine($"{status:X}");
+                        Address = address,
+                        Frequency = this.Frequency,
+                        TxBufferLength = data.Length,
+                        TxBuffer = (IntPtr)pData,
+                        RxBufferLength = 0,
+                        RxBuffer = IntPtr.Zero
+                    };
+
+                    Output.WriteIf(_showI2cDebug, " +SendData");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
+                    if (result != 0)
+                    {
+                        DecipherI2CError(UPD.GetLastError());
                     }
                 }
-
-                // TODO: check for error bits
-
-                // if this is the last byte, we'll need to set the stop condition afterward, and the byte latches it, so set the register now
-                if (_transmitQueue.Count == 1)
-                {
-                    // send stop
-                    SetStopBit();
-                }
-
-                // write the next byte to the tx register
-                SetTxRegister(_transmitQueue.Dequeue());
             }
-            Console.WriteLine("done");
+            finally
+            {
+                _busSemaphore.Release();
+            }
         }
 
-        private void SendStart(int byteCount, byte destination, bool write)
+        private void DecipherI2CError(Nuttx.ErrorCode ec)
         {
-            Console.WriteLine($"+SendStart");
-
-            // ensure start is not set
-            var status = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
-            if ((status & STM32.I2C_CR2_START) != 0)
+            switch(ec)
             {
-                // we can't set these if the start bit is on
-                Console.WriteLine($" SendStart sending stop");
-                SetStopBit();
+                case (Nuttx.ErrorCode)125:
+                    throw new NativeException("Communication error.  Verify address and that SCL and SDA are not reversed.");
+                case (Nuttx.ErrorCode)116:
+                    throw new NativeException("Communication error.  Verify device is powered and that SCL is Connected.");
+                case (Nuttx.ErrorCode)112:
+                    throw new NativeException("Communication error.  No device found at requested address.");
+                case Nuttx.ErrorCode.TryAgain:
+                    throw new NativeException("Communication error.  Verify SDA Is Connected.");
+                default:
+                    throw new NativeException($"Communication error.  Error code {(int)ec}");
             }
-
-            // Set the (7 bit) address.
-            // 10 bit addressing is not yet supported.
-            Set7BitDestinationAddress(destination);
-
-            Console.WriteLine($" SendStart A {write}");
-            // The flag of the current message is used to determine the direction of
-            // transfer required for the current message.
-            SetTransferDirection(write);
-
-            Console.WriteLine($" SendStart B {byteCount}");
-            // Set the number of bytes to transfer (I2C_CR2->NBYTES) to the number of
-            // bytes in the current message or 255, whichever is lower so as to not
-            // exceed the hardware maximum allowed.   
-            SetBytesToTransfer(byteCount);
-
-            Console.WriteLine($" SendStart C");
-            // Set the I2C_CR2->START bit to 1 to instruct the hardware to send the
-            // START condition using the address and transfer direction data entered.
-            SetStartBit();
-
-            Console.WriteLine($"-SendStart");
         }
-
-        /*
-        public bool I2CTransfer(byte address, byte[] data)
-        {
-            uint status = 0;
-            uint cr1;
-            uint cr2;
-            int errval = 0;
-            int waitrc = 0;
-
-            // TODO: Wait for any STOP in progress (bus semaphore)
-            // stm32_i2c_sem_waitstop(priv);
-
-            // Clear any pending error interrupts
-            // stm32_i2c_clearinterrupts(priv);
-
-            // Old transfers are done
-
-            // Reset I2C trace logic
-            // stm32_i2c_tracereset(priv);
-
-            // Set I2C clock frequency toggles I2C_CR1_PE performing a SW reset!
-
-            stm32_i2c_setclock(priv, msgs->frequency);
-
-            // Trigger start condition, then the process moves into the ISR.  I2C
-            // interrupts will be enabled within stm32_i2c_waitdone().
-
-            // TODO: enable interrupts and make transfers interrupt driven
-            // Enable transmit and receive interrupts here so when we send the start
-            // condition below the ISR will fire if the data was sent and some
-            // response from the slave received.  All other interrupts relevant to
-            // our needs are enabled in stm32_i2c_sem_waitdone() below.
-             
-            //stm32_i2c_enableinterrupts(priv);
-
-            // Trigger START condition generation, which also sends the slave address
-            // with read/write flag and the data in the first message
-            //
-            //  stm32_i2c_sendstart(priv);
-
-            // Wait for the ISR to tell us that the transfer is complete by attempting
-            // to grab the semaphore that is initially locked by the ISR.  If the ISR
-            // does not release the lock so we can obtain it here prior to the end of
-            // the timeout period waitdone returns error and we report a timeout.
-            waitrc = stm32_i2c_sem_waitdone(priv);
-
-            cr1 = stm32_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET);
-            cr2 = stm32_i2c_getreg32(priv, STM32_I2C_CR2_OFFSET);
-
-            // Status after a normal / good exit is usually 0x00000001, meaning the TXE
-            // bit is set.  That occurs as a result of the I2C_TXDR register being
-            // empty, and it naturally will be after the last byte is transmitted.
-            // This bit is cleared when we attempt communications again and re-enable
-            // the peripheral.  The priv->status field can hold additional information
-            // like a NACK, so we reset the status field to include that information.
-            status = stm32_i2c_getstatus(priv);
-
-            // The priv->status field can hold additional information like a NACK
-            // event so we include that information.
-            status = priv->status & 0xffffffff;
-
-            if (waitrc < 0)
-            {
-                // Connection timed out
-                errval = ETIMEDOUT;
-                i2cerr("ERROR: Waitdone timed out CR1: 0x%08x CR2: 0x%08x status: 0x%08x\n",
-                       cr1, cr2, status);
-            }
-
-
-            // Check for error status conditions
-            if ((status & (I2C_INT_BERR |
-                         I2C_INT_ARLO |
-                         I2C_INT_OVR |
-                         I2C_INT_PECERR |
-                         I2C_INT_TIMEOUT |
-                         I2C_INT_NACK)) != 0)
-            {
-                // one or more errors in the mask are present
-                if (status & I2C_INT_BERR)
-                {
-                    // Bus Error, ignore it because of errata (revision A,Z)
-                    // i2cerr("ERROR: I2C Bus Error\n");
-                }
-                else if (status & I2C_INT_ARLO)
-                {
-                    // Arbitration Lost (master mode)
-                    // i2cerr("ERROR: I2C Arbitration Lost\n");
-                    errval = EAGAIN;
-                }
-                else if (status & I2C_INT_OVR)
-                {
-                    // Overrun/Underrun
-                    //i2cerr("ERROR: I2C Overrun/Underrun\n");
-                    errval = EIO;
-                }
-                else if (status & I2C_INT_PECERR)
-                {
-                    // PEC Error in reception (SMBus Only)
-                    // i2cerr("ERROR: I2C PEC Error\n");
-                    errval = EPROTO;
-                }
-                else if (status & I2C_INT_TIMEOUT)
-                {
-                    // Timeout or Tlow Error (SMBus Only
-                    //i2cerr("ERROR: I2C Timeout / Tlow Error\n");
-                    errval = ETIME;
-                }
-                else if (status & I2C_INT_NACK)
-                {
-                    // NACK Received, flag as "communication error on send"
-                    if (priv->astart == TRUE)
-                    {
-                        //i2cwarn("WARNING: I2C Address NACK\n");
-                        errval = EADDRNOTAVAIL;
-                    }
-                    else
-                    {
-                        //i2cwarn("WARNING: I2C Data NACK\n");
-                        errval = ECOMM;
-                    }
-                }
-                else
-                {
-                    // Unrecognized error
-                    //i2cerr("ERROR: I2C Unrecognized Error");
-                    errval = EINTR;
-                }
-            }
-
-
-            //stm32_i2c_sem_post(dev);
-
-
-        }
-        */
     }
 }

@@ -1,9 +1,11 @@
-﻿namespace Meadow.Peripherals.Sensors.Light
+﻿using System;
+
+namespace Meadow.Peripherals.Sensors.Light
 {
     /// <summary>
     /// Light sensor interface requirements.
     /// </summary>
-    public interface ILightSensor : ISensor
+    public interface ILightSensor : ISensor, IObservable<FloatChangeResult>
     {
         /// <summary>
         /// Last value read from the Light sensor.
@@ -11,15 +13,8 @@
         float Luminosity { get; }
 
         /// <summary>
-        /// Threshold value for the changed notification event.
+        /// Raised when a change in light is detected.
         /// </summary>
-        float LightLevelChangeNotificationThreshold { get; set; }
-
-        /// <summary>
-        /// The LightChanged event will be raised when the difference (absolute value)
-        /// between the current Light reading and the last notified reading is greater
-        /// than the LightChangeNotificationThreshold.
-        /// </summary>
-        event SensorFloatEventHandler LightLevelChanged;
+        event EventHandler<FloatChangeResult> LightLevelChanged;
     }
 }

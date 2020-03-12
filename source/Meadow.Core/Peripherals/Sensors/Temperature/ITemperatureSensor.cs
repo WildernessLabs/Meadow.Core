@@ -1,11 +1,13 @@
-﻿using Meadow.Peripherals.Sensors;
+﻿using System;
+using System.Threading.Tasks;
+using Meadow.Peripherals.Sensors.Atmospheric;
 
-namespace Meadow.Peripherals.Temperature
+namespace Meadow.Peripherals.Sensors.Temperature
 {
     /// <summary>
     /// Temperature sensor interface requirements.
     /// </summary>
-    public interface ITemperatureSensor : ISensor
+    public interface ITemperatureSensor : ISensor, IObservable<AtmosphericConditionChangeResult>
     {
         /// <summary>
         /// Last value read from the Temperature sensor.
@@ -13,15 +15,27 @@ namespace Meadow.Peripherals.Temperature
         float Temperature { get; }
 
         /// <summary>
-        /// Threshold value for the changed notification event.
+        /// Raised when a new reading has been made. Events will only be raised
+        /// while the driver is updating. To start, call the `StartUpdating()`
+        /// method.
         /// </summary>
-        float TemperatureChangeNotificationThreshold { get; set; }
+        event EventHandler<AtmosphericConditionChangeResult> Updated;
 
-        /// <summary>
-        /// The TemperatureChanged event will be raised when the difference (absolute value)
-        /// between the current Temperature reading and the last notified reading is greater
-        /// than the TemperatureChangeNotificationThreshold.
-        /// </summary>
-        event SensorFloatEventHandler TemperatureChanged;
+        ///// <summary>
+        ///// Convenience method to get the current temperature. For frequent reads, use
+        ///// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
+        ///// </summary>
+        //Task<AtmosphericConditions> Read();
+        ///// <summary>
+        ///// Starts continuously sampling the sensor.
+        /////
+        ///// This method also starts raising `Changed` events and IObservable
+        ///// subscribers getting notified.
+        ///// </summary>
+        //void StartUpdating();
+        ///// <summary>
+        ///// Stops sampling the temperature.
+        ///// </summary>
+        //void StopUpdating();
     }
 }

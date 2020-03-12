@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
@@ -9,40 +11,36 @@ namespace InterruptTest
     class InterruptApp : App<F7Micro, InterruptApp>
     {
         private List<IDigitalInputPort> _inputs = new List<IDigitalInputPort>();
+        private int _count = 0;
 
         public InterruptApp()
         {
-            ConfigureInterrupts();
+            Console.WriteLine("+InterruptApp");
+
+            var output = Device.CreateDigitalOutputPort(
+                Device.Pins.D05, false);
+
+//            WireInterrupt(Device.Pins.D02, output);
+            WireInterrupt(Device.Pins.D03, output);
+            WireInterrupt(Device.Pins.D04, output);
         }
 
-        private void ConfigureInterrupts()
+        private void WireInterrupt(IPin pin, IDigitalOutputPort output)
         {
-            var d0 = Device.CreateDigitalInputPort(Device.Pins.D00, InterruptMode.EdgeRising);
-            d0.Changed += D0_Changed;
-            _inputs.Add(d0);
+            var input = Device.CreateDigitalInputPort(
+                pin,
+                InterruptMode.EdgeRising,
+                ResistorMode.PullDown,
+                20);
 
-            var d1 = Device.CreateDigitalInputPort(Device.Pins.D01, InterruptMode.EdgeFalling);
-            d1.Changed += D1_Changed;
-            _inputs.Add(d1);
+            input.Changed += async (s, o) =>
+            {
+                output.State = true;
+                await Task.Delay(1000);
+                output.State = false;
+                Console.WriteLine($"{++_count}: {(s as DigitalInputPort).Channel.Name} interrupt");
+            };
 
-            var d2 = Device.CreateDigitalInputPort(Device.Pins.D02, InterruptMode.EdgeBoth);
-            d2.Changed += D2_Changed;
-            _inputs.Add(d1);
-        }
-
-        void D0_Changed(object sender, DigitalInputPortEventArgs e)
-        {
-            Console.WriteLine("Rising Interrupt on D00");
-        }
-
-        void D1_Changed(object sender, DigitalInputPortEventArgs e)
-        {
-            Console.WriteLine("Falling Interrupt on D01");
-        }
-
-        void D2_Changed(object sender, DigitalInputPortEventArgs e)
-        {
-            Console.WriteLine($"{(e.Value ? "Rising" : "Falling")} Interrupt on D02");
         }
     }
 }

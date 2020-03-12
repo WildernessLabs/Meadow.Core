@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
@@ -8,40 +7,42 @@ namespace AnalogObserver
 {
     public class AnalogObserverApp : App<F7Micro, AnalogObserverApp>
     {
-        protected AnalogInputPort _analog01;
+        IAnalogInputPort _analogIn;
 
         protected IDisposable _absoluteObserver = null;
 
         public AnalogObserverApp()
         {
+            Console.WriteLine("Starting App");
             this.InitializeIO();
             this.WireUpObservers();
         }
 
         public void InitializeIO()
         {
-            // TODO: how to instantiate?
-            //_analog01 = new AnalogInputPort();
+            _analogIn = Device.CreateAnalogInputPort(Device.Pins.A00);
+            Console.WriteLine("Analog port created");
         }
 
         public void WireUpObservers()
         {
-            var firehoseSubscriber = _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
+            var firehoseSubscriber = _analogIn.Subscribe(new FilterableObserver<FloatChangeResult, float>(
                 handler: result =>
                 {
-                    Debug.WriteLine("Previous Value: " + result.Old);
-                    Debug.WriteLine("New Value: " + result.New);
+                    Console.WriteLine("Previous Value: " + result.Old);
+                    Console.WriteLine("New Value: " + result.New);
                 }));
 
             //firehoseSubscriber.Dispose();
 
             // absolute: notify me when the temperature hits 75º
-            float seventyFiveDegrees = (3.3f / 100f) * 75;
-            _absoluteObserver = _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
-                filter: result => (result.New > seventyFiveDegrees),
+            float seventyFiveDegreesC = (75f - 32f) * (5f / 9f); // convert to C
+            float seventyFiveDegreesVoltage = (seventyFiveDegreesC / 100f) * 3.3f;
+            _absoluteObserver = _analogIn.Subscribe(new FilterableObserver<FloatChangeResult, float>(
+                filter: result => (result.New > seventyFiveDegreesVoltage),
                 handler: avgValue =>
                 {
-                    Debug.WriteLine("We've hit 75º!");
+                    Console.WriteLine("We've hit 75º!");
                     // unsubscribe when we hit it
                     if (_absoluteObserver != null)
                     {
@@ -51,26 +52,25 @@ namespace AnalogObserver
 
             // relative, static comparison; e.g if change is > 1º
             float oneDegreeC = 3.3f / 100f; // TMP35DZ: 0º = 0V, 100º = 3.3V
-            var relative = _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
+            var relative = _analogIn.Subscribe(new FilterableObserver<FloatChangeResult, float>(
                 filter: result => (result.Delta > oneDegreeC || result.Delta < oneDegreeC),
                 handler: result =>
                 {
-                    Debug.WriteLine("Changed value: " + result.Delta);
+                    Console.WriteLine("Changed value: " + result.Delta);
                 }));
 
             //relative.Dispose();
 
             // relative percentage change
-            _analog01.Subscribe(new FilterableObserver<FloatChangeResult>(
+            _analogIn.Subscribe(new FilterableObserver<FloatChangeResult, float>(
                 filter: result => (result.DeltaPercent > 10 || result.DeltaPercent < 10),
                 handler: result =>
                 {
-                    Debug.WriteLine("Percentage changed: " + result.Delta);
+                    Console.WriteLine("Percentage changed: " + result.Delta);
                 }));
 
             // spin up the ADC sampling engine
-            // TODO
-            _analog01.StartSampling();
+            _analogIn.StartSampling();
 
         }
     }

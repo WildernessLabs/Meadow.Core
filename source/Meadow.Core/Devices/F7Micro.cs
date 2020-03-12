@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Meadow.Hardware;
 using Meadow.Gateway.WiFi;
+using System;
 
 namespace Meadow.Devices
 {
@@ -9,8 +10,11 @@ namespace Meadow.Devices
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
     public partial class F7Micro : IIODevice
-    { 
-        //public List<WiFiAdapter> WiFiAdapters { get; }
+    {
+        /// <summary>
+        /// The default resolution for analog inputs
+        /// </summary>
+        public const int DefaultA2DResolution = 12;
 
         public DeviceCapabilities Capabilities { get; protected set; }
 
@@ -19,35 +23,30 @@ namespace Meadow.Devices
         /// </summary>
         /// <value>The pins.</value>
         public F7MicroPinDefinitions Pins { get; protected set; }
-        //IPinDefinitions IDevice.Pins => throw new System.NotImplementedException();
+
+        public SerialPortNameDefinitions SerialPortNames { get; protected set; }
+            = new SerialPortNameDefinitions();
+
 
         internal IIOController IoController { get; private set; }
 
-        // private static
         static F7Micro() { }
 
         public F7Micro()
         {
-            this.Capabilities = new DeviceCapabilities();
-            //this.WiFiAdapters = new List<WiFiAdapter>
-            //{
-            //    // TODO: stuff.
-            //    new WiFiAdapter()
-            //};
+            this.Capabilities = new DeviceCapabilities(
+                new AnalogCapabilities(true, DefaultA2DResolution),
+                new NetworkCapabilities(true, true)
+                );
 
             this.IoController = new F7GPIOManager();
             this.IoController.Initialize();
 
-            // 
             this.Pins = new F7MicroPinDefinitions();
-            
         }
 
-
-        //public C CreatePort<C>(P portConfig) where P : IPortConfig, where C : IPort {}
-
         public IDigitalOutputPort CreateDigitalOutputPort(
-            IPin pin, 
+            IPin pin,
             bool initialState = false)
         {
             return DigitalOutputPort.From(pin, this.IoController, initialState);
@@ -77,60 +76,181 @@ namespace Meadow.Devices
 
         public IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            float voltageReference = 3.3f)
+            float voltageReference = IIODevice.DefaultA2DReferenceVoltage)
         {
             return AnalogInputPort.From(pin, this.IoController, voltageReference);
         }
 
         public IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = 100,
-            float dutyCycle = 0
-            /*bool inverted = false*/)
+            float frequency = IIODevice.DefaultPwmFrequency,
+            float dutyCycle = IIODevice.DefaultPwmDutyCycle,
+            bool inverted = false)
         {
-            return PwmPort.From(pin, this.IoController, frequency, dutyCycle);
+            bool isOnboard = IsOnboardLed(pin);
+            return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted, isOnboard);
         }
 
+        /// <summary>
+        /// Tests whether or not the pin passed in belongs to an onboard LED
+        /// component. Used for a dirty dirty hack.
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <returns>whether or no the pin belons to the onboard LED</returns>
+        protected bool IsOnboardLed(IPin pin)
+        {
+            return (
+                pin == Pins.OnboardLedBlue ||
+                pin == Pins.OnboardLedGreen ||
+                pin == Pins.OnboardLedRed
+                );
+        }
+
+        public ISerialPort CreateSerialPort(
+            SerialPortName portName,
+            int baudRate,
+            int dataBits = 8,
+            Parity parity = Parity.None,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096)
+        {
+            return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+        }
+
+        /// <summary>
+        /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, MOSI and MISO
+        /// </summary>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
-            IPin[] pins, ushort speed = 1000
+            long speedkHz = IIODevice.DefaultSpiBusSpeed
         )
         {
-            return SpiBus.From(pins[0], pins[1], pins[2], speed);
+            return CreateSpiBus(Pins.SCK, Pins.MOSI, Pins.MISO, speedkHz);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="pins">IPint instances used for (in this order) CLK, MOSI, MISO</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
+        public ISpiBus CreateSpiBus(
+            IPin[] pins,
+            long speedkHz = IIODevice.DefaultSpiBusSpeed
+        )
+        {
+            return CreateSpiBus(pins[0], pins[1], pins[2], speedkHz);
+        }
+
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
             IPin miso,
-            ushort speed = 1000
+            long speedkHz = IIODevice.DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus(clock, mosi, miso, speed);
+            var bus = SpiBus.From(clock, mosi, miso);
+            bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
+            bus.Configuration.SpeedKHz = speedkHz;
+            return bus;
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
+        /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="config">The bus clock configuration parameters</param>
+        /// <returns>An instance of an IISpiBus</returns>
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin mosi,
+            IPin miso,
+            SpiClockConfiguration config
+        )
+        {
+            var bus = SpiBus.From(clock, mosi, miso);
+            bus.BusNumber = GetSpiBusNumberForPins(clock, mosi, miso);
+            bus.Configuration = config;
+            return bus;
+        }
+
+        private int GetSpiBusNumberForPins(IPin clock, IPin mosi, IPin miso)
+        {
+            // we're only looking at clock pin.  
+            // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
+            if (clock == Pins.ESP_CLK)
+            {
+                return 2;
+            }
+            else if (clock == Pins.SCK)
+            {
+                return 3;
+            }
+
+            // this is an unsupported bus, but will get caught elsewhere
+            return -1;
+        }
+
+        /// <summary>
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
-            ushort speed = 1000
+            I2cBusSpeed busSpeed
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, speed);
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, (int)busSpeed);
         }
 
+        /// <summary>
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
+        public II2cBus CreateI2cBus(
+            int frequencyHz = IIODevice.DefaultI2cBusSpeed
+        )
+        {
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequencyHz);
+        }
+
+        /// <summary>
+        /// Creates an I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
-            ushort speed
+            int frequencyHz = IIODevice.DefaultI2cBusSpeed
         )
         {
-            return CreateI2cBus(pins[0], pins[1], speed);
+            return CreateI2cBus(pins[0], pins[1], frequencyHz);
         }
 
-
+        /// <summary>
+        /// Creates an I2C bus instance for the requested pins and bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            ushort speed
+            int frequencyHz = IIODevice.DefaultI2cBusSpeed
         )
         {
-            return I2cBus.From(this.IoController, clock, data, speed);
+            return I2cBus.From(this.IoController, clock, data, frequencyHz);
         }
 
     }

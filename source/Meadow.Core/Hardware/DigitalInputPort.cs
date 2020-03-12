@@ -15,7 +15,7 @@ namespace Meadow.Hardware
 
         protected IIOController IOController { get; set; }
 
-        protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
+        private DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         protected DigitalInputPort(
             IPin pin,
@@ -27,8 +27,12 @@ namespace Meadow.Hardware
             int glitchFilterCycleCount = 0
             ) : base(pin, channel, interruptMode)
         {
-            if (interruptMode != InterruptMode.None && (!channel.InterrruptCapable))
-            {
+            // DEVELOPER NOTE:
+            // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
+            // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
+
+            if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
+            {                
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
             }
 
@@ -41,9 +45,7 @@ namespace Meadow.Hardware
             if (success.Item1)
             {
                 // make sure the pin is configured as a digital output with the proper state
-                ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchFilterCycleCount);
-                DebounceDuration = debounceDuration;
-                GlitchFilterCycleCount = glitchFilterCycleCount;
+                ioController.ConfigureInput(pin, resistorMode, interruptMode);
             }
             else
             {
@@ -63,10 +65,15 @@ namespace Meadow.Hardware
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if (chan != null) {
                 //TODO: need other checks here.
-                if (interruptMode != InterruptMode.None && (!chan.InterrruptCapable)) {
+                if (interruptMode != InterruptMode.None && (!chan.InterruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                return new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
+                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode);
+                // set these here, not in a constructor because they are virtual
+                port.DebounceDuration = debounceDuration;
+                port.GlitchFilterCycleCount = glitchFilterCycleCount;
+                return port;
+
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
@@ -91,7 +98,6 @@ namespace Meadow.Hardware
                 // debounce timing checks
                 if (DebounceDuration > 0) {
                     if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration) {
-                        //Console.WriteLine("Debounced.");
                         return;
                     }
                 }

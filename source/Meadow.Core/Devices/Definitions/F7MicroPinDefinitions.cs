@@ -11,34 +11,34 @@ namespace Meadow.Devices
             public IList<IPin> AllPins { get; } = new List<IPin>();
             public F7NamedPinGroups Groups { get; protected set; }
 
-            // OnboardLEDBlue
+            // OnboardLedBlue
             // TIM2_CH1/TIM2_ETR, TIM5_CH1, TIM8_ETR, USART2_CTS, UART4_TX, SAI2_SD_B, ETH_MII_CRS, EVENTOUT
             // ADC1_IN0, ADC2_IN0, ADC3_IN0, WKUP1
-            public readonly IPin OnboardLEDBlue = new Pin(
-                "OnboardLEDBlue", "PA0",
+            public readonly IPin OnboardLedBlue = new Pin(
+                "OnboardLedBlue", "PA0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA0", inverseLogic: true),
-                    new PwmChannelInfo("TIM2_CH1", 2, 1), //?? many to choose from
+                    new PwmChannelInfo("TIM2_CH1", 2, 1)
                 }
             );
-            // OnboardLEDGreen
+            // OnboardLedGreen
             // TIM2_CH2, TIM5_CH2, USART2_RTS, UART4_RX, QUADSPI_BK1_IO3, SAI2_MCLK_B, ETH_MII_RX_CLK/ETH_R MII_REF_CLK, LCD_R2, EVENTOUT
             // ADC1_IN1, ADC2_IN1, ADC3_IN1
-            public readonly IPin OnboardLEDGreen = new Pin(
-                "OnboardLEDGreen", "PA1",
+            public readonly IPin OnboardLedGreen = new Pin(
+                "OnboardLedGreen", "PA1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA1", inverseLogic: true),
-                    new PwmChannelInfo("TIM2_CH2", 2, 2), //?? many to choose from
+                    new PwmChannelInfo("TIM2_CH2", 2, 2)
                 }
             );
-            // OnboardLEDRed
+            // OnboardLedRed
             // TIM2_CH3, TIM5_CH3, TIM9_CH1, USART2_TX, SAI2_SCK_B, ETH_MDIO, MDIOS_MDIO, LCD_R1, EVENTOUT
             // ADC1_IN2, ADC2_IN2, ADC3_IN2, WKUP2
-            public readonly IPin OnboardLEDRed = new Pin(
-                "OnboardLEDGreen", "PA2",
+            public readonly IPin OnboardLedRed = new Pin(
+                "OnboardLedRed", "PA2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA2", inverseLogic: true),
-                    new PwmChannelInfo("TIM2_CH3", 2, 3), //?? many to choose from
+                    new PwmChannelInfo("TIM2_CH3", 2, 3)
                 }
             );
 
@@ -57,7 +57,6 @@ namespace Meadow.Devices
                 "D01", "PH13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH13"),
-                    new PwmChannelInfo("TIM8_CH1N", 8, 1),
                     new UartChannelInfo("UART4_TX", SerialDirectionType.Transmit)
                 }
             );
@@ -67,7 +66,7 @@ namespace Meadow.Devices
                 "D02", "PC6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC6"),
-                    new PwmChannelInfo("TIM3_CH1", 3, 1), // OR TIM8_CH1. Not sure which we're using
+                    new PwmChannelInfo("TIM8_CH1", 8, 1)
                 }
             );
             // D03
@@ -76,7 +75,7 @@ namespace Meadow.Devices
                 "D03", "PB8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB8"),
-                    new PwmChannelInfo("TIM4_CH3", 4, 3), // OR TIM10_CH1. Not sure which we're using
+                    new PwmChannelInfo("TIM4_CH3", 4, 3),
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
             );
@@ -86,7 +85,7 @@ namespace Meadow.Devices
                 "D04", "PB9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9"),
-                    new PwmChannelInfo("TIM4_CH3", 4, 3), // OR TIM10_CH1. Not sure which we're using
+                    new PwmChannelInfo("TIM4_CH4", 4, 4),
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
             );
@@ -95,8 +94,8 @@ namespace Meadow.Devices
             public readonly IPin D05 = new Pin(
                 "D05", "PC7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB8"),
-                    new PwmChannelInfo("TIM3_CH2", 3, 2), // OR TIM8_CH2. Not sure which we're using
+                    new DigitalChannelInfo("PC7"),
+                    new PwmChannelInfo("TIM3_CH2", 3, 2)
                 }
             );
             // D06
@@ -106,7 +105,7 @@ namespace Meadow.Devices
                 "D06", "PB0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB0"),
-                    new PwmChannelInfo("TIM1_CH2N", 1, 2), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
+                    new PwmChannelInfo("TIM3_CH3", 3, 3),
                     new AnalogChannelInfo("ADC1_IN8", 12) // or ADC2_IN8?
                 }
             );
@@ -116,7 +115,7 @@ namespace Meadow.Devices
                 "D07", "PB7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7"),
-                    new PwmChannelInfo("TIM4_CH2", 4, 2), // OR TIM3_CH3, TIM8_CH2N. Not sure which we're using
+                    new PwmChannelInfo("TIM2_CH2", 4, 2),
                     new I2cChannelInfo("I2C1_SDA", I2cChannelFunctionType.Data) // or I2C4_SDA
                 }
             );
@@ -137,7 +136,7 @@ namespace Meadow.Devices
                 "D09", "PB1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB1"),
-                    new PwmChannelInfo("TIM1_CH3N", 1, 3),
+                    new PwmChannelInfo("TIM3_CH4", 3, 4),
                     new AnalogChannelInfo("ADC1_IN9", 12) // or ADC2_IN9
                 }
             );
@@ -147,7 +146,7 @@ namespace Meadow.Devices
                 "D10", "PH10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH10"),
-                    new PwmChannelInfo("TIM5_CH1", 5, 1),
+                    new PwmChannelInfo("TIM5_CH1", 5, 1)
                 }
             );
             // D11
@@ -156,7 +155,7 @@ namespace Meadow.Devices
                 "D11", "PC9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC9"),
-                    new PwmChannelInfo("TIM3_CH4", 3, 4), //or TIM8_CH4
+                    new PwmChannelInfo("TIM8_CH4", 8, 4)
                 }
             );
             // D12
@@ -165,7 +164,7 @@ namespace Meadow.Devices
                 "D12", "PB14",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB14"),
-                    new PwmChannelInfo("TIM1_CH2N", 1, 2), //or TIM8_CH2N
+                    new PwmChannelInfo("TIM12_CH1", 12, 1),
                     new UartChannelInfo("USART1_TX", SerialDirectionType.Transmit)
                 }
             );
@@ -175,7 +174,7 @@ namespace Meadow.Devices
                 "D13", "PB15",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB15"),
-                    new PwmChannelInfo("TIM1_CH3N", 1, 3), //or TIM8_CH3N
+                    new PwmChannelInfo("TIM12_CH2", 12, 2),
                     new UartChannelInfo("USART1_RX", SerialDirectionType.Receive)
                 }
             );
@@ -261,7 +260,8 @@ namespace Meadow.Devices
             public readonly IPin SCK = new Pin(
                 "SCK", "PC10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC10")
+                    new DigitalChannelInfo("PC10"),
+                    new SpiChannelInfo("PC10", SpiLineType.Clock)
                 }
             );
             // MOSI
@@ -269,7 +269,8 @@ namespace Meadow.Devices
             public readonly IPin MOSI = new Pin(
                 "MOSI", "PB5",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB5")
+                    new DigitalChannelInfo("PB5"),
+                    new SpiChannelInfo("PB5", SpiLineType.MOSI)
                 }
             );
             // MISO
@@ -277,7 +278,8 @@ namespace Meadow.Devices
             public readonly IPin MISO = new Pin(
                 "MISO", "PC11",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC11")
+                    new DigitalChannelInfo("PC11"),
+                    new SpiChannelInfo("PC11", SpiLineType.MISO)
                 }
             );
 
@@ -286,6 +288,7 @@ namespace Meadow.Devices
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI3"),
+                    new SpiChannelInfo("PI3", SpiLineType.MOSI)
                 }
             );
             // ESP_MISO
@@ -293,6 +296,7 @@ namespace Meadow.Devices
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI2"),
+                    new SpiChannelInfo("PI2", SpiLineType.MISO)
                 }
             );
             // ESP_CLK
@@ -300,6 +304,7 @@ namespace Meadow.Devices
                 "ESP_CLK", "PD3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD3"),
+                    new SpiChannelInfo("PD3", SpiLineType.Clock)
                 }
             );
             // ESP_CS
@@ -307,6 +312,7 @@ namespace Meadow.Devices
                 "ESP_CS", "PI0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI0"),
+                    new SpiChannelInfo("PI10", SpiLineType.ChipSelect)
                 }
             );
             // ESP_BOOT
@@ -347,6 +353,9 @@ namespace Meadow.Devices
             {
                 InitAllPins();
                 //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
+
+                I2C_SCL = this.D08;
+                I2C_SDA = this.D07;
             }
 
             protected void InitAllPins()
@@ -376,9 +385,9 @@ namespace Meadow.Devices
                 AllPins.Add(this.D13);
                 AllPins.Add(this.D14);
                 AllPins.Add(this.D15);
-                AllPins.Add(this.OnboardLEDRed);
-                AllPins.Add(this.OnboardLEDGreen);
-                AllPins.Add(this.OnboardLEDBlue);
+                AllPins.Add(this.OnboardLedRed);
+                AllPins.Add(this.OnboardLedGreen);
+                AllPins.Add(this.OnboardLedBlue);
                 AllPins.Add(this.ESP_MOSI);
                 AllPins.Add(this.ESP_MISO);
                 AllPins.Add(this.ESP_CLK);

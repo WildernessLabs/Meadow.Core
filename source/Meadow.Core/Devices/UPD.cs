@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Meadow.Core;
+using Meadow.Hardware;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -9,7 +11,7 @@ namespace Meadow.Devices
     /// A wrapped around the Meadow Generic Platform Driver
     /// </summary>
     /// <remarks>
-    /// There is one and only one instance of this driver, and it lives effectivly whenever th app is up, so it's
+    /// There is one and only one instance of this driver, and it lives effectivly whenever the app is up, so it's
     /// used as a static singleton
     /// </remarks>
     internal static class UPD
@@ -20,10 +22,10 @@ namespace Meadow.Devices
 
         static UPD()
         {
-            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.ReadOnly);
+            DriverHandle = Interop.Nuttx.open(GPDDriverName, Interop.Nuttx.DriverFlags.DontCare);
             if (DriverHandle == IntPtr.Zero || DriverHandle.ToInt32() == -1)
             {
-                Console.Write("Failed to open UPD driver");
+                throw new NativeException("Failed to open UPD driver");
             }
         }
 
@@ -83,6 +85,13 @@ namespace Meadow.Devices
             return value;
         }
 
+        public static Nuttx.ErrorCode GetLastError()
+        {
+            int errno = 0;
+            Nuttx.ioctl(DriverHandle, Nuttx.UpdIoctlFn.GetLastError, ref errno);
+            return (Nuttx.ErrorCode)errno;
+        }
+
         public static void UpdateRegister(uint address, uint clearBits, uint setBits)
         {
             Nuttx.UpdateRegister(DriverHandle, address, clearBits, setBits);
@@ -90,77 +99,205 @@ namespace Meadow.Devices
 
         public static int Ioctl(Nuttx.GpioIoctlFn request, ref int pinDesignator)
         {
-            return Nuttx.ioctl(DriverHandle, request, ref pinDesignator);
+            var result = Nuttx.ioctl(DriverHandle, request, ref pinDesignator);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
         }
 
         public static int Ioctl(Nuttx.GpioIoctlFn request, ref Nuttx.GPIOPinState pinState)
         {
-            return Nuttx.ioctl(DriverHandle, request, ref pinState);
+            var result = Nuttx.ioctl(DriverHandle, request, ref pinState);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
         }
 
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdRegisterValue registerValue)
         {
-            return Nuttx.ioctl(DriverHandle, request, ref registerValue);
+            var result = Nuttx.ioctl(DriverHandle, request, ref registerValue);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
         }
 
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdRegisterUpdate registerUpdate)
         {
-            return Nuttx.ioctl(DriverHandle, request, ref registerUpdate);
+            var result = Nuttx.ioctl(DriverHandle, request, ref registerUpdate);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, IntPtr.Zero);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
         }
 
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdGpioInterruptConfiguration interruptConfig)
         {
-            return Nuttx.ioctl(DriverHandle, request, ref interruptConfig);
+            var result = Nuttx.ioctl(DriverHandle, request, ref interruptConfig);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdI2CCommand i2cCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref i2cCommand);
+
+            if (result != 0)
+            {
+                var err = GetLastError();
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPIDataCommand spiCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
+
+            if (result != 0)
+            {
+                var err = GetLastError();
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPISpeedCommand spiCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
+
+            if (result != 0)
+            {
+                var err = GetLastError();
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPIModeCommand spiCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
+
+            if (result != 0)
+            {
+                var err = GetLastError();
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdSPIBitsCommand spiCommand)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref spiCommand);
+
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
         }
 
         public static int Ioctl(Nuttx.GpioIoctlFn request, ref Nuttx.GPIOConfigFlags configFlags)
         {
-            return Nuttx.ioctl(DriverHandle, request, ref configFlags);
+            var result = Nuttx.ioctl(DriverHandle, request, ref configFlags);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdEnumDirCmd cmd)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref cmd);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
         }
 
         public static class PWM
         {
-            private static List<uint> m_channelsInitialized = new List<uint>();
+            private static List<uint> m_timersInitialized = new List<uint>();
 
             public static bool PwmCmd(Nuttx.UpdIoctlFn request, Nuttx.UpdPwmCmd data)
             {
                 var result = Nuttx.ioctl(DriverHandle, request, ref data);
                 if (result != 0)
                 {
-                    Console.WriteLine($"PWM setup failed: {result}");
+                    var err = GetLastError();
+                    Console.WriteLine($"PWM setup failed {err.ToString()}");
                     return false;
                 }
 
                 return true;
             }
 
-            public static bool Setup(uint channel)
+            public static bool Setup(uint timer)
             {
-                if(m_channelsInitialized.Contains(channel))
+                if (m_timersInitialized.Contains(timer))
                 {
                     return true;
                 }
 
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel,
+                    Timer = timer,
                 };
 
                 var result = PwmCmd(Nuttx.UpdIoctlFn.PwmSetup, data);
-                if(result)
+                if (result)
                 {
-                    m_channelsInitialized.Add(channel);
+                    m_timersInitialized.Add(timer);
                 }
 
-                Output.WriteLineIf(true, $"Setup PWM {channel} returned {result}");
+                Output.WriteLineIf(true, $"Setup PWM {timer} returned {result}");
 
                 return result;
             }
 
-            public static bool Start(uint channel, uint frequency, float dutyCycle)
+            public static bool Start(IPwmChannelInfo pwmChannelInfo, uint frequency, float dutyCycle)
             {
                 // just make ssure we've been initialized
-                if(! Setup(channel))
+                if (!Setup(pwmChannelInfo.Timer))
                 {
                     return false;
                 }
@@ -171,25 +308,27 @@ namespace Meadow.Devices
                 // nuttx (well the processor) takes a 16-bit duty cycle, so 65536 == 100% == 1.0
                 var sixteenBitDuty = (((uint)(dutyCycle * 100)) << 16) / 100;
 
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel,
+                    Timer = pwmChannelInfo.Timer,
+                    Channel = pwmChannelInfo.TimerChannel,
                     Frequency = frequency,
                     Duty = sixteenBitDuty
                 };
 
                 var result = UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmStart, data);
 
-                Output.WriteLineIf(true, $"Start PWM {channel}:{frequency}:{dutyCycle} returned {result}");
+                //Output.WriteLineIf(true, $"Start PWM {pwmChannelInfo.Timer}:{frequency}:{dutyCycle} returned {result}");
 
                 return result;
             }
 
-            public static bool Stop(uint channel)
+            public static bool Stop(IPwmChannelInfo pwmChannelInfo)
             {
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel
+                    Timer = pwmChannelInfo.Timer,
+                    Channel = pwmChannelInfo.TimerChannel
                 };
 
                 return UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmStop, data);
@@ -197,18 +336,18 @@ namespace Meadow.Devices
 
             public static bool Shutdown(uint channel)
             {
-                var data = new Nuttx.UpdPwmCmd()
+                var data = new Nuttx.UpdPwmCmd
                 {
-                    TimerId = channel
+                    Timer = channel
                 };
 
                 var result = UPD.PWM.PwmCmd(Nuttx.UpdIoctlFn.PwmShutdown, data);
 
-                if(result)
+                if (result)
                 {
-                    if (m_channelsInitialized.Contains(channel))
+                    if (m_timersInitialized.Contains(channel))
                     {
-                        m_channelsInitialized.Remove(channel);
+                        m_timersInitialized.Remove(channel);
                     }
                 }
                 return result;

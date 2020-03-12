@@ -19,7 +19,9 @@ namespace ByteCommsAPIScratchPad
 
             // Can write to the device either way:
             spiPeriph.WriteByte(0x01);
-            spiBus.WriteByte(spiPeriph.ChipSelect, 0x01);
+
+            // TODO: This code needs to be fixed, commented to unbreak the build - Joao
+            //spiBus.WriteByte(spiPeriph.ChipSelect, 0x01);
 
             //==== I2C Example
             II2cBus i2cBus = Device.CreateI2cBus(Device.Pins.Groups.I2c1, 100); //TODO: should have a default speed
@@ -29,7 +31,7 @@ namespace ByteCommsAPIScratchPad
 
             // write (same as SPI, can write directly to the peripheral or via the bus)
             i2cPeripheral.WriteByte(0x01);
-            i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
+            //i2cBus.WriteByte(i2cPeripheral.Address, 0x01);
 
             // accessing the device from the core:
             IPin[] spiPins;

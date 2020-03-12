@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Meadow.Devices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
@@ -8,15 +14,11 @@ namespace Meadow.Hardware
     /// </summary>
     public partial class SpiBus : ISpiBus
     {
-        ///// <summary>
-        ///// SPI bus object.
-        ///// </summary>
-        //private static Spi _spi;
+        private bool _showSpiDebug = false;
+        private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
+        private SpiClockConfiguration _clockConfig;
 
-        /// <summary>
-        /// Configuration to use for this instance of the SPIBus.
-        /// </summary>
-        public SpiBus.ConfigurationOptions Configuration { get; protected set; }
+        internal int BusNumber { get; set; }
 
         /// <summary>
         /// Default constructor for the SPIBus.
@@ -26,265 +28,470 @@ namespace Meadow.Hardware
         /// </remarks>
         protected SpiBus()
         {
+#if !DEBUG
+            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            _showSpiDebug = false;
+#endif
         }
 
-        // TODO: Call from Device.CreateSpiBus
-        // TODO: use Spi.Configuration configuration? don't we already know this, as its chip specific?
-        // TODO: we should already know clock phase and polarity, yeah?
         internal static SpiBus From(
             IPin clock,
             IPin mosi,
-            IPin miso,
-            ushort speed = 1000,
-            byte cpha = 0,
-            byte cpol = 0)
+            IPin miso)
         {
+            // check for pin compatibility and availability
+            if (!clock.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.Clock) != SpiLineType.None))
+            {
+                throw new NotSupportedException($"Pin {clock.Name} does not support SPI Clock capability");
+            }
+            if (!mosi.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MOSI) != SpiLineType.None))
+            {
+                throw new NotSupportedException($"Pin {clock.Name} does not support SPI MOSI capability");
+            }
+            if (!miso.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MISO) != SpiLineType.None))
+            {
+                throw new NotSupportedException($"Pin {clock.Name} does not support SPI MISO capability");
+            }
+            
+            // we can't set the speed here yet because the caller has to set the bus number first
             return new SpiBus();
         }
 
-
-        ///// <summary>
-        ///// Create a new SPIBus object using the requested clock phase and polarity.
-        ///// </summary>
-        ///// <param name="cpha">CPHA - Clock Phase (0 or 1).</param>
-        ///// <param name="cpol">CPOL - Clock Polarity (0 or 1).</param>
-        ///// <param name="speed">Speed of the SPI bus.</param>
-        //protected SpiBus(ushort speed = 1000, byte cpha = 0, byte cpol = 0)
-        //{
-        //    Configure(module, chipSelect, cpha, cpol, speed);
-        //    //_spi = new Spi(Configuration);
-        //}
-
-        ///// <summary>
-        ///// Create a new SPIBus operating in the specified mode.
-        ///// </summary>
-        ///// <remarks>
-        /////     Mode    CPOL    CPHA
-        /////     0       0       0
-        /////     1       0       1
-        /////     2       1       0
-        /////     3       1       1
-        ///// </remarks>
-        ///// <param name="module">SPI module to configure.</param>
-        ///// <param name="chipSelect">Chip select pin.</param>
-        ///// <param name="mode">SPI Bus Mode - should be in the range 0 - 3.</param>
-        ///// <param name="speed">Speed of the SPI bus.</param>
-        //public SpiBus(Spi.SPI_module module, IPin chipSelect, byte mode, ushort speed)
-        //{
-        //    if (mode > 3) {
-        //        throw new ArgumentException("SPI Mode should be in the range 0 - 3.");
-        //    }
-        //    byte cpha = 0;
-        //    byte cpol = 0;
-        //    switch (mode) {
-        //        case 1:
-        //            cpha = 1;
-        //            break;
-        //        case 2:
-        //            cpol = 1;
-        //            break;
-        //        case 3:
-        //            cpol = 1;
-        //            cpha = 1;
-        //            break;
-        //    }
-        //    Configure(module, chipSelect, cpha, cpol, speed);
-        //    _spi = new Spi(Configuration);
-        //}
-
-
-        #region Methods
-
-        ///// <summary>
-        ///// Works out how the SPI bus should be configured from the clock polarity and phase.
-        ///// </summary>
-        ///// <param name="module">SPI module to configure.</param>
-        ///// <param name="chipSelect">Chip select pin.</param>
-        ///// <param name="cpha">CPHA - Clock phase (0 or 1).</param>
-        ///// <param name="cpol">CPOL - Clock polarity (0 or 1).</param>
-        ///// <param name="speed">Speed of the SPI bus.</param>
-        ///// <returns>SPI Configuration object.</returns>
-        //private void Configure(Spi.SPI_module module, IPin chipSelect, byte cpha, byte cpol,
-        //    ushort speed)
-        //{
-        //    if (cpha > 1) {
-        //        throw new ArgumentException("Clock phase should be 0 to 1.");
-        //    }
-        //    if (cpol > 1) {
-        //        throw new ArgumentException("Clock polarity should be 0 to 1.");
-        //    }
-        //    Configuration = new Spi.Configuration(SPI_mod: module,
-        //                                       ChipSelect_Port: chipSelect,
-        //                                       ChipSelect_ActiveState: false,
-        //                                       ChipSelect_SetupTime: 0,
-        //                                       ChipSelect_HoldTime: 0,
-        //                                       Clock_IdleState: (cpol == 1),
-        //                                       Clock_Edge: (cpha == 1),
-        //                                       Clock_RateKHz: speed);
-        //}
-
         /// <summary>
-        /// Write a single byte to the peripheral.
+        /// Configuration to use for this instance of the SPIBus.
         /// </summary>
-        /// <param name="value">Value to be written (8-bits).</param>
-        public void WriteByte(IDigitalOutputPort chipSelect, byte value)
+        public SpiClockConfiguration Configuration
         {
-            WriteBytes(chipSelect, new[] { value });
-        }
-
-        /// <summary>
-        /// Write a number of bytes to the peripheral.
-        /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
-        /// <param name="values">Values to be written.</param>
-        public void WriteBytes(IDigitalOutputPort chipSelect, byte[] values)
-        {
-            //_spi.Config = Configuration;
-            //_spi.Write(values);
-        }
-
-        /// <summary>
-        /// Write an unsigned short to the peripheral.
-        /// </summary>
-        /// <param name="address">Address to write the first byte to.</param>
-        /// <param name="value">Value to be written (16-bits).</param>
-        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShort(IDigitalOutputPort chipSelect, byte address, ushort value,
-            ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var data = new byte[2];
-            if (order == ByteOrder.LittleEndian) {
-                data[0] = (byte)(value & 0xff);
-                data[1] = (byte)((value >> 8) & 0xff);
-            } else {
-                data[0] = (byte)((value >> 8) & 0xff);
-                data[1] = (byte)(value & 0xff);
+            get
+            {
+                if(_clockConfig == null)
+                {
+                    Configuration = new SpiClockConfiguration(375, SpiClockConfiguration.Mode.Mode0);
+                }
+                return _clockConfig;
             }
-            WriteRegisters(chipSelect, address, data);
+            internal set
+            {
+                if (value == null) { throw new ArgumentNullException(); }
+
+                if(_clockConfig != null)
+                {
+                    _clockConfig.Changed -= OnConfigChanged;
+                }
+
+                _clockConfig = value;
+
+                HandleConfigChange();
+
+                _clockConfig.Changed += OnConfigChanged;
+            }
+        }
+
+        private void OnConfigChanged(object sender, EventArgs e)
+        {
+            HandleConfigChange();
+        }
+
+        private void HandleConfigChange()
+        {
+            // try setting the clock frequency.  Actual frequency comes back (based on clock divisor)
+            var actual = SetFrequency(Configuration.SpeedKHz * 1000);
+            // update the config with what we actually set so it's readable
+            Configuration.SetActualSpeedKHz(actual);
+
+            int mode = 0;
+
+            switch (Configuration.Phase)
+            {
+                case SpiClockConfiguration.ClockPhase.Zero:
+                    mode = (Configuration.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 0 : 2;
+                    break;
+                case SpiClockConfiguration.ClockPhase.One:
+                    mode = (Configuration.Polarity == SpiClockConfiguration.ClockPolarity.Normal) ? 1 : 3;
+                    break;
+            }
+
+            SetMode(mode);
+            SetBitsPerWord(Configuration.BitsPerWord);
         }
 
         /// <summary>
-        /// Write a number of unsigned shorts to the peripheral.
+        /// Writes data to the SPI bus
         /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
-        /// <param name="address">Address to write the first byte to.</param>
-        /// <param name="values">Values to be written.</param>
-        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
-        public void WriteUShorts(IDigitalOutputPort chipSelect, byte address, ushort[] values,
-            ByteOrder order = ByteOrder.LittleEndian)
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
+        /// <param name="data">Data to write</param>
+        public void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data)
         {
-            var data = new byte[2 * values.Length];
-            for (var index = 0; index < values.Length; index++) {
-                if (order == ByteOrder.LittleEndian) {
-                    data[index * 2] = (byte)(values[index] & 0xff);
-                    data[(index * 2) + 1] = (byte)((values[index] >> 8) & 0xff);
-                } else {
-                    data[index * 2] = (byte)((values[index] >> 8) & 0xff);
-                    data[(index * 2) + 1] = (byte)(values[index] & 0xff);
+            SendData(chipSelect, ChipSelectMode.ActiveLow, data.ToArray());
+        }
+
+        /// <summary>
+        /// Writes data to the SPI bus
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="data">Data to write</param>
+        public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, IEnumerable<byte> data)
+        {
+            SendData(chipSelect, csMode, data.ToArray());
+        }
+
+        /// <summary>
+        /// Writes data to the SPI bus
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
+        /// <param name="data">Data to write</param>
+        public void SendData(IDigitalOutputPort chipSelect, params byte[] data)
+        {
+            SendData(chipSelect, ChipSelectMode.ActiveLow, data);
+        }
+
+        /// <summary>
+        /// Writes data to the SPI bus
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="data">Data to write</param>
+        public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] data)
+        {
+            var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
+            Output.WriteLineIf(_showSpiDebug, $" +SendData");
+
+            try
+            {
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                var command = new Nuttx.UpdSPIDataCommand()
+                {
+                    BufferLength = data.Length,
+                    TxBuffer = gch.AddrOfPinnedObject(),
+                    RxBuffer = IntPtr.Zero,
+                    BusNumber = BusNumber
+                };
+
+                Output.WriteLineIf(_showSpiDebug, $" sending {data.Length} bytes: {BitConverter.ToString(data)}");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                if (result != 0)
+                {
+                    DecipherSPIError(UPD.GetLastError());
+                }
+                Output.WriteLineIf(_showSpiDebug, $" send complete");
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
                 }
             }
-            WriteRegisters(chipSelect, address, data);
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (gch.IsAllocated)
+                {
+                    gch.Free();
+                }
+                Output.WriteLineIf(_showSpiDebug, $" -SendData");
+            }
         }
 
         /// <summary>
-        /// Write data a register in the peripheral.
+        /// Reads data from the SPI bus
         /// </summary>
-        /// <param name="address">Address of the register to write to.</param>
-        /// <param name="value">Data to write into the register.</param>
-        public void WriteRegister(IDigitalOutputPort chipSelect, byte address, byte value)
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
+        /// <param name="numberOfBytes">Number of bytes to read</param>
+        public byte[] ReceiveData(IDigitalOutputPort chipSelect, int numberOfBytes)
         {
-            WriteRegisters(chipSelect, address, new[] { value });
+            return ReceiveData(chipSelect, ChipSelectMode.ActiveLow, numberOfBytes);
         }
 
         /// <summary>
-        /// Write data to one or more registers.
+        /// Reads data from the SPI bus
         /// </summary>
-        /// <param name="address">Address of the first register to write to.</param>
-        /// <param name="data">Data to write into the registers.</param>
-        public void WriteRegisters(IDigitalOutputPort chipSelect, byte address, byte[] values)
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="numberOfBytes">Number of bytes to read</param>
+        public byte[] ReceiveData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, int numberOfBytes)
         {
-            var data = new byte[values.Length + 1];
-            data[0] = address;
-            Array.Copy(values, 0, data, 1, values.Length);
-            WriteBytes(chipSelect, data);
+            var rxBuffer = new byte[numberOfBytes];
+            var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                var command = new Nuttx.UpdSPIDataCommand()
+                {
+                    TxBuffer = IntPtr.Zero,
+                    BufferLength = rxBuffer.Length,
+                    RxBuffer = gch.AddrOfPinnedObject(),
+                    BusNumber = BusNumber
+                };
+
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                if (result != 0)
+                {
+                    DecipherSPIError(UPD.GetLastError());
+                }
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                }
+
+                return rxBuffer;
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (gch.IsAllocated)
+                {
+                    gch.Free();
+                }
+            }
         }
 
         /// <summary>
-        /// Write data to the peripheral and also read some data from the peripheral.
+        /// Does a data exchange on the SPI bus.
         /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="sendBuffer">Buffer holding data to be written</param>
+        /// <param name="receiveBuffer">Buffer where the received data will be written</param>
+        /// <returns></returns>
         /// <remarks>
-        /// The number of bytes to be written and read will be determined by the length of the byte arrays.
+        /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
+        /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
+        /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
+        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
         /// </remarks>
-        /// <param name="write">Array of bytes to be written to the device.</param>
-        /// <param name="length">Amount of data to read from the device.</param>
-        public byte[] WriteRead(IDigitalOutputPort chipSelect, byte[] write, ushort length)
+        public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
         {
-            var result = new byte[length];
-            //Config = Configuration;
-            //WriteRead(chipSelect, write, result);
-            //return result;
-            return new byte[] { 0 };
+            ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
         }
 
         /// <summary>
-        /// Read the specified number of bytes from the I2C peripheral.
+        /// Does a data exchange on the SPI bus.
         /// </summary>
-        /// <returns>The bytes.</returns>
-        /// <param name="numberOfBytes">Number of bytes.</param>
-        public byte[] ReadBytes(IDigitalOutputPort chipSelect, ushort numberOfBytes)
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="sendBuffer">Buffer holding data to be written</param>
+        /// <param name="receiveBuffer">Buffer where the received data will be written</param>
+        /// <param name="bytesToExchange">The number of bytes to exchange, between 1 and the length of the buffer parameters</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
+        /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
+        /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
+        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
+        /// </remarks>
+        public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer, int bytesToExchange)
         {
-            throw new NotImplementedException();
+            if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
+            if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+            if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
+
+            GCHandle rxGch = default(GCHandle);
+            GCHandle txGch = default(GCHandle);
+
+            _busSemaphore.Wait();
+
+            try
+            {
+                txGch = GCHandle.Alloc(sendBuffer, GCHandleType.Pinned);
+                rxGch = GCHandle.Alloc(receiveBuffer, GCHandleType.Pinned);
+
+                if (chipSelect != null)
+                {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                var command = new Nuttx.UpdSPIDataCommand()
+                {
+                    BufferLength = bytesToExchange,
+                    TxBuffer = txGch.AddrOfPinnedObject(),
+                    RxBuffer = rxGch.AddrOfPinnedObject(),
+                    BusNumber = BusNumber
+                };
+
+                Output.WriteLineIf(_showSpiDebug, "+Exchange");
+                Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                if (result != 0)
+                {
+                    DecipherSPIError(UPD.GetLastError());
+                }
+                Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
+
+                if (chipSelect != null)
+                {
+                    // deactivate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                }
+            }
+            finally
+            {
+                _busSemaphore.Release();
+
+                if (rxGch.IsAllocated)
+                {
+                    rxGch.Free();
+                }
+                if (txGch.IsAllocated)
+                {
+                    txGch.Free();
+                }
+            }
         }
 
         /// <summary>
-        /// Read a registers from the peripheral.
+        /// Gets an array of all of the speeds (in kHz) that the SPI bus supports.
         /// </summary>
-        /// <param name="address">Address of the register to read.</param>
-        public byte ReadRegister(IDigitalOutputPort chipSelect, byte address)
+        public long[] SupportedSpeeds
         {
-            return WriteRead(chipSelect, new[] { address }, 1)[0];
+            get => new long[]
+                {
+                    375,
+                    750,
+                    1500,
+                    3000,
+                    6000,
+                    12000,
+                    24000,
+                    48000
+                };
         }
 
-        /// <summary>
-        /// Read one or more registers from the peripheral.
-        /// </summary>
-        /// <param name="address">Address of the first register to read.</param>
-        /// <param name="length">Number of bytes to read from the device.</param>
-        public byte[] ReadRegisters(IDigitalOutputPort chipSelect, byte address, ushort length)
+        private void SetBitsPerWord(int bitsPerWord)
         {
-            return WriteRead(chipSelect, new[] { address }, length);
+            if(bitsPerWord < 4 || bitsPerWord > 16)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            var command = new Nuttx.UpdSPIBitsCommand()
+            {
+                BusNumber = BusNumber,
+                BitsPerWord = bitsPerWord
+            };
+
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} bits per word to {command.BitsPerWord}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIBits, ref command);
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
         }
 
-        /// <summary>
-        /// Read an unsigned short from a pair of registers.
-        /// </summary>
-        /// <param name="address">Register address of the low byte (the high byte will follow).</param>
-        /// <param name="order">Order of the bytes in the register (little endian is the default).</param>
-        /// <returns>Value read from the register.</returns>
-        public ushort ReadUShort(IDigitalOutputPort chipSelect, byte address,
-            ByteOrder order = ByteOrder.LittleEndian)
+        private void SetMode(int mode)
         {
-            throw new NotImplementedException();
+            var command = new Nuttx.UpdSPIModeCommand()
+            {
+                BusNumber = BusNumber,
+                Mode = mode
+            };
+
+            Output.WriteLineIf(_showSpiDebug, "+SetMode");
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} mode to {command.Mode}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIMode, ref command);
+            if (result != 0)
+            {
+                DecipherSPIError(UPD.GetLastError());
+            }
+            Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
         }
 
-        /// <summary>
-        /// Read the specified number of unsigned shorts starting at the register
-        /// address specified.
-        /// </summary>
-        /// <param name="address">First register address to read from.</param>
-        /// <param name="number">Number of unsigned shorts to read.</param>
-        /// <param name="order">Order of the bytes (Little or Big endian)</param>
-        /// <returns>Array of unsigned shorts.</returns>
-        public ushort[] ReadUShorts(IDigitalOutputPort chipSelect, byte address, ushort number,
-            ByteOrder order = ByteOrder.LittleEndian)
+        private long SetFrequency(long desiredSpeed)
         {
-            throw new NotImplementedException();
+            // TODO: move this to the F7
+            var speed = GetSupportedSpeed(desiredSpeed);
+
+            var command = new Nuttx.UpdSPISpeedCommand()
+            {
+                BusNumber = BusNumber,
+                Frequency = speed
+            };
+
+            Output.WriteLineIf(_showSpiDebug, "+SetFrequency");
+            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} speed to {command.Frequency}");
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPISpeed, ref command);
+            if (result != 0)
+            {
+                DecipherSPIError(UPD.GetLastError());
+            }
+            Output.WriteLineIf(_showSpiDebug, $" speed set to {desiredSpeed}");
+
+            return speed;
         }
 
-        #endregion Methods
+        private long GetSupportedSpeed(long desiredSpeed)
+        {
+            /*
+             * Meadow's STM32 uses a clock divisor from the PCLK2 for speed.  
+             * PCLK2 (at the time of writing) is 96MHz and max SPI speed is PCLK2/2
+            48
+            24
+            12
+            6
+            3
+            1.5
+            0.75
+            0.375
+            */
+
+            var clockSpeed = 96000000L;
+            var divisor = 2;
+            while (divisor <= 256)
+            {
+                var test = clockSpeed / divisor;
+                if (desiredSpeed >= test)
+                {
+                    return test;
+                }
+                divisor *= 2;
+            }
+            // return the slowest rate
+            return clockSpeed / 256;
+        }
+
+        private uint SpeedToDivisor(long speed)
+        {
+            var clockSpeed = 96000000L;
+            var divisor = clockSpeed / speed;
+            for (int i = 0; i <= 7; i++)
+            {
+                if ((2 << i) == divisor)
+                {
+                    return (uint)i;
+                }
+            }
+
+            return 0;
+        }
+
+        private void DecipherSPIError(Nuttx.ErrorCode ec)
+        {
+            // This is highly unlikely to ever get called.  The underlying Nuttx SPI driver does no error checking and therefore is incapable of returning error codes. Yay.
+            switch (ec)
+            {
+                default:
+                    throw new NativeException($"Communication error.  Error code {(int)ec}");
+            }
+        }
     }
 }

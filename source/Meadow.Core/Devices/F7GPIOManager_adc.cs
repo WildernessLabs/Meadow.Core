@@ -8,8 +8,17 @@ namespace Meadow.Devices
 {
     public partial class F7GPIOManager : IIOController
     {
+        private bool _debuggingADC = false;
+        private bool _initialized = false;
+
         public void ConfigureAnalogInput(IPin pin)
         {
+            if (!_initialized)
+            {
+                InitializeADC();
+                _initialized = true;
+            }
+
             var designator = GetPortAndPin(pin);
 
             // set up the GPIO register to say this is now an anlog
@@ -32,6 +41,8 @@ namespace Meadow.Devices
 
         private bool ConfigureADC(STM32.GpioPort port, int pin)
         {
+            Output.WriteLineIf(_debuggingADC, $"Configuring GPIO for ADC {port}:{pin}");
+
             // set up the pin for analog
             ConfigureGpio(port, pin, STM32.GpioMode.Analog, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
 
@@ -42,15 +53,17 @@ namespace Meadow.Devices
 
         private bool InitializeADC()
         {
+            Output.WriteLineIf(_debuggingADC, $"+InitializeADC");
+
             // do the grunt work to set up the ADC itself
 
             // enable the ADC1 clock - all Meadow ADCs are in ADC1
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0, (1u << 8));
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0,  STM32.RCC_APB2ENR_ADC1EN);
 
             // reset the ADC RCC clock - set the reset bit
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, 0, (1u << 8));
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, 0, STM32.RCC_APB2RSTR_ADCRST);
             // clear the reset bit
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, (1u << 8), 0);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, STM32.RCC_APB2RSTR_ADCRST, 0);
 
             // clear the SR status register
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET,
@@ -64,8 +77,9 @@ namespace Meadow.Devices
             //  Auto conversion disabled
             //  scan mode disabled
             // 
-            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR1_OFFSET,
-                0x7c0ffffF, 0);
+            // basically clear all non-reserved bits
+            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR1_OFFSET, 
+                STM32.ADC_CR1_NON_RESERVED_MASK, 0);
 
             // Set up the CR2 control register.  This translates to:
             //  external trigger disabled
@@ -75,38 +89,43 @@ namespace Meadow.Devices
             //  single conversion mode
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0x7f7f0b03, (1 << 10));
+                STM32.ADC_CR2_NON_RESERVED_MASK, STM32.ADC_CR2_EOCS);
 
             // Set up the SMPR1 sample time register.  This translates to:
-            //  112 samle cycles for channels 10 & 11 
+            //  112 sample cycles for channels 10 & 11 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SMPR1_OFFSET,
-                0x7ffffc0, 0x2d);
+                STM32.ADC_SMPR1_NON_RESERVED_MASK, 
+                (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH10_SHIFT) | (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH11_SHIFT));
 
             // Set up the SMPR2 sample time register.  This translates to:
-            //  112 samle cycles for channels 3 & 7 
+            //  112 sample cycles for channels 3, 4, 5 & 7 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SMPR2_OFFSET,
-                0x3f1ff1ff, 0xa00a00);
+                STM32.ADC_SMPR2_NON_RESERVED_MASK,
+                (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH3_SHIFT)
+                | (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH4_SHIFT)
+                | (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH5_SHIFT)
+                | (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR2_CH7_SHIFT));
 
             // Set up the SQR1 sequence register.  This translates to:
             //  One (1) conversion 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR1_OFFSET,
-                0x00ffffff, 0);
+                STM32.ADC_SQR1_NON_RESERVED_MASK, 0);
 
             // Set up the SQR2 sequence register.  This translates to:
             //  no conversions 7-12 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR2_OFFSET,
-                0x03fffffff, 0);
+                STM32.ADC_SQR2_NON_RESERVED_MASK, 0);
 
 
             // Set up the SQR3 sequence register.  This translates to:
             //  no conversions 0-6 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
-                0x03fffffff, 0);
+                STM32.ADC_SQR3_NON_RESERVED_MASK, 0);
 
             // Set up the CCR common control register.  This translates to:
             //  temp sensor disabled
@@ -115,10 +134,33 @@ namespace Meadow.Devices
             //  DMA disabled
             //  independent ADCs
             // 
-            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
-                0xc0ef1f, (1 << 16));
+            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET,
+                STM32.ADC_CCR_NON_RESERVED_MASK,
+                STM32.ADC_CCR_PRESCALER_DIV4 << STM32.ADC_CCR_ADCPRE_SHIFT);
+
+            // enable the ADC via the CR2 register's ADON bit
+            A2DPower(true);
+
+            Output.WriteLineIf(_debuggingADC, $"CR2 ADON is set.");
 
             return true;
+        }
+
+        private void A2DPower(bool on)
+        {
+            if (on)
+            {
+                UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
+                    0,
+                    STM32.ADC_CR2_ADON);
+            }
+            else
+            {
+                // enable the ADC via the CR2 register's ADON bit
+                UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
+                    STM32.ADC_CR2_ADON,
+                    0);
+            }
         }
 
         public int GetAnalogValue(IPin pin)
@@ -138,27 +180,31 @@ namespace Meadow.Devices
                 default:
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
+            
+            Output.WriteLineIf(_debuggingADC, $"Starting process to get analog for channel {channel}");
 
-            //            Console.WriteLine($"Starting process to get analog for channel {channel}");
-
-            // adjust the SQR3 sequence register to tell it which channel to convert
+            // adjust the SQR3 sequence register to tell it which channel to convert - we're doing 1 conversion only right now
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SQR3_OFFSET,
-                0, (uint)channel);
+                STM32.ADC_SQRx_CHANNEL_MASK << STM32.ADC_SQR3_SQ1_SHIFT, // clear last channel
+                (uint)channel << STM32.ADC_SQR3_SQ1_SHIFT);
 
-            //            Console.WriteLine($"SQR3 set to {channel}");
+            Output.WriteLineIf(_debuggingADC, $"SQR3::SQ1 set to {channel}");
+            
+            // make sure EOC is cleared
+            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET,
+                STM32.ADC_SR_EOC,
+                0);
 
-            // enable the ADC via the CR2 register's ADON bit
-            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0, 1);
+            Output.WriteLineIf(_debuggingADC, $"EOC Cleared...");
 
-            //            Console.WriteLine($"CR2 ADON is set.");
-            //            Console.WriteLine($"Starting ADC Conversion...");
+            Output.WriteLineIf(_debuggingADC, $"Starting ADC Conversion...");
 
             // start a conversion via the CR2 SWSTART bit
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0, 1 << 30);
+                0, 
+                STM32.ADC_CR2_SWSTART);
 
-            //            Console.Write($"Polling status register...");
+            Output.WriteLineIf(_debuggingADC, $"Polling status register...");
 
             // poll the status register - wait for conversion complete
             var ready = false;
@@ -166,22 +212,21 @@ namespace Meadow.Devices
             do
             {
                 var register_sr = UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET);
-                ready = (register_sr & (1 << 1)) != 0;
+                ready = (register_sr & STM32.ADC_SR_EOC) != 0;
 
                 // we need a timeout here to prevent deadlock if the SR never comes on
                 if (tick++ > 200)
                 {
                     // we've failed
-                    Console.Write($"Conversion timed out");
+                    Output.WriteLineIf(_debuggingADC, $"Conversion timed out");
                     return -1;
                 }
 
-                // TODO: yield
-                // currently the OS hangs if I try to Sleep, so we'll spin.  BAD BAD BAD HACK
+                // yield
                 System.Threading.Thread.Sleep(1);
             } while (!ready);
 
-            //            Console.WriteLine($"Conversion complete. Reading DR");
+            Output.WriteLineIf(_debuggingADC, $"Conversion complete. Reading DR");
 
             // read the data register
             return (int)UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_DR_OFFSET);

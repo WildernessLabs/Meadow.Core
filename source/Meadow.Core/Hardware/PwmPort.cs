@@ -12,62 +12,184 @@ namespace Meadow.Hardware
     /// </summary>
     public class PwmPort : PwmPortBase
     {
+        private bool _isRunning = false;
+        private float _frequency;
+        private float _dutyCycle;
+        private bool _inverted;
+
+        // dirty dirty hack
+        internal bool IsOnboard { get; set; }
+
         protected IIOController IOController { get; set; }
         protected IPwmChannelInfo PwmChannelInfo { get; set; }
 
         protected PwmPort(
             IPin pin,
             IIOController ioController,
-            IPwmChannelInfo channel
-            /*bool inverted = false*/) 
-            : base (pin, channel)
+            IPwmChannelInfo channel,
+            bool inverted = false,
+            bool isOnboard = false)
+            : base(pin, channel)
         {
+            this.IsOnboard = isOnboard;
             this.IOController = ioController;
             this.PwmChannelInfo = channel;
+            this.Inverted = inverted;
         }
 
         internal static PwmPort From(
             IPin pin,
             IIOController ioController,
-            float frequency = 100,
-            float dutyCycle = 0
-            /*bool inverted = false*/)
+            float frequency = 100f,
+            float dutyCycle = 0.5f,
+            bool inverted = false,
+            bool isOnboard = false)
         {
-            var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().First();
-            if (channel != null) {
-                //TODO: need other checks here.
-                var port = new PwmPort(pin, ioController, channel);
-                port.Frequency = frequency;
-                port.DutyCycle = dutyCycle;
+            var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().FirstOrDefault();
+            if (channel != null)
+            {
+                var success = DeviceChannelManager.ReservePwm(pin, channel, frequency);
 
-                return port;
-
+                if (success.Item1)
+                {
+                    var port = new PwmPort(pin, ioController, channel, inverted, isOnboard);
+                    port.TimeScale = TimeScale.Seconds;
+                    port.Frequency = frequency;
+                    port.DutyCycle = dutyCycle;
+                    port.Inverted = inverted;
+                    return port;
+                }
+                else
+                {
+                    throw new PortInUseException(success.Item2);
+                }
             }
-            else {
+            else
+            {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a PWM channel");
             }
-
         }
 
-        ~PwmPort() { throw new NotImplementedException(); }
+        /// <summary>
+        /// When <b>true</b> Duty Cycle is "percentage of time spent low" rather than high.
+        /// </summary>
+        public override bool Inverted
+        {
+            get => _inverted;
+            set {
+                if (value == Inverted) return;
+                _inverted = value;
+                if (State)
+                {
+                    UpdateChannel();
+                }
+            }
+        }
 
-        public override float Duration { get; set; }
-        //public override float DutyCycle { get; set; }
-        //public override float Frequency { get; set; }
-        public override float Period { get; set; }
-        //public IDigitalPin Pin { get; }
-        public override TimeScaleFactor Scale { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        /// <summary>
+        /// The frequency, in Hz (cycles per second) of the PWM square wave.
+        /// </summary>
+        public override float Frequency
+        {
+            get => _frequency;
+            set {
+                // clamp
+                if (value < 0) { value = 0; }
+                // TODO: add upper bound.
 
-        public override bool State => throw new NotImplementedException();
+                // shortcut
+                if (value == Frequency) return;
 
+                _frequency = value;
+                if (State) {
+                    UpdateChannel();
+                }
+            }
+        }
+
+        /// <summary>
+        /// The percentage of time the PWM pulse is high (in the range of 0.0 to 1.0)
+        /// </summary>
+        public override float DutyCycle
+        {
+            get => _dutyCycle;
+            set {
+                // clamp
+                if (value < 0) { value = 0; }
+                if (value > 1) { value = 1; }
+                if (value == DutyCycle) return;
+                
+                // dirty dirty hack
+                // Onboard LED flatlines at PWM > 0.85ish.
+                if (IsOnboard && (value > 0.85f)) {
+                    value = 0.85f;
+                }
+
+                _dutyCycle = value;
+                if (State) {
+                    UpdateChannel();
+                }
+            }
+        }
+    
+        /// <summary>
+        /// The amount of time, in seconds, that the a PWM pulse is high.  This will always be less than or equal to the Period
+        /// </summary>
+        public override float Duration
+        {
+            get => DutyCycle * Period;
+            set {
+                if (value > Period) throw new ArgumentOutOfRangeException("Duration must be less than Period");
+                // clamp
+                if (value < 0) { value = 0; }
+
+                DutyCycle = value / Period;
+            }
+        }
+
+        /// <summary>
+        /// The reciprocal of the PWM frequency - in seconds.
+        /// </summary>
+        public override float Period
+        {
+            get => 1.0f / Frequency * (float)TimeScale;
+            set {
+                Frequency = 1.0f / value / (float)TimeScale;
+            }
+        }
+
+        private void UpdateChannel()
+        {
+            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency, Inverted ? (1.0f - DutyCycle) : DutyCycle);
+        }
+
+
+        /// <summary>
+        /// Returns <b>true</b> if the PWM is currently running, otherwise <b>false</b>
+        /// </summary>
+        public override bool State
+        {
+            get => _isRunning;
+        }
+
+        /// <summary>
+        /// Starts the PWM output
+        /// </summary>
         public override void Start()
         {
-            UPD.PWM.Start(PwmChannelInfo.Timer, (uint)Frequency, DutyCycle);
+            DeviceChannelManager.BeforeStartPwm(this.PwmChannelInfo);
+            UpdateChannel();
+            DeviceChannelManager.AfterStartPwm(this.PwmChannelInfo, this.IOController);
+            _isRunning = true;
         }
 
+        /// <summary>
+        /// Stops the PWM output
+        /// </summary>
         public override void Stop()
         {
-            UPD.PWM.Stop(PwmChannelInfo.Timer);
+            UPD.PWM.Stop(PwmChannelInfo);
+            _isRunning = false;
         }
 
         protected void Dispose(bool disposing)
@@ -76,6 +198,9 @@ namespace Meadow.Hardware
             UPD.PWM.Shutdown(PwmChannelInfo.Timer);
         }
 
+        /// <summary>
+        /// Disposes the resources associated with the PwmPort
+        /// </summary>
         public override void Dispose()
         {
             Dispose(true);

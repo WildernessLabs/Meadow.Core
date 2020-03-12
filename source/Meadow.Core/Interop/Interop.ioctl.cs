@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Meadow.Core
 {
@@ -64,13 +65,43 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdGpioInterruptConfiguration interruptConfig);
 
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdI2CCommand i2cCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPIDataCommand spiCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPISpeedCommand spiCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPIModeCommand spiCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPIBitsCommand spiCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, IntPtr pData);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref int dwData);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, StringBuilder sb);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEnumDirCmd command);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, int request, IntPtr pData);
+
             /// <summary>
             /// Configures the Universal Platofrm Driver to set PWM APB clock.
             /// </summary>
             /// <returns>0 on success, otherwise an error code</returns>
             /// <param name="fd">Driver handle</param>
             /// <param name="request">UPD Ioctl function constant - should be 5 in this case</param>
-            /// <param name="interruptConfig">A UpdGpioInterruptConfiguration struct describing the specific interrupt configuration desired</param>
+            /// <param name="pwmCmd">A UpdPwmCmd struct describing the specific PWM command</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdPwmCmd pwmCmd);
 

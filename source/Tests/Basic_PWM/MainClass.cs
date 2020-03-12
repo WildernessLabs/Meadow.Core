@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Basic_PWM
 {
@@ -10,6 +11,8 @@ class MainClass
         {
             // instantiate and run new meadow app
             _app = new PWMApp();
+
+            Thread.Sleep(Timeout.Infinite);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Meadow;
 
 namespace InterruptTest
@@ -11,6 +12,8 @@ namespace InterruptTest
         {
             // instantiate and run new meadow app
             _app = new InterruptApp();
+
+            Thread.Sleep(Timeout.Infinite);
         }
     }
 }
