@@ -1,22 +1,55 @@
 # Meadow.Core pipeline
 # Reference: https://aka.ms/yaml
 
-trigger:
-- master
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
 
-pool: "Default"
+trigger:
+- develop
+
+pool: 'Hosted VS2017'
+
+variables:
+  solution: '**/Meadow.Core.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
 
 steps:
-- task: ShellScript@2
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
   inputs:
-    scriptPath: build.sh
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+    msbuildArgs: /property:langversion=latest
+
 - task: CopyFiles@2
   inputs:
-    contents: |
-     source/Meadow.Core/bin/Debug/Meadow.Core.dll
-     source/Meadow.Core/bin/Debug/Meadow.Core.pdb
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
+    Contents: '**\*.nupkg'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    flattenFolders: true
+    cleanTargetFolder: true
+    overWrite: true
+
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: Meadow.Core
+    artifactName: packages
+
+- task: NuGetCommand@2
+  displayName: 'nuget push'
+  inputs:
+    command: 'push'
+    feedsToUse: 'select'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)\**\*-*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: 'Meadow'
+    versioningScheme: 'off'
+#    allowPackageConflicts: true
