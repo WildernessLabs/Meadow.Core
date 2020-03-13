@@ -125,10 +125,11 @@ namespace Meadow.Core
                 [FieldOffset(8)]
                 public byte c_cc; // this is actually 9 bytes, but we don't use it, so whatevs
                 // there are probably 3 bytes of padding right here to get dword alignment below
-                [FieldOffset(20)]
+                [FieldOffset(17)]
                 public int c_speed;
             }
 
+            // from nuttx termios.h
             //typedef uint32_t speed_t;   /* Used for terminal baud rates */
             //typedef uint16_t tcflag_t;  /* Used for terminal modes */
             //typedef int      cc_t;      /* Used for terminal special characters */

@@ -100,6 +100,13 @@
         /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
         byte[] ReadToToken(byte token);
 
+        /// <summary>
+        /// Reads bytes from the input buffer until a specified token is found
+        /// </summary>
+        /// <param name="token">The token to search for</param>
+        /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
+        byte[] ReadToToken(char token);
+
         string ToString();
 
         /// <summary>
