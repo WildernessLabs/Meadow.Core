@@ -18,6 +18,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class SerialPort : IDisposable, ISerialPort
     {
+        private const int TCSANOW = 0x00;
         private const int TCGETS = 0x0101;
         private const int TCSETS = 0x0102;
         private const string DriverFolder = "/dev";
@@ -352,26 +353,28 @@ namespace Meadow.Hardware
 
                         if (result > 0)
                         {
-                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
+//                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
+                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {BitConverter.ToString(readBuffer, 0, result)}");
+
                             _readBuffer.Enqueue(readBuffer, 0, result);
 
                             if (DataReceived != null)
                             {
                                 // put on a worker thread, else if the handler goes into some wait, we'll never process data
-                                //                                Task.Run(() =>
-                                //                                {
-                                try
+                                Task.Run(() =>
                                 {
-                                    Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
-                                    DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
-                                    Output.WriteLineIf(_showSerialDebug, $"event handler complete");
-                                }
-                                catch (Exception ex)
-                                {
-                                    // if the event handler throws, we don't want this to die
-                                    Output.WriteLine($"Serial event handler threw: {ex.Message}");
-                                }
-                                //                                });
+                                    try
+                                    {
+                                        Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
+                                        DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
+                                        Output.WriteLineIf(_showSerialDebug, $"event handler complete");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // if the event handler throws, we don't want this to die
+                                        Output.WriteLine($"Serial event handler threw: {ex.Message}");
+                                    }
+                                });
                             }
                         }
                     }
@@ -393,6 +396,17 @@ namespace Meadow.Hardware
         {
             if (_readBuffer == null || _readBuffer.Count == 0) return -1;
             return _readBuffer.Peek();
+        }
+
+        /// <summary>
+        /// Reads bytes from the input buffer until a specified token is found
+        /// </summary>
+        /// <param name="token">The token to search for</param>
+        /// <returns>All data in the buffer up to and including the specified token, if a token exists, otherwise an empty array.</returns>
+        /// <exception cref="TimeoutException">No token was received before the specified timeout.</exception>
+        public byte[] ReadToToken(char token)
+        {
+            return ReadToToken(Convert.ToByte(token));
         }
 
         /// <summary>
@@ -535,6 +549,89 @@ namespace Meadow.Hardware
         {
             var settings = new Nuttx.Termios();
 
+            // get the current settings           
+            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
+            var result = Nuttx.tcgetattr(_driverHandle, ref settings);
+            if (result != 0)
+            {
+                var error = UPD.GetLastError();
+                throw new NativeException(error);
+            }
+
+            if (_showSerialDebug)
+            {
+                ShowSettings(settings);
+            }
+
+            // clear stuff that should be off
+            settings.c_iflag &= ~(Nuttx.InputFlags.IGNBRK | Nuttx.InputFlags.BRKINT | Nuttx.InputFlags.PARMRK | Nuttx.InputFlags.ISTRIP | Nuttx.InputFlags.INLCR | Nuttx.InputFlags.IGNCR | Nuttx.InputFlags.ICRNL | Nuttx.InputFlags.IXON);
+            settings.c_oflag &= ~Nuttx.OutputFlags.OPOST;
+            settings.c_lflag &= ~(Nuttx.LocalFlags.ECHO | Nuttx.LocalFlags.ECHONL | Nuttx.LocalFlags.ICANON | Nuttx.LocalFlags.ISIG | Nuttx.LocalFlags.IEXTEN);
+            settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
+
+            // now set the user-requested settings
+            switch (DataBits)
+            {
+                case 5:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS5;
+                    break;
+                case 6:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS6;
+                    break;
+                case 7:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS7;
+                    break;
+                case 8:
+                    settings.c_cflag |= Nuttx.ControlFlags.CS8;
+                    break;
+            }
+            switch (Parity)
+            {
+                case Parity.Odd:
+                    settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
+                    break;
+                case Parity.Even:
+                    settings.c_cflag |= Nuttx.ControlFlags.PARENB;
+                    break;
+            }
+            switch (StopBits)
+            {
+                case StopBits.Two:
+                    settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
+                    break;
+            }
+
+            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
+            Nuttx.cfsetspeed(ref settings, BaudRate);
+            if (_showSerialDebug)
+            {
+                ShowSettings(settings);
+            }
+
+            result = Nuttx.tcsetattr(_driverHandle, TCSANOW, ref settings);
+
+            if (result != 0)
+            {
+                throw new NativeException(UPD.GetLastError());
+            }
+
+            if (_showSerialDebug)
+            {
+                // get the settings again
+                result = Nuttx.tcgetattr(_driverHandle, ref settings);
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
+                ShowSettings(settings);
+            }
+        }
+
+        private unsafe void SetPortSettingsIoctl()
+        {
+            var settings = new Nuttx.Termios();
+
             // get the current settings
             var p = (IntPtr)(&settings);
 
@@ -601,6 +698,18 @@ namespace Meadow.Hardware
             if (result != 0)
             {
                 throw new NativeException(UPD.GetLastError());
+            }
+
+            if(_showSerialDebug)
+            {
+                // get the settings again
+                result = Nuttx.ioctl(_driverHandle, TCGETS, p);
+                if (result != 0)
+                {
+                    var error = UPD.GetLastError();
+                    throw new NativeException(error);
+                }
+                ShowSettings(settings);
             }
         }
     }
