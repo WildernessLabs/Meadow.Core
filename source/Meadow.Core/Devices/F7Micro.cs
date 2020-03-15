@@ -253,5 +253,14 @@ namespace Meadow.Devices
             return I2cBus.From(this.IoController, clock, data, frequencyHz);
         }
 
+        public void SetClock(DateTime dateTime)
+        {
+            var ts = new Core.Interop.Nuttx.timespec
+            {
+                tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
+            };
+
+            Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
+        }
     }
 }
