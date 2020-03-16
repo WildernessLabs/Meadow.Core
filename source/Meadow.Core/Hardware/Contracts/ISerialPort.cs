@@ -1,4 +1,6 @@
-﻿namespace Meadow.Hardware
+﻿using System;
+
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
@@ -56,6 +58,11 @@
         /// Indicates that data has been received through a port represented by the SerialPort object.
         /// </summary>
         event SerialDataReceivedEventHandler DataReceived;
+
+        /// <summary>
+        /// Indicates that the internal data buffer has overrun and data has been lost.
+        /// </summary>
+        event EventHandler BufferOverrun;
 
         /// <summary>
         /// Closes the port connection and sets the IsOpen property to false.

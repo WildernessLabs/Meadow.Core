@@ -37,6 +37,11 @@ namespace Meadow.Hardware
         public event SerialDataReceivedEventHandler DataReceived;
 
         /// <summary>
+        /// Indicates that the internal data buffer has overrun and data has been lost.
+        /// </summary>
+        public event EventHandler BufferOverrun;
+
+        /// <summary>
         /// Gets the port name used for communications.
         /// </summary>
         public string PortName { get; }
@@ -195,6 +200,20 @@ namespace Meadow.Hardware
                 // TODO: if there are events wired, we need to handle that.
                 // for now this is private to prevent resizing
                 _readBuffer = new CircularBuffer<byte>(value);
+                _readBuffer.Overrun += OnReadBufferOverrun;
+            }
+        }
+
+        private void OnReadBufferOverrun(object sender, EventArgs e)
+        {
+            try
+            {
+                BufferOverrun?.Invoke(this, EventArgs.Empty);
+            }
+            catch(Exception ex)
+            {
+                // ignore errors in the consumer's code
+                Console.WriteLine($"Error in BufferOverrun handler: {ex.Message}");
             }
         }
 
@@ -230,6 +249,7 @@ namespace Meadow.Hardware
             if (_readBuffer != null)
             {
                 _readBuffer.Clear();
+                _readBuffer.Overrun -= OnReadBufferOverrun;
             }
         }
 
