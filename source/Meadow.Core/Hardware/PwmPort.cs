@@ -77,7 +77,8 @@ namespace Meadow.Hardware
         public override bool Inverted
         {
             get => _inverted;
-            set {
+            set
+            {
                 if (value == Inverted) return;
                 _inverted = value;
                 if (State)
@@ -93,7 +94,10 @@ namespace Meadow.Hardware
         public override float Frequency
         {
             get => _frequency;
-            set {
+            set
+            {
+                Console.WriteLine($"Setting freq to {(int)(value*100)}");
+
                 // clamp
                 if (value < 0) { value = 0; }
                 // TODO: add upper bound.
@@ -102,7 +106,8 @@ namespace Meadow.Hardware
                 if (value == Frequency) return;
 
                 _frequency = value;
-                if (State) {
+                if (State)
+                {
                     UpdateChannel();
                 }
             }
@@ -114,32 +119,36 @@ namespace Meadow.Hardware
         public override float DutyCycle
         {
             get => _dutyCycle;
-            set {
+            set
+            {
                 // clamp
                 if (value < 0) { value = 0; }
                 if (value > 1) { value = 1; }
                 if (value == DutyCycle) return;
-                
+
                 // dirty dirty hack
                 // Onboard LED flatlines at PWM > 0.85ish.
-                if (IsOnboard && (value > 0.85f)) {
+                if (IsOnboard && (value > 0.85f))
+                {
                     value = 0.85f;
                 }
 
                 _dutyCycle = value;
-                if (State) {
+                if (State)
+                {
                     UpdateChannel();
                 }
             }
         }
-    
+
         /// <summary>
         /// The amount of time, in seconds, that the a PWM pulse is high.  This will always be less than or equal to the Period
         /// </summary>
         public override float Duration
         {
             get => DutyCycle * Period;
-            set {
+            set
+            {
                 if (value > Period) throw new ArgumentOutOfRangeException("Duration must be less than Period");
                 // clamp
                 if (value < 0) { value = 0; }
@@ -154,8 +163,9 @@ namespace Meadow.Hardware
         public override float Period
         {
             get => 1.0f / Frequency * (float)TimeScale;
-            set {
-                Frequency = 1.0f / value / (float)TimeScale;
+            set
+            {
+                Frequency = 1.0f * (float)TimeScale / value;
             }
         }
 
