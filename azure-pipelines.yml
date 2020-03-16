@@ -1,22 +1,22 @@
-# # Meadow.Core pipeline
-# # Reference: https://aka.ms/yaml
+# Meadow.Core pipeline
+# Reference: https://aka.ms/yaml
 
-# trigger:
-# - master
+trigger:
+- master
 
-# pool: "Default"
+pool: "Default"
 
-# steps:
-# - task: ShellScript@2
-#   inputs:
-#     scriptPath: build.sh
-# - task: CopyFiles@2
-#   inputs:
-#     contents: |
-#      source/Meadow.Core/bin/Debug/Meadow.Core.dll
-#      source/Meadow.Core/bin/Debug/Meadow.Core.pdb
-#     targetFolder: '$(Build.ArtifactStagingDirectory)'
-# - task: PublishBuildArtifacts@1
-#   inputs:
-#     pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#     artifactName: Meadow.Core
+steps:
+- task: ShellScript@2
+  inputs:
+    scriptPath: build.sh
+- task: CopyFiles@2
+  inputs:
+    contents: |
+     source/Meadow.Core/bin/Debug/Meadow.Core.dll
+     source/Meadow.Core/bin/Debug/Meadow.Core.pdb
+    targetFolder: '$(Build.ArtifactStagingDirectory)'
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: Meadow.Core
