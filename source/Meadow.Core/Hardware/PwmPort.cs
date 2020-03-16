@@ -57,6 +57,7 @@ namespace Meadow.Hardware
                     port.Frequency = frequency;
                     port.DutyCycle = dutyCycle;
                     port.Inverted = inverted;
+                    port.Channel = channel;
                     return port;
                 }
                 else

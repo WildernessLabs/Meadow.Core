@@ -366,6 +366,31 @@ namespace Meadow
         }
 
         /// <summary>
+        /// Determine if the buffer contains a specified value
+        /// </summary>
+        /// <returns></returns>
+        public bool Contains(T searchFor)
+        {
+            lock (m_syncRoot)
+            {
+                // we don't want to enumerate values outside of our "valid" range
+                for (int i = 0; i < Count; i++)
+                {
+                    int index = m_tail + i;
+
+                    if ((m_head <= m_tail) && (index >= MaxElements))
+                    {
+                        index -= MaxElements;
+                    }
+
+                    if (m_list[index].Equals(searchFor)) return true;
+                }
+
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Dequeues the requested number of elements from the buffer
         /// </summary>
         /// <param name="count"></param>

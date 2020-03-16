@@ -1,5 +1,7 @@
 ﻿
 
+using System;
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -115,5 +117,7 @@ namespace Meadow.Hardware
             IPin data,
             int frequencyHz = DefaultI2cBusSpeed
         );
+
+        void SetClock(DateTime dateTime);
     }
 }

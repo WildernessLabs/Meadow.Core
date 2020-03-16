@@ -95,6 +95,18 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, int request, IntPtr pData);
 
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int tcgetattr(IntPtr fd, ref Termios termiosp);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int tcsetattr(IntPtr fd, int options, ref Termios termiosp);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int cfgetspeed(ref Termios termiosp);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int cfsetspeed(ref Termios termiosp, int speed);
+
             /// <summary>
             /// Configures the Universal Platofrm Driver to set PWM APB clock.
             /// </summary>

@@ -1,4 +1,6 @@
-﻿namespace Meadow.Hardware
+﻿using System;
+
+namespace Meadow.Hardware
 {
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
@@ -58,6 +60,11 @@
         event SerialDataReceivedEventHandler DataReceived;
 
         /// <summary>
+        /// Indicates that the internal data buffer has overrun and data has been lost.
+        /// </summary>
+        event EventHandler BufferOverrun;
+
+        /// <summary>
         /// Closes the port connection and sets the IsOpen property to false.
         /// </summary>
         void Close();
@@ -99,6 +106,13 @@
         /// <param name="token">The token to search for</param>
         /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
         byte[] ReadToToken(byte token);
+
+        /// <summary>
+        /// Reads bytes from the input buffer until a specified token is found
+        /// </summary>
+        /// <param name="token">The token to search for</param>
+        /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
+        byte[] ReadToToken(char token);
 
         string ToString();
 
