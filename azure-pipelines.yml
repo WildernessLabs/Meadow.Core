@@ -1,22 +1,75 @@
 # Meadow.Core pipeline
 # Reference: https://aka.ms/yaml
 
+# .NET Desktop
+# Build and run tests for .NET Desktop or Windows classic desktop solutions.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+
 trigger:
 - master
+- develop
 
-pool: "Default"
+variables:
+  solution: '**/Meadow.Core.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  internalFeedName: 'Meadow'
+  preReleasePackageBranch: 'refs/heads/develop'
+  meadowNugetServiceConnectionName: 'Meadow_Nuget'
 
-steps:
-- task: ShellScript@2
-  inputs:
-    scriptPath: build.sh
-- task: CopyFiles@2
-  inputs:
-    contents: |
-     source/Meadow.Core/bin/Debug/Meadow.Core.dll
-     source/Meadow.Core/bin/Debug/Meadow.Core.pdb
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: Meadow.Core
+pool:
+  vmImage: windows-2019
+
+stages:
+- stage: Build
+  jobs: 
+    - job: Build_Solution
+      steps:
+      - task: NuGetToolInstaller@1
+      - task: NuGetCommand@2
+        inputs:
+          restoreSolution: '$(solution)'
+      - task: VSBuild@1
+        inputs:
+          solution: '$(solution)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+          msbuildArgs: /property:langversion=latest
+      - task: CopyFiles@2
+        inputs:
+          Contents: '**\*.nupkg'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          flattenFolders: true
+          cleanTargetFolder: true
+          overWrite: true
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: packages
+
+# DEVELOP BRANCH PUBLISH
+
+- stage: Publish
+  dependsOn: Build
+  condition: and(succeeded('Build'), eq(variables['build.sourceBranch'], variables['preReleasePackageBranch']))
+  jobs:
+  - job: Publish_Beta_Nugets
+    steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'packages'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - task: NuGetCommand@2
+        displayName: 'nuget push'
+        inputs:
+          command: 'push'
+          feedsToUse: 'select'
+          packagesToPush: '$(System.ArtifactsDirectory)\**\*-*.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: $(internalFeedName)
+          versioningScheme: 'off'
+          allowPackageConflicts: true
+    
