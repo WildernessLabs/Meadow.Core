@@ -9,49 +9,64 @@
 trigger:
 - develop
 
-pool:
-  vmImage: windows-2019
-
 variables:
   solution: '**/Meadow.Core.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  internalFeedName: 'Meadow'
+  preReleasePackageBranch: 'refs/heads/develop'
+  meadowNugetServiceConnectionName: 'Meadow_Nuget'
 
-steps:
-- task: NuGetToolInstaller@1
+pool:
+  vmImage: windows-2019
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+stages:
+- stage: Build
+  jobs: 
+    - job: Build_Solution
+      steps:
+      - task: NuGetToolInstaller@1
+      - task: NuGetCommand@2
+        inputs:
+          restoreSolution: '$(solution)'
+      - task: VSBuild@1
+        inputs:
+          solution: '$(solution)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+          msbuildArgs: /property:langversion=latest
+      - task: CopyFiles@2
+        inputs:
+          Contents: '**\*.nupkg'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          flattenFolders: true
+          cleanTargetFolder: true
+          overWrite: true
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: packages
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    msbuildArgs: /property:langversion=latest
-
-- task: CopyFiles@2
-  inputs:
-    Contents: '**\*.nupkg'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-    flattenFolders: true
-    cleanTargetFolder: true
-    overWrite: true
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: packages
-
-- task: NuGetCommand@2
-  displayName: 'nuget push'
-  inputs:
-    command: 'push'
-    feedsToUse: 'select'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)\**\*-*.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: 'Meadow'
-    versioningScheme: 'off'
-#    allowPackageConflicts: true
-#
+- stage: Publish
+  dependsOn: Build
+  condition: and(succeeded('Build'), eq(variables['build.sourceBranch'], variables['preReleasePackageBranch']))
+  jobs:
+  - job: Publish_Beta_Nugets
+    steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'packages'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - task: NuGetCommand@2
+        displayName: 'nuget push'
+        inputs:
+          command: 'push'
+          feedsToUse: 'select'
+          packagesToPush: '$(System.ArtifactsDirectory)\**\*-*.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: $(internalFeedName)
+          versioningScheme: 'off'
+          allowPackageConflicts: true
+    
