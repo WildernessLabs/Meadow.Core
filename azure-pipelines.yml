@@ -11,7 +11,6 @@ variables:
   buildConfiguration: 'Release'
   internalFeedName: 'Meadow'
   preReleasePackageBranch: 'refs/heads/develop'
-  meadowNugetServiceConnectionName: 'Meadow_Nuget'
 
 pool:
   vmImage: windows-2019
@@ -45,7 +44,7 @@ stages:
 
 # DEVELOP BRANCH PUBLISH
 
-- stage: Publish
+- stage: Publish_Staging
   dependsOn: Build
   condition: and(succeeded('Build'), eq(variables['build.sourceBranch'], variables['preReleasePackageBranch']))
   jobs:
@@ -67,4 +66,20 @@ stages:
           publishVstsFeed: $(internalFeedName)
           versioningScheme: 'off'
           allowPackageConflicts: true
-    
+
+# MASTER BRANCH PUBLISH
+
+- stage: Publish_Prod
+  dependsOn: Build
+  condition: and(succeeded('Build'), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  jobs:
+  - job: Publish_Nugets
+    steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'packages'
+          downloadPath: '$(System.ArtifactsDirectory)'
+      - task: NuGetToolInstaller@1
+      - script: nuget push -ApiKey $(meadowNugetApiKey) -Source https://api.nuget.org/v3/index.json -SkipDuplicate -NoSymbols $(System.ArtifactsDirectory)\**\*.nupkg
