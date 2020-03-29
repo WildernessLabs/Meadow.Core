@@ -64,6 +64,7 @@ namespace Meadow.Hardware
         bool UnconfigureGpio(IPin pin);
 
         void ConfigureAnalogInput(IPin pin);
-        int GetAnalogValue(IPin pin);        
+        int GetAnalogValue(IPin pin);
+        void ReassertConfig(IPin pin);
     }
 }

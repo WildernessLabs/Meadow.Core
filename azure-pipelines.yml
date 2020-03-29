@@ -3,20 +3,39 @@
 
 trigger:
 - master
+- develop
 
-pool: "Default"
+variables:
+  solution: '**/Meadow.Core.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
 
-steps:
-- task: ShellScript@2
-  inputs:
-    scriptPath: build.sh
-- task: CopyFiles@2
-  inputs:
-    contents: |
-     source/Meadow.Core/bin/Debug/Meadow.Core.dll
-     source/Meadow.Core/bin/Debug/Meadow.Core.pdb
-    targetFolder: '$(Build.ArtifactStagingDirectory)'
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: Meadow.Core
+pool:
+  vmImage: windows-2019
+
+stages:
+- stage: Build
+  jobs: 
+    - job: Build_Solution
+      steps:
+      - task: NuGetToolInstaller@1
+      - task: NuGetCommand@2
+        inputs:
+          restoreSolution: '$(solution)'
+      - task: VSBuild@1
+        inputs:
+          solution: '$(solution)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+          msbuildArgs: /property:langversion=latest
+      - task: CopyFiles@2
+        inputs:
+          Contents: '**\*.nupkg'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          flattenFolders: true
+          cleanTargetFolder: true
+          overWrite: true
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: packages
