@@ -27,7 +27,7 @@ namespace Meadow.Devices
 
         private List<GpioConfig> _currentConfigs = new List<GpioConfig>();
 
-        void INuttxIOController.ReassertConfig(IPin pin)
+        public void ReassertConfig(IPin pin)
         {
             var designator = GetPortAndPin(pin);
             lock (_currentConfigs)

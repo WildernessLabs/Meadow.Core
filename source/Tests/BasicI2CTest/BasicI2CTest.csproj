@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <ProjectGuid>{DC2AB456-74B1-4408-9640-960B555460C8}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>BasicI2CTest</RootNamespace>
     <AssemblyName>App</AssemblyName>

@@ -15,6 +15,9 @@ namespace Basic_PWM
 
             try
             {
+                var pwm04 = Device.CreatePwmPort(Device.Pins.D04, 2, 0.5f);
+                TimeScaleChecks(pwm04);
+
                 PwmWithGpio();
             }
             catch (Exception ex)
@@ -58,6 +61,35 @@ namespace Basic_PWM
             pwmA.Start();
             pwmB.Start();
             pwmC.Start();
+        }
+
+        private void TimeScaleChecks(IPwmPort pwm)
+        {
+            var delta = 100;
+
+            pwm.Frequency = 50f;
+
+            pwm.Start();
+            while (true)
+            {
+                pwm.TimeScale = TimeScale.Seconds;
+                pwm.Period = 0.02f;
+                Console.WriteLine($"Freq: {(int)pwm.Frequency}  Period: {(int)pwm.Period} {pwm.TimeScale}");
+                Thread.Sleep(2000);
+
+                pwm.TimeScale = TimeScale.Milliseconds;
+                Console.WriteLine($"Freq: {(int)pwm.Frequency}  Period: {(int)pwm.Period} {pwm.TimeScale}");
+                Thread.Sleep(2000);
+                pwm.Period = 50f;
+                Console.WriteLine($"Freq: {(int)pwm.Frequency}  Period: {(int)pwm.Period} {pwm.TimeScale}");
+                Thread.Sleep(2000);
+
+                pwm.TimeScale = TimeScale.Microseconds;
+                Console.WriteLine($"Freq: {(int)pwm.Frequency}  Period: {(int)pwm.Period} {pwm.TimeScale}");
+                pwm.Period = 80f;
+                Console.WriteLine($"Freq: {(int)pwm.Frequency}  Period: {(int)pwm.Period} {pwm.TimeScale}");
+                Thread.Sleep(2000);
+            }
         }
 
         private void FrequencyChecks(IPwmPort pwm)
