@@ -47,8 +47,10 @@ namespace Meadow.Hardware
         /// <param name="byteCountToRead">Number of bytes to read</param>
         /// <param name="dataToWrite">Data to be written.</param>
         /// <returns>The data read from the bus</returns>
+        [Obsolete("This overload if WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
         byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite);
 
+        void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer);
 
         /// <summary>
         ///  Read the specified number of bytes from the I2C device.

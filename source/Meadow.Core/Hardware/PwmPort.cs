@@ -96,8 +96,6 @@ namespace Meadow.Hardware
             get => _frequency;
             set
             {
-                Console.WriteLine($"Setting freq to {(int)(value*100)}");
-
                 // clamp
                 if (value < 0) { value = 0; }
                 // TODO: add upper bound.
