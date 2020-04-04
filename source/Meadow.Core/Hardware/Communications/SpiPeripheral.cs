@@ -127,6 +127,18 @@ namespace Meadow.Hardware
             return result;
         }
 
+        public void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            // DEV NOTE: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
+
+            var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);
+
+            for (int i = 0; i < readBuffer.Length; i++)
+            {
+                readBuffer[i] = r[i];
+            }
+        }
+
         /// <summary>
         /// Reads the specified number of bytes from the bus
         /// </summary>
