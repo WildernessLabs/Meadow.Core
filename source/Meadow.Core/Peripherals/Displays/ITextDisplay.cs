@@ -35,12 +35,6 @@
         void ClearLine(byte lineNumber);
 
         /// <summary>
-        /// Sets the display's brightness.
-        /// </summary>
-        /// <param name="brightness">0 is lowest, 1 is highest</param>
-        void SetBrightness(float brightness = 0.75f);
-
-        /// <summary>
         /// Set cursor in the especified row and column.
         /// </summary>
         /// <param name="column"></param>
