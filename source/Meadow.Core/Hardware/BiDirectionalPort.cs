@@ -150,7 +150,7 @@ namespace Meadow.Hardware
             if (pin == this.Pin)
             {
                 var time = DateTime.Now;
-
+// p-m TEST BiDirectionalPort AND SEE IF THIS IS USED
                 // debounce timing checks
                 if (DebounceDuration > 0)
                 {

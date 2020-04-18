@@ -73,6 +73,8 @@ namespace Meadow.Devices
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
             //            DebugFeatures = DebugFeature.GpioDetail;
+            // p-m REMOVE THIS LINE BEFORE CHECKIN
+            DebugFeatures = DebugFeature.Interrupts;
 #endif
         }
 
@@ -276,7 +278,9 @@ namespace Meadow.Devices
         public void ConfigureInput(
             IPin pin,
             ResistorMode resistorMode,
-            InterruptMode interruptMode
+            InterruptMode interruptMode,
+            uint debounceDuration = 0,
+            uint glitchFilterCycleCount = 0
             )
         {
             // translate resistor mode from Meadow to STM32 register bits
@@ -296,12 +300,13 @@ namespace Meadow.Devices
 
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"Configuring {pin.Name} for resistor {resistorMode} ({(int)mode32})");
 
-            ConfigureInput(pin, mode32, interruptMode);
+            ConfigureInput(pin, mode32, interruptMode, debounceDuration, glitchFilterCycleCount);
 
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $"{pin.Name} configured");
         }
 
-        private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode)
+        private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode,
+            uint debounceDuration = 0, uint glitchFilterCycleCount = 0)
         {
             lock (_interruptPins)
             {
@@ -315,7 +320,8 @@ namespace Meadow.Devices
                     _interruptPins.Remove(key);
                 }
             }
-            return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, interruptMode);
+            return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, 
+                    false, interruptMode, debounceDuration, glitchFilterCycleCount);
         }
 
         private bool ConfigureOutput(IPin pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
@@ -339,14 +345,18 @@ namespace Meadow.Devices
             return ConfigureGpio(designator.port, designator.pin, STM32.GpioMode.Input, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
         }
 
-        private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode)
+        private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
+            STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
+            uint debounceDuration = 0, uint glitchFilterCycleCount = 0)
         {
             var designator = GetPortAndPin(pin);
 
-            return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode);
+            return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode, 0, debounceDuration, glitchFilterCycleCount);
         }
 
-        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber = 0)
+        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
+         STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
+         int alternateFunctionNumber = 0, uint debounceDuration = 0, uint glitchFilterCycleCount = 0)
         {
             int setting = 0;
             uint base_addr = 0;
@@ -454,7 +464,7 @@ namespace Meadow.Devices
 
 
             // INTERRUPTS
-            WireInterrupt(port, pin, interruptMode);
+            WireInterrupt(port, pin, interruptMode, debounceDuration, glitchFilterCycleCount);
             RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
 
             return true;

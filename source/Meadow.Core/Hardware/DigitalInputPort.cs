@@ -10,8 +10,8 @@ namespace Meadow.Hardware
     public class DigitalInputPort : DigitalInputPortBase
     {
         private ResistorMode _resistorMode;
-        private int _debounceDuration;
-        private int _glitchCycleCount;
+        private uint _debounceDuration;
+        private uint _glitchCycleCount;
 
         protected IIOController IOController { get; set; }
 
@@ -23,10 +23,11 @@ namespace Meadow.Hardware
             IDigitalChannelInfo channel,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            int debounceDuration = 0,
-            int glitchFilterCycleCount = 0
+            uint debounceDuration = 0,
+            uint glitchFilterCycleCount = 0
             ) : base(pin, channel, interruptMode)
         {
+
             // DEVELOPER NOTE:
             // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
             // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
@@ -39,13 +40,15 @@ namespace Meadow.Hardware
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
             this._resistorMode = resistorMode;
+            this._debounceDuration = debounceDuration;
+            this._glitchCycleCount = glitchFilterCycleCount;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
             if (success.Item1)
             {
-                // make sure the pin is configured as a digital output with the proper state
-                ioController.ConfigureInput(pin, resistorMode, interruptMode);
+                // make sure the pin is configured as a digital input with the proper state
+                ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchFilterCycleCount);
             }
             else
             {
@@ -58,8 +61,8 @@ namespace Meadow.Hardware
             IIOController ioController,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            int debounceDuration = 0,
-            int glitchFilterCycleCount = 0
+            uint debounceDuration = 0,
+            uint glitchFilterCycleCount = 0
             )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
@@ -68,14 +71,11 @@ namespace Meadow.Hardware
                 if (interruptMode != InterruptMode.None && (!chan.InterruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode);
-                // set these here, not in a constructor because they are virtual
-                port.DebounceDuration = debounceDuration;
-                port.GlitchFilterCycleCount = glitchFilterCycleCount;
+                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);                // set these here, not in a constructor because they are virtual
                 return port;
 
             } else {
-                throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
+                throw new Exception("Unable to create an input port on the pin, because it doesn't have a digital channel");
             }
         }
 
@@ -89,25 +89,32 @@ namespace Meadow.Hardware
             }
         }
 
+        // p-m THIS NEEDS MORE THOUGHT!
         void OnInterrupt(IPin pin, bool state)
         {
             if(pin == this.Pin)
             {
-                var time = DateTime.Now;
-
-                // debounce timing checks
-                if (DebounceDuration > 0) {
-                    if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration) {
-                        return;
-                    }
-                }
-
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                this.LastEventTime = time;
-
-                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, time, capturedLastTime));
-                
+                this.LastEventTime = DateTime.Now;
+                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, this.LastEventTime, capturedLastTime));
             }
+
+            // P-M OLD
+            // {
+            //     var time = DateTime.Now;
+
+            //     // debounce timing checks
+            //     if (DebounceDuration > 0) {
+            //         if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration) {
+            //             return;
+            //         }
+            //     }
+
+            //     var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
+            //     this.LastEventTime = time;
+
+            //     RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, time, capturedLastTime));
+            // }
         }
 
         public override void Dispose()
@@ -148,7 +155,7 @@ namespace Meadow.Hardware
             }
         }
 
-        public override int DebounceDuration
+        public override uint DebounceDuration
         {
             get => _debounceDuration;
             set
@@ -158,7 +165,7 @@ namespace Meadow.Hardware
             }
         }
 
-        public override int GlitchFilterCycleCount
+        public override uint GlitchFilterCycleCount
         {
             get => _glitchCycleCount;
             set

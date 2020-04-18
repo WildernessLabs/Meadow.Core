@@ -30,12 +30,13 @@ namespace HelloLED
         public void ShowLights()
         {
             var state = false;
+            var stateCount = 0;
 
             while(true)
             {
                 state = !state;
 
-                Console.WriteLine($"State: {state}");
+                Console.WriteLine($" Count: {++stateCount}, State: {state}");
 
                 _redLED.State = state;
                 Thread.Sleep(200);

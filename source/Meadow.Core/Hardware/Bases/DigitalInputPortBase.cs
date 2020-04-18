@@ -21,8 +21,8 @@ namespace Meadow.Hardware
 
         public abstract bool State { get; }
         public abstract ResistorMode Resistor { get; set; }
-        public abstract int DebounceDuration { get; set; }
-        public abstract int GlitchFilterCycleCount { get; set; }
+        public abstract uint DebounceDuration { get; set; }
+        public abstract uint GlitchFilterCycleCount { get; set; }
 
         protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
 

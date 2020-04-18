@@ -6,8 +6,8 @@ namespace Meadow.Hardware
     {
         event EventHandler<DigitalInputPortEventArgs> Changed;
 
-        int DebounceDuration { get; set; }
-        int GlitchFilterCycleCount { get; set; }
+        uint DebounceDuration { get; set; }
+        uint GlitchFilterCycleCount { get; set; }
         InterruptMode InterruptMode { get; }
     }
 }

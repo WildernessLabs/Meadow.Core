@@ -56,7 +56,7 @@ namespace Meadow.Core
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdRegisterUpdate registerUpdate);
 
             /// <summary>
-            /// Configures the Universal Platofrm Driver to catch GPIO interrupts
+            /// Configures the Universal Platform Driver to catch GPIO interrupts
             /// </summary>
             /// <returns>0 on success, otherwise an error code</returns>
             /// <param name="fd">Driver handle</param>

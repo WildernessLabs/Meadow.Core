@@ -56,8 +56,8 @@ namespace Meadow.Devices
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            int debounceDuration = 0,
-            int glitchFilterCycleCount = 0
+            uint debounceDuration = 0,
+            uint glitchFilterCycleCount = 0
             )
         {
             return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);

@@ -18,27 +18,29 @@ namespace InterruptTest
             Console.WriteLine("+InterruptApp");
 
             var output = Device.CreateDigitalOutputPort(
-                Device.Pins.D05, false);
+                Device.Pins.D15, false);
 
-//            WireInterrupt(Device.Pins.D02, output);
-            WireInterrupt(Device.Pins.D03, output);
-            WireInterrupt(Device.Pins.D04, output);
+            WireUpInterrupt(Device.Pins.D00, output); // PI9
+            WireUpInterrupt(Device.Pins.D01, output); // PH13
+            WireUpInterrupt(Device.Pins.D02, output); // PC6
+            WireUpInterrupt(Device.Pins.D03, output); // PB8
         }
 
-        private void WireInterrupt(IPin pin, IDigitalOutputPort output)
+        private void WireUpInterrupt(IPin pin, IDigitalOutputPort output)
         {
             var input = Device.CreateDigitalInputPort(
                 pin,
-                InterruptMode.EdgeRising,
+                InterruptMode.EdgeFalling,
                 ResistorMode.PullDown,
-                20);
+                20,   // debounce duration
+                2);   // glitch filter
 
             input.Changed += async (s, o) =>
             {
                 output.State = true;
                 await Task.Delay(1000);
                 output.State = false;
-                Console.WriteLine($"{++_count}: {(s as DigitalInputPort).Channel.Name} interrupt");
+                Console.WriteLine($"InterruptApp:{++_count:D4} Mono:{(s as DigitalInputPort).Channel.Name} interrupt");
             };
 
         }

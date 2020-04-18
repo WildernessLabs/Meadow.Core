@@ -14,8 +14,8 @@ namespace Meadow.Hardware
         // internals
         protected bool _currentState;
         protected bool _isDisposed;
-        private int _debounceDuration;
-        private int _glitchCycleCount;
+        private uint _debounceDuration;
+        private uint _glitchCycleCount;
 
         public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
@@ -56,7 +56,7 @@ namespace Meadow.Hardware
             GC.SuppressFinalize(this);
         }
 
-        public int DebounceDuration 
+        public uint DebounceDuration 
         {
             get => _debounceDuration; 
             set
@@ -66,7 +66,7 @@ namespace Meadow.Hardware
             } 
         }
 
-        public int GlitchFilterCycleCount
+        public uint GlitchFilterCycleCount
         {
             get => _glitchCycleCount; 
             set
