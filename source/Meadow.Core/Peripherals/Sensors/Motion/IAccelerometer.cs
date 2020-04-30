@@ -1,23 +1,39 @@
-﻿namespace Meadow.Peripherals.Sensors.Motion
+﻿using System;
+
+namespace Meadow.Peripherals.Sensors.Motion
 {
     /// <summary>
     /// Represents a generic accelerometer sensor.
     /// </summary>
-    public interface IAccelerometer : ISensor
+    public interface IAccelerometer :  ISensor, IObservable<AccelerationConditionChangeResult>
     {
         /// <summary>
-        /// Returns acceleration value in the X axis
+        /// Last value read from the Temperature sensor.
         /// </summary>
-        float XAcceleration { get; }
+        AccelerationConditions Conditions { get; }
 
         /// <summary>
-        /// Returns acceleration value in the Y axis
+        /// Raised when a new reading has been made. Events will only be raised
+        /// while the driver is updating. To start, call the `StartUpdating()`
+        /// method.
         /// </summary>
-        float YAcceleration { get; }
+        event EventHandler<AccelerationConditionChangeResult> Updated;
 
-        /// <summary>
-        /// Returns acceleration value in the Z axis
-        /// </summary>
-        float ZAcceleration { get; }
+        ///// <summary>
+        ///// Convenience method to get the current temperature. For frequent reads, use
+        ///// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
+        ///// </summary>
+        //Task<AccelerationConditions> Read();
+        ///// <summary>
+        ///// Starts continuously sampling the sensor.
+        /////
+        ///// This method also starts raising `Changed` events and IObservable
+        ///// subscribers getting notified.
+        ///// </summary>
+        //void StartUpdating();
+        ///// <summary>
+        ///// Stops sampling the temperature.
+        ///// </summary>
+        //void StopUpdating();
     }
 }
