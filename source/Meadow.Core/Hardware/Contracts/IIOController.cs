@@ -60,7 +60,7 @@ namespace Meadow.Hardware
             ResistorMode resistorMode,
             InterruptMode interruptMode,
             uint debounceDuration = 0,
-            uint glitchFilterCycleCount = 0
+            uint glitchDuration = 0
             );
 
         bool UnconfigureGpio(IPin pin);

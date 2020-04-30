@@ -11,7 +11,7 @@ namespace Meadow.Hardware
     {
         private ResistorMode _resistorMode;
         private uint _debounceDuration;
-        private uint _glitchCycleCount;
+        private uint _glitchDuration;
 
         protected IIOController IOController { get; set; }
 
@@ -24,7 +24,7 @@ namespace Meadow.Hardware
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             uint debounceDuration = 0,
-            uint glitchFilterCycleCount = 0
+            uint glitchDuration = 0
             ) : base(pin, channel, interruptMode)
         {
 
@@ -41,14 +41,14 @@ namespace Meadow.Hardware
             this.IOController.Interrupt += OnInterrupt;
             this._resistorMode = resistorMode;
             this._debounceDuration = debounceDuration;
-            this._glitchCycleCount = glitchFilterCycleCount;
+            this._glitchDuration = glitchDuration;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
             if (success.Item1)
             {
                 // make sure the pin is configured as a digital input with the proper state
-                ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchFilterCycleCount);
+                ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
             }
             else
             {
@@ -62,7 +62,7 @@ namespace Meadow.Hardware
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             uint debounceDuration = 0,
-            uint glitchFilterCycleCount = 0
+            uint glitchDuration = 0
             )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
@@ -71,7 +71,7 @@ namespace Meadow.Hardware
                 if (interruptMode != InterruptMode.None && (!chan.InterruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);                // set these here, not in a constructor because they are virtual
+                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchDuration);                // set these here, not in a constructor because they are virtual
                 return port;
 
             } else {
@@ -89,7 +89,6 @@ namespace Meadow.Hardware
             }
         }
 
-        // p-m THIS NEEDS MORE THOUGHT!
         void OnInterrupt(IPin pin, bool state)
         {
             if(pin == this.Pin)
@@ -98,23 +97,6 @@ namespace Meadow.Hardware
                 this.LastEventTime = DateTime.Now;
                 RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, this.LastEventTime, capturedLastTime));
             }
-
-            // P-M OLD
-            // {
-            //     var time = DateTime.Now;
-
-            //     // debounce timing checks
-            //     if (DebounceDuration > 0) {
-            //         if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration) {
-            //             return;
-            //         }
-            //     }
-
-            //     var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-            //     this.LastEventTime = time;
-
-            //     RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, time, capturedLastTime));
-            // }
         }
 
         public override void Dispose()
@@ -165,13 +147,13 @@ namespace Meadow.Hardware
             }
         }
 
-        public override uint GlitchFilterCycleCount
+        public override uint GlitchDuration
         {
-            get => _glitchCycleCount;
+            get => _glitchDuration;
             set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException();
-                _glitchCycleCount = value;
+                _glitchDuration = value;
             }
         }
     }

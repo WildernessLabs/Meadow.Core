@@ -15,7 +15,7 @@ namespace Meadow.Hardware
         protected bool _currentState;
         protected bool _isDisposed;
         private uint _debounceDuration;
-        private uint _glitchCycleCount;
+        private uint _glitchDuration;
 
         public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
@@ -66,13 +66,13 @@ namespace Meadow.Hardware
             } 
         }
 
-        public uint GlitchFilterCycleCount
+        public uint GlitchDuration
         {
-            get => _glitchCycleCount; 
+            get => _glitchDuration; 
             set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException();
-                _glitchCycleCount = value;
+                _glitchDuration = value;
             } 
         }
 

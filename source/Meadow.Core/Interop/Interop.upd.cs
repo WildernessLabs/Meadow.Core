@@ -186,7 +186,7 @@ namespace Meadow.Core
                 public uint RisingEdge;
                 public uint FallingEdge;
                 public uint debounceDuration;
-                public uint glitchFilterCycleCount;
+                public uint glitchDuration;
             }
 
             public struct UpdI2CCommand

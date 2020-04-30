@@ -20,6 +20,7 @@ namespace InterruptTest
             var output = Device.CreateDigitalOutputPort(
                 Device.Pins.D15, false);
 
+            //             Monitored inputs
             WireUpInterrupt(Device.Pins.D00, output); // PI9
             WireUpInterrupt(Device.Pins.D01, output); // PH13
             WireUpInterrupt(Device.Pins.D02, output); // PC6
@@ -30,14 +31,14 @@ namespace InterruptTest
         {
             var input = Device.CreateDigitalInputPort(
                 pin,
-                InterruptMode.EdgeFalling,
+                InterruptMode.EdgeBoth,
                 ResistorMode.PullDown,
-                20,   // debounce duration
-                2);   // glitch filter
+                0,          // debounce duration
+                10);        // glitch filter
 
             input.Changed += async (s, o) =>
             {
-                output.State = true;
+                output.State = true;    // flash LED
                 await Task.Delay(1000);
                 output.State = false;
                 Console.WriteLine($"InterruptApp:{++_count:D4} Mono:{(s as DigitalInputPort).Channel.Name} interrupt");

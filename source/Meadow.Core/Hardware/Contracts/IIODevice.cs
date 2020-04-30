@@ -34,8 +34,8 @@ namespace Meadow.Hardware
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            uint debounceDuration = 0,
-            uint glitchFilterCycleCount = 0
+            double debounceDuration = 0,
+            double glitchDuration = 0
         );
 
         IBiDirectionalPort CreateBiDirectionalPort(

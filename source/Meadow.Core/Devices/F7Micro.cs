@@ -52,15 +52,19 @@ namespace Meadow.Devices
             return DigitalOutputPort.From(pin, this.IoController, initialState);
         }
 
+
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            uint debounceDuration = 0,
-            uint glitchFilterCycleCount = 0
+            double debounceDuration = 0,    // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0       // 0 - 1000 msec in .1 increments
             )
         {
-            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
+            // Internally these durations are unsigned int with 100 usec resolution
+            uint uDebounceDuration = (uint)(debounceDuration * 10);
+            uint uGlitchDuration = (uint)(glitchDuration * 10);
+            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, uDebounceDuration, uGlitchDuration);
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(

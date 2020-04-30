@@ -19,8 +19,7 @@ namespace Meadow.Devices
         private Thread _ist;
 
         private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
-        // p-m SHOULD debounceDuration and glitchFilterCycleCount have a useful default?
-                                    uint debounceDuration = 0, uint glitchFilterCycleCount = 0)
+                                  uint debounceDuration = 0, uint glitchDuration = 0)
         {
             if (interruptMode != InterruptMode.None)
             {
@@ -33,7 +32,7 @@ namespace Meadow.Devices
                     FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
                     Irq = ((uint)port << 4) | (uint)pin,
                     debounceDuration = debounceDuration,
-                    glitchFilterCycleCount = glitchFilterCycleCount
+                    glitchDuration = glitchDuration
 
                 };
 
@@ -88,7 +87,7 @@ namespace Meadow.Devices
                 $"IST Started reading queue {queue.ToInt32():X}");
             
             // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
-            // the debounced state of the input point
+            // the debounced state of the GPIO
             var rx_buffer = new byte[2];
 
             while (true)
