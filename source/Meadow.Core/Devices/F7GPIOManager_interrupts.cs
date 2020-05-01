@@ -61,22 +61,20 @@ namespace Meadow.Devices
             }
             else
             {
-                // TODO: disable interrupt if it was enabled
-                /*
-                 SOMETHING HERE IS BAD - CAUSES OS CRASHINESS!               
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
-                    Enable = false,
-                    Port = (int)port,
-                    Pin = pin,
-                    RisingEdge = false,
-                    FallingEdge = false,
-                    Irq = ((int)port << 4) | pin
+                    Enable = 0,
+                    Port = (uint)port,
+                    Pin = (uint)pin,
+                    RisingEdge = 0,
+                    FallingEdge = 0,
+                    Irq = ((uint)port << 4) | (uint)pin,
+                    debounceDuration = 0,
+                    glitchDuration = 0
                 };
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
                     "Calling ioctl to disable interrupts");
-                var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
-                */
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
         }
 

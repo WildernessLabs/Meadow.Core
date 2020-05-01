@@ -62,20 +62,22 @@ namespace Meadow.Devices
             )
         {
             // Internally these durations are unsigned int with 100 usec resolution
-            uint uDebounceDuration = (uint)(debounceDuration * 10);
-            uint uGlitchDuration = (uint)(glitchDuration * 10);
-            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, uDebounceDuration, uGlitchDuration);
+            uint debounceDurationx10 = (uint)(debounceDuration * 10);
+            uint glitchDurationx10 = (uint)(glitchDuration * 10);
+            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDurationx10, glitchDurationx10);
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(
             IPin pin,
             bool initialState = false,
-            bool glitchFilter = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            double debounceDuration = 0,    // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0       // 0 - 1000 msec in .1 increments
+            )
         {
-            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, interruptMode, resistorMode, initialDirection);
+            return BiDirectionalPort.From(pin, this.IoController, initialState, interruptMode, resistorMode, initialDirection);
         }
 
         public IAnalogInputPort CreateAnalogInputPort(
@@ -266,5 +268,6 @@ namespace Meadow.Devices
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
+
     }
 }

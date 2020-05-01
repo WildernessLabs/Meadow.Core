@@ -32,7 +32,8 @@ namespace Basic_BiDirectonalPort
                 Device.Pins.D06,
                 resistorMode: ResistorMode.Disabled,
                 initialDirection: PortDirectionType.Input, 
-                interruptMode: InterruptMode.EdgeRising);
+                interruptMode: InterruptMode.EdgeRising,
+                glitchDuration: 10);
 
             _d06.Changed += OnD06Changed;
 

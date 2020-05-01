@@ -38,7 +38,7 @@ namespace InterruptTest
 
             input.Changed += async (s, o) =>
             {
-                output.State = true;    // flash LED
+                output.State = true;    // flash LED for Task.Delay
                 await Task.Delay(1000);
                 output.State = false;
                 Console.WriteLine($"InterruptApp:{++_count:D4} Mono:{(s as DigitalInputPort).Channel.Name} interrupt");

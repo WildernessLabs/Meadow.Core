@@ -41,10 +41,11 @@ namespace Meadow.Hardware
         IBiDirectionalPort CreateBiDirectionalPort(
             IPin pin,
             bool initialState = false,
-            bool glitchFilter = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            double debounceDuration = 0,
+            double glitchDuration = 0
         );
 
         IAnalogInputPort CreateAnalogInputPort(

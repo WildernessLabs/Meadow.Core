@@ -462,8 +462,7 @@ namespace Meadow.Devices
                 UpdateConfigRegister1Bit(base_addr + STM32.GPIO_OTYPER_OFFSET, false, pin);
             }
 
-
-            // INTERRUPTS
+            ////// ====== INTERRUPTS ======
             WireInterrupt(port, pin, interruptMode, debounceDuration, glitchDuration);
             RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
 

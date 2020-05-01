@@ -23,14 +23,15 @@
         /// <summary>
         /// The interrupt is triggered on any state change.
         /// </summary>
-        EdgeBoth = 3,
-        /// <summary>
-        /// Interrupt is triggered when the signal goes high.
-        /// </summary>
-        LevelHigh = 4,
-        /// <summary>
-        /// Interrupt is triggered when the signal goes low.
-        /// </summary>
-        LevelLow = 5
+        EdgeBoth = 3
+        // Not support by F7
+        // /// <summary>
+        // /// Interrupt is triggered when the signal goes high.
+        // /// </summary>
+        // LevelHigh = 4,
+        // /// <summary>
+        // /// Interrupt is triggered when the signal goes low.
+        // /// </summary>
+        // LevelLow = 5
     }
 }

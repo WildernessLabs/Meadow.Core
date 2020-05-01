@@ -37,11 +37,13 @@ namespace Meadow.Hardware
             IIOController gpioController,
             IDigitalChannelInfo channel,
             bool initialState = false, 
-            bool glitchFilter = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
-            : base (pin, channel, initialState, glitchFilter, interruptMode, resistorMode, initialDirection)
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            uint debounceDuration = 0,
+            uint glitchDuration = 0
+            )
+            : base (pin, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration)
         {
             if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
             {
@@ -71,7 +73,8 @@ namespace Meadow.Hardware
                 // make sure the pin direction (and state for outputs) is configured as desired
                 if (_currentDirection == PortDirectionType.Input)
                 {
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode);
+                    // This call will utlimately result in Nuttx being called
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode, debounceDuration, glitchDuration);
                 }
                 else
                 {
@@ -88,17 +91,19 @@ namespace Meadow.Hardware
             IPin pin,
             IIOController ioController,
             bool initialState = false,
-            bool glitchFilter = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            uint debounceDuration = 0,
+            uint glitchDuration = 0
+            )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if(chan == null) 
             {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
-            return new BiDirectionalPort(pin, ioController, chan, initialState, glitchFilter, interruptMode, resistorMode, initialDirection);
+            return new BiDirectionalPort(pin, ioController, chan, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration);
         }
 
         ~BiDirectionalPort()
@@ -150,16 +155,6 @@ namespace Meadow.Hardware
             if (pin == this.Pin)
             {
                 var time = DateTime.Now;
-// p-m TEST BiDirectionalPort AND SEE IF THIS IS USED
-                // debounce timing checks
-                if (DebounceDuration > 0)
-                {
-                    if ((time - this.LastEventTime).TotalMilliseconds < DebounceDuration)
-                    {
-                        return;
-                    }
-                }
-
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = time;
 

@@ -7,7 +7,7 @@ namespace Meadow.Hardware
     /// Provides a base implementation for BiDirectional Ports; digital ports 
     /// that can be both input and output.
     /// </summary>
-    public abstract class BiDirectionalPortBase : DigitalPortBase, IBiDirectionalPort, IDisposable
+    public abstract class BiDirectionalPortBase : DigitalPortBase, IBiDirectionalPort, IDigitalInterruptPort, IDisposable
     {
         public event EventHandler<DigitalInputPortEventArgs> Changed;
 
@@ -17,7 +17,6 @@ namespace Meadow.Hardware
         private uint _debounceDuration;
         private uint _glitchDuration;
 
-        public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
         public ResistorMode Resistor { get; }
         protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
@@ -37,16 +36,19 @@ namespace Meadow.Hardware
             IPin pin,
             IDigitalChannelInfo channel,
             bool initialState,
-            bool glitchFilter,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            uint debounceDuration = 0,
+            uint glitchDuration = 0)
             : base(pin, channel)
         {
             this.InterruptMode = interruptMode;
             InitialState = initialState;
             Resistor = resistorMode;
             Direction = initialDirection;
+            _debounceDuration = debounceDuration;
+            _glitchDuration = glitchDuration;
         }
 
         public override void Dispose()
