@@ -25,15 +25,22 @@ namespace Basic_BiDirectonalPort
         private void SetupIO()
         {
             Console.Write("Creating ports...");
-            _d04 = Device.CreateBiDirectionalPort(Device.Pins.D04);
-            _d05 = Device.CreateBiDirectionalPort(Device.Pins.D05);
+            // _d04 = Device.CreateBiDirectionalPort(Device.Pins.D04);
+            // _d05 = Device.CreateBiDirectionalPort(Device.Pins.D05);
+
+            // _d06 = Device.CreateBiDirectionalPort(
+            //     Device.Pins.D06,
+            _d04 = Device.CreateBiDirectionalPort(Device.Pins.D08);
+            _d05 = Device.CreateBiDirectionalPort(Device.Pins.D09);
 
             _d06 = Device.CreateBiDirectionalPort(
-                Device.Pins.D06,
+                Device.Pins.D10,
                 resistorMode: ResistorMode.Disabled,
                 initialDirection: PortDirectionType.Input, 
                 interruptMode: InterruptMode.EdgeRising,
-                glitchDuration: 10);
+                glitchDuration: 10,
+                outputType: OutputType.OpenDrain
+                );
 
             _d06.Changed += OnD06Changed;
 
@@ -44,12 +51,12 @@ namespace Basic_BiDirectonalPort
         {
             Console.WriteLine("D06 Interrupt");
             Console.WriteLine("D06 -> high");
-            _d06.State = true;
+            _d06.State = true;      // Becomes output & sets high
             await Task.Delay(1000);
             Console.WriteLine("D06 -> low");
-            _d06.State = false;
+            _d06.State = false;     // Still output & sets low
             Console.WriteLine("D06 -> input");
-            _d06.Direction = PortDirectionType.Input;
+            _d06.Direction = PortDirectionType.Input;   // Return to input
         }
 
         private void TeardownIO()
@@ -75,33 +82,33 @@ namespace Basic_BiDirectonalPort
                 {
                     SetupIO();
                 }
+                // // _d04 starts as input
+                // Console.WriteLine($"D04 --> D05 {(state ? "high" : "low")}");
+                // // set output
+                // _d04.State = state;     // D04 to output and set true
+                // // read input
+                // var check = _d05.State; // Read D05 changes to input
+                // Console.WriteLine($"  D05 is {(check ? "high" : "low")}");
 
-                Console.WriteLine($"D04 --> D05 {(state ? "high" : "low")}");
-                // set output
-                _d04.State = state;
-                // read input
-                var check = _d05.State;
-                Console.WriteLine($"  D05 is {(check ? "high" : "low")}");
+                // state = !state;
 
-                state = !state;
+                // // now reverse
+                // Console.WriteLine($"D04 <-- D05 {(state ? "high" : "low")}");
+                // // set output
+                // _d05.State = state;   // D05 to output set false
+                // // read input
+                // check = _d04.State;   // Read D04 changes to input
+                // Console.WriteLine($"  D04 is {(check ? "high" : "low")}");
 
-                // now reverse
-                Console.WriteLine($"D04 <-- D05 {(state ? "high" : "low")}");
-                // set output
-                _d05.State = state;
-                // read input
-                check = _d04.State;
-                Console.WriteLine($"  D04 is {(check ? "high" : "low")}");
+                // state = !state;
 
-                state = !state;
+                // if(++count %10 == 0)
+                // {
+                //     // verifies Dispose is working
+                //     TeardownIO();
+                // }
 
                 Thread.Sleep(2000);
-
-                if(++count %10 == 0)
-                {
-                    // verifies Dispose is working
-                    TeardownIO();
-                }
             }
 
         }

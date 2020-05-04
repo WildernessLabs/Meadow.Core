@@ -273,7 +273,28 @@ namespace Meadow.Devices
             ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, initialState);
         }
 
+        public void ConfigureOutput(IPin pin, bool initialState, OutputType initialOutputType)
+        {
+            // translate output type from Meadow to STM32 
+            STM32.OutputType outputType;
+            if(initialOutputType == OutputType.PushPull)
+                outputType = STM32.OutputType.PushPull;
+            else
+                outputType = STM32.OutputType.OpenDrain;
+
+            ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, outputType, initialState);
+        }
+
         private Dictionary<string, IPin> _interruptPins = new Dictionary<string, IPin>();
+        
+        public void ConfigureInput(
+            IPin pin,
+            ResistorMode resistorMode,
+            InterruptMode interruptMode
+            )
+        {
+          ConfigureInput(pin, resistorMode, interruptMode);
+        }
 
         public void ConfigureInput(
             IPin pin,
@@ -463,9 +484,13 @@ namespace Meadow.Devices
             }
 
             ////// ====== INTERRUPTS ======
-            WireInterrupt(port, pin, interruptMode, debounceDuration, glitchDuration);
-            RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
+            if(mode == STM32.GpioMode.Input)
+            {
+                // Only GPIOs as inputs need interrupts
+                WireInterrupt(port, pin, interruptMode, debounceDuration, glitchDuration);
+            }
 
+            RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
             return true;
         }
 

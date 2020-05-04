@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace Meadow.Hardware
 {
-    /// <summary>
-    /// Represents a port that is capable of reading and writing digital input
-    /// and output.
-    /// </summary>
-    public class BiDirectionalPort : BiDirectionalPortBase
+  /// <summary>
+  /// Represents a port that is capable of reading and writing digital input
+  /// and output.
+  /// </summary>
+  public class BiDirectionalPort : BiDirectionalPortBase
     {
         private PortDirectionType _currentDirection;
 
@@ -22,10 +22,13 @@ namespace Meadow.Hardware
                 if ((IOController == null) || (value == Direction)) return;
                 if (value == PortDirectionType.Input)
                 {
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None);
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, this.InterruptMode);
                 }
                 else
                 {
+                    // InterruptMode.None disables interrupts within Nuttx via WireInterrupt
+
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None);
                     this.IOController.ConfigureOutput(this.Pin, this.InitialState);
                 }
                 _currentDirection = value;
@@ -41,9 +44,10 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
             uint debounceDuration = 0,
-            uint glitchDuration = 0
+            uint glitchDuration = 0,
+            OutputType output = OutputType.PushPull
             )
-            : base (pin, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration)
+            : base (pin, channel, initialState, interruptMode, resistorMode, initialDirection)
         {
             if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
             {
@@ -73,8 +77,8 @@ namespace Meadow.Hardware
                 // make sure the pin direction (and state for outputs) is configured as desired
                 if (_currentDirection == PortDirectionType.Input)
                 {
-                    // This call will utlimately result in Nuttx being called
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode, debounceDuration, glitchDuration);
+                    // This call will ultimately result in Nuttx being called
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode);
                 }
                 else
                 {
@@ -95,7 +99,8 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
             uint debounceDuration = 0,
-            uint glitchDuration = 0
+            uint glitchDuration = 0,
+            OutputType outputType = OutputType.PushPull
             )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
@@ -103,7 +108,7 @@ namespace Meadow.Hardware
             {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
-            return new BiDirectionalPort(pin, ioController, chan, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration);
+            return new BiDirectionalPort(pin, ioController, chan, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType);
         }
 
         ~BiDirectionalPort()
@@ -154,12 +159,9 @@ namespace Meadow.Hardware
         {
             if (pin == this.Pin)
             {
-                var time = DateTime.Now;
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                this.LastEventTime = time;
-
-                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, time, capturedLastTime));
-
+                this.LastEventTime = DateTime.Now;
+                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, this.LastEventTime, capturedLastTime));
             }
         }
     }

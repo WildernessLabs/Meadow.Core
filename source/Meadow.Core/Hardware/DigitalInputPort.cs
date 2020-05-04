@@ -27,7 +27,6 @@ namespace Meadow.Hardware
             uint glitchDuration = 0
             ) : base(pin, channel, interruptMode)
         {
-
             // DEVELOPER NOTE:
             // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
             // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
@@ -40,15 +39,15 @@ namespace Meadow.Hardware
             this.IOController = ioController;
             this.IOController.Interrupt += OnInterrupt;
             this._resistorMode = resistorMode;
-            this._debounceDuration = debounceDuration;
-            this._glitchDuration = glitchDuration;
+            DebounceDuration = debounceDuration;
+            GlitchDuration = glitchDuration;
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
             if (success.Item1)
             {
                 // make sure the pin is configured as a digital input with the proper state
-                ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
+                ioController.ConfigureInput(pin, resistorMode, interruptMode);
             }
             else
             {
@@ -71,7 +70,8 @@ namespace Meadow.Hardware
                 if (interruptMode != InterruptMode.None && (!chan.InterruptCapable)) {
                     throw new Exception("Unable to create input; channel is not capable of interrupts");
                 }
-                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, debounceDuration, glitchDuration);                // set these here, not in a constructor because they are virtual
+                var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, 
+                                debounceDuration, glitchDuration);      // set these here, not in a constructor because they are virtual
                 return port;
 
             } else {

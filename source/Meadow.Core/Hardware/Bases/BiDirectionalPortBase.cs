@@ -18,6 +18,7 @@ namespace Meadow.Hardware
         private uint _glitchDuration;
 
         public bool InitialState { get; }
+        public OutputType InitialOutputType { get; }
         public ResistorMode Resistor { get; }
         protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
 
@@ -40,15 +41,17 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
             uint debounceDuration = 0,
-            uint glitchDuration = 0)
+            uint glitchDuration = 0,
+            OutputType initialOutputType = OutputType.PushPull)
             : base(pin, channel)
         {
             this.InterruptMode = interruptMode;
             InitialState = initialState;
             Resistor = resistorMode;
             Direction = initialDirection;
-            _debounceDuration = debounceDuration;
-            _glitchDuration = glitchDuration;
+            DebounceDuration = debounceDuration;
+            GlitchDuration = glitchDuration;
+            InitialOutputType = initialOutputType;
         }
 
         public override void Dispose()

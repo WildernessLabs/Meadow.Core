@@ -31,10 +31,10 @@ namespace InterruptTest
         {
             var input = Device.CreateDigitalInputPort(
                 pin,
-                InterruptMode.EdgeBoth,
+                InterruptMode.EdgeRising,
                 ResistorMode.PullDown,
                 0,          // debounce duration
-                10);        // glitch filter
+                100);        // glitch filter
 
             input.Changed += async (s, o) =>
             {

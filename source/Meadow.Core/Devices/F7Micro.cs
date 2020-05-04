@@ -47,11 +47,11 @@ namespace Meadow.Devices
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
-            bool initialState = false)
+            bool initialState = false,
+            OutputType initialOutputType = OutputType.PushPull)
         {
-            return DigitalOutputPort.From(pin, this.IoController, initialState);
+            return DigitalOutputPort.From(pin, this.IoController, initialState, initialOutputType);
         }
-
 
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
@@ -61,7 +61,7 @@ namespace Meadow.Devices
             double glitchDuration = 0       // 0 - 1000 msec in .1 increments
             )
         {
-            // Internally these durations are unsigned int with 100 usec resolution
+            // Convert durations to unsigned int with 100 usec resolution
             uint debounceDurationx10 = (uint)(debounceDuration * 10);
             uint glitchDurationx10 = (uint)(glitchDuration * 10);
             return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDurationx10, glitchDurationx10);
@@ -74,10 +74,14 @@ namespace Meadow.Devices
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
             double debounceDuration = 0,    // 0 - 1000 msec in .1 increments
-            double glitchDuration = 0       // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0,      // 0 - 1000 msec in .1 increments
+            OutputType outputType = OutputType.PushPull
             )
         {
-            return BiDirectionalPort.From(pin, this.IoController, initialState, interruptMode, resistorMode, initialDirection);
+            // Convert durations to unsigned int with 100 usec resolution
+            uint debounceDurationx10 = (uint)(debounceDuration * 10);
+            uint glitchDurationx10 = (uint)(glitchDuration * 10);
+            return BiDirectionalPort.From(pin, this.IoController, initialState, interruptMode, resistorMode, initialDirection, debounceDurationx10, glitchDurationx10, outputType);
         }
 
         public IAnalogInputPort CreateAnalogInputPort(
@@ -268,6 +272,5 @@ namespace Meadow.Devices
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
-
     }
 }

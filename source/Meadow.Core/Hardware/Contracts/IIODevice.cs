@@ -28,7 +28,9 @@ namespace Meadow.Hardware
 
         // TODO: consider specializing IIODevice
         IDigitalOutputPort CreateDigitalOutputPort(
-            IPin pin,bool initialState = false);
+            IPin pin,
+            bool initialState = false,
+            OutputType initialOutputType = OutputType.PushPull);
 
         IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
@@ -36,7 +38,7 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled,
             double debounceDuration = 0,
             double glitchDuration = 0
-        );
+            );
 
         IBiDirectionalPort CreateBiDirectionalPort(
             IPin pin,
@@ -45,7 +47,8 @@ namespace Meadow.Hardware
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
             double debounceDuration = 0,
-            double glitchDuration = 0
+            double glitchDuration = 0,
+            OutputType output = OutputType.PushPull
         );
 
         IAnalogInputPort CreateAnalogInputPort(

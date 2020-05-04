@@ -55,14 +55,10 @@ namespace Meadow.Hardware
         /// <param name="pin"></param>
         /// <param name="resistorMode"></param>
         /// <param name="interruptMode"></param>
-        /// <param name="debounceDuration"></param>
-        /// <param name="glitchDuration"></param>
         void ConfigureInput(
             IPin pin,
             ResistorMode resistorMode,
-            InterruptMode interruptMode,
-            uint debounceDuration = 0,
-            uint glitchDuration = 0
+            InterruptMode interruptMode
             );
 
         bool UnconfigureGpio(IPin pin);

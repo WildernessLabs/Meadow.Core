@@ -33,8 +33,9 @@ namespace Meadow.Hardware
             IPin pin,
             IIOController ioController,
             IDigitalChannelInfo channel, 
-            bool initialState) 
-            : base(pin, channel, initialState)
+            bool initialState,
+            OutputType initialOutputType) 
+            : base(pin, channel, initialState, initialOutputType)
         {
             this.IOController = ioController;
 
@@ -61,12 +62,13 @@ namespace Meadow.Hardware
         /// <param name="initialState">If set to <c>true</c> initial state.</param>
         internal static DigitalOutputPort From(IPin pin, 
             IIOController ioController,
-            bool initialState = false)
+            bool initialState = false,
+            OutputType initialOutputType = OutputType.PushPull)
         {
             var channel = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             if(channel != null) {
                 //TODO: need other checks here.
-                return new DigitalOutputPort(pin, ioController, channel, initialState);
+                return new DigitalOutputPort(pin, ioController, channel, initialState, initialOutputType);
             } else {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
