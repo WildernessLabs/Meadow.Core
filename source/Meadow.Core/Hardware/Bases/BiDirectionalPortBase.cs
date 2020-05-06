@@ -14,8 +14,6 @@ namespace Meadow.Hardware
         // internals
         protected bool _currentState;
         protected bool _isDisposed;
-        private uint _debounceDuration;
-        private uint _glitchDuration;
 
         public bool InitialState { get; }
         public OutputType InitialOutputType { get; }
@@ -26,6 +24,9 @@ namespace Meadow.Hardware
         public abstract PortDirectionType Direction { get; set; }
 
         protected abstract void Dispose(bool disposing);
+
+        public abstract double DebounceDuration { get; set; }
+        public abstract double GlitchDuration { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating the type of interrupt monitoring this input.
@@ -40,8 +41,8 @@ namespace Meadow.Hardware
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
-            uint debounceDuration = 0,
-            uint glitchDuration = 0,
+            double debounceDuration = 0,
+            double glitchDuration = 0,
             OutputType initialOutputType = OutputType.PushPull)
             : base(pin, channel)
         {
@@ -59,26 +60,6 @@ namespace Meadow.Hardware
             Dispose(true);
             _isDisposed = true;
             GC.SuppressFinalize(this);
-        }
-
-        public uint DebounceDuration 
-        {
-            get => _debounceDuration; 
-            set
-            {
-                if (value < 0) throw new ArgumentOutOfRangeException();
-                _debounceDuration = value;
-            } 
-        }
-
-        public uint GlitchDuration
-        {
-            get => _glitchDuration; 
-            set
-            {
-                if (value < 0) throw new ArgumentOutOfRangeException();
-                _glitchDuration = value;
-            } 
         }
 
         protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)

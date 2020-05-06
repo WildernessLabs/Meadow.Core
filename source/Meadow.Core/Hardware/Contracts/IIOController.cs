@@ -47,18 +47,40 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="initialState"></param>
-        void ConfigureOutput(IPin pin, bool initialState);
-
+        /// <param name="outputType"></param>
+        void ConfigureOutput(
+            IPin pin,
+            bool initialState,
+            OutputType outputType
+            );
+            
         /// <summary>
         /// 
         /// </summary>
         /// <param name="pin"></param>
         /// <param name="resistorMode"></param>
         /// <param name="interruptMode"></param>
+        /// <param name="debounceDuration"></param>
+        /// <param name="glitchDuration"></param>
         void ConfigureInput(
             IPin pin,
             ResistorMode resistorMode,
-            InterruptMode interruptMode
+            InterruptMode interruptMode,
+            double debounceDuration,
+            double glitchDuration
+            );
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="interruptMode"></param>
+        /// <param name="debounceDuration"></param>
+        /// <param name="glitchDuration"></param>
+        void WireInterrupt(IPin pin,
+            InterruptMode interruptMode,
+            double debounceDuration,
+            double glitchDuration
             );
 
         bool UnconfigureGpio(IPin pin);

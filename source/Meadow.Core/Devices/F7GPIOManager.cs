@@ -290,18 +290,9 @@ namespace Meadow.Devices
         public void ConfigureInput(
             IPin pin,
             ResistorMode resistorMode,
-            InterruptMode interruptMode
-            )
-        {
-          ConfigureInput(pin, resistorMode, interruptMode);
-        }
-
-        public void ConfigureInput(
-            IPin pin,
-            ResistorMode resistorMode,
             InterruptMode interruptMode,
-            uint debounceDuration = 0,
-            uint glitchDuration = 0
+            double debounceDuration = 0.0,
+            double glitchDuration = 0.0
             )
         {
             // translate resistor mode from Meadow to STM32 register bits
@@ -327,7 +318,7 @@ namespace Meadow.Devices
         }
 
         private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode,
-            uint debounceDuration = 0, uint glitchDuration = 0)
+            double debounceDuration, double glitchDuration)
         {
             lock (_interruptPins)
             {
@@ -368,7 +359,7 @@ namespace Meadow.Devices
 
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
             STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
-            uint debounceDuration = 0, uint glitchDuration = 0)
+            double debounceDuration = 0, double glitchDuration = 0)
         {
             var designator = GetPortAndPin(pin);
 
@@ -377,7 +368,7 @@ namespace Meadow.Devices
 
         private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
          STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
-         int alternateFunctionNumber = 0, uint debounceDuration = 0, uint glitchDuration = 0)
+         int alternateFunctionNumber = 0, double debounceDuration = 0, double glitchDuration = 0)
         {
             int setting = 0;
             uint base_addr = 0;
@@ -486,10 +477,11 @@ namespace Meadow.Devices
             ////// ====== INTERRUPTS ======
             if(mode == STM32.GpioMode.Input)
             {
-                // Only GPIOs as inputs need interrupts
+                // Only input GPIOs need interrupt configuration
                 WireInterrupt(port, pin, interruptMode, debounceDuration, glitchDuration);
             }
 
+            ////// ====== REGISTER CONFIGURATION ======
             RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
             return true;
         }

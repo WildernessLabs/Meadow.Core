@@ -34,7 +34,7 @@ namespace Meadow.Hardware
             IIOController ioController,
             IDigitalChannelInfo channel, 
             bool initialState,
-            OutputType initialOutputType) 
+            OutputType initialOutputType)
             : base(pin, channel, initialState, initialOutputType)
         {
             this.IOController = ioController;
@@ -46,7 +46,7 @@ namespace Meadow.Hardware
                 _state = this.InverseLogic ? !initialState : initialState;
 
                 // make sure the pin is configured as a digital output with the proper state
-                ioController.ConfigureOutput(pin, _state);
+                ioController.ConfigureOutput(pin, _state, InitialOutputType);
             }
             else
             {

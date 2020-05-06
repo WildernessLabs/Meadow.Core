@@ -57,14 +57,11 @@ namespace Meadow.Devices
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            double debounceDuration = 0,    // 0 - 1000 msec in .1 increments
-            double glitchDuration = 0       // 0 - 1000 msec in .1 increments
+            double debounceDuration = 0.0,    // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0.0       // 0 - 1000 msec in .1 increments
             )
         {
-            // Convert durations to unsigned int with 100 usec resolution
-            uint debounceDurationx10 = (uint)(debounceDuration * 10);
-            uint glitchDurationx10 = (uint)(glitchDuration * 10);
-            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDurationx10, glitchDurationx10);
+            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(
@@ -73,8 +70,8 @@ namespace Meadow.Devices
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
-            double debounceDuration = 0,    // 0 - 1000 msec in .1 increments
-            double glitchDuration = 0,      // 0 - 1000 msec in .1 increments
+            double debounceDuration = 0.0,    // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0.0,      // 0 - 1000 msec in .1 increments
             OutputType outputType = OutputType.PushPull
             )
         {

@@ -18,8 +18,15 @@ namespace Meadow.Devices
 
         private Thread _ist;
 
+        public void WireInterrupt(IPin pin, InterruptMode interruptMode,
+                    double debounceDuration, double glitchDuration)
+        {
+            var designator = GetPortAndPin(pin);
+            WireInterrupt(designator.port, designator.pin, interruptMode, debounceDuration, glitchDuration);
+        }
+        
         private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
-                    uint debounceDuration = 0, uint glitchDuration = 0)
+                    double debounceDuration, double glitchDuration)
         {
             if (interruptMode != InterruptMode.None)
             {
@@ -31,8 +38,10 @@ namespace Meadow.Devices
                     RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
                     FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
                     Irq = ((uint)port << 4) | (uint)pin,
-                    debounceDuration = debounceDuration,
-                    glitchDuration = glitchDuration
+
+                    // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
+                    debounceDuration = (uint)(debounceDuration * 10),
+                    glitchDuration = (uint)(glitchDuration * 10)
                 };
 
                 if (_ist == null)
@@ -62,7 +71,7 @@ namespace Meadow.Devices
             {
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
-                    Enable = 0,
+                    Enable = 0,   // Disable
                     Port = (uint)port,
                     Pin = (uint)pin,
                     RisingEdge = 0,
@@ -73,6 +82,7 @@ namespace Meadow.Devices
                 };
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
                     $"Calling ioctl to disable interrupts for:{port}{pin}");
+
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
         }
