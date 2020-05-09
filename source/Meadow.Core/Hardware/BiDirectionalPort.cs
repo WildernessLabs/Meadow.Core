@@ -10,7 +10,6 @@ namespace Meadow.Hardware
   public class BiDirectionalPort : BiDirectionalPortBase
     {
         private PortDirectionType _currentDirection;
-
         protected IIOController IOController { get; }
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
@@ -23,7 +22,7 @@ namespace Meadow.Hardware
                 if ((IOController == null) || (value == Direction)) return;
                 if (value == PortDirectionType.Input)
                 {
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, this.InterruptMode, DebounceDuration, GlitchDuration);
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, this.InterruptMode, this._debounceDuration, this._glitchDuration);
                 }
                 else
                 {
@@ -61,11 +60,11 @@ namespace Meadow.Hardware
             {
                 throw new Exception("Unable to create port; channel is not capable of outputs");
             }
-            if(debounceDuration < 0.0 || debounceDuration > 1000.0)
+            if (debounceDuration < 0.0 || debounceDuration > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
-            if(glitchDuration < 0.0 || glitchDuration > 1000.0)
+            if (glitchDuration < 0.0 || glitchDuration > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(glitchDuration), "Unable to create an input port, because glitchDuration is out of range (0.1-1000.0)");
             }
@@ -167,25 +166,25 @@ namespace Meadow.Hardware
 
         public override double DebounceDuration
         {
-            get => DebounceDuration;
+            get => _debounceDuration;
             set
             {
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
-                DebounceDuration = value;
-                // Update in F7
-                this.IOController.WireInterrupt(Pin, InterruptMode, DebounceDuration, GlitchDuration);
-            }
+                _debounceDuration = value;
+                // Update in MCU
+                this.IOController.WireInterrupt(Pin, InterruptMode, _debounceDuration, _glitchDuration);
+           }
         }
 
         public override double GlitchDuration
         {
-            get => GlitchDuration;
+            get => _glitchDuration;
             set
             {
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
-                GlitchDuration = value;
-                // Update in F7
-                this.IOController.WireInterrupt(Pin, InterruptMode, DebounceDuration, GlitchDuration);
+                _glitchDuration = value;
+                // Update in MCU
+                this.IOController.WireInterrupt(Pin, InterruptMode, _debounceDuration, _glitchDuration);
             }
         }
 

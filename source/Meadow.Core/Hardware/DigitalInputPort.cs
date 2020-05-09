@@ -153,7 +153,7 @@ namespace Meadow.Hardware
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
                 _debounceDuration = value;
                 // Update in F7
-                this.IOController.WireInterrupt(Pin, InterruptMode, _debounceDuration, GlitchDuration);
+                this.IOController.WireInterrupt(Pin, InterruptMode, _debounceDuration, _glitchDuration);
             }
         }
 
@@ -165,7 +165,7 @@ namespace Meadow.Hardware
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
                 _glitchDuration = value;
                 // Update in F7
-                this.IOController.WireInterrupt(Pin, InterruptMode, DebounceDuration, _glitchDuration);
+                this.IOController.WireInterrupt(Pin, InterruptMode, _debounceDuration, _glitchDuration);
             }
         }
     }

@@ -25,6 +25,9 @@ namespace Meadow.Hardware
 
         protected abstract void Dispose(bool disposing);
 
+        protected double _debounceDuration;
+        protected double _glitchDuration;
+
         public abstract double DebounceDuration { get; set; }
         public abstract double GlitchDuration { get; set; }
 
@@ -41,8 +44,8 @@ namespace Meadow.Hardware
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             PortDirectionType initialDirection = PortDirectionType.Input,
-            double debounceDuration = 0,
-            double glitchDuration = 0,
+            double debounceDuration = 0.0,
+            double glitchDuration = 0.0,
             OutputType initialOutputType = OutputType.PushPull)
             : base(pin, channel)
         {
@@ -50,8 +53,8 @@ namespace Meadow.Hardware
             InitialState = initialState;
             Resistor = resistorMode;
             Direction = initialDirection;
-            DebounceDuration = debounceDuration;
-            GlitchDuration = glitchDuration;
+            _debounceDuration = debounceDuration;   // Don't trigger WireInterrupt call via property
+            _glitchDuration = glitchDuration;       // Don't trigger WireInterrupt call via property
             InitialOutputType = initialOutputType;
         }
 

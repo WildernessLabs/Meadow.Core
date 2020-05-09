@@ -31,19 +31,48 @@ namespace InterruptTest
         {
             var input = Device.CreateDigitalInputPort(
                 pin,
-                InterruptMode.EdgeFalling,
-                ResistorMode.PullDown,
+                InterruptMode.EdgeRising,
+                ResistorMode.PullUp,
                 0,          // debounce duration
                 20);        // glitch filter
 
+
             input.Changed += async (s, o) =>
             {
+                if((_count % 5) == 0)
+                {
+                    bool _changed = false;
+                    if (input.DebounceDuration == 21)
+                    {
+                        input.DebounceDuration = 41;
+                        _changed = true;
+                    }
+                    else if (input.DebounceDuration == 41)
+                    {
+                        input.DebounceDuration = 21;
+                        _changed = true;
+                    }
+
+                    if (input.GlitchDuration == 21)
+                    {
+                        input.GlitchDuration = 41;
+                        _changed = true;
+                    }
+                    else if(input.GlitchDuration == 41)
+                    {
+                        input.GlitchDuration = 21;
+                        _changed = true;
+                    }
+
+                    if(_changed)
+                      Console.WriteLine($"{_count:D4} ***** Changed debounce and/or glitch durations *****");
+                }
+
                 output.State = true;    // flash LED for Task.Delay
-                await Task.Delay(1000);
+                await Task.Delay(250);
                 output.State = false;
                 Console.WriteLine($"InterruptApp:{++_count:D4} Mono:{(s as DigitalInputPort).Channel.Name} interrupt");
             };
-
         }
     }
 }

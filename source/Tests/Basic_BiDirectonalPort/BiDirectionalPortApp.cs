@@ -27,9 +27,9 @@ namespace Basic_BiDirectonalPort
             Console.Write("Creating ports...");
             // _d04 = Device.CreateBiDirectionalPort(Device.Pins.D04);
             // _d05 = Device.CreateBiDirectionalPort(Device.Pins.D05);
-
             // _d06 = Device.CreateBiDirectionalPort(
             //     Device.Pins.D06,
+
             _d04 = Device.CreateBiDirectionalPort(Device.Pins.D08);
             _d05 = Device.CreateBiDirectionalPort(Device.Pins.D09);
 
@@ -56,6 +56,8 @@ namespace Basic_BiDirectonalPort
             Console.WriteLine("D06 -> low");
             _d06.State = false;     // Still output & sets low
             Console.WriteLine("D06 -> input");
+            _d06.State = true;      // Still output & sets high
+            await Task.Delay(1000);
             _d06.Direction = PortDirectionType.Input;   // Return to input
         }
 

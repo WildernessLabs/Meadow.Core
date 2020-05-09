@@ -76,9 +76,7 @@ namespace Meadow.Devices
             )
         {
             // Convert durations to unsigned int with 100 usec resolution
-            uint debounceDurationx10 = (uint)(debounceDuration * 10);
-            uint glitchDurationx10 = (uint)(glitchDuration * 10);
-            return BiDirectionalPort.From(pin, this.IoController, initialState, interruptMode, resistorMode, initialDirection, debounceDurationx10, glitchDurationx10, outputType);
+            return BiDirectionalPort.From(pin, this.IoController, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType);
         }
 
         public IAnalogInputPort CreateAnalogInputPort(
