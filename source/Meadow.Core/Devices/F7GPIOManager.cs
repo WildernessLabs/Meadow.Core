@@ -276,13 +276,13 @@ namespace Meadow.Devices
         public void ConfigureOutput(IPin pin, bool initialState, OutputType initialOutputType)
         {
             // translate output type from Meadow to STM32 
-            STM32.OutputType outputType;
+            STM32.OutputType stm32OutputType;
             if(initialOutputType == OutputType.PushPull)
-                outputType = STM32.OutputType.PushPull;
+                stm32OutputType = STM32.OutputType.PushPull;
             else
-                outputType = STM32.OutputType.OpenDrain;
+                stm32OutputType = STM32.OutputType.OpenDrain;
 
-            ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, outputType, initialState);
+            ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, stm32OutputType, initialState);
         }
 
         private Dictionary<string, IPin> _interruptPins = new Dictionary<string, IPin>();
