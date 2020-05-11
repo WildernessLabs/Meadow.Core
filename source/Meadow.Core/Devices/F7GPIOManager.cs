@@ -73,8 +73,7 @@ namespace Meadow.Devices
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
             //            DebugFeatures = DebugFeature.GpioDetail;
-            // p-m REMOVE THIS LINE BEFORE CHECKIN
-            DebugFeatures = DebugFeature.Interrupts;
+            // DebugFeatures = DebugFeature.Interrupts;
 #endif
         }
 

@@ -39,34 +39,34 @@ namespace InterruptTest
 
             input.Changed += async (s, o) =>
             {
-                if((_count % 5) == 0)
-                {
-                    bool _changed = false;
-                    if (input.DebounceDuration == 21)
-                    {
-                        input.DebounceDuration = 41;
-                        _changed = true;
-                    }
-                    else if (input.DebounceDuration == 41)
-                    {
-                        input.DebounceDuration = 21;
-                        _changed = true;
-                    }
+                //if ((_count % 5) == 0)
+                //{
+                //    bool _changed = false;
+                //    if (input.DebounceDuration == 21)
+                //    {
+                //        input.DebounceDuration = 41;
+                //        _changed = true;
+                //    }
+                //    else if (input.DebounceDuration == 41)
+                //    {
+                //        input.DebounceDuration = 21;
+                //        _changed = true;
+                //    }
 
-                    if (input.GlitchDuration == 21)
-                    {
-                        input.GlitchDuration = 41;
-                        _changed = true;
-                    }
-                    else if(input.GlitchDuration == 41)
-                    {
-                        input.GlitchDuration = 21;
-                        _changed = true;
-                    }
+                //    if (input.GlitchDuration == 21)
+                //    {
+                //        input.GlitchDuration = 41;
+                //        _changed = true;
+                //    }
+                //    else if (input.GlitchDuration == 41)
+                //    {
+                //        input.GlitchDuration = 21;
+                //        _changed = true;
+                //    }
 
-                    if(_changed)
-                      Console.WriteLine($"{_count:D4} ***** Changed debounce and/or glitch durations *****");
-                }
+                //    if (_changed)
+                //      Console.WriteLine($"{_count:D4} ***** Changed debounce and/or glitch durations *****");
+                //}
 
                 output.State = true;    // flash LED for Task.Delay
                 await Task.Delay(250);
