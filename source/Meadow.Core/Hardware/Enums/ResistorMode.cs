@@ -12,10 +12,10 @@
         /// <summary>
         /// Pulled down to `0V` by default.
         /// </summary>
-        PullDown = 1,
+        PullUp = 1,
         /// <summary>
-        /// Pulled up to `VCC` by default.
+        /// Pulled down to `0V` by default.
         /// </summary>
-        PullUp = 2
+        PullDown = 2
     }
 }

@@ -79,6 +79,7 @@ namespace Meadow.Hardware
         /// <param name="glitchDuration"></param>
         void WireInterrupt(IPin pin,
             InterruptMode interruptMode,
+            ResistorMode resistorMode,
             double debounceDuration,
             double glitchDuration
             );

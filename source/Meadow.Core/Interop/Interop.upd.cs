@@ -179,14 +179,14 @@ namespace Meadow.Core
 
             public struct UpdGpioInterruptConfiguration
             {
-                public uint Irq;
                 public uint Port;
                 public uint Pin;
                 public uint Enable;
                 public uint RisingEdge;
                 public uint FallingEdge;
-                public uint debounceDuration;
-                public uint glitchDuration;
+                public uint ResistorMode;
+                public uint DebounceDuration;
+                public uint GlitchDuration;
             }
 
             public struct UpdI2CCommand

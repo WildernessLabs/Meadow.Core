@@ -18,14 +18,15 @@ namespace Meadow.Devices
 
         private Thread _ist;
 
-        public void WireInterrupt(IPin pin, InterruptMode interruptMode,
+        public void WireInterrupt(IPin pin, InterruptMode interruptMode, Meadow.Hardware.ResistorMode resistorMode,
                     double debounceDuration, double glitchDuration)
         {
             var designator = GetPortAndPin(pin);
-            WireInterrupt(designator.port, designator.pin, interruptMode, debounceDuration, glitchDuration);
+            WireInterrupt(designator.port, designator.pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
         
         private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
+                    Meadow.Hardware.ResistorMode resistorMode,
                     double debounceDuration, double glitchDuration)
         {
             if (interruptMode != InterruptMode.None)
@@ -37,11 +38,11 @@ namespace Meadow.Devices
                     Pin = (uint)pin,
                     RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
                     FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
-                    Irq = ((uint)port << 4) | (uint)pin,
+                    ResistorMode = (uint)resistorMode,
 
                     // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
-                    debounceDuration = (uint)(debounceDuration * 10),
-                    glitchDuration = (uint)(glitchDuration * 10)
+                    DebounceDuration = (uint)(debounceDuration * 10),
+                    GlitchDuration = (uint)(glitchDuration * 10)
                 };
 
                 if (_ist == null)
@@ -55,7 +56,7 @@ namespace Meadow.Devices
                 }
 
                 Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-                    $"Calling ioctl from WireInterrupt() enable Input: {port}{pin}, GpioId:0x{cfg.Irq:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
+                    $"Calling ioctl from WireInterrupt() enable Input: {port}{pin}, ResistorMode:0x{cfg.ResistorMode:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 
@@ -76,9 +77,9 @@ namespace Meadow.Devices
                     Pin = (uint)pin,
                     RisingEdge = 0,
                     FallingEdge = 0,
-                    Irq = ((uint)port << 4) | (uint)pin,
-                    debounceDuration = 0,
-                    glitchDuration = 0
+                    ResistorMode = 0,
+                    DebounceDuration = 0,
+                    GlitchDuration = 0
                 };
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
                     $"Calling ioctl to disable interrupts for Input: {port}{pin}");

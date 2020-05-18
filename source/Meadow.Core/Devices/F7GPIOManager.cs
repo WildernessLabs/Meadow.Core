@@ -73,7 +73,7 @@ namespace Meadow.Devices
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
             //            DebugFeatures = DebugFeature.GpioDetail;
-            // DebugFeatures = DebugFeature.Interrupts;
+            DebugFeatures = DebugFeature.Interrupts;
 #endif
         }
 
@@ -477,14 +477,30 @@ namespace Meadow.Devices
             if(mode == STM32.GpioMode.Input)
             {
                 // Only input GPIOs need interrupt configuration
-                WireInterrupt(port, pin, interruptMode, debounceDuration, glitchDuration);
+                Meadow.Hardware.ResistorMode meadowResistor;
+
+                switch (resistor)
+                {
+                    case STM32.ResistorMode.PullDown:
+                        meadowResistor = Meadow.Hardware.ResistorMode.PullDown;
+                        break;
+                    case STM32.ResistorMode.PullUp:
+                        meadowResistor = Meadow.Hardware.ResistorMode.PullUp;
+                        break;
+                    default:
+                        meadowResistor = Meadow.Hardware.ResistorMode.Disabled;
+                        break;
+                }
+
+                WireInterrupt(port, pin, interruptMode, meadowResistor, debounceDuration, glitchDuration);
             }
 
             ////// ====== REGISTER CONFIGURATION ======
             RegisterConfig(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber);
             return true;
         }
-
+        
+        // Called from ResistorProperty
         public void SetResistorMode(IPin pin, ResistorMode mode)
         {
             var designator = GetPortAndPin(pin);

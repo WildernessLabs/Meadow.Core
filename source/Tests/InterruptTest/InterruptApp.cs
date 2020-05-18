@@ -18,7 +18,7 @@ namespace InterruptTest
             Console.WriteLine("+InterruptApp");
 
             var output = Device.CreateDigitalOutputPort(
-                Device.Pins.D15, false);
+                Device.Pins.D05, false);
 
             //             Monitored inputs
             WireUpInterrupt(Device.Pins.D00, output); // PI9
@@ -36,9 +36,11 @@ namespace InterruptTest
                 0,          // debounce duration
                 20);        // glitch filter
 
-
+            Console.WriteLine($"InterruptApp: Input config complete for:{pin.Name}");
             input.Changed += async (s, o) =>
             {
+                // This is for testing that the DebounceDuration and GlitchDuration
+                // properties can be changed by the app
                 //if ((_count % 5) == 0)
                 //{
                 //    bool _changed = false;
@@ -69,7 +71,7 @@ namespace InterruptTest
                 //}
 
                 output.State = true;    // flash LED for Task.Delay
-                await Task.Delay(250);
+                await Task.Delay(1000);
                 output.State = false;
                 Console.WriteLine($"InterruptApp:{++_count:D4} Mono:{(s as DigitalInputPort).Channel.Name} interrupt");
             };
