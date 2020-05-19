@@ -1,5 +1,7 @@
 ﻿namespace Meadow.Hardware
 {
+    // Internal note: The values for PullUp and PullDown are backwards from
+    // what STM32F7 expects.
     /// <summary>
     /// Describes the internal IO resistor state.
     /// </summary>
@@ -12,10 +14,10 @@
         /// <summary>
         /// Pulled down to `0V` by default.
         /// </summary>
-        PullUp = 1,
+        PullDown = 1,
         /// <summary>
-        /// Pulled down to `0V` by default.
+        /// Pulled up to `VCC` by default.
         /// </summary>
-        PullDown = 2
+        PullUp = 2
     }
 }

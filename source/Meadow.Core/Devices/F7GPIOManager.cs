@@ -476,23 +476,7 @@ namespace Meadow.Devices
             ////// ====== INTERRUPTS ======
             if(mode == STM32.GpioMode.Input)
             {
-                // Only input GPIOs need interrupt configuration
-                Meadow.Hardware.ResistorMode meadowResistor;
-
-                switch (resistor)
-                {
-                    case STM32.ResistorMode.PullDown:
-                        meadowResistor = Meadow.Hardware.ResistorMode.PullDown;
-                        break;
-                    case STM32.ResistorMode.PullUp:
-                        meadowResistor = Meadow.Hardware.ResistorMode.PullUp;
-                        break;
-                    default:
-                        meadowResistor = Meadow.Hardware.ResistorMode.Disabled;
-                        break;
-                }
-
-                WireInterrupt(port, pin, interruptMode, meadowResistor, debounceDuration, glitchDuration);
+                WireInterrupt(port, pin, interruptMode, resistor, debounceDuration, glitchDuration);
             }
 
             ////// ====== REGISTER CONFIGURATION ======

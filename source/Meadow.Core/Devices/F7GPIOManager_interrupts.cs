@@ -18,15 +18,31 @@ namespace Meadow.Devices
 
         private Thread _ist;
 
-        public void WireInterrupt(IPin pin, InterruptMode interruptMode, Meadow.Hardware.ResistorMode resistorMode,
-                    double debounceDuration, double glitchDuration)
+        public void WireInterrupt(IPin pin, InterruptMode interruptMode,
+                     Meadow.Hardware.ResistorMode resistorMode,
+                     double debounceDuration, double glitchDuration)
         {
+                STM32.ResistorMode stm32Resistor;
+
+                switch (resistorMode)
+                {
+                    case Meadow.Hardware.ResistorMode.PullDown:
+                        stm32Resistor = STM32.ResistorMode.PullDown;
+                        break;
+                    case Meadow.Hardware.ResistorMode.PullUp:
+                        stm32Resistor = STM32.ResistorMode.PullUp;
+                        break;
+                    default:
+                        stm32Resistor = STM32.ResistorMode.Float;
+                        break;
+                }
+
             var designator = GetPortAndPin(pin);
-            WireInterrupt(designator.port, designator.pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
+            WireInterrupt(designator.port, designator.pin, interruptMode, stm32Resistor, debounceDuration, glitchDuration);
         }
-        
+
         private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
-                    Meadow.Hardware.ResistorMode resistorMode,
+                    STM32.ResistorMode resistorMode,
                     double debounceDuration, double glitchDuration)
         {
             if (interruptMode != InterruptMode.None)
