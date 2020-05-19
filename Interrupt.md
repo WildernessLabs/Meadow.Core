@@ -61,4 +61,4 @@ Or the Glitch filter can be used in a situation where an undesirable, very short
 
 For a normal push button or toggle switch, *GlitchDebounce* values of 10 - 50 milliseconds are usually good enough.
 
-[ReadMe.md](https://../Readme.md)
+[ReadMe.md]([https://../Readme.md](https://github.com/WildernessLabs/Meadow.Core/blob/multi-interrupts/Readme.md))
