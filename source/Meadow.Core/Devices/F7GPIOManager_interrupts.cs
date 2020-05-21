@@ -18,18 +18,47 @@ namespace Meadow.Devices
 
         private Thread _ist;
 
-        private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode)
+        public void WireInterrupt(IPin pin, InterruptMode interruptMode,
+                     Meadow.Hardware.ResistorMode resistorMode,
+                     double debounceDuration, double glitchDuration)
+        {
+                STM32.ResistorMode stm32Resistor;
+
+                switch (resistorMode)
+                {
+                    case Meadow.Hardware.ResistorMode.PullDown:
+                        stm32Resistor = STM32.ResistorMode.PullDown;
+                        break;
+                    case Meadow.Hardware.ResistorMode.PullUp:
+                        stm32Resistor = STM32.ResistorMode.PullUp;
+                        break;
+                    default:
+                        stm32Resistor = STM32.ResistorMode.Float;
+                        break;
+                }
+
+            var designator = GetPortAndPin(pin);
+            WireInterrupt(designator.port, designator.pin, interruptMode, stm32Resistor, debounceDuration, glitchDuration);
+        }
+
+        private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
+                    STM32.ResistorMode resistorMode,
+                    double debounceDuration, double glitchDuration)
         {
             if (interruptMode != InterruptMode.None)
             {
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
-                    Enable = true,
-                    Port = (int)port,
-                    Pin = pin,
-                    RisingEdge = interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth,
-                    FallingEdge = interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth,
-                    Irq = ((int)port << 4) | pin
+                    Enable = 1,
+                    Port = (uint)port,
+                    Pin = (uint)pin,
+                    RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
+                    FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
+                    ResistorMode = (uint)resistorMode,
+
+                    // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
+                    DebounceDuration = (uint)(debounceDuration * 10),
+                    GlitchDuration = (uint)(glitchDuration * 10)
                 };
 
                 if (_ist == null)
@@ -43,7 +72,7 @@ namespace Meadow.Devices
                 }
 
                 Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-                    $"Calling ioctl to enable interrupts {cfg.Port}::{cfg.Pin}::{cfg.Irq}");
+                    $"Calling ioctl from WireInterrupt() enable Input: {port}{pin}, ResistorMode:0x{cfg.ResistorMode:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 
@@ -57,22 +86,21 @@ namespace Meadow.Devices
             }
             else
             {
-                // TODO: disable interrupt if it was enabled
-                /*
-                 SOMETHING HERE IS BAD - CAUSES OS CRASHINESS!               
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
-                    Enable = false,
-                    Port = (int)port,
-                    Pin = pin,
-                    RisingEdge = false,
-                    FallingEdge = false,
-                    Irq = ((int)port << 4) | pin
+                    Enable = 0,   // Disable
+                    Port = (uint)port,
+                    Pin = (uint)pin,
+                    RisingEdge = 0,
+                    FallingEdge = 0,
+                    ResistorMode = 0,
+                    DebounceDuration = 0,
+                    GlitchDuration = 0
                 };
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    "Calling ioctl to disable interrupts");
-                var result = GPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
-                */
+                    $"Calling ioctl to disable interrupts for Input: {port}{pin}");
+
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
             }
         }
 
@@ -81,8 +109,10 @@ namespace Meadow.Devices
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
             Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
                 $"IST Started reading queue {queue.ToInt32():X}");
-                
-            var rx_buffer = new byte[16];
+            
+            // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
+            // the debounced state of the GPIO
+            var rx_buffer = new byte[2];
 
             while (true)
             {
@@ -92,23 +122,23 @@ namespace Meadow.Devices
                 Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
                     $"queue data arrived: {BitConverter.ToString(rx_buffer)}");
 
-                // we get in 4 bytes here that is the port.  We get no other info (e.g. state)
+                // byte 1 contains the port and pin, byte 2 contains the stable state.
                 if (result >= 0)
                 {
-                    var irq = BitConverter.ToInt32(rx_buffer, 0);
+                    var irq = rx_buffer[0];
+                    bool state = rx_buffer[1] == 0 ? false : true;
                     var port = irq >> 4;
                     var pin = irq & 0xf;
                     var key = $"P{(char)(65 + port)}{pin}";
 
                     Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"Interrupt on {key} state={rx_buffer[4]}");
+                        $"Interrupt on {key} state:{state}");
 
                     lock (_interruptPins)
                     {
                         if (_interruptPins.ContainsKey(key))
                         {
                             var ipin = _interruptPins[key];
-                            var state = GetDiscrete(ipin);
                             Interrupt?.Invoke(ipin, state);
                         }
                     }
@@ -116,6 +146,7 @@ namespace Meadow.Devices
             }
         }
     }
+
 
     /* ===== MEADOW GPIO PIN MAP =====
         BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?

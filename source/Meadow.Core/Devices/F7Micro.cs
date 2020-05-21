@@ -47,31 +47,36 @@ namespace Meadow.Devices
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
-            bool initialState = false)
+            bool initialState = false,
+            OutputType initialOutputType = OutputType.PushPull)
         {
-            return DigitalOutputPort.From(pin, this.IoController, initialState);
+            return DigitalOutputPort.From(pin, this.IoController, initialState, initialOutputType);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            int debounceDuration = 0,
-            int glitchFilterCycleCount = 0
+            double debounceDuration = 0.0,    // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0.0       // 0 - 1000 msec in .1 increments
             )
         {
-            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchFilterCycleCount);
+            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(
             IPin pin,
             bool initialState = false,
-            bool glitchFilter = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            double debounceDuration = 0.0,    // 0 - 1000 msec in .1 increments
+            double glitchDuration = 0.0,      // 0 - 1000 msec in .1 increments
+            OutputType outputType = OutputType.PushPull
+            )
         {
-            return BiDirectionalPort.From(pin, this.IoController, initialState, glitchFilter, interruptMode, resistorMode, initialDirection);
+            // Convert durations to unsigned int with 100 usec resolution
+            return BiDirectionalPort.From(pin, this.IoController, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType);
         }
 
         public IAnalogInputPort CreateAnalogInputPort(
