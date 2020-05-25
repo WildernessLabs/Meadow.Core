@@ -24,21 +24,15 @@
         void WriteLine(string text, byte lineNumber);
 
         /// <summary>
-        /// Clears the entire display.
+        /// Clears all ITextDisplay lines of text
         /// </summary>
-        void Clear();
+        void ClearLines();
 
         /// <summary>
         /// Clears the specified line of characters on the display.
         /// </summary>
         /// <param name="lineNumber">Line Number</param>
         void ClearLine(byte lineNumber);
-
-        /// <summary>
-        /// Sets the display's brightness.
-        /// </summary>
-        /// <param name="brightness">0 is lowest, 1 is highest</param>
-        void SetBrightness(float brightness = 0.75f);
 
         /// <summary>
         /// Set cursor in the especified row and column.

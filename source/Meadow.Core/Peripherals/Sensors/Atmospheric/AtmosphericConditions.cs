@@ -6,24 +6,24 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
         /// <summary>
         /// The temperature, in degrees celsius (ºC).
         /// </summary>
-        public float Temperature { get; set; }
+        public float? Temperature { get; set; }
         /// <summary>
         /// The pressure, in hectopascals (hPa), which is equal to one
         /// millibar, or 1/10th of a kilopascal (kPa)/centibar.
         /// </summary>
-        public float Pressure { get; set; }
+        public float? Pressure { get; set; }
         /// <summary>
         /// The humidity, in percent relative humidity.
         /// </summary>
-        public float Humidity { get; set; }
+        public float? Humidity { get; set; }
 
         public AtmosphericConditions()
         { }
 
         public AtmosphericConditions(
-            float temperature,
-            float pressure,
-            float humidity)
+            float? temperature,
+            float? pressure,
+            float? humidity)
         {
             this.Temperature = temperature;
             this.Pressure = pressure;

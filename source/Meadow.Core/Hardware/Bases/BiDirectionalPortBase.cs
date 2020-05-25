@@ -7,18 +7,16 @@ namespace Meadow.Hardware
     /// Provides a base implementation for BiDirectional Ports; digital ports 
     /// that can be both input and output.
     /// </summary>
-    public abstract class BiDirectionalPortBase : DigitalPortBase, IBiDirectionalPort, IDisposable
+    public abstract class BiDirectionalPortBase : DigitalPortBase, IBiDirectionalPort, IDigitalInterruptPort, IDisposable
     {
         public event EventHandler<DigitalInputPortEventArgs> Changed;
 
         // internals
         protected bool _currentState;
         protected bool _isDisposed;
-        private int _debounceDuration;
-        private int _glitchCycleCount;
 
-        public bool GlitchFilter { get; set; }
         public bool InitialState { get; }
+        public OutputType InitialOutputType { get; }
         public ResistorMode Resistor { get; }
         protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
 
@@ -26,6 +24,12 @@ namespace Meadow.Hardware
         public abstract PortDirectionType Direction { get; set; }
 
         protected abstract void Dispose(bool disposing);
+
+        protected double _debounceDuration;
+        protected double _glitchDuration;
+
+        public abstract double DebounceDuration { get; set; }
+        public abstract double GlitchDuration { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating the type of interrupt monitoring this input.
@@ -37,16 +41,21 @@ namespace Meadow.Hardware
             IPin pin,
             IDigitalChannelInfo channel,
             bool initialState,
-            bool glitchFilter,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input)
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            double debounceDuration = 0.0,
+            double glitchDuration = 0.0,
+            OutputType initialOutputType = OutputType.PushPull)
             : base(pin, channel)
         {
             this.InterruptMode = interruptMode;
             InitialState = initialState;
             Resistor = resistorMode;
             Direction = initialDirection;
+            _debounceDuration = debounceDuration;   // Don't trigger WireInterrupt call via property
+            _glitchDuration = glitchDuration;       // Don't trigger WireInterrupt call via property
+            InitialOutputType = initialOutputType;
         }
 
         public override void Dispose()
@@ -54,26 +63,6 @@ namespace Meadow.Hardware
             Dispose(true);
             _isDisposed = true;
             GC.SuppressFinalize(this);
-        }
-
-        public int DebounceDuration 
-        {
-            get => _debounceDuration; 
-            set
-            {
-                if (value < 0) throw new ArgumentOutOfRangeException();
-                _debounceDuration = value;
-            } 
-        }
-
-        public int GlitchFilterCycleCount
-        {
-            get => _glitchCycleCount; 
-            set
-            {
-                if (value < 0) throw new ArgumentOutOfRangeException();
-                _glitchCycleCount = value;
-            } 
         }
 
         protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)

@@ -231,43 +231,39 @@ namespace Meadow.Hardware
         /// <param name="peripheralAddress">The I2C Address to read</param>
         /// <param name="numberOfBytes">The number of bytes/octets to read</param>
         /// <returns></returns>
-        public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
+        public unsafe byte[] ReadData(byte peripheralAddress, int numberOfBytes)
         {
-            var rxBuffer = new byte[numberOfBytes];
-            var gch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-
             _busSemaphore.Wait();
+            Span<byte> rxBuffer = stackalloc byte[numberOfBytes];
 
             try
             {
-                var command = new Nuttx.UpdI2CCommand()
+                fixed (byte* pData = &rxBuffer.GetPinnableReference())
                 {
-                    Address = peripheralAddress,
-                    Frequency = this.Frequency,
-                    TxBufferLength = 0,
-                    TxBuffer = IntPtr.Zero,
-                    RxBufferLength = rxBuffer.Length,
-                    RxBuffer = gch.AddrOfPinnedObject(),
-                };
+                    var command = new Nuttx.UpdI2CCommand()
+                    {
+                        Address = peripheralAddress,
+                        Frequency = this.Frequency,
+                        TxBufferLength = 0,
+                        TxBuffer = IntPtr.Zero,
+                        RxBufferLength = rxBuffer.Length,
+                        RxBuffer = (IntPtr)pData
+                    };
 
-                Output.WriteIf(_showI2cDebug, " +ReadData");
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                if (result != 0)
-                {
-                    DecipherI2CError(UPD.GetLastError());
+                    Output.WriteIf(_showI2cDebug, " +SendData");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
+                    if (result != 0)
+                    {
+                        DecipherI2CError(UPD.GetLastError());
+                    }
+
+                    return rxBuffer.ToArray();
                 }
-                Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-
-                return rxBuffer;
             }
             finally
             {
                 _busSemaphore.Release();
-
-                if (gch.IsAllocated)
-                {
-                    gch.Free();
-                }
             }
         }
 
