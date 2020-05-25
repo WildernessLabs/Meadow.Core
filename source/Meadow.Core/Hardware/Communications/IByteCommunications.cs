@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -62,6 +64,13 @@ namespace Meadow.Hardware
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
         byte[] WriteRead(byte[] write, ushort length);
+
+        /// <summary>
+        /// Write data to followed by read data from the peripheral.
+        /// </summary>
+        /// <param name="writeBuffer">Data to write</param>
+        /// <param name="readBuffer">Buffer where read data will be written.  Number of bytes read is determined by buffer size</param>
+        void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer);
 
         /// <summary>
         /// Read the specified number of bytes from the peripheral.

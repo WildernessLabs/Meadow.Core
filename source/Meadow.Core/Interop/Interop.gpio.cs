@@ -161,7 +161,7 @@ namespace Meadow.Core
                 PortG = 6 << GPIO_PORT_SHIFT,
                 PortH = 7 << GPIO_PORT_SHIFT,
                 PortI = 8 << GPIO_PORT_SHIFT,
-                PortJ = 8 << GPIO_PORT_SHIFT,
+                PortJ = 9 << GPIO_PORT_SHIFT,
                 PortK = 10 << GPIO_PORT_SHIFT,
 
                 Pin0 = 0 << GPIO_PIN_SHIFT,

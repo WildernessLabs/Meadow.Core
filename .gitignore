@@ -338,3 +338,6 @@ ASALocalRun/
 /**/bin/
 /**/obj/
 _site
+
+# macOS Garbage
+**/*.DS_Store

@@ -28,23 +28,27 @@ namespace Meadow.Hardware
 
         // TODO: consider specializing IIODevice
         IDigitalOutputPort CreateDigitalOutputPort(
-            IPin pin,bool initialState = false);
+            IPin pin,
+            bool initialState = false,
+            OutputType initialOutputType = OutputType.PushPull);
 
         IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            int debounceDuration = 0,
-            int glitchFilterCycleCount = 0
-        );
+            double debounceDuration = 0,
+            double glitchDuration = 0
+            );
 
         IBiDirectionalPort CreateBiDirectionalPort(
             IPin pin,
             bool initialState = false,
-            bool glitchFilter = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input
+            PortDirectionType initialDirection = PortDirectionType.Input,
+            double debounceDuration = 0,
+            double glitchDuration = 0,
+            OutputType output = OutputType.PushPull
         );
 
         IAnalogInputPort CreateAnalogInputPort(

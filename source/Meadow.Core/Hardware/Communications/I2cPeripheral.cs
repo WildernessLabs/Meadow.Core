@@ -21,41 +21,63 @@ namespace Meadow.Hardware
 
         public byte[] ReadBytes(ushort numberOfBytes)
         {
-            return this.Bus.ReadData(this.Address, numberOfBytes);
+            return Bus.ReadData(this.Address, numberOfBytes);
         }
 
         public byte ReadRegister(byte address)
         {
-            return this.Bus.WriteReadData(this.Address, 1, address).First();
+            // write the register address, then read
+            Span<byte> tx = stackalloc byte[1];
+            tx[0] = address;
+            Span<byte> rx = stackalloc byte[1];
+
+            Bus.WriteReadData(this.Address, tx, rx);
+            return rx[0];
         }
 
         public byte[] ReadRegisters(byte address, ushort length)
         {
-            return this.Bus.WriteReadData(this.Address, length, address);
+            // write the register address, then read
+            Span<byte> tx = stackalloc byte[1];
+            tx[0] = address;
+            Span<byte> rx = stackalloc byte[length];
+
+            Bus.WriteReadData(this.Address, tx, rx);
+            return rx.ToArray();
         }
 
         public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
-            var data = this.Bus.WriteReadData(this.Address, 2, address);
+            // write the register address, then read
+            Span<byte> tx = stackalloc byte[1];
+            tx[0] = address;
+            Span<byte> rx = stackalloc byte[2];
+
+            Bus.WriteReadData(this.Address, tx, rx);
             if (order == ByteOrder.LittleEndian)
             {
-                return (ushort)(data[0] | (data[1] << 8));
+                return (ushort)(rx[0] | (rx[1] << 8));
             }
-            return (ushort)((data[0] << 8) | data[1]);
+            return (ushort)((rx[0] << 8) | rx[1]);
         }
 
         public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
-            var data = this.Bus.WriteReadData(this.Address, number * 2, address);
+            // write the register address, then read
+            Span<byte> tx = stackalloc byte[1];
+            tx[0] = address;
+            Span<byte> rx = stackalloc byte[number * 2];
+
+            Bus.WriteReadData(this.Address, tx, rx);
 
             var result = new ushort[number];
             for (int i = 0; i < number; i++)
             {
                 if (order == ByteOrder.LittleEndian)
                 {
-                    result[i] = (ushort)(data[i * 2] | (data[i * 2 + 1] << 8));
+                    result[i] = (ushort)(rx[i * 2] | (rx[i * 2 + 1] << 8));
                 }
-                result[i] = (ushort)((data[i * 2] << 8) | data[i * 2 + 1]);
+                result[i] = (ushort)((rx[i * 2] << 8) | rx[i * 2 + 1]);
             }
 
             return result;
@@ -71,9 +93,15 @@ namespace Meadow.Hardware
             this.Bus.WriteData(this.Address, values);
         }
 
+        [Obsolete("This overload if WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
         public byte[] WriteRead(byte[] write, ushort length)
         {
             return this.Bus.WriteReadData(this.Address, length, write);
+        }
+
+        public void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            Bus.WriteReadData(this.Address, writeBuffer, readBuffer);
         }
 
         public void WriteRegister(byte address, byte value)
