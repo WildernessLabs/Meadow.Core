@@ -40,7 +40,7 @@ namespace InterruptTest
             input.Changed += async (s, o) =>
             {
                 // This is for testing that the DebounceDuration and GlitchDuration
-                // properties can be changed by the app
+                // properties can be changed from within the app
                 //if ((_count % 5) == 0)
                 //{
                 //    bool _changed = false;
