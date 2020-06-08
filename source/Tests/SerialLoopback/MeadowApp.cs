@@ -15,31 +15,28 @@ namespace SerialLoopback
     /// </summary>
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
+        ISerialPort serialPort;
+
         public MeadowApp()
         {
             Console.WriteLine("+SerialLoopback");
 
-            Console.WriteLine($"Using '{Device.SerialPortNames.Com4.FriendlyName}'...");
-            var port = Device.CreateSerialPort(Device.SerialPortNames.Com4, 115200);
+            Console.WriteLine($"Using '{Device.SerialPortNames.Com1.FriendlyName}'...");
+            this.serialPort = Device.CreateSerialPort(Device.SerialPortNames.Com1, 115200);
 
             Console.WriteLine("\tCreated");
-            port.ReadTimeout = Timeout.Infinite;
-            port.Open();
+            this.serialPort.ReadTimeout = Timeout.Infinite;
+            this.serialPort.Open();
             Console.WriteLine("\tOpened");
 
-//            SimplePollingListener(port);
+            //SingleEventTest(this.serialPort);
 
-            // BUGBUG: serial events are problematic right now. known threading
-            // issue. 
-            var testWithEvents = false;
+            var testWithEvents = true;
 
-            if (testWithEvents)
-            {
-                EventTestByTokenDelimter(port);
-            }
-            else
-            {
-                PollTestByTokenDelimter(port);
+            if (testWithEvents) {
+                EventTestByTokenDelimter(this.serialPort);
+            } else {
+                PollTestByTokenDelimter(this.serialPort);
             }
         }
 
@@ -49,12 +46,10 @@ namespace SerialLoopback
             Thread.Sleep(50);
             port.ClearReceiveBuffer();
 
-            while (true)
-            {
+            while (true) {
                 // wait for all data (everything up to a token) to be read to the input buffer
                 var read = port.ReadToToken(DelimiterByte);
-                while (read.Length == 0)
-                {
+                while (read.Length == 0) {
                     Thread.Sleep(50);
                     read = port.ReadToToken(DelimiterByte);
                 }
@@ -67,7 +62,7 @@ namespace SerialLoopback
         }
 
         private string[] TestSentences = {
-            "Hellow Meadow!",
+            "Hello Meadow!",
             "Ground control to Major Tom.",
             "Those evil-natured robots, they're programmed to destroy us",
             "Life, it seems, will fade away. Drifting further every day. Getting lost within myself, nothing matters, no one else.",
@@ -88,15 +83,12 @@ namespace SerialLoopback
             port.ClearReceiveBuffer();
             port.ReadTimeout = 2000;
 
-            while (true)
-            {
+            while (true) {
 
                 Console.WriteLine("Writing data...");
-                foreach (var sentence in TestSentences)
-                {
+                foreach (var sentence in TestSentences) {
 
-                    try
-                    {
+                    try {
                         var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
                         var written = port.Write(dataToWrite);
                         Console.WriteLine($"Wrote {written} bytes");
@@ -106,9 +98,7 @@ namespace SerialLoopback
 
                         // don't show the token
                         Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         Console.WriteLine($"Error: {ex.Message}");
                     }
 
@@ -118,6 +108,16 @@ namespace SerialLoopback
         }
 
 
+        void SingleEventTest(ISerialPort port)
+        {
+            port.DataReceived += OnSerialDataReceived;
+
+
+            var dataToWrite = Encoding.ASCII.GetBytes($"This is a test of a single event\r\n");
+            var written = port.Write(dataToWrite);
+            Console.WriteLine($"Wrote {written} bytes");
+        }
+
         void EventTestByTokenDelimter(ISerialPort port)
         {
             // clear out anything already in the port buffer
@@ -126,10 +126,8 @@ namespace SerialLoopback
 
             port.DataReceived += OnSerialDataReceived;
 
-            while (true)
-            {
-                foreach (var sentence in TestSentences)
-                {
+            while (true) {
+                foreach (var sentence in TestSentences) {
                     var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
                     var written = port.Write(dataToWrite);
                     Console.WriteLine($"Wrote {written} bytes");
@@ -141,20 +139,18 @@ namespace SerialLoopback
 
         private void OnSerialDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            Console.WriteLine("Serial Event Received");
+
             var port = sender as SerialPort;
 
-            try
-            {
+            try {
                 // wait for all data (everything up to a token) to be read to the input buffer
                 var read = port.ReadToToken(DelimiterByte);
-                while (read.Length > 0)
-                {
-                    // don't show the token
-                    Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
-                }
-            }
-            catch(Exception ex)
-            {
+
+                Console.WriteLine($"=== read: {read.Length} bytes.===");
+                Console.WriteLine($"msg: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+
+            } catch (Exception ex) {
                 Console.WriteLine($"Read error: {ex.Message}");
             }
         }
