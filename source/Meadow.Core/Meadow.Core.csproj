@@ -30,4 +30,8 @@
  <ItemGroup>
    <None Include="Hardware\Communications\SoftwareSpiBus.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
  </ItemGroup>
+ <ItemGroup>
+   <Folder Include="Peripherals\Sensors\Location\" />
+   <Folder Include="Peripherals\Sensors\Location\Gnss\" />
+ </ItemGroup>
 </Project>
