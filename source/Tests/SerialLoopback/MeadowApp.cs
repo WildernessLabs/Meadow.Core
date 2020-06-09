@@ -72,6 +72,8 @@ namespace SerialLoopback
         private static char DelimiterToken = '\n';
         private static byte DelimiterByte = Convert.ToByte(DelimiterToken);
 
+        string delimeterTokens = "$$BIGMONAY\r\n";  //new byte[] { Convert.ToByte('\r'), Convert.ToByte('\n') };
+
         /// <summary>
         /// 
         /// </summary>
@@ -128,7 +130,8 @@ namespace SerialLoopback
 
             while (true) {
                 foreach (var sentence in TestSentences) {
-                    var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+                    //var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+                    var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{delimeterTokens}");
                     var written = port.Write(dataToWrite);
                     Console.WriteLine($"Wrote {written} bytes");
 
@@ -145,10 +148,13 @@ namespace SerialLoopback
 
             try {
                 // wait for all data (everything up to a token) to be read to the input buffer
-                var read = port.ReadToToken(DelimiterByte);
+                //var read = port.ReadToToken(DelimiterByte);
+                Console.WriteLine("bout to read");
+                var read = port.ReadTo(delimeterTokens, true);
 
                 Console.WriteLine($"=== read: {read.Length} bytes.===");
-                Console.WriteLine($"msg: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+                //Console.WriteLine($"msg: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+                Console.WriteLine($"msg: {Encoding.ASCII.GetString(read, 0, read.Length)}");
 
             } catch (Exception ex) {
                 Console.WriteLine($"Read error: {ex.Message}");

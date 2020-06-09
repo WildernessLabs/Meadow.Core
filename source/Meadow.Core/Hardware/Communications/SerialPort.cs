@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -380,28 +381,37 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Reads bytes from the input buffer until a specified token is found
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
         /// </summary>
-        /// <param name="token">The token to search for</param>
-        /// <returns>All data in the buffer up to and including the specified token, if a token exists, otherwise an empty array.</returns>
-        /// <exception cref="TimeoutException">No token was received before the specified timeout.</exception>
-        public byte[] ReadToToken(char token)
+        /// <param name="tokens">The token(s) to search for</param>
+        /// <param name="preserveTokens">Whether or not to return the tokens in
+        /// the bytes read. If `true`, the tokens are preserved, if `false`, the
+        /// tokens will be automatically removed.</param>
+        /// <returns>All data in the buffer up to and including the specified
+        /// token, if a token exists, otherwise an empty array.</returns>
+        /// <exception cref="TimeoutException">No token was received before the
+        /// specified timeout.</exception>
+        public byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true)
         {
-            return ReadToToken(Convert.ToByte(token));
-        }
+            // convert the tokens into a byte array
+            List<byte> tokenByteList = new List<byte>();
+            foreach (char c in tokens) {
+                // i think we need to do this because a character can span
+                // multiple bytes. like unicode characters or emoji 🤷🏾‍♀️
+                tokenByteList.Add(Convert.ToByte(c));
+            }
+            byte[] tokenBytes = tokenByteList.ToArray();
 
-        /// <summary>
-        /// Reads bytes from the input buffer until a specified token is found
-        /// </summary>
-        /// <param name="token">The token to search for</param>
-        /// <returns>All data in the buffer up to and including the specified token, if a token exists, otherwise an empty array.</returns>
-        /// <exception cref="TimeoutException">No token was received before the specified timeout.</exception>
-        public byte[] ReadToToken(byte token)
-        {
+            // if there's a timeout, we check every 10ms to see if the search
+            // token exists. TODO: consider not checking until a new data arrived
+            // event is triggered. it was originally written this way because
+            // serial events didn't work.
             if (ReadTimeout > 0) {
                 Stopwatch sw = null;
 
-                while (!_readBuffer.Any(b => b == token)) {
+                //while (!_readBuffer.Any(b => b == token)) {
+                while (!_readBuffer.Contains(tokenBytes)) {
                     if (sw == null) {
                         sw = new Stopwatch();
                         sw.Start();
@@ -417,16 +427,31 @@ namespace Meadow.Hardware
                 }
             }
 
-            if (_readBuffer != null && _readBuffer.Any(b => b == token)) {
-                var list = new List<byte>();
-                while (_readBuffer.Peek() != token) {
-                    list.Add(_readBuffer.Dequeue());
-                }
-                // grab the token
-                list.Add(_readBuffer.Dequeue());
-                return list.ToArray();
-            }
+            // if the buffer contains the token
+            if (_readBuffer != null) {
+                int firstIndex = _readBuffer.FirstIndexOf(tokenBytes);
 
+                if (firstIndex >= 0) {
+                    int tokenLength = tokenBytes.Count();
+                    var bytesToDequeue = firstIndex + tokenLength;
+                    Span<byte> msg = new byte[bytesToDequeue];
+
+                    // deuque the message, sans delimeter
+                    for (int i = 0; i < firstIndex; i++) {
+                        msg[i] = _readBuffer.Dequeue();
+                    }
+                    // handle the delimeters. either add to msg or toss away.
+                    for (int i = firstIndex; i < bytesToDequeue; i++) {
+                        if (preserveTokens) {
+                            msg[i] = _readBuffer.Dequeue();
+                        } else {
+                            _readBuffer.Dequeue();
+                        }
+                    }
+
+                    return msg.ToArray();
+                }
+            }
             return new byte[0];
         }
 

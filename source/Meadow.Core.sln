@@ -58,6 +58,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Profiler", "Tests\Profiler\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealTimeClock", "Tests\RealTimeClock\RealTimeClock.csproj", "{74CFCE38-FB3F-429E-8531-72715F64B107}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionMethods", "Tests\ExtensionMethods\ExtensionMethods.csproj", "{2EEC9836-7352-4564-AC01-35F082AB84D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -164,6 +166,10 @@ Global
 		{74CFCE38-FB3F-429E-8531-72715F64B107}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74CFCE38-FB3F-429E-8531-72715F64B107}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74CFCE38-FB3F-429E-8531-72715F64B107}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -194,6 +200,7 @@ Global
 		{EA14DADF-10F8-4E28-AB73-8D4949869E9C} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{4B689705-4092-4104-A4EC-B4C2696141A1} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{74CFCE38-FB3F-429E-8531-72715F64B107} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
+		{2EEC9836-7352-4564-AC01-35F082AB84D6} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}
