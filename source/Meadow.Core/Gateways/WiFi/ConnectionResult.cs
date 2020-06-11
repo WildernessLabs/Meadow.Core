@@ -6,11 +6,33 @@ namespace Meadow.Gateway.WiFi
     /// </summary>
     public class ConnectionResult
     {
-        public ConnectionStatus ConnectionStatus {get; protected set;}
+        #region Properties
+        
+        /// <summary>
+        /// Connecrtion status.
+        /// </summary>
+        public ConnectionStatus ConnectionStatus { get; protected set; }
+        
+        #endregion Properties
 
-        public ConnectionResult(ConnectionStatus status)
+        #region Constructor(s)
+
+        /// <summary>
+        /// Default constructor is private to prevent it from being used.
+        /// </summary>
+        private ConnectionResult()
         {
-            this.ConnectionStatus = status;
         }
+        
+        /// <summary>
+        /// Create a new ConnectionResult object.
+        /// </summary>
+        /// <param name="connectionStatus">Status of the connection attempt.</param>
+        public ConnectionResult(ConnectionStatus connectionStatus)
+        {
+            ConnectionStatus = connectionStatus;
+        }
+        
+        #endregion Consytructor(s)
     }
 }

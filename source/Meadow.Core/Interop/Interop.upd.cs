@@ -161,7 +161,9 @@ namespace Meadow.Core
 
                 DirEnum = 41,
 
-                GetLastError = 51
+                GetLastError = 51,
+
+                Esp32Command = 61
             }
 
             public struct UpdRegisterValue
@@ -289,6 +291,22 @@ namespace Meadow.Core
               } cfg;
             };
             */
+
+            /// <summary>
+            /// Information required by the ESP32 in order to execute a command.
+            /// </summary>
+            public struct UpdEsp32Command
+            {
+                public byte Interface;         // Interface (WiFi, System etc.) to perform the request.
+                public UInt32 Function;        // Function number to be executed by the specified interface.
+                public UInt32 StatusCode;      // Status code returned by the ESP32.
+                public IntPtr Payload;         // Pointer to the data required by the function.
+                public UInt32 PayloadLength;   // Length of the payload data block.
+                public IntPtr Result;          // Pointer to the result.
+                public UInt32 ResultLength;    // Length of the result data block.
+                public byte Block;             // Is this a blocking call (1 = yes, 0 = no).
+            }
+
             public static bool TryGetRegister(IntPtr driverHandle, int address, out uint value)
             {
                 return TryGetRegister(driverHandle, (uint)address, out value);
