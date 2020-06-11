@@ -16,21 +16,25 @@ namespace Meadow.Hardware
 
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
+    /// Preserved for legacy API compatibility. For a more modern approach, use
+    /// `SerialMessagePort`.
     /// </summary>
     public class SerialPort : IDisposable, ISerialPort
     {
-        private const int TCSANOW = 0x00;
-        private const int TCGETS = 0x0101;
-        private const int TCSETS = 0x0102;
-        private const string DriverFolder = "/dev";
-        private const string SerialPortDriverPrefix = "tty";
+        protected const int TCSANOW = 0x00;
+        protected const int TCGETS = 0x0101;
+        protected const int TCSETS = 0x0102;
+        protected const string DriverFolder = "/dev";
+        protected const string SerialPortDriverPrefix = "tty";
 
-        private IntPtr _driverHandle = IntPtr.Zero;
-        private bool _showSerialDebug = false;
-        private CircularBuffer<byte> _readBuffer;
-        private Thread _readThread;
-        private int _readTimeout;
-        private int _baudRate;
+        protected IntPtr _driverHandle = IntPtr.Zero;
+        protected bool _showSerialDebug = false;
+        protected CircularBuffer<byte> _readBuffer;
+        protected Thread _readThread;
+        protected int _readTimeout;
+        protected int _baudRate;
+
+        protected object _accessLock = new object();
 
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
@@ -380,80 +384,6 @@ namespace Meadow.Hardware
             return _readBuffer.Peek();
         }
 
-        /// <summary>
-        /// Reads bytes from the input buffer until the specified token(s) are
-        /// found.
-        /// </summary>
-        /// <param name="tokens">The token(s) to search for</param>
-        /// <param name="preserveTokens">Whether or not to return the tokens in
-        /// the bytes read. If `true`, the tokens are preserved, if `false`, the
-        /// tokens will be automatically removed.</param>
-        /// <returns>All data in the buffer up to and including the specified
-        /// token, if a token exists, otherwise an empty array.</returns>
-        /// <exception cref="TimeoutException">No token was received before the
-        /// specified timeout.</exception>
-        public byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true)
-        {
-            // convert the tokens into a byte array
-            List<byte> tokenByteList = new List<byte>();
-            foreach (char c in tokens) {
-                // i think we need to do this because a character can span
-                // multiple bytes. like unicode characters or emoji 🤷🏾‍♀️
-                tokenByteList.Add(Convert.ToByte(c));
-            }
-            byte[] tokenBytes = tokenByteList.ToArray();
-
-            // if there's a timeout, we check every 10ms to see if the search
-            // token exists. TODO: consider not checking until a new data arrived
-            // event is triggered. it was originally written this way because
-            // serial events didn't work.
-            if (ReadTimeout > 0) {
-                Stopwatch sw = null;
-
-                //while (!_readBuffer.Any(b => b == token)) {
-                while (!_readBuffer.Contains(tokenBytes)) {
-                    if (sw == null) {
-                        sw = new Stopwatch();
-                        sw.Start();
-                    } else {
-                        if (sw.ElapsedMilliseconds > ReadTimeout) {
-                            throw new TimeoutException("Serial port read timeout");
-                        }
-                    }
-                    Thread.Sleep(10);
-                }
-                if (sw != null) {
-                    sw.Stop();
-                }
-            }
-
-            // if the buffer contains the token
-            if (_readBuffer != null) {
-                int firstIndex = _readBuffer.FirstIndexOf(tokenBytes);
-
-                if (firstIndex >= 0) {
-                    int tokenLength = tokenBytes.Count();
-                    var bytesToDequeue = firstIndex + tokenLength;
-                    Span<byte> msg = new byte[bytesToDequeue];
-
-                    // deuque the message, sans delimeter
-                    for (int i = 0; i < firstIndex; i++) {
-                        msg[i] = _readBuffer.Dequeue();
-                    }
-                    // handle the delimeters. either add to msg or toss away.
-                    for (int i = firstIndex; i < bytesToDequeue; i++) {
-                        if (preserveTokens) {
-                            msg[i] = _readBuffer.Dequeue();
-                        } else {
-                            _readBuffer.Dequeue();
-                        }
-                    }
-
-                    return msg.ToArray();
-                }
-            }
-            return new byte[0];
-        }
 
         /// <summary>
         /// Synchronously reads one byte from the SerialPort input buffer.
@@ -467,6 +397,14 @@ namespace Meadow.Hardware
 
             if (_readBuffer.Count == 0) return -1;
             return _readBuffer.Dequeue();
+        }
+
+        public byte[] ReadAll()
+        {
+            if (!IsOpen) {
+                throw new InvalidOperationException("Cannot read from a closed port");
+            }
+            return _readBuffer.Dequeue(_readBuffer.Count);
         }
 
         /// <summary>

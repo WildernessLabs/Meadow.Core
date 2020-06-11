@@ -122,6 +122,38 @@ namespace Meadow.Devices
             return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
+        public Hardware.Communications.SerialMessagePort CreateSerialMessagePort(
+            SerialPortName portName,
+            byte[] suffixDelimiter,
+            bool preserveDelimiter,
+            int baudRate,
+            int dataBits = 8,
+            Parity parity = Parity.None,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096 )
+        {
+            return Hardware.Communications.SerialMessagePort.From(portName,
+                suffixDelimiter, preserveDelimiter, baudRate, dataBits, parity,
+                stopBits, readBufferSize);
+        }
+
+        public Hardware.Communications.SerialMessagePort CreateSerialMessagePort(
+            SerialPortName portName,
+            byte[] prefixDelimiter,
+            bool preserveDelimiter,
+            int messageLength,
+            int baudRate,
+            int dataBits = 8,
+            Parity parity = Parity.None,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096)
+        {
+            return Hardware.Communications.SerialMessagePort.From(portName,
+                prefixDelimiter, preserveDelimiter, messageLength, baudRate,
+                dataBits, parity, stopBits, readBufferSize);
+        }
+
+
         /// <summary>
         /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, MOSI and MISO
         /// </summary>

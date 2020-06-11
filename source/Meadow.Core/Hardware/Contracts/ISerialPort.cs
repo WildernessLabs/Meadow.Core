@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
@@ -110,7 +111,8 @@ namespace Meadow.Hardware
         /// tokens will be automatically removed.</param>
         /// <returns>All data in the buffer up to and including the specified
         /// token, if a token exists, otherwise an empty array.</returns>
-        byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true);
+        //byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true);
+        //Task<byte[]> ReadTo(char[] tokens, bool preserveTokens = true);
 
         ///// <summary>
         ///// Reads bytes from the input buffer until a specified token is found
