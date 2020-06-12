@@ -284,6 +284,8 @@ namespace Meadow.Hardware
             return Write(buffer, 0, buffer.Length);
         }
 
+        // TODO: if > 250b, chunk it up
+        // TODO: critical section on write
         /// <summary>
         /// Writes a specified number of bytes to the serial port using data from a buffer.
         /// </summary>

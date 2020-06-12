@@ -3,24 +3,6 @@ using System.Text;
 
 namespace Meadow.Hardware.Communications
 {
-    public enum SerialMessageMode
-    {
-        PrefixDelimited,
-        SuffixDelimited
-    }
-
-    //public class SerialMessage
-    //{
-    //    public byte[] Bytes { get; set; } = new byte[0];
-
-    //    // todo: how does this know the encoding? ASCII v Unicode v Unicode32, etc.
-    //    public string GetMessageString()
-    //    {
-    //        return BitConverter.ToString(this.Bytes);
-    //    }
-
-    //}
-
 
     public class SerialMessageEventArgs : EventArgs {
         public byte[] Message { get; set; } = new byte[0];
@@ -34,13 +16,17 @@ namespace Meadow.Hardware.Communications
         
     }
 
+    // TODO: to optimize, this really should re-implement its own serialport stuff
+    // rather than using the ClassicSerialPort. That way we don't maintain two
+    // buffers; one in the underlying port, and one in this.
+
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
-    /// Preserved for legacy API compatibility.
-    ///
+    /// 
     /// Has a streamlined API over class SerialPort that deals in messages.
     ///
     /// TODO: doc better
+    ///
     /// </summary>
     public class SerialMessagePort// : FilterableObservableBase<AtmosphericConditionChangeResult, AtmosphericConditions>
     {
@@ -54,6 +40,7 @@ namespace Meadow.Hardware.Communications
         protected bool _preserveDelimiter;
 
         protected CircularBuffer<byte> _readBuffer;
+        protected object _msgParseLock = new object();
 
         internal static SerialMessagePort From(
             SerialPortName portName,
@@ -145,6 +132,10 @@ namespace Meadow.Hardware.Communications
             this.Init(readBufferSize);
         }
 
+        /// <summary>
+        /// Initializes the buffer and underlying serial port
+        /// </summary>
+        /// <param name="readBufferSize"></param>
         protected void Init(int readBufferSize)
         {
             _readBuffer = new CircularBuffer<byte>(readBufferSize);
@@ -154,47 +145,59 @@ namespace Meadow.Hardware.Communications
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             Console.WriteLine("SerialPort_DataReceived");
+            // only one message processor at a time
+            lock (_msgParseLock) {
 
-            if (e.EventType == SerialDataType.Chars) {
+                if (e.EventType == SerialDataType.Chars) {
 
-                byte[] data = _classicSerialPort.ReadAll();
+                    // read all the available data from the underlying port
+                    this._readBuffer.Append(_classicSerialPort.ReadAll());
 
-                Console.WriteLine($"data: {Encoding.ASCII.GetString(data)}//");
-                // read all the available data
-                //this._readBuffer.Append(_classicSerialPort.ReadAll());
-                this._readBuffer.Append(data);                
+                    switch (this._messageMode) {
+                        // PREFIX DELIMITED PARSING ROUTINE
+                        case SerialMessageMode.PrefixDelimited:
+                            //TODO
+                            throw new NotImplementedException();
 
-                switch (this._messageMode) {
-                    case SerialMessageMode.PrefixDelimited:
-                        //TODO
-                        throw new NotImplementedException();
-                    case SerialMessageMode.SuffixDelimited:
-                        // if the buffer contains the token
-                        int firstIndex = _readBuffer.FirstIndexOf(_suffixDelimiterTokens);
+                        // SUFFIX DELIMITED PARSING ROUTINE
+                        case SerialMessageMode.SuffixDelimited:
+                            // if the buffer contains the token
+                            int firstIndex = _readBuffer.FirstIndexOf(_suffixDelimiterTokens);
 
-                        if (firstIndex >= 0) {
-                            int tokenLength = _suffixDelimiterTokens.Length;
-                            var bytesToDequeue = firstIndex + tokenLength;
-                            //Span<byte> msg = new byte[bytesToDequeue];
-                            byte[] msg = new byte[bytesToDequeue];
+                            // while there are valid messages in here (multiple
+                            // messages can be in a single data event
+                            while (firstIndex >= 0) {
+                                int tokenLength = _suffixDelimiterTokens.Length;
+                                var bytesToDequeue = firstIndex + tokenLength;
+                                //Span<byte> msg = new byte[bytesToDequeue];
+                                byte[] msg = new byte[bytesToDequeue];
 
-                            // deuque the message, sans delimeter
-                            for (int i = 0; i < firstIndex; i++) {
-                                msg[i] = _readBuffer.Dequeue();
-                            }
-                            // handle the delimeters. either add to msg or toss away.
-                            for (int i = firstIndex; i < bytesToDequeue; i++) {
-                                if (_preserveDelimiter) {
+                                // deuque the message, sans delimeter
+                                for (int i = 0; i < firstIndex; i++) {
                                     msg[i] = _readBuffer.Dequeue();
-                                } else {
-                                    _readBuffer.Dequeue();
                                 }
+                                // handle the delimeters. either add to msg or toss away.
+                                for (int i = firstIndex; i < bytesToDequeue; i++) {
+                                    if (_preserveDelimiter) {
+                                        msg[i] = _readBuffer.Dequeue();
+                                    } else {
+                                        _readBuffer.Dequeue();
+                                    }
+                                }
+
+                                //todo: should this run on a new thread?
+                                // it doesn't seem to fucking return
+                                System.Threading.Tasks.Task.Run(() => {
+                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
+                                    this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
+                                });
+
+                                firstIndex = _readBuffer.FirstIndexOf(_suffixDelimiterTokens);
                             }
-                            this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
-                        }
-                        break;
+                            break;
+                    }
                 }
-             }
+            }
         }
 
         protected void RaiseMessageReceivedAndNotify(SerialMessageEventArgs messageResult)
@@ -320,6 +323,15 @@ namespace Meadow.Hardware.Communications
         //        }
         //    });
         //}
+
+        /// <summary>
+        /// Whether we're defining messages by prefix + length, or suffix.
+        /// </summary>
+        protected enum SerialMessageMode
+        {
+            PrefixDelimited,
+            SuffixDelimited
+        }
 
     }
 }
