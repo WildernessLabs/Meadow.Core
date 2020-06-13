@@ -24,7 +24,8 @@ namespace MeadowApp
             Console.WriteLine($"Using '{Device.SerialPortNames.Com1.FriendlyName}'...");
             Console.WriteLine($"delimiter:{delimiterString}");
 
-            TestSuffixDelimiter();
+            //TestSuffixDelimiter();
+            TestPrefixDelimiter();
         }
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace MeadowApp
 
             // write to the port.
             while (true) {
-                foreach (var sentence in BuildTestSentences()) {
+                foreach (var sentence in BuildVariableLengthTestSentences()) {
                     //var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
                     var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}").Concat(delimiterBytes).ToArray();
                     //var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}") + delimiter;
@@ -64,18 +65,54 @@ namespace MeadowApp
 
         protected void TestPrefixDelimiter()
         {
+            // TEST PARAM
+            // whether or not to return the message with the tokens in it
+            bool preseveDelimiter = true;
+
+            // instantiate our serial port
+            this.serialPort = Device.CreateSerialMessagePort(
+                Device.SerialPortNames.Com1, delimiterBytes, preseveDelimiter, 27, baudRate: 115200);
+            Console.WriteLine("\tCreated");
+
+            // open the serial port
+            this.serialPort.Open();
+            Console.WriteLine("\tOpened");
+
+            // wire up message received handler
+            this.serialPort.MessageReceived += SerialPort_MessageReceived;
+
+            // write to the port.
+            while (true) {
+                foreach (var sentence in BuildFixedLengthTestSentences()) {
+                    //var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+                    var dataToWrite = delimiterBytes.Concat(Encoding.ASCII.GetBytes($"{sentence}")).ToArray();
+                    var written = this.serialPort.Write(dataToWrite);
+                    Console.WriteLine($"\nWrote {written} bytes");
+                    // sleep
+                    Thread.Sleep(2000);
+                }
+            }
 
         }
-
 
 
         private void SerialPort_MessageReceived(object sender, SerialMessageEventArgs e)
         {
             //Console.WriteLine($"Msg received: {e.GetMessageString()}\n");
-            Console.WriteLine($"Msg recvd: {e.GetMessageString().Substring(0, 5)}...\n");
+            Console.WriteLine($"Msg recvd: {e.GetMessageString()}\n");
         }
 
-        protected string[] BuildTestSentences() {
+        protected string[] BuildFixedLengthTestSentences() {
+            return new string[] {
+                "1234567890_abcdefghijklmnop",
+                "quad erat demonstrandum foo",
+                "eat your meat or no pudding",
+                "another brick in the wall..",
+                "life is better in the sun.."
+            };
+        }
+
+        protected string[] BuildVariableLengthTestSentences() {
             return new string[] {
             "Hello Meadow!",
             "TrickyDouble." + delimiterString + "DoubleMessageTest",

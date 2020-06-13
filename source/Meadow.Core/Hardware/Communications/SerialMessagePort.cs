@@ -34,8 +34,7 @@ namespace Meadow.Hardware.Communications
 
         protected SerialPort _classicSerialPort;
         protected SerialMessageMode _messageMode;
-        protected byte[] _suffixDelimiterTokens;
-        protected byte[] _prefixDelimiterTokens;
+        protected byte[] _messageDelimiterTokens;
         protected int _messageLength;
         protected bool _preserveDelimiter;
 
@@ -96,7 +95,7 @@ namespace Meadow.Hardware.Communications
         {
             this._messageMode = SerialMessageMode.SuffixDelimited;
             this._preserveDelimiter = preserveDelimiter;
-            this._suffixDelimiterTokens = suffixDelimiter;
+            this._messageDelimiterTokens = suffixDelimiter;
             this._classicSerialPort = SerialPort.From(
                 portName, baudRate, dataBits, parity, stopBits, readBufferSize);
             this.Init(readBufferSize);
@@ -125,7 +124,7 @@ namespace Meadow.Hardware.Communications
 
             this._messageMode = SerialMessageMode.PrefixDelimited;
             this._preserveDelimiter = preserveDelimiter;
-            this._prefixDelimiterTokens = prefixDelimiter;
+            this._messageDelimiterTokens = prefixDelimiter;
             this._messageLength = messageLength;
             this._classicSerialPort = SerialPort.From(
                 portName, baudRate, dataBits, parity, stopBits, readBufferSize);
@@ -153,22 +152,71 @@ namespace Meadow.Hardware.Communications
                     // read all the available data from the underlying port
                     this._readBuffer.Append(_classicSerialPort.ReadAll());
 
+                    int firstIndex;
                     switch (this._messageMode) {
+
                         // PREFIX DELIMITED PARSING ROUTINE
                         case SerialMessageMode.PrefixDelimited:
-                            //TODO
-                            throw new NotImplementedException();
+
+                            // if the buffer contains the prefix
+                            firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
+
+                            // while there are messages to dequeue
+                            while (firstIndex >= 0) {
+                                // calculations
+                                // length of the entire message that needs to be dequeued
+                                int totalMsgLength = _messageDelimiterTokens.Length + _messageLength;
+                                // length of the message to return (depends on delimiter preservation)
+                                int returnMsgLength = ( _preserveDelimiter ? totalMsgLength : _messageLength);
+
+                                byte[] msg = new byte[returnMsgLength];
+
+                                // throw away anything before the prefix
+                                for (int i = 0; i < firstIndex; i++) {
+                                    _readBuffer.Dequeue();
+                                }
+
+                                // presever delimiter?
+                                switch (_preserveDelimiter) {
+                                    case true: // if preserving, dump the whole message in
+                                        for (int i = 0; i < totalMsgLength; i++) {
+                                            msg[i] = _readBuffer.Dequeue();
+                                        }
+                                        break;
+                                    case false:
+                                        // if tossing away, throw away first part
+                                        for (int i = 0; i < _messageDelimiterTokens.Length; i++) {
+                                            _readBuffer.Dequeue();
+                                        }
+                                        for (int i = 0; i < returnMsgLength; i++) {
+                                            msg[i] = _readBuffer.Dequeue();
+                                        }
+                                        break;
+                                }
+
+                                //todo: should this run on a new thread?
+                                // it doesn't seem to fucking return otherwise
+                                System.Threading.Tasks.Task.Run(() => {
+                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
+                                    Console.WriteLine($"Message:{Encoding.ASCII.GetString(msg)}");
+                                    this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
+                                });
+
+                                // check if there are any left
+                                firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
+                            }
+
+                            break;
 
                         // SUFFIX DELIMITED PARSING ROUTINE
                         case SerialMessageMode.SuffixDelimited:
-                            // if the buffer contains the token
-                            int firstIndex = _readBuffer.FirstIndexOf(_suffixDelimiterTokens);
+                            // if the buffer contains the suffix
+                            firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
 
                             // while there are valid messages in here (multiple
                             // messages can be in a single data event
                             while (firstIndex >= 0) {
-                                int tokenLength = _suffixDelimiterTokens.Length;
-                                var bytesToDequeue = firstIndex + tokenLength;
+                                var bytesToDequeue = firstIndex + _messageDelimiterTokens.Length;
                                 //Span<byte> msg = new byte[bytesToDequeue];
                                 byte[] msg = new byte[bytesToDequeue];
 
@@ -192,7 +240,7 @@ namespace Meadow.Hardware.Communications
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
                                 });
 
-                                firstIndex = _readBuffer.FirstIndexOf(_suffixDelimiterTokens);
+                                firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
                             }
                             break;
                     }
