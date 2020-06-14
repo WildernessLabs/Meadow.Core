@@ -18,6 +18,7 @@ namespace MeadowApp
             Initialize();
 
             SimpleReadWriteTest();
+            Console.WriteLine("Simple read/write testing completed.");
         }
 
         void Initialize()

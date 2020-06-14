@@ -200,10 +200,10 @@ namespace Meadow.Hardware
                                 }
 
                                 //todo: should this run on a new thread?
-                                // it doesn't seem to fucking return otherwise
+                                // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
-                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
-                                    Console.WriteLine($"Message:{Encoding.ASCII.GetString(msg)}");
+                                    //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
+                                    //Console.WriteLine($"Message:{Encoding.ASCII.GetString(msg)}");
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
                                 });
 
@@ -239,9 +239,9 @@ namespace Meadow.Hardware
                                 }
 
                                 //todo: should this run on a new thread?
-                                // it doesn't seem to fucking return
+                                // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
-                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
+                                    //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
                                 });
 
@@ -291,91 +291,6 @@ namespace Meadow.Hardware
         {
             return this._classicSerialPort.Write(buffer, offset, count);
         }
-
-        ///// <summary>
-        ///// Reads bytes from the input buffer until the specified token(s) are
-        /////
-        ///// TODO: make async, and drive via events, rather than the polling loop.
-        ///// found.
-        ///// </summary>
-        ///// <param name="tokens">The token(s) to search for</param>
-        ///// <param name="preserveTokens">Whether or not to return the tokens in
-        ///// the bytes read. If `true`, the tokens are preserved, if `false`, the
-        ///// tokens will be automatically removed.</param>
-        ///// <returns>All data in the buffer up to and including the specified
-        ///// token, if a token exists, otherwise an empty array.</returns>
-        ///// <exception cref="TimeoutException">No token was received before the
-        ///// specified timeout.</exception>
-        //public async Task<byte[]> ReadTo(char[] tokens, bool preserveTokens = true)
-        //{
-        //    //char[] midnightTokers = new char[tokens.Length];
-        //    //tokens.CopyTo(midnightTokers);
-
-        //    return await Task.Run(() => {
-        //        // only one access of dequeue at a time
-        //        lock (_accessLock) {
-        //            // convert the tokens into a byte array
-        //            List<byte> tokenByteList = new List<byte>();
-        //            foreach (char c in tokens) {
-        //                // i think we need to do this because a character can span
-        //                // multiple bytes. like unicode characters or emoji 🤷🏾‍♀️
-        //                tokenByteList.Add(Convert.ToByte(c));
-        //            }
-        //            byte[] tokenBytes = tokenByteList.ToArray();
-
-        //            // if there's a timeout, we check every 10ms to see if the search
-        //            // token exists. TODO: consider not checking until a new data arrived
-        //            // event is triggered. it was originally written this way because
-        //            // serial events didn't work.
-        //            if (ReadTimeout > 0) {
-        //                Stopwatch sw = null;
-
-        //                //while (!_readBuffer.Any(b => b == token)) {
-        //                while (!_readBuffer.Contains(tokenBytes)) {
-        //                    if (sw == null) {
-        //                        sw = new Stopwatch();
-        //                        sw.Start();
-        //                    } else {
-        //                        if (sw.ElapsedMilliseconds > ReadTimeout) {
-        //                            throw new TimeoutException("Serial port read timeout");
-        //                        }
-        //                    }
-        //                    Thread.Sleep(50);
-        //                }
-        //                if (sw != null) {
-        //                    sw.Stop();
-        //                }
-        //            }
-
-        //            // if the buffer contains the token
-        //            if (_readBuffer != null) {
-        //                int firstIndex = _readBuffer.FirstIndexOf(tokenBytes);
-
-        //                if (firstIndex >= 0) {
-        //                    int tokenLength = tokenBytes.Count();
-        //                    var bytesToDequeue = firstIndex + tokenLength;
-        //                    Span<byte> msg = new byte[bytesToDequeue];
-
-        //                    // deuque the message, sans delimeter
-        //                    for (int i = 0; i < firstIndex; i++) {
-        //                        msg[i] = _readBuffer.Dequeue();
-        //                    }
-        //                    // handle the delimeters. either add to msg or toss away.
-        //                    for (int i = firstIndex; i < bytesToDequeue; i++) {
-        //                        if (preserveTokens) {
-        //                            msg[i] = _readBuffer.Dequeue();
-        //                        } else {
-        //                            _readBuffer.Dequeue();
-        //                        }
-        //                    }
-
-        //                    return msg.ToArray();
-        //                }
-        //            }
-        //            return new byte[0];
-        //        }
-        //    });
-        //}
 
         /// <summary>
         /// Whether we're defining messages by prefix + length, or suffix.
