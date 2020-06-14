@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Meadow.Hardware.Communications
+namespace Meadow.Hardware
 {
 
     public class SerialMessageEventArgs : EventArgs {
@@ -150,7 +150,12 @@ namespace Meadow.Hardware.Communications
                 if (e.EventType == SerialDataType.Chars) {
 
                     // read all the available data from the underlying port
-                    this._readBuffer.Append(_classicSerialPort.ReadAll());
+                    // HACK: note that this is where this class actually re-implementing
+                    // serial port comms would be beneifical. we wouldn't have to do
+                    // these additional allocations (`tempBuffer`)
+                    byte[] tempBuffer = new byte[_classicSerialPort.BytesToRead];
+                    _classicSerialPort.ReadAll(tempBuffer);
+                    this._readBuffer.Append(tempBuffer);
 
                     int firstIndex;
                     switch (this._messageMode) {

@@ -122,7 +122,7 @@ namespace Meadow.Devices
             return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
-        public Hardware.Communications.SerialMessagePort CreateSerialMessagePort(
+        public SerialMessagePort CreateSerialMessagePort(
             SerialPortName portName,
             byte[] suffixDelimiter,
             bool preserveDelimiter,
@@ -132,12 +132,12 @@ namespace Meadow.Devices
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096 )
         {
-            return Hardware.Communications.SerialMessagePort.From(portName,
+            return SerialMessagePort.From(portName,
                 suffixDelimiter, preserveDelimiter, baudRate, dataBits, parity,
                 stopBits, readBufferSize);
         }
 
-        public Hardware.Communications.SerialMessagePort CreateSerialMessagePort(
+        public SerialMessagePort CreateSerialMessagePort(
             SerialPortName portName,
             byte[] prefixDelimiter,
             bool preserveDelimiter,
@@ -148,7 +148,7 @@ namespace Meadow.Devices
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096)
         {
-            return Hardware.Communications.SerialMessagePort.From(portName,
+            return SerialMessagePort.From(portName,
                 prefixDelimiter, preserveDelimiter, messageLength, baudRate,
                 dataBits, parity, stopBits, readBufferSize);
         }

@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using Meadow;
 using Meadow.Devices;
-using Meadow.Hardware.Communications;
+using Meadow.Hardware;
 
 namespace MeadowApp
 {

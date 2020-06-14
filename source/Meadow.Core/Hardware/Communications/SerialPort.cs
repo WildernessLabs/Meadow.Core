@@ -401,15 +401,50 @@ namespace Meadow.Hardware
             return _readBuffer.Dequeue();
         }
 
-        public byte[] ReadAll()
+
+        public int ReadAll(byte[] buffer)
         {
-            if (!IsOpen) {
-                throw new InvalidOperationException("Cannot read from a closed port");
-            }
-            return _readBuffer.Dequeue(_readBuffer.Count);
+            return ReadAll(buffer, 0);
         }
 
         /// <summary>
+        /// Reads the entire serial port buffer into an array of bytes. Before
+        /// calling, make sure that your buffer is large enough by checking
+        /// `BytesToRead` property. If your buffer isn't large enough, this will
+        /// leave bytes in the serial port buffer.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public int ReadAll(byte[] buffer, int index)
+        {
+            // checks
+            if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+            if (buffer == null) { throw new ArgumentNullException(); }
+            if (index < 0) { throw new ArgumentException("Invalid index"); }
+
+            // capture the count
+            int readCount = _readBuffer.Count;
+
+            // check to see if there's room for the whole thing, if not, we're
+            // only going to read as much as we can.
+            if (readCount + index > buffer.Length) {
+                readCount = buffer.Length - index;
+            }
+
+            // empty the serial data into the user's buffer
+            _readBuffer.Dequeue(readCount).CopyTo(buffer, index);
+
+            // return the count read
+            return readCount;
+        }
+
+        // we'll use this to unblock the `Read()` thread on the event of new
+        // data coming in.
+        AutoResetEvent readThreadResetEvent = new AutoResetEvent(false);
+
+        /// <summary>
+        /// TODO: rename offset to `index`
         /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
         /// </summary>
         /// <param name="buffer">The byte array to write the input to.</param>
@@ -417,48 +452,59 @@ namespace Meadow.Hardware
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         /// <returns>The number of bytes read.</returns>
         /// <exception cref="TimeoutException">No bytes were available to read.</exception>
-        public int Read(byte[] buffer, int offset, int count)
+        public async Task<int> Read(byte[] buffer, int offset, int count)
         {
-            if (!IsOpen) {
-                throw new InvalidOperationException("Cannot read from a closed port");
-            }
+            // all the checks
+            if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+            if (buffer == null) { throw new ArgumentNullException(); }
+            if (count > (buffer.Length - offset)) { throw new ArgumentException("Count is larger than available buffer size"); }
+            if (offset < 0) { throw new ArgumentException("Invalid offset"); }
+            if (count == 0) { return 0; }
 
-            if (buffer == null) throw new ArgumentNullException();
-            if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available buffer size");
-            if (offset < 0) throw new ArgumentException("Invalid offset");
-            if (count == 0) return 0;
+            // async, so spin up a new task to go and read on
+            return await Task.Run(() => {
 
-            var read = 0;
+                var read = 0;
 
-            Stopwatch sw = null;
+                Stopwatch sw = null;
 
-            if (ReadTimeout > 0) {
-                while (_readBuffer.Count == 0) {
-                    if (sw == null) {
-                        sw = new Stopwatch();
-                        sw.Start();
-                    } else {
-                        if (sw.ElapsedMilliseconds > ReadTimeout) {
-                            Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
-                            throw new TimeoutException("Serial port read timeout");
+                // this basicaly reads and if there is not enough data to be read
+                // it sleeps for a bit and then reads some more. it'll read until
+                // the time elapses, and then just retrun what it was able to read
+                // in tha time
+                // TODO: change to use a WaitHandleReset
+                if (ReadTimeout > 0) {
+                    while (_readBuffer.Count == 0) {
+                        if (sw == null) {
+                            sw = new Stopwatch();
+                            sw.Start();
+                        } else {
+                            if (sw.ElapsedMilliseconds > ReadTimeout) {
+                                Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
+                                throw new TimeoutException("Serial port read timeout");
+                            }
                         }
+                        Thread.Sleep(10);
                     }
-                    Thread.Sleep(10);
+                    if (sw != null) {
+                        sw.Stop();
+                    }
                 }
-                if (sw != null) {
-                    sw.Stop();
+
+                // update the read count with how much we were actually able to
+                // read, based on the timeout
+                if (count < _readBuffer.Count) {
+                    read = count;
+                } else { // clip this to the max we can count
+                    read = _readBuffer.Count;
                 }
-            }
 
-            if (count < _readBuffer.Count) {
-                read = count;
-            } else {
-                read = _readBuffer.Count;
-            }
+                // dequeue the data to read and copy it into the user's buffer.
+                Array.Copy(_readBuffer.Dequeue(read), 0, buffer, offset, read);
 
-            Array.Copy(_readBuffer.Dequeue(read), 0, buffer, offset, read);
-
-            return read;
+                // return the number of bytes read.
+                return read;
+            });
         }
 
         private void ShowSettings(Nuttx.Termios settings)

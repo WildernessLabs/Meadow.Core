@@ -93,7 +93,7 @@ namespace Meadow.Hardware
         /// <param name="offset">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         /// <returns>The number of bytes read.</returns>
-        int Read(byte[] buffer, int offset, int count);
+        Task<int> Read(byte[] buffer, int offset, int count);
 
         /// <summary>
         /// Synchronously reads one byte from the SerialPort input buffer.
@@ -135,6 +135,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
+        //int Write(Span<byte> buffer);
         int Write(byte[] buffer);
 
         /// <summary>
@@ -144,6 +145,7 @@ namespace Meadow.Hardware
         /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <returns></returns>
+        //int Write(Span<byte> buffer, int offset, int count);
         int Write(byte[] buffer, int offset, int count);
     }
 }

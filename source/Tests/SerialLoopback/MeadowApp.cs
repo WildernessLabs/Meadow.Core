@@ -40,10 +40,13 @@ namespace SerialLoopback
             }
         }
 
+        protected void SimpleWriteReadTest()
+        { }
+
         void SimplePollingListener(ISerialPort port)
         {
             // clear out anything already in the port buffer
-            Thread.Sleep(50);
+            //Thread.Sleep(50);
             port.ClearReceiveBuffer();
 
             while (true) {
@@ -74,40 +77,40 @@ namespace SerialLoopback
 
         string delimeterTokens = "$$BIGMONAY\r\n";  //new byte[] { Convert.ToByte('\r'), Convert.ToByte('\n') };
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="port"></param>
-        void PollTestByTokenDelimter(ISerialPort port)
-        {
-            // clear out anything already in the port buffer
-            Thread.Sleep(50);
-            port.ClearReceiveBuffer();
-            port.ReadTimeout = 2000;
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="port"></param>
+        //void PollTestByTokenDelimter(ISerialPort port)
+        //{
+        //    // clear out anything already in the port buffer
+        //    Thread.Sleep(50);
+        //    port.ClearReceiveBuffer();
+        //    port.ReadTimeout = 2000;
 
-            while (true) {
+        //    while (true) {
 
-                Console.WriteLine("Writing data...");
-                foreach (var sentence in TestSentences) {
+        //        Console.WriteLine("Writing data...");
+        //        foreach (var sentence in TestSentences) {
 
-                    try {
-                        var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
-                        var written = port.Write(dataToWrite);
-                        Console.WriteLine($"Wrote {written} bytes");
+        //            try {
+        //                var dataToWrite = Encoding.ASCII.GetBytes($"{sentence}{DelimiterToken}");
+        //                var written = port.Write(dataToWrite);
+        //                Console.WriteLine($"Wrote {written} bytes");
 
-                        // wait for data or a timeout
-                        var read = port.ReadToToken(DelimiterByte);
+        //                // wait for data or a timeout
+        //                var read = port.ReadToToken(DelimiterByte);
 
-                        // don't show the token
-                        Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
-                    } catch (Exception ex) {
-                        Console.WriteLine($"Error: {ex.Message}");
-                    }
+        //                // don't show the token
+        //                Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");
+        //            } catch (Exception ex) {
+        //                Console.WriteLine($"Error: {ex.Message}");
+        //            }
 
-                    Thread.Sleep(2000);
-                }
-            }
-        }
+        //            Thread.Sleep(2000);
+        //        }
+        //    }
+        //}
 
 
         void SingleEventTest(ISerialPort port)
