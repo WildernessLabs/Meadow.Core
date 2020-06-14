@@ -160,17 +160,17 @@ namespace Meadow
             }
         }
 
-        public void Enqueue(IEnumerable<T> items)
+        public void Append(IEnumerable<T> items)
         {
             foreach (var i in items) {
-                Enqueue(i);
+                Append(i);
             }
         }
 
-        public void Enqueue(T[] items, int offset, int count)
+        public void Append(T[] items, int offset, int count)
         {
             for (int i = offset; i < offset + count; i++) {
-                Enqueue(items[i]);
+                Append(items[i]);
             }
         }
 
@@ -180,15 +180,15 @@ namespace Meadow
         //    this.Enqueue(element);
         //}
 
-        public void Append(T element)
-        {
-            this.Enqueue(element);
-        }
+        //public void Append(T element)
+        //{
+        //    this.Enqueue(element);
+        //}
 
-        public void Append(IEnumerable<T> items)
-        {
-            this.Enqueue(items);
-        }
+        //public void Append(IEnumerable<T> items)
+        //{
+        //    this.Enqueue(items);
+        //}
 
         /// <summary>
         /// Adds an element to the head of the buffer
@@ -197,7 +197,7 @@ namespace Meadow
         /// <remarks>
         /// If the buffer is full and Enqueue is called, the new item will be successfully added to the buffer and the tail (oldest) item will be automatically removed
         /// </remarks>
-        public void Enqueue(T item)
+        public void Append(T item)
         {
             lock (_syncRoot) {
                 if (IsFull) {
@@ -230,7 +230,7 @@ namespace Meadow
             }
         }
 
-        public bool EnqueueWaitOne(int millisecondsTimeout)
+        public bool AppendWaitOne(int millisecondsTimeout)
         {
             return _addedResetEvent.WaitOne(millisecondsTimeout);
         }

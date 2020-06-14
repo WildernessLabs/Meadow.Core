@@ -348,10 +348,10 @@ namespace Meadow.Hardware
                         Output.WriteLineIf(_showSerialDebug, $"reading");
 
                         if (result > 0) {
-                            //                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
+                            //Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
                             Output.WriteLineIf(_showSerialDebug, $"Enqueuing {BitConverter.ToString(readBuffer, 0, result)}");
 
-                            _readBuffer.Enqueue(readBuffer, 0, result);
+                            _readBuffer.Append(readBuffer, 0, result);
 
                             if (DataReceived != null) {
                                 // put on a worker thread, else if the handler goes into some wait, we'll never process data
