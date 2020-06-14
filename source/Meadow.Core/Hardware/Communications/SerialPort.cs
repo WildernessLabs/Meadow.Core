@@ -398,7 +398,7 @@ namespace Meadow.Hardware
             }
 
             if (_readBuffer.Count == 0) return -1;
-            return _readBuffer.Dequeue();
+            return _readBuffer.Remove();
         }
 
 
@@ -433,7 +433,7 @@ namespace Meadow.Hardware
             }
 
             // empty the serial data into the user's buffer
-            _readBuffer.Dequeue(readCount).CopyTo(buffer, index);
+            _readBuffer.Remove(readCount).CopyTo(buffer, index);
 
             // return the count read
             return readCount;
@@ -499,8 +499,8 @@ namespace Meadow.Hardware
                     read = _readBuffer.Count;
                 }
 
-                // dequeue the data to read and copy it into the user's buffer.
-                Array.Copy(_readBuffer.Dequeue(read), 0, buffer, offset, read);
+                // Remove the data to read and copy it into the user's buffer.
+                Array.Copy(_readBuffer.Remove(read), 0, buffer, offset, read);
 
                 // return the number of bytes read.
                 return read;

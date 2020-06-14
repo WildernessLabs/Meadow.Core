@@ -39,7 +39,7 @@ namespace Meadow
         /// </summary>
         public event EventHandler HighWater;
         /// <summary>
-        /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Dequeue call.  This event fires only once when passing downward across the boundary.
+        /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Remove call.  This event fires only once when passing downward across the boundary.
         /// </summary>
         public event EventHandler LowWater;
         /// <summary>
@@ -239,7 +239,7 @@ namespace Meadow
         /// Removes the element from the tail of the buffer, if one exists
         /// </summary>
         /// <returns></returns>
-        public T Dequeue()
+        public T Remove()
         {
             return GetOldest(true);
         }
@@ -396,14 +396,14 @@ namespace Meadow
         //}
 
         /// <summary>
-        /// Dequeues the requested number of elements from the buffer
+        /// Removes the requested number of elements from the buffer
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
         /// <remarks>
-        /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are dequeued
+        /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are Removed
         /// </remarks>
-        public T[] Dequeue(int count)
+        public T[] Remove(int count)
         {
             if (Count < count) return new T[] { };
 
@@ -411,7 +411,7 @@ namespace Meadow
 
             lock (_syncRoot) {
                 for (int i = 0; i < count; i++) {
-                    result[i] = Dequeue();
+                    result[i] = Remove();
                 }
             }
 

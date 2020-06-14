@@ -166,10 +166,10 @@ namespace Meadow.Hardware
                             // if the buffer contains the prefix
                             firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
 
-                            // while there are messages to dequeue
+                            // while there are messages to Remove
                             while (firstIndex >= 0) {
                                 // calculations
-                                // length of the entire message that needs to be dequeued
+                                // length of the entire message that needs to be Removed
                                 int totalMsgLength = _messageDelimiterTokens.Length + _messageLength;
                                 // length of the message to return (depends on delimiter preservation)
                                 int returnMsgLength = ( _preserveDelimiter ? totalMsgLength : _messageLength);
@@ -178,23 +178,23 @@ namespace Meadow.Hardware
 
                                 // throw away anything before the prefix
                                 for (int i = 0; i < firstIndex; i++) {
-                                    _readBuffer.Dequeue();
+                                    _readBuffer.Remove();
                                 }
 
                                 // presever delimiter?
                                 switch (_preserveDelimiter) {
                                     case true: // if preserving, dump the whole message in
                                         for (int i = 0; i < totalMsgLength; i++) {
-                                            msg[i] = _readBuffer.Dequeue();
+                                            msg[i] = _readBuffer.Remove();
                                         }
                                         break;
                                     case false:
                                         // if tossing away, throw away first part
                                         for (int i = 0; i < _messageDelimiterTokens.Length; i++) {
-                                            _readBuffer.Dequeue();
+                                            _readBuffer.Remove();
                                         }
                                         for (int i = 0; i < returnMsgLength; i++) {
-                                            msg[i] = _readBuffer.Dequeue();
+                                            msg[i] = _readBuffer.Remove();
                                         }
                                         break;
                                 }
@@ -221,20 +221,20 @@ namespace Meadow.Hardware
                             // while there are valid messages in here (multiple
                             // messages can be in a single data event
                             while (firstIndex >= 0) {
-                                var bytesToDequeue = firstIndex + _messageDelimiterTokens.Length;
-                                //Span<byte> msg = new byte[bytesToDequeue];
-                                byte[] msg = new byte[bytesToDequeue];
+                                var bytesToRemove = firstIndex + _messageDelimiterTokens.Length;
+                                //Span<byte> msg = new byte[bytesToRemove];
+                                byte[] msg = new byte[bytesToRemove];
 
                                 // deuque the message, sans delimeter
                                 for (int i = 0; i < firstIndex; i++) {
-                                    msg[i] = _readBuffer.Dequeue();
+                                    msg[i] = _readBuffer.Remove();
                                 }
                                 // handle the delimeters. either add to msg or toss away.
-                                for (int i = firstIndex; i < bytesToDequeue; i++) {
+                                for (int i = firstIndex; i < bytesToRemove; i++) {
                                     if (_preserveDelimiter) {
-                                        msg[i] = _readBuffer.Dequeue();
+                                        msg[i] = _readBuffer.Remove();
                                     } else {
-                                        _readBuffer.Dequeue();
+                                        _readBuffer.Remove();
                                     }
                                 }
 
