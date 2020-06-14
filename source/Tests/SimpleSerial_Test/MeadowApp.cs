@@ -53,7 +53,7 @@ namespace MeadowApp
             int dataLength = 0;
             for (int i = 0; i < 10; i++) {
                 Console.WriteLine("Writing data...");
-                dataLength = this.classicSerialPort.Write(Encoding.ASCII.GetBytes($"{ count * i } PRINT Hello Meadow!"));
+                dataLength = this.classicSerialPort.Write(Encoding.Unicode.GetBytes($"{ count * i } PRINT Hello Meadow!"));
 
                 // give some time for the electrons to electronify
                 // TODO/HACK/BUGBUG: reduce this to 100ms and weird stuff happens;
@@ -75,7 +75,7 @@ namespace MeadowApp
                 //int dataLength = this.classicSerialPort.BytesToRead;
                 this.classicSerialPort.Read(buffer, 0, dataLength);
 
-                Console.WriteLine($"Serial data: {Encoding.ASCII.GetString(buffer, 0, dataLength)}");
+                Console.WriteLine($"Serial data: {Encoding.Unicode.GetString(buffer, 0, dataLength)}");
 
                 Thread.Sleep(300);
             }
@@ -113,21 +113,21 @@ namespace MeadowApp
             // send some messages
             await Task.Run(async () => {
                 Console.WriteLine("Sending 8 messages of profundity.");
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("Ticking away the moments that make up a dull day,"));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("Ticking away the moments that make up a dull day,"));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("fritter and waste the hours in an offhand way."));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("fritter and waste the hours in an offhand way."));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("Kicking around on a piece of ground in your home town,"));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("Kicking around on a piece of ground in your home town,"));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("Waiting for someone or something to show you the way."));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("Waiting for someone or something to show you the way."));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("Tired of lying in the sunshine, staying home to watch the rain,"));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("Tired of lying in the sunshine, staying home to watch the rain,"));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("you are young and life is long and there is time to kill today."));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("you are young and life is long and there is time to kill today."));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("And then one day you find ten years have got behind you,"));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("And then one day you find ten years have got behind you,"));
                 await Task.Delay(100);
-                this.classicSerialPort.Write(Encoding.ASCII.GetBytes("No one told you when to run, you missed the starting gun."));
+                this.classicSerialPort.Write(Encoding.Unicode.GetBytes("No one told you when to run, you missed the starting gun."));
                 await Task.Delay(100);
             });
 
@@ -165,7 +165,7 @@ namespace MeadowApp
         protected string ParseToString(byte[] buffer, int length)
         {
             Span<byte> actualData = buffer.AsSpan<byte>().Slice(0, length);
-            return Encoding.ASCII.GetString(actualData);
+            return Encoding.Unicode.GetString(actualData);
         }
 
         void AsyncReadWaitTest()
