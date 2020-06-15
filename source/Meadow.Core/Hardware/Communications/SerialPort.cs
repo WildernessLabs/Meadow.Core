@@ -290,19 +290,19 @@ namespace Meadow.Hardware
         /// Writes a specified number of bytes to the serial port using data from a buffer.
         /// </summary>
         /// <param name="buffer">The byte array that contains the data to write to the port.</param>
-        /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
+        /// <param name="index">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <returns></returns>
-        public int Write(byte[] buffer, int offset, int count)
+        public int Write(byte[] buffer, int index, int count)
         {
             // all the checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot write to a closed port"); }
             if (buffer == null) throw new ArgumentNullException();
-            if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available data");
-            if (offset < 0) throw new ArgumentException("Invalid offset");
+            if (count > (buffer.Length - index)) throw new ArgumentException("Count is larger than available data");
+            if (index < 0) throw new ArgumentException("Invalid offset");
             if (count == 0) return 0;
 
-            int currentIndex = offset;
+            int currentIndex = index;
             int totalBytesWritten = 0;
             int result = 0;
             int systemBufferMax = 255;
@@ -332,7 +332,7 @@ namespace Meadow.Hardware
                 //Console.WriteLine($"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
 
                 // recalculate the current index, including the original offset
-                currentIndex = totalBytesWritten + offset;
+                currentIndex = totalBytesWritten + index;
                 bytesLeft = count - totalBytesWritten;
                 bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
                 //Console.WriteLine($"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
