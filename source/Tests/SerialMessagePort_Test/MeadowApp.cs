@@ -66,7 +66,7 @@ namespace MeadowApp
         {
             // TEST PARAM
             // whether or not to return the message with the tokens in it
-            bool preseveDelimiter = true;
+            bool preseveDelimiter = false;
 
             // instantiate our serial port
             this.serialPort = Device.CreateSerialMessagePort(
