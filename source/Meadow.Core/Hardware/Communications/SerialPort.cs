@@ -295,32 +295,69 @@ namespace Meadow.Hardware
         /// <returns></returns>
         public int Write(byte[] buffer, int offset, int count)
         {
-            if (!IsOpen) {
-                throw new InvalidOperationException("Cannot write to a closed port");
-            }
-
+            // all the checks
+            if (!IsOpen) { throw new InvalidOperationException("Cannot write to a closed port"); }
             if (buffer == null) throw new ArgumentNullException();
             if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available data");
             if (offset < 0) throw new ArgumentException("Invalid offset");
             if (count == 0) return 0;
 
-            Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
-            if (offset > 0) {
-                // we need to make a copy
-                var tmp = new byte[count];
-                Array.Copy(buffer, offset, tmp, 0, count);
-                var result = Nuttx.write(_driverHandle, tmp, count);
+            int currentIndex = offset;
+            int totalBytesWritten = 0;
+            int result = 0;
+            int systemBufferMax = 255;
+            int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
+            int bytesToWriteThisLoop = maxCount;
+            int bytesLeft = count;
+
+            //Console.WriteLine($"count:{count}, maxCount:{maxCount}");
+
+            // we can only write 255 bytes at a time, so we loop 
+            while (totalBytesWritten < count) {
+                // if there's an offset, we want to slice
+                if (currentIndex > 0) {
+                    //Console.WriteLine($"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                    Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
+                    result = Nuttx.write(_driverHandle, data.ToArray(), count);
+                } else {
+                    result = Nuttx.write(_driverHandle, buffer, count);
+                }
+                // if there was an error, pull it out of NuttX
                 if (result < 0) {
                     throw new NativeException(UPD.GetLastError());
                 }
-                return result;
-            } else {
-                var result = Nuttx.write(_driverHandle, buffer, count);
-                if (result < 0) {
-                    throw new NativeException(UPD.GetLastError());
-                }
-                return result;
+                // otherwise,
+                totalBytesWritten += result;
+
+                //Console.WriteLine($"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+
+                // recalculate the current index, including the original offset
+                currentIndex = totalBytesWritten + offset;
+                bytesLeft = count - totalBytesWritten;
+                bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
+                //Console.WriteLine($"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
             }
+
+            return totalBytesWritten;
+
+
+            ////Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
+            //if (offset > 0) {
+            //    // we need to make a copy
+            //    var tmp = new byte[count];
+            //    Array.Copy(buffer, offset, tmp, 0, count);
+            //    var result = Nuttx.write(_driverHandle, tmp, count);
+            //    if (result < 0) {
+            //        throw new NativeException(UPD.GetLastError());
+            //    }
+            //    return result;
+            //} else {
+            //    var result = Nuttx.write(_driverHandle, buffer, count);
+            //    if (result < 0) {
+            //        throw new NativeException(UPD.GetLastError());
+            //    }
+            //    return result;
+            //}
         }
 
         private void ReadThreadProc()

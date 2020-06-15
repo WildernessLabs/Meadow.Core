@@ -23,8 +23,8 @@ namespace MeadowApp
             Console.WriteLine($"Using '{Device.SerialPortNames.Com1.FriendlyName}'...");
             Console.WriteLine($"delimiter:{delimiterString}");
 
-            //TestSuffixDelimiter();
-            TestPrefixDelimiter();
+            TestSuffixDelimiter();
+            //TestPrefixDelimiter();
         }
 
         /// <summary>
