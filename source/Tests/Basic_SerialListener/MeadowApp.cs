@@ -40,7 +40,7 @@ namespace MeadowApp
         /// just a diagnostic method that polls the serial and outputs anything
         /// in the buffer.
         /// </summary>
-        async void ListenToSerial()
+        void ListenToSerial()
         {
             byte[] buffer = new byte[1024];
             int bytesToRead;
@@ -50,7 +50,7 @@ namespace MeadowApp
                 if (bytesToRead > buffer.Length) {
                     bytesToRead = buffer.Length;
                 }
-                int dataLength = await classicSerialPort.Read(buffer, 0, bytesToRead);
+                int dataLength = classicSerialPort.Read(buffer, 0, bytesToRead);
 
                 if (dataLength > 0) {
                     Console.WriteLine(ParseToString(buffer, dataLength, Encoding.ASCII));
