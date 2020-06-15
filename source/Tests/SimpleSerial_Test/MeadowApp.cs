@@ -28,15 +28,19 @@ namespace MeadowApp
 
         void Initialize()
         {
+            //this.InitSerial(Device.SerialPortNames.Com1, 115200);
+            this.InitSerial(Device.SerialPortNames.Com4, 9600);
+        }
+
+        void InitSerial(SerialPortName portName, int baud)
+        {
             // instantiate our serial port
-            this.classicSerialPort = Device.CreateSerialPort(
-                Device.SerialPortNames.Com1, 115200);
+            this.classicSerialPort = Device.CreateSerialPort(portName, baud);
             Console.WriteLine("\tCreated");
 
             // open the serial port
             this.classicSerialPort.Open();
             Console.WriteLine("\tOpened");
-
         }
 
         /// <summary>
@@ -75,7 +79,7 @@ namespace MeadowApp
                 //int dataLength = this.classicSerialPort.BytesToRead;
                 this.classicSerialPort.Read(buffer, 0, dataLength);
 
-                Console.WriteLine($"Serial data: {Encoding.Unicode.GetString(buffer, 0, dataLength)}");
+                Console.WriteLine($"Serial data: {ParseToString(buffer, dataLength, Encoding.Unicode)}");
 
                 Thread.Sleep(300);
             }
@@ -144,7 +148,7 @@ namespace MeadowApp
                 byte[] buffer = new byte[512];
                 while (true) {
                     int readCount = await classicSerialPort.Read(buffer, 0, 512);
-                    Console.Write(ParseToString(buffer, readCount));
+                    Console.Write(ParseToString(buffer, readCount, Encoding.Unicode));
                     // if we got all the data, break the while loop, otherwise, keep going.
                     if (readCount < 512) { break; }
                 }
@@ -153,8 +157,6 @@ namespace MeadowApp
 
         }
 
-
-
         /// <summary>
         /// C# compiler doesn't allow Span<T> in async methods, so can't do this
         /// inline.
@@ -162,10 +164,10 @@ namespace MeadowApp
         /// <param name="buffer"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        protected string ParseToString(byte[] buffer, int length)
+        protected string ParseToString(byte[] buffer, int length, Encoding encoding)
         {
             Span<byte> actualData = buffer.AsSpan<byte>().Slice(0, length);
-            return Encoding.Unicode.GetString(actualData);
+            return encoding.GetString(actualData);
         }
 
         void AsyncReadWaitTest()
