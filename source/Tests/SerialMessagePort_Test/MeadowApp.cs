@@ -11,7 +11,6 @@ namespace MeadowApp
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
         SerialMessagePort serialPort;
-        //byte[] delimiter = System.Text.Encoding.Unicode.GetBytes("$$BIGMONAY$$");
         string delimiterString = "$$$";
         byte[] delimiterBytes;
 

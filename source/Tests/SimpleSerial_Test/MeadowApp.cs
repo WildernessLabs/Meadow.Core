@@ -9,6 +9,9 @@ using Meadow.Hardware;
 
 namespace MeadowApp
 {
+    /// <summary>
+    /// To run these tests, create a loopback on COM4 by connecting D12 and D13.
+    /// </summary>
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
         ISerialPort classicSerialPort;
@@ -28,8 +31,8 @@ namespace MeadowApp
 
         void Initialize()
         {
-            //this.InitSerial(Device.SerialPortNames.Com1, 115200);
-            this.InitSerial(Device.SerialPortNames.Com4, 9600);
+            this.InitSerial(Device.SerialPortNames.Com1, 115200);
+            //this.InitSerial(Device.SerialPortNames.Com4, 9600);
         }
 
         void InitSerial(SerialPortName portName, int baud)
@@ -57,7 +60,7 @@ namespace MeadowApp
             int dataLength = 0;
             for (int i = 0; i < 10; i++) {
                 Console.WriteLine("Writing data...");
-                dataLength = this.classicSerialPort.Write(Encoding.Unicode.GetBytes($"{ count * i } PRINT Hello Meadow!"));
+                /*dataLength =*/ this.classicSerialPort.Write(Encoding.Unicode.GetBytes($"{ count * i } PRINT Hello Meadow!"));
 
                 // give some time for the electrons to electronify
                 // TODO/HACK/BUGBUG: reduce this to 100ms and weird stuff happens;
@@ -76,7 +79,7 @@ namespace MeadowApp
                 Thread.Sleep(300);
 
                 // empty it out
-                //int dataLength = this.classicSerialPort.BytesToRead;
+                dataLength = this.classicSerialPort.BytesToRead;
                 this.classicSerialPort.Read(buffer, 0, dataLength);
 
                 Console.WriteLine($"Serial data: {ParseToString(buffer, dataLength, Encoding.Unicode)}");
@@ -142,12 +145,12 @@ namespace MeadowApp
             this.classicSerialPort.DataReceived -= ProcessData;
 
             // anonymous method declaration so we can unwire later.
-            async void ProcessData(object sender, SerialDataReceivedEventArgs e)
+            void ProcessData(object sender, SerialDataReceivedEventArgs e)
             {
                 Console.WriteLine("Serial Data Received");
                 byte[] buffer = new byte[512];
                 while (true) {
-                    int readCount = await classicSerialPort.Read(buffer, 0, 512);
+                    int readCount = classicSerialPort.Read(buffer, 0, classicSerialPort.BytesToRead);
                     Console.Write(ParseToString(buffer, readCount, Encoding.Unicode));
                     // if we got all the data, break the while loop, otherwise, keep going.
                     if (readCount < 512) { break; }

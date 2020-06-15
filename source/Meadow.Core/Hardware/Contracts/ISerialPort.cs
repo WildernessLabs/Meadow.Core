@@ -93,7 +93,7 @@ namespace Meadow.Hardware
         /// <param name="offset">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         /// <returns>The number of bytes read.</returns>
-        Task<int> Read(byte[] buffer, int offset, int count);
+        int Read(byte[] buffer, int offset, int count);
 
         /// <summary>
         /// Synchronously reads one byte from the SerialPort input buffer.

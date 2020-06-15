@@ -439,72 +439,162 @@ namespace Meadow.Hardware
             return readCount;
         }
 
+
+        // DON'T DELETE
+        // This is preserved here as a potential solution to reading past what
+        // is currently in the buffer.
+        //
+        // Ultimately, I don't believe this is practically possible with the
+        // expected mecanics of the SerialPort.
+        //
+        // The issue is that in order to continue to read, we have two options,
+        // 1) either sleep/spin in a loop that keeps checking the buffer to see
+        //    if anything has come in, and pull it off, or:
+        // 2) as i have done here, use a `ManualResetEvent` to unblock the `Read`
+        //    thread when data has come in. This prevents a spinning loop.
+        //
+        // However, in practice, because we don't protect the underlying read
+        // buffer, a user could subscribe to the `DataReceived` event and empty
+        // out data in the buffer, causing the `Read` call to be useless. The only
+        // way to do this would be to cancel any notifications of `DataReceived`
+        // while this call was still executing. That's doable, but I think it
+        // adds a lot more complexity to the archtiecture, and makes for a bad
+        // API experience. As such, I think we need to restrict `Read()` to
+        // data that is in the buffer. If they want an modern async model, they
+        // should probalby use the SerialMessagePort
+        //
+        // in any case, i'm preserving this (untested) code below, in case we
+        // might someday make a wrapper to SerialPort that is properly async.
+        //
+        // ====== CODE PRESERVED BELOW
         // we'll use this to unblock the `Read()` thread on the event of new
         // data coming in.
-        AutoResetEvent readThreadResetEvent = new AutoResetEvent(false);
+        // ManualResetEvent readThreadResetEvent = new ManualResetEvent(false);
+        //
+        //public async ValueTask<int> ReadWithResetEvent(byte[] buffer, int index, int count)
+        //{
+        //    // all the checks
+        //    if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+        //    if (buffer == null) { throw new ArgumentNullException(); }
+        //    if (count > (buffer.Length - index)) { throw new ArgumentException("Count is larger than available buffer size"); }
+        //    if (index < 0) { throw new ArgumentException("Invalid offset"); }
+        //    if (count == 0) { return 0; }
+
+        //    // if they want less than or as much data as we have already,
+        //    if (count <= this._readBuffer.Count) {
+        //        // read what we have into the buffer and return
+        //        Array.Copy(_readBuffer.Remove(count), 0, buffer, index, count);
+        //        return count;
+        //    }
+        //    // if they want more than is in the buffer
+        //    else {
+
+        //        // think this needs to be in a task
+        //        //// async, so spin up a new task to go and read on
+        //        //return await Task<int>.Run(() => {
+
+        //        this.DataReceived += ResetReadThread;
+
+        //        // capture the count
+        //        int bytesRead = _readBuffer.Count;
+
+        //        // read what we can
+        //        Array.Copy(_readBuffer.Remove(count), 0, buffer, index, count);
+
+        //        // while we haven't read everything, and we haven't timed out
+        //        while (bytesRead < count) {
+        //            // set a wait handle to wait for the data received event
+        //            // when it's reset, read some more
+        //            readThreadResetEvent.WaitOne();
+
+        //            // read read read
+        //            bytesRead += _readBuffer.Count;
+        //            int dataLength = _readBuffer.Count;
+        //            Array.Copy(_readBuffer.Remove(dataLength), 0, buffer, bytesRead, dataLength);
+        //        }
+
+        //        // cleanup
+        //        this.DataReceived += ResetReadThread;
+
+        //        //});
+
+        //    }
+
+        //    void ResetReadThread(object sender, SerialDataReceivedEventArgs e)
+        //    {
+        //        readThreadResetEvent.Set();
+        //    }
+
+        //}
+
 
         /// <summary>
-        /// TODO: rename offset to `index`
         /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
         /// </summary>
         /// <param name="buffer">The byte array to write the input to.</param>
-        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
+        /// <param name="index">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         /// <returns>The number of bytes read.</returns>
         /// <exception cref="TimeoutException">No bytes were available to read.</exception>
-        public async Task<int> Read(byte[] buffer, int offset, int count)
+        public int Read(byte[] buffer, int index, int count)
         {
             // all the checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
             if (buffer == null) { throw new ArgumentNullException(); }
-            if (count > (buffer.Length - offset)) { throw new ArgumentException("Count is larger than available buffer size"); }
-            if (offset < 0) { throw new ArgumentException("Invalid offset"); }
+            if (count > (buffer.Length - index)) { throw new ArgumentException("Count is larger than available buffer size"); }
+            if (index < 0) { throw new ArgumentException("Invalid offset"); }
             if (count == 0) { return 0; }
 
-            // async, so spin up a new task to go and read on
-            return await Task.Run(() => {
+            if (count > _readBuffer.Count) { throw new ArgumentException("Count cannot be larger than the available data."); }
 
-                var read = 0;
+            // read what we have into the buffer and return
+            Array.Copy(_readBuffer.Remove(count), 0, buffer, index, count);
+            return count;
 
-                Stopwatch sw = null;
+            //// async, so spin up a new task to go and read on
+            //return await Task.Run(() => {
 
-                // this basicaly reads and if there is not enough data to be read
-                // it sleeps for a bit and then reads some more. it'll read until
-                // the time elapses, and then just retrun what it was able to read
-                // in tha time
-                // TODO: change to use a WaitHandleReset
-                if (ReadTimeout > 0) {
-                    while (_readBuffer.Count == 0) {
-                        if (sw == null) {
-                            sw = new Stopwatch();
-                            sw.Start();
-                        } else {
-                            if (sw.ElapsedMilliseconds > ReadTimeout) {
-                                Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
-                                throw new TimeoutException("Serial port read timeout");
-                            }
-                        }
-                        Thread.Sleep(10);
-                    }
-                    if (sw != null) {
-                        sw.Stop();
-                    }
-                }
+            //    var read = 0;
 
-                // update the read count with how much we were actually able to
-                // read, based on the timeout
-                if (count < _readBuffer.Count) {
-                    read = count;
-                } else { // clip this to the max we can count
-                    read = _readBuffer.Count;
-                }
+            //    Stopwatch sw = null;
 
-                // Remove the data to read and copy it into the user's buffer.
-                Array.Copy(_readBuffer.Remove(read), 0, buffer, offset, read);
+            //    // this basicaly reads and if there is not enough data to be read
+            //    // it sleeps for a bit and then reads some more. it'll read until
+            //    // the time elapses, and then just retrun what it was able to read
+            //    // in tha time
+            //    // TODO: change to use a WaitHandleReset
+            //    if (ReadTimeout > 0) {
+            //        while (_readBuffer.Count == 0) {
+            //            if (sw == null) {
+            //                sw = new Stopwatch();
+            //                sw.Start();
+            //            } else {
+            //                if (sw.ElapsedMilliseconds > ReadTimeout) {
+            //                    Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
+            //                    throw new TimeoutException("Serial port read timeout");
+            //                }
+            //            }
+            //            Thread.Sleep(10);
+            //        }
+            //        if (sw != null) {
+            //            sw.Stop();
+            //        }
+            //    }
 
-                // return the number of bytes read.
-                return read;
-            });
+            //    // update the read count with how much we were actually able to
+            //    // read, based on the timeout
+            //    if (count < _readBuffer.Count) {
+            //        read = count;
+            //    } else { // clip this to the max we can count
+            //        read = _readBuffer.Count;
+            //    }
+
+            //    // Remove the data to read and copy it into the user's buffer.
+            //    Array.Copy(_readBuffer.Remove(read), 0, buffer, index, read);
+
+            //    // return the number of bytes read.
+            //    return read;
+            //});
         }
 
         private void ShowSettings(Nuttx.Termios settings)
