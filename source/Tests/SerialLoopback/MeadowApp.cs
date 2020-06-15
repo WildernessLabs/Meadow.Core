@@ -48,10 +48,10 @@ namespace SerialLoopback
 
             while (true) {
                 // wait for all data (everything up to a token) to be read to the input buffer
-                var read = port.ReadToToken(DelimiterByte);
+                var read = port.ReadTo(DelimiterToken);
                 while (read.Length == 0) {
                     Thread.Sleep(50);
-                    read = port.ReadToToken(DelimiterByte);
+                    read = port.ReadTo(DelimiterToken);
                 }
 
                 // don't show the token
@@ -70,7 +70,6 @@ namespace SerialLoopback
         };
 
         private static char DelimiterToken = '\n';
-        private static byte DelimiterByte = Convert.ToByte(DelimiterToken);
 
         string delimeterTokens = "$$BIGMONAY\r\n";  //new byte[] { Convert.ToByte('\r'), Convert.ToByte('\n') };
 
@@ -96,7 +95,7 @@ namespace SerialLoopback
                         Console.WriteLine($"Wrote {written} bytes");
 
                         // wait for data or a timeout
-                        var read = port.ReadToToken(DelimiterByte);
+                        var read = port.ReadTo(DelimiterToken);
 
                         // don't show the token
                         Console.WriteLine($"Read {read.Length} bytes: {Encoding.ASCII.GetString(read, 0, read.Length).TrimEnd(DelimiterToken)}");

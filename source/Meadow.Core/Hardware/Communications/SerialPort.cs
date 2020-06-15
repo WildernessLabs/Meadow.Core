@@ -383,6 +383,19 @@ namespace Meadow.Hardware
         /// <summary>
         /// Reads bytes from the input buffer until the specified token(s) are
         /// found.
+        /// <summary>
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
+        /// </summary>
+        /// <param name="tokens">The token(s) to search for</param>
+        public byte[] ReadTo(params char[] tokens)
+        {
+            return ReadTo(tokens, true);
+        }
+
+        /// <summary>
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
         /// </summary>
         /// <param name="tokens">The token(s) to search for</param>
         /// <param name="preserveTokens">Whether or not to return the tokens in

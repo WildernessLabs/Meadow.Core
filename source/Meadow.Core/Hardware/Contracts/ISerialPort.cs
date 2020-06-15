@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
@@ -111,6 +112,13 @@ namespace Meadow.Hardware
         /// <returns>All data in the buffer up to and including the specified
         /// token, if a token exists, otherwise an empty array.</returns>
         byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true);
+
+        /// <summary>
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
+        /// </summary>
+        /// <param name="tokens">The token(s) to search for</param>
+        byte[] ReadTo(params char[] tokens);
 
         ///// <summary>
         ///// Reads bytes from the input buffer until a specified token is found
