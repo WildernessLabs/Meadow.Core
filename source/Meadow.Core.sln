@@ -44,7 +44,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Tests\Benchma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteCommsAPIScratchPad", "Tests\ByteCommsAPIScratchPad\ByteCommsAPIScratchPad.csproj", "{CB756052-D824-40AC-8A54-C6E608DD83B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicI2CTest", "Tests\BasicI2CTest\BasicI2CTest.csproj", "{DC2AB456-74B1-4408-9640-960B555460C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicI2CTest", "Tests\BasicI2CTest\BasicI2CTest.csproj", "{DC2AB456-74B1-4408-9640-960B555460C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basic_Digital_Input", "Tests\Basic_Digital_Input\Basic_Digital_Input.csproj", "{3173C381-839B-4458-A2E9-D2EF326ACF2D}"
 EndProject
@@ -54,11 +54,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic_PWM", "Tests\Basic_PW
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerialLoopback", "Tests\SerialLoopback\SerialLoopback.csproj", "{EA14DADF-10F8-4E28-AB73-8D4949869E9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Profiler", "Tests\Profiler\Profiler.csproj", "{4B689705-4092-4104-A4EC-B4C2696141A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Profiler", "Tests\Profiler\Profiler.csproj", "{4B689705-4092-4104-A4EC-B4C2696141A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealTimeClock", "Tests\RealTimeClock\RealTimeClock.csproj", "{74CFCE38-FB3F-429E-8531-72715F64B107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealTimeClock", "Tests\RealTimeClock\RealTimeClock.csproj", "{74CFCE38-FB3F-429E-8531-72715F64B107}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionMethods", "Tests\ExtensionMethods\ExtensionMethods.csproj", "{2EEC9836-7352-4564-AC01-35F082AB84D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSystem", "Tests\FileSystem\FileSystem.csproj", "{31BF92DD-008D-43C6-A644-19A7C857A42C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -166,10 +166,10 @@ Global
 		{74CFCE38-FB3F-429E-8531-72715F64B107}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74CFCE38-FB3F-429E-8531-72715F64B107}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74CFCE38-FB3F-429E-8531-72715F64B107}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2EEC9836-7352-4564-AC01-35F082AB84D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31BF92DD-008D-43C6-A644-19A7C857A42C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31BF92DD-008D-43C6-A644-19A7C857A42C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31BF92DD-008D-43C6-A644-19A7C857A42C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31BF92DD-008D-43C6-A644-19A7C857A42C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -200,7 +200,7 @@ Global
 		{EA14DADF-10F8-4E28-AB73-8D4949869E9C} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{4B689705-4092-4104-A4EC-B4C2696141A1} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{74CFCE38-FB3F-429E-8531-72715F64B107} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
-		{2EEC9836-7352-4564-AC01-35F082AB84D6} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
+		{31BF92DD-008D-43C6-A644-19A7C857A42C} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}
