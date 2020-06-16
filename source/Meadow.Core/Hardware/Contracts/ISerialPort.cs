@@ -119,7 +119,7 @@ namespace Meadow.Hardware
         /// found.
         /// </summary>
         /// <param name="tokens">The token(s) to search for</param>
-        byte[] ReadTo(params char[] tokens);
+        //byte[] ReadTo(params char[] tokens);
 
         ///// <summary>
         ///// Reads bytes from the input buffer until a specified token is found
