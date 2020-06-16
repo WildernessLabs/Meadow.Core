@@ -16,21 +16,25 @@ namespace Meadow.Hardware
 
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
+    /// Preserved for legacy API compatibility. For a more modern approach, use
+    /// `SerialMessagePort`.
     /// </summary>
     public class SerialPort : IDisposable, ISerialPort
     {
-        private const int TCSANOW = 0x00;
-        private const int TCGETS = 0x0101;
-        private const int TCSETS = 0x0102;
-        private const string DriverFolder = "/dev";
-        private const string SerialPortDriverPrefix = "tty";
+        protected const int TCSANOW = 0x00;
+        protected const int TCGETS = 0x0101;
+        protected const int TCSETS = 0x0102;
+        protected const string DriverFolder = "/dev";
+        protected const string SerialPortDriverPrefix = "tty";
 
-        private IntPtr _driverHandle = IntPtr.Zero;
-        private bool _showSerialDebug = false;
-        private CircularBuffer<byte> _readBuffer;
-        private Thread _readThread;
-        private int _readTimeout;
-        private int _baudRate;
+        protected IntPtr _driverHandle = IntPtr.Zero;
+        protected bool _showSerialDebug = false;
+        protected CircularBuffer<byte> _readBuffer;
+        protected Thread _readThread;
+        protected int _readTimeout;
+        protected int _baudRate;
+
+        protected object _accessLock = new object();
 
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
@@ -280,41 +284,80 @@ namespace Meadow.Hardware
             return Write(buffer, 0, buffer.Length);
         }
 
+        // TODO: if > 250b, chunk it up
+        // TODO: critical section on write
         /// <summary>
         /// Writes a specified number of bytes to the serial port using data from a buffer.
         /// </summary>
         /// <param name="buffer">The byte array that contains the data to write to the port.</param>
-        /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
+        /// <param name="index">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <returns></returns>
-        public int Write(byte[] buffer, int offset, int count)
+        public int Write(byte[] buffer, int index, int count)
         {
-            if (!IsOpen) {
-                throw new InvalidOperationException("Cannot write to a closed port");
-            }
-
+            // all the checks
+            if (!IsOpen) { throw new InvalidOperationException("Cannot write to a closed port"); }
             if (buffer == null) throw new ArgumentNullException();
-            if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available data");
-            if (offset < 0) throw new ArgumentException("Invalid offset");
+            if (count > (buffer.Length - index)) throw new ArgumentException("Count is larger than available data");
+            if (index < 0) throw new ArgumentException("Invalid offset");
             if (count == 0) return 0;
 
-            Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
-            if (offset > 0) {
-                // we need to make a copy
-                var tmp = new byte[count];
-                Array.Copy(buffer, offset, tmp, 0, count);
-                var result = Nuttx.write(_driverHandle, tmp, count);
+            int currentIndex = index;
+            int totalBytesWritten = 0;
+            int result = 0;
+            int systemBufferMax = 255;
+            int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
+            int bytesToWriteThisLoop = maxCount;
+            int bytesLeft = count;
+
+            //Console.WriteLine($"count:{count}, maxCount:{maxCount}");
+
+            // we can only write 255 bytes at a time, so we loop 
+            while (totalBytesWritten < count) {
+                // if there's an offset, we want to slice
+                if (currentIndex > 0) {
+                    //Console.WriteLine($"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                    Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
+                    result = Nuttx.write(_driverHandle, data.ToArray(), count);
+                } else {
+                    result = Nuttx.write(_driverHandle, buffer, count);
+                }
+                // if there was an error, pull it out of NuttX
                 if (result < 0) {
                     throw new NativeException(UPD.GetLastError());
                 }
-                return result;
-            } else {
-                var result = Nuttx.write(_driverHandle, buffer, count);
-                if (result < 0) {
-                    throw new NativeException(UPD.GetLastError());
-                }
-                return result;
+                // otherwise,
+                totalBytesWritten += result;
+
+                //Console.WriteLine($"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+
+                // recalculate the current index, including the original offset
+                currentIndex = totalBytesWritten + index;
+                bytesLeft = count - totalBytesWritten;
+                bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
+                //Console.WriteLine($"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
             }
+
+            return totalBytesWritten;
+
+
+            ////Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
+            //if (offset > 0) {
+            //    // we need to make a copy
+            //    var tmp = new byte[count];
+            //    Array.Copy(buffer, offset, tmp, 0, count);
+            //    var result = Nuttx.write(_driverHandle, tmp, count);
+            //    if (result < 0) {
+            //        throw new NativeException(UPD.GetLastError());
+            //    }
+            //    return result;
+            //} else {
+            //    var result = Nuttx.write(_driverHandle, buffer, count);
+            //    if (result < 0) {
+            //        throw new NativeException(UPD.GetLastError());
+            //    }
+            //    return result;
+            //}
         }
 
         private void ReadThreadProc()
@@ -342,10 +385,10 @@ namespace Meadow.Hardware
                         Output.WriteLineIf(_showSerialDebug, $"reading");
 
                         if (result > 0) {
-                            //                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
+                            //Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
                             Output.WriteLineIf(_showSerialDebug, $"Enqueuing {BitConverter.ToString(readBuffer, 0, result)}");
 
-                            _readBuffer.Enqueue(readBuffer, 0, result);
+                            _readBuffer.Append(readBuffer, 0, result);
 
                             if (DataReceived != null) {
                                 // put on a worker thread, else if the handler goes into some wait, we'll never process data
@@ -380,93 +423,6 @@ namespace Meadow.Hardware
             return _readBuffer.Peek();
         }
 
-        /// <summary>
-        /// Reads bytes from the input buffer until the specified token(s) are
-        /// found.
-        /// <summary>
-        /// Reads bytes from the input buffer until the specified token(s) are
-        /// found.
-        /// </summary>
-        /// <param name="tokens">The token(s) to search for</param>
-        public byte[] ReadTo(params char[] tokens)
-        {
-            return ReadTo(tokens, true);
-        }
-
-        /// <summary>
-        /// Reads bytes from the input buffer until the specified token(s) are
-        /// found.
-        /// </summary>
-        /// <param name="tokens">The token(s) to search for</param>
-        /// <param name="preserveTokens">Whether or not to return the tokens in
-        /// the bytes read. If `true`, the tokens are preserved, if `false`, the
-        /// tokens will be automatically removed.</param>
-        /// <returns>All data in the buffer up to and including the specified
-        /// token, if a token exists, otherwise an empty array.</returns>
-        /// <exception cref="TimeoutException">No token was received before the
-        /// specified timeout.</exception>
-        public byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true)
-        {
-            // convert the tokens into a byte array
-            List<byte> tokenByteList = new List<byte>();
-            foreach (char c in tokens) {
-                // i think we need to do this because a character can span
-                // multiple bytes. like unicode characters or emoji 🤷🏾‍♀️
-                tokenByteList.Add(Convert.ToByte(c));
-            }
-            byte[] tokenBytes = tokenByteList.ToArray();
-
-            // if there's a timeout, we check every 10ms to see if the search
-            // token exists. TODO: consider not checking until a new data arrived
-            // event is triggered. it was originally written this way because
-            // serial events didn't work.
-            if (ReadTimeout > 0) {
-                Stopwatch sw = null;
-
-                //while (!_readBuffer.Any(b => b == token)) {
-                while (!_readBuffer.Contains(tokenBytes)) {
-                    if (sw == null) {
-                        sw = new Stopwatch();
-                        sw.Start();
-                    } else {
-                        if (sw.ElapsedMilliseconds > ReadTimeout) {
-                            throw new TimeoutException("Serial port read timeout");
-                        }
-                    }
-                    Thread.Sleep(10);
-                }
-                if (sw != null) {
-                    sw.Stop();
-                }
-            }
-
-            // if the buffer contains the token
-            if (_readBuffer != null) {
-                int firstIndex = _readBuffer.FirstIndexOf(tokenBytes);
-
-                if (firstIndex >= 0) {
-                    int tokenLength = tokenBytes.Count();
-                    var bytesToDequeue = firstIndex + tokenLength;
-                    Span<byte> msg = new byte[bytesToDequeue];
-
-                    // deuque the message, sans delimeter
-                    for (int i = 0; i < firstIndex; i++) {
-                        msg[i] = _readBuffer.Dequeue();
-                    }
-                    // handle the delimeters. either add to msg or toss away.
-                    for (int i = firstIndex; i < bytesToDequeue; i++) {
-                        if (preserveTokens) {
-                            msg[i] = _readBuffer.Dequeue();
-                        } else {
-                            _readBuffer.Dequeue();
-                        }
-                    }
-
-                    return msg.ToArray();
-                }
-            }
-            return new byte[0];
-        }
 
         /// <summary>
         /// Synchronously reads one byte from the SerialPort input buffer.
@@ -479,59 +435,202 @@ namespace Meadow.Hardware
             }
 
             if (_readBuffer.Count == 0) return -1;
-            return _readBuffer.Dequeue();
+            return _readBuffer.Remove();
         }
+
+
+        public int ReadAll(byte[] buffer)
+        {
+            return ReadAll(buffer, 0);
+        }
+
+        /// <summary>
+        /// Reads the entire serial port buffer into an array of bytes. Before
+        /// calling, make sure that your buffer is large enough by checking
+        /// `BytesToRead` property. If your buffer isn't large enough, this will
+        /// leave bytes in the serial port buffer.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
+        public int ReadAll(byte[] buffer, int index)
+        {
+            // checks
+            if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+            if (buffer == null) { throw new ArgumentNullException(); }
+            if (index < 0) { throw new ArgumentException("Invalid index"); }
+
+            // capture the count
+            int readCount = _readBuffer.Count;
+
+            // check to see if there's room for the whole thing, if not, we're
+            // only going to read as much as we can.
+            if (readCount + index > buffer.Length) {
+                readCount = buffer.Length - index;
+            }
+
+            // empty the serial data into the user's buffer
+            _readBuffer.Remove(readCount).CopyTo(buffer, index);
+
+            // return the count read
+            return readCount;
+        }
+
+
+        // DON'T DELETE
+        // This is preserved here as a potential solution to reading past what
+        // is currently in the buffer.
+        //
+        // Ultimately, I don't believe this is practically possible with the
+        // expected mecanics of the SerialPort.
+        //
+        // The issue is that in order to continue to read, we have two options,
+        // 1) either sleep/spin in a loop that keeps checking the buffer to see
+        //    if anything has come in, and pull it off, or:
+        // 2) as i have done here, use a `ManualResetEvent` to unblock the `Read`
+        //    thread when data has come in. This prevents a spinning loop.
+        //
+        // However, in practice, because we don't protect the underlying read
+        // buffer, a user could subscribe to the `DataReceived` event and empty
+        // out data in the buffer, causing the `Read` call to be useless. The only
+        // way to do this would be to cancel any notifications of `DataReceived`
+        // while this call was still executing. That's doable, but I think it
+        // adds a lot more complexity to the archtiecture, and makes for a bad
+        // API experience. As such, I think we need to restrict `Read()` to
+        // data that is in the buffer. If they want an modern async model, they
+        // should probalby use the SerialMessagePort
+        //
+        // in any case, i'm preserving this (untested) code below, in case we
+        // might someday make a wrapper to SerialPort that is properly async.
+        //
+        // ====== CODE PRESERVED BELOW
+        // we'll use this to unblock the `Read()` thread on the event of new
+        // data coming in.
+        // ManualResetEvent readThreadResetEvent = new ManualResetEvent(false);
+        //
+        //public async ValueTask<int> ReadWithResetEvent(byte[] buffer, int index, int count)
+        //{
+        //    // all the checks
+        //    if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+        //    if (buffer == null) { throw new ArgumentNullException(); }
+        //    if (count > (buffer.Length - index)) { throw new ArgumentException("Count is larger than available buffer size"); }
+        //    if (index < 0) { throw new ArgumentException("Invalid offset"); }
+        //    if (count == 0) { return 0; }
+
+        //    // if they want less than or as much data as we have already,
+        //    if (count <= this._readBuffer.Count) {
+        //        // read what we have into the buffer and return
+        //        Array.Copy(_readBuffer.Remove(count), 0, buffer, index, count);
+        //        return count;
+        //    }
+        //    // if they want more than is in the buffer
+        //    else {
+
+        //        // think this needs to be in a task
+        //        //// async, so spin up a new task to go and read on
+        //        //return await Task<int>.Run(() => {
+
+        //        this.DataReceived += ResetReadThread;
+
+        //        // capture the count
+        //        int bytesRead = _readBuffer.Count;
+
+        //        // read what we can
+        //        Array.Copy(_readBuffer.Remove(count), 0, buffer, index, count);
+
+        //        // while we haven't read everything, and we haven't timed out
+        //        while (bytesRead < count) {
+        //            // set a wait handle to wait for the data received event
+        //            // when it's reset, read some more
+        //            readThreadResetEvent.WaitOne();
+
+        //            // read read read
+        //            bytesRead += _readBuffer.Count;
+        //            int dataLength = _readBuffer.Count;
+        //            Array.Copy(_readBuffer.Remove(dataLength), 0, buffer, bytesRead, dataLength);
+        //        }
+
+        //        // cleanup
+        //        this.DataReceived += ResetReadThread;
+
+        //        //});
+
+        //    }
+
+        //    void ResetReadThread(object sender, SerialDataReceivedEventArgs e)
+        //    {
+        //        readThreadResetEvent.Set();
+        //    }
+
+        //}
+
 
         /// <summary>
         /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
         /// </summary>
         /// <param name="buffer">The byte array to write the input to.</param>
-        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
+        /// <param name="index">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         /// <returns>The number of bytes read.</returns>
         /// <exception cref="TimeoutException">No bytes were available to read.</exception>
-        public int Read(byte[] buffer, int offset, int count)
+        public int Read(byte[] buffer, int index, int count)
         {
-            if (!IsOpen) {
-                throw new InvalidOperationException("Cannot read from a closed port");
-            }
+            // all the checks
+            if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+            if (buffer == null) { throw new ArgumentNullException(); }
+            if (count > (buffer.Length - index)) { throw new ArgumentException("Count is larger than available buffer size"); }
+            if (index < 0) { throw new ArgumentException("Invalid offset"); }
+            if (count == 0) { return 0; }
 
-            if (buffer == null) throw new ArgumentNullException();
-            if (count > (buffer.Length - offset)) throw new ArgumentException("Count is larger than available buffer size");
-            if (offset < 0) throw new ArgumentException("Invalid offset");
-            if (count == 0) return 0;
+            if (count > _readBuffer.Count) { throw new ArgumentException("Count cannot be larger than the available data."); }
 
-            var read = 0;
+            // read what we have into the buffer and return
+            return _readBuffer.MoveItemsTo(buffer, index, count);
 
-            Stopwatch sw = null;
+            //// async, so spin up a new task to go and read on
+            //return await Task.Run(() => {
 
-            if (ReadTimeout > 0) {
-                while (_readBuffer.Count == 0) {
-                    if (sw == null) {
-                        sw = new Stopwatch();
-                        sw.Start();
-                    } else {
-                        if (sw.ElapsedMilliseconds > ReadTimeout) {
-                            Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
-                            throw new TimeoutException("Serial port read timeout");
-                        }
-                    }
-                    Thread.Sleep(10);
-                }
-                if (sw != null) {
-                    sw.Stop();
-                }
-            }
+            //    var read = 0;
 
-            if (count < _readBuffer.Count) {
-                read = count;
-            } else {
-                read = _readBuffer.Count;
-            }
+            //    Stopwatch sw = null;
 
-            Array.Copy(_readBuffer.Dequeue(read), 0, buffer, offset, read);
+            //    // this basicaly reads and if there is not enough data to be read
+            //    // it sleeps for a bit and then reads some more. it'll read until
+            //    // the time elapses, and then just retrun what it was able to read
+            //    // in tha time
+            //    // TODO: change to use a WaitHandleReset
+            //    if (ReadTimeout > 0) {
+            //        while (_readBuffer.Count == 0) {
+            //            if (sw == null) {
+            //                sw = new Stopwatch();
+            //                sw.Start();
+            //            } else {
+            //                if (sw.ElapsedMilliseconds > ReadTimeout) {
+            //                    Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
+            //                    throw new TimeoutException("Serial port read timeout");
+            //                }
+            //            }
+            //            Thread.Sleep(10);
+            //        }
+            //        if (sw != null) {
+            //            sw.Stop();
+            //        }
+            //    }
 
-            return read;
+            //    // update the read count with how much we were actually able to
+            //    // read, based on the timeout
+            //    if (count < _readBuffer.Count) {
+            //        read = count;
+            //    } else { // clip this to the max we can count
+            //        read = _readBuffer.Count;
+            //    }
+
+            //    // Remove the data to read and copy it into the user's buffer.
+            //    Array.Copy(_readBuffer.Remove(read), 0, buffer, index, read);
+
+            //    // return the number of bytes read.
+            //    return read;
+            //});
         }
 
         private void ShowSettings(Nuttx.Termios settings)

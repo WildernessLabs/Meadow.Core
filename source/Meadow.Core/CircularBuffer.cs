@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ namespace Meadow
         /// </summary>
         public event EventHandler HighWater;
         /// <summary>
-        /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Dequeue call.  This event fires only once when passing downward across the boundary.
+        /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Remove call.  This event fires only once when passing downward across the boundary.
         /// </summary>
         public event EventHandler LowWater;
         /// <summary>
@@ -160,17 +161,17 @@ namespace Meadow
             }
         }
 
-        public void Enqueue(IEnumerable<T> items)
+        public void Append(IEnumerable<T> items)
         {
             foreach (var i in items) {
-                Enqueue(i);
+                Append(i);
             }
         }
 
-        public void Enqueue(T[] items, int offset, int count)
+        public void Append(T[] items, int offset, int count)
         {
             for (int i = offset; i < offset + count; i++) {
-                Enqueue(items[i]);
+                Append(items[i]);
             }
         }
 
@@ -180,15 +181,15 @@ namespace Meadow
         //    this.Enqueue(element);
         //}
 
-        public void Append(T element)
-        {
-            this.Enqueue(element);
-        }
+        //public void Append(T element)
+        //{
+        //    this.Enqueue(element);
+        //}
 
-        public void Append(IEnumerable<T> items)
-        {
-            this.Enqueue(items);
-        }
+        //public void Append(IEnumerable<T> items)
+        //{
+        //    this.Enqueue(items);
+        //}
 
         /// <summary>
         /// Adds an element to the head of the buffer
@@ -197,7 +198,7 @@ namespace Meadow
         /// <remarks>
         /// If the buffer is full and Enqueue is called, the new item will be successfully added to the buffer and the tail (oldest) item will be automatically removed
         /// </remarks>
-        public void Enqueue(T item)
+        public void Append(T item)
         {
             lock (_syncRoot) {
                 if (IsFull) {
@@ -230,7 +231,7 @@ namespace Meadow
             }
         }
 
-        public bool EnqueueWaitOne(int millisecondsTimeout)
+        public bool AppendWaitOne(int millisecondsTimeout)
         {
             return _addedResetEvent.WaitOne(millisecondsTimeout);
         }
@@ -239,7 +240,7 @@ namespace Meadow
         /// Removes the element from the tail of the buffer, if one exists
         /// </summary>
         /// <returns></returns>
-        public T Dequeue()
+        public T Remove()
         {
             return GetOldest(true);
         }
@@ -396,14 +397,14 @@ namespace Meadow
         //}
 
         /// <summary>
-        /// Dequeues the requested number of elements from the buffer
+        /// Removes the requested number of elements from the buffer
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
         /// <remarks>
-        /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are dequeued
+        /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are Removed
         /// </remarks>
-        public T[] Dequeue(int count)
+        public T[] Remove(int count)
         {
             if (Count < count) return new T[] { };
 
@@ -411,11 +412,62 @@ namespace Meadow
 
             lock (_syncRoot) {
                 for (int i = 0; i < count; i++) {
-                    result[i] = Dequeue();
+                    result[i] = Remove();
                 }
             }
 
             return result;
+        }
+
+        public int MoveItemsTo(T[] destination, int index, int count)
+        {
+            if (count <= 0) return 0;
+
+            try
+            {
+                lock (_syncRoot)
+                {
+                    // how many are we moving?
+                    // move from current toward the tail
+                    var actual = (count > this.Count) ? this.Count : count;
+
+                    if (_tail < _head || (_tail == 0 && IsFull))
+                    {
+                        // the data is linear, just copy
+                        Array.Copy(_list, destination, actual);
+                        // move the tail pointer
+                        _tail += actual;
+                    }
+                    else
+                    {
+                        // there's a data wrap
+                        // copy from here to the end
+                        var remaining = actual;
+                        var c = _list.Length - _tail;
+                        Array.Copy(_list, _tail, destination, 0 + index, c);
+                        // now copy from the start (tail == 0) the remaining data
+                        _tail = 0;
+                        remaining -= c;
+                        Array.Copy(_list, _tail, destination, c + index, remaining);
+
+                        // move the tail pointer
+                        _tail = remaining;
+                    }
+
+                    return actual;
+                }
+            }
+            finally
+            {
+                if ((LowWaterLevel > 0) && (Count <= LowWaterLevel))
+                {
+                    if (!_lowwaterExceeded)
+                    {
+                        _lowwaterExceeded = true;
+                        LowWater?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            }
         }
 
         public T this[int index] {
