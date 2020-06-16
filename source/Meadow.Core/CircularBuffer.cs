@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -416,6 +417,57 @@ namespace Meadow
             }
 
             return result;
+        }
+
+        public int MoveItemsTo(T[] destination, int index, int count)
+        {
+            if (count <= 0) return 0;
+
+            try
+            {
+                lock (_syncRoot)
+                {
+                    // how many are we moving?
+                    // move from current toward the tail
+                    var actual = (count > this.Count) ? this.Count : count;
+
+                    if (_tail < _head || (_tail == 0 && IsFull))
+                    {
+                        // the data is linear, just copy
+                        Array.Copy(_list, destination, actual);
+                        // move the tail pointer
+                        _tail += actual;
+                    }
+                    else
+                    {
+                        // there's a data wrap
+                        // copy from here to the end
+                        var remaining = actual;
+                        var c = _list.Length - _tail;
+                        Array.Copy(_list, _tail, destination, 0 + index, c);
+                        // now copy from the start (tail == 0) the remaining data
+                        _tail = 0;
+                        remaining -= c;
+                        Array.Copy(_list, _tail, destination, c + index, remaining);
+
+                        // move the tail pointer
+                        _tail = remaining;
+                    }
+
+                    return actual;
+                }
+            }
+            finally
+            {
+                if ((LowWaterLevel > 0) && (Count <= LowWaterLevel))
+                {
+                    if (!_lowwaterExceeded)
+                    {
+                        _lowwaterExceeded = true;
+                        LowWater?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            }
         }
 
         public T this[int index] {

@@ -585,8 +585,7 @@ namespace Meadow.Hardware
             if (count > _readBuffer.Count) { throw new ArgumentException("Count cannot be larger than the available data."); }
 
             // read what we have into the buffer and return
-            Array.Copy(_readBuffer.Remove(count), 0, buffer, index, count);
-            return count;
+            return _readBuffer.MoveItemsTo(buffer, index, count);
 
             //// async, so spin up a new task to go and read on
             //return await Task.Run(() => {
