@@ -114,6 +114,13 @@ namespace Meadow.Hardware
         //byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true);
         //Task<byte[]> ReadTo(char[] tokens, bool preserveTokens = true);
 
+        /// <summary>
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
+        /// </summary>
+        /// <param name="tokens">The token(s) to search for</param>
+        byte[] ReadTo(params char[] tokens);
+
         ///// <summary>
         ///// Reads bytes from the input buffer until a specified token is found
         ///// </summary>
