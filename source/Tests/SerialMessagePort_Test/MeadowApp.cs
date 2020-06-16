@@ -98,7 +98,7 @@ namespace MeadowApp
         private void SerialPort_MessageReceived(object sender, SerialMessageEventArgs e)
         {
             //Console.WriteLine($"Msg received: {e.GetMessageString()}\n");
-            Console.WriteLine($"Msg recvd: {e.GetMessageString()}\n");
+            Console.WriteLine($"Msg recvd: {e.GetMessageString(Encoding.ASCII)}\n");
         }
 
         protected string[] BuildFixedLengthTestSentences() {

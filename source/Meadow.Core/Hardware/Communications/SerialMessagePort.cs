@@ -8,10 +8,10 @@ namespace Meadow.Hardware
         public byte[] Message { get; set; } = new byte[0];
 
         // todo: how does this know the encoding? ASCII v Unicode v Unicode32, etc.
-        public string GetMessageString()
+        public string GetMessageString(Encoding encoding)
         {
             ///return BitConverter.ToString(this.Message);
-            return Encoding.ASCII.GetString(this.Message);
+            return encoding.GetString(this.Message);
         }
         
     }
