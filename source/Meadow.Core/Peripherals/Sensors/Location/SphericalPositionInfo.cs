@@ -6,12 +6,12 @@ namespace Meadow.Peripherals.Sensors.Location
         /// <summary>
         ///     Latitude of the reading.
         /// </summary>
-        public DegreesMinutesSecondsPosition Latitude { get; set; }
+        public DegreesMinutesSecondsPosition? Latitude { get; set; }
 
         /// <summary>
         ///     Longitude of the reading.
         /// </summary>
-        public DegreesMinutesSecondsPosition Longitude { get; set; }
+        public DegreesMinutesSecondsPosition? Longitude { get; set; }
 
         /// <summary>
         /// Altitude above mean sea level (m).
