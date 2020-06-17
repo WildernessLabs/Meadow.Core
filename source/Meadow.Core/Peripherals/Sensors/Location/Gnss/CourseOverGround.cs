@@ -9,21 +9,21 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// True heading in degrees.
         /// </summary>
-        public double TrueHeading;
+        public decimal TrueHeading { get; set; }
 
         /// <summary>
         /// Magnetic heading.
         /// </summary>
-        public double MagneticHeading;
+        public decimal MagneticHeading { get; set; }
 
         /// <summary>
         /// Speed measured in knots.
         /// </summary>
-        public double Knots;
+        public decimal Knots { get; set; }
 
         /// <summary>
         /// Speed measured in kilometers per hour.
         /// </summary>
-        public double Kph;
+        public decimal Kph { get; set; }
     }
 }

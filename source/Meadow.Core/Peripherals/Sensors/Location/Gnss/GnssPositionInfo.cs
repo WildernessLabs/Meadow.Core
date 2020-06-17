@@ -60,7 +60,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// Horizontal dilution of position (HDOP).
         /// </summary>
-        public double HorizontalDilutionOfPrecision { get; set; }
+        public decimal HorizontalDilutionOfPrecision { get; set; }
 
         public GnssPositionInfo()
         {
