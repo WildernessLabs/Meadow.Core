@@ -143,7 +143,7 @@ namespace Meadow.Hardware
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            Console.WriteLine("SerialPort_DataReceived");
+            //Console.WriteLine("SerialPort_DataReceived");
             // only one message processor at a time
             lock (_msgParseLock) {
 
