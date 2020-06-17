@@ -34,23 +34,22 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// Magnetic variation.
         /// </summary>
-        public CardinalDirection MagneticVariation { get; set; }
-
+        public CardinalDirection MagneticVariation { get; set; } = CardinalDirection.Unknown;
 
         /// <summary>
         /// Global position
         /// </summary>
-        public SphericalPositionInfo Position { get; set; }
+        public SphericalPositionInfo Position { get; set; } = new SphericalPositionInfo();
 
-        /// <summary>
-        /// Time that the reading was taken.  The date component is fixed for each reading.
-        /// </summary>
-        public DateTime ReadingTime { get; set; }
+        ///// <summary>
+        ///// Time that the reading was taken.  The date component is fixed for each reading.
+        ///// </summary>
+        //public DateTime ReadingTime { get; set; }
 
         /// <summary>
         /// Quality of the fix.
         /// </summary>
-        public FixType FixQuality { get; set; }
+        public FixType FixQuality { get; set; } = FixType.Invalid;
 
         /// <summary>
         /// Number of satellites used to generate the positional information.
