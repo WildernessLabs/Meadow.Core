@@ -10,15 +10,15 @@ namespace Meadow.Peripherals.Sensors.Location
         /// Latitudinal: -90º to 90º
         /// Longitudinal: -180º to 180º
         /// </summary>
-        public int Degrees;
+        public int Degrees { get; set; }
         /// <summary>
         /// 0' to 60'
         /// </summary>
-        public decimal Minutes;
+        public decimal Minutes { get; set; }
         /// <summary>
         /// 0" to 60"
         /// </summary>
-        public decimal seconds;
+        public decimal seconds { get; set; }
         /// <summary>
         /// Cardinal direction.
         /// </summary>
