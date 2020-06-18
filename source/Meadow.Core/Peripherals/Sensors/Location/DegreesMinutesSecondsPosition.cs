@@ -27,7 +27,7 @@ namespace Meadow.Peripherals.Sensors.Location
 
         public override string ToString()
         {
-            var position = $"{this.Degrees:f2}º {this.Minutes:f2}' {this.seconds:f2}\"";
+            var position = $"{this.Degrees:f2}° {this.Minutes:f2}' {this.seconds:f2}\"";
             switch (this.Direction) {
                 case CardinalDirection.East:
                     position += "E";
