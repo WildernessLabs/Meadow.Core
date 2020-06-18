@@ -24,5 +24,29 @@ namespace Meadow.Peripherals.Sensors.Location
         /// </summary>
         public CardinalDirection Direction;
 
+
+        public override string ToString()
+        {
+            var position = $"{this.Degrees:f2}º {this.Minutes:f2}' {this.seconds:f2}\"";
+            switch (this.Direction) {
+                case CardinalDirection.East:
+                    position += "E";
+                    break;
+                case CardinalDirection.West:
+                    position += "W";
+                    break;
+                case CardinalDirection.North:
+                    position += "N";
+                    break;
+                case CardinalDirection.South:
+                    position += "S";
+                    break;
+                case CardinalDirection.Unknown:
+                    position += "Unknown";
+                    break;
+            }
+            return position;
+
+        }
     }
 }
