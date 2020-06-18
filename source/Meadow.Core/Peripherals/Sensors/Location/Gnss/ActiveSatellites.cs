@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
     /// <summary>
@@ -19,7 +21,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// PRNs of the satellites used in the fix.
         /// </summary>
-        public string[] SatellitesUsedForFix { get; set; }
+        public string[]? SatellitesUsedForFix { get; set; }
 
         /// <summary>
         /// Dilution of precision for the reading.
