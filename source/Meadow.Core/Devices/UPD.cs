@@ -306,7 +306,7 @@ namespace Meadow.Devices
                 if (dutyCycle < 0) dutyCycle = 0;
 
                 // nuttx (well the processor) takes a 16-bit duty cycle, so 65536 == 100% == 1.0
-                var sixteenBitDuty = (((uint)(dutyCycle * 100)) << 16) / 100;
+                var sixteenBitDuty = (uint)(dutyCycle * 65535f);
 
                 var data = new Nuttx.UpdPwmCmd
                 {
