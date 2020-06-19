@@ -4,7 +4,7 @@ namespace Meadow.Peripherals.Sensors.Location
     /// <summary>
     /// Represents a positional point on a spherical axis.
     /// </summary>
-    public struct DegreesMinutesSecondsPosition
+    public class DegreesMinutesSecondsPosition
     {
         /// <summary>
         /// Latitudinal: -90º to 90º

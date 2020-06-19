@@ -4,6 +4,10 @@ using Meadow.Utilities;
 
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
+
+    /// <summary>
+    /// TODO: doc this class
+    /// </summary>
     public class NmeaSentence
     {
         public string Prefix { get; set; }

@@ -1,6 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
+    //public class Satellites : List<Satellite>, IGnssResult
+    //{
+    //    public DateTime TimeOfReading { get; set; }
+    //}
+
     /// <summary>
     /// Satellite information to use in the GSV (Satellites in View) decoder.
     /// </summary>
@@ -9,7 +16,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// Satellite ID.
         /// </summary>
-        public string ID;
+        public int ID;
 
         /// <summary>
         /// Angle of elevation.
