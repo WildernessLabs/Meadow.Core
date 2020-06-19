@@ -6,8 +6,13 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
     /// <summary>
     /// Active satellite information (GSA message information).
     /// </summary>
-    public struct ActiveSatellites
+    public struct ActiveSatellites : IGnssResult
     {
+        /// <summary>
+        /// Time the reading was generated.
+        /// </summary>
+        public DateTime TimeOfReading { get; set; }
+
         /// <summary>
         /// Dimensional fix type (No fix, 2D or 3D?)
         /// </summary>

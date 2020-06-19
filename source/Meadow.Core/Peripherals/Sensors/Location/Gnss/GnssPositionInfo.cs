@@ -4,9 +4,8 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
     /// <summary>
     /// Represents a GNSS/GPS position reading.
     /// </summary>
-    public class GnssPositionInfo
+    public class GnssPositionInfo : IGnssResult
     {
-        //NOTE: pulled from PositionCourseAndTime
         /// <summary>
         /// Time the reading was generated.
         /// </summary>
