@@ -71,6 +71,16 @@ namespace Meadow.Hardware
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096);
 
+        SerialMessagePort CreateSerialMessagePort(
+            SerialPortName portName,
+            byte[] suffixDelimiter,
+            bool preserveDelimiter,
+            int baudRate,
+            int dataBits = 8,
+            Parity parity = Parity.None,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096);
+
         /// <summary>
         /// Creates a SPI bus instance for the requested control pins and bus speed
         /// </summary>
