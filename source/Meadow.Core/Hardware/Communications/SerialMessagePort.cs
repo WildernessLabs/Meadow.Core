@@ -30,6 +30,12 @@ namespace Meadow.Hardware
     /// </summary>
     public class SerialMessagePort// : FilterableObservableBase<AtmosphericConditionChangeResult, AtmosphericConditions>
     {
+        public int BaudRate
+        {
+            get => _classicSerialPort == null ? 0 : BaudRate;
+            set { if (_classicSerialPort != null) { _classicSerialPort.BaudRate = value; } }
+        }
+
         public event EventHandler<SerialMessageEventArgs> MessageReceived = delegate { };
 
         protected SerialPort _classicSerialPort;
