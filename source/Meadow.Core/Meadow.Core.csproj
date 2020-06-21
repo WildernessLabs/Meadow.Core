@@ -12,6 +12,7 @@
    <Version>0.14.0-beta01</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
+   <Nullable>enable</Nullable>
  </PropertyGroup>
  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
