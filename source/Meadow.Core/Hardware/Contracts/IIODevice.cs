@@ -71,7 +71,7 @@ namespace Meadow.Hardware
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096);
 
-        SerialMessagePort CreateSerialMessagePort(
+        ISerialMessagePort CreateSerialMessagePort(
             SerialPortName portName,
             byte[] suffixDelimiter,
             bool preserveDelimiter,

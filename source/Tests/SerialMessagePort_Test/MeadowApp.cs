@@ -8,11 +8,15 @@ using Meadow.Hardware;
 
 namespace MeadowApp
 {
+    /// <summary>
+    /// TODO: someone should really break these out into proper tests and whatnot.
+    /// </summary>
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
-        SerialMessagePort serialPort;
+        ISerialMessagePort serialPort;
         string delimiterString = "$$$";
         byte[] delimiterBytes;
+        Encoding encoding = Encoding.UTF8;
 
         public MeadowApp()
         {
@@ -23,7 +27,9 @@ namespace MeadowApp
             Console.WriteLine($"Using '{Device.SerialPortNames.Com1.FriendlyName}'...");
             Console.WriteLine($"delimiter:{delimiterString}");
 
-            TestSuffixDelimiter();
+            TestDoubleMessageWithSuffix();
+
+            //TestSuffixDelimiter();
             //TestPrefixDelimiter();
         }
 
@@ -62,6 +68,34 @@ namespace MeadowApp
             }
         }
 
+        protected void TestDoubleMessageWithSuffix()
+        {
+            // TEST PARAM
+            // whether or not to return the message with the tokens in it
+            bool preseveDelimiter = false;
+
+            // instantiate our serial port
+            this.serialPort = Device.CreateSerialMessagePort(
+                Device.SerialPortNames.Com1, delimiterBytes, preseveDelimiter, 115200);
+            Console.WriteLine("\tCreated");
+
+            // open the serial port
+            this.serialPort.Open();
+            Console.WriteLine("\tOpened");
+
+            // wire up message received handler
+            this.serialPort.MessageReceived += SerialPort_MessageReceived;
+
+
+            var dataToWrite = Encoding.ASCII.GetBytes($"{GetDoubleInOne()}").Concat(delimiterBytes).ToArray();
+            var written = this.serialPort.Write(dataToWrite);
+            Console.WriteLine($"\nWrote {written} bytes");
+            // sleep
+            Thread.Sleep(2000);
+
+        }
+
+
         protected void TestPrefixDelimiter()
         {
             // TEST PARAM
@@ -95,9 +129,8 @@ namespace MeadowApp
         }
 
 
-        private void SerialPort_MessageReceived(object sender, SerialMessageEventArgs e)
+        private void SerialPort_MessageReceived(object sender, SerialMessageData e)
         {
-            //Console.WriteLine($"Msg received: {e.GetMessageString()}\n");
             Console.WriteLine($"Msg recvd: {e.GetMessageString(Encoding.ASCII)}\n");
         }
 
@@ -111,10 +144,15 @@ namespace MeadowApp
             };
         }
 
+        protected string GetDoubleInOne()
+        {
+            return $"TrickyDouble.{delimiterString}DoubleMessageTest";
+        }
+
         protected string[] BuildVariableLengthTestSentences() {
             return new string[] {
             "Hello Meadow!",
-            "TrickyDouble." + delimiterString + "DoubleMessageTest",
+            $"TrickyDouble.{delimiterString}DoubleMessageTest",
             "Ground control to Major Tom.",
             "Those evil-natured robots, they're programmed to destroy us",
             "Life, it seems, will fade away. Drifting further every day. Getting lost within myself, nothing matters, no one else.",

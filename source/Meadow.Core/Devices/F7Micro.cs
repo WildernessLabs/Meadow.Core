@@ -122,7 +122,7 @@ namespace Meadow.Devices
             return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
-        public SerialMessagePort CreateSerialMessagePort(
+        public ISerialMessagePort CreateSerialMessagePort(
             SerialPortName portName,
             byte[] suffixDelimiter,
             bool preserveDelimiter,

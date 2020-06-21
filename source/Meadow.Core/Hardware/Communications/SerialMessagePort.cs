@@ -3,19 +3,6 @@ using System.Text;
 
 namespace Meadow.Hardware
 {
-
-    public class SerialMessageEventArgs : EventArgs {
-        public byte[] Message { get; set; } = new byte[0];
-
-        // todo: how does this know the encoding? ASCII v Unicode v Unicode32, etc.
-        public string GetMessageString(Encoding encoding)
-        {
-            ///return BitConverter.ToString(this.Message);
-            return encoding.GetString(this.Message);
-        }
-        
-    }
-
     // TODO: to optimize, this really should re-implement its own serialport stuff
     // rather than using the ClassicSerialPort. That way we don't maintain two
     // buffers; one in the underlying port, and one in this.
@@ -28,15 +15,47 @@ namespace Meadow.Hardware
     /// TODO: doc better
     ///
     /// </summary>
-    public class SerialMessagePort// : FilterableObservableBase<AtmosphericConditionChangeResult, AtmosphericConditions>
+    public class SerialMessagePort : ISerialMessagePort// : FilterableObservableBase<AtmosphericConditionChangeResult, AtmosphericConditions>
     {
+        /// <summary>
+        /// Gets or sets the serial baud rate.
+        /// </summary>
         public int BaudRate
         {
-            get => _classicSerialPort == null ? 0 : BaudRate;
-            set { if (_classicSerialPort != null) { _classicSerialPort.BaudRate = value; } }
+            get => _classicSerialPort.BaudRate;
+            set => _classicSerialPort.BaudRate = value;
+        }
+        /// <summary>
+        /// Gets the port name used for communications.
+        /// </summary>
+        public string PortName { get => _classicSerialPort.PortName; }
+        /// <summary>
+        /// Gets a value indicating the open or closed status of the SerialPort object.
+        /// </summary>
+        public bool IsOpen { get => _classicSerialPort.IsOpen; }
+        /// <summary>
+        /// Gets or sets the parity-checking protocol.
+        /// </summary>
+        public Parity Parity { get => _classicSerialPort.Parity; }
+        /// <summary>
+        /// Gets or sets the standard length of data bits per byte.
+        /// </summary>
+        public int DataBits { get => _classicSerialPort.DataBits; }
+        /// <summary>
+        /// Gets or sets the standard number of stopbits per byte.
+        /// </summary>
+        public StopBits StopBits { get => _classicSerialPort.StopBits; }
+        /// <summary>
+        /// The buffer size, in bytes.
+        /// </summary>
+        public int ReceiveBufferSize {
+            get => _classicSerialPort.ReceiveBufferSize;
         }
 
-        public event EventHandler<SerialMessageEventArgs> MessageReceived = delegate { };
+
+
+
+        public event EventHandler<SerialMessageData> MessageReceived = delegate { };
 
         protected SerialPort _classicSerialPort;
         protected SerialMessageMode _messageMode;
@@ -210,7 +229,7 @@ namespace Meadow.Hardware
                                 System.Threading.Tasks.Task.Run(() => {
                                     //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
                                     //Console.WriteLine($"Message:{Encoding.ASCII.GetString(msg)}");
-                                    this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
+                                    this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
                                 });
 
                                 // check if there are any left
@@ -228,7 +247,6 @@ namespace Meadow.Hardware
                             // messages can be in a single data event
                             while (firstIndex >= 0) {
                                 var bytesToRemove = firstIndex + _messageDelimiterTokens.Length;
-                                //Span<byte> msg = new byte[bytesToRemove];
                                 byte[] msg = new byte[bytesToRemove];
 
                                 // deuque the message, sans delimeter
@@ -248,7 +266,7 @@ namespace Meadow.Hardware
                                 // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
                                     //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
-                                    this.RaiseMessageReceivedAndNotify(new SerialMessageEventArgs() { Message = msg });
+                                    this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
                                 });
 
                                 firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
@@ -259,9 +277,9 @@ namespace Meadow.Hardware
             }
         }
 
-        protected void RaiseMessageReceivedAndNotify(SerialMessageEventArgs messageResult)
+        protected void RaiseMessageReceivedAndNotify(SerialMessageData messageData)
         {
-            MessageReceived(this, messageResult);
+            MessageReceived(this, messageData);
             //TODO: figure out the IObservable when there's no change context
             //base.NotifyObservers(messageResult);
         }
