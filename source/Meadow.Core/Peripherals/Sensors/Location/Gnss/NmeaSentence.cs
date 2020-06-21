@@ -4,36 +4,72 @@ using Meadow.Utilities;
 
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
-
     /// <summary>
-    /// TODO: doc this class
+    /// Represents a NMEA data sentence typically used in GPS/GNSS systems. 
     /// </summary>
+    /// <remarks>
+    /// For additional info on NMEA sentences, an excellent reference 
+    /// can found [here](https://gpsd.gitlab.io/gpsd/NMEA.html).
+    /// </remarks>
     public class NmeaSentence
     {
+        /// <summary>
+        /// The prefix, including the `$` symbol of the sentence, i.e.: `$GPRMC`.
+        /// </summary>
         public string Prefix { get; set; }
+
+        /// <summary>
+        /// A list of strings that represent the data elements within a NMEA
+        /// sentence, between the prefix and the checksum data. 
+        /// </summary>
         public List<string> DataElements { get; set; } = new List<string>();
+
+        /// <summary>
+        /// The checksum data of the data elements. Calculated by `XOR`ing
+        /// all of the data elements.
+        /// </summary>
         public byte Checksum {
             get { return ChecksumCalculator.XOR(GetDataString()); }
         }
 
+        /// <summary>
+        /// Returns the NMEA sentence string without the checksum digits.
+        /// </summary>
+        /// <returns></returns>
         protected string GetDataString()
         {
-            return Prefix + String.Join(",", DataElements);
+            return $"{Prefix},{String.Join(",", DataElements)}";
         }
 
+        /// <summary>
+        /// Returns a fully-expressed NMEA data string, including the prefix,
+        /// data elements, and checksum information.
+        ///
+        /// I.e.: $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
+        /// </summary>
+        /// <returns>A string of the sentence.</returns>
         public override string ToString()
         {
             string data = GetDataString(); //don't want to calculate twice
             return data + "*" + ChecksumCalculator.XOR(data);
         }
 
-        public bool DebugMode { get; set; } = true;
+        //public bool DebugMode { get; set; } = false;
 
-        public NmeaSentence()
-        {
+        /// <summary>
+        /// Creates a new, empty NMEA sentence.
+        /// </summary>
+        public NmeaSentence() {}
 
-        }
-
+        /// <summary>
+        /// Creates a `NmeaSentence` from a string. Will parse the prefix, data
+        /// elements, and also valide the checksum. If the checksum is invalid,
+        /// it will throw an `ArgumentException`, therefore this should be used
+        /// in a `try`/`catch` block.
+        /// </summary>
+        /// <param name="sentence">A NMEA sentence string.</param>
+        /// <returns>A `NmeaSentence` class representing with the NMEA
+        /// information loaded.</returns>
         public static NmeaSentence From(string sentence)
         {
             NmeaSentence newSentence = new NmeaSentence();

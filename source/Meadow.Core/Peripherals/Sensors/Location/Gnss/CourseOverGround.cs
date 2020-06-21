@@ -1,15 +1,16 @@
 ﻿using System;
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
+    // TODO: Should this be a struct with fields?
     /// <summary>
     /// Decoded data for the VTG - Course over ground and ground speed messages.
     /// </summary>
-    public struct CourseOverGround : IGnssResult
+    public class CourseOverGround : IGnssResult
     {
         /// <summary>
         /// Time the reading was generated.
         /// </summary>
-        public DateTime TimeOfReading { get; set; }
+        public DateTime? TimeOfReading { get; set; }
 
         /// <summary>
         /// True heading in degrees.

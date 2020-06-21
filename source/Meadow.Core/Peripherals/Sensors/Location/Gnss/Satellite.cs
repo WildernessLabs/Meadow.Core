@@ -3,30 +3,26 @@ using System.Collections.Generic;
 
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
-    //public class Satellites : List<Satellite>, IGnssResult
-    //{
-    //    public DateTime TimeOfReading { get; set; }
-    //}
-
+    // TODO: Should this be a struct with fields?
     /// <summary>
     /// Satellite information to use in the GSV (Satellites in View) decoder.
     /// </summary>
-    public struct Satellite
+    public class Satellite
     {
         /// <summary>
         /// Satellite ID.
         /// </summary>
-        public int ID;
+        public int ID { get; set; }
 
         /// <summary>
         /// Angle of elevation.
         /// </summary>
-        public int Elevation;
+        public int Elevation { get; set; }
 
         /// <summary>
         /// Satellite azimuth.
         /// </summary>
-        public int Azimuth;
+        public int Azimuth { get; set; }
 
         /// <summary>
         /// Signal to noise ratio of the signal.

@@ -1,6 +1,7 @@
 ﻿using System;
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
+    // TODO: Should this be a struct with fields?
     /// <summary>
     /// Represents a GNSS/GPS position reading.
     /// </summary>
@@ -11,23 +12,21 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// </summary>
         public DateTime TimeOfReading { get; set; }
 
-        //NOTE: pulled from PositionCourseAndTime
         /// <summary>
-        ///     Indicate if the data is valid or not.
+        /// Indicate if the data is valid or not.
         /// </summary>
         public bool Valid { get; set; }
 
-        //NOTE: pulled from PositionCourseAndTime
         /// <summary>
         /// Current speed in Knots.
         /// </summary>
-        public decimal SpeedInKnots { get; set; }
+        public decimal? SpeedInKnots { get; set; }
 
         //NOTE: pulled from PositionCourseAndTime
         /// <summary>
         /// Course in degrees (true heading).
         /// </summary>
-        public decimal CourseHeading { get; set; }
+        public decimal? CourseHeading { get; set; }
 
         //NOTE: pulled from PositionCourseAndTime
         /// <summary>
@@ -38,12 +37,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// Global position
         /// </summary>
-        public SphericalPositionInfo Position { get; set; } = new SphericalPositionInfo();
-
-        ///// <summary>
-        ///// Time that the reading was taken.  The date component is fixed for each reading.
-        ///// </summary>
-        //public DateTime ReadingTime { get; set; }
+        public SphericalPositionInfo? Position { get; set; } = new SphericalPositionInfo();
 
         /// <summary>
         /// Quality of the fix.

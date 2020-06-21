@@ -1,12 +1,12 @@
-﻿#nullable enable
+﻿using System;
 
-using System;
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
+    // TODO: Should this be a struct with fields?
     /// <summary>
     /// Active satellite information (GSA message information).
     /// </summary>
-    public struct ActiveSatellites : IGnssResult
+    public class ActiveSatellites : IGnssResult
     {
         /// <summary>
         /// Time the reading was generated.

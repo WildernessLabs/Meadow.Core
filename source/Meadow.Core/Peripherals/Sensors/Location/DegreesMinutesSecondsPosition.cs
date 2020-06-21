@@ -1,6 +1,7 @@
 ﻿using System;
 namespace Meadow.Peripherals.Sensors.Location
 {
+    // TODO: Should this be a struct with fields?
     /// <summary>
     /// Represents a positional point on a spherical axis.
     /// </summary>

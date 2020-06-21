@@ -3,7 +3,7 @@
 namespace Meadow.Peripherals.Sensors.Location
 {
     /// <summary>
-    ///    Cardinal direction indicator.
+    /// Cardinal directions such as North, South, etc.
     /// </summary>
     public enum CardinalDirection
     {
