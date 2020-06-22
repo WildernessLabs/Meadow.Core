@@ -14,7 +14,34 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
     public class NmeaSentence
     {
         /// <summary>
-        /// The prefix, including the `$` symbol of the sentence, i.e.: `$GPRMC`.
+        /// The first character in the sentence. Usually `$`, but AIVDM/AIVDO
+        /// sentences might start with `!`.
+        /// </summary>
+        public string StartingDelimiter { get; set; } = "$";
+
+        /// <summary>
+        /// The first two letters (after the starting delimiter) comprise the
+        /// Talker ID, which describes the system in use, for instance "GL" means
+        /// that the data came from the GLONASS system. "BD" means BeiDou, etc.
+        ///
+        /// Default value is "GP".
+        /// </summary>
+        public string TalkerID { get; set; } = "GP";
+
+        /// <summary>
+        /// Retreives the full name associated with the TalkerID via the
+        /// `KnownTalkerIDs` property of the Lookups class.
+        /// </summary>
+        public string TalkerSystemName {
+            get {
+                string name = Lookups.KnownTalkerIDs[TalkerID];
+                return (name != null) ? name : "";
+            }
+        }
+
+        /// <summary>
+        /// The prefix, excluding the `$` symbol and first two letters of the
+        /// sentence, i.e.: `RMC`.
         /// </summary>
         public string Prefix { get; set; }
 
@@ -38,7 +65,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <returns></returns>
         protected string GetDataString()
         {
-            return $"{Prefix},{String.Join(",", DataElements)}";
+            return $"{StartingDelimiter}{TalkerID}{Prefix},{String.Join(",", DataElements)}";
         }
 
         /// <summary>
@@ -59,7 +86,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// <summary>
         /// Creates a new, empty NMEA sentence.
         /// </summary>
-        public NmeaSentence() {}
+        public NmeaSentence() { }
 
         /// <summary>
         /// Creates a `NmeaSentence` from a string. Will parse the prefix, data
@@ -101,14 +128,33 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
 
                 // make sure data is good
                 if (calculatedChecksum == parsedChecksum) {
+
+                    // get the starting delimiter (usually `$`)
+                    // |
+                    // $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
+                    newSentence.StartingDelimiter = messageData.Substring(0, 1);
+                    //Console.WriteLine($"Found starting delimiter:{newSentence.StartingDelimiter}");
+
+                    // get the talker ID
+                    //  ||
+                    // $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
+                    newSentence.TalkerID = messageData.Substring(1, 2);
+                    //Console.WriteLine($"Found TalkerID:{newSentence.TalkerID}");
+
+                    // get the prefix
+                    //    |||
+                    // $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
+                    newSentence.Prefix = messageData.Substring(3, 3);
+                    //Console.WriteLine($"Found Prefix:{newSentence.Prefix}");
+
                     // split the sentence data up by commas
                     var elements = messageData.Split(',').AsSpan<string>();
                     if (elements.Length <= 0) {
                         throw new ArgumentException("No data in sentence.");
                     }
                     // store the data
-                    newSentence.Prefix = elements[0];
                     newSentence.DataElements.Clear();
+                    // skip the first element, which is the tag ($GPRMC).
                     newSentence.DataElements.AddRange(elements.Slice(1).ToArray());
                 } else {
                     throw new ArgumentException("Checksum does not match data. Invalid data.");
