@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
     // TODO: Should this be a struct with fields?
@@ -76,6 +78,28 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
 
         public GnssPositionInfo()
         {
+        }
+
+        public override string ToString()
+        {
+            StringBuilder outString = new StringBuilder();
+
+            outString.Append("GnssPositionInfo: {\r\n");
+            outString.Append($"\tTalker ID: {TalkerID}, talker name: {TalkerSystemName}\r\n");
+            outString.Append($"\tTime of reading: {TimeOfReading}\r\n");
+            outString.Append($"\tValid: {Valid}\r\n");
+            outString.Append($"\tLatitude: {Position?.Latitude}\r\n");
+            outString.Append($"\tLongitude: {Position?.Longitude}\r\n");
+            outString.Append($"\tAltitude: {Position?.Altitude:f2}\r\n");
+            outString.Append($"\tSpeed in Knots: {SpeedInKnots?.ToString("f2")}\r\n");
+            outString.Append($"\tCourse Heading: {CourseHeading?.ToString("f2")}\r\n");
+            outString.Append($"\tMagnetic Variation: {MagneticVariation}\r\n");
+            outString.Append($"\tNumber of satellites: {NumberOfSatellites}\r\n");
+            outString.Append($"\tFix quality: {FixQuality}\r\n");
+            outString.Append($"\tHDOP: {HorizontalDilutionOfPrecision:f2}\r\n");
+            outString.Append("}");
+
+            return outString.ToString();
         }
     }
 }

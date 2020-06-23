@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
@@ -62,5 +63,28 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// Vertical dilution of precision for the reading.
         /// </summary>
         public decimal VerticalDilutionOfPrecision { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder outString = new StringBuilder();
+
+            outString.Append("Active Satellites: {\r\n");
+            outString.Append($"\tTalker ID: {TalkerID}, talker name: {TalkerSystemName}\r\n");
+            outString.Append($"\tTime of reading: {TimeOfReading}\r\n");
+            outString.Append($"\tNumber of satellites involved in fix: {SatellitesUsedForFix?.Length}\r\n");
+            outString.Append($"\tDilution of precision: {DilutionOfPrecision:f2}\r\n");
+            outString.Append($"\tHDOP: {HorizontalDilutionOfPrecision:f2}\r\n");
+            outString.Append($"\tVDOP: {VerticalDilutionOfPrecision:f2}\r\n");
+            if (SatellitesUsedForFix != null) {
+                outString.Append($"\tSatellites used for fix:\r\n");
+                foreach (var sat in SatellitesUsedForFix) {
+                    outString.Append($"\t{sat}\r\n");
+                }
+            }
+            outString.Append("}");
+
+            return outString.ToString();
+        }
+
     }
 }

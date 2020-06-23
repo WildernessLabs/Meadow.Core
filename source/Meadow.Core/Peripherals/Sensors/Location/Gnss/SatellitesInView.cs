@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
     public class SatellitesInView : IGnssResult
@@ -28,6 +30,21 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         public SatellitesInView(Satellite[] satellites)
         {
             this.Satellites = satellites;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder outString = new StringBuilder();
+
+            outString.Append("SatellitesInView: {\r\n");
+            outString.Append($"\tTalker ID: {TalkerID}, talker name: {TalkerSystemName}\r\n");
+            outString.Append($"\tSatellites:\r\n");
+            foreach (var sat in Satellites) {
+                outString.Append($"\t{sat}\r\n");
+            }
+            outString.Append("}");
+
+            return outString.ToString();
         }
     }
 }

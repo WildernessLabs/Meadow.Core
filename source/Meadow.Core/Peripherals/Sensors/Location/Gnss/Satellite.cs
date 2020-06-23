@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Meadow.Peripherals.Sensors.Location.Gnss
 {
@@ -28,5 +29,15 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// Signal to noise ratio of the signal.
         /// </summary>
         public int SignalTolNoiseRatio;
+
+        public override string ToString()
+        {
+            StringBuilder outString = new StringBuilder();
+
+            outString.Append($"ID: {ID}, Azimuth: {Azimuth}, Elevation: {Elevation}, Signal to Noise Ratio: {SignalTolNoiseRatio}");
+
+            return outString.ToString();
+        }
+
     }
 }
