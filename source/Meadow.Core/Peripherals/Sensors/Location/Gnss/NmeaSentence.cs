@@ -129,22 +129,27 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
                 // make sure data is good
                 if (calculatedChecksum == parsedChecksum) {
 
+                    int tagLength = messageData.IndexOf(',') - 1;
+                    int talkerIDLength = (tagLength == 5) ? 2 : 1;
+                    int prefixIndex = (talkerIDLength == 2) ? 3 : 2;
+
                     // get the starting delimiter (usually `$`)
                     // |
                     // $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
                     newSentence.StartingDelimiter = messageData.Substring(0, 1);
                     //Console.WriteLine($"Found starting delimiter:{newSentence.StartingDelimiter}");
 
-                    // get the talker ID
+                    // get the talker ID (can be a single digit, so we check tag length)
                     //  ||
                     // $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
-                    newSentence.TalkerID = messageData.Substring(1, 2);
+                    newSentence.TalkerID = messageData.Substring(1, talkerIDLength);
                     //Console.WriteLine($"Found TalkerID:{newSentence.TalkerID}");
 
                     // get the prefix
                     //    |||
                     // $GPRMC,000049.799,V,,,,,0.00,0.00,060180,,,N*48
-                    newSentence.Prefix = messageData.Substring(3, 3);
+
+                    newSentence.Prefix = messageData.Substring(prefixIndex, 3);
                     //Console.WriteLine($"Found Prefix:{newSentence.Prefix}");
 
                     // split the sentence data up by commas
