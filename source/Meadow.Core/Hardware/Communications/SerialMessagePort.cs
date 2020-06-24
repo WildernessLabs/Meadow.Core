@@ -12,8 +12,9 @@ namespace Meadow.Hardware
     /// 
     /// Has a streamlined API over class SerialPort that deals in messages.
     ///
-    /// TODO: doc better
-    ///
+    /// This is a modern, asynchronous take on serial communications that is
+    /// thread-safe and asynchronous in nature. This is the recommended way to
+    /// use serial on Meadow for nearly all use cases.
     /// </summary>
     public class SerialMessagePort : ISerialMessagePort// : FilterableObservableBase<AtmosphericConditionChangeResult, AtmosphericConditions>
     {
@@ -52,9 +53,9 @@ namespace Meadow.Hardware
             get => _classicSerialPort.ReceiveBufferSize;
         }
 
-
-
-
+        /// <summary>
+        /// Raised when a message, as defined in the constructor, arrives.
+        /// </summary>
         public event EventHandler<SerialMessageData> MessageReceived = delegate { };
 
         protected SerialPort _classicSerialPort;
@@ -70,7 +71,7 @@ namespace Meadow.Hardware
             SerialPortName portName,
             byte[] suffixDelimiter,
             bool preserveDelimiter,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
@@ -87,7 +88,7 @@ namespace Meadow.Hardware
             byte[] prefixDelimiter,
             bool preserveDelimiter,
             int messageLength,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
@@ -100,23 +101,34 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Initializes a new instance of the SerialPort class.
+        /// Initializes a new instance of the `SerialMessagePort` class that
+        /// listens for serial messages defined byte[] message termination suffix.
         /// </summary>
-        /// <param name="portName">The port to use (for example, 'ttyS1').</param>
-        /// <param name="baudRate"></param>
-        /// <param name="parity"></param>
-        /// <param name="dataBits"></param>
-        /// <param name="stopBits"></param>
-        /// <param name="readBufferSize"></param>
+        /// <param name="portName">The 'SerialPortName` of port to use.</param>
+        /// <param name="suffixDelimiter">A `byte[]` of the delimiter(s) that
+        /// denote the end of the message.</param>
+        /// <param name="preserveDelimiter">Whether or not to preseve the
+        /// delimiter tokens when passing the message to subscribers.</param>
+        /// <param name="baudRate">Speed, in bits per second, of the serial port.</param>
+        /// <param name="parity">`Parity` enum describing what type of
+        /// cyclic-redundancy-check (CRC) bit, if any, should be expected in the
+        /// serial message frame. Default is `Parity.None`.</param>
+        /// <param name="dataBits">Number of data bits expected in the serial
+        /// message frame. Default is `8`.</param>
+        /// <param name="stopBits">`StopBits` describing how many bits should be
+        /// expected at the end of every character in the serial message frame.
+        /// Default is `StopBits.One`.</param>
+        /// <param name="readBufferSize">Size, in bytes, of the read buffer. Default
+        /// is 512.</param>
         protected SerialMessagePort(
             SerialPortName portName,
             byte[] suffixDelimiter,
             bool preserveDelimiter,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
-            int readBufferSize = 4096)
+            int readBufferSize = 512)
         {
             this._messageMode = SerialMessageMode.SuffixDelimited;
             this._preserveDelimiter = preserveDelimiter;
@@ -127,24 +139,38 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Initializes a new instance of the SerialPort class.
+        /// Initializes a new instance of the `SerialMessagePort` class that
+        /// listens for serial messages defined by a `byte[]` prefix, and a
+        /// fixed length.
         /// </summary>
-        /// <param name="portName">The port to use (for example, 'ttyS1').</param>
-        /// <param name="baudRate"></param>
-        /// <param name="parity"></param>
-        /// <param name="dataBits"></param>
-        /// <param name="stopBits"></param>
-        /// <param name="readBufferSize"></param>
+        /// <param name="portName">The 'SerialPortName` of port to use.</param>
+        /// <param name="messageLength">Length of the message, not including the
+        /// delimiter, to be parsed out of the incoming data.</param>
+        /// <param name="prefixDelimiter">A `byte[]` of the delimiter(s) that
+        /// denote the beginning of the message.</param>
+        /// <param name="preserveDelimiter">Whether or not to preseve the
+        /// delimiter tokens when passing the message to subscribers.</param>
+        /// <param name="baudRate">Speed, in bits per second, of the serial port.</param>
+        /// <param name="parity">`Parity` enum describing what type of
+        /// cyclic-redundancy-check (CRC) bit, if any, should be expected in the
+        /// serial message frame. Default is `Parity.None`.</param>
+        /// <param name="dataBits">Number of data bits expected in the serial
+        /// message frame. Default is `8`.</param>
+        /// <param name="stopBits">`StopBits` describing how many bits should be
+        /// expected at the end of every character in the serial message frame.
+        /// Default is `StopBits.One`.</param>
+        /// <param name="readBufferSize">Size, in bytes, of the read buffer. Default
+        /// is 512.</param>
         protected SerialMessagePort(
             SerialPortName portName,
             byte[] prefixDelimiter,
             bool preserveDelimiter,
             int messageLength,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
-            int readBufferSize = 4096)
+            int readBufferSize = 512)
         {
 
             this._messageMode = SerialMessageMode.PrefixDelimited;
@@ -284,11 +310,17 @@ namespace Meadow.Hardware
             //base.NotifyObservers(messageResult);
         }
 
+        /// <summary>
+        /// Opens a new serial port connection.
+        /// </summary>
         public void Open()
         {
             this._classicSerialPort.Open();
         }
 
+        /// <summary>
+        /// Closes the port connection and sets the IsOpen property to false.
+        /// </summary>
         public void Close()
         {
             this._classicSerialPort.Close();

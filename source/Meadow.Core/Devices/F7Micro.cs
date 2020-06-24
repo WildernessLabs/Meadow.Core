@@ -113,7 +113,7 @@ namespace Meadow.Devices
 
         public ISerialPort CreateSerialPort(
             SerialPortName portName,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
@@ -126,7 +126,7 @@ namespace Meadow.Devices
             SerialPortName portName,
             byte[] suffixDelimiter,
             bool preserveDelimiter,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,
@@ -137,12 +137,12 @@ namespace Meadow.Devices
                 stopBits, readBufferSize);
         }
 
-        public SerialMessagePort CreateSerialMessagePort(
+        public ISerialMessagePort CreateSerialMessagePort(
             SerialPortName portName,
             byte[] prefixDelimiter,
             bool preserveDelimiter,
             int messageLength,
-            int baudRate,
+            int baudRate = 9600,
             int dataBits = 8,
             Parity parity = Parity.None,
             StopBits stopBits = StopBits.One,

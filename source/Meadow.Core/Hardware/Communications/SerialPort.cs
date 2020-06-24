@@ -101,14 +101,23 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Initializes a new instance of the SerialPort class.
+        /// Initializes a new instance of a legacy `ISerialPort`. `ISerialPort`
+        /// is provided for legacy compatibility, we recommend using the more
+        /// modern, thread-safe `ISerialMessagePort`.
         /// </summary>
-        /// <param name="portName">The port to use (for example, 'ttyS1').</param>
-        /// <param name="baudRate"></param>
-        /// <param name="parity"></param>
-        /// <param name="dataBits"></param>
-        /// <param name="stopBits"></param>
-        /// <param name="readBufferSize"></param>
+        /// <param name="portName">The 'SerialPortName` of port to use.</param>
+        /// <param name="baudRate">Speed, in bits per second, of the serial port.</param>
+        /// <param name="parity">`Parity` enum describing what type of
+        /// cyclic-redundancy-check (CRC) bit, if any, should be expected in the
+        /// serial message frame. Default is `Parity.None`.</param>
+        /// <param name="dataBits">Number of data bits expected in the serial
+        /// message frame. Default is `8`.</param>
+        /// <param name="stopBits">`StopBits` describing how many bits should be
+        /// expected at the end of every character in the serial message frame.
+        /// Default is `StopBits.One`.</param>
+        /// <param name="readBufferSize">Size, in bytes, of the read buffer. Default
+        /// is 1024.</param>
+        /// <returns></returns>
         protected SerialPort(
             SerialPortName portName,
             int baudRate,
@@ -168,6 +177,7 @@ namespace Meadow.Hardware
         /// Gets an array of supported baud rates
         /// </summary>
         /// <returns></returns>
+        /// TODO: how about making this static?
         public int[] GetSupportedBaudRates()
         {
             return new int[]
@@ -284,7 +294,6 @@ namespace Meadow.Hardware
             return Write(buffer, 0, buffer.Length);
         }
 
-        // TODO: if > 250b, chunk it up
         // TODO: critical section on write
         /// <summary>
         /// Writes a specified number of bytes to the serial port using data from a buffer.
@@ -586,51 +595,6 @@ namespace Meadow.Hardware
 
             // read what we have into the buffer and return
             return _readBuffer.MoveItemsTo(buffer, index, count);
-
-            //// async, so spin up a new task to go and read on
-            //return await Task.Run(() => {
-
-            //    var read = 0;
-
-            //    Stopwatch sw = null;
-
-            //    // this basicaly reads and if there is not enough data to be read
-            //    // it sleeps for a bit and then reads some more. it'll read until
-            //    // the time elapses, and then just retrun what it was able to read
-            //    // in tha time
-            //    // TODO: change to use a WaitHandleReset
-            //    if (ReadTimeout > 0) {
-            //        while (_readBuffer.Count == 0) {
-            //            if (sw == null) {
-            //                sw = new Stopwatch();
-            //                sw.Start();
-            //            } else {
-            //                if (sw.ElapsedMilliseconds > ReadTimeout) {
-            //                    Output.WriteLineIf(_showSerialDebug, $"  Read timeout...");
-            //                    throw new TimeoutException("Serial port read timeout");
-            //                }
-            //            }
-            //            Thread.Sleep(10);
-            //        }
-            //        if (sw != null) {
-            //            sw.Stop();
-            //        }
-            //    }
-
-            //    // update the read count with how much we were actually able to
-            //    // read, based on the timeout
-            //    if (count < _readBuffer.Count) {
-            //        read = count;
-            //    } else { // clip this to the max we can count
-            //        read = _readBuffer.Count;
-            //    }
-
-            //    // Remove the data to read and copy it into the user's buffer.
-            //    Array.Copy(_readBuffer.Remove(read), 0, buffer, index, read);
-
-            //    // return the number of bytes read.
-            //    return read;
-            //});
         }
 
         private void ShowSettings(Nuttx.Termios settings)
