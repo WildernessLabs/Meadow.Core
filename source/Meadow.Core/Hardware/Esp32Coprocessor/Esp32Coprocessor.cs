@@ -66,8 +66,6 @@ namespace Meadow.Hardware
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
 
-            Output.WriteLine($"Esp32Coprocessor.Connect - connecting to {ssid}");
-
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
 
@@ -102,6 +100,8 @@ namespace Meadow.Hardware
                 if (result == 0)
                 {
                     Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"IP Address: {resultBuffer[0]}.{resultBuffer[1]}.{resultBuffer[2]}.{resultBuffer[3]}");
+                    Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"Subnet mask Address: {resultBuffer[4]}.{resultBuffer[5]}.{resultBuffer[6]}.{resultBuffer[7]}");
+                    Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"Gateway Address: {resultBuffer[8]}.{resultBuffer[9]}.{resultBuffer[10]}.{resultBuffer[11]}");
                 }
             }
             finally

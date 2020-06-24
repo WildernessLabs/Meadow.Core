@@ -11,7 +11,7 @@ using static Meadow.Core.Interop;
 namespace Meadow.Devices
 {
     public partial class F7GPIOManager : INuttxIOController
-    { 
+    {
         private class GpioConfig
         {
             public STM32.GpioPort Port { get; set; }
@@ -77,10 +77,10 @@ namespace Meadow.Devices
 
     /* ===== MEADOW GPIO PIN MAP =====
         BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?
-        J301-1      RESET                       
-        J301-2      3.3                       
-        J301-3      VREF                       
-        J301-4      GND                       
+        J301-1      RESET
+        J301-2      3.3
+        J301-3      VREF
+        J301-4      GND
         J301-5      DAC_OUT1        PA4         A0
         J301-6      DAC_OUT2        PA5         A1
         J301-7      ADC1_IN3        PA3         A2

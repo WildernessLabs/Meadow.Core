@@ -244,6 +244,18 @@ namespace Meadow.Devices
             ConfigureOutput(STM32.GpioPort.PortG, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
             ConfigureOutput(STM32.GpioPort.PortE, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
 
+            // these are signals that run to the ESP32
+            // ConfigureOutput(STM32.GpioPort.PortI, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
+            // ConfigureOutput(STM32.GpioPort.PortI, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // ConfigureOutput(STM32.GpioPort.PortD, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // ConfigureOutput(STM32.GpioPort.PortI, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");
+            // ConfigureOutput(STM32.GpioPort.PortI, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // ConfigureOutput(STM32.GpioPort.PortF, 7, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // ConfigureOutput(STM32.GpioPort.PortD, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            // ConfigureOutput(STM32.GpioPort.PortB, 13, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+
             Output.WriteLineIf((DebugFeatures & DebugFeature.PinInitilize) != 0, "done");
         }
 
