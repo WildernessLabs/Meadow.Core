@@ -12,11 +12,137 @@ namespace Benchmarks
         public FileSystemApp()
         {
             Console.WriteLine("Meadow File System Tests");
-            DirectoryListTest("/");
-            DirectoryListTest("/meadow0");
+            Stat("/meadow0/App.exe");
+            CreateFile("/meadow0/hello.txt");
+            Tree("/", true);
             Console.WriteLine("Testing complete");
         }
-        
+
+        private void CreateFile(string path)
+        {
+            Console.WriteLine($"Creating '{path}'...");
+
+            try
+            {
+                using (var fs = File.CreateText(path))
+                {
+                    fs.WriteLine("Hello Meadow File!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        protected void Stat(string path)
+        {
+            Console.WriteLine($"File: {Path.GetFileName(path)}");
+
+            try
+            {
+                using (var stream = File.Open(path, FileMode.Open, FileAccess.Read))
+                {
+                    Console.WriteLine($"Size: {stream.Length,-8}");
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        protected void Tree(string root, bool showSize = false)
+        {
+            var fileCount = 0;
+            var folderCount = 0;
+
+            ShowFolder(root, 0);
+            Console.WriteLine(string.Empty);
+            Console.WriteLine($"{folderCount} directories");
+            Console.WriteLine($"{fileCount} files");
+
+            void ShowFolder(string folder, int depth, bool last = false)
+            {
+                Console.WriteLine($"{GetPrefix(depth)}{Path.GetFileName(folder)}");
+
+                string[] files = null;
+
+                try
+                {
+                    files = Directory.GetFiles(folder);
+                }
+                catch
+                {
+                    Console.WriteLine($"{GetPrefix(depth + 1, last)}<cannot list files>");
+                }
+                if (files != null)
+                {
+                    foreach (var file in files)
+                    {
+                        var prefix = GetPrefix(depth + 1, last);
+                        if (showSize)
+                        {
+                            FileInfo fi = null;
+                            try
+                            {
+                                fi = new FileInfo(file);
+                                prefix += $"[{fi.Length,8}]  ";
+
+                            }
+                            catch
+                            {
+                                prefix += $"[   error]  ";
+                            }
+                        }
+                        Console.WriteLine($"{prefix}{Path.GetFileName(file)}");
+                        fileCount++;
+                    }
+                }
+
+                string[] dirs = null;
+                try
+                {
+                    dirs = Directory.GetDirectories(folder);
+                }
+                catch
+                {
+                    Console.WriteLine($"{GetPrefix(depth + 1)}<cannot list sub-directories>");
+                }
+                if (dirs != null)
+                {
+                    for (var i = 0; i < dirs.Length; i++)
+                    {
+                        ShowFolder(dirs[i], depth + 1, i == dirs.Length - 1);
+                        folderCount++;
+                    }
+                }
+
+                string GetPrefix(int d, bool isLast = false)
+                {
+                    var p = string.Empty;
+
+                    for (var i = 0; i < d; i++)
+                    {
+                        if (i == d - 1)
+                        {
+                            p += "+--";
+                        }
+                        else if (isLast && i == d - 2)
+                        {
+                            p += "   ";
+                        }
+                        else
+                        {
+                            p += "|  ";
+                        }
+                    }
+
+                    return p;
+                }
+            }
+        }
+
         protected void DirectoryListTest(string path)
         {
             Console.WriteLine($"Enumerating path '{path}'");
