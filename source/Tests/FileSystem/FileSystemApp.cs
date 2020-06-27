@@ -64,16 +64,16 @@ namespace Benchmarks
 
             void ShowFolder(string folder, int depth, bool last = false)
             {
-                Console.WriteLine($"{GetPrefix(depth)}{Path.GetFileName(folder)}");
-
                 string[] files = null;
 
                 try
                 {
                     files = Directory.GetFiles(folder);
+                    Console.WriteLine($"{GetPrefix(depth, last && files.Length == 0)}{Path.GetFileName(folder)}");
                 }
                 catch
                 {
+                    Console.WriteLine($"{GetPrefix(depth, last)}{Path.GetFileName(folder)}");
                     Console.WriteLine($"{GetPrefix(depth + 1, last)}<cannot list files>");
                 }
                 if (files != null)
@@ -107,7 +107,14 @@ namespace Benchmarks
                 }
                 catch
                 {
-                    Console.WriteLine($"{GetPrefix(depth + 1)}<cannot list sub-directories>");
+                    if (files == null || files.Length == 0)
+                    {
+                        Console.WriteLine($"{GetPrefix(depth + 1, last)}<cannot list sub-directories>");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{GetPrefix(depth + 1)}<cannot list sub-directories>");
+                    }
                 }
                 if (dirs != null)
                 {
