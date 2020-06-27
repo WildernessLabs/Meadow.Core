@@ -3,15 +3,11 @@ using System.IO;
 using System.Threading;
 using Meadow;
 using Meadow.Devices;
-using Meadow.Foundation;
-using Meadow.Foundation.Leds;
 
 namespace MeadowApp
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
-        RgbPwmLed onboardLed;
-
         public MeadowApp()
         {
             string appRootDir = "meadow0";
@@ -32,6 +28,19 @@ namespace MeadowApp
             //}
 
 
+        }
+
+        private void CreateFile(string path)
+        {
+            Console.WriteLine($"Creating '{path}'...");
+
+            try {
+                using (var fs = File.CreateText(path)) {
+                    fs.WriteLine("Hello Meadow File!");
+                }
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
         }
 
     }
