@@ -9,9 +9,10 @@
    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
-   <Version>0.13.0</Version>
+   <Version>0.14.0</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
+   <Nullable>enable</Nullable>
  </PropertyGroup>
  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -29,5 +30,9 @@
  </ItemGroup>
  <ItemGroup>
    <None Include="Hardware\Communications\SoftwareSpiBus.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+ </ItemGroup>
+ <ItemGroup>
+   <Folder Include="Peripherals\Sensors\Location\" />
+   <Folder Include="Peripherals\Sensors\Location\Gnss\" />
  </ItemGroup>
 </Project>

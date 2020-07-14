@@ -361,6 +361,7 @@ namespace Meadow.Devices
             protected void InitAllPins()
             {
                 // add all our pins to the collection
+                AllPins.Add(this.A00);
                 AllPins.Add(this.A01);
                 AllPins.Add(this.A02);
                 AllPins.Add(this.A03);

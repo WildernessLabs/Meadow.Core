@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
@@ -101,18 +102,38 @@ namespace Meadow.Hardware
         int ReadByte();
 
         /// <summary>
-        /// Reads bytes from the input buffer until a specified token is found
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
         /// </summary>
-        /// <param name="token">The token to search for</param>
-        /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
-        byte[] ReadToToken(byte token);
+        /// <param name="tokens">The token(s) to search for</param>
+        /// <param name="preserveTokens">Whether or not to return the tokens in
+        /// the bytes read. If `true`, the tokens are preserved, if `false`, the
+        /// tokens will be automatically removed.</param>
+        /// <returns>All data in the buffer up to and including the specified
+        /// token, if a token exists, otherwise an empty array.</returns>
+        //byte[] ReadTo(ReadOnlySpan<char> tokens, bool preserveTokens = true);
+        //Task<byte[]> ReadTo(char[] tokens, bool preserveTokens = true);
 
         /// <summary>
-        /// Reads bytes from the input buffer until a specified token is found
+        /// Reads bytes from the input buffer until the specified token(s) are
+        /// found.
         /// </summary>
-        /// <param name="token">The token to search for</param>
-        /// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
-        byte[] ReadToToken(char token);
+        /// <param name="tokens">The token(s) to search for</param>
+        //byte[] ReadTo(params char[] tokens);
+
+        ///// <summary>
+        ///// Reads bytes from the input buffer until a specified token is found
+        ///// </summary>
+        ///// <param name="token">The token to search for</param>
+        ///// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
+        //byte[] ReadToToken(byte token);
+
+        ///// <summary>
+        ///// Reads bytes from the input buffer until a specified token is found
+        ///// </summary>
+        ///// <param name="token">The token to search for</param>
+        ///// <returns>All data in the buffer up to and including the specified token, if a toen exists, otherwise an empty array.</returns>
+        //byte[] ReadToToken(char token);
 
         string ToString();
 
@@ -121,6 +142,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
+        //int Write(Span<byte> buffer);
         int Write(byte[] buffer);
 
         /// <summary>
@@ -130,6 +152,7 @@ namespace Meadow.Hardware
         /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <returns></returns>
+        //int Write(Span<byte> buffer, int offset, int count);
         int Write(byte[] buffer, int offset, int count);
     }
 }

@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class CircularBuffer<T> : IEnumerable<T>
     {
         public event EventHandler ItemAdded;
 
-        private T[] m_list;
-        private object m_syncRoot = new object();
-        private int m_head = 0;
-        private int m_tail = 0;
-        private bool m_highwaterExceeded = false;
-        private bool m_lowwaterExceeded = true;
-        private int m_highWater;
-        private int m_lowWater;
-        private AutoResetEvent m_addedResetEvent;
+        // TODO: this should probably be Span<T>
+        private T[] _list;
+        private object _syncRoot = new object();
+        private int _head = 0;
+        private int _tail = 0;
+        private bool _highwaterExceeded = false;
+        private bool _lowwaterExceeded = true;
+        private int _highWater;
+        private int _lowWater;
+        private AutoResetEvent _addedResetEvent;
 
         /// <summary>
         /// Fires when an element is added to the buffer when it is already full
@@ -34,7 +40,7 @@ namespace Meadow
         /// </summary>
         public event EventHandler HighWater;
         /// <summary>
-        /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Dequeue call.  This event fires only once when passing downward across the boundary.
+        /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Remove call.  This event fires only once when passing downward across the boundary.
         /// </summary>
         public event EventHandler LowWater;
         /// <summary>
@@ -69,9 +75,9 @@ namespace Meadow
 
         public CircularBuffer(int maxElements)
         {
-            m_addedResetEvent = new AutoResetEvent(false);
+            _addedResetEvent = new AutoResetEvent(false);
             MaxElements = maxElements;
-            m_list = new T[MaxElements];
+            _list = new T[MaxElements];
         }
 
         /// <summary>
@@ -79,12 +85,11 @@ namespace Meadow
         /// </summary>
         public void Clear()
         {
-            lock (m_syncRoot)
-            {
-                m_head = 0;
-                m_tail = 0;
-                m_highwaterExceeded = false;
-                m_lowwaterExceeded = true;
+            lock (_syncRoot) {
+                _head = 0;
+                _tail = 0;
+                _highwaterExceeded = false;
+                _lowwaterExceeded = true;
                 IsFull = false;
                 HasOverrun = false;
                 HasUnderrun = false;
@@ -94,22 +99,18 @@ namespace Meadow
         /// <summary>
         /// Gets the current count of elements in the buffer
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                lock (m_syncRoot)
-                {
+        public int Count {
+            get {
+                lock (_syncRoot) {
                     if (IsFull) return MaxElements;
 
-                    if (m_head == m_tail) return 0;
+                    if (_head == _tail) return 0;
 
-                    if (m_head > m_tail)
-                    {
-                        return m_head - m_tail;
+                    if (_head > _tail) {
+                        return _head - _tail;
                     }
 
-                    return MaxElements - m_tail + m_head;
+                    return MaxElements - _tail + _head;
                 }
             }
         }
@@ -120,12 +121,10 @@ namespace Meadow
         /// <remarks>
         /// Set the value to zero (default) to disable high-water notifications
         /// </remarks>
-        public int HighWaterLevel
-        {
-            get { return m_highWater; }
-            set
-            {
-                m_highWater = value;
+        public int HighWaterLevel {
+            get { return _highWater; }
+            set {
+                _highWater = value;
             }
         }
 
@@ -135,53 +134,62 @@ namespace Meadow
         /// <remarks>
         /// Set the value to zero (default) to disable low-water notifications
         /// </remarks>
-        public int LowWaterLevel
-        {
-            get { return m_lowWater; }
-            set
-            {
-                m_lowWater = value;
+        public int LowWaterLevel {
+            get { return _lowWater; }
+            set {
+                _lowWater = value;
             }
         }
 
         private void IncrementTail()
         {
-            m_tail++;
-            if (m_tail >= MaxElements)
-            {
-                m_tail = 0;
+            _tail++;
+            if (_tail >= MaxElements) {
+                _tail = 0;
             }
         }
 
         private void IncrementHead()
         {
-            m_head++;
-            if (m_head >= MaxElements)
-            {
-                m_head = 0;
+            _head++;
+            if (_head >= MaxElements) {
+                _head = 0;
             }
 
-            if (m_head == m_tail)
-            {
+            if (_head == _tail) {
                 IsFull = true;
             }
         }
 
-        public void Enqueue(IEnumerable<T> items)
+        public void Append(IEnumerable<T> items)
         {
-            foreach (var i in items)
-            {
-                Enqueue(i);
+            foreach (var i in items) {
+                Append(i);
             }
         }
 
-        public void Enqueue(T[] items, int offset, int count)
+        public void Append(T[] items, int offset, int count)
         {
-            for (int i = offset; i < offset + count; i++)
-            {
-                Enqueue(items[i]);
+            for (int i = offset; i < offset + count; i++) {
+                Append(items[i]);
             }
         }
+
+        // TODO: not sure why i can't do this. but LINQ adds Append<T> methods.
+        //public void Append<T>(T element)
+        //{
+        //    this.Enqueue(element);
+        //}
+
+        //public void Append(T element)
+        //{
+        //    this.Enqueue(element);
+        //}
+
+        //public void Append(IEnumerable<T> items)
+        //{
+        //    this.Enqueue(items);
+        //}
 
         /// <summary>
         /// Adds an element to the head of the buffer
@@ -190,12 +198,10 @@ namespace Meadow
         /// <remarks>
         /// If the buffer is full and Enqueue is called, the new item will be successfully added to the buffer and the tail (oldest) item will be automatically removed
         /// </remarks>
-        public void Enqueue(T item)
+        public void Append(T item)
         {
-            lock (m_syncRoot)
-            {
-                if (IsFull)
-                {
+            lock (_syncRoot) {
+                if (IsFull) {
                     // drop the tail item
                     IncrementTail();
 
@@ -204,40 +210,37 @@ namespace Meadow
                 }
 
                 // put the new item in the list
-                m_list[m_head] = item;
+                _list[_head] = item;
 
                 IncrementHead();
 
-                if ((HighWaterLevel > 0) && (Count >= HighWaterLevel))
-                {
-                    if (!m_highwaterExceeded)
-                    {
-                        m_highwaterExceeded = true;
+                if ((HighWaterLevel > 0) && (Count >= HighWaterLevel)) {
+                    if (!_highwaterExceeded) {
+                        _highwaterExceeded = true;
                         HighWater?.Invoke(this, EventArgs.Empty);
                     }
                 }
 
-                if ((LowWaterLevel > 0) && (Count > LowWaterLevel))
-                {
-                    m_lowwaterExceeded = false;
+                if ((LowWaterLevel > 0) && (Count > LowWaterLevel)) {
+                    _lowwaterExceeded = false;
                 }
 
                 // do notifications
-                m_addedResetEvent.Set();
+                _addedResetEvent.Set();
                 ItemAdded?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public bool EnqueueWaitOne(int millisecondsTimeout)
+        public bool AppendWaitOne(int millisecondsTimeout)
         {
-            return m_addedResetEvent.WaitOne(millisecondsTimeout);
+            return _addedResetEvent.WaitOne(millisecondsTimeout);
         }
 
         /// <summary>
         /// Removes the element from the tail of the buffer, if one exists
         /// </summary>
         /// <returns></returns>
-        public T Dequeue()
+        public T Remove()
         {
             return GetOldest(true);
         }
@@ -253,31 +256,25 @@ namespace Meadow
 
         private T GetOldest(bool remove)
         {
-            lock (m_syncRoot)
-            {
-                if ((Count == 0) && !(IsFull))
-                {
+            lock (_syncRoot) {
+                if ((Count == 0) && !(IsFull)) {
                     OnUnderrun();
                     return default(T);
                 }
 
-                T item = m_list[m_tail];
+                T item = _list[_tail];
 
-                if (remove)
-                {
+                if (remove) {
                     IncrementTail();
                     IsFull = false;
 
-                    if ((HighWaterLevel > 0) && (Count < HighWaterLevel))
-                    {
-                        m_highwaterExceeded = false;
+                    if ((HighWaterLevel > 0) && (Count < HighWaterLevel)) {
+                        _highwaterExceeded = false;
                     }
 
-                    if ((LowWaterLevel > 0) && (Count <= LowWaterLevel))
-                    {
-                        if (!m_lowwaterExceeded)
-                        {
-                            m_lowwaterExceeded = true;
+                    if ((LowWaterLevel > 0) && (Count <= LowWaterLevel)) {
+                        if (!_lowwaterExceeded) {
+                            _lowwaterExceeded = true;
                             LowWater?.Invoke(this, EventArgs.Empty);
                         }
                     }
@@ -291,8 +288,7 @@ namespace Meadow
         {
             HasOverrun = true;
 
-            if (ExceptOnOverrun)
-            {
+            if (ExceptOnOverrun) {
                 throw new BufferException("Overrun");
             }
             Overrun?.Invoke(this, EventArgs.Empty);
@@ -302,8 +298,7 @@ namespace Meadow
         {
             HasUnderrun = true;
 
-            if (ExceptOnUnderrun)
-            {
+            if (ExceptOnUnderrun) {
                 throw new BufferException("Underrun");
             }
             Underrun?.Invoke(this, EventArgs.Empty);
@@ -317,19 +312,15 @@ namespace Meadow
         /// <returns></returns>
         public T Last(Func<T, bool> findFunction, T defaultValue = default(T))
         {
-            lock (m_syncRoot)
-            {
+            lock (_syncRoot) {
                 int index = 0;
-                if (m_head > 0)
-                {
-                    index = m_head - 1;
+                if (_head > 0) {
+                    index = _head - 1;
                 }
 
-                for (int i = 0; i < Count; i++)
-                {
-                    T item = m_list[index];
-                    if (findFunction(item))
-                    {
+                for (int i = 0; i < Count; i++) {
+                    T item = _list[index];
+                    if (findFunction(item)) {
                         return item;
                     }
                     if (--index < 0) index = MaxElements - 1;
@@ -347,15 +338,12 @@ namespace Meadow
         /// <returns></returns>
         public T First(Func<T, bool> findFunction, T defaultValue = default(T))
         {
-            lock (m_syncRoot)
-            {
-                int index = m_tail;
+            lock (_syncRoot) {
+                int index = _tail;
 
-                for (int i = 0; i < Count; i++)
-                {
-                    T item = m_list[index];
-                    if (findFunction(item))
-                    {
+                for (int i = 0; i < Count; i++) {
+                    T item = _list[index];
+                    if (findFunction(item)) {
                         return item;
                     }
                     if (++index >= MaxElements - 1) index = 0;
@@ -371,64 +359,127 @@ namespace Meadow
         /// <returns></returns>
         public bool Contains(T searchFor)
         {
-            lock (m_syncRoot)
-            {
+            lock (_syncRoot) {
                 // we don't want to enumerate values outside of our "valid" range
-                for (int i = 0; i < Count; i++)
-                {
-                    int index = m_tail + i;
+                for (int i = 0; i < Count; i++) {
+                    int index = _tail + i;
 
-                    if ((m_head <= m_tail) && (index >= MaxElements))
-                    {
+                    if ((_head <= _tail) && (index >= MaxElements)) {
                         index -= MaxElements;
                     }
 
-                    if (m_list[index].Equals(searchFor)) return true;
+                    if (_list[index].Equals(searchFor)) return true;
                 }
 
                 return false;
             }
         }
 
+        //public bool Contains(T[] pattern)
+        //{
+        //    int patternLength = pattern.Length;
+        //    //int totalLength = Count;
+        //    T firstMatch = pattern[0];
+
+        //    for (int i = 0; i < Count; i++) {
+        //        // calculate the index from the head
+        //        int index = _tail = i;
+        //        if ((_head <= _tail) && (index >= MaxElements)) {
+        //            index -= MaxElements;
+        //        }
+
+        //        if (firstMatch == source[i] && Count - i >= patternLength) {
+
+        //        }
+        //    }
+
+        //    return false;
+        //}
+
         /// <summary>
-        /// Dequeues the requested number of elements from the buffer
+        /// Removes the requested number of elements from the buffer
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
         /// <remarks>
-        /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are dequeued
+        /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are Removed
         /// </remarks>
-        public T[] Dequeue(int count)
+        public T[] Remove(int count)
         {
             if (Count < count) return new T[] { };
 
             var result = new T[count];
 
-            lock (m_syncRoot)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    result[i] = Dequeue();
+            lock (_syncRoot) {
+                for (int i = 0; i < count; i++) {
+                    result[i] = Remove();
                 }
             }
 
             return result;
         }
 
-        public T this[int index]
+        public int MoveItemsTo(T[] destination, int index, int count)
         {
-            get
-            {
-                lock (m_syncRoot)
-                {
-                    int i = m_tail + index;
+            if (count <= 0) return 0;
 
-                    if ((m_head <= m_tail) && (i >= MaxElements))
+            try
+            {
+                lock (_syncRoot)
+                {
+                    // how many are we moving?
+                    // move from current toward the tail
+                    var actual = (count > this.Count) ? this.Count : count;
+
+                    if (_tail < _head || (_tail == 0 && IsFull))
                     {
+                        // the data is linear, just copy
+                        Array.Copy(_list, destination, actual);
+                        // move the tail pointer
+                        _tail += actual;
+                    }
+                    else
+                    {
+                        // there's a data wrap
+                        // copy from here to the end
+                        var remaining = actual;
+                        var c = _list.Length - _tail;
+                        Array.Copy(_list, _tail, destination, 0 + index, c);
+                        // now copy from the start (tail == 0) the remaining data
+                        _tail = 0;
+                        remaining -= c;
+                        Array.Copy(_list, _tail, destination, c + index, remaining);
+
+                        // move the tail pointer
+                        _tail = remaining;
+                    }
+
+                    return actual;
+                }
+            }
+            finally
+            {
+                if ((LowWaterLevel > 0) && (Count <= LowWaterLevel))
+                {
+                    if (!_lowwaterExceeded)
+                    {
+                        _lowwaterExceeded = true;
+                        LowWater?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            }
+        }
+
+        public T this[int index] {
+            get {
+                lock (_syncRoot) {
+                    int i = _tail + index;
+
+                    if ((_head <= _tail) && (i >= MaxElements)) {
                         i -= MaxElements;
                     }
 
-                    return m_list[i];
+                    return _list[i];
                 }
             }
         }
@@ -436,16 +487,14 @@ namespace Meadow
         public IEnumerator<T> GetEnumerator()
         {
             // we don't want to enumerate values outside of our "valid" range
-            for (int i = 0; i < Count; i++)
-            {
-                int index = m_tail + i;
+            for (int i = 0; i < Count; i++) {
+                int index = _tail + i;
 
-                if ((m_head <= m_tail) && (index >= MaxElements))
-                {
+                if ((_head <= _tail) && (index >= MaxElements)) {
                     index -= MaxElements;
                 }
 
-                yield return m_list[index];
+                yield return _list[index];
             }
         }
 
