@@ -20,7 +20,7 @@ namespace Meadow.Peripherals.Sensors.Location
 
         /// <summary>
         /// Altitude above mean sea level in meters.
-        public decimal Altitude { get; set; }
+        public decimal? Altitude { get; set; }
 
         public SphericalPositionInfo()
         {
