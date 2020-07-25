@@ -4,7 +4,7 @@
     {
         public float? Distance { get; set; }
 
-        public DistanceConditions ()
+        public DistanceConditions()
         {
         }
 
@@ -17,46 +17,46 @@
         {
             return new DistanceConditions(conditions.Distance);
         }
+    }
 
-        public class AtmosphericConditionChangeResult : IChangeResult<DistanceConditions>
+    public class DistanceConditionChangeResult : IChangeResult<DistanceConditions>
+    {
+        public DistanceConditions New
         {
-            public DistanceConditions New
+            get => newValue; 
+            set
             {
-                get => newValue; 
-                set
-                {
-                    newValue = value;
-                    RecalcDelta();
-                }
+                newValue = value;
+                RecalcDelta();
             }
-            protected DistanceConditions newValue = new DistanceConditions();
+        }
+        protected DistanceConditions newValue = new DistanceConditions();
 
-            public DistanceConditions Old
+        public DistanceConditions Old
+        {
+            get { return oldValue; }
+            set
             {
-                get { return oldValue; }
-                set
-                {
-                    oldValue = value;
-                    RecalcDelta();
-                }
+                oldValue = value;
+                RecalcDelta();
             }
-            protected DistanceConditions oldValue = new DistanceConditions();
+        }
+        protected DistanceConditions oldValue = new DistanceConditions();
 
-            public DistanceConditions Delta { get; protected set; } = new DistanceConditions();
+        public DistanceConditions Delta { get; protected set; } = new DistanceConditions();
 
-            public AtmosphericConditionChangeResult(DistanceConditions newValue, DistanceConditions oldValue)
-            {
-                New = newValue;
-                Old = oldValue;
-            }
+        public DistanceConditionChangeResult(DistanceConditions newValue, DistanceConditions oldValue)
+        {
+            New = newValue;
+            Old = oldValue;
+        }
 
-            protected void RecalcDelta()
-            {
-                DistanceConditions delta = new DistanceConditions();
-                delta.Distance = New.Distance - Old.Distance;
+        protected void RecalcDelta()
+        {
+            DistanceConditions delta = new DistanceConditions();
+            delta.Distance = New.Distance - Old.Distance;
  
-                Delta = delta;
-            }
+            Delta = delta;
         }
     }
 }
