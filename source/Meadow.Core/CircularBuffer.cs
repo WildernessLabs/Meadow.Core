@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -23,8 +19,6 @@ namespace Meadow
         private int _tail = 0;
         private bool _highwaterExceeded = false;
         private bool _lowwaterExceeded = true;
-        private int _highWater;
-        private int _lowWater;
         private AutoResetEvent _addedResetEvent;
 
         /// <summary>
@@ -121,12 +115,7 @@ namespace Meadow
         /// <remarks>
         /// Set the value to zero (default) to disable high-water notifications
         /// </remarks>
-        public int HighWaterLevel {
-            get { return _highWater; }
-            set {
-                _highWater = value;
-            }
-        }
+        public int HighWaterLevel { get; set; }
 
         /// <summary>
         /// The LowWater event will fire when the buffer contains this many (or less) elements.
@@ -134,12 +123,7 @@ namespace Meadow
         /// <remarks>
         /// Set the value to zero (default) to disable low-water notifications
         /// </remarks>
-        public int LowWaterLevel {
-            get { return _lowWater; }
-            set {
-                _lowWater = value;
-            }
-        }
+        public int LowWaterLevel { get; set; }
 
         private void IncrementTail()
         {
@@ -421,7 +405,7 @@ namespace Meadow
 
         public int MoveItemsTo(T[] destination, int index, int count)
         {
-            if (count <= 0) return 0;
+            if (count <= 0) { return 0; }
 
             try
             {
@@ -429,7 +413,7 @@ namespace Meadow
                 {
                     // how many are we moving?
                     // move from current toward the tail
-                    var actual = (count > this.Count) ? this.Count : count;
+                    var actual = (count > Count) ? Count : count;
 
                     if (_tail < _head || (_tail == 0 && IsFull))
                     {
@@ -442,13 +426,12 @@ namespace Meadow
                     {
                         // there's a data wrap
                         // copy from here to the end
-                        var remaining = actual;
-                        var c = _list.Length - _tail;
-                        Array.Copy(_list, _tail, destination, 0 + index, c);
+                        var tailToEnd = _list.Length - _tail;
+                        Array.Copy(_list, _tail, destination, index, tailToEnd);
                         // now copy from the start (tail == 0) the remaining data
                         _tail = 0;
-                        remaining -= c;
-                        Array.Copy(_list, _tail, destination, c + index, remaining);
+                        var remaining = actual - tailToEnd;
+                        Array.Copy(_list, _tail, destination, tailToEnd + index, remaining);
 
                         // move the tail pointer
                         _tail = remaining;
