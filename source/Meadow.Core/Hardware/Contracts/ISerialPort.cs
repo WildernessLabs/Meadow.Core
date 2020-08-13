@@ -81,7 +81,7 @@ namespace Meadow.Hardware
         void Open();
 
         /// <summary>
-        /// Returns the next available by in the input buffer but does not consume it.
+        /// Returns the next available byte in the input buffer but does not consume it.
         /// </summary>
         /// <returns>The byte, cast to an Int32, or -1 if there is no data available in the input buffer.</returns>
         int Peek();
