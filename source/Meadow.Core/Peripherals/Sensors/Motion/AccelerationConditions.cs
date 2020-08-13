@@ -44,25 +44,25 @@ namespace Meadow.Peripherals.Sensors.Motion
     {
         public AccelerationConditions New
         {
-            get => _newValue;
+            get => newValue;
             set
             {
-                _newValue = value;
+                newValue = value;
                 RecalcDelta();
             }
         }
-        protected AccelerationConditions _newValue = new AccelerationConditions();
+        protected AccelerationConditions newValue = new AccelerationConditions();
 
         public AccelerationConditions Old
         {
-            get => _oldValue; 
+            get => oldValue; 
             set
             {
-                this._oldValue = value;
+                oldValue = value;
                 RecalcDelta();
             }
         }
-        protected AccelerationConditions _oldValue = new AccelerationConditions();
+        protected AccelerationConditions oldValue = new AccelerationConditions();
 
         public AccelerationConditions Delta { get; protected set; } = new AccelerationConditions();
 
@@ -75,7 +75,7 @@ namespace Meadow.Peripherals.Sensors.Motion
 
         protected void RecalcDelta()
         {
-            AccelerationConditions delta = new AccelerationConditions();
+            var delta = new AccelerationConditions();
 
             delta.XAcceleration = New.XAcceleration - Old.XAcceleration;
             delta.YAcceleration = New.YAcceleration - Old.YAcceleration;
@@ -85,7 +85,7 @@ namespace Meadow.Peripherals.Sensors.Motion
             delta.YGyroscopicAcceleration = New.YGyroscopicAcceleration - Old.YGyroscopicAcceleration;
             delta.ZGyroscopicAcceleration = New.ZGyroscopicAcceleration - Old.ZGyroscopicAcceleration;
 
-            this.Delta = delta;
+            Delta = delta;
         }
     }
 }
