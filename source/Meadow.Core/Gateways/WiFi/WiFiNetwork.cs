@@ -120,12 +120,6 @@ namespace Meadow.Gateway.WiFi
 
         #region Methods
 
-        public void StartNetwork(string networkName, string password)
-        {
-            Esp32Coprocessor.StartNetwork(networkName, password);
-        }
-
-
         #endregion Methods
     }
 }

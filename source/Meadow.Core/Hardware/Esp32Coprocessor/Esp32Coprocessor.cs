@@ -4,13 +4,16 @@ using System.Runtime.InteropServices;
 using Meadow.Hardware.Coprocessor;
 using static Meadow.Core.Interop;
 using Meadow.Hardware.Coprocessor.MessagePayloads;
+using System.Net;
+using Meadow.Gateway.WiFi;
+using Meadow.Gateway;
 
 namespace Meadow.Hardware
 {
     /// <summary>
     ///
     /// </summary>
-    internal static class Esp32Coprocessor
+    public class Esp32Coprocessor : IWiFiAdapter
     {
         #region Enums
 
@@ -35,14 +38,33 @@ namespace Meadow.Hardware
 
         #endregion Private fields / variables
 
+        #region Properties
+
+        /// <summary>
+        /// IP Address of the network adapter.
+        /// </summary>
+        public IPAddress IpAddress { get; private set; }
+
+        /// <summary>
+        /// Subnet mask of the adapter.
+        /// </summary>
+        public IPAddress SubnetMask { get; private set; }
+
+        /// <summary>
+        /// Default gateway for the adapter.
+        /// </summary>
+        public IPAddress Gateway { get; private set; }
+
+        #endregion Properties
+
         #region Constructor(s)
 
         /// <summary>
         /// Default constructor of the Esp32Coprocessor class.
         /// </summary>
-        static Esp32Coprocessor()
+        public Esp32Coprocessor()
         {
-            DebugLevel = DebugOptions.Full;
+            DebugLevel = DebugOptions.None;
         }
 
         #endregion Constructor(s)
@@ -54,8 +76,10 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="ssid">Name of the network to connect to.</param>
         /// <param name="password">Password for the network.</param>
-        /// <exception cref="ArgumentNullException">Thrown if the SSID is null or empty, password is null.</exception>
-        public static void StartNetwork(string ssid, string password)
+        /// <param name="reconnection">Should the adapter reconnect automatically?</param>
+        /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
+        /// <returns>true if the connection was successfully made.</returns>
+        public bool StartNetwork(string ssid, string password, ReconnectionType reconnection)
         {
             if (string.IsNullOrEmpty(ssid))
             {
@@ -68,6 +92,7 @@ namespace Meadow.Hardware
 
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
+            bool connected;
 
             try
             {
@@ -94,14 +119,27 @@ namespace Meadow.Hardware
                     Block = 1
                 };
 
-                Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"Connecting to {ssid}.");
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
 
                 if (result == 0)
                 {
-                    Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"IP Address: {resultBuffer[0]}.{resultBuffer[1]}.{resultBuffer[2]}.{resultBuffer[3]}");
-                    Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"Subnet mask Address: {resultBuffer[4]}.{resultBuffer[5]}.{resultBuffer[6]}.{resultBuffer[7]}");
-                    Output.WriteLineIf(DebugLevel.HasFlag(DebugOptions.Information), $"Gateway Address: {resultBuffer[8]}.{resultBuffer[9]}.{resultBuffer[10]}.{resultBuffer[11]}");
+                    byte[] addressBytes = new byte[4];
+                    Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
+                    IpAddress = new IPAddress(addressBytes);
+                    Array.Copy(resultBuffer, 4, addressBytes, 0, addressBytes.Length);
+                    SubnetMask = new IPAddress(addressBytes);
+                    Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
+                    Gateway = new IPAddress(addressBytes);
+                    connected = true;
+                }
+                else
+                {
+                    byte[] addressBytes = new byte[4];
+                    Array.Clear(addressBytes, 0, addressBytes.Length);
+                    IpAddress = new IPAddress(addressBytes);
+                    SubnetMask = new IPAddress(addressBytes);
+                    Gateway = new IPAddress(addressBytes);
+                    connected = false;
                 }
             }
             finally
@@ -115,6 +153,7 @@ namespace Meadow.Hardware
                     resultGcHandle.Free();
                 }
             }
+            return (connected);
         }
 
         #endregion Methods

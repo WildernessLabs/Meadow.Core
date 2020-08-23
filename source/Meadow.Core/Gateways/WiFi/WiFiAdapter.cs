@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Meadow.Gateways.Exceptions;
+using Meadow.Hardware;
 
 namespace Meadow.Gateway.WiFi
 {
@@ -71,6 +73,11 @@ namespace Meadow.Gateway.WiFi
                 _scanFrequency = value;
             }
         }
+
+        /// <summary>
+        /// Network adapter.
+        /// </summary>
+        private IWiFiAdapter NetworkAdapter { get; set; }
         
         #endregion Properties
 
@@ -79,17 +86,20 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Default constructor private to prevent it from being called.
         /// </summary>
-        public WiFiAdapter()
+        private WiFiAdapter()
         {
         }
 
         /// <summary>
-        /// Create a new WiFi adapter that implements the <see cref="INetworkAdapter"/> interface.
+        /// Create a new WiFi adapter that implements the <see cref="IWifiAdapter"/> interface.
         /// </summary>
         /// <param name="networkAdapter">Network adapter interface.</param>
-        public WiFiAdapter(INetworkAdapter networkAdapter)
+        public WiFiAdapter(IWiFiAdapter networkAdapter)
         {
+            NetworkAdapter = networkAdapter;
             Networks = new ObservableCollection<WifiNetwork>();
+            IsConnected = false;
+            HasInternetAccess = false;
         }
         
         #endregion Constructor(s)
@@ -141,6 +151,36 @@ namespace Meadow.Gateway.WiFi
             {
                 return new ConnectionResult(ConnectionStatus.Timeout);
             });
+        }
+
+        /// <summary>
+        /// Connect to a WiFi network.
+        /// </summary>
+        /// <param name="ssid">SSID of the network to connect to</param>
+        /// <param name="password">Password for the WiFi access point.</param>
+        /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
+        /// <returns></returns>
+        //TODO: we should probably be using some sort of password credential and secure storage see: https://docs.microsoft.com/en-us/uwp/api/windows.security.credentials.passwordcredential
+        // public Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
+        public ConnectionResult Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
+        {
+            // return new Task<ConnectionResult>(() =>
+            // {
+                ConnectionResult result;
+                if (NetworkAdapter.StartNetwork(ssid, password, reconnection))
+                {
+                    IsConnected = true;
+                    HasInternetAccess = true;
+                    result = new ConnectionResult(ConnectionStatus.Success);
+                }
+                else
+                {
+                    IsConnected = false;
+                    HasInternetAccess = false;
+                    result = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
+                }
+                return result;
+            // });
         }
 
         /// <summary>
