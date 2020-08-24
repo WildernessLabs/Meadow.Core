@@ -43,7 +43,7 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Is the WiFi adapter currently connected to an access point?
         /// </summary>
-        public bool IsConnected { get; protected set; }
+        public bool IsConnected { get { return(NetworkAdapter.IsConnected); } }
         
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
@@ -98,7 +98,6 @@ namespace Meadow.Gateway.WiFi
         {
             NetworkAdapter = networkAdapter;
             Networks = new ObservableCollection<WifiNetwork>();
-            IsConnected = false;
             HasInternetAccess = false;
         }
         
@@ -114,13 +113,14 @@ namespace Meadow.Gateway.WiFi
         /// </remarks>
         public void Scan()
         {
-            Task.Run(() => {
-                Networks.Clear();
-                //
-                //  TODO: Make the adapter scan for networks and then populate the Networks property.
-                //
-                Thread.Sleep(ScanFrequency);
-            });
+            Networks = NetworkAdapter.GetAccessPoints();
+            // Task.Run(() => {
+            //     Networks.Clear();
+            //     //
+            //     //  TODO: Make the adapter scan for networks and then populate the Networks property.
+            //     //
+            //     Thread.Sleep(ScanFrequency);
+            // });
         }
 
         /// <summary>
@@ -169,13 +169,11 @@ namespace Meadow.Gateway.WiFi
                 ConnectionResult result;
                 if (NetworkAdapter.StartNetwork(ssid, password, reconnection))
                 {
-                    IsConnected = true;
                     HasInternetAccess = true;
                     result = new ConnectionResult(ConnectionStatus.Success);
                 }
                 else
                 {
-                    IsConnected = false;
                     HasInternetAccess = false;
                     result = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
                 }

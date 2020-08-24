@@ -7,6 +7,9 @@ using Meadow.Hardware.Coprocessor.MessagePayloads;
 using System.Net;
 using Meadow.Gateway.WiFi;
 using Meadow.Gateway;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
 
 namespace Meadow.Hardware
 {
@@ -55,6 +58,11 @@ namespace Meadow.Hardware
         /// </summary>
         public IPAddress Gateway { get; private set; }
 
+        /// <summary>
+        /// Record if the WiFi ESP32 is connected to an access point.
+        /// </summary>
+        public bool IsConnected { get; private set; }
+
         #endregion Properties
 
         #region Constructor(s)
@@ -65,6 +73,7 @@ namespace Meadow.Hardware
         public Esp32Coprocessor()
         {
             DebugLevel = DebugOptions.None;
+            IsConnected = false;
         }
 
         #endregion Constructor(s)
@@ -92,7 +101,6 @@ namespace Meadow.Hardware
 
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
-            bool connected;
 
             try
             {
@@ -130,7 +138,7 @@ namespace Meadow.Hardware
                     SubnetMask = new IPAddress(addressBytes);
                     Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
                     Gateway = new IPAddress(addressBytes);
-                    connected = true;
+                    IsConnected = true;
                 }
                 else
                 {
@@ -139,7 +147,7 @@ namespace Meadow.Hardware
                     IpAddress = new IPAddress(addressBytes);
                     SubnetMask = new IPAddress(addressBytes);
                     Gateway = new IPAddress(addressBytes);
-                    connected = false;
+                    IsConnected = false;
                 }
             }
             finally
@@ -153,8 +161,87 @@ namespace Meadow.Hardware
                     resultGcHandle.Free();
                 }
             }
-            return (connected);
+            return (IsConnected);
         }
+
+                /// <summary>
+        /// Get the list of access points.
+        /// </summary>
+        /// <remarks>
+        /// The network must be started before this method can be called.
+        /// </remarks>
+        /// <returns>ObservableCollection (possibly empty) of access points.</returns>
+        public ObservableCollection<WifiNetwork> GetAccessPoints()
+        {
+            if (!IsConnected)
+            {
+                throw new InvalidOperationException("Device must be connected to a network before scanning for access points.");
+            }
+
+            byte[] resultBuffer = new byte[4000];
+            byte[] encodedPayload = null;
+            var payloadGcHandle = default(GCHandle);
+            var resultGcHandle = default(GCHandle);
+            var networks = new ObservableCollection<WifiNetwork>();
+            try
+            {
+                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
+                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
+                var command = new Nuttx.UpdEsp32Command()
+                {
+                    Interface = (byte) Esp32Interfaces.WiFi,
+                    Function = (UInt32) WiFiFunction.GetAccessPoints,
+                    StatusCode = 0,
+                    Payload = payloadGcHandle.AddrOfPinnedObject(),
+                    PayloadLength = 0,
+                    Result = resultGcHandle.AddrOfPinnedObject(),
+                    ResultLength = (UInt32) resultBuffer.Length,
+                    Block = 1
+                };
+
+                if (UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) == 0)
+                {
+                    var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
+                    var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
+
+                    if (accessPointList.NumberOfAccessPoints > 0)
+                    {
+                        int accessPointOffset = 0;
+                        for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+                        {
+                            var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
+                            accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
+                            string bssid = "";
+                            for (int index = 0; index < accessPoint.Bssid.Length; index++)
+                            {
+                                bssid += accessPoint.Bssid[index].ToString("x2");
+                                if (index != accessPoint.Bssid.Length - 1)
+                                {
+                                    bssid += ":";
+                                }
+                            }
+                            var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown, 
+                                new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
+                                accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
+                            networks.Add(network);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                // if (payloadGcHandle.IsAllocated)
+                // {
+                //     payloadGcHandle.Free();
+                // }
+                if (resultGcHandle.IsAllocated)
+                {
+                    resultGcHandle.Free();
+                }
+            }
+            return(networks);
+        }
+
 
         #endregion Methods
     }

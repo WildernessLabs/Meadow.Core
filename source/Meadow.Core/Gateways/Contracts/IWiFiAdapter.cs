@@ -1,5 +1,6 @@
 using System.Net;
 using Meadow.Gateway.WiFi;
+using System.Collections.ObjectModel;
 
 namespace Meadow.Gateway
 {
@@ -14,5 +15,13 @@ namespace Meadow.Gateway
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
         bool StartNetwork(string ssid, string password, ReconnectionType reconnection);
+
+        /// <summary>
+        /// Indicate if the network adapter is connected to an access point.
+        /// </summary>
+        bool IsConnected { get; }
+
+        ObservableCollection<WifiNetwork> GetAccessPoints();
+
     }
 }
