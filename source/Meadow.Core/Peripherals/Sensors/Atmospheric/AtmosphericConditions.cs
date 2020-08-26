@@ -25,9 +25,9 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
             float? pressure,
             float? humidity)
         {
-            this.Temperature = temperature;
-            this.Pressure = pressure;
-            this.Humidity = humidity;
+            Temperature = temperature;
+            Pressure = pressure;
+            Humidity = humidity;
         }
 
         public static AtmosphericConditions From(AtmosphericConditions conditions)
@@ -43,21 +43,22 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
     public class AtmosphericConditionChangeResult : IChangeResult<AtmosphericConditions>
     {
         public AtmosphericConditions New {
-            get { return this._newValue; }
+            get => newValue; 
             set {
-                this._newValue = value;
+                newValue = value;
                 RecalcDelta();
             }
-        } protected AtmosphericConditions _newValue = new AtmosphericConditions();
+        } 
+        protected AtmosphericConditions newValue = new AtmosphericConditions();
 
         public AtmosphericConditions Old {
-            get { return this._oldValue; }
+            get => oldValue; 
             set {
-                this._oldValue = value;
+                oldValue = value;
                 RecalcDelta();
             }
         }
-        protected AtmosphericConditions _oldValue = new AtmosphericConditions();
+        protected AtmosphericConditions oldValue = new AtmosphericConditions();
 
         public AtmosphericConditions Delta { get; protected set; } = new AtmosphericConditions();
 
@@ -74,8 +75,7 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
             delta.Temperature = New.Temperature - Old.Temperature;
             delta.Pressure = New.Pressure - Old.Pressure;
             delta.Humidity = New.Humidity - Old.Humidity;
-            this.Delta = delta;
+            Delta = delta;
         }
-
     }
 }

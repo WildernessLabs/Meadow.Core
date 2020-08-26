@@ -64,8 +64,8 @@ namespace Meadow.Hardware
         );
 
         /// <summary>
-        /// Initializes a new instance of a legacy `ISerialPort`. `ISerialPort`
-        /// is provided for legacy compatibility, we recommend using the more
+        /// Initializes a new instance of a `ISerialPort`.
+        /// When parsing text data, we recommend using the more
         /// modern, thread-safe `ISerialMessagePort`.
         /// </summary>
         /// <param name="portName">The 'SerialPortName` of port to use.</param>
