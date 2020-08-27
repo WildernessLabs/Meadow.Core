@@ -17,25 +17,26 @@ namespace Meadow.Devices
         public event InterruptHandler Interrupt;
 
         private Thread _ist;
+        private Dictionary<int, int> _interruptGroupInUseByPin = new Dictionary<int, int>();
 
         public void WireInterrupt(IPin pin, InterruptMode interruptMode,
                      Meadow.Hardware.ResistorMode resistorMode,
                      double debounceDuration, double glitchDuration)
         {
-                STM32.ResistorMode stm32Resistor;
+            STM32.ResistorMode stm32Resistor;
 
-                switch (resistorMode)
-                {
-                    case Meadow.Hardware.ResistorMode.PullDown:
-                        stm32Resistor = STM32.ResistorMode.PullDown;
-                        break;
-                    case Meadow.Hardware.ResistorMode.PullUp:
-                        stm32Resistor = STM32.ResistorMode.PullUp;
-                        break;
-                    default:
-                        stm32Resistor = STM32.ResistorMode.Float;
-                        break;
-                }
+            switch (resistorMode)
+            {
+                case Meadow.Hardware.ResistorMode.PullDown:
+                    stm32Resistor = STM32.ResistorMode.PullDown;
+                    break;
+                case Meadow.Hardware.ResistorMode.PullUp:
+                    stm32Resistor = STM32.ResistorMode.PullUp;
+                    break;
+                default:
+                    stm32Resistor = STM32.ResistorMode.Float;
+                    break;
+            }
 
             var designator = GetPortAndPin(pin);
             WireInterrupt(designator.port, designator.pin, interruptMode, stm32Resistor, debounceDuration, glitchDuration);
@@ -47,6 +48,27 @@ namespace Meadow.Devices
         {
             if (interruptMode != InterruptMode.None)
             {
+                lock (_interruptGroupInUseByPin)
+                {
+                    // interrupt group is effectively the Port designation, base-1
+                    var group = (int)port + 1;
+                    if(_interruptGroupInUseByPin.ContainsKey(group))
+                    {
+                        if(_interruptGroupInUseByPin[group] > 0)
+                        {
+                            throw new InterruptGroupInUseException(group, _interruptGroupInUseByPin[group]);
+                        }
+                        else
+                        {
+                            _interruptGroupInUseByPin[group] = pin;
+                        }
+                    }
+                    else
+                    {
+                        _interruptGroupInUseByPin.Add(group, pin);
+                    }
+                }
+
                 var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
                 {
                     Enable = 1,
@@ -101,6 +123,18 @@ namespace Meadow.Devices
                     $"Calling ioctl to disable interrupts for Input: {port}{pin}");
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+
+                lock (_interruptGroupInUseByPin)
+                {
+                    // interrupt group is effectively the Port designation, base-1
+                    var group = (int)port + 1;
+                    if (_interruptGroupInUseByPin[group] != pin)
+                    {
+                        throw new Exception("Cannot disconnect an interrupt for this pin.  It is in use by another.");
+                    }
+                    // set an invalid number instead of removing from the dictionary.  This is minor, but results in less allocations.
+                    _interruptGroupInUseByPin[group] = -1;
+                }
             }
         }
 
@@ -149,12 +183,12 @@ namespace Meadow.Devices
 
 
     /* ===== MEADOW GPIO PIN MAP =====
-        BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?
-        J301-1      RESET                       
-        J301-2      3.3                       
-        J301-3      VREF                       
-        J301-4      GND                       
-        J301-5      DAC_OUT1        PA4         A0
+        BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   INT GROUP
+        J301-1      RESET                                           - 
+        J301-2      3.3                                             - 
+        J301-3      VREF                                            - 
+        J301-4      GND                                             - 
+        J301-5      DAC_OUT1        PA4         A0                  
         J301-6      DAC_OUT2        PA5         A1
         J301-7      ADC1_IN3        PA3         A2
         J301-8      ADC1_IN7        PA7         A3

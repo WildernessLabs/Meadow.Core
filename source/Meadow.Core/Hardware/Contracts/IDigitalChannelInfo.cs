@@ -35,5 +35,9 @@ namespace Meadow.Hardware
         /// </summary>
         /// <value><c>true</c> if voltage high equals logic low; otherwise, <c>false</c>.</value>
         bool InverseLogic { get; }
+        /// <summary>
+        /// If the channel is interrupt capable and is grouped (i.e. only one channel per group is allowed) this will be non-zero.
+        /// </summary>
+        int InterruptGroup { get; }
     }
 }
