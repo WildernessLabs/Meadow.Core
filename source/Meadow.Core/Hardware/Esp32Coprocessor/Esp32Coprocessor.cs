@@ -81,6 +81,59 @@ namespace Meadow.Hardware
         #region Methods
 
         /// <summary>
+        /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
+        /// </summary>
+        /// <param name="where">Interface the command is destined for.</param>
+        /// <param name="command">Command to be sent.</param>
+        /// <returns>A byte buffer containing result data.</returns>
+        private byte[] SendParameterlessCommand(byte where, UInt32 function)
+        {
+            byte[] resultBuffer = new byte[4000];
+            byte[] encodedPayload = null;
+            var payloadGcHandle = default(GCHandle);
+            var resultGcHandle = default(GCHandle);
+            int result;
+            try
+            {
+                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
+                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
+                var command = new Nuttx.UpdEsp32Command()
+                {
+                    Interface = where,
+                    Function = function,
+                    StatusCode = 0,
+                    Payload = payloadGcHandle.AddrOfPinnedObject(),
+                    PayloadLength = 0,
+                    Result = resultGcHandle.AddrOfPinnedObject(),
+                    ResultLength = (UInt32) resultBuffer.Length,
+                    Block = 1
+                };
+
+                result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
+            }
+            finally
+            {
+                if (payloadGcHandle.IsAllocated)
+                {
+                    payloadGcHandle.Free();
+                }
+                if (resultGcHandle.IsAllocated)
+                {
+                    resultGcHandle.Free();
+                }
+            }
+            return(result == 0 ? resultBuffer : null);
+        }
+
+        /// <summary>
+        /// Reset the ESP32.
+        /// </summary>
+        public void Reset()
+        {
+            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32);
+        }
+
+        /// <summary>
         /// Request the ESP32 to connect to the specified network.
         /// </summary>
         /// <param name="ssid">Name of the network to connect to.</param>
@@ -178,65 +231,95 @@ namespace Meadow.Hardware
                 throw new InvalidOperationException("Device must be connected to a network before scanning for access points.");
             }
 
-            byte[] resultBuffer = new byte[4000];
-            byte[] encodedPayload = null;
-            var payloadGcHandle = default(GCHandle);
-            var resultGcHandle = default(GCHandle);
+            // byte[] resultBuffer = new byte[4000];
+            // byte[] encodedPayload = null;
+            // var payloadGcHandle = default(GCHandle);
+            // var resultGcHandle = default(GCHandle);
+            // var networks = new ObservableCollection<WifiNetwork>();
+            // try
+            // {
+            //     payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
+            //     resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
+            //     var command = new Nuttx.UpdEsp32Command()
+            //     {
+            //         Interface = (byte) Esp32Interfaces.WiFi,
+            //         Function = (UInt32) WiFiFunction.GetAccessPoints,
+            //         StatusCode = 0,
+            //         Payload = payloadGcHandle.AddrOfPinnedObject(),
+            //         PayloadLength = 0,
+            //         Result = resultGcHandle.AddrOfPinnedObject(),
+            //         ResultLength = (UInt32) resultBuffer.Length,
+            //         Block = 1
+            //     };
+
+            //     if (UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) == 0)
+            //     {
+            //         var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
+            //         var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
+
+            //         if (accessPointList.NumberOfAccessPoints > 0)
+            //         {
+            //             int accessPointOffset = 0;
+            //             for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+            //             {
+            //                 var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
+            //                 accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
+            //                 string bssid = "";
+            //                 for (int index = 0; index < accessPoint.Bssid.Length; index++)
+            //                 {
+            //                     bssid += accessPoint.Bssid[index].ToString("x2");
+            //                     if (index != accessPoint.Bssid.Length - 1)
+            //                     {
+            //                         bssid += ":";
+            //                     }
+            //                 }
+            //                 var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown, 
+            //                     new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
+            //                     accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
+            //                 networks.Add(network);
+            //             }
+            //         }
+            //     }
+            // }
+            // finally
+            // {
+            //     if (payloadGcHandle.IsAllocated)
+            //     {
+            //         payloadGcHandle.Free();
+            //     }
+            //     if (resultGcHandle.IsAllocated)
+            //     {
+            //         resultGcHandle.Free();
+            //     }
+            // }
             var networks = new ObservableCollection<WifiNetwork>();
-            try
+            byte[] resultBuffer = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints);
+            if (resultBuffer.Length > 0)
             {
-                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
-                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
-                var command = new Nuttx.UpdEsp32Command()
-                {
-                    Interface = (byte) Esp32Interfaces.WiFi,
-                    Function = (UInt32) WiFiFunction.GetAccessPoints,
-                    StatusCode = 0,
-                    Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = 0,
-                    Result = resultGcHandle.AddrOfPinnedObject(),
-                    ResultLength = (UInt32) resultBuffer.Length,
-                    Block = 1
-                };
+                var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
+                var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
 
-                if (UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) == 0)
+                if (accessPointList.NumberOfAccessPoints > 0)
                 {
-                    var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
-                    var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
-
-                    if (accessPointList.NumberOfAccessPoints > 0)
+                    int accessPointOffset = 0;
+                    for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
                     {
-                        int accessPointOffset = 0;
-                        for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+                        var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
+                        accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
+                        string bssid = "";
+                        for (int index = 0; index < accessPoint.Bssid.Length; index++)
                         {
-                            var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
-                            accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
-                            string bssid = "";
-                            for (int index = 0; index < accessPoint.Bssid.Length; index++)
+                            bssid += accessPoint.Bssid[index].ToString("x2");
+                            if (index != accessPoint.Bssid.Length - 1)
                             {
-                                bssid += accessPoint.Bssid[index].ToString("x2");
-                                if (index != accessPoint.Bssid.Length - 1)
-                                {
-                                    bssid += ":";
-                                }
+                                bssid += ":";
                             }
-                            var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown, 
-                                new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
-                                accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
-                            networks.Add(network);
                         }
+                        var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown, 
+                            new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
+                            accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
+                        networks.Add(network);
                     }
-                }
-            }
-            finally
-            {
-                // if (payloadGcHandle.IsAllocated)
-                // {
-                //     payloadGcHandle.Free();
-                // }
-                if (resultGcHandle.IsAllocated)
-                {
-                    resultGcHandle.Free();
                 }
             }
             return(networks);
