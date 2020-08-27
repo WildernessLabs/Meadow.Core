@@ -23,17 +23,23 @@ namespace Meadow
         protected App()
         {
             _current = this as A;
-            _device = Activator.CreateInstance<D>();
-
+            
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-
-            // set our device on the MeadowOS class
-            MeadowOS.Init(_device);
         }
 
         public static D Device
         {
-            get { return _device; }
+            get 
+            {
+                if(_device == null)
+                {
+                    _device = Activator.CreateInstance<D>();
+
+                    // set our device on the MeadowOS class
+                    MeadowOS.Init(_device);
+                }
+                return _device; 
+            }
         } private static D _device;
 
         /// <summary>

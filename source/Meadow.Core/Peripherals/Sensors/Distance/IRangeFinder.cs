@@ -5,26 +5,18 @@ namespace Meadow.Peripherals.Sensors.Distance
     /// <summary>
     /// Interface for distance sensors classes.
     /// </summary>
-    public interface IRangeFinder
+    public interface IRangeFinder : ISensor, IObservable<DistanceConditionChangeResult>
     {
         /// <summary>
-        /// Returns current distance detected.
+        /// Last value read from the Temperature sensor.
         /// </summary>
-        float CurrentDistance { get; }
+        DistanceConditions Conditions { get; }
 
         /// <summary>
-        /// Minimum valid distance (CurrentDistance returns -1 if below).
+        /// Raised when a new reading has been made. Events will only be raised
+        /// while the driver is updating. To start, call the `StartUpdating()`
+        /// method.
         /// </summary>
-        float MinimumDistance { get; }
-
-        /// <summary>
-        /// Maximum valid distance (CurrentDistance returns -1 if above).
-        /// </summary>
-        float MaximumDistance { get; }
-
-        /// <summary>
-        /// Raised when detecting an obstacle.
-        /// </summary>
-        event EventHandler<DistanceEventArgs> DistanceDetected;
+        event EventHandler<DistanceConditionChangeResult> Updated;
     }
 }

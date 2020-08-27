@@ -254,6 +254,18 @@ namespace Meadow.Devices
             return result;
         }
 
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdEsp32Command cmd)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref cmd);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                return (int)err;
+            }
+            return result;
+        }
+
         public static class PWM
         {
             private static List<uint> m_timersInitialized = new List<uint>();
@@ -306,7 +318,7 @@ namespace Meadow.Devices
                 if (dutyCycle < 0) dutyCycle = 0;
 
                 // nuttx (well the processor) takes a 16-bit duty cycle, so 65536 == 100% == 1.0
-                var sixteenBitDuty = (((uint)(dutyCycle * 100)) << 16) / 100;
+                var sixteenBitDuty = (uint)(dutyCycle * 65535f);
 
                 var data = new Nuttx.UpdPwmCmd
                 {
@@ -357,10 +369,10 @@ namespace Meadow.Devices
 
     /* ===== MEADOW GPIO PIN MAP =====
         BOARD PIN   SCHEMATIC       CPU PIN   MDW NAME  ALT FN   IMPLEMENTED?
-        J301-1      RESET                       
-        J301-2      3.3                       
-        J301-3      VREF                       
-        J301-4      GND                       
+        J301-1      RESET
+        J301-2      3.3
+        J301-3      VREF
+        J301-4      GND
         J301-5      DAC_OUT1        PA4         A0
         J301-6      DAC_OUT2        PA5         A1
         J301-7      ADC1_IN3        PA3         A2
