@@ -85,8 +85,9 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="where">Interface the command is destined for.</param>
         /// <param name="command">Command to be sent.</param>
+        /// <param name="block">Is this a blocking command?</param>
         /// <returns>A byte buffer containing result data.</returns>
-        private byte[] SendParameterlessCommand(byte where, UInt32 function)
+        private byte[] SendParameterlessCommand(byte where, UInt32 function, bool block)
         {
             byte[] resultBuffer = new byte[4000];
             byte[] encodedPayload = null;
@@ -101,15 +102,18 @@ namespace Meadow.Hardware
                 {
                     Interface = where,
                     Function = function,
-                    StatusCode = 0,
+                    StatusCode = (UInt32) StatusCodes.CompletedOk,
                     Payload = payloadGcHandle.AddrOfPinnedObject(),
                     PayloadLength = 0,
                     Result = resultGcHandle.AddrOfPinnedObject(),
                     ResultLength = (UInt32) resultBuffer.Length,
-                    Block = 1
+                    Block = (byte) (block ? 1 : 0)
                 };
 
-                result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
+                if ((UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) != 0) || (command.StatusCode != (UInt32) StatusCodes.CompletedOk))
+                {
+                    resultBuffer = null;
+                }
             }
             finally
             {
@@ -122,7 +126,7 @@ namespace Meadow.Hardware
                     resultGcHandle.Free();
                 }
             }
-            return(result == 0 ? resultBuffer : null);
+            return(resultBuffer);
         }
 
         /// <summary>
@@ -130,7 +134,7 @@ namespace Meadow.Hardware
         /// </summary>
         public void Reset()
         {
-            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32);
+            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false);
         }
 
         /// <summary>
@@ -172,7 +176,7 @@ namespace Meadow.Hardware
                 {
                     Interface = (byte) Esp32Interfaces.WiFi,
                     Function = (UInt32) WiFiFunction.Start,
-                    StatusCode = 0,
+                    StatusCode = (UInt32) StatusCodes.CompletedOk,
                     Payload = payloadGcHandle.AddrOfPinnedObject(),
                     PayloadLength = (UInt32) encodedPayload.Length,
                     Result = resultGcHandle.AddrOfPinnedObject(),
@@ -182,7 +186,7 @@ namespace Meadow.Hardware
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
 
-                if (result == 0)
+                if ((result == 0) && (command.StatusCode == (UInt32) StatusCodes.CompletedOk))
                 {
                     byte[] addressBytes = new byte[4];
                     Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
@@ -293,7 +297,7 @@ namespace Meadow.Hardware
             //     }
             // }
             var networks = new ObservableCollection<WifiNetwork>();
-            byte[] resultBuffer = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints);
+            byte[] resultBuffer = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true);
             if (resultBuffer.Length > 0)
             {
                 var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
