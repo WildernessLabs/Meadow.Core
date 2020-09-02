@@ -273,7 +273,7 @@ namespace Meadow.Hardware
                             // messages can be in a single data event
                             while (firstIndex >= 0) {
                                 var bytesToRemove = firstIndex + _messageDelimiterTokens.Length;
-                                byte[] msg = new byte[bytesToRemove];
+                                byte[] msg = new byte[(_preserveDelimiter ? bytesToRemove : (bytesToRemove - _messageDelimiterTokens.Length))];
 
                                 // deuque the message, sans delimeter
                                 for (int i = 0; i < firstIndex; i++) {
