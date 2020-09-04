@@ -55,7 +55,7 @@ namespace Meadow.Devices
             // right now there's a 5 second delay. i wonder if we can get a
             // response when it's up instead. if it's typically within a
             // reasonable timeframe, maybe we block?
-            this.InitEsp32CoProc().Wait();
+            this.InitEsp32CoProc();
         }
 
         protected Task<bool> InitEsp32CoProc()
@@ -72,7 +72,7 @@ namespace Meadow.Devices
                     this.WiFiAdapter = new WiFiAdapter(this.esp32);
                     Console.WriteLine("Esp32 coproc initialization complete.");
                     // if we make the creation non-blocking:
-                    //this.WiFiAdapterInitilaized(this, new EventArgs());
+                    this.WiFiAdapterInitilaized(this, new EventArgs());
                     return true;
                 } catch (Exception e) {
                     Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");

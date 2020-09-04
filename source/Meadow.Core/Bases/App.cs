@@ -22,8 +22,13 @@ namespace Meadow
 
         protected App()
         {
+            //BUGBUG: because a user's `App` class doesn't have to call this
+            // base ctor, then this might not ever run, or it might run
+            // non-deterministically. so we need to figure out how to make sure
+            // this stuff happens
+
             _current = this as A;
-            
+
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
         }
 
@@ -31,8 +36,7 @@ namespace Meadow
         {
             get 
             {
-                if(_device == null)
-                {
+                if (_device == null) {
                     _device = Activator.CreateInstance<D>();
 
                     // set our device on the MeadowOS class
