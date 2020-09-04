@@ -1,9 +1,8 @@
 using Meadow.Devices;
 using System;
 using System.Runtime.InteropServices;
-using Meadow.Hardware.Coprocessor;
 using static Meadow.Core.Interop;
-using Meadow.Hardware.Coprocessor.MessagePayloads;
+using Meadow.Devices.Esp32.MessagePayloads;
 using System.Net;
 using Meadow.Gateway.WiFi;
 using Meadow.Gateway;
@@ -11,7 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 
-namespace Meadow.Hardware
+namespace Meadow.Devices
 {
     /// <summary>
     ///

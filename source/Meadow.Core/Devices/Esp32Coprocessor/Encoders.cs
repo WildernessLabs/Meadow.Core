@@ -13,7 +13,7 @@
 
 using System;
 
-namespace Meadow.Hardware.Coprocessor.MessagePayloads
+namespace Meadow.Devices.Esp32.MessagePayloads
 {
     public static class Encoders
     {

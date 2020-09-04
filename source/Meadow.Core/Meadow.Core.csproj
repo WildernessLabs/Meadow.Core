@@ -22,9 +22,6 @@
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
    <LangVersion>8.0</LangVersion>
  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.2.0" />
-  </ItemGroup>
  <ItemGroup>
    <Compile Remove="Hardware\Communications\SoftwareSpiBus.cs" />
  </ItemGroup>
@@ -34,5 +31,17 @@
  <ItemGroup>
    <Folder Include="Peripherals\Sensors\Location\" />
    <Folder Include="Peripherals\Sensors\Location\Gnss\" />
+   <Folder Include="Devices\Esp32Coprocessor\" />
+ </ItemGroup>
+ <ItemGroup>
+   <Reference Include="mscorlib">
+     <HintPath>..\mscorlib.dll</HintPath>
+   </Reference>
+   <Reference Include="System.Core">
+     <HintPath>..\System.Core.dll</HintPath>
+   </Reference>
+   <Reference Include="System">
+     <HintPath>..\System.dll</HintPath>
+   </Reference>
  </ItemGroup>
 </Project>

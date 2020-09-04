@@ -15,7 +15,7 @@
 
 using System;
 
-namespace Meadow.Hardware.Coprocessor
+namespace Meadow.Devices.Esp32.MessagePayloads
 {
     // <summary>
     // Status and error codes for the various function calls.
