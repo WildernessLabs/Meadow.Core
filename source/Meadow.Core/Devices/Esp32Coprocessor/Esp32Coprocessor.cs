@@ -69,7 +69,8 @@ namespace Meadow.Devices
         /// <summary>
         /// Default constructor of the Esp32Coprocessor class.
         /// </summary>
-        internal Esp32Coprocessor()
+        //internal
+        public Esp32Coprocessor()
         {
             DebugLevel = DebugOptions.None;
             IsConnected = false;
