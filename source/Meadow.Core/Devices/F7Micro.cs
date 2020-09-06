@@ -54,7 +54,12 @@ namespace Meadow.Devices
             // TODO: it would be nice to block on this initialization, but
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.
-            this.InitEsp32CoProc();
+            //this.InitEsp32CoProc();
+        }
+
+        public Task<bool> InitWiFiAdapter()
+        {
+            return InitEsp32CoProc();
         }
 
         protected Task<bool> InitEsp32CoProc()
@@ -74,9 +79,10 @@ namespace Meadow.Devices
                     Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");
                     return false;
                 }
+
                 // this needs to be out of the exception block, otherwise user
                 // code exceptions get caught
-                this.WiFiAdapterInitilaized(this, new EventArgs());
+                //this.WiFiAdapterInitilaized(this, new EventArgs());
                 return true;
             });
         }
