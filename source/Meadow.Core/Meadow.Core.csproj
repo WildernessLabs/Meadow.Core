@@ -34,14 +34,6 @@
    <Folder Include="Devices\Esp32Coprocessor\" />
  </ItemGroup>
  <ItemGroup>
-   <Reference Include="mscorlib">
-     <HintPath>..\mscorlib.dll</HintPath>
-   </Reference>
-   <Reference Include="System.Core">
-     <HintPath>..\System.Core.dll</HintPath>
-   </Reference>
-   <Reference Include="System">
-     <HintPath>..\System.dll</HintPath>
-   </Reference>
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.3.0" />
  </ItemGroup>
 </Project>
