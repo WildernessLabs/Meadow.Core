@@ -22,13 +22,12 @@ namespace Meadow
 
         protected App()
         {
-            //BUGBUG: because a user's `App` class doesn't have to call this
-            // base ctor, then this might not ever run, or it might run
-            // non-deterministically. so we need to figure out how to make sure
-            // this stuff happens
-
+            //Console.WriteLine("Base App ()");
             _current = this as A;
 
+            //BUGBUG: because a user's `App` class doesn't have to call this
+            // base ctor, this runs asynchronously during startup, so this may
+            // not get set immediately
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
         }
 

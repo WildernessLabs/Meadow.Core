@@ -94,7 +94,7 @@ namespace Meadow.Gateway.WiFi
         /// Create a new WiFi adapter that implements the <see cref="IWifiAdapter"/> interface.
         /// </summary>
         /// <param name="networkAdapter">Network adapter interface.</param>
-        public WiFiAdapter(IWiFiAdapter networkAdapter)
+        internal WiFiAdapter(IWiFiAdapter networkAdapter)
         {
             NetworkAdapter = networkAdapter;
             Networks = new ObservableCollection<WifiNetwork>();
