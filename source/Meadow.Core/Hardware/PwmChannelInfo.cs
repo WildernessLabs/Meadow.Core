@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 namespace Meadow.Hardware
 {
     public class PwmChannelInfo : DigitalChannelInfoBase, IPwmChannelInfo

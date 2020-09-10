@@ -194,7 +194,6 @@ namespace Meadow.Hardware
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            //Console.WriteLine("SerialPort_DataReceived");
             // only one message processor at a time
             lock (_msgParseLock) {
 
@@ -291,7 +290,7 @@ namespace Meadow.Hardware
                                 //todo: should this run on a new thread?
                                 // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
-                                    //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
+                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
                                 });
 
@@ -305,7 +304,17 @@ namespace Meadow.Hardware
 
         protected void RaiseMessageReceivedAndNotify(SerialMessageData messageData)
         {
-            MessageReceived(this, messageData);
+            Console.WriteLine($"+RaiseMessageReceivedAndNotify");
+
+            try
+            {
+                MessageReceived(this, messageData);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"!! {ex.Message}");
+            }
+            Console.WriteLine($"-RaiseMessageReceivedAndNotify");
             //TODO: figure out the IObservable when there's no change context
             //base.NotifyObservers(messageResult);
         }

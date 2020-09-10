@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
-using Meadow.Gateway.WiFi;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow.Devices
@@ -12,6 +12,7 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7Micro : IIODevice
     {
+        private SynchronizationContext _context;
         private Esp32Coprocessor esp32;
 
         public WiFiAdapter WiFiAdapter { get; protected set; }
@@ -402,6 +403,23 @@ namespace Meadow.Devices
             };
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
+        }
+
+        public void SetSynchronizationContext(SynchronizationContext context)
+        {
+            _context = context;
+        }
+
+        public void BeginInvokeOnMainThread(Action action)
+        {
+            if (_context == null)
+            {
+                action();
+            }
+            else
+            {
+                _context.Send(delegate { action(); }, null);
+            }
         }
     }
 }
