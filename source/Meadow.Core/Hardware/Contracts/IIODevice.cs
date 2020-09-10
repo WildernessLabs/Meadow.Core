@@ -1,6 +1,7 @@
 ﻿
 
 using System;
+using System.Threading;
 
 namespace Meadow.Hardware
 {
@@ -205,6 +206,17 @@ namespace Meadow.Hardware
             int frequencyHz = DefaultI2cBusSpeed
         );
 
+        /// <summary>
+        /// Sets the device time
+        /// </summary>
+        /// <param name="dateTime"></param>
         void SetClock(DateTime dateTime);
+
+        /// <summary>
+        /// Meadow Internal method for setting the device's primary (i.e. entry) SynchronizationContext
+        /// </summary>
+        /// <param name="context"></param>
+        void SetSynchronizationContext(SynchronizationContext context);
+
     }
 }

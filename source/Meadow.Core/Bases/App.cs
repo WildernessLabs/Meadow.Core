@@ -1,5 +1,6 @@
-﻿using System;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
+using System;
+using System.Threading;
 
 namespace Meadow
 {
@@ -9,7 +10,7 @@ namespace Meadow
     /// device information.
     /// </summary>
     public abstract class App<D, A> : IApp 
-        where A : class, IApp 
+        where A : class, IApp
         where D : class, IIODevice//<P> where P : IPinDefinitions
     {
         /// <summary>
@@ -20,15 +21,23 @@ namespace Meadow
             get { return _current; }
         } private static A _current;
 
+        private static SynchronizationContext _mainContext { get; }
+
+        static App()
+        {
+            AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
+
+            _mainContext = new MeadowSynchronizationContext();
+            SynchronizationContext.SetSynchronizationContext(_mainContext);
+        }
+
         protected App()
         {
-            //Console.WriteLine("Base App ()");
-            _current = this as A;
-
             //BUGBUG: because a user's `App` class doesn't have to call this
-            // base ctor, this runs asynchronously during startup, so this may
-            // not get set immediately
-            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+            // base ctor, then this might not ever run, or it might run
+            // non-deterministically. so we need to figure out how to make sure
+            // this stuff happens
+            _current = this as A;
         }
 
         public static D Device
@@ -37,6 +46,7 @@ namespace Meadow
             {
                 if (_device == null) {
                     _device = Activator.CreateInstance<D>();
+                    _device.SetSynchronizationContext(_mainContext);
 
                     // set our device on the MeadowOS class
                     MeadowOS.Init(_device);
@@ -60,6 +70,19 @@ namespace Meadow
         /// </summary>
         public virtual void WillReset() {}
 
+        private static void StaticOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if(_current == null)
+            {
+                // in the event the user never called the base c'tor
+                Console.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
+            }
+            else
+            {
+                (_current as App<D,A>)?.OnUnhandledException(sender, e);
+            }
+        }
+
         /// <summary>
         /// Called when the application encounters an unhandled Exception
         /// </summary>
@@ -67,7 +90,7 @@ namespace Meadow
         /// <param name="e">The unhandled Exception object</param>
         internal virtual void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Console.WriteLine($"Unhandled Exception: {e.ExceptionObject.ToString()}");
+            Console.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
         }
     }
 }
