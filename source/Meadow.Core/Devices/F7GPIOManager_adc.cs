@@ -175,6 +175,7 @@ namespace Meadow.Devices
                     channel = designator.pin;
                     break;
                 case STM32.GpioPort.PortC:
+                    // PC0 and PC1 have additional functions of ADC1_IN10 and 11 (see manual 'STM32F777xx STM32F778Ax STM32F779xx')
                     channel = designator.pin + 10;
                     break;
                 default:
