@@ -81,5 +81,9 @@ namespace Meadow.Hardware
         //int Write(Span<byte> buffer, int offset, int count);
         int Write(byte[] buffer, int offset, int count);
 
+        /// <summary>
+        /// Discards all data from the receive buffer.
+        /// </summary>
+        void ClearReceiveBuffer();
     }
 }

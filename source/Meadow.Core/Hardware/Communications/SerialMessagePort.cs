@@ -358,6 +358,14 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
+        /// Discards all data from the receive buffer.
+        /// </summary>
+        public void ClearReceiveBuffer()
+        {
+            _classicSerialPort.ClearReceiveBuffer();
+        }
+
+        /// <summary>
         /// Whether we're defining messages by prefix + length, or suffix.
         /// </summary>
         protected enum SerialMessageMode

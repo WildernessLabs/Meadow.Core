@@ -10,11 +10,10 @@ namespace Meadow.Hardware
             bool interruptCapable = true,
             bool pullDownCapable = true,
             bool pullUpCapable = true,
-            bool inverseLogic = false,
-            int interruptGroup = 0
+            bool inverseLogic = false
         ) 
             : base(name, inputCapable, outputCapable, interruptCapable,
-                pullDownCapable, pullUpCapable, inverseLogic, interruptGroup)
+                pullDownCapable, pullUpCapable, inverseLogic)
         {
         }
     }

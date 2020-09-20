@@ -17,7 +17,7 @@ namespace Meadow.Devices
             public readonly IPin OnboardLedBlue = new Pin(
                 "OnboardLedBlue", "PA0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA0", inverseLogic: true, interruptGroup: 1),
+                    new DigitalChannelInfo("PA0", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH1", 2, 1)
                 }
             );
@@ -27,7 +27,7 @@ namespace Meadow.Devices
             public readonly IPin OnboardLedGreen = new Pin(
                 "OnboardLedGreen", "PA1",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA1", inverseLogic: true, interruptGroup: 1),
+                    new DigitalChannelInfo("PA1", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH2", 2, 2)
                 }
             );
@@ -37,7 +37,7 @@ namespace Meadow.Devices
             public readonly IPin OnboardLedRed = new Pin(
                 "OnboardLedRed", "PA2",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA2", inverseLogic: true, interruptGroup: 1),
+                    new DigitalChannelInfo("PA2", inverseLogic: true),
                     new PwmChannelInfo("TIM2_CH3", 2, 3)
                 }
             );
@@ -47,7 +47,7 @@ namespace Meadow.Devices
             public readonly IPin D00 = new Pin(
                 "D00", "PI9",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI9", interruptGroup: 9),
+                    new DigitalChannelInfo("PI9"),
                     new UartChannelInfo("UART4_RX", SerialDirectionType.Receive)
                 }
             );
@@ -56,7 +56,7 @@ namespace Meadow.Devices
             public readonly IPin D01 = new Pin(
                 "D01", "PH13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH13", interruptGroup: 8),
+                    new DigitalChannelInfo("PH13"),
                     new UartChannelInfo("UART4_TX", SerialDirectionType.Transmit)
                 }
             );
@@ -65,7 +65,7 @@ namespace Meadow.Devices
             public readonly IPin D02 = new Pin(
                 "D02", "PC6",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC6", interruptGroup: 3),
+                    new DigitalChannelInfo("PC6"),
                     new PwmChannelInfo("TIM8_CH1", 8, 1)
                 }
             );
@@ -74,7 +74,7 @@ namespace Meadow.Devices
             public readonly IPin D03 = new Pin(
                 "D03", "PB8",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB8", interruptGroup: 2),
+                    new DigitalChannelInfo("PB8"),
                     new PwmChannelInfo("TIM4_CH3", 4, 3),
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
@@ -84,7 +84,7 @@ namespace Meadow.Devices
             public readonly IPin D04 = new Pin(
                 "D04", "PB9",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB9", interruptGroup: 2),
+                    new DigitalChannelInfo("PB9"),
                     new PwmChannelInfo("TIM4_CH4", 4, 4),
                     new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
@@ -94,7 +94,7 @@ namespace Meadow.Devices
             public readonly IPin D05 = new Pin(
                 "D05", "PC7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC7", interruptGroup: 3),
+                    new DigitalChannelInfo("PC7"),
                     new PwmChannelInfo("TIM3_CH2", 3, 2)
                 }
             );
@@ -104,7 +104,7 @@ namespace Meadow.Devices
             public readonly IPin D06 = new Pin(
                 "D06", "PB0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB0", interruptGroup: 2),
+                    new DigitalChannelInfo("PB0"),
                     new PwmChannelInfo("TIM3_CH3", 3, 3),
                     new AnalogChannelInfo("ADC1_IN8", 12) // or ADC2_IN8?
                 }
@@ -114,7 +114,7 @@ namespace Meadow.Devices
             public readonly IPin D07 = new Pin(
                 "D07", "PB7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB7", interruptGroup: 2),
+                    new DigitalChannelInfo("PB7"),
                     new PwmChannelInfo("TIM2_CH2", 4, 2),
                     new I2cChannelInfo("I2C1_SDA", I2cChannelFunctionType.Data) // or I2C4_SDA
                 }
@@ -124,7 +124,7 @@ namespace Meadow.Devices
             public readonly IPin D08 = new Pin(
                 "D08", "PB6",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB6", interruptGroup: 2),
+                    new DigitalChannelInfo("PB6"),
                     new PwmChannelInfo("TIM4_CH1", 4, 1),
                     new I2cChannelInfo("I2C1_SCL", I2cChannelFunctionType.Clock ) // or I2C4_SCL
                 }
@@ -135,7 +135,7 @@ namespace Meadow.Devices
             public readonly IPin D09 = new Pin(
                 "D09", "PB1",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB1", interruptGroup: 2),
+                    new DigitalChannelInfo("PB1"),
                     new PwmChannelInfo("TIM3_CH4", 3, 4),
                     new AnalogChannelInfo("ADC1_IN9", 12) // or ADC2_IN9
                 }
@@ -145,7 +145,7 @@ namespace Meadow.Devices
             public readonly IPin D10 = new Pin(
                 "D10", "PH10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH10", interruptGroup: 8),
+                    new DigitalChannelInfo("PH10"),
                     new PwmChannelInfo("TIM5_CH1", 5, 1)
                 }
             );
@@ -154,7 +154,7 @@ namespace Meadow.Devices
             public readonly IPin D11 = new Pin(
                 "D11", "PC9",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC9", interruptGroup: 3),
+                    new DigitalChannelInfo("PC9"),
                     new PwmChannelInfo("TIM8_CH4", 8, 4)
                 }
             );
@@ -163,7 +163,7 @@ namespace Meadow.Devices
             public readonly IPin D12 = new Pin(
                 "D12", "PB14",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB14", interruptGroup: 2),
+                    new DigitalChannelInfo("PB14"),
                     new PwmChannelInfo("TIM12_CH1", 12, 1),
                     new UartChannelInfo("USART1_TX", SerialDirectionType.Transmit)
                 }
@@ -173,7 +173,7 @@ namespace Meadow.Devices
             public readonly IPin D13 = new Pin(
                 "D13", "PB15",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB15", interruptGroup: 2),
+                    new DigitalChannelInfo("PB15"),
                     new PwmChannelInfo("TIM12_CH2", 12, 2),
                     new UartChannelInfo("USART1_RX", SerialDirectionType.Receive)
                 }
@@ -183,7 +183,7 @@ namespace Meadow.Devices
             public readonly IPin D14 = new Pin(
                 "D14", "PG3",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PG3", interruptGroup: 7),
+                    new DigitalChannelInfo("PG3"),
                 }
             );
             // D15
@@ -191,7 +191,7 @@ namespace Meadow.Devices
             public readonly IPin D15 = new Pin(
                 "D15", "PE3",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PE3", interruptGroup: 5),
+                    new DigitalChannelInfo("PE3"),
                 }
             );
 
@@ -201,7 +201,7 @@ namespace Meadow.Devices
             public readonly IPin A00 = new Pin(
                 "A00", "PA4",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA4", interruptGroup: 1),
+                    new DigitalChannelInfo("PA4"),
                     new AnalogChannelInfo("ADC1_IN4", 12)
                 }
             );
@@ -211,7 +211,7 @@ namespace Meadow.Devices
             public readonly IPin A01 = new Pin(
                 "A01", "PA5",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA5", interruptGroup: 1),
+                    new DigitalChannelInfo("PA5"),
                     new AnalogChannelInfo("ADC1_IN5", 12)
                 }
             );
@@ -221,7 +221,7 @@ namespace Meadow.Devices
             public readonly IPin A02 = new Pin(
                 "A02", "PA3",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA3", interruptGroup: 1),
+                    new DigitalChannelInfo("PA3"),
                     new AnalogChannelInfo("ADC1_IN3", 12)
                 }
             );
@@ -231,7 +231,7 @@ namespace Meadow.Devices
             public readonly IPin A03 = new Pin(
                 "A03", "PA7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA7", interruptGroup: 1),
+                    new DigitalChannelInfo("PA7"),
                     new AnalogChannelInfo("ADC1_IN7", 12)
                 }
             );
@@ -241,7 +241,7 @@ namespace Meadow.Devices
             public readonly IPin A04 = new Pin(
                 "A04", "PC0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC0", interruptGroup: 3),
+                    new DigitalChannelInfo("PC0"),
                     new AnalogChannelInfo("ADC1_IN10", 12)
                 }
             );
@@ -251,7 +251,7 @@ namespace Meadow.Devices
             public readonly IPin A05 = new Pin(
                 "A05", "PC1",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC1", interruptGroup: 3),
+                    new DigitalChannelInfo("PC1"),
                     new AnalogChannelInfo("ADC1_IN11", 12)
                 }
             );
@@ -260,7 +260,7 @@ namespace Meadow.Devices
             public readonly IPin SCK = new Pin(
                 "SCK", "PC10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC10", interruptGroup: 3),
+                    new DigitalChannelInfo("PC10"),
                     new SpiChannelInfo("PC10", SpiLineType.Clock)
                 }
             );
@@ -269,7 +269,7 @@ namespace Meadow.Devices
             public readonly IPin MOSI = new Pin(
                 "MOSI", "PB5",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB5", interruptGroup: 2),
+                    new DigitalChannelInfo("PB5"),
                     new SpiChannelInfo("PB5", SpiLineType.MOSI)
                 }
             );
@@ -278,7 +278,7 @@ namespace Meadow.Devices
             public readonly IPin MISO = new Pin(
                 "MISO", "PC11",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC11", interruptGroup: 3),
+                    new DigitalChannelInfo("PC11"),
                     new SpiChannelInfo("PC11", SpiLineType.MISO)
                 }
             );
@@ -287,7 +287,7 @@ namespace Meadow.Devices
             public /*internal*/ readonly IPin ESP_MOSI = new Pin(
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI3", interruptGroup: 9),
+                    new DigitalChannelInfo("PI3"),
                     new SpiChannelInfo("PI3", SpiLineType.MOSI)
                 }
             );
@@ -295,7 +295,7 @@ namespace Meadow.Devices
             public /*internal*/ readonly IPin ESP_MISO = new Pin(
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI2", interruptGroup: 9),
+                    new DigitalChannelInfo("PI2"),
                     new SpiChannelInfo("PI2", SpiLineType.MISO)
                 }
             );
@@ -303,7 +303,7 @@ namespace Meadow.Devices
             public /*internal*/ readonly IPin ESP_CLK = new Pin(
                 "ESP_CLK", "PD3",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PD3", interruptGroup: 4),
+                    new DigitalChannelInfo("PD3"),
                     new SpiChannelInfo("PD3", SpiLineType.Clock)
                 }
             );
@@ -311,7 +311,7 @@ namespace Meadow.Devices
             public /*internal*/ readonly IPin ESP_CS = new Pin(
                 "ESP_CS", "PI0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI0", interruptGroup: 9),
+                    new DigitalChannelInfo("PI0"),
                     new SpiChannelInfo("PI10", SpiLineType.ChipSelect)
                 }
             );
@@ -319,28 +319,28 @@ namespace Meadow.Devices
             public /*internal*/ readonly IPin ESP_BOOT = new Pin(
                 "ESP_BOOT", "PI10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI10", interruptGroup: 9),
+                    new DigitalChannelInfo("PI10"),
                 }
             );
             // ESP_RST
             public /*internal*/ readonly IPin ESP_RST = new Pin(
                 "ESP_RST", "PF7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PF7", interruptGroup: 6),
+                    new DigitalChannelInfo("PF7"),
                 }
             );
             // ESP_UART_RX
             public /*internal*/ readonly IPin ESP_UART_RX = new Pin(
                 "ESP_UART_RX", "PD2",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PD2", interruptGroup: 4),
+                    new DigitalChannelInfo("PD2"),
                 }
             );
             // ESP_UART_TX
             public /*internal*/ readonly IPin ESP_UART_TX = new Pin(
                 "ESP_UART_TX", "PB13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB13", interruptGroup: 2),
+                    new DigitalChannelInfo("PB13"),
                 }
             );
 

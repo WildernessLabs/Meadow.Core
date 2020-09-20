@@ -29,7 +29,7 @@ namespace Meadow.Hardware
             this.PullDownCapable = pullDownCapable;
             this.PullUpCapable = pullUpCapable;
             this.InverseLogic = inverseLogic;
-            this.InterruptGroup = interruptGroup;
+            this.InterruptGroup = int.Parse(name.Substring(2));
         }
     }
 }
