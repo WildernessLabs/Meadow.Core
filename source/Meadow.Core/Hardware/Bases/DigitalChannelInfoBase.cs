@@ -10,7 +10,7 @@ namespace Meadow.Hardware
         public bool PullDownCapable { get; protected set; }
         public bool PullUpCapable { get; protected set; }
         public bool InverseLogic { get; protected set; }
-        public int InterruptGroup { get; protected set; }
+        public int? InterruptGroup { get; protected set; }
 
         protected DigitalChannelInfoBase(
             string name,
@@ -20,7 +20,7 @@ namespace Meadow.Hardware
             bool pullDownCapable,
             bool pullUpCapable,
             bool inverseLogic,
-            int interruptGroup = 0)
+            int? interruptGroup = null)
             : base(name)
         {
             this.InputCapable = inputCapable;
@@ -29,7 +29,7 @@ namespace Meadow.Hardware
             this.PullDownCapable = pullDownCapable;
             this.PullUpCapable = pullUpCapable;
             this.InverseLogic = inverseLogic;
-            this.InterruptGroup = int.Parse(name.Substring(2));
+            this.InterruptGroup = interruptGroup;
         }
     }
 }

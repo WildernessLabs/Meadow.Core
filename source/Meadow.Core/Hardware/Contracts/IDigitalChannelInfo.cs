@@ -38,6 +38,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// If the channel is interrupt capable and is grouped (i.e. only one channel per group is allowed) this will be non-zero.
         /// </summary>
-        int InterruptGroup { get; }
+        // TODO: consider moving this to an `IInterruptChannelInfo` class
+        int? InterruptGroup { get; }
     }
 }
