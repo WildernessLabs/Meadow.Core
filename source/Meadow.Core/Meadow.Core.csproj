@@ -9,7 +9,7 @@
    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
-   <Version>0.15.0</Version>
+   <Version>0.16.0</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
@@ -22,9 +22,6 @@
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
    <LangVersion>8.0</LangVersion>
  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.2.0" />
-  </ItemGroup>
  <ItemGroup>
    <Compile Remove="Hardware\Communications\SoftwareSpiBus.cs" />
  </ItemGroup>
@@ -34,5 +31,9 @@
  <ItemGroup>
    <Folder Include="Peripherals\Sensors\Location\" />
    <Folder Include="Peripherals\Sensors\Location\Gnss\" />
+   <Folder Include="Devices\Esp32Coprocessor\" />
+ </ItemGroup>
+ <ItemGroup>
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.3.2" />
  </ItemGroup>
 </Project>

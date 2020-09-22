@@ -2,7 +2,7 @@
 namespace Meadow.Gateway.WiFi
 {
     /// <summary>
-    /// Descrbies the Wifi connection method type.
+    /// Describes the Wifi connection method type.
     /// </summary>
     public enum ConnectionMethodType
     {

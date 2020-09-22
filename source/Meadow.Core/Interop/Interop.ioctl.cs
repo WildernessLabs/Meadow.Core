@@ -126,6 +126,16 @@ namespace Meadow.Core
             /// <param name="configFlags">Config flags.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, GpioIoctlFn request, ref GPIOConfigFlags configFlags);
+
+            /// <summary>
+            /// Request the ESP perform a function / execute a command.
+            /// </summary>
+            /// <param name="fd">File descriptor for the UPD driver.</param>
+            /// <param name="request">Function number (should be IoctlFn.Esp32Command).</param>
+            /// <param name="espCommand">Data structure holding the information about the command / request.</param>
+            /// <returns>0 on success, error code if a problem was encountered.</returns>
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdEsp32Command espCommand);
         }
     }
 }

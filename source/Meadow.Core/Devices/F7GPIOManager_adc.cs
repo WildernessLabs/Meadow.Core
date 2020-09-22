@@ -26,11 +26,9 @@ namespace Meadow.Devices
             switch (designator.port)
             {
                 case STM32.GpioPort.PortA:
-                    ConfigureADC(designator.port, designator.pin);
-                    break;
                 case STM32.GpioPort.PortC:
-                    // channel 10 starts at C0 (see STM32F777xx pinouts, pg 68)
-                    ConfigureADC(designator.port, designator.pin + 10);
+                    // port C uses ADC1, but still gets *configured* as port C
+                    ConfigureADC(designator.port, designator.pin);
                     break;
                 default:
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
@@ -175,12 +173,13 @@ namespace Meadow.Devices
                     channel = designator.pin;
                     break;
                 case STM32.GpioPort.PortC:
+                    // PC0 and PC1 have additional functions of ADC1_IN10 and 11 (see manual 'STM32F777xx STM32F778Ax STM32F779xx')
                     channel = designator.pin + 10;
                     break;
                 default:
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
-            
+
             Output.WriteLineIf(_debuggingADC, $"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert - we're doing 1 conversion only right now

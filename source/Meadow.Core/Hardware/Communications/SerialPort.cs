@@ -130,8 +130,8 @@ namespace Meadow.Hardware
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
             _showSerialDebug = false;
 #endif
-            if (baudRate <= 0) throw new ArgumentOutOfRangeException("Invalid baud rate");
-            if (dataBits < 5 || dataBits > 8) throw new ArgumentOutOfRangeException("Invalid dataBits");
+            if (baudRate <= 0) { throw new ArgumentOutOfRangeException("Invalid baud rate"); }
+            if (dataBits < 5 || dataBits > 8) { throw new ArgumentOutOfRangeException("Invalid dataBits"); }
 
             PortName = portName.SystemName;
             BaudRate = baudRate;
@@ -201,7 +201,7 @@ namespace Meadow.Hardware
         public int ReceiveBufferSize {
             get => _readBuffer == null ? 0 : _readBuffer.MaxElements;
             private set {
-                if (value == ReceiveBufferSize) return;
+                if (value == ReceiveBufferSize) { return; }
                 // TODO: if there are events wired, we need to handle that.
                 // for now this is private to prevent resizing
                 _readBuffer = new CircularBuffer<byte>(value);
@@ -249,7 +249,7 @@ namespace Meadow.Hardware
         {
             if (_readBuffer != null) {
                 _readBuffer.Clear();
-                _readBuffer.Overrun -= OnReadBufferOverrun;
+                //_readBuffer.Overrun -= OnReadBufferOverrun; - Adrian, this shouldn't be needed Aug 12, 2020
             }
         }
 

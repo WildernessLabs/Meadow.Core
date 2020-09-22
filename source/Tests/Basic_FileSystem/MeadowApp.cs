@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using Meadow;
 using Meadow.Devices;
 
@@ -11,7 +10,9 @@ namespace MeadowApp
         public MeadowApp()
         {
             string appRootDir = "meadow0";
+            string fileName = "text.txt";
 
+            CreateFile(Path.Combine(appRootDir, fileName));
 
             // This works
             //string[] files = Directory.GetFiles("/");
@@ -28,6 +29,7 @@ namespace MeadowApp
             //}
 
 
+            Console.WriteLine($"File contents: {File.ReadAllText(Path.Combine(appRootDir, fileName))}");
         }
 
         private void CreateFile(string path)

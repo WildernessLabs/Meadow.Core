@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
-using Meadow.Gateway.WiFi;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices
 {
@@ -11,6 +12,13 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7Micro : IIODevice
     {
+        private SynchronizationContext _context;
+        private Esp32Coprocessor esp32;
+
+        public WiFiAdapter WiFiAdapter { get; protected set; }
+
+        public event EventHandler WiFiAdapterInitilaized = delegate {};
+
         /// <summary>
         /// The default resolution for analog inputs
         /// </summary>
@@ -43,6 +51,41 @@ namespace Meadow.Devices
             this.IoController.Initialize();
 
             this.Pins = new F7MicroPinDefinitions();
+
+            // TODO: it would be nice to block on this initialization, but
+            // because of the app architecture, this ctor runs asynchronously
+            // with app startup, so right now we're raising an event.
+            //this.InitEsp32CoProc();
+        }
+
+        public Task<bool> InitWiFiAdapter()
+        {
+            return InitEsp32CoProc();
+        }
+
+        protected Task<bool> InitEsp32CoProc()
+        {
+            Console.WriteLine("Initializing Esp32 coproc.");
+            return Task.Run<bool>(async () => {
+                try {
+                    //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                    //stopwatch.Start()
+                    //Console.WriteLine("creating Esp32 Coproc.");
+                    this.esp32 = new Esp32Coprocessor();
+                    this.esp32.Reset();
+                    await Task.Delay(5000);
+                    this.WiFiAdapter = new WiFiAdapter(this.esp32);
+                    Console.WriteLine("Esp32 coproc initialization complete.");
+                } catch (Exception e) {
+                    Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");
+                    return false;
+                }
+
+                // this needs to be out of the exception block, otherwise user
+                // code exceptions get caught
+                //this.WiFiAdapterInitilaized(this, new EventArgs());
+                return true;
+            });
         }
 
         public IDigitalOutputPort CreateDigitalOutputPort(
@@ -360,6 +403,23 @@ namespace Meadow.Devices
             };
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
+        }
+
+        public void SetSynchronizationContext(SynchronizationContext context)
+        {
+            _context = context;
+        }
+
+        public void BeginInvokeOnMainThread(Action action)
+        {
+            if (_context == null)
+            {
+                action();
+            }
+            else
+            {
+                _context.Send(delegate { action(); }, null);
+            }
         }
     }
 }

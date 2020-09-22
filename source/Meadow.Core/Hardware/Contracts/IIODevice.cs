@@ -1,6 +1,7 @@
 ﻿
 
 using System;
+using System.Threading;
 
 namespace Meadow.Hardware
 {
@@ -64,8 +65,8 @@ namespace Meadow.Hardware
         );
 
         /// <summary>
-        /// Initializes a new instance of a legacy `ISerialPort`. `ISerialPort`
-        /// is provided for legacy compatibility, we recommend using the more
+        /// Initializes a new instance of a `ISerialPort`.
+        /// When parsing text data, we recommend using the more
         /// modern, thread-safe `ISerialMessagePort`.
         /// </summary>
         /// <param name="portName">The 'SerialPortName` of port to use.</param>
@@ -205,6 +206,17 @@ namespace Meadow.Hardware
             int frequencyHz = DefaultI2cBusSpeed
         );
 
+        /// <summary>
+        /// Sets the device time
+        /// </summary>
+        /// <param name="dateTime"></param>
         void SetClock(DateTime dateTime);
+
+        /// <summary>
+        /// Meadow Internal method for setting the device's primary (i.e. entry) SynchronizationContext
+        /// </summary>
+        /// <param name="context"></param>
+        void SetSynchronizationContext(SynchronizationContext context);
+
     }
 }
