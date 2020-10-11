@@ -1,13 +1,9 @@
 ﻿using Meadow.Devices;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Meadow;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -328,67 +324,52 @@ namespace Meadow.Hardware
             if (index < 0) throw new ArgumentException("Invalid offset");
             if (count == 0) return 0;
 
-            int currentIndex = index;
-            int totalBytesWritten = 0;
-            int result = 0;
-            int systemBufferMax = 255;
-            int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
-            int bytesToWriteThisLoop = maxCount;
-            int bytesLeft = count;
-
-            //Console.WriteLine($"count:{count}, maxCount:{maxCount}");
-
-            // we can only write 255 bytes at a time, so we loop 
-            while (totalBytesWritten < count)
+            lock (_accessLock)
             {
-                // if there's an offset, we want to slice
-                if (currentIndex > 0)
-                {
-                    //Console.WriteLine($"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
-                    Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
-                    result = Nuttx.write(_driverHandle, data.ToArray(), count);
-                }
-                else
-                {
-                    result = Nuttx.write(_driverHandle, buffer, count);
-                }
-                // if there was an error, pull it out of NuttX
-                if (result < 0)
-                {
-                    throw new NativeException(UPD.GetLastError());
-                }
-                // otherwise,
-                totalBytesWritten += result;
+                int currentIndex = index;
+                int totalBytesWritten = 0;
+                int result = 0;
+                int systemBufferMax = 255;
+                int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
+                int bytesToWriteThisLoop = maxCount;
+                int bytesLeft = count;
 
-                //Console.WriteLine($"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+                Output.WriteLineIf(_showSerialDebug, $"count:{count}, maxCount:{maxCount}");
+                Output.WriteLineIf(_showSerialDebug, $"Starting with: {(BitConverter.ToString(buffer, 0, (buffer.Length > 6) ? 6 : buffer.Length))}");
 
-                // recalculate the current index, including the original offset
-                currentIndex = totalBytesWritten + index;
-                bytesLeft = count - totalBytesWritten;
-                bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
-                //Console.WriteLine($"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                // we can only write 255 bytes at a time, so we loop 
+                while (totalBytesWritten < count)
+                {
+                    // if there's an offset, we want to slice
+                    if (currentIndex > 0)
+                    {
+                        Output.WriteLineIf(_showSerialDebug, $"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                        Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
+                        result = Nuttx.write(_driverHandle, data.ToArray(), count);
+                    }
+                    else
+                    {
+                        result = Nuttx.write(_driverHandle, buffer, count);
+                    }
+                    // if there was an error, pull it out of NuttX
+                    if (result < 0)
+                    {
+                        throw new NativeException(UPD.GetLastError());
+                    }
+                    // otherwise,
+                    totalBytesWritten += result;
+
+                    Output.WriteLineIf(_showSerialDebug, $"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+
+                    // recalculate the current index, including the original offset
+                    currentIndex = totalBytesWritten + index;
+                    bytesLeft = count - totalBytesWritten;
+                    bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
+                    Output.WriteLineIf(_showSerialDebug, $"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                }
+
+                return totalBytesWritten;
             }
-
-            return totalBytesWritten;
-
-
-            ////Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
-            //if (offset > 0) {
-            //    // we need to make a copy
-            //    var tmp = new byte[count];
-            //    Array.Copy(buffer, offset, tmp, 0, count);
-            //    var result = Nuttx.write(_driverHandle, tmp, count);
-            //    if (result < 0) {
-            //        throw new NativeException(UPD.GetLastError());
-            //    }
-            //    return result;
-            //} else {
-            //    var result = Nuttx.write(_driverHandle, buffer, count);
-            //    if (result < 0) {
-            //        throw new NativeException(UPD.GetLastError());
-            //    }
-            //    return result;
-            //}
         }
 
         private void ReadThreadProc()
@@ -406,8 +387,6 @@ namespace Meadow.Hardware
                     if (result < 0)
                     {
                         var ec = UPD.GetLastError();
-
-                        //Output.WriteLineIf(_showSerialDebug, $"Nuttx read returned {ec}");
 
                         if (ec == Nuttx.ErrorCode.TryAgain)
                         {
