@@ -11,6 +11,13 @@ namespace Meadow.Hardware
     public interface IIODevice//<P> where P : IPinDefinitions
     {
         /// <summary>
+        /// Retrieves an IPin by name
+        /// </summary>
+        /// <param name="pinName">Registered name of the pin to retrieve</param>
+        /// <returns>The requested pin or null if not found</returns>
+        IPin GetPin(string pinName);
+
+        /// <summary>
         /// The default I2C Bus speed, in Hz, used when speed parameters are not provided
         /// </summary>
         public const int DefaultI2cBusSpeed = 100000;
