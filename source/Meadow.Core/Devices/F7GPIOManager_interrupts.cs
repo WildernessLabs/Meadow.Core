@@ -16,7 +16,7 @@ namespace Meadow.Devices
     {
         public event InterruptHandler Interrupt;
 
-        private Thread _ist;
+        private Thread _ist = null;
         private Dictionary<int, int> _interruptGroupInUseByPin = new Dictionary<int, int>();
 
         public void WireInterrupt(IPin pin, InterruptMode interruptMode,
@@ -46,6 +46,8 @@ namespace Meadow.Devices
                     STM32.ResistorMode resistorMode,
                     double debounceDuration, double glitchDuration)
         {
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $" + Wire Interrupt");
+
             if (interruptMode != InterruptMode.None)
             {
                 lock (_interruptGroupInUseByPin)
@@ -128,12 +130,20 @@ namespace Meadow.Devices
                 {
                     // interrupt group is effectively the Port designation, base-1
                     var group = (int)port + 1;
-                    if (_interruptGroupInUseByPin[group] != pin)
+                    if (_interruptGroupInUseByPin.ContainsKey(group))
                     {
-                        throw new Exception("Cannot disconnect an interrupt for this pin.  It is in use by another.");
+                        if (_interruptGroupInUseByPin[group] != pin)
+                        {
+                            throw new Exception("Cannot disconnect an interrupt for this pin.  It is in use by another.");
+                        }
+                        // set an invalid number instead of removing from the dictionary.  This is minor, but results in less allocations.
+                        _interruptGroupInUseByPin[group] = -1;
                     }
-                    // set an invalid number instead of removing from the dictionary.  This is minor, but results in less allocations.
-                    _interruptGroupInUseByPin[group] = -1;
+                    else
+                    {
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                            $"Int group: {group} not in use");
+                    }
                 }
             }
         }
