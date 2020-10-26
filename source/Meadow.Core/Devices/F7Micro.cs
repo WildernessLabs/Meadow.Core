@@ -72,8 +72,6 @@ namespace Meadow.Devices
                     //stopwatch.Start()
                     //Console.WriteLine("creating Esp32 Coproc.");
                     this.esp32 = new Esp32Coprocessor();
-                    this.esp32.Reset();
-                    await Task.Delay(5000);
                     this.WiFiAdapter = new WiFiAdapter(this.esp32);
                     Console.WriteLine("Esp32 coproc initialization complete.");
                 } catch (Exception e) {

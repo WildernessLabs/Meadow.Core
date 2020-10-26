@@ -15,7 +15,7 @@ namespace Meadow.Gateways.Exceptions
         }
 
         /// <summary>
-        /// Create a new CoprocessorResponseNotFoundException object passing on the
+        /// Create a new InvalidNetworkOperationException object passing on the
         /// message information.
         /// </summary>
         /// <param name="message">Message for the calling application.</param>
@@ -25,7 +25,7 @@ namespace Meadow.Gateways.Exceptions
         }
 
         /// <summary>
-        /// Create a new CoprocessorResponseNotFoundException object passing on the
+        /// Create a new InvalidNetworkOperationException object passing on the
         /// message and inner exception details.
         /// </summary>
         /// <param name="message">Message for the calling application.</param>
