@@ -35,7 +35,7 @@ namespace Meadow.Devices
 
         internal F7GPIOManager()
         {
-            DebugFeatures = DebugFeature.None;
+            DebugFeatures = DebugFeature.Interrupts;
 #if DEBUG
             //Console.WriteLine($"DirectRegisterAccess = {DirectRegisterAccess}");
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
@@ -113,6 +113,10 @@ namespace Meadow.Devices
 
             if (DirectRegisterAccess)
             {
+                // write the register
+                Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
+                    $"Writing {targetValue:X} to address : {targetAddress:X}");
+
                 *(uint*)targetAddress = targetValue;
                 return;
             }
@@ -150,6 +154,9 @@ namespace Meadow.Devices
         {
             var targetAddress = baseAddress + STM32.GPIO_IDR_OFFSET;
             uint register;
+
+            Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0,
+                $"Reading 0x{targetAddress:X}");
 
             if (DirectRegisterAccess)
             {
