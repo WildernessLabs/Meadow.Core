@@ -85,14 +85,14 @@ namespace Meadow.Devices
         /// <param name="where">Interface the command is destined for.</param>
         /// <param name="command">Command to be sent.</param>
         /// <param name="block">Is this a blocking command?</param>
-        /// <returns>A byte buffer containing result data.</returns>
-        private byte[] SendParameterlessCommand(byte where, UInt32 function, bool block)
+        /// <param name="resultBuffer">4000 byte array to hold any data returned by the command.</param>
+        /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
+        private StatusCodes SendParameterlessCommand(byte where, UInt32 function, bool block, byte[] resultBuffer)
         {
-            byte[] resultBuffer = new byte[4000];
             byte[] encodedPayload = null;
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
-            int result;
+            StatusCodes result;
             try
             {
                 payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
@@ -109,9 +109,13 @@ namespace Meadow.Devices
                     Block = (byte) (block ? 1 : 0)
                 };
 
-                if ((UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) != 0) || (command.StatusCode != (UInt32) StatusCodes.CompletedOk))
+                if (UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) != 0)
                 {
-                    resultBuffer = null;
+                    result = (StatusCodes) command.StatusCode;
+                }
+                else
+                {
+                    result = StatusCodes.Failure;
                 }
             }
             finally
@@ -125,7 +129,7 @@ namespace Meadow.Devices
                     resultGcHandle.Free();
                 }
             }
-            return(resultBuffer);
+            return(result);
         }
 
         /// <summary>
@@ -133,7 +137,35 @@ namespace Meadow.Devices
         /// </summary>
         public void Reset()
         {
-            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false);
+            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
+        }
+
+        /// <summary>
+        /// Start the network interface on the WiFi adapter.
+        /// </summary>
+        /// <remarks>
+        /// This method starts the network interface hardware.  The result of this action depends upon the
+        /// settings stored in the WiFi adapter memory.
+        ///
+        /// No Stored Configuration
+        /// If no settings are stored in the adapter then the hardware will simply start.  IP addresses
+        /// will not be obtained in this mode.
+        ///
+        /// In this case, the return result indicates if the hardware started successfully.
+        ///
+        /// Stored Configuration Present NOTE NOT IMPLEMENTED IN THIS RELEASE
+        /// If a default access point (and optional password) are stored in the adapter then the network
+        /// interface and the system is set to connect at startup then the system will then attempt to
+        /// connect to the specified access point.
+        ///
+        /// In this case, the return result indicates if the interface was started successfully and a
+        /// connection to the access point was made.
+        /// </remarks>
+        /// <returns>true if teh adapter was started successfully, false if there was an error.</returns>
+        public bool StartNetwork()
+        {
+            StatusCodes result = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartNetwork, true, null);
+            return (result == StatusCodes.CompletedOk);
         }
 
         /// <summary>
@@ -144,7 +176,21 @@ namespace Meadow.Devices
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
+        [Obsolete("StartNetwork(ssid, password, reconnection) is deprecated, please use ConnectToAccessPoint instead.")]
         public bool StartNetwork(string ssid, string password, ReconnectionType reconnection)
+        {
+            return (ConnectToAccessPoint(ssid, password, reconnection));
+        }
+
+        /// <summary>
+        /// Request the ESP32 to connect to the specified network.
+        /// </summary>
+        /// <param name="ssid">Name of the network to connect to.</param>
+        /// <param name="password">Password for the network.</param>
+        /// <param name="reconnection">Should the adapter reconnect automatically?</param>
+        /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
+        /// <returns>true if the connection was successfully made.</returns>
+        public bool ConnectToAccessPoint(string ssid, string password, ReconnectionType reconnection)
         {
             if (string.IsNullOrEmpty(ssid))
             {
@@ -174,7 +220,7 @@ namespace Meadow.Devices
                 var command = new Nuttx.UpdEsp32Command()
                 {
                     Interface = (byte) Esp32Interfaces.WiFi,
-                    Function = (UInt32) WiFiFunction.Start,
+                    Function = (UInt32) WiFiFunction.ConnectToAccessPoint,
                     StatusCode = (UInt32) StatusCodes.CompletedOk,
                     Payload = payloadGcHandle.AddrOfPinnedObject(),
                     PayloadLength = (UInt32) encodedPayload.Length,
@@ -239,8 +285,8 @@ namespace Meadow.Devices
             }
 
             var networks = new ObservableCollection<WifiNetwork>();
-            byte[] resultBuffer = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true);
-            if (resultBuffer.Length > 0)
+            byte[] resultBuffer = new byte[4000];
+            if (SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer) == StatusCodes.CompletedOk)
             {
                 var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
                 var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
@@ -261,7 +307,7 @@ namespace Meadow.Devices
                                 bssid += ":";
                             }
                         }
-                        var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown, 
+                        var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown,
                             new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
                             accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
                         networks.Add(network);
