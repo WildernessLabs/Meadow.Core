@@ -92,7 +92,7 @@ namespace Meadow.Devices
             byte[] encodedPayload = null;
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
-            StatusCodes result;
+            StatusCodes result = StatusCodes.CompletedOk;
             try
             {
                 payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
@@ -109,7 +109,8 @@ namespace Meadow.Devices
                     Block = (byte) (block ? 1 : 0)
                 };
 
-                if (UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command) != 0)
+                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
+                if (updResult == 0)
                 {
                     result = (StatusCodes) command.StatusCode;
                 }
@@ -279,14 +280,10 @@ namespace Meadow.Devices
         /// <returns>ObservableCollection (possibly empty) of access points.</returns>
         public ObservableCollection<WifiNetwork> GetAccessPoints()
         {
-            if (!IsConnected)
-            {
-                throw new InvalidOperationException("Device must be connected to a network before scanning for access points.");
-            }
-
             var networks = new ObservableCollection<WifiNetwork>();
             byte[] resultBuffer = new byte[4000];
-            if (SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer) == StatusCodes.CompletedOk)
+            StatusCodes result = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
+            if (result == StatusCodes.CompletedOk)
             {
                 var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
                 var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
@@ -313,6 +310,10 @@ namespace Meadow.Devices
                         networks.Add(network);
                     }
                 }
+            }
+            else
+            {
+                Console.WriteLine($"Error getting access points: {result}");
             }
             return(networks);
         }
