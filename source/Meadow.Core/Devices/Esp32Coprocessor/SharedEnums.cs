@@ -28,19 +28,21 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Failure = 3,
         InvalidInterface = 4,
         QueueError = 5,
-        InvalidPacket = 6,
-        InvalidHeader = 7,
-        UnexpectedData = 8,
-        MissingEndOfFrameMarker = 9,
-        HeaderBodyFieldMismatch = 10,
-        WiFiAlreadyStarted = 11,
-        InvalidSsid = 12,
-        InvalidPassword = 13,
+        Timeout = 6,
+        InvalidPacket = 7,
+        InvalidHeader = 8,
+        UnexpectedData = 9,
+        MissingEndOfFrameMarker = 10,
+        HeaderBodyFieldMismatch = 11,
+        WiFiAlreadyStarted = 12,
+        InvalidWiFiCredentials = 13,
         WiFiDisconnected = 14,
-        InvalidAntennaData = 15,
-        InvalidAntennaValue = 16,
-        NoMessagesWaiting = 17,
-        CoprocessorNotResponding = 18
+        CannotStartNetworkInterface = 15,
+        CannotConnectToAccessPoint = 16,
+        InvalidAntennaData = 17,
+        InvalidAntennaValue = 18,
+        NoMessagesWaiting = 19,
+        CoprocessorNotResponding = 20
     };
 
     // <summary>
@@ -62,7 +64,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     public enum SystemFunction
     {
         GetConfiguration = 0,
-        SetConfiguration = 1,
+        SetConfigurationItem = 1,
         DeepSleep = 2,
         GetBatteryChargeLevel = 3
     };
@@ -72,28 +74,24 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     // </summary>
     public enum WiFiFunction
     {
-        Start = 0,
+        StartNetwork = 0,
         Stop = 1,
-        ConnectToAp = 2,
-        Disconnect = 3,
+        ConnectToAccessPoint = 2,
+        DisconnectFromAccessPoint = 3,
         GetAccessPoints = 4,
-        GetConfiguration = 5,
-        SetConfiguration = 6,
-        SetAntenna = 7,
-        GetAntenna = 8,
-        GetAddrInfo = 9,
-        Socket = 10,
-        Connect = 11,
-        FreeAddrInfo = 12,
-        Write = 13,
-        SetSockOpt = 14,
-        Read = 15,
-        Close = 16,
-        SendTo = 17,
-        RecvFrom = 18,
-        Poll = 19,
-        InterruptPollResponse = 20,
-        Send = 21
+        GetAddrInfo = 5,
+        Socket = 6,
+        Connect = 7,
+        FreeAddrInfo = 8,
+        Write = 9,
+        SetSockOpt = 10,
+        Read = 11,
+        Close = 12,
+        SendTo = 13,
+        RecvFrom = 14,
+        Poll = 15,
+        InterruptPollResponse = 16,
+        Send = 17
     };
 
     // <summary>
@@ -129,6 +127,28 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Transport = 0x20,
         Header = 0x40,
         Data = 0x80
+    };
+
+    // <summary>
+    // Name of items that can be configured (changed by the code on the STM32) on the ESP32.
+    // </summary>
+    public enum ConfigurationItems
+    {
+        MaximumMessageQueueLength = 0,
+        AutomaticallyStartNetwork = 1,
+        AutomaticallyReconnect = 2,
+        MaximumRetryCount = 3,
+        DeviceName = 4,
+        DefaultApAndPassword = 5,
+        NtpServer = 6,
+        GetTimeAtStartup = 7,
+        UseDhcp = 8,
+        StaticIpAddress = 9,
+        DnsServer = 10,
+        DefaultGateway = 11,
+        Antenna = 12,
+        BoardMacAddress = 13,
+        SoftApMacAddress = 14
     };
 
     // <summary>

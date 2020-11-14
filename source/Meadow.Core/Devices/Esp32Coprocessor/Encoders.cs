@@ -1,5 +1,5 @@
 //
-//
+//      
 //
 //      Message encoders and decoders.
 //
@@ -10,13 +10,110 @@
 //
 //      *************************** WARNING ***************************
 //
-
 using System;
 
 namespace Meadow.Devices.Esp32.MessagePayloads
 {
     public static class Encoders
     {
+        /// <summary>
+        /// Calculate the amount of memory that should be allocated for the receive buffer.
+        /// 
+        /// SPI reception on the ESP32 should be on a 32-bit boundary and also a multiple of 
+        /// 4 bytes long with a minimum length of 8 bytes (See the article linked below).
+        /// 
+        /// https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/peripherals/spi_slave.html#restrictions-and-known-issues
+        /// </summary>
+        /// <returns>Size of the buffer that should be used.</returns>
+        /// <param name="requestedSize">Requested size.</param>
+        public static UInt32 CalculateSpiBufferSize(UInt32 requestedSize)
+        {
+            UInt32 result = requestedSize;
+
+            if (result < 8)
+            {
+                result = 8;
+            }
+            //
+            //  The buffer should always be 4 bytes longer than needed.  During development it
+            //  was found that the last four bytes of any transmission were being discarded.
+            //  Empirical tests proved this for 24, 32 and 40 byte packets.
+            //
+            //  The work around is to increase the packet size by 4 and have dummy data in the
+            //  last four bytes and discard the bytes.
+            //
+            //
+            //  See support post: https://esp32.com/viewtopic.php?f=13&t=10117
+            //
+            requestedSize += 4;
+            if ((requestedSize & 3) != 0)
+            {
+                result = (requestedSize & 0xfffffffc) + 4;
+            }
+            else
+            {
+                result += 4;
+            }
+            return (result);
+        }
+
+        /// <summary>
+        /// Seed for the Crc32 algorithm.
+        /// </summary>
+        private const UInt32 CRC32_SEED = 0xffffffff;
+
+        /// <summary>
+        ///     Calculate the 32-bit CRC for the array of bytes.
+        /// </summary>
+        /// <param name="data">Buffer of data.</param>
+        /// <returns>32-bit CRC for the array of bytes.</returns>
+        private static UInt32 Crc32(byte[] buffer)
+        {
+            return (Crc32(buffer, 0, buffer.Length));
+        }
+
+        /// <summary>
+        /// Calculate the 32-bit CRC for the array of bytes.
+        /// </summary>
+        /// <param name="data">Buffer of data.</param>
+        /// <param name="start">Offset into the buffer at which the CRC calculation will start</param>
+        /// <param name="length">Amount of data to calculate the CRC</param>
+        /// <returns>32-bit CRC for the array of bytes.</returns>
+        private static UInt32 Crc32(byte[] data, int start, int length)
+        {
+            UInt32 crc = CRC32_SEED;
+
+            for (int index = start; index < length; index++)
+            {
+                crc = ProgressiveCrc32(crc, data[index]);
+            }
+
+            return (crc);
+        }
+
+        /// <summary>
+        ///     Progressively calculate the Crc32 value.
+        /// </summary>
+        /// <remarks>
+        ///     This allows method allows the Crc32 value to be built up as the data bytes
+        ///     from the serial port are received.  This means that all of the data frame
+        ///     does not need to be present in order to calculate this value.
+        /// </remarks>
+        /// <param name="currentChecksum">Current value for the _originalChecksum.</param>
+        /// <param name="data">ApplicationData byte to be processed.</param>
+        /// <returns>Next value for the Crc32.</returns>
+        private static UInt32 ProgressiveCrc32(UInt32 currentChecksum, byte data)
+        {
+            UInt32 crc = currentChecksum;
+            crc ^= data;
+            for (UInt32 index = 0; index < 8; index++)
+            {
+                UInt32 mask = (UInt32) (-(crc & 0x01));
+                crc = (crc >> 1) ^ (0xedb88320 & mask);
+            }
+            return (crc);
+        }
+
         /// <summary>
         ///     Take two bytes from the buffer and encode them as a 16-bit integer.
         ///     Note that the data should be encoded as LSB first.
@@ -151,7 +248,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return (result);
         }
 
-        public static byte[] EncodeSystemConfiguration(SystemConfiguration systemConfiguration)
+        /// <summary>
+        /// Encode a SystemConfiguration object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="systemConfiguration">SystemConfiguration object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SystemConfiguration object.</returns>
+        public static byte[] EncodeSystemConfiguration(MessagePayloads.SystemConfiguration systemConfiguration)
         {
             int offset = 0;
             int length = 0;
@@ -159,22 +261,95 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += 4;
+            length += (int) (systemConfiguration.SoftwareVersion.Length + 1);
+            length += (int) 6;
+            length += (int) 6;
+            length += (int) (systemConfiguration.DeviceName.Length + 1);
+            length += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
+            length += (int) (systemConfiguration.NtpServer.Length + 1);
+            length += 25;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeUInt32(systemConfiguration.MessageSize, buffer, offset);
+            EncodeString(systemConfiguration.SoftwareVersion, buffer, offset);
+            offset += systemConfiguration.SoftwareVersion.Length + 1;
+            buffer[offset] = systemConfiguration.MaximumMessageQueueLength;
+            offset += 1;
+            buffer[offset] = systemConfiguration.AutomaticallyStartNetwork;
+            offset += 1;
+            buffer[offset] = systemConfiguration.AutomaticallyReconnect;
+            offset += 1;
+            EncodeUInt32(systemConfiguration.MaximumRetryCount, buffer, offset);
+            offset += 4;
+            buffer[offset] = systemConfiguration.Antenna;
+            offset += 1;
+            Array.Copy(systemConfiguration.BoardMacAddress, 0, buffer, offset, 6);
+            offset += (int) 6;
+            Array.Copy(systemConfiguration.SoftApMacAddress, 0, buffer, offset, 6);
+            offset += (int) 6;
+            EncodeString(systemConfiguration.DeviceName, buffer, offset);
+            offset += systemConfiguration.DeviceName.Length + 1;
+            EncodeString(systemConfiguration.DefaultAccessPoint, buffer, offset);
+            offset += systemConfiguration.DefaultAccessPoint.Length + 1;
+            EncodeString(systemConfiguration.NtpServer, buffer, offset);
+            offset += systemConfiguration.NtpServer.Length + 1;
+            EncodeInt32(systemConfiguration.GetTimeAtStartup, buffer, offset);
+            offset += 4;
+            buffer[offset] = systemConfiguration.UseDhcp;
+            offset += 1;
+            EncodeUInt32(systemConfiguration.StaticIpAddress, buffer, offset);
+            offset += 4;
+            EncodeUInt32(systemConfiguration.DnsServer, buffer, offset);
+            offset += 4;
+            EncodeUInt32(systemConfiguration.DefaultGateway, buffer, offset);
             return(buffer);
         }
 
-        public static SystemConfiguration ExtractSystemConfiguration(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a SystemConfiguration object from a byte array.
+        /// </summary>
+        /// <param name="systemConfiguration">Byte array containing the object to the extracted.</param>
+        /// <returns>SystemConfiguration object.</returns>
+        public static MessagePayloads.SystemConfiguration ExtractSystemConfiguration(byte[] buffer, int offset)
         {
             SystemConfiguration systemConfiguration = new MessagePayloads.SystemConfiguration();
 
-            systemConfiguration.MessageSize = ExtractUInt32(buffer, offset);
+            systemConfiguration.SoftwareVersion = ExtractString(buffer, offset);
+            offset += (int) (systemConfiguration.SoftwareVersion.Length + 1);
+            systemConfiguration.MaximumMessageQueueLength = buffer[offset];
+            offset += 1;
+            systemConfiguration.AutomaticallyStartNetwork = buffer[offset];
+            offset += 1;
+            systemConfiguration.AutomaticallyReconnect = buffer[offset];
+            offset += 1;
+            systemConfiguration.MaximumRetryCount = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.Antenna = buffer[offset];
+            offset += 1;
+            systemConfiguration.BoardMacAddress = new byte[6];
+            Array.Copy(buffer, offset, systemConfiguration.BoardMacAddress, 0, 6);
+            offset += (int) 6;
+            systemConfiguration.SoftApMacAddress = new byte[6];
+            Array.Copy(buffer, offset, systemConfiguration.SoftApMacAddress, 0, 6);
+            offset += (int) 6;
+            systemConfiguration.DeviceName = ExtractString(buffer, offset);
+            offset += (int) (systemConfiguration.DeviceName.Length + 1);
+            systemConfiguration.DefaultAccessPoint = ExtractString(buffer, offset);
+            offset += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
+            systemConfiguration.NtpServer = ExtractString(buffer, offset);
+            offset += (int) (systemConfiguration.NtpServer.Length + 1);
+            systemConfiguration.GetTimeAtStartup = ExtractInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.UseDhcp = buffer[offset];
+            offset += 1;
+            systemConfiguration.StaticIpAddress = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.DnsServer = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.DefaultGateway = ExtractUInt32(buffer, offset);
             return(systemConfiguration);
         }
 
@@ -185,10 +360,20 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded SystemConfiguration object.</returns>
         public static int EncodedSystemConfigurationBufferSize(MessagePayloads.SystemConfiguration systemConfiguration)
         {
-            return(4);
+            int result = 0;
+            result += (int) systemConfiguration.SoftwareVersion.Length;
+            result += (int) systemConfiguration.DeviceName.Length;
+            result += (int) systemConfiguration.DefaultAccessPoint.Length;
+            result += (int) systemConfiguration.NtpServer.Length;
+            return(result + 41);
         }
 
-        public static byte[] EncodeWiFiConfiguration(WiFiConfiguration wiFiConfiguration)
+        /// <summary>
+        /// Encode a ConfigurationValue object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="configurationValue">ConfigurationValue object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ConfigurationValue object.</returns>
+        public static byte[] EncodeConfigurationValue(MessagePayloads.ConfigurationValue configurationValue)
         {
             int offset = 0;
             int length = 0;
@@ -196,48 +381,64 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += 7;
+            length += (int) (configurationValue.ValueLength + 4);
+            length += 4;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            buffer[offset] = wiFiConfiguration.AutomaticReconnect;
-            offset += 1;
-            EncodeUInt32(wiFiConfiguration.MaximumRetryCount, buffer, offset);
+            EncodeUInt32(configurationValue.Item, buffer, offset);
             offset += 4;
-            buffer[offset] = wiFiConfiguration.Antenna;
-            offset += 1;
-            buffer[offset] = wiFiConfiguration.MaximumMessageQueueLength;
+            EncodeUInt32(configurationValue.ValueLength, buffer, offset);
+            offset += 4;
+            if (configurationValue.ValueLength > 0)
+            {
+                Array.Copy(configurationValue.Value, 0, buffer, offset, configurationValue.ValueLength);
+            }
             return(buffer);
         }
 
-        public static WiFiConfiguration ExtractWiFiConfiguration(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a ConfigurationValue object from a byte array.
+        /// </summary>
+        /// <param name="configurationValue">Byte array containing the object to the extracted.</param>
+        /// <returns>ConfigurationValue object.</returns>
+        public static MessagePayloads.ConfigurationValue ExtractConfigurationValue(byte[] buffer, int offset)
         {
-            WiFiConfiguration wiFiConfiguration = new MessagePayloads.WiFiConfiguration();
+            ConfigurationValue configurationValue = new MessagePayloads.ConfigurationValue();
 
-            wiFiConfiguration.AutomaticReconnect = buffer[offset];
-            offset += 1;
-            wiFiConfiguration.MaximumRetryCount = ExtractUInt32(buffer, offset);
+            configurationValue.Item = ExtractUInt32(buffer, offset);
             offset += 4;
-            wiFiConfiguration.Antenna = buffer[offset];
-            offset += 1;
-            wiFiConfiguration.MaximumMessageQueueLength = buffer[offset];
-            return(wiFiConfiguration);
+            configurationValue.ValueLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (configurationValue.ValueLength > 0)
+            {
+                configurationValue.Value = new byte[configurationValue.ValueLength];
+                Array.Copy(buffer, offset, configurationValue.Value, 0, configurationValue.ValueLength);
+            }
+            return(configurationValue);
         }
 
         /// <summary>
-        /// Calculate the amount of memory required to hold the given instance of the WiFiConfiguration object.
+        /// Calculate the amount of memory required to hold the given instance of the ConfigurationValue object.
         /// </summary>
-        /// <param name="wiFiConfiguration">WiFiConfiguration object to be encoded.</param>
-        /// <returns>Number of bytes required to hold the encoded WiFiConfiguration object.</returns>
-        public static int EncodedWiFiConfigurationBufferSize(MessagePayloads.WiFiConfiguration wiFiConfiguration)
+        /// <param name="configurationValue">ConfigurationValue object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded ConfigurationValue object.</returns>
+        public static int EncodedConfigurationValueBufferSize(MessagePayloads.ConfigurationValue configurationValue)
         {
-            return(7);
+            int result = 0;
+            result += (int) configurationValue.ValueLength;
+            return(result + 8);
         }
 
-        public static byte[] EncodeWiFiCredentials(WiFiCredentials wiFiCredentials)
+        /// <summary>
+        /// Encode a WiFiCredentials object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="wiFiCredentials">WiFiCredentials object to be encoded.</param>
+        /// <returns>Byte array containing the encoded WiFiCredentials object.</returns>
+        public static byte[] EncodeWiFiCredentials(MessagePayloads.WiFiCredentials wiFiCredentials)
         {
             int offset = 0;
             int length = 0;
@@ -259,7 +460,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static WiFiCredentials ExtractWiFiCredentials(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a WiFiCredentials object from a byte array.
+        /// </summary>
+        /// <param name="wiFiCredentials">Byte array containing the object to the extracted.</param>
+        /// <returns>WiFiCredentials object.</returns>
+        public static MessagePayloads.WiFiCredentials ExtractWiFiCredentials(byte[] buffer, int offset)
         {
             WiFiCredentials wiFiCredentials = new MessagePayloads.WiFiCredentials();
 
@@ -282,44 +488,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 2);
         }
 
-        public static byte[] EncodeAntennaInfo(AntennaInfo antennaInfo)
-        {
-            int offset = 0;
-            int length = 0;
-
-            //
-            //  Calculate the amount of memory needed.
-            //
-            length += 1;
-
-            //
-            //  Now allocate a new buffer and copy the data in to the buffer.
-            //
-            byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
-            buffer[offset] = antennaInfo.Antenna;
-            return(buffer);
-        }
-
-        public static AntennaInfo ExtractAntennaInfo(byte[] buffer, int offset)
-        {
-            AntennaInfo antennaInfo = new MessagePayloads.AntennaInfo();
-
-            antennaInfo.Antenna = buffer[offset];
-            return(antennaInfo);
-        }
-
         /// <summary>
-        /// Calculate the amount of memory required to hold the given instance of the AntennaInfo object.
+        /// Encode a AccessPoint object and return a byte array containing the encoded message.
         /// </summary>
-        /// <param name="antennaInfo">AntennaInfo object to be encoded.</param>
-        /// <returns>Number of bytes required to hold the encoded AntennaInfo object.</returns>
-        public static int EncodedAntennaInfoBufferSize(MessagePayloads.AntennaInfo antennaInfo)
-        {
-            return(1);
-        }
-
-        public static byte[] EncodeAccessPoint(AccessPoint accessPoint)
+        /// <param name="accessPoint">AccessPoint object to be encoded.</param>
+        /// <returns>Byte array containing the encoded AccessPoint object.</returns>
+        public static byte[] EncodeAccessPoint(MessagePayloads.AccessPoint accessPoint)
         {
             int offset = 0;
             int length = 0;
@@ -357,7 +531,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static AccessPoint ExtractAccessPoint(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a AccessPoint object from a byte array.
+        /// </summary>
+        /// <param name="accessPoint">Byte array containing the object to the extracted.</param>
+        /// <returns>AccessPoint object.</returns>
+        public static MessagePayloads.AccessPoint ExtractAccessPoint(byte[] buffer, int offset)
         {
             AccessPoint accessPoint = new MessagePayloads.AccessPoint();
 
@@ -391,7 +570,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(47);
         }
 
-        public static byte[] EncodeAccessPointList(AccessPointList accessPointList)
+        /// <summary>
+        /// Encode a AccessPointList object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="accessPointList">AccessPointList object to be encoded.</param>
+        /// <returns>Byte array containing the encoded AccessPointList object.</returns>
+        public static byte[] EncodeAccessPointList(MessagePayloads.AccessPointList accessPointList)
         {
             int offset = 0;
             int length = 0;
@@ -418,7 +602,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static AccessPointList ExtractAccessPointList(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a AccessPointList object from a byte array.
+        /// </summary>
+        /// <param name="accessPointList">Byte array containing the object to the extracted.</param>
+        /// <returns>AccessPointList object.</returns>
+        public static MessagePayloads.AccessPointList ExtractAccessPointList(byte[] buffer, int offset)
         {
             AccessPointList accessPointList = new MessagePayloads.AccessPointList();
 
@@ -446,7 +635,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 8);
         }
 
-        public static byte[] EncodeSockAddr(SockAddr sockAddr)
+        /// <summary>
+        /// Encode a SockAddr object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="sockAddr">SockAddr object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SockAddr object.</returns>
+        public static byte[] EncodeSockAddr(MessagePayloads.SockAddr sockAddr)
         {
             int offset = 0;
             int length = 0;
@@ -454,32 +648,49 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += (int) 14;
-            length += 2;
+            length += (int) 16;
+            length += 15;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            buffer[offset] = sockAddr.Length;
-            offset += 1;
             buffer[offset] = sockAddr.Family;
             offset += 1;
-            Array.Copy(sockAddr.Data, 0, buffer, offset, 14);
+            EncodeUInt16(sockAddr.Port, buffer, offset);
+            offset += 2;
+            EncodeUInt32(sockAddr.Ip4Address, buffer, offset);
+            offset += 4;
+            EncodeUInt32(sockAddr.FlowInfo, buffer, offset);
+            offset += 4;
+            Array.Copy(sockAddr.Ip6Address, 0, buffer, offset, 16);
+            offset += (int) 16;
+            EncodeUInt32(sockAddr.ScopeID, buffer, offset);
             return(buffer);
         }
 
-        public static SockAddr ExtractSockAddr(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a SockAddr object from a byte array.
+        /// </summary>
+        /// <param name="sockAddr">Byte array containing the object to the extracted.</param>
+        /// <returns>SockAddr object.</returns>
+        public static MessagePayloads.SockAddr ExtractSockAddr(byte[] buffer, int offset)
         {
             SockAddr sockAddr = new MessagePayloads.SockAddr();
 
-            sockAddr.Length = buffer[offset];
-            offset += 1;
             sockAddr.Family = buffer[offset];
             offset += 1;
-            sockAddr.Data = new byte[14];
-            Array.Copy(buffer, offset, sockAddr.Data, 0, 14);
+            sockAddr.Port = ExtractUInt16(buffer, offset);
+            offset += 2;
+            sockAddr.Ip4Address = ExtractUInt32(buffer, offset);
+            offset += 4;
+            sockAddr.FlowInfo = ExtractUInt32(buffer, offset);
+            offset += 4;
+            sockAddr.Ip6Address = new byte[16];
+            Array.Copy(buffer, offset, sockAddr.Ip6Address, 0, 16);
+            offset += (int) 16;
+            sockAddr.ScopeID = ExtractUInt32(buffer, offset);
             return(sockAddr);
         }
 
@@ -490,10 +701,15 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded SockAddr object.</returns>
         public static int EncodedSockAddrBufferSize(MessagePayloads.SockAddr sockAddr)
         {
-            return(16);
+            return(31);
         }
 
-        public static byte[] EncodeAddrInfo(AddrInfo addrInfo)
+        /// <summary>
+        /// Encode a AddrInfo object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="addrInfo">AddrInfo object to be encoded.</param>
+        /// <returns>Byte array containing the encoded AddrInfo object.</returns>
+        public static byte[] EncodeAddrInfo(MessagePayloads.AddrInfo addrInfo)
         {
             int offset = 0;
             int length = 0;
@@ -535,7 +751,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static AddrInfo ExtractAddrInfo(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a AddrInfo object from a byte array.
+        /// </summary>
+        /// <param name="addrInfo">Byte array containing the object to the extracted.</param>
+        /// <returns>AddrInfo object.</returns>
+        public static MessagePayloads.AddrInfo ExtractAddrInfo(byte[] buffer, int offset)
         {
             AddrInfo addrInfo = new MessagePayloads.AddrInfo();
 
@@ -578,7 +799,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 33);
         }
 
-        public static byte[] EncodeGetAddrInfoRequest(GetAddrInfoRequest getAddrInfoRequest)
+        /// <summary>
+        /// Encode a GetAddrInfoRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getAddrInfoRequest">GetAddrInfoRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetAddrInfoRequest object.</returns>
+        public static byte[] EncodeGetAddrInfoRequest(MessagePayloads.GetAddrInfoRequest getAddrInfoRequest)
         {
             int offset = 0;
             int length = 0;
@@ -616,7 +842,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static GetAddrInfoRequest ExtractGetAddrInfoRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a GetAddrInfoRequest object from a byte array.
+        /// </summary>
+        /// <param name="getAddrInfoRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>GetAddrInfoRequest object.</returns>
+        public static MessagePayloads.GetAddrInfoRequest ExtractGetAddrInfoRequest(byte[] buffer, int offset)
         {
             GetAddrInfoRequest getAddrInfoRequest = new MessagePayloads.GetAddrInfoRequest();
 
@@ -657,7 +888,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 10);
         }
 
-        public static byte[] EncodeGetAddrInfoResponse(GetAddrInfoResponse getAddrInfoResponse)
+        /// <summary>
+        /// Encode a GetAddrInfoResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getAddrInfoResponse">GetAddrInfoResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetAddrInfoResponse object.</returns>
+        public static byte[] EncodeGetAddrInfoResponse(MessagePayloads.GetAddrInfoResponse getAddrInfoResponse)
         {
             int offset = 0;
             int length = 0;
@@ -684,7 +920,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static GetAddrInfoResponse ExtractGetAddrInfoResponse(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a GetAddrInfoResponse object from a byte array.
+        /// </summary>
+        /// <param name="getAddrInfoResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>GetAddrInfoResponse object.</returns>
+        public static MessagePayloads.GetAddrInfoResponse ExtractGetAddrInfoResponse(byte[] buffer, int offset)
         {
             GetAddrInfoResponse getAddrInfoResponse = new MessagePayloads.GetAddrInfoResponse();
 
@@ -712,7 +953,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 8);
         }
 
-        public static byte[] EncodeSocketRequest(SocketRequest socketRequest)
+        /// <summary>
+        /// Encode a SocketRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="socketRequest">SocketRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SocketRequest object.</returns>
+        public static byte[] EncodeSocketRequest(MessagePayloads.SocketRequest socketRequest)
         {
             int offset = 0;
             int length = 0;
@@ -737,7 +983,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static SocketRequest ExtractSocketRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a SocketRequest object from a byte array.
+        /// </summary>
+        /// <param name="socketRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>SocketRequest object.</returns>
+        public static MessagePayloads.SocketRequest ExtractSocketRequest(byte[] buffer, int offset)
         {
             SocketRequest socketRequest = new MessagePayloads.SocketRequest();
 
@@ -761,7 +1012,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(16);
         }
 
-        public static byte[] EncodeIntegerResponse(IntegerResponse integerResponse)
+        /// <summary>
+        /// Encode a IntegerResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="integerResponse">IntegerResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded IntegerResponse object.</returns>
+        public static byte[] EncodeIntegerResponse(MessagePayloads.IntegerResponse integerResponse)
         {
             int offset = 0;
             int length = 0;
@@ -780,7 +1036,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static IntegerResponse ExtractIntegerResponse(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a IntegerResponse object from a byte array.
+        /// </summary>
+        /// <param name="integerResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>IntegerResponse object.</returns>
+        public static MessagePayloads.IntegerResponse ExtractIntegerResponse(byte[] buffer, int offset)
         {
             IntegerResponse integerResponse = new MessagePayloads.IntegerResponse();
 
@@ -798,7 +1059,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(4);
         }
 
-        public static byte[] EncodeIntegerAndErrnoResponse(IntegerAndErrnoResponse integerAndErrnoResponse)
+        /// <summary>
+        /// Encode a IntegerAndErrnoResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="integerAndErrnoResponse">IntegerAndErrnoResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded IntegerAndErrnoResponse object.</returns>
+        public static byte[] EncodeIntegerAndErrnoResponse(MessagePayloads.IntegerAndErrnoResponse integerAndErrnoResponse)
         {
             int offset = 0;
             int length = 0;
@@ -819,7 +1085,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static IntegerAndErrnoResponse ExtractIntegerAndErrnoResponse(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a IntegerAndErrnoResponse object from a byte array.
+        /// </summary>
+        /// <param name="integerAndErrnoResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>IntegerAndErrnoResponse object.</returns>
+        public static MessagePayloads.IntegerAndErrnoResponse ExtractIntegerAndErrnoResponse(byte[] buffer, int offset)
         {
             IntegerAndErrnoResponse integerAndErrnoResponse = new MessagePayloads.IntegerAndErrnoResponse();
 
@@ -839,7 +1110,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(8);
         }
 
-        public static byte[] EncodeConnectRequest(ConnectRequest connectRequest)
+        /// <summary>
+        /// Encode a ConnectRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="connectRequest">ConnectRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ConnectRequest object.</returns>
+        public static byte[] EncodeConnectRequest(MessagePayloads.ConnectRequest connectRequest)
         {
             int offset = 0;
             int length = 0;
@@ -848,7 +1124,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Calculate the amount of memory needed.
             //
             length += (int) (connectRequest.AddrLength + 4);
-            length += 8;
+            length += 4;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
@@ -862,13 +1138,16 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (connectRequest.AddrLength > 0)
             {
                 Array.Copy(connectRequest.Addr, 0, buffer, offset, connectRequest.AddrLength);
-                offset += (int) (connectRequest.AddrLength);
             }
-            EncodeInt32(connectRequest.AddrLen, buffer, offset);
             return(buffer);
         }
 
-        public static ConnectRequest ExtractConnectRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a ConnectRequest object from a byte array.
+        /// </summary>
+        /// <param name="connectRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>ConnectRequest object.</returns>
+        public static MessagePayloads.ConnectRequest ExtractConnectRequest(byte[] buffer, int offset)
         {
             ConnectRequest connectRequest = new MessagePayloads.ConnectRequest();
 
@@ -880,9 +1159,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 connectRequest.Addr = new byte[connectRequest.AddrLength];
                 Array.Copy(buffer, offset, connectRequest.Addr, 0, connectRequest.AddrLength);
-                offset += (int) connectRequest.AddrLength;
             }
-            connectRequest.AddrLen = ExtractInt32(buffer, offset);
             return(connectRequest);
         }
 
@@ -895,10 +1172,15 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int) connectRequest.AddrLength;
-            return(result + 12);
+            return(result + 8);
         }
 
-        public static byte[] EncodeFreeAddrInfoRequest(FreeAddrInfoRequest freeAddrInfoRequest)
+        /// <summary>
+        /// Encode a FreeAddrInfoRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="freeAddrInfoRequest">FreeAddrInfoRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded FreeAddrInfoRequest object.</returns>
+        public static byte[] EncodeFreeAddrInfoRequest(MessagePayloads.FreeAddrInfoRequest freeAddrInfoRequest)
         {
             int offset = 0;
             int length = 0;
@@ -917,7 +1199,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static FreeAddrInfoRequest ExtractFreeAddrInfoRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a FreeAddrInfoRequest object from a byte array.
+        /// </summary>
+        /// <param name="freeAddrInfoRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>FreeAddrInfoRequest object.</returns>
+        public static MessagePayloads.FreeAddrInfoRequest ExtractFreeAddrInfoRequest(byte[] buffer, int offset)
         {
             FreeAddrInfoRequest freeAddrInfoRequest = new MessagePayloads.FreeAddrInfoRequest();
 
@@ -935,7 +1222,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(4);
         }
 
-        public static byte[] EncodeTimeVal(TimeVal timeVal)
+        /// <summary>
+        /// Encode a TimeVal object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="timeVal">TimeVal object to be encoded.</param>
+        /// <returns>Byte array containing the encoded TimeVal object.</returns>
+        public static byte[] EncodeTimeVal(MessagePayloads.TimeVal timeVal)
         {
             int offset = 0;
             int length = 0;
@@ -956,7 +1248,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static TimeVal ExtractTimeVal(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a TimeVal object from a byte array.
+        /// </summary>
+        /// <param name="timeVal">Byte array containing the object to the extracted.</param>
+        /// <returns>TimeVal object.</returns>
+        public static MessagePayloads.TimeVal ExtractTimeVal(byte[] buffer, int offset)
         {
             TimeVal timeVal = new MessagePayloads.TimeVal();
 
@@ -976,7 +1273,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(8);
         }
 
-        public static byte[] EncodeSetSockOptRequest(SetSockOptRequest setSockOptRequest)
+        /// <summary>
+        /// Encode a SetSockOptRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="setSockOptRequest">SetSockOptRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SetSockOptRequest object.</returns>
+        public static byte[] EncodeSetSockOptRequest(MessagePayloads.SetSockOptRequest setSockOptRequest)
         {
             int offset = 0;
             int length = 0;
@@ -992,7 +1294,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeInt32(setSockOptRequest.SocketNumber, buffer, offset);
+            EncodeInt32(setSockOptRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(setSockOptRequest.Level, buffer, offset);
             offset += 4;
@@ -1009,11 +1311,16 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static SetSockOptRequest ExtractSetSockOptRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a SetSockOptRequest object from a byte array.
+        /// </summary>
+        /// <param name="setSockOptRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>SetSockOptRequest object.</returns>
+        public static MessagePayloads.SetSockOptRequest ExtractSetSockOptRequest(byte[] buffer, int offset)
         {
             SetSockOptRequest setSockOptRequest = new MessagePayloads.SetSockOptRequest();
 
-            setSockOptRequest.SocketNumber = ExtractInt32(buffer, offset);
+            setSockOptRequest.SocketHandle = ExtractInt32(buffer, offset);
             offset += 4;
             setSockOptRequest.Level = ExtractInt32(buffer, offset);
             offset += 4;
@@ -1043,7 +1350,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 20);
         }
 
-        public static byte[] EncodeLinger(Linger linger)
+        /// <summary>
+        /// Encode a Linger object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="linger">Linger object to be encoded.</param>
+        /// <returns>Byte array containing the encoded Linger object.</returns>
+        public static byte[] EncodeLinger(MessagePayloads.Linger linger)
         {
             int offset = 0;
             int length = 0;
@@ -1064,7 +1376,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static Linger ExtractLinger(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a Linger object from a byte array.
+        /// </summary>
+        /// <param name="linger">Byte array containing the object to the extracted.</param>
+        /// <returns>Linger object.</returns>
+        public static MessagePayloads.Linger ExtractLinger(byte[] buffer, int offset)
         {
             Linger linger = new MessagePayloads.Linger();
 
@@ -1084,7 +1401,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(8);
         }
 
-        public static byte[] EncodeWriteRequest(WriteRequest writeRequest)
+        /// <summary>
+        /// Encode a WriteRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="writeRequest">WriteRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded WriteRequest object.</returns>
+        public static byte[] EncodeWriteRequest(MessagePayloads.WriteRequest writeRequest)
         {
             int offset = 0;
             int length = 0;
@@ -1113,7 +1435,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static WriteRequest ExtractWriteRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a WriteRequest object from a byte array.
+        /// </summary>
+        /// <param name="writeRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>WriteRequest object.</returns>
+        public static MessagePayloads.WriteRequest ExtractWriteRequest(byte[] buffer, int offset)
         {
             WriteRequest writeRequest = new MessagePayloads.WriteRequest();
 
@@ -1143,7 +1470,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 12);
         }
 
-        public static byte[] EncodeReadRequest(ReadRequest readRequest)
+        /// <summary>
+        /// Encode a ReadRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="readRequest">ReadRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ReadRequest object.</returns>
+        public static byte[] EncodeReadRequest(MessagePayloads.ReadRequest readRequest)
         {
             int offset = 0;
             int length = 0;
@@ -1164,7 +1496,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static ReadRequest ExtractReadRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a ReadRequest object from a byte array.
+        /// </summary>
+        /// <param name="readRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>ReadRequest object.</returns>
+        public static MessagePayloads.ReadRequest ExtractReadRequest(byte[] buffer, int offset)
         {
             ReadRequest readRequest = new MessagePayloads.ReadRequest();
 
@@ -1184,7 +1521,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(8);
         }
 
-        public static byte[] EncodeReadResponse(ReadResponse readResponse)
+        /// <summary>
+        /// Encode a ReadResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="readResponse">ReadResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ReadResponse object.</returns>
+        public static byte[] EncodeReadResponse(MessagePayloads.ReadResponse readResponse)
         {
             int offset = 0;
             int length = 0;
@@ -1213,7 +1555,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static ReadResponse ExtractReadResponse(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a ReadResponse object from a byte array.
+        /// </summary>
+        /// <param name="readResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>ReadResponse object.</returns>
+        public static MessagePayloads.ReadResponse ExtractReadResponse(byte[] buffer, int offset)
         {
             ReadResponse readResponse = new MessagePayloads.ReadResponse();
 
@@ -1243,7 +1590,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 12);
         }
 
-        public static byte[] EncodeCloseRequest(CloseRequest closeRequest)
+        /// <summary>
+        /// Encode a CloseRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="closeRequest">CloseRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded CloseRequest object.</returns>
+        public static byte[] EncodeCloseRequest(MessagePayloads.CloseRequest closeRequest)
         {
             int offset = 0;
             int length = 0;
@@ -1262,7 +1614,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static CloseRequest ExtractCloseRequest(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a CloseRequest object from a byte array.
+        /// </summary>
+        /// <param name="closeRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>CloseRequest object.</returns>
+        public static MessagePayloads.CloseRequest ExtractCloseRequest(byte[] buffer, int offset)
         {
             CloseRequest closeRequest = new MessagePayloads.CloseRequest();
 
@@ -1280,7 +1637,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(4);
         }
 
-        public static byte[] EncodeGetBatteryChargeLevelResponse(GetBatteryChargeLevelResponse getBatteryChargeLevelResponse)
+        /// <summary>
+        /// Encode a GetBatteryChargeLevelResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getBatteryChargeLevelResponse">GetBatteryChargeLevelResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetBatteryChargeLevelResponse object.</returns>
+        public static byte[] EncodeGetBatteryChargeLevelResponse(MessagePayloads.GetBatteryChargeLevelResponse getBatteryChargeLevelResponse)
         {
             int offset = 0;
             int length = 0;
@@ -1299,7 +1661,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(buffer);
         }
 
-        public static GetBatteryChargeLevelResponse ExtractGetBatteryChargeLevelResponse(byte[] buffer, int offset)
+        /// <summary>
+        /// Extract a GetBatteryChargeLevelResponse object from a byte array.
+        /// </summary>
+        /// <param name="getBatteryChargeLevelResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>GetBatteryChargeLevelResponse object.</returns>
+        public static MessagePayloads.GetBatteryChargeLevelResponse ExtractGetBatteryChargeLevelResponse(byte[] buffer, int offset)
         {
             GetBatteryChargeLevelResponse getBatteryChargeLevelResponse = new MessagePayloads.GetBatteryChargeLevelResponse();
 
@@ -1315,6 +1682,499 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public static int EncodedGetBatteryChargeLevelResponseBufferSize(MessagePayloads.GetBatteryChargeLevelResponse getBatteryChargeLevelResponse)
         {
             return(4);
+        }
+
+        /// <summary>
+        /// Encode a SendRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="sendRequest">SendRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SendRequest object.</returns>
+        public static byte[] EncodeSendRequest(MessagePayloads.SendRequest sendRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (sendRequest.BufferLength + 4);
+            length += 12;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(sendRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeUInt32(sendRequest.BufferLength, buffer, offset);
+            offset += 4;
+            if (sendRequest.BufferLength > 0)
+            {
+                Array.Copy(sendRequest.Buffer, 0, buffer, offset, sendRequest.BufferLength);
+                offset += (int) (sendRequest.BufferLength);
+            }
+            EncodeInt32(sendRequest.Length, buffer, offset);
+            offset += 4;
+            EncodeInt32(sendRequest.Flags, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a SendRequest object from a byte array.
+        /// </summary>
+        /// <param name="sendRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>SendRequest object.</returns>
+        public static MessagePayloads.SendRequest ExtractSendRequest(byte[] buffer, int offset)
+        {
+            SendRequest sendRequest = new MessagePayloads.SendRequest();
+
+            sendRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            sendRequest.BufferLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (sendRequest.BufferLength > 0)
+            {
+                sendRequest.Buffer = new byte[sendRequest.BufferLength];
+                Array.Copy(buffer, offset, sendRequest.Buffer, 0, sendRequest.BufferLength);
+                offset += (int) sendRequest.BufferLength;
+            }
+            sendRequest.Length = ExtractInt32(buffer, offset);
+            offset += 4;
+            sendRequest.Flags = ExtractInt32(buffer, offset);
+            return(sendRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the SendRequest object.
+        /// </summary>
+        /// <param name="sendRequest">SendRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded SendRequest object.</returns>
+        public static int EncodedSendRequestBufferSize(MessagePayloads.SendRequest sendRequest)
+        {
+            int result = 0;
+            result += (int) sendRequest.BufferLength;
+            return(result + 16);
+        }
+
+        /// <summary>
+        /// Encode a SendToRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="sendToRequest">SendToRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SendToRequest object.</returns>
+        public static byte[] EncodeSendToRequest(MessagePayloads.SendToRequest sendToRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (sendToRequest.BufferLength + 4);
+            length += (int) (sendToRequest.DestinationAddressLength + 4);
+            length += 12;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(sendToRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeUInt32(sendToRequest.BufferLength, buffer, offset);
+            offset += 4;
+            if (sendToRequest.BufferLength > 0)
+            {
+                Array.Copy(sendToRequest.Buffer, 0, buffer, offset, sendToRequest.BufferLength);
+                offset += (int) (sendToRequest.BufferLength);
+            }
+            EncodeInt32(sendToRequest.Length, buffer, offset);
+            offset += 4;
+            EncodeInt32(sendToRequest.Flags, buffer, offset);
+            offset += 4;
+            EncodeUInt32(sendToRequest.DestinationAddressLength, buffer, offset);
+            offset += 4;
+            if (sendToRequest.DestinationAddressLength > 0)
+            {
+                Array.Copy(sendToRequest.DestinationAddress, 0, buffer, offset, sendToRequest.DestinationAddressLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a SendToRequest object from a byte array.
+        /// </summary>
+        /// <param name="sendToRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>SendToRequest object.</returns>
+        public static MessagePayloads.SendToRequest ExtractSendToRequest(byte[] buffer, int offset)
+        {
+            SendToRequest sendToRequest = new MessagePayloads.SendToRequest();
+
+            sendToRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            sendToRequest.BufferLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (sendToRequest.BufferLength > 0)
+            {
+                sendToRequest.Buffer = new byte[sendToRequest.BufferLength];
+                Array.Copy(buffer, offset, sendToRequest.Buffer, 0, sendToRequest.BufferLength);
+                offset += (int) sendToRequest.BufferLength;
+            }
+            sendToRequest.Length = ExtractInt32(buffer, offset);
+            offset += 4;
+            sendToRequest.Flags = ExtractInt32(buffer, offset);
+            offset += 4;
+            sendToRequest.DestinationAddressLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (sendToRequest.DestinationAddressLength > 0)
+            {
+                sendToRequest.DestinationAddress = new byte[sendToRequest.DestinationAddressLength];
+                Array.Copy(buffer, offset, sendToRequest.DestinationAddress, 0, sendToRequest.DestinationAddressLength);
+            }
+            return(sendToRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the SendToRequest object.
+        /// </summary>
+        /// <param name="sendToRequest">SendToRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded SendToRequest object.</returns>
+        public static int EncodedSendToRequestBufferSize(MessagePayloads.SendToRequest sendToRequest)
+        {
+            int result = 0;
+            result += (int) sendToRequest.BufferLength;
+            result += (int) sendToRequest.DestinationAddressLength;
+            return(result + 20);
+        }
+
+        /// <summary>
+        /// Encode a RecvFromRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="recvFromRequest">RecvFromRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded RecvFromRequest object.</returns>
+        public static byte[] EncodeRecvFromRequest(MessagePayloads.RecvFromRequest recvFromRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 16;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(recvFromRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeInt32(recvFromRequest.Length, buffer, offset);
+            offset += 4;
+            EncodeInt32(recvFromRequest.Flags, buffer, offset);
+            offset += 4;
+            EncodeInt32(recvFromRequest.GetSourceAddress, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a RecvFromRequest object from a byte array.
+        /// </summary>
+        /// <param name="recvFromRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>RecvFromRequest object.</returns>
+        public static MessagePayloads.RecvFromRequest ExtractRecvFromRequest(byte[] buffer, int offset)
+        {
+            RecvFromRequest recvFromRequest = new MessagePayloads.RecvFromRequest();
+
+            recvFromRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            recvFromRequest.Length = ExtractInt32(buffer, offset);
+            offset += 4;
+            recvFromRequest.Flags = ExtractInt32(buffer, offset);
+            offset += 4;
+            recvFromRequest.GetSourceAddress = ExtractInt32(buffer, offset);
+            return(recvFromRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the RecvFromRequest object.
+        /// </summary>
+        /// <param name="recvFromRequest">RecvFromRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded RecvFromRequest object.</returns>
+        public static int EncodedRecvFromRequestBufferSize(MessagePayloads.RecvFromRequest recvFromRequest)
+        {
+            return(16);
+        }
+
+        /// <summary>
+        /// Encode a RecvFromResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="recvFromResponse">RecvFromResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded RecvFromResponse object.</returns>
+        public static byte[] EncodeRecvFromResponse(MessagePayloads.RecvFromResponse recvFromResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (recvFromResponse.BufferLength + 4);
+            length += (int) (recvFromResponse.SourceAddressLength + 4);
+            length += 12;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(recvFromResponse.BufferLength, buffer, offset);
+            offset += 4;
+            if (recvFromResponse.BufferLength > 0)
+            {
+                Array.Copy(recvFromResponse.Buffer, 0, buffer, offset, recvFromResponse.BufferLength);
+                offset += (int) (recvFromResponse.BufferLength);
+            }
+            EncodeInt32(recvFromResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(recvFromResponse.ResponseErrno, buffer, offset);
+            offset += 4;
+            EncodeUInt32(recvFromResponse.SourceAddressLength, buffer, offset);
+            offset += 4;
+            if (recvFromResponse.SourceAddressLength > 0)
+            {
+                Array.Copy(recvFromResponse.SourceAddress, 0, buffer, offset, recvFromResponse.SourceAddressLength);
+                offset += (int) (recvFromResponse.SourceAddressLength);
+            }
+            EncodeUInt32(recvFromResponse.SourceAddressLen, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a RecvFromResponse object from a byte array.
+        /// </summary>
+        /// <param name="recvFromResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>RecvFromResponse object.</returns>
+        public static MessagePayloads.RecvFromResponse ExtractRecvFromResponse(byte[] buffer, int offset)
+        {
+            RecvFromResponse recvFromResponse = new MessagePayloads.RecvFromResponse();
+
+            recvFromResponse.BufferLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (recvFromResponse.BufferLength > 0)
+            {
+                recvFromResponse.Buffer = new byte[recvFromResponse.BufferLength];
+                Array.Copy(buffer, offset, recvFromResponse.Buffer, 0, recvFromResponse.BufferLength);
+                offset += (int) recvFromResponse.BufferLength;
+            }
+            recvFromResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            recvFromResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            offset += 4;
+            recvFromResponse.SourceAddressLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (recvFromResponse.SourceAddressLength > 0)
+            {
+                recvFromResponse.SourceAddress = new byte[recvFromResponse.SourceAddressLength];
+                Array.Copy(buffer, offset, recvFromResponse.SourceAddress, 0, recvFromResponse.SourceAddressLength);
+                offset += (int) recvFromResponse.SourceAddressLength;
+            }
+            recvFromResponse.SourceAddressLen = ExtractUInt32(buffer, offset);
+            return(recvFromResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the RecvFromResponse object.
+        /// </summary>
+        /// <param name="recvFromResponse">RecvFromResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded RecvFromResponse object.</returns>
+        public static int EncodedRecvFromResponseBufferSize(MessagePayloads.RecvFromResponse recvFromResponse)
+        {
+            int result = 0;
+            result += (int) recvFromResponse.BufferLength;
+            result += (int) recvFromResponse.SourceAddressLength;
+            return(result + 20);
+        }
+
+        /// <summary>
+        /// Encode a PollRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="pollRequest">PollRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded PollRequest object.</returns>
+        public static byte[] EncodePollRequest(MessagePayloads.PollRequest pollRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 18;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(pollRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeUInt16(pollRequest.Events, buffer, offset);
+            offset += 2;
+            EncodeInt32(pollRequest.Timeout, buffer, offset);
+            offset += 4;
+            EncodeInt32(pollRequest.Setup, buffer, offset);
+            offset += 4;
+            EncodeUInt32(pollRequest.SetupMessageId, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a PollRequest object from a byte array.
+        /// </summary>
+        /// <param name="pollRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>PollRequest object.</returns>
+        public static MessagePayloads.PollRequest ExtractPollRequest(byte[] buffer, int offset)
+        {
+            PollRequest pollRequest = new MessagePayloads.PollRequest();
+
+            pollRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            pollRequest.Events = ExtractUInt16(buffer, offset);
+            offset += 2;
+            pollRequest.Timeout = ExtractInt32(buffer, offset);
+            offset += 4;
+            pollRequest.Setup = ExtractInt32(buffer, offset);
+            offset += 4;
+            pollRequest.SetupMessageId = ExtractUInt32(buffer, offset);
+            return(pollRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the PollRequest object.
+        /// </summary>
+        /// <param name="pollRequest">PollRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded PollRequest object.</returns>
+        public static int EncodedPollRequestBufferSize(MessagePayloads.PollRequest pollRequest)
+        {
+            return(18);
+        }
+
+        /// <summary>
+        /// Encode a PollResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="pollResponse">PollResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded PollResponse object.</returns>
+        public static byte[] EncodePollResponse(MessagePayloads.PollResponse pollResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 10;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt16(pollResponse.ReturnedEvents, buffer, offset);
+            offset += 2;
+            EncodeInt32(pollResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(pollResponse.ResponseErrno, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a PollResponse object from a byte array.
+        /// </summary>
+        /// <param name="pollResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>PollResponse object.</returns>
+        public static MessagePayloads.PollResponse ExtractPollResponse(byte[] buffer, int offset)
+        {
+            PollResponse pollResponse = new MessagePayloads.PollResponse();
+
+            pollResponse.ReturnedEvents = ExtractUInt16(buffer, offset);
+            offset += 2;
+            pollResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            pollResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            return(pollResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the PollResponse object.
+        /// </summary>
+        /// <param name="pollResponse">PollResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded PollResponse object.</returns>
+        public static int EncodedPollResponseBufferSize(MessagePayloads.PollResponse pollResponse)
+        {
+            return(10);
+        }
+
+        /// <summary>
+        /// Encode a InterruptPollResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="interruptPollResponse">InterruptPollResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded InterruptPollResponse object.</returns>
+        public static byte[] EncodeInterruptPollResponse(MessagePayloads.InterruptPollResponse interruptPollResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 18;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(interruptPollResponse.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeInt32(interruptPollResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(interruptPollResponse.ResponseErrno, buffer, offset);
+            offset += 4;
+            EncodeUInt16(interruptPollResponse.ReturnedEvents, buffer, offset);
+            offset += 2;
+            EncodeUInt32(interruptPollResponse.SetupMessageId, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a InterruptPollResponse object from a byte array.
+        /// </summary>
+        /// <param name="interruptPollResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>InterruptPollResponse object.</returns>
+        public static MessagePayloads.InterruptPollResponse ExtractInterruptPollResponse(byte[] buffer, int offset)
+        {
+            InterruptPollResponse interruptPollResponse = new MessagePayloads.InterruptPollResponse();
+
+            interruptPollResponse.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            interruptPollResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            interruptPollResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            offset += 4;
+            interruptPollResponse.ReturnedEvents = ExtractUInt16(buffer, offset);
+            offset += 2;
+            interruptPollResponse.SetupMessageId = ExtractUInt32(buffer, offset);
+            return(interruptPollResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the InterruptPollResponse object.
+        /// </summary>
+        /// <param name="interruptPollResponse">InterruptPollResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded InterruptPollResponse object.</returns>
+        public static int EncodedInterruptPollResponseBufferSize(MessagePayloads.InterruptPollResponse interruptPollResponse)
+        {
+            return(18);
         }
 
     }
