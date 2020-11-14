@@ -1,5 +1,5 @@
 //
-//
+//      
 //
 //      Message encoders and decoders.
 //
@@ -10,33 +10,41 @@
 //
 //      *************************** WARNING ***************************
 //
-
 using System;
 
-namespace Meadow.Devices.Esp32.MessagePayloads //Meadow.Hardware.Coprocessor.MessagePayloads
+namespace Meadow.Devices.Esp32.MessagePayloads
 {
     public struct SystemConfiguration
     {
-        public UInt32 MessageSize;
-    };
-
-    public struct WiFiConfiguration
-    {
-        public Byte AutomaticReconnect;
+        public String SoftwareVersion;
+        public Byte MaximumMessageQueueLength;
+        public Byte AutomaticallyStartNetwork;
+        public Byte AutomaticallyReconnect;
         public UInt32 MaximumRetryCount;
         public Byte Antenna;
-        public Byte MaximumMessageQueueLength;
+        public Byte[] BoardMacAddress;
+        public Byte[] SoftApMacAddress;
+        public String DeviceName;
+        public String DefaultAccessPoint;
+        public String NtpServer;
+        public Int32 GetTimeAtStartup;
+        public Byte UseDhcp;
+        public UInt32 StaticIpAddress;
+        public UInt32 DnsServer;
+        public UInt32 DefaultGateway;
+    };
+
+    public struct ConfigurationValue
+    {
+        public UInt32 Item;
+        public UInt32 ValueLength;
+        public byte[] Value;
     };
 
     public struct WiFiCredentials
     {
         public String NetworkName;
         public String Password;
-    };
-
-    public struct AntennaInfo
-    {
-        public Byte Antenna;
     };
 
     public struct AccessPoint
@@ -59,9 +67,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads //Meadow.Hardware.Coprocessor.Mes
 
     public struct SockAddr
     {
-        public Byte Length;
         public Byte Family;
-        public Byte[] Data;
+        public UInt16 Port;
+        public UInt32 Ip4Address;
+        public UInt32 FlowInfo;
+        public Byte[] Ip6Address;
+        public UInt32 ScopeID;
     };
 
     public struct AddrInfo
@@ -119,7 +130,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads //Meadow.Hardware.Coprocessor.Mes
         public Int32 SocketHandle;
         public UInt32 AddrLength;
         public byte[] Addr;
-        public Int32 AddrLen;
     };
 
     public struct FreeAddrInfoRequest
@@ -135,7 +145,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads //Meadow.Hardware.Coprocessor.Mes
 
     public struct SetSockOptRequest
     {
-        public Int32 SocketNumber;
+        public Int32 SocketHandle;
         public Int32 Level;
         public Int32 OptionName;
         public UInt32 OptionValueLength;
@@ -179,6 +189,70 @@ namespace Meadow.Devices.Esp32.MessagePayloads //Meadow.Hardware.Coprocessor.Mes
     public struct GetBatteryChargeLevelResponse
     {
         public UInt32 Level;
+    };
+
+    public struct SendRequest
+    {
+        public Int32 SocketHandle;
+        public UInt32 BufferLength;
+        public byte[] Buffer;
+        public Int32 Length;
+        public Int32 Flags;
+    };
+
+    public struct SendToRequest
+    {
+        public Int32 SocketHandle;
+        public UInt32 BufferLength;
+        public byte[] Buffer;
+        public Int32 Length;
+        public Int32 Flags;
+        public UInt32 DestinationAddressLength;
+        public byte[] DestinationAddress;
+    };
+
+    public struct RecvFromRequest
+    {
+        public Int32 SocketHandle;
+        public Int32 Length;
+        public Int32 Flags;
+        public Int32 GetSourceAddress;
+    };
+
+    public struct RecvFromResponse
+    {
+        public UInt32 BufferLength;
+        public byte[] Buffer;
+        public Int32 Result;
+        public Int32 ResponseErrno;
+        public UInt32 SourceAddressLength;
+        public byte[] SourceAddress;
+        public UInt32 SourceAddressLen;
+    };
+
+    public struct PollRequest
+    {
+        public Int32 SocketHandle;
+        public UInt16 Events;
+        public Int32 Timeout;
+        public Int32 Setup;
+        public UInt32 SetupMessageId;
+    };
+
+    public struct PollResponse
+    {
+        public UInt16 ReturnedEvents;
+        public Int32 Result;
+        public Int32 ResponseErrno;
+    };
+
+    public struct InterruptPollResponse
+    {
+        public Int32 SocketHandle;
+        public Int32 Result;
+        public Int32 ResponseErrno;
+        public UInt16 ReturnedEvents;
+        public UInt32 SetupMessageId;
     };
 
 }
