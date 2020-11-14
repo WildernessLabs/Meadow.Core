@@ -15,7 +15,19 @@ namespace Meadow
         public void Sleep()
         {
             Console.WriteLine("! Software Sleep Requested !");
-            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep);
+            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep1);
+        }
+
+        public void WatchdogEnable(ulong timoutMs)
+        {
+            Console.WriteLine("! Watchdog Enable !");
+            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerWDSet, ref timoutMs);
+        }
+
+        public void WatchdogReset()
+        {
+            Console.WriteLine("! Watchdog Reset !");
+            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerWDPet);
         }
     }
 }

@@ -166,7 +166,10 @@ namespace Meadow.Core
                 Esp32Command = 61,
 
                 PowerReset = 71,
-                PowerSleep = 72,
+                PowerSleep1 = 72,
+                PowerSleep2 = 73,
+                PowerWDSet = 74,
+                PowerWDPet = 75,
             }
 
             public struct UpdRegisterValue
