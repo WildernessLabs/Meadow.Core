@@ -34,7 +34,7 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int mq_timedreceive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio, ref timespec abs_timeout);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int mq_receive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]

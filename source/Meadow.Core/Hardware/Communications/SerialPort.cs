@@ -31,6 +31,7 @@ namespace Meadow.Hardware
         protected int _baudRate;
 
         protected object _accessLock = new object();
+        private int _writeTimeout;
 
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
@@ -76,6 +77,19 @@ namespace Meadow.Hardware
                     throw new ArgumentOutOfRangeException();
                 }
                 _readTimeout = value;
+            }
+        }
+
+        public int WriteTimeout
+        {
+            get => _writeTimeout;
+            set
+            {
+                if (value == 0 || value < -1)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                _writeTimeout = value;
             }
         }
 
@@ -337,35 +351,56 @@ namespace Meadow.Hardware
                 Output.WriteLineIf(_showSerialDebug, $"count:{count}, maxCount:{maxCount}");
                 Output.WriteLineIf(_showSerialDebug, $"Starting with: {(BitConverter.ToString(buffer, 0, (buffer.Length > 6) ? 6 : buffer.Length))}");
 
-                // we can only write 255 bytes at a time, so we loop 
-                while (totalBytesWritten < count)
+                Timer writeTimeoutTimer = null;
+
+                if(WriteTimeout > 0)
                 {
-                    // if there's an offset, we want to slice
-                    if (currentIndex > 0)
+                    writeTimeoutTimer = new Timer((o) =>
                     {
-                        Output.WriteLineIf(_showSerialDebug, $"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
-                        Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
-                        result = Nuttx.write(_driverHandle, data.ToArray(), count);
-                    }
-                    else
-                    {
-                        result = Nuttx.write(_driverHandle, buffer, count);
-                    }
-                    // if there was an error, pull it out of NuttX
-                    if (result < 0)
-                    {
-                        throw new NativeException(UPD.GetLastError());
-                    }
-                    // otherwise,
-                    totalBytesWritten += result;
+                        throw new TimeoutException("Write timeout");
+                    }, null, WriteTimeout, Timeout.Infinite);
+                }
 
-                    Output.WriteLineIf(_showSerialDebug, $"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+                // we can only write 255 bytes at a time, so we loop 
+                try
+                {
+                    while (totalBytesWritten < count)
+                    {
+                        // if there's an offset, we want to slice
+                        if (currentIndex > 0)
+                        {
+                            Output.WriteLineIf(_showSerialDebug, $"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                            Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
+                            result = Nuttx.write(_driverHandle, data.ToArray(), count);
+                        }
+                        else
+                        {
+                            result = Nuttx.write(_driverHandle, buffer, count);
+                        }
+                        // if there was an error, pull it out of NuttX
+                        if (result < 0)
+                        {
+                            throw new NativeException(UPD.GetLastError());
+                        }
+                        // otherwise,
+                        totalBytesWritten += result;
 
-                    // recalculate the current index, including the original offset
-                    currentIndex = totalBytesWritten + index;
-                    bytesLeft = count - totalBytesWritten;
-                    bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
-                    Output.WriteLineIf(_showSerialDebug, $"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                        Output.WriteLineIf(_showSerialDebug, $"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+
+                        // recalculate the current index, including the original offset
+                        currentIndex = totalBytesWritten + index;
+                        bytesLeft = count - totalBytesWritten;
+                        bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
+                        Output.WriteLineIf(_showSerialDebug, $"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                    }
+                }
+                finally
+                {
+                    if(writeTimeoutTimer != null)
+                    {
+                        writeTimeoutTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                        writeTimeoutTimer.Dispose();
+                    }
                 }
 
                 return totalBytesWritten;

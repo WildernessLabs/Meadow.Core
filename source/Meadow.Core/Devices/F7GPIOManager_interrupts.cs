@@ -16,8 +16,8 @@ namespace Meadow.Devices
     {
         public event InterruptHandler Interrupt;
 
-        private Thread _ist;
-        private Dictionary<int, int> _interruptGroupInUseByPin = new Dictionary<int, int>();
+        private Thread _ist = null;
+        private List<int> _interruptGroupsInUse = new List<int>();
 
         public void WireInterrupt(IPin pin, InterruptMode interruptMode,
                      Meadow.Hardware.ResistorMode resistorMode,
@@ -46,26 +46,24 @@ namespace Meadow.Devices
                     STM32.ResistorMode resistorMode,
                     double debounceDuration, double glitchDuration)
         {
+            Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" + Wire Interrupt {interruptMode}");
+
             if (interruptMode != InterruptMode.None)
             {
-                lock (_interruptGroupInUseByPin)
+                lock (_interruptGroupsInUse)
                 {
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin}");
+
                     // interrupt group is effectively the pin number
-                    var group = pin;
-                    if(_interruptGroupInUseByPin.ContainsKey(group))
+                    if (_interruptGroupsInUse.Contains(pin))
                     {
-                        if(_interruptGroupInUseByPin[group] > 0)
-                        {
-                            throw new InterruptGroupInUseException(group, _interruptGroupInUseByPin[group]);
-                        }
-                        else
-                        {
-                            _interruptGroupInUseByPin[group] = pin;
-                        }
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} in use");
+                        throw new InterruptGroupInUseException(pin);
                     }
                     else
                     {
-                        _interruptGroupInUseByPin.Add(group, pin);
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} not in use");
+                        _interruptGroupsInUse.Add(pin);
                     }
                 }
 
@@ -124,16 +122,17 @@ namespace Meadow.Devices
 
                 var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 
-                lock (_interruptGroupInUseByPin)
+                lock (_interruptGroupsInUse)
                 {
-                    // interrupt group is effectively the Port designation, base-1
-                    var group = (int)port + 1;
-                    if (_interruptGroupInUseByPin[group] != pin)
+                    if (_interruptGroupsInUse.Contains(pin))
                     {
-                        throw new Exception("Cannot disconnect an interrupt for this pin.  It is in use by another.");
+                        _interruptGroupsInUse.Remove(pin);
                     }
-                    // set an invalid number instead of removing from the dictionary.  This is minor, but results in less allocations.
-                    _interruptGroupInUseByPin[group] = -1;
+                    else
+                    {
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                            $"Int group: {pin} not in use");
+                    }
                 }
             }
         }
@@ -151,31 +150,45 @@ namespace Meadow.Devices
             while (true)
             {
                 int priority = 0;
-                var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    $"queue data arrived: {BitConverter.ToString(rx_buffer)}");
-
-                // byte 1 contains the port and pin, byte 2 contains the stable state.
-                if (result >= 0)
+                try
                 {
-                    var irq = rx_buffer[0];
-                    bool state = rx_buffer[1] == 0 ? false : true;
-                    var port = irq >> 4;
-                    var pin = irq & 0xf;
-                    var key = $"P{(char)(65 + port)}{pin}";
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                        $"+mq_receive...");
+
+                    var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
 
                     Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"Interrupt on {key} state:{state}");
+                        $"-mq_receive...");
 
-                    lock (_interruptPins)
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                        $"queue data arrived: {BitConverter.ToString(rx_buffer)}");
+
+                    // byte 1 contains the port and pin, byte 2 contains the stable state.
+                    if (result >= 0)
                     {
-                        if (_interruptPins.ContainsKey(key))
+                        var irq = rx_buffer[0];
+                        bool state = rx_buffer[1] == 0 ? false : true;
+                        var port = irq >> 4;
+                        var pin = irq & 0xf;
+                        var key = $"P{(char)(65 + port)}{pin}";
+
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                            $"Interrupt on {key} state:{state}");
+
+                        lock (_interruptPins)
                         {
-                            var ipin = _interruptPins[key];
-                            Interrupt?.Invoke(ipin, state);
+                            if (_interruptPins.ContainsKey(key))
+                            {
+                                var ipin = _interruptPins[key];
+                                Interrupt?.Invoke(ipin, state);
+                            }
                         }
                     }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"IST: {ex.Message}");
+                    Thread.Sleep(5000);
                 }
             }
         }

@@ -125,6 +125,7 @@ namespace Meadow.Hardware
                 if (disposing)
                 {
                     DeviceChannelManager.ReleasePin(Pin);
+                    IOController.UnconfigureGpio(Pin);
                 }
                 disposed = true;
             }
