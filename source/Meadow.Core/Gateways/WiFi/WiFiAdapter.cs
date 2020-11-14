@@ -25,18 +25,18 @@ namespace Meadow.Gateway.WiFi
         /// Minimum delay (in milliseconds) that can be used for the <see cref="ScanFrequency"/>.
         /// </summary>
         public const ushort MINIMUM_SCAN_FREQUENCY = 1000;
-        
+
         /// <summary>
         /// Maximum delay (in milliseconds) that can be used for the <see cref="ScanFrequency"/>.
         /// </summary>
         public const ushort MAXIMUM_SCAN_FREQUENCY = 60000;
-        
+
         #endregion Constants
-        
+
         #region Properties
-        
+
         /// <summary>
-        /// Observable collection of <see cref="WifiNetwork"/>s that were detected on the last scan. 
+        /// Observable collection of <see cref="WifiNetwork"/>s that were detected on the last scan.
         /// </summary>
         public ObservableCollection<WifiNetwork> Networks { get; private set; }
 
@@ -44,7 +44,7 @@ namespace Meadow.Gateway.WiFi
         /// Is the WiFi adapter currently connected to an access point?
         /// </summary>
         public bool IsConnected { get { return(NetworkAdapter.IsConnected); } }
-        
+
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
         /// </summary>
@@ -78,11 +78,11 @@ namespace Meadow.Gateway.WiFi
         /// Network adapter.
         /// </summary>
         private IWiFiAdapter NetworkAdapter { get; set; }
-        
+
         #endregion Properties
 
         #region Constructor(s)
-        
+
         /// <summary>
         /// Default constructor private to prevent it from being called.
         /// </summary>
@@ -100,7 +100,7 @@ namespace Meadow.Gateway.WiFi
             Networks = new ObservableCollection<WifiNetwork>();
             HasInternetAccess = false;
         }
-        
+
         #endregion Constructor(s)
 
         #region Methods
@@ -109,7 +109,7 @@ namespace Meadow.Gateway.WiFi
         /// Scan for networks.
         /// </summary>
         /// <remarks>
-        /// 
+        ///
         /// </remarks>
         public void Scan()
         {
@@ -167,7 +167,7 @@ namespace Meadow.Gateway.WiFi
             // return new Task<ConnectionResult>(() =>
             // {
                 ConnectionResult result;
-                if (NetworkAdapter.StartNetwork(ssid, password, reconnection))
+                if (NetworkAdapter.ConnectToAccessPoint(ssid, password, reconnection))
                 {
                     HasInternetAccess = true;
                     result = new ConnectionResult(ConnectionStatus.Success);

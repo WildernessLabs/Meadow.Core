@@ -1,6 +1,7 @@
 ﻿using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -56,6 +57,11 @@ namespace Meadow.Devices
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.
             //this.InitEsp32CoProc();
+        }
+
+        public IPin GetPin(string pinName)
+        {
+            return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
         public Task<bool> InitWiFiAdapter()

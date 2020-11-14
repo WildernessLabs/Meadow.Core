@@ -1,13 +1,9 @@
 ﻿using Meadow.Devices;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Meadow;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
@@ -35,6 +31,7 @@ namespace Meadow.Hardware
         protected int _baudRate;
 
         protected object _accessLock = new object();
+        private int _writeTimeout;
 
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
@@ -70,20 +67,37 @@ namespace Meadow.Hardware
         /// The number of milliseconds before a time-out occurs when a read operation does not finish.
         /// </summary>
         /// <remarks>The time-out can be set to any value greater than zero, or set to InfiniteTimeout, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        public int ReadTimeout {
+        public int ReadTimeout
+        {
             get => _readTimeout;
-            set {
-                if (value == 0 || value < -1) {
+            set
+            {
+                if (value == 0 || value < -1)
+                {
                     throw new ArgumentOutOfRangeException();
                 }
                 _readTimeout = value;
             }
         }
 
+        public int WriteTimeout
+        {
+            get => _writeTimeout;
+            set
+            {
+                if (value == 0 || value < -1)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+                _writeTimeout = value;
+            }
+        }
+
         /// <summary>
         /// Gets the number of bytes of data in the receive buffer.
         /// </summary>
-        public int BytesToRead {
+        public int BytesToRead
+        {
             get => _readBuffer == null ? 0 : _readBuffer.Count;
         }
 
@@ -145,9 +159,11 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets or sets the serial baud rate.
         /// </summary>
-        public int BaudRate {
+        public int BaudRate
+        {
             get => _baudRate;
-            set {
+            set
+            {
                 if (value == BaudRate) return;
                 if (value <= 0) throw new ArgumentOutOfRangeException();
                 if (IsOpen) throw new IOException("You cannot change BaudRate on an Open port");
@@ -164,8 +180,10 @@ namespace Meadow.Hardware
         {
             var allDevices = F7Micro.FileSystem.EnumDirectory(DriverFolder);
             var list = new List<string>();
-            foreach (var s in allDevices) {
-                if (s.StartsWith(SerialPortDriverPrefix)) {
+            foreach (var s in allDevices)
+            {
+                if (s.StartsWith(SerialPortDriverPrefix))
+                {
                     list.Add(s);
                 }
             }
@@ -198,9 +216,11 @@ namespace Meadow.Hardware
         /// <summary>
         /// The buffer size, in bytes.
         /// </summary>
-        public int ReceiveBufferSize {
+        public int ReceiveBufferSize
+        {
             get => _readBuffer == null ? 0 : _readBuffer.MaxElements;
-            private set {
+            private set
+            {
                 if (value == ReceiveBufferSize) { return; }
                 // TODO: if there are events wired, we need to handle that.
                 // for now this is private to prevent resizing
@@ -211,9 +231,12 @@ namespace Meadow.Hardware
 
         private void OnReadBufferOverrun(object sender, EventArgs e)
         {
-            try {
+            try
+            {
                 BufferOverrun?.Invoke(this, EventArgs.Empty);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 // ignore errors in the consumer's code
                 Console.WriteLine($"Error in BufferOverrun handler: {ex.Message}");
             }
@@ -222,7 +245,8 @@ namespace Meadow.Hardware
         public override string ToString()
         {
             char p;
-            switch (Parity) {
+            switch (Parity)
+            {
                 case Parity.Even:
                     p = 'e';
                     break;
@@ -247,7 +271,8 @@ namespace Meadow.Hardware
         /// </summary>
         public void ClearReceiveBuffer()
         {
-            if (_readBuffer != null) {
+            if (_readBuffer != null)
+            {
                 _readBuffer.Clear();
                 //_readBuffer.Overrun -= OnReadBufferOverrun; - Adrian, this shouldn't be needed Aug 12, 2020
             }
@@ -261,12 +286,14 @@ namespace Meadow.Hardware
             if (IsOpen) throw new InvalidOperationException("Port is already open");
 
             var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput | Nuttx.DriverFlags.NonBlocking);
-            if (handle.ToInt32() < 0) {
+            if (handle.ToInt32() < 0)
+            {
                 throw new NativeException(UPD.GetLastError());
             }
             _driverHandle = handle;
             SetPortSettings();
-            _readThread = new Thread(ReadThreadProc) {
+            _readThread = new Thread(ReadThreadProc)
+            {
                 IsBackground = true,
                 Name = "Serial Read Thread"
             };
@@ -311,62 +338,73 @@ namespace Meadow.Hardware
             if (index < 0) throw new ArgumentException("Invalid offset");
             if (count == 0) return 0;
 
-            int currentIndex = index;
-            int totalBytesWritten = 0;
-            int result = 0;
-            int systemBufferMax = 255;
-            int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
-            int bytesToWriteThisLoop = maxCount;
-            int bytesLeft = count;
+            lock (_accessLock)
+            {
+                int currentIndex = index;
+                int totalBytesWritten = 0;
+                int result = 0;
+                int systemBufferMax = 255;
+                int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
+                int bytesToWriteThisLoop = maxCount;
+                int bytesLeft = count;
 
-            //Console.WriteLine($"count:{count}, maxCount:{maxCount}");
+                Output.WriteLineIf(_showSerialDebug, $"count:{count}, maxCount:{maxCount}");
+                Output.WriteLineIf(_showSerialDebug, $"Starting with: {(BitConverter.ToString(buffer, 0, (buffer.Length > 6) ? 6 : buffer.Length))}");
 
-            // we can only write 255 bytes at a time, so we loop 
-            while (totalBytesWritten < count) {
-                // if there's an offset, we want to slice
-                if (currentIndex > 0) {
-                    //Console.WriteLine($"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
-                    Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
-                    result = Nuttx.write(_driverHandle, data.ToArray(), count);
-                } else {
-                    result = Nuttx.write(_driverHandle, buffer, count);
+                Timer writeTimeoutTimer = null;
+
+                if(WriteTimeout > 0)
+                {
+                    writeTimeoutTimer = new Timer((o) =>
+                    {
+                        throw new TimeoutException("Write timeout");
+                    }, null, WriteTimeout, Timeout.Infinite);
                 }
-                // if there was an error, pull it out of NuttX
-                if (result < 0) {
-                    throw new NativeException(UPD.GetLastError());
+
+                // we can only write 255 bytes at a time, so we loop 
+                try
+                {
+                    while (totalBytesWritten < count)
+                    {
+                        // if there's an offset, we want to slice
+                        if (currentIndex > 0)
+                        {
+                            Output.WriteLineIf(_showSerialDebug, $"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                            Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
+                            result = Nuttx.write(_driverHandle, data.ToArray(), count);
+                        }
+                        else
+                        {
+                            result = Nuttx.write(_driverHandle, buffer, count);
+                        }
+                        // if there was an error, pull it out of NuttX
+                        if (result < 0)
+                        {
+                            throw new NativeException(UPD.GetLastError());
+                        }
+                        // otherwise,
+                        totalBytesWritten += result;
+
+                        Output.WriteLineIf(_showSerialDebug, $"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
+
+                        // recalculate the current index, including the original offset
+                        currentIndex = totalBytesWritten + index;
+                        bytesLeft = count - totalBytesWritten;
+                        bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
+                        Output.WriteLineIf(_showSerialDebug, $"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                    }
                 }
-                // otherwise,
-                totalBytesWritten += result;
+                finally
+                {
+                    if(writeTimeoutTimer != null)
+                    {
+                        writeTimeoutTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                        writeTimeoutTimer.Dispose();
+                    }
+                }
 
-                //Console.WriteLine($"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
-
-                // recalculate the current index, including the original offset
-                currentIndex = totalBytesWritten + index;
-                bytesLeft = count - totalBytesWritten;
-                bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
-                //Console.WriteLine($"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
+                return totalBytesWritten;
             }
-
-            return totalBytesWritten;
-
-
-            ////Output.WriteLineIf(_showSerialDebug, $"Writing {count} bytes to {PortName}...");
-            //if (offset > 0) {
-            //    // we need to make a copy
-            //    var tmp = new byte[count];
-            //    Array.Copy(buffer, offset, tmp, 0, count);
-            //    var result = Nuttx.write(_driverHandle, tmp, count);
-            //    if (result < 0) {
-            //        throw new NativeException(UPD.GetLastError());
-            //    }
-            //    return result;
-            //} else {
-            //    var result = Nuttx.write(_driverHandle, buffer, count);
-            //    if (result < 0) {
-            //        throw new NativeException(UPD.GetLastError());
-            //    }
-            //    return result;
-            //}
         }
 
         private void ReadThreadProc()
@@ -375,46 +413,62 @@ namespace Meadow.Hardware
 
             Output.WriteLineIf(_showSerialDebug, $"ReadThreadProc: {IsOpen}");
 
-            while (IsOpen) {
-                try {
+            while (IsOpen)
+            {
+                try
+                {
                     var result = Nuttx.read(_driverHandle, readBuffer, readBuffer.Length);
 
-                    if (result < 0) {
+                    if (result < 0)
+                    {
                         var ec = UPD.GetLastError();
 
-                        Output.WriteLineIf(_showSerialDebug, $"Nuttx read returned {ec}");
-
-                        if (ec == Nuttx.ErrorCode.TryAgain) {
+                        if (ec == Nuttx.ErrorCode.TryAgain)
+                        {
                             // no data available, just wait
                             Thread.Sleep(200);
-                        } else {
+                        }
+                        else
+                        {
                             throw new NativeException(ec);
                         }
-                    } else {
-                        Output.WriteLineIf(_showSerialDebug, $"reading");
+                    }
+                    else
+                    {
+                        Output.WriteLineIf(_showSerialDebug, $"data read");
 
-                        if (result > 0) {
-                            //Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
-                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {BitConverter.ToString(readBuffer, 0, result)}");
-
+                        if (result > 0)
+                        {
+                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
+                            
                             _readBuffer.Append(readBuffer, 0, result);
 
-                            if (DataReceived != null) {
+                            if (DataReceived != null)
+                            {
                                 // put on a worker thread, else if the handler goes into some wait, we'll never process data
-                                Task.Run(() => {
-                                    try {
+                                Task.Run(() =>
+                                {
+                                    try
+                                    {
                                         Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
                                         DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
                                         Output.WriteLineIf(_showSerialDebug, $"event handler complete");
-                                    } catch (Exception ex) {
+                                    }
+                                    catch (Exception ex)
+                                    {
                                         // if the event handler throws, we don't want this to die
                                         Output.WriteLine($"Serial event handler threw: {ex.Message}");
                                     }
                                 });
                             }
                         }
+
+                        // we *have* to yield to allow the receiver to process data or we'll just overrun
+                        Thread.Sleep(10);
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Output.WriteLine($"ReadThreadProc error: {ex.Message}");
                 }
             }
@@ -439,7 +493,8 @@ namespace Meadow.Hardware
         /// <returns>The byte, cast to an Int32, or -1 if the end of the stream has been read.</returns>
         public int ReadByte()
         {
-            if (!IsOpen) {
+            if (!IsOpen)
+            {
                 throw new InvalidOperationException("Cannot read from a closed port");
             }
 
@@ -474,7 +529,8 @@ namespace Meadow.Hardware
 
             // check to see if there's room for the whole thing, if not, we're
             // only going to read as much as we can.
-            if (readCount + index > buffer.Length) {
+            if (readCount + index > buffer.Length)
+            {
                 readCount = buffer.Length - index;
             }
 
@@ -613,12 +669,14 @@ namespace Meadow.Hardware
             // get the current settings           
             Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
             var result = Nuttx.tcgetattr(_driverHandle, ref settings);
-            if (result != 0) {
+            if (result != 0)
+            {
                 var error = UPD.GetLastError();
                 throw new NativeException(error);
             }
 
-            if (_showSerialDebug) {
+            if (_showSerialDebug)
+            {
                 ShowSettings(settings);
             }
 
@@ -629,7 +687,8 @@ namespace Meadow.Hardware
             settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
 
             // now set the user-requested settings
-            switch (DataBits) {
+            switch (DataBits)
+            {
                 case 5:
                     settings.c_cflag |= Nuttx.ControlFlags.CS5;
                     break;
@@ -643,7 +702,8 @@ namespace Meadow.Hardware
                     settings.c_cflag |= Nuttx.ControlFlags.CS8;
                     break;
             }
-            switch (Parity) {
+            switch (Parity)
+            {
                 case Parity.Odd:
                     settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
                     break;
@@ -651,7 +711,8 @@ namespace Meadow.Hardware
                     settings.c_cflag |= Nuttx.ControlFlags.PARENB;
                     break;
             }
-            switch (StopBits) {
+            switch (StopBits)
+            {
                 case StopBits.Two:
                     settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
                     break;
@@ -659,20 +720,24 @@ namespace Meadow.Hardware
 
             Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (_showSerialDebug) {
+            if (_showSerialDebug)
+            {
                 ShowSettings(settings);
             }
 
             result = Nuttx.tcsetattr(_driverHandle, TCSANOW, ref settings);
 
-            if (result != 0) {
+            if (result != 0)
+            {
                 throw new NativeException(UPD.GetLastError());
             }
 
-            if (_showSerialDebug) {
+            if (_showSerialDebug)
+            {
                 // get the settings again
                 result = Nuttx.tcgetattr(_driverHandle, ref settings);
-                if (result != 0) {
+                if (result != 0)
+                {
                     var error = UPD.GetLastError();
                     throw new NativeException(error);
                 }
@@ -689,12 +754,14 @@ namespace Meadow.Hardware
 
             Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
             var result = Nuttx.ioctl(_driverHandle, TCGETS, p);
-            if (result != 0) {
+            if (result != 0)
+            {
                 var error = UPD.GetLastError();
                 throw new NativeException(error);
             }
 
-            if (_showSerialDebug) {
+            if (_showSerialDebug)
+            {
                 ShowSettings(settings);
             }
 
@@ -705,7 +772,8 @@ namespace Meadow.Hardware
             settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
 
             // now set the user-requested settings
-            switch (DataBits) {
+            switch (DataBits)
+            {
                 case 5:
                     settings.c_cflag |= Nuttx.ControlFlags.CS5;
                     break;
@@ -719,7 +787,8 @@ namespace Meadow.Hardware
                     settings.c_cflag |= Nuttx.ControlFlags.CS8;
                     break;
             }
-            switch (Parity) {
+            switch (Parity)
+            {
                 case Parity.Odd:
                     settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
                     break;
@@ -727,7 +796,8 @@ namespace Meadow.Hardware
                     settings.c_cflag |= Nuttx.ControlFlags.PARENB;
                     break;
             }
-            switch (StopBits) {
+            switch (StopBits)
+            {
                 case StopBits.Two:
                     settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
                     break;
@@ -736,19 +806,23 @@ namespace Meadow.Hardware
             settings.c_speed = BaudRate;
 
             Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            if (_showSerialDebug) {
+            if (_showSerialDebug)
+            {
                 ShowSettings(settings);
             }
 
             result = Nuttx.ioctl(_driverHandle, TCSETS, p);
-            if (result != 0) {
+            if (result != 0)
+            {
                 throw new NativeException(UPD.GetLastError());
             }
 
-            if (_showSerialDebug) {
+            if (_showSerialDebug)
+            {
                 // get the settings again
                 result = Nuttx.ioctl(_driverHandle, TCGETS, p);
-                if (result != 0) {
+                if (result != 0)
+                {
                     var error = UPD.GetLastError();
                     throw new NativeException(error);
                 }

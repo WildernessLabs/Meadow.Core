@@ -51,6 +51,12 @@ namespace Meadow.Hardware
         int ReadTimeout { get; set; }
 
         /// <summary>
+        /// The number of milliseconds before a time-out occurs when a read operation does not finish.
+        /// </summary>
+        /// <remarks>The time-out can be set to any value greater than zero, or set to InfiniteTimeout, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        int WriteTimeout { get; set; }
+
+        /// <summary>
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
         StopBits StopBits { get; }

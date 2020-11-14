@@ -16,6 +16,10 @@ namespace Meadow.Hardware
         private static IDictionary<IPin, ChannelConfig> _channelStates;
         private static readonly object _channelLock = new object();
         private static IDictionary<uint, float> _pwmTimerFrequencies;
+        private static List<uint> _pwmTimersInitialized = new List<uint>();
+        private static KeyValuePair<IPin, ChannelConfig>[] _pinsToReasssertForPwm = null;
+
+        internal static bool ShowDebug { get; set; } = false;
 
         static DeviceChannelManager()
         {
@@ -31,34 +35,39 @@ namespace Meadow.Hardware
         // TODO: should also check to see if that particular pin has the capapbility it's asking for? we can address later.
         internal static Tuple<bool, string> ReservePin(IPin pin, ChannelConfigurationType configType)
         {
+            Output.WriteLineIf(ShowDebug, "+ReservePin");
             // thread sync
-            lock (_channelLock)
+            try
             {
-                // if the config exists in the collection
-                if(_channelStates.ContainsKey(pin))
+                lock (_channelLock)
                 {
-                    // if the channel is already in use
-                    if (_channelStates[pin].State == ChannelState.InUse)
+                    // if the config exists in the collection
+                    if (_channelStates.ContainsKey(pin))
                     {
-                        // bail out
-                        return new Tuple<bool, string>(false, "Channel already in use.");
+                        // if the channel is already in use
+                        if (_channelStates[pin].State == ChannelState.InUse)
+                        {
+                            // bail out
+                            return new Tuple<bool, string>(false, "Channel already in use.");
+                        }
+                        else
+                        { // if it's not, probably need to do some cleanup
+                            _channelStates.Remove(pin);
+                        }
                     }
-                    else
-                    { // if it's not, probably need to do some cleanup
-                        _channelStates.Remove(pin);
-                    }
-                }
 
-                // add the new config to the list
-                var newConfig = new ChannelConfig() { Config = configType, State = ChannelState.InUse };
-                _channelStates.Add(pin, newConfig);
-                // successfully reserved the port
-                return new Tuple<bool, string>(true, "Success");
+                    // add the new config to the list
+                    var newConfig = new ChannelConfig() { Config = configType, State = ChannelState.InUse };
+                    _channelStates.Add(pin, newConfig);
+                    // successfully reserved the port
+                    return new Tuple<bool, string>(true, "Success");
+                }
+            }
+            finally
+            {
+                Output.WriteLineIf(ShowDebug, "-ReservePin");
             }
         }
-
-        private static List<uint> _pwmTimersInitialized = new List<uint>();
-        private static KeyValuePair<IPin, ChannelConfig>[] _pinsToReasssertForPwm;
 
         internal static void BeforeStartPwm(IPwmChannelInfo info)
         {
@@ -172,37 +181,5 @@ namespace Meadow.Hardware
             return true;
         }
     }
-
-    internal class ChannelConfig
-    {
-        public ChannelState State { get; set; }
-        public ChannelConfigurationType Config { get; set; }
-    }
-
-    internal enum ChannelState
-    {
-        Unknown,
-        NotInUse,
-        InUse,
-    }
-
-    /// <summary>
-    /// TODO: revisit this structure. Ultimately, it would be nice to know, specifically
-    /// what a channel is cofigured for, i.e. DigitalInput, I2C TX, UART RX, etc.
-    /// </summary>
-    public enum ChannelConfigurationType
-    {
-        None,
-        DigitalOutput,
-        DigitalInput,
-        AnalogOutput,
-        AnalogInput,
-        PWM,
-        SPI,
-        I2C,
-        CAN,
-        UART
-    }
-
 }
 
