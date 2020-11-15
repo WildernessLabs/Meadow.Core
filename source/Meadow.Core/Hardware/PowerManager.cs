@@ -40,10 +40,38 @@ namespace Meadow
             //5. Wait for the registers to be updated (IWDG_SR = 0x0000 0000).
             //6. Refresh the counter value with IWDG_RLR (IWDG_KR = 0x0000 AAAA)
 
+            // The RLR can have a maximum of 4096, so we have to play with the prescaler to get close to the desired value
+            uint prescale, rlr;
+
+            if (timeoutMs < 4096)
+            {
+                prescale = STM32.IWDG_PR_DIV_32;
+                rlr = (uint)timeoutMs;
+            }
+            else if (timeoutMs < 4096 * 2)
+            {
+                prescale = STM32.IWDG_PR_DIV_64;
+                rlr = (uint)timeoutMs / 2;
+            }
+            else if (timeoutMs < 4096 * 4)
+            {
+                prescale = STM32.IWDG_PR_DIV_128;
+                rlr = (uint)timeoutMs / 4;
+            }
+            else if (timeoutMs < 4096 * 8)
+            {
+                prescale = STM32.IWDG_PR_DIV_256;
+                rlr = (uint)timeoutMs / 8;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException($"Timeout must be less than {4096 * 8}ms");
+            }
+
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000cccc);
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x00005555);
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_PR_OFFSET, STM32.IWDG_PR_DIV_64);
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_RLR_OFFSET, (uint)timeoutMs);
+            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_PR_OFFSET, prescale);
+            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_RLR_OFFSET, rlr);
         }
 
         public void WatchdogReset()
