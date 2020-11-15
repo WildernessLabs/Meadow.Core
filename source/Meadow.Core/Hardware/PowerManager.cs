@@ -1,6 +1,5 @@
 ﻿using Meadow.Devices;
 using System;
-using System.IO;
 using static Meadow.Core.Interop;
 
 namespace Meadow
@@ -13,20 +12,18 @@ namespace Meadow
 
         public unsafe void Reset()
         {
-            Console.WriteLine("! Software Reset Requested !");
             UPD.Ioctl(Nuttx.UpdIoctlFn.PowerReset);
         }
 
         public void Sleep()
         {
+            throw new NotImplementedException("Sleep not yet implemented");
             Console.WriteLine("! Software Sleep Requested !");
             UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep1);
         }
 
         public void WatchdogEnable(int timeoutMs)
         {
-            Console.WriteLine($"! Watchdog Enable {timeoutMs}ms");
-
             // we'll use the IWDG registers.  
             // WWDG is too fast, with a max timeout in the 40ms range, which for a managed app is a recipe for lots of restarts
             // the IWDG uses the LSI clock, which has a freq of 32000
@@ -76,7 +73,6 @@ namespace Meadow
 
         public void WatchdogReset()
         {
-            Console.WriteLine("! Watchdog Reset !");
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000aaaa);
         }
     }
