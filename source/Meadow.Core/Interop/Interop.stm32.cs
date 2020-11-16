@@ -9,10 +9,12 @@ namespace Meadow.Core
         {
             public const uint BOARD_XTAL = 25000000u;
             public const uint HSE_FREQUENCY = BOARD_XTAL;
-            public const uint VCO_FREQUENCY = ((HSE_FREQUENCY / 25) * 432);
-            public const uint SYSCLK_FREQUENCY = (VCO_FREQUENCY / 2);
-            public const uint HCLK_FREQUENCY = SYSCLK_FREQUENCY;
-            public const uint PCLK1_FREQUENCY = (HCLK_FREQUENCY / 4);
+            public const uint LSI_FREQUENCY = 32000;
+            public const uint LSE_FREQUENCY = 32768;
+            public const uint VCO_FREQUENCY = ((HSE_FREQUENCY / 25) * 432); // 432,000,000
+            public const uint SYSCLK_FREQUENCY = (VCO_FREQUENCY / 2); // 216,000,000
+            public const uint HCLK_FREQUENCY = SYSCLK_FREQUENCY; // 216,000,000
+            public const uint PCLK1_FREQUENCY = (HCLK_FREQUENCY / 4); // 54,000,000
 
             public const int GPIOA_BASE = 0x40020000;
             public const int GPIOB_BASE = 0x40020400;
@@ -375,6 +377,24 @@ namespace Meadow.Core
             public const int IRQ_MDIOS = (IRQ_FIRST + 109); /* 109: MDIO slave global interrupt */
 
 
+            public const int WWDG_BASE = 0x40002C00;
+            public const int WWDG_CR_OFFSET = 0x00;
+            public const int WWDG_CFR_OFFSET = 0x04;
+            public const int WWDG_SR_OFFSET = 0x08;
+            public const int IWDG_BASE = 0x40003000;
+            public const int IWDG_KR_OFFSET = 0x00;
+            public const int IWDG_PR_OFFSET = 0x04;
+            public const int IWDG_RLR_OFFSET = 0x08;
+            public const int IWDG_SR_OFFSET = 0x0C;
+            public const int IWDG_WINR_OFFSET = 0x10;
+
+            public const int IWDG_PR_DIV_4 = 0b000;
+            public const int IWDG_PR_DIV_8 = 0b001;
+            public const int IWDG_PR_DIV_16 = 0b010;
+            public const int IWDG_PR_DIV_32 = 0b011;
+            public const int IWDG_PR_DIV_64 = 0b100;
+            public const int IWDG_PR_DIV_128 = 0b101;
+            public const int IWDG_PR_DIV_256 = 0b110;
 
             public enum GpioPort
             {

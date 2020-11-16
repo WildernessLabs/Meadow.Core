@@ -136,6 +136,9 @@ namespace Meadow.Core
             /// <returns>0 on success, error code if a problem was encountered.</returns>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdEsp32Command espCommand);
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref ulong param);
         }
     }
 }

@@ -163,7 +163,13 @@ namespace Meadow.Core
 
                 GetLastError = 51,
 
-                Esp32Command = 61
+                Esp32Command = 61,
+
+                PowerReset = 71,
+                PowerSleep1 = 72,
+                PowerSleep2 = 73,
+                PowerWDSet = 74,
+                PowerWDPet = 75,
             }
 
             public struct UpdRegisterValue
