@@ -35,7 +35,7 @@ namespace Meadow.Devices
 
         internal F7GPIOManager()
         {
-            DebugFeatures = DebugFeature.Interrupts;
+            DebugFeatures = DebugFeature.None;
 #if DEBUG
             //Console.WriteLine($"DirectRegisterAccess = {DirectRegisterAccess}");
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.

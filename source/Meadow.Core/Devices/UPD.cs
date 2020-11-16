@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Meadow.Core;
+﻿using Meadow.Core;
 using Meadow.Hardware;
+using System;
+using System.Collections.Generic;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -103,7 +102,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -115,7 +114,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -127,7 +126,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -139,7 +138,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -151,7 +150,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -163,7 +162,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -224,7 +223,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -236,7 +235,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -248,7 +247,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -260,7 +259,19 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request.ToString()} failed {err.ToString()}");
+                Console.WriteLine($"ioctl {request} failed {err}");
+                return (int)err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref ulong param)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref param);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -268,7 +279,7 @@ namespace Meadow.Devices
 
         public static class PWM
         {
-            private static List<uint> m_timersInitialized = new List<uint>();
+            private static readonly List<uint> m_timersInitialized = new List<uint>();
 
             public static bool PwmCmd(Nuttx.UpdIoctlFn request, Nuttx.UpdPwmCmd data)
             {
@@ -276,7 +287,7 @@ namespace Meadow.Devices
                 if (result != 0)
                 {
                     var err = GetLastError();
-                    Console.WriteLine($"PWM setup failed {err.ToString()}");
+                    Console.WriteLine($"PWM setup failed {err}");
                     return false;
                 }
 
