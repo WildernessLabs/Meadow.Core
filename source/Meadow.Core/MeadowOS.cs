@@ -36,9 +36,12 @@ namespace Meadow
         }
 
         /// <summary>
-        /// Enables a watchdog timer with the specified timeout in milliseconds.  If Watchdog.Reset is not called before the timeout period, the Meadow will reset.
+        /// Enables a watchdog timer with the specified timeout in milliseconds.
+        /// If Watchdog.Reset is not called before the timeout period, the Meadow
+        /// will reset.
         /// </summary>
-        /// <param name="timeoutMs">Watchdog timeout period, in milliseconds</param>
+        /// <param name="timeoutMs">Watchdog timeout period, in milliseconds.
+        /// Maximum allowed timeout of 32,768ms</param>
         public static void WatchdogEnable(int timeoutMs)
         {
             // we'll use the IWDG registers.  
