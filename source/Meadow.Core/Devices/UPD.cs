@@ -301,7 +301,7 @@ namespace Meadow.Devices
                     m_timersInitialized.Add(timer);
                 }
 
-                Output.WriteLineIf(true, $"Setup PWM {timer} returned {result}");
+                //Output.WriteLineIf(true, $"Setup PWM {timer} returned {result}");
 
                 return result;
             }
