@@ -15,15 +15,18 @@ namespace Meadow
         public static IIODevice CurrentDevice { get; private set; }
 
 
-        public static void Sleep(DateTime until) {
+        public static void Sleep(DateTime until)
+        {
             throw new NotImplementedException();
         }
 
-        public static void Sleep(TimeSpan duration) {
+        public static void Sleep(TimeSpan duration)
+        {
             throw new NotImplementedException();
         }
 
-        public static void Sleep(WakeUpOptions wakeUp) {
+        public static void Sleep(WakeUpOptions wakeUp)
+        {
             throw new NotImplementedException();
         }
 
@@ -60,28 +63,19 @@ namespace Meadow
             // The RLR can have a maximum of 4096, so we have to play with the prescaler to get close to the desired value
             uint prescale, rlr;
 
-            if (timeoutMs < 4096)
-            {
+            if (timeoutMs < 4096) {
                 prescale = STM32.IWDG_PR_DIV_32;
                 rlr = (uint)timeoutMs;
-            }
-            else if (timeoutMs < 4096 * 2)
-            {
+            } else if (timeoutMs < 4096 * 2) {
                 prescale = STM32.IWDG_PR_DIV_64;
                 rlr = (uint)timeoutMs / 2;
-            }
-            else if (timeoutMs < 4096 * 4)
-            {
+            } else if (timeoutMs < 4096 * 4) {
                 prescale = STM32.IWDG_PR_DIV_128;
                 rlr = (uint)timeoutMs / 4;
-            }
-            else if (timeoutMs < 4096 * 8)
-            {
+            } else if (timeoutMs < 4096 * 8) {
                 prescale = STM32.IWDG_PR_DIV_256;
                 rlr = (uint)timeoutMs / 8;
-            }
-            else
-            {
+            } else {
                 throw new ArgumentOutOfRangeException($"Timeout must be less than {4096 * 8}ms");
             }
 
