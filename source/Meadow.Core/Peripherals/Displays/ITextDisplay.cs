@@ -21,7 +21,7 @@
         /// </summary>
         /// <param name="text">String to display.</param>
         /// <param name="lineNumber">Line Number.</param>
-        void WriteLine(string text, byte lineNumber);
+        void WriteLine(string text, byte lineNumber, bool showCursor = false);
 
         /// <summary>
         /// Clears all ITextDisplay lines of text
@@ -40,6 +40,11 @@
         /// <param name="column"></param>
         /// <param name="line"></param>
         void SetCursorPosition(byte column, byte line);
+
+        /// <summary>
+        /// Update the display, not used by character dislays
+        /// </summary>
+        void Show();
 
         /// <summary>
         ///  is this going to be supported by all text displays?
