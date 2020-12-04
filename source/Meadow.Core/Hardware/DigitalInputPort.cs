@@ -124,6 +124,7 @@ namespace Meadow.Hardware
             {
                 if (disposing)
                 {
+                    this.IOController.Interrupt -= OnInterrupt;
                     DeviceChannelManager.ReleasePin(Pin);
                     IOController.UnconfigureGpio(Pin);
                 }
