@@ -3,7 +3,7 @@ namespace Meadow
     /// <summary>
     /// Describes the Elements in the Device Info string[]
     /// </summary>
-    public enum DeviceInfoElements
+    public enum DeviceInfoOffset
     {
       DeviceName,
       Product,
