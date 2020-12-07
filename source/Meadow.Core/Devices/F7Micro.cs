@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using Meadow.Core;
 
 namespace Meadow.Devices
 {
@@ -424,6 +426,34 @@ namespace Meadow.Devices
             {
                 _context.Send(delegate { action(); }, null);
             }
+        }
+
+        public string[] GetDeviceInformation()
+        {
+            // Make the request
+            byte[] strBuffer = new byte[512];
+            GCHandle returnGcHandle = GCHandle.Alloc(strBuffer, GCHandleType.Pinned);
+
+            // Object to contain data
+            Interop.Nuttx.UpdDeviceInfo rqst = new Interop.Nuttx.UpdDeviceInfo()
+            {
+               devInfoBuffer = returnGcHandle.AddrOfPinnedObject(),
+               devInfoBufLen = strBuffer.Length,
+               devInfoRetLen = 0
+            };
+
+            //  Make the request
+            int ret = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetDeviceInfo, ref rqst);
+            if(ret < 0)
+              return Array.Empty<string>();
+
+            string infoStr = System.Text.Encoding.ASCII.GetString(strBuffer, 0, rqst.devInfoRetLen);
+            
+            // Split the ETX (0x03) delimited string
+            string[] splitStr = infoStr.Split((char) 0x03);
+
+            returnGcHandle.Free();
+            return splitStr;
         }
     }
 }
