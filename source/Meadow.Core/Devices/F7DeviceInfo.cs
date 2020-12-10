@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Meadow.Core;
 using System.Text;
+using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
@@ -10,7 +11,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Describes the device information values
         /// </summary>
-        public struct DeviceInfoValues
+        public struct DeviceInformation
         {
           public string DeviceName;
           public string Product;
@@ -47,10 +48,10 @@ namespace Meadow.Devices
           MonoVersion
         };
 
-        public DeviceInfoValues GetDeviceInformation()
+        public DeviceInformation GetDeviceInformation()
         {
             // Make the request
-            var devInfo = new DeviceInfoValues();
+            var devInfo = new DeviceInformation();
             byte[] strBuffer = new byte[512];
             GCHandle returnGcHandle = GCHandle.Alloc(strBuffer, GCHandleType.Pinned);
 
@@ -65,7 +66,7 @@ namespace Meadow.Devices
             //  Make the request
             int ret = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetDeviceInfo, ref rqst);
             if(ret < 0)
-              return devInfo;   // Error
+              throw new NativeException(UPD.GetLastError());   // Error
 
             // Returns a single long string containing the device information
             string infoStr = Encoding.ASCII.GetString(strBuffer, 0, rqst.devInfoRetLen);
