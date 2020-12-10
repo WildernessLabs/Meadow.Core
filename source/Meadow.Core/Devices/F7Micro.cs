@@ -4,8 +4,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using Meadow.Core;
 
 namespace Meadow.Devices
 {
