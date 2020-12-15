@@ -170,6 +170,8 @@ namespace Meadow.Core
                 PowerSleep2 = 73,
                 PowerWDSet = 74,
                 PowerWDPet = 75,
+
+                GetDeviceInfo = 81,
             }
 
             public struct UpdRegisterValue
@@ -311,6 +313,13 @@ namespace Meadow.Core
                 public IntPtr Result;          // Pointer to the result.
                 public UInt32 ResultLength;    // Length of the result data block.
                 public byte Block;             // Is this a blocking call (1 = yes, 0 = no).
+            }
+
+            public struct UpdDeviceInfo
+            {
+                public IntPtr devInfoBuffer;    // Points to return buffer
+                public int devInfoBufLen;       // Available space buffer
+                public int devInfoRetLen;       // Space used in buffer
             }
 
             public static bool TryGetRegister(IntPtr driverHandle, int address, out uint value)
