@@ -19,10 +19,10 @@ namespace Meadow.Devices
           public string OsVersion;
           public string BuildDate;
           public string ProcessorType;
-          public string McuUniqueId;
-          public string McuSerialNumb;
-          public string CoProcType;
-          public string CoProcFirmwareVersion;
+          public string UniqueId;
+          public string SerialNumber;
+          public string CoprocessorType;
+          public string CoprocessorFirmwareVersion;
           public string MonoVersion;
         };
         
@@ -41,10 +41,10 @@ namespace Meadow.Devices
           OsVersion,
           BuildDate,
           ProcessorType,
-          McuUniqueId,
-          McuSerialNumb,
-          CoProcType,
-          CoProcFirmwareVersion,
+          UniqueId,
+          SerialNumber,
+          CoprocessorType,
+          CoprocessorFirmwareVersion,
           MonoVersion
         };
 
@@ -75,17 +75,17 @@ namespace Meadow.Devices
             string[] splitStr = infoStr.Split((char) 0x03);
 
             // Populate the structure
-            devInfo.DeviceName            = splitStr[(int)DeviceInfoOffset.DeviceName];
-            devInfo.Product               = splitStr[(int)DeviceInfoOffset.Product];
-            devInfo.Model                 = splitStr[(int)DeviceInfoOffset.Model];
-            devInfo.OsVersion             = splitStr[(int)DeviceInfoOffset.OsVersion];
-            devInfo.BuildDate             = splitStr[(int)DeviceInfoOffset.BuildDate];
-            devInfo.ProcessorType         = splitStr[(int)DeviceInfoOffset.ProcessorType];
-            devInfo.McuUniqueId           = splitStr[(int)DeviceInfoOffset.McuUniqueId];
-            devInfo.McuSerialNumb         = splitStr[(int)DeviceInfoOffset.McuSerialNumb];
-            devInfo.CoProcType            = splitStr[(int)DeviceInfoOffset.CoProcType];
-            devInfo.CoProcFirmwareVersion = splitStr[(int)DeviceInfoOffset.CoProcFirmwareVersion];
-            devInfo.MonoVersion           = splitStr[(int)DeviceInfoOffset.MonoVersion];
+            devInfo.DeviceName                  = splitStr[(int)DeviceInfoOffset.DeviceName];
+            devInfo.Product                     = splitStr[(int)DeviceInfoOffset.Product];
+            devInfo.Model                       = splitStr[(int)DeviceInfoOffset.Model];
+            devInfo.OsVersion                   = splitStr[(int)DeviceInfoOffset.OsVersion];
+            devInfo.BuildDate                   = splitStr[(int)DeviceInfoOffset.BuildDate];
+            devInfo.ProcessorType               = splitStr[(int)DeviceInfoOffset.ProcessorType];
+            devInfo.UniqueId                    = splitStr[(int)DeviceInfoOffset.UniqueId];
+            devInfo.SerialNumber                = splitStr[(int)DeviceInfoOffset.SerialNumber];
+            devInfo.CoprocessorType             = splitStr[(int)DeviceInfoOffset.CoprocessorType];
+            devInfo.CoprocessorFirmwareVersion  = splitStr[(int)DeviceInfoOffset.CoprocessorFirmwareVersion];
+            devInfo.MonoVersion                 = splitStr[(int)DeviceInfoOffset.MonoVersion];
 
             returnGcHandle.Free();
             return devInfo;
