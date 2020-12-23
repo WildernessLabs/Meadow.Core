@@ -153,8 +153,13 @@ namespace Meadow.Hardware
             set
             {
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
+                if (value == _debounceDuration) return;
+
                 _debounceDuration = value;
+
                 // Update in F7
+                // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
+                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, 0, 0);
                 this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
             }
         }
@@ -165,8 +170,13 @@ namespace Meadow.Hardware
             set
             {
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
+                if (value == _glitchDuration) return;
+
                 _glitchDuration = value;
+
                 // Update in F7
+                // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
+                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, 0, 0);
                 this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
             }
         }
