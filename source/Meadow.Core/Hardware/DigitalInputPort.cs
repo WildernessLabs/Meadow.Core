@@ -88,6 +88,9 @@ namespace Meadow.Hardware
             return port;
         }
 
+        /// <summary>
+        /// Gets or Sets the internal resistor mode for the input
+        /// </summary>
         public override ResistorMode Resistor
         {
             get => _resistorMode;
@@ -138,6 +141,9 @@ namespace Meadow.Hardware
             Dispose(false);
         }
 
+        /// <summary>
+        /// Gets the current State of the input (True == high, False == low)
+        /// </summary>
         public override bool State
         {
             get
@@ -147,6 +153,9 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Gets or Sets the interrupt debounce duration (in milliseconds)
+        /// </summary>
         public override double DebounceDuration
         {
             get => _debounceDuration;
@@ -164,6 +173,9 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Gets or Sets the interrupt glitch filter duration (in milliseconds)
+        /// </summary>
         public override double GlitchDuration
         {
             get => _glitchDuration;
