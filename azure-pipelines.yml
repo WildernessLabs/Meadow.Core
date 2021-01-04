@@ -2,40 +2,40 @@
 # Reference: https://aka.ms/yaml
 
 trigger:
-- master
-- develop
+  - main
+  - develop
 
 variables:
-  solution: '**/Meadow.Core.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  solution: "**/Meadow.Core.sln"
+  buildPlatform: "Any CPU"
+  buildConfiguration: "Release"
 
 pool:
   vmImage: windows-2019
 
 stages:
-- stage: Build
-  jobs: 
-    - job: Build_Solution
-      steps:
-      - task: NuGetToolInstaller@1
-      - task: NuGetCommand@2
-        inputs:
-          restoreSolution: '$(solution)'
-      - task: VSBuild@1
-        inputs:
-          solution: '$(solution)'
-          platform: '$(buildPlatform)'
-          configuration: '$(buildConfiguration)'
-          msbuildArgs: /property:langversion=latest
-      - task: CopyFiles@2
-        inputs:
-          Contents: '**\*.nupkg'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
-          flattenFolders: true
-          cleanTargetFolder: true
-          overWrite: true
-      - task: PublishBuildArtifacts@1
-        inputs:
-          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-          artifactName: packages
+  - stage: Build
+    jobs:
+      - job: Build_Solution
+        steps:
+          - task: NuGetToolInstaller@1
+          - task: NuGetCommand@2
+            inputs:
+              restoreSolution: "$(solution)"
+          - task: VSBuild@1
+            inputs:
+              solution: "$(solution)"
+              platform: "$(buildPlatform)"
+              configuration: "$(buildConfiguration)"
+              msbuildArgs: /property:langversion=latest
+          - task: CopyFiles@2
+            inputs:
+              Contents: '**\*.nupkg'
+              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+              flattenFolders: true
+              cleanTargetFolder: true
+              overWrite: true
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: "$(Build.ArtifactStagingDirectory)"
+              artifactName: packages

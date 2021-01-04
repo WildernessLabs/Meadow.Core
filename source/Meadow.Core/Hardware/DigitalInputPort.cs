@@ -88,6 +88,9 @@ namespace Meadow.Hardware
             return port;
         }
 
+        /// <summary>
+        /// Gets or Sets the internal resistor mode for the input
+        /// </summary>
         public override ResistorMode Resistor
         {
             get => _resistorMode;
@@ -138,6 +141,9 @@ namespace Meadow.Hardware
             Dispose(false);
         }
 
+        /// <summary>
+        /// Gets the current State of the input (True == high, False == low)
+        /// </summary>
         public override bool State
         {
             get
@@ -147,26 +153,42 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Gets or Sets the interrupt debounce duration (in milliseconds)
+        /// </summary>
         public override double DebounceDuration
         {
             get => _debounceDuration;
             set
             {
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
+                if (value == _debounceDuration) return;
+
                 _debounceDuration = value;
+
                 // Update in F7
+                // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
+                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, 0, 0);
                 this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
             }
         }
 
+        /// <summary>
+        /// Gets or Sets the interrupt glitch filter duration (in milliseconds)
+        /// </summary>
         public override double GlitchDuration
         {
             get => _glitchDuration;
             set
             {
                 if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
+                if (value == _glitchDuration) return;
+
                 _glitchDuration = value;
+
                 // Update in F7
+                // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
+                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, 0, 0);
                 this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
             }
         }
