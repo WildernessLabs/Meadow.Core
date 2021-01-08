@@ -93,7 +93,7 @@ namespace Meadow.Hardware
             this.Bus.WriteData(this.Address, values);
         }
 
-        [Obsolete("This overload if WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
+        [Obsolete("This overload of WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
         public byte[] WriteRead(byte[] write, ushort length)
         {
             return this.Bus.WriteReadData(this.Address, length, write);

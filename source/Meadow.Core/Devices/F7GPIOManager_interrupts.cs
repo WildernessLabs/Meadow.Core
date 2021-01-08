@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Meadow.Core;
 using Meadow.Hardware;
 using static Meadow.Core.Interop;
@@ -179,8 +180,11 @@ namespace Meadow.Devices
                         {
                             if (_interruptPins.ContainsKey(key))
                             {
-                                var ipin = _interruptPins[key];
-                                Interrupt?.Invoke(ipin, state);
+                                Task.Run(() =>
+                                {
+                                    var ipin = _interruptPins[key];
+                                    Interrupt?.Invoke(ipin, state);
+                                });
                             }
                         }
                     }
