@@ -126,8 +126,8 @@ namespace Meadow.Units
         [Pure]
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (Equals(this, obj)) return true;
+            if (ReferenceEquals(null, obj)) { return false; }
+            if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Temperature)obj);
         }
 
