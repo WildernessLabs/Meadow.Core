@@ -33,6 +33,7 @@ namespace Meadow.Units
         /// The temperature expressed as a value.
         /// </summary>
         [Pure] public double Value { get; }
+
         /// <summary>
         /// The unit that describes the value.
         /// </summary>
@@ -111,11 +112,13 @@ namespace Meadow.Units
         /// <param name="value">The temperature value.</param>
         /// <returns>A new temperature object.</returns>
         [Pure] public static Temperature FromCelsius(double value) => new Temperature(value, UnitType.Celsius);
+
         /// <summary>
         /// Creates a new Temperature object from a unit value in Fahrenheit.
         /// </summary>
         /// <param name="value">The temperature value.</param>
         /// <returns>A new temperature object.</returns>
+
         [Pure] public static Temperature FromFahrenheit(double value) => new Temperature(value, UnitType.Fahrenheit);
         /// <summary>
         /// Creates a new Temperature object from a unit value in Kelvin.
