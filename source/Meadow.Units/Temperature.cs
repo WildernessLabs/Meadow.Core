@@ -122,7 +122,6 @@ namespace Meadow.Units
         /// <returns>A new temperature object.</returns>
         [Pure] public static Temperature FromKelvin(double value) => new Temperature(value, UnitType.Kelvin);
 
-        [Pure] public bool Equals(Temperature other) => Value == other.Value;
         [Pure]
         public override bool Equals(object obj)
         {
@@ -130,6 +129,8 @@ namespace Meadow.Units
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Temperature)obj);
         }
+
+        [Pure] public bool Equals(Temperature other) => Value == other.Value;
 
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
