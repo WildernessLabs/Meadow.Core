@@ -67,6 +67,7 @@ namespace Meadow.Units
                 }
             }
         }
+
         /// <summary>
         /// Gets the temperature value expressed as a unit Fahrenheit.
         /// </summary>
@@ -83,6 +84,7 @@ namespace Meadow.Units
                 }
             }
         }
+
         /// <summary>
         /// Gets the temperature value expressed as a unit Kelvin.
         /// </summary>
