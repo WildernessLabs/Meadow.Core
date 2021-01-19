@@ -32,12 +32,12 @@ namespace Meadow.Units
         /// <summary>
         /// The temperature expressed as a value.
         /// </summary>
-        [Pure] public double Value { get; }
+        public double Value { get; set; }
 
         /// <summary>
         /// The unit that describes the value.
         /// </summary>
-        [Pure] public UnitType Unit { get; }
+        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the temperature.
@@ -80,7 +80,7 @@ namespace Meadow.Units
                     case UnitType.Fahrenheit:
                         return Value;
                     case UnitType.Kelvin:
-                        return TempConversions.KToF(Value);
+                        return TempConversions.CToF(TempConversions.KToC(Value));
                     default: throw new Exception("the compiler lies.");
                 }
             }
@@ -95,7 +95,7 @@ namespace Meadow.Units
                     case UnitType.Celsius:
                         return TempConversions.CToK(Value);
                     case UnitType.Fahrenheit:
-                        return TempConversions.FToK(Value);
+                        return TempConversions.CToK(TempConversions.FToC(Value));
                     case UnitType.Kelvin:
                         return Value;
                     default: throw new Exception("the compiler lies.");

@@ -31,12 +31,12 @@ namespace Meadow.Units
         /// <summary>
         /// The relative expressed as a value percent.
         /// </summary>
-        [Pure] public double Value { get; }
+        public double Value { get; set; }
 
         /// <summary>
         /// The unit that describes the value.
         /// </summary>
-        [Pure] public UnitType Unit { get; }
+        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the temperature.

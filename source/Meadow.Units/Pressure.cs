@@ -32,12 +32,12 @@ namespace Meadow.Units
         /// <summary>
         /// The temperature expressed as a value.
         /// </summary>
-        [Pure] public double Value { get; }
+        public double Value { get; set; }
 
         /// <summary>
         /// The unit that describes the value.
         /// </summary>
-        [Pure] public UnitType Unit { get; }
+        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the temperature.
@@ -62,9 +62,9 @@ namespace Meadow.Units
                     case UnitType.Pascal:
                         return PressureConversions.PaToBar(Value);
                     case UnitType.Psi:
-                        return PressureConversions.PsiToBar(Value);
+                        return PressureConversions.PaToBar(PressureConversions.PsiToPa(Value));
                     case UnitType.StandardAtmosphere:
-                        return PressureConversions.AtToBar(Value);
+                        return PressureConversions.PaToBar(PressureConversions.AtToPa(Value));
                     case UnitType.Bar:
                         return Value;
                     default: throw new Exception("the compiler lies.");
@@ -81,7 +81,7 @@ namespace Meadow.Units
                     case UnitType.Pascal:
                         return Value;
                     case UnitType.Psi:
-                        return PressureConversions.PsiToPascal(Value);
+                        return PressureConversions.PsiToPa(Value);
                     case UnitType.StandardAtmosphere:
                         return PressureConversions.AtToPa(Value);
                     case UnitType.Bar:
@@ -102,9 +102,9 @@ namespace Meadow.Units
                     case UnitType.Psi:
                         return Value;
                     case UnitType.StandardAtmosphere:
-                        return PressureConversions.AtToPsi(Value);
+                        return PressureConversions.PaToPsi(PressureConversions.AtToPa(Value));
                     case UnitType.Bar:
-                        return PressureConversions.BarToPsi(Value);
+                        return PressureConversions.PaToPsi(PressureConversions.BarToPa(Value));
                     default: throw new Exception("the compiler lies.");
                 }
             }
@@ -119,11 +119,11 @@ namespace Meadow.Units
                     case UnitType.Pascal:
                         return PressureConversions.PaToAt(Value);
                     case UnitType.Psi:
-                        return PressureConversions.PsiToAt(Value);
+                        return PressureConversions.PaToAt(PressureConversions.PsiToPa(Value));
                     case UnitType.StandardAtmosphere:
                         return Value;
                     case UnitType.Bar:
-                        return PressureConversions.BarToAt(Value);
+                        return PressureConversions.PaToAt(PressureConversions.BarToPa(Value));
                     default: throw new Exception("the compiler lies.");
                 }
             }
@@ -158,7 +158,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="value">The pressure value.</param>
         /// <returns>A new pressure object.</returns>
-        [Pure] public static Pressure FromAt(double value) => new Pressure(value, UnitType.StandardAtmosphere);
+        public static Pressure FromAt(double value) => new Pressure(value, UnitType.StandardAtmosphere);
 
         //=============================
         // Boilerplate interface stuff.

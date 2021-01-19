@@ -25,7 +25,7 @@ namespace Meadow.Units.Tests
         {
             Pressure p = new Pressure(1, Pressure.UnitType.Bar);
             Assert.That(p.Pascal == 100000);
-            Assert.That(p.Psi == 14.5038);
+            Assert.That(Equals4DigitPrecision(p.Psi, 14.503773773));
             Assert.That(Equals4DigitPrecision(p.StandardAtmosphere, 0.9869233));
 
             Pressure p2 = new Pressure(1, Pressure.UnitType.Pascal);
