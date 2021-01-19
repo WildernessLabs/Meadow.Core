@@ -33,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TemperatureTests.cs" />
+    <Compile Include="PressureTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

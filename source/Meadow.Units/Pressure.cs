@@ -16,15 +16,15 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(true)]
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
-    public struct Temperature : IComparable, IFormattable, IConvertible,
+    public struct Pressure : IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Temperature` object.
+        /// Creates a new `Pressure` object.
         /// </summary>
-        /// <param name="value">The temperature value.</param>
-        /// <param name="type">_Celsius_ (`C°`), by default.</param>
-        public Temperature(double value, UnitType type = UnitType.Celsius)
+        /// <param name="value">The pressure value.</param>
+        /// <param name="type">_Bar_ (`Bar`), by default.</param>
+        public Pressure(double value, UnitType type = UnitType.Bar)
         {
             Value = value; Unit = type;
         }
@@ -44,60 +44,86 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
-            Celsius,
-            Fahrenheit,
-            Kelvin,
+            Pascal,
+            Psi,
+            StandardAtmosphere,
+            Bar
         }
 
         //========================
         // TO property conversions
 
         /// <summary>
-        /// Gets the temperature value expressed as a unit _Celsius/Centrigrade_ (`C°`).
+        /// Gets the pressure value expressed as a unit _Bar_ (`Bar`)
         /// </summary>
-        public double Celsius {
+        public double Bar {
             get {
                 switch (Unit) {
-                    case UnitType.Celsius:
+                    case UnitType.Pascal:
+                        return PressureConversions.PaToBar(Value);
+                    case UnitType.Psi:
+                        return PressureConversions.PsiToBar(Value);
+                    case UnitType.StandardAtmosphere:
+                        return PressureConversions.AtToBar(Value);
+                    case UnitType.Bar:
                         return Value;
-                    case UnitType.Fahrenheit:
-                        return TempConversions.FToC(Value);
-                    case UnitType.Kelvin:
-                        return TempConversions.KToC(Value);
                     default: throw new Exception("the compiler lies.");
                 }
             }
         }
 
         /// <summary>
-        /// Gets the temperature value expressed as a unit _Fahrenheit_ (`F°`).
+        /// Gets the pressure value expressed as a unit _Pascal_ (`Pa`).
         /// </summary>
-        public double Fahrenheit {
+        public double Pascal {
             get {
                 switch (Unit) {
-                    case UnitType.Celsius:
-                        return TempConversions.CToF(Value);
-                    case UnitType.Fahrenheit:
+                    case UnitType.Pascal:
                         return Value;
-                    case UnitType.Kelvin:
-                        return TempConversions.KToF(Value);
+                    case UnitType.Psi:
+                        return PressureConversions.PsiToPascal(Value);
+                    case UnitType.StandardAtmosphere:
+                        return PressureConversions.AtToPa(Value);
+                    case UnitType.Bar:
+                        return PressureConversions.BarToPa(Value);
                     default: throw new Exception("the compiler lies.");
                 }
             }
         }
 
         /// <summary>
-        /// Gets the temperature value expressed as a unit _Kelvin_ (`K`).
+        /// Gets the pressure value expressed as a unit _Pound-force per square inch_ (`Psi`).
         /// </summary>
-        public double Kelvin {
+        public double Psi {
             get {
                 switch (Unit) {
-                    case UnitType.Celsius:
-                        return TempConversions.CToK(Value);
-                    case UnitType.Fahrenheit:
-                        return TempConversions.FToK(Value);
-                    case UnitType.Kelvin:
+                    case UnitType.Pascal:
+                        return PressureConversions.PaToPsi(Value);
+                    case UnitType.Psi:
                         return Value;
+                    case UnitType.StandardAtmosphere:
+                        return PressureConversions.AtToPsi(Value);
+                    case UnitType.Bar:
+                        return PressureConversions.BarToPsi(Value);
+                    default: throw new Exception("the compiler lies.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the pressure value expressed as a unit _Standard Atmosphere_ (`At`).
+        /// </summary>
+        public double StandardAtmosphere {
+            get {
+                switch (Unit) {
+                    case UnitType.Pascal:
+                        return PressureConversions.PaToAt(Value);
+                    case UnitType.Psi:
+                        return PressureConversions.PsiToAt(Value);
+                    case UnitType.StandardAtmosphere:
+                        return Value;
+                    case UnitType.Bar:
+                        return PressureConversions.BarToAt(Value);
                     default: throw new Exception("the compiler lies.");
                 }
             }
@@ -107,25 +133,32 @@ namespace Meadow.Units
         // FROM convenience conversions
 
         /// <summary>
-        /// Creates a new `Temperature` object from a unit value in _Celsius/Centigrade_ (`C°`).
+        /// Creates a new `Pressure` object from a unit value in _Bar_ (`Bar`).
         /// </summary>
-        /// <param name="value">The temperature value.</param>
-        /// <returns>A new temperature object.</returns>
-        [Pure] public static Temperature FromCelsius(double value) => new Temperature(value, UnitType.Celsius);
+        /// <param name="value">The pressure value.</param>
+        /// <returns>A new pressure object.</returns>
+        [Pure] public static Pressure FromBar(double value) => new Pressure(value, UnitType.Bar);
 
         /// <summary>
-        /// Creates a new `Temperature` object from a unit value in _Fahrenheit_ (`F°`).
+        /// Creates a new `Pressure` object from a unit value in _Pascal_ (`Pa`).
         /// </summary>
-        /// <param name="value">The temperature value.</param>
-        /// <returns>A new temperature object.</returns>
+        /// <param name="value">The pressure value.</param>
+        /// <returns>A new pressure object.</returns>
+        [Pure] public static Pressure FromPascal(double value) => new Pressure(value, UnitType.Pascal);
 
-        [Pure] public static Temperature FromFahrenheit(double value) => new Temperature(value, UnitType.Fahrenheit);
         /// <summary>
-        /// Creates a new `Temperature` object from a unit value in _Kelvin_ (`K°`).
+        /// Creates a new `Pressure` object from a unit value in _Pounds-force per square inch_ (`Psi`).
         /// </summary>
-        /// <param name="value">The temperature value.</param>
+        /// <param name="value">The pressure value.</param>
         /// <returns>A new temperature object.</returns>
-        [Pure] public static Temperature FromKelvin(double value) => new Temperature(value, UnitType.Kelvin);
+        [Pure] public static Pressure FromPsi(double value) => new Pressure(value, UnitType.Psi);
+
+        /// <summary>
+        /// Creates a new `Pressure` object from a unit value in _Standard Atmosphere_ (`At`).
+        /// </summary>
+        /// <param name="value">The pressure value.</param>
+        /// <returns>A new pressure object.</returns>
+        [Pure] public static Pressure FromAt(double value) => new Pressure(value, UnitType.StandardAtmosphere);
 
         //=============================
         // Boilerplate interface stuff.
@@ -135,22 +168,22 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Temperature)obj);
+            return obj.GetType() == GetType() && Equals((Pressure)obj);
         }
 
-        [Pure] public bool Equals(Temperature other) => Value == other.Value;
+        [Pure] public bool Equals(Pressure other) => Value == other.Value;
 
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public static bool operator ==(Temperature left, Temperature right) => Equals(left, right);
-        [Pure] public static bool operator !=(Temperature left, Temperature right) => !Equals(left, right);
-        [Pure] public int CompareTo(Temperature other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
-        [Pure] public static bool operator <(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Pressure left, Pressure right) => Equals(left, right);
+        [Pure] public static bool operator !=(Pressure left, Pressure right) => !Equals(left, right);
+        [Pure] public int CompareTo(Pressure other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
+        [Pure] public static bool operator <(Pressure left, Pressure right) => Comparer<Pressure>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Pressure left, Pressure right) => Comparer<Pressure>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Pressure left, Pressure right) => Comparer<Pressure>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Pressure left, Pressure right) => Comparer<Pressure>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Temperature(int value) => new Temperature(value);
+        [Pure] public static implicit operator Pressure(int value) => new Pressure(value);
 
         [Pure] public override string ToString() => Value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
