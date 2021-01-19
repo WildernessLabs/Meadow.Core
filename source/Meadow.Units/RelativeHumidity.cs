@@ -13,7 +13,7 @@ namespace Meadow.Units
     /// the same temperature.
     /// </summary>
     [Serializable]
-    [ImmutableObject(true)]
+    [ImmutableObject(false)]
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
     public struct RelativeHumidity : IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>

@@ -14,7 +14,7 @@ namespace Meadow.Units
     /// is in contact with another that is colder or hotter.
     /// </summary>
     [Serializable]
-    [ImmutableObject(true)]
+    [ImmutableObject(false)]
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
     public struct Pressure : IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
