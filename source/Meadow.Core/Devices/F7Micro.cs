@@ -1,4 +1,5 @@
 ﻿using Meadow.Gateway.WiFi;
+using Meadow.Gateways.Bluetooth;
 using Meadow.Hardware;
 using System;
 using System.Linq;
@@ -17,8 +18,12 @@ namespace Meadow.Devices
         private Esp32Coprocessor esp32;
 
         public WiFiAdapter WiFiAdapter { get; protected set; }
+        public BluetoothAdapter BluetoothAdapter { get; protected set; }
 
         public event EventHandler WiFiAdapterInitilaized = delegate {};
+
+        private bool coProcInitialized;
+        private bool initializingCoProc;
 
         /// <summary>
         /// The default resolution for analog inputs
@@ -69,27 +74,42 @@ namespace Meadow.Devices
             return InitEsp32CoProc();
         }
 
+        public Task<bool> InitBluetoothAdapter()
+        {
+            return InitEsp32CoProc();
+        }
+
         protected Task<bool> InitEsp32CoProc()
         {
-            Console.WriteLine("Initializing Esp32 coproc.");
-            return Task.Run<bool>(async () => {
-                try {
-                    //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                    //stopwatch.Start()
-                    //Console.WriteLine("creating Esp32 Coproc.");
-                    this.esp32 = new Esp32Coprocessor();
-                    this.WiFiAdapter = new WiFiAdapter(this.esp32);
-                    Console.WriteLine("Esp32 coproc initialization complete.");
-                } catch (Exception e) {
-                    Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");
-                    return false;
-                }
+            if (!initializingCoProc && !coProcInitialized) {
+                this.initializingCoProc = true;
 
-                // this needs to be out of the exception block, otherwise user
-                // code exceptions get caught
-                //this.WiFiAdapterInitilaized(this, new EventArgs());
-                return true;
-            });
+                Console.WriteLine("Initializing Esp32 coproc.");
+                return Task.Run<bool>(async () => {
+                    try {
+                        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                        //stopwatch.Start()
+                        //Console.WriteLine("creating Esp32 Coproc.");
+                        this.esp32 = new Esp32Coprocessor();
+                        this.WiFiAdapter = new WiFiAdapter(this.esp32);
+                        this.BluetoothAdapter = new BluetoothAdapter(this.esp32);
+                        Console.WriteLine("Esp32 coproc initialization complete.");
+                    } catch (Exception e) {
+                        Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");
+                        return false;
+                    }
+
+                    // this needs to be out of the exception block, otherwise user
+                    // code exceptions get caught
+                    //this.WiFiAdapterInitilaized(this, new EventArgs());
+
+                    this.initializingCoProc = false;
+                    this.coProcInitialized = true;
+                    return true;
+                });
+            } else {
+                return Task.FromResult(false);
+            }
         }
 
         public IDigitalOutputPort CreateDigitalOutputPort(

@@ -5,7 +5,8 @@ using static Meadow.Core.Interop;
 using Meadow.Devices.Esp32.MessagePayloads;
 using System.Net;
 using Meadow.Gateway.WiFi;
-using Meadow.Gateway;
+using Meadow.Gateway; //TODO: all the stuff in that namespace should be `Gateways`
+using Meadow.Gateways;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Meadow.Gateways.Exceptions;
@@ -15,7 +16,7 @@ namespace Meadow.Devices
     /// <summary>
     ///
     /// </summary>
-    public class Esp32Coprocessor : IWiFiAdapter
+    public class Esp32Coprocessor : IWiFiAdapter, IBluetoothDevice
     {
         #region Enums
 

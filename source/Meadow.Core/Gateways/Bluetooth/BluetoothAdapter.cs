@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Meadow.Gateways.Bluetooth
 {
     /// <summary>
@@ -10,11 +11,18 @@ namespace Meadow.Gateways.Bluetooth
         public ulong Address { get; protected set; }
         public AdapterCapabilities Capabilities { get; set; }
 
-        public BluetoothAdapter(string deviceID, ulong address, AdapterCapabilities capabilities)
+        private IBluetoothDevice bluetoothDevice;
+
+        private BluetoothAdapter() { }
+
+        internal BluetoothAdapter(IBluetoothDevice device)
         {
-            this.DeviceID = deviceID;
-            this.Address = address;
-            this.Capabilities = capabilities;
+            this.bluetoothDevice = device;
+
+            //this.DeviceID = what?
+            //this.Address = what?
+            //this.Capabilities = device.BluetoothCapabilities;
         }
+
     }
 }

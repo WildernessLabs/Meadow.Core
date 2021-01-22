@@ -2,6 +2,7 @@ using System.Net;
 using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
 
+//TODO: this should be Meadow.Gateways
 namespace Meadow.Gateway
 {
     public interface IWiFiAdapter
