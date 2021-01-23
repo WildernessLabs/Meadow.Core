@@ -11,7 +11,7 @@ namespace Meadow.Gateways.Bluetooth
         public ulong Address { get; protected set; }
         public AdapterCapabilities Capabilities { get; set; }
 
-        BluetoothContentTree ContentTree { get; } = new BluetoothContentTree();
+        public ObservableDictionary<Guid, IService> Services { get; } = new ObservableDictionary<Guid, IService>();
 
         private IBluetoothDevice bluetoothDevice;
 
@@ -21,8 +21,11 @@ namespace Meadow.Gateways.Bluetooth
         {
             this.bluetoothDevice = device;
 
-            //this.DeviceID = what?
-            //this.Address = what?
+            // TODO: should be Device.Name or whatever
+            this.DeviceID = "MeadowF7";
+            // TODO: not sure
+            this.Address = 37337;
+            // TODO: figure this out.
             //this.Capabilities = device.BluetoothCapabilities;
 
             InitializeContentTree();
@@ -36,7 +39,7 @@ namespace Meadow.Gateways.Bluetooth
             //IService basicService = new Service(new guid) {
             //    Name = "HonkyTonk"
             //}
-            //ContentTree.Services.Add(basicService.ID, basicService);
+            //Services.Add(basicService.ID, basicService);
         }
 
     }
