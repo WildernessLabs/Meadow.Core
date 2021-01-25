@@ -16,9 +16,8 @@ namespace Meadow.Devices
     {
         private SynchronizationContext _context;
         private Esp32Coprocessor esp32;
-
-        public WiFiAdapter WiFiAdapter { get; protected set; }
-        public BluetoothAdapter BluetoothAdapter { get; protected set; }
+        private WiFiAdapter _wifiAdapter;
+        private BluetoothAdapter _bleAdapter;
 
         public event EventHandler WiFiAdapterInitilaized = delegate {};
 
@@ -62,6 +61,32 @@ namespace Meadow.Devices
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.
             //this.InitEsp32CoProc();
+        }
+
+        public WiFiAdapter WiFiAdapter
+        {
+            get
+            {
+                if(_wifiAdapter == null)
+                {
+                    throw new Exception("ESP32 Is not initialized.  Call InitWiFiAdapter()");
+                }
+                return _wifiAdapter;
+            }
+            protected set => _wifiAdapter = value;
+        }
+
+        public BluetoothAdapter BluetoothAdapter
+        {
+            get
+            {
+                if (_bleAdapter == null)
+                {
+                    throw new Exception("ESP32 Is not initialized.  Call InitBluetoothAdapter()");
+                }
+                return _bleAdapter;
+            }
+            protected set => _bleAdapter = value;
         }
 
         public IPin GetPin(string pinName)

@@ -2177,5 +2177,520 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(18);
         }
 
+        /// <summary>
+        /// Encode a ListenRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="listenRequest">ListenRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ListenRequest object.</returns>
+        public static byte[] EncodeListenRequest(MessagePayloads.ListenRequest listenRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 8;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(listenRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeInt32(listenRequest.BackLog, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a ListenRequest object from a byte array.
+        /// </summary>
+        /// <param name="listenRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>ListenRequest object.</returns>
+        public static MessagePayloads.ListenRequest ExtractListenRequest(byte[] buffer, int offset)
+        {
+            ListenRequest listenRequest = new MessagePayloads.ListenRequest();
+
+            listenRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            listenRequest.BackLog = ExtractInt32(buffer, offset);
+            return(listenRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the ListenRequest object.
+        /// </summary>
+        /// <param name="listenRequest">ListenRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded ListenRequest object.</returns>
+        public static int EncodedListenRequestBufferSize(MessagePayloads.ListenRequest listenRequest)
+        {
+            return(8);
+        }
+
+        /// <summary>
+        /// Encode a BindRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="bindRequest">BindRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded BindRequest object.</returns>
+        public static byte[] EncodeBindRequest(MessagePayloads.BindRequest bindRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (bindRequest.AddrLength + 4);
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(bindRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeUInt32(bindRequest.AddrLength, buffer, offset);
+            offset += 4;
+            if (bindRequest.AddrLength > 0)
+            {
+                Array.Copy(bindRequest.Addr, 0, buffer, offset, bindRequest.AddrLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a BindRequest object from a byte array.
+        /// </summary>
+        /// <param name="bindRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>BindRequest object.</returns>
+        public static MessagePayloads.BindRequest ExtractBindRequest(byte[] buffer, int offset)
+        {
+            BindRequest bindRequest = new MessagePayloads.BindRequest();
+
+            bindRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            bindRequest.AddrLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (bindRequest.AddrLength > 0)
+            {
+                bindRequest.Addr = new byte[bindRequest.AddrLength];
+                Array.Copy(buffer, offset, bindRequest.Addr, 0, bindRequest.AddrLength);
+            }
+            return(bindRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the BindRequest object.
+        /// </summary>
+        /// <param name="bindRequest">BindRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded BindRequest object.</returns>
+        public static int EncodedBindRequestBufferSize(MessagePayloads.BindRequest bindRequest)
+        {
+            int result = 0;
+            result += (int) bindRequest.AddrLength;
+            return(result + 8);
+        }
+
+        /// <summary>
+        /// Encode a AcceptRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="acceptRequest">AcceptRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded AcceptRequest object.</returns>
+        public static byte[] EncodeAcceptRequest(MessagePayloads.AcceptRequest acceptRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(acceptRequest.SocketHandle, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a AcceptRequest object from a byte array.
+        /// </summary>
+        /// <param name="acceptRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>AcceptRequest object.</returns>
+        public static MessagePayloads.AcceptRequest ExtractAcceptRequest(byte[] buffer, int offset)
+        {
+            AcceptRequest acceptRequest = new MessagePayloads.AcceptRequest();
+
+            acceptRequest.SocketHandle = ExtractInt32(buffer, offset);
+            return(acceptRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the AcceptRequest object.
+        /// </summary>
+        /// <param name="acceptRequest">AcceptRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded AcceptRequest object.</returns>
+        public static int EncodedAcceptRequestBufferSize(MessagePayloads.AcceptRequest acceptRequest)
+        {
+            return(4);
+        }
+
+        /// <summary>
+        /// Encode a AcceptResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="acceptResponse">AcceptResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded AcceptResponse object.</returns>
+        public static byte[] EncodeAcceptResponse(MessagePayloads.AcceptResponse acceptResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (acceptResponse.AddrLength + 4);
+            length += 8;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(acceptResponse.AddrLength, buffer, offset);
+            offset += 4;
+            if (acceptResponse.AddrLength > 0)
+            {
+                Array.Copy(acceptResponse.Addr, 0, buffer, offset, acceptResponse.AddrLength);
+                offset += (int) (acceptResponse.AddrLength);
+            }
+            EncodeInt32(acceptResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(acceptResponse.ResponseErrno, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a AcceptResponse object from a byte array.
+        /// </summary>
+        /// <param name="acceptResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>AcceptResponse object.</returns>
+        public static MessagePayloads.AcceptResponse ExtractAcceptResponse(byte[] buffer, int offset)
+        {
+            AcceptResponse acceptResponse = new MessagePayloads.AcceptResponse();
+
+            acceptResponse.AddrLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (acceptResponse.AddrLength > 0)
+            {
+                acceptResponse.Addr = new byte[acceptResponse.AddrLength];
+                Array.Copy(buffer, offset, acceptResponse.Addr, 0, acceptResponse.AddrLength);
+                offset += (int) acceptResponse.AddrLength;
+            }
+            acceptResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            acceptResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            return(acceptResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the AcceptResponse object.
+        /// </summary>
+        /// <param name="acceptResponse">AcceptResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded AcceptResponse object.</returns>
+        public static int EncodedAcceptResponseBufferSize(MessagePayloads.AcceptResponse acceptResponse)
+        {
+            int result = 0;
+            result += (int) acceptResponse.AddrLength;
+            return(result + 12);
+        }
+
+        /// <summary>
+        /// Encode a IoctlRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="ioctlRequest">IoctlRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded IoctlRequest object.</returns>
+        public static byte[] EncodeIoctlRequest(MessagePayloads.IoctlRequest ioctlRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(ioctlRequest.Command, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a IoctlRequest object from a byte array.
+        /// </summary>
+        /// <param name="ioctlRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>IoctlRequest object.</returns>
+        public static MessagePayloads.IoctlRequest ExtractIoctlRequest(byte[] buffer, int offset)
+        {
+            IoctlRequest ioctlRequest = new MessagePayloads.IoctlRequest();
+
+            ioctlRequest.Command = ExtractInt32(buffer, offset);
+            return(ioctlRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the IoctlRequest object.
+        /// </summary>
+        /// <param name="ioctlRequest">IoctlRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded IoctlRequest object.</returns>
+        public static int EncodedIoctlRequestBufferSize(MessagePayloads.IoctlRequest ioctlRequest)
+        {
+            return(4);
+        }
+
+        /// <summary>
+        /// Encode a IoctlResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="ioctlResponse">IoctlResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded IoctlResponse object.</returns>
+        public static byte[] EncodeIoctlResponse(MessagePayloads.IoctlResponse ioctlResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (ioctlResponse.AddrLength + 4);
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(ioctlResponse.AddrLength, buffer, offset);
+            offset += 4;
+            if (ioctlResponse.AddrLength > 0)
+            {
+                Array.Copy(ioctlResponse.Addr, 0, buffer, offset, ioctlResponse.AddrLength);
+                offset += (int) (ioctlResponse.AddrLength);
+            }
+            EncodeInt32(ioctlResponse.Flags, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a IoctlResponse object from a byte array.
+        /// </summary>
+        /// <param name="ioctlResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>IoctlResponse object.</returns>
+        public static MessagePayloads.IoctlResponse ExtractIoctlResponse(byte[] buffer, int offset)
+        {
+            IoctlResponse ioctlResponse = new MessagePayloads.IoctlResponse();
+
+            ioctlResponse.AddrLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (ioctlResponse.AddrLength > 0)
+            {
+                ioctlResponse.Addr = new byte[ioctlResponse.AddrLength];
+                Array.Copy(buffer, offset, ioctlResponse.Addr, 0, ioctlResponse.AddrLength);
+                offset += (int) ioctlResponse.AddrLength;
+            }
+            ioctlResponse.Flags = ExtractInt32(buffer, offset);
+            return(ioctlResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the IoctlResponse object.
+        /// </summary>
+        /// <param name="ioctlResponse">IoctlResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded IoctlResponse object.</returns>
+        public static int EncodedIoctlResponseBufferSize(MessagePayloads.IoctlResponse ioctlResponse)
+        {
+            int result = 0;
+            result += (int) ioctlResponse.AddrLength;
+            return(result + 8);
+        }
+
+        /// <summary>
+        /// Encode a GetSockNameRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getSockNameRequest">GetSockNameRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetSockNameRequest object.</returns>
+        public static byte[] EncodeGetSockNameRequest(MessagePayloads.GetSockNameRequest getSockNameRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(getSockNameRequest.SocketHandle, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a GetSockNameRequest object from a byte array.
+        /// </summary>
+        /// <param name="getSockNameRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>GetSockNameRequest object.</returns>
+        public static MessagePayloads.GetSockNameRequest ExtractGetSockNameRequest(byte[] buffer, int offset)
+        {
+            GetSockNameRequest getSockNameRequest = new MessagePayloads.GetSockNameRequest();
+
+            getSockNameRequest.SocketHandle = ExtractInt32(buffer, offset);
+            return(getSockNameRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the GetSockNameRequest object.
+        /// </summary>
+        /// <param name="getSockNameRequest">GetSockNameRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded GetSockNameRequest object.</returns>
+        public static int EncodedGetSockNameRequestBufferSize(MessagePayloads.GetSockNameRequest getSockNameRequest)
+        {
+            return(4);
+        }
+
+        /// <summary>
+        /// Encode a GetSockNameResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getSockNameResponse">GetSockNameResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetSockNameResponse object.</returns>
+        public static byte[] EncodeGetSockNameResponse(MessagePayloads.GetSockNameResponse getSockNameResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (getSockNameResponse.AddrLength + 4);
+            length += 8;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(getSockNameResponse.AddrLength, buffer, offset);
+            offset += 4;
+            if (getSockNameResponse.AddrLength > 0)
+            {
+                Array.Copy(getSockNameResponse.Addr, 0, buffer, offset, getSockNameResponse.AddrLength);
+                offset += (int) (getSockNameResponse.AddrLength);
+            }
+            EncodeInt32(getSockNameResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(getSockNameResponse.ResponseErrno, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a GetSockNameResponse object from a byte array.
+        /// </summary>
+        /// <param name="getSockNameResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>GetSockNameResponse object.</returns>
+        public static MessagePayloads.GetSockNameResponse ExtractGetSockNameResponse(byte[] buffer, int offset)
+        {
+            GetSockNameResponse getSockNameResponse = new MessagePayloads.GetSockNameResponse();
+
+            getSockNameResponse.AddrLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (getSockNameResponse.AddrLength > 0)
+            {
+                getSockNameResponse.Addr = new byte[getSockNameResponse.AddrLength];
+                Array.Copy(buffer, offset, getSockNameResponse.Addr, 0, getSockNameResponse.AddrLength);
+                offset += (int) getSockNameResponse.AddrLength;
+            }
+            getSockNameResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            getSockNameResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            return(getSockNameResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the GetSockNameResponse object.
+        /// </summary>
+        /// <param name="getSockNameResponse">GetSockNameResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded GetSockNameResponse object.</returns>
+        public static int EncodedGetSockNameResponseBufferSize(MessagePayloads.GetSockNameResponse getSockNameResponse)
+        {
+            int result = 0;
+            result += (int) getSockNameResponse.AddrLength;
+            return(result + 12);
+        }
+
+        /// <summary>
+        /// Encode a BTServicesDescription object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="bTServicesDescription">BTServicesDescription object to be encoded.</param>
+        /// <returns>Byte array containing the encoded BTServicesDescription object.</returns>
+        public static byte[] EncodeBTServicesDescription(MessagePayloads.BTServicesDescription bTServicesDescription)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (bTServicesDescription.DeviceName.Length + 1);
+            length += (int) (bTServicesDescription.PrimaryService.Length + 1);
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeString(bTServicesDescription.DeviceName, buffer, offset);
+            offset += bTServicesDescription.DeviceName.Length + 1;
+            EncodeString(bTServicesDescription.PrimaryService, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a BTServicesDescription object from a byte array.
+        /// </summary>
+        /// <param name="bTServicesDescription">Byte array containing the object to the extracted.</param>
+        /// <returns>BTServicesDescription object.</returns>
+        public static MessagePayloads.BTServicesDescription ExtractBTServicesDescription(byte[] buffer, int offset)
+        {
+            BTServicesDescription bTServicesDescription = new MessagePayloads.BTServicesDescription();
+
+            bTServicesDescription.DeviceName = ExtractString(buffer, offset);
+            offset += (int) (bTServicesDescription.DeviceName.Length + 1);
+            bTServicesDescription.PrimaryService = ExtractString(buffer, offset);
+            return(bTServicesDescription);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the BTServicesDescription object.
+        /// </summary>
+        /// <param name="bTServicesDescription">BTServicesDescription object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded BTServicesDescription object.</returns>
+        public static int EncodedBTServicesDescriptionBufferSize(MessagePayloads.BTServicesDescription bTServicesDescription)
+        {
+            int result = 0;
+            result += (int) bTServicesDescription.DeviceName.Length;
+            result += (int) bTServicesDescription.PrimaryService.Length;
+            return(result + 2);
+        }
+
     }
 }

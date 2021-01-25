@@ -16,7 +16,7 @@ namespace Meadow.Devices
     /// <summary>
     ///
     /// </summary>
-    public class Esp32Coprocessor : IWiFiAdapter, IBluetoothDevice
+    public partial class Esp32Coprocessor : IWiFiAdapter, IBluetoothDevice
     {
         #region Enums
 

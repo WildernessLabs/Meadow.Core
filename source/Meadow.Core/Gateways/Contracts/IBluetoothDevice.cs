@@ -1,7 +1,8 @@
 ﻿using System;
 namespace Meadow.Gateways
 {
-    public interface IBluetoothDevice
+    internal interface IBluetoothDevice
     {
+        bool StartBluetoothStack(string deviceName);
     }
 }

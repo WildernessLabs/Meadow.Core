@@ -91,7 +91,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         RecvFrom = 14,
         Poll = 15,
         InterruptPollResponse = 16,
-        Send = 17
+        Send = 17,
+        Bind = 18,
+        Listen = 19,
+        Accept = 20,
+        Ioctl = 21,
+        GetSockName = 22
     };
 
     // <summary>
@@ -99,8 +104,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     // </summary>
     public enum BluetoothFunction
     {
-        GetConfiguration = 0,
-        SetConfiguration = 1
+        Start = 0,
+        Stop = 1
     };
 
     // <summary>

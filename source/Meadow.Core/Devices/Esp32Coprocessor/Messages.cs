@@ -255,4 +255,61 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public UInt32 SetupMessageId;
     };
 
+    public struct ListenRequest
+    {
+        public Int32 SocketHandle;
+        public Int32 BackLog;
+    };
+
+    public struct BindRequest
+    {
+        public Int32 SocketHandle;
+        public UInt32 AddrLength;
+        public byte[] Addr;
+    };
+
+    public struct AcceptRequest
+    {
+        public Int32 SocketHandle;
+    };
+
+    public struct AcceptResponse
+    {
+        public UInt32 AddrLength;
+        public byte[] Addr;
+        public Int32 Result;
+        public Int32 ResponseErrno;
+    };
+
+    public struct IoctlRequest
+    {
+        public Int32 Command;
+    };
+
+    public struct IoctlResponse
+    {
+        public UInt32 AddrLength;
+        public byte[] Addr;
+        public Int32 Flags;
+    };
+
+    public struct GetSockNameRequest
+    {
+        public Int32 SocketHandle;
+    };
+
+    public struct GetSockNameResponse
+    {
+        public UInt32 AddrLength;
+        public byte[] Addr;
+        public Int32 Result;
+        public Int32 ResponseErrno;
+    };
+
+    public struct BTServicesDescription
+    {
+        public String DeviceName;
+        public String PrimaryService;
+    };
+
 }
