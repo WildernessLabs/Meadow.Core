@@ -304,8 +304,6 @@ namespace Meadow.Hardware
 
         protected void RaiseMessageReceivedAndNotify(SerialMessageData messageData)
         {
-            Console.WriteLine($"+RaiseMessageReceivedAndNotify");
-
             try
             {
                 MessageReceived(this, messageData);
@@ -314,7 +312,6 @@ namespace Meadow.Hardware
             {
                 Console.WriteLine($"!! {ex.Message}");
             }
-            Console.WriteLine($"-RaiseMessageReceivedAndNotify");
             //TODO: figure out the IObservable when there's no change context
             //base.NotifyObservers(messageResult);
         }
