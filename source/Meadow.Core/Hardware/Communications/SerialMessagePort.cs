@@ -290,7 +290,6 @@ namespace Meadow.Hardware
                                 //todo: should this run on a new thread?
                                 // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
-                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
                                 });
 
