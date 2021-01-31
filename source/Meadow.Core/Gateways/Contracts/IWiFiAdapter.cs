@@ -45,7 +45,28 @@ namespace Meadow.Gateway
         /// </summary>
         bool IsConnected { get; }
 
-        ObservableCollection<WifiNetwork> GetAccessPoints();
+        /// <summary>
+        /// IP Address of the network adapter.
+        /// </summary>
+        IPAddress IpAddress { get; }
 
+        /// <summary>
+        /// Subnet mask of the adapter.
+        /// </summary>
+        IPAddress SubnetMask { get; }
+
+        /// <summary>
+        /// Default gateway for the adapter.
+        /// </summary>
+        IPAddress Gateway { get; }
+
+        /// <summary>
+        /// Get the list of access points.
+        /// </summary>
+        /// <remarks>
+        /// The network must be started before this method can be called.
+        /// </remarks>
+        /// <returns>ObservableCollection (possibly empty) of access points.</returns>
+        ObservableCollection<WifiNetwork> GetAccessPoints();
     }
 }

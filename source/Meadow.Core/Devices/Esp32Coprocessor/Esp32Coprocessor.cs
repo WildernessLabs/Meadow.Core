@@ -73,11 +73,24 @@ namespace Meadow.Devices
         {
             DebugLevel = DebugOptions.None;
             IsConnected = false;
+            ClearIpDetails();
         }
 
         #endregion Constructor(s)
 
         #region Methods
+
+        /// <summary>
+        /// Clear the IP address, subnet mask and gateway details.
+        /// </summary>
+        private void ClearIpDetails()
+        {
+            byte[] addressBytes = new byte[4];
+            Array.Clear(addressBytes, 0, addressBytes.Length);
+            IpAddress = new IPAddress(addressBytes);
+            SubnetMask = new IPAddress(addressBytes);
+            Gateway = new IPAddress(addressBytes);
+        }
 
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
@@ -245,11 +258,7 @@ namespace Meadow.Devices
                 }
                 else
                 {
-                    byte[] addressBytes = new byte[4];
-                    Array.Clear(addressBytes, 0, addressBytes.Length);
-                    IpAddress = new IPAddress(addressBytes);
-                    SubnetMask = new IPAddress(addressBytes);
-                    Gateway = new IPAddress(addressBytes);
+                    ClearIpDetails();
                     IsConnected = false;
                     if (command.StatusCode == (UInt32) StatusCodes.CoprocessorNotResponding)
                     {

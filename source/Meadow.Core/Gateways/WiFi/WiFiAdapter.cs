@@ -79,6 +79,21 @@ namespace Meadow.Gateway.WiFi
         /// </summary>
         private IWiFiAdapter NetworkAdapter { get; set; }
 
+        /// <summary>
+        /// IP Address of the network adapter.
+        /// </summary>
+        public IPAddress IpAddress { get { return (NetworkAdapter.IpAddress); } }
+
+        /// <summary>
+        /// Subnet mask of the adapter.
+        /// </summary>
+        public IPAddress SubnetMask { get { return (NetworkAdapter.SubnetMask); } }
+
+        /// <summary>
+        /// Default gateway for the adapter.
+        /// </summary>
+        public IPAddress Gateway { get { return (NetworkAdapter.Gateway); } }
+
         #endregion Properties
 
         #region Constructor(s)
