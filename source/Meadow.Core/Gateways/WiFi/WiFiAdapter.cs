@@ -43,7 +43,7 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Is the WiFi adapter currently connected to an access point?
         /// </summary>
-        public bool IsConnected { get { return(NetworkAdapter.IsConnected); } }
+        public bool IsConnected { get { return (NetworkAdapter.IsConnected); } }
 
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
@@ -93,6 +93,76 @@ namespace Meadow.Gateway.WiFi
         /// Default gateway for the adapter.
         /// </summary>
         public IPAddress Gateway { get { return (NetworkAdapter.Gateway); } }
+
+        /// <summary>
+        /// Get the network time when the network adapter starts?
+        /// </summary>
+        public bool GetNetworkTimeAtStartup
+        {
+            get { return (NetworkAdapter.GetNetworkTimeAtStartup); }
+            set { NetworkAdapter.GetNetworkTimeAtStartup = value; }
+        }
+
+        /// <summary>
+        /// Address of the NTP server.
+        /// </summary>
+        public string NtpServer
+        {
+            get { return (NetworkAdapter.NtpServer); }
+            set { NetworkAdapter.NtpServer = value; }
+        }
+
+        /// <summary>
+        /// Name of the board on the network.
+        /// </summary>
+        public string DeviceName { get { return (NetworkAdapter.DeviceName); } }
+
+        /// <summary>
+        /// MAC address of the board when acting as a client.
+        /// </summary>
+        public byte[] MacAddress
+        {
+            get { return (NetworkAdapter.MacAddress); }
+        }
+
+        /// <summary>
+        /// MAC address of the board when acting as a sft access point.
+        /// </summary>
+        public byte[] ApMacAddress
+            {
+            get { return (NetworkAdapter.ApMacAddress); }
+        }
+
+        /// <summary>
+        /// Automatically start the network interface when the board reboots?
+        /// </summary>
+        /// <remarks>
+        /// This will automatically connect to any preconfigured access points if they are available.
+        /// </remarks>
+        public bool AutomaticallyStartNetwork
+        {
+            get { return (NetworkAdapter.AutomaticallyStartNetwork); }
+            set { NetworkAdapter.AutomaticallyStartNetwork = value; }
+        }
+
+        /// <summary>
+        /// Automatically try to reconnect to an access point if there is a problem / disconnection?
+        /// </summary>
+        public bool AutomaticallyReconnect
+        {
+            get { return (NetworkAdapter.AutomaticallyReconnect); }
+            set { NetworkAdapter.AutomaticallyReconnect = value; }
+        }
+
+        /// <summary>
+        /// Default access point to try to connect to if the network interface is started and the board
+        /// is configured to automatically reconnect.
+        /// </summary>
+        public string DefaultAcessPoint
+        {
+            get { return (NetworkAdapter.DefaultAcessPoint); }
+            set { NetworkAdapter.DefaultAcessPoint = value; }
+        }
 
         #endregion Properties
 

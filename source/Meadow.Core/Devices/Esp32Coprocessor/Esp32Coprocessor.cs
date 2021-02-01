@@ -17,6 +17,15 @@ namespace Meadow.Devices
     /// </summary>
     public class Esp32Coprocessor : IWiFiAdapter
     {
+        #region Constants
+
+        /// <summary>
+        /// Maximum length od the SPI buffer that can be used for communication with the ESP32.
+        /// </summary>
+        private const uint MAXIMUM_SPI_BUFFER_LENGTH = 4000;
+
+        #endregion Constants
+
         #region Enums
 
         /// <summary>
@@ -36,7 +45,12 @@ namespace Meadow.Devices
         /// The flags set in this variable determine the type and amount of output generated when
         /// debugging this class.
         /// </remarks>
-        private static DebugOptions DebugLevel;
+        private static DebugOptions _debugLevel;
+
+        /// <summary>
+        /// Hold the ESP32 configuration.
+        /// </summary>
+        private SystemConfiguration? _config = null;
 
         #endregion Private fields / variables
 
@@ -62,6 +76,140 @@ namespace Meadow.Devices
         /// </summary>
         public bool IsConnected { get; private set; }
 
+        /// <summary>
+        /// Should the system automatically get the time when the board is connected to an access point?
+        /// </summary>
+        public bool GetNetworkTimeAtStartup
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.GetTimeAtStartup == 1);
+            }
+            set { SetProperty(ConfigurationItems.GetTimeAtStartup, value); }
+        }
+
+        /// <summary>
+        /// Name of the NTP server to use for time retrieval.
+        /// </summary>
+        public string NtpServer
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.NtpServer);
+            }
+            set { SetProperty(ConfigurationItems.NtpServer, value); }
+        }
+
+        /// <summary>
+        /// Get the device name.
+        /// </summary>
+        /// <remarks>
+        /// This value should be changed through the meadow.cfg file.
+        /// </remarks>
+        public string DeviceName
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.DeviceName);
+            }
+        }
+
+        /// <summary>
+        /// MAC address as used by the ESP32 when acting as a client.
+        /// </summary>
+        public byte[] MacAddress
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.BoardMacAddress);
+            }
+
+        }
+
+        /// <summary>
+        /// MAC address as used by the ESP32 when acting as an access point.
+        /// </summary>
+        public byte[] ApMacAddress
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.SoftApMacAddress);
+            }
+
+        }
+
+        /// <summary>
+        /// Automatically start the network interface when the board reboots?
+        /// </summary>
+        /// <remarks>
+        /// This will automatically connect to any preconfigured access points if they are available.
+        /// </remarks>
+        public bool AutomaticallyStartNetwork
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.AutomaticallyStartNetwork == 1);
+            }
+            set { SetProperty(ConfigurationItems.NtpServer, value); }
+        }
+
+        /// <summary>
+        /// Automatically try to reconnect to an access point if there is a problem / disconnection?
+        /// </summary>
+        public bool AutomaticallyReconnect
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.AutomaticallyReconnect == 1);
+            }
+            set { SetProperty(ConfigurationItems.NtpServer, value); }
+        }
+
+        /// <summary>
+        /// Default access point to try to connect to if the network interface is started and the board
+        /// is configured to automatically reconnect.
+        /// </summary>
+        public string DefaultAcessPoint
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                return (_config.Value.DefaultAccessPoint);
+            }
+            set { SetProperty(ConfigurationItems.NtpServer, value); }
+        }
+
         #endregion Properties
 
         #region Constructor(s)
@@ -71,7 +219,7 @@ namespace Meadow.Devices
         /// </summary>
         internal Esp32Coprocessor()
         {
-            DebugLevel = DebugOptions.None;
+            _debugLevel = DebugOptions.None;
             IsConnected = false;
             ClearIpDetails();
         }
@@ -79,6 +227,32 @@ namespace Meadow.Devices
         #endregion Constructor(s)
 
         #region Methods
+
+
+        private void SetProperty(ConfigurationItems item, UInt32 value)
+        {
+            throw new NotImplementedException("SetProperty is not implemented.");
+        }
+
+        private void SetProperty(ConfigurationItems item, byte value)
+        {
+            UInt32 v = value;
+            SetProperty(item, v);
+        }
+
+        private void SetProperty(ConfigurationItems item, bool value)
+        {
+            UInt32 v = 0;
+            if (value)
+            {
+                v = 1;
+            }
+            SetProperty(item, v);
+        }
+
+        private void SetProperty(ConfigurationItems item, string value)
+        {
+        }
 
         /// <summary>
         /// Clear the IP address, subnet mask and gateway details.
@@ -96,29 +270,47 @@ namespace Meadow.Devices
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
         /// </summary>
         /// <param name="where">Interface the command is destined for.</param>
-        /// <param name="command">Command to be sent.</param>
+        /// <param name="function">Command to be sent.</param>
         /// <param name="block">Is this a blocking command?</param>
-        /// <param name="resultBuffer">4000 byte array to hold any data returned by the command.</param>
+        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        private StatusCodes SendParameterlessCommand(byte where, UInt32 function, bool block, byte[] resultBuffer)
+        private StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[] encodedResult)
         {
-            byte[] encodedPayload = null;
+            return(SendCommand(where, function, block, null, encodedResult));
+        }
+
+        /// <summary>
+        /// Send a command and its payload to the ESP32.
+        /// </summary>
+        /// <param name="where">Interface the command is destined for.</param>
+        /// <param name="function">Command to be sent.</param>
+        /// <param name="block">Is this a blocking command?</param>
+        /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
+        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
+        /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
+        private StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[] payload, byte[] encodedResult)
+        {
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
             StatusCodes result = StatusCodes.CompletedOk;
             try
             {
-                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
-                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
+                payloadGcHandle = GCHandle.Alloc(payload, GCHandleType.Pinned);
+                resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
+                UInt32 payloadLength = 0;
+                if (!(payload is null))
+                {
+                    payloadLength = (UInt32) payload.Length;
+                }
                 var command = new Nuttx.UpdEsp32Command()
                 {
                     Interface = where,
                     Function = function,
                     StatusCode = (UInt32) StatusCodes.CompletedOk,
                     Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = 0,
+                    PayloadLength = payloadLength,
                     Result = resultGcHandle.AddrOfPinnedObject(),
-                    ResultLength = (UInt32) resultBuffer.Length,
+                    ResultLength = (UInt32) encodedResult.Length,
                     Block = (byte) (block ? 1 : 0)
                 };
 
@@ -143,7 +335,27 @@ namespace Meadow.Devices
                     resultGcHandle.Free();
                 }
             }
-            return(result);
+            return (result);
+        }
+
+        /// <summary>
+        /// Get the configuration data structure from the ESP32.
+        /// </summary>
+        /// <param name="force">Get the configuration from the ESP32 anyway?  Can be used to refresh the previously retrieved configuration.</param>
+        /// <returns>Result of getting the configuration from the ESP32.</returns>
+        private StatusCodes GetConfiguration(bool force = false)
+        {
+            StatusCodes result = StatusCodes.CompletedOk;
+            if ((_config is null) || force)
+            {
+                byte[] encodedResult = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+                result = SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetConfiguration, true, encodedResult);
+                if (result == StatusCodes.CompletedOk)
+                {
+                    _config = Encoders.ExtractSystemConfiguration(encodedResult, 0);
+                }
+            }
+            return (result);
         }
 
         /// <summary>
@@ -151,7 +363,7 @@ namespace Meadow.Devices
         /// </summary>
         public void Reset()
         {
-            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
+            SendCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
         }
 
         /// <summary>
@@ -175,10 +387,10 @@ namespace Meadow.Devices
         /// In this case, the return result indicates if the interface was started successfully and a
         /// connection to the access point was made.
         /// </remarks>
-        /// <returns>true if teh adapter was started successfully, false if there was an error.</returns>
+        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
         public bool StartNetwork()
         {
-            StatusCodes result = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartNetwork, true, null);
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartNetwork, true, null);
             return (result == StatusCodes.CompletedOk);
         }
 
@@ -215,66 +427,34 @@ namespace Meadow.Devices
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
 
-            var payloadGcHandle = default(GCHandle);
-            var resultGcHandle = default(GCHandle);
-
-            try
+            WiFiCredentials request = new WiFiCredentials()
             {
-                WiFiCredentials request = new WiFiCredentials()
-                {
-                    NetworkName = ssid,
-                    Password = password
-                };
-                byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
-                byte[] resultBuffer = new byte[4000];
+                NetworkName = ssid,
+                Password = password
+            };
+            byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
+            byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
 
-                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
-                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
 
-                var command = new Nuttx.UpdEsp32Command()
-                {
-                    Interface = (byte) Esp32Interfaces.WiFi,
-                    Function = (UInt32) WiFiFunction.ConnectToAccessPoint,
-                    StatusCode = (UInt32) StatusCodes.CompletedOk,
-                    Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = (UInt32) encodedPayload.Length,
-                    Result = resultGcHandle.AddrOfPinnedObject(),
-                    ResultLength = (UInt32) resultBuffer.Length,
-                    Block = 1
-                };
-
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
-
-                if ((result == 0) && (command.StatusCode == (UInt32) StatusCodes.CompletedOk))
-                {
-                    byte[] addressBytes = new byte[4];
-                    Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
-                    IpAddress = new IPAddress(addressBytes);
-                    Array.Copy(resultBuffer, 4, addressBytes, 0, addressBytes.Length);
-                    SubnetMask = new IPAddress(addressBytes);
-                    Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
-                    Gateway = new IPAddress(addressBytes);
-                    IsConnected = true;
-                }
-                else
-                {
-                    ClearIpDetails();
-                    IsConnected = false;
-                    if (command.StatusCode == (UInt32) StatusCodes.CoprocessorNotResponding)
-                    {
-                        throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
-                    }
-                }
+            if ((result == StatusCodes.CompletedOk))
+            {
+                byte[] addressBytes = new byte[4];
+                Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
+                IpAddress = new IPAddress(addressBytes);
+                Array.Copy(resultBuffer, 4, addressBytes, 0, addressBytes.Length);
+                SubnetMask = new IPAddress(addressBytes);
+                Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
+                Gateway = new IPAddress(addressBytes);
+                IsConnected = true;
             }
-            finally
+            else
             {
-                if (payloadGcHandle.IsAllocated)
+                ClearIpDetails();
+                IsConnected = false;
+                if (result == StatusCodes.CoprocessorNotResponding)
                 {
-                    payloadGcHandle.Free();
-                }
-                if (resultGcHandle.IsAllocated)
-                {
-                    resultGcHandle.Free();
+                    throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
                 }
             }
             return (IsConnected);
@@ -290,8 +470,8 @@ namespace Meadow.Devices
         public ObservableCollection<WifiNetwork> GetAccessPoints()
         {
             var networks = new ObservableCollection<WifiNetwork>();
-            byte[] resultBuffer = new byte[4000];
-            StatusCodes result = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
+            byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
             if (result == StatusCodes.CompletedOk)
             {
                 var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);

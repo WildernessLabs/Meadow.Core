@@ -71,7 +71,6 @@ namespace Meadow.Devices
 
         protected Task<bool> InitEsp32CoProc()
         {
-            Console.WriteLine("Initializing Esp32 coproc.");
             return Task.Run<bool>(async () => {
                 try {
                     //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
@@ -79,9 +78,8 @@ namespace Meadow.Devices
                     //Console.WriteLine("creating Esp32 Coproc.");
                     this.esp32 = new Esp32Coprocessor();
                     this.WiFiAdapter = new WiFiAdapter(this.esp32);
-                    Console.WriteLine("Esp32 coproc initialization complete.");
                 } catch (Exception e) {
-                    Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");
+                    Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                     return false;
                 }
 

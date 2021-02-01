@@ -27,7 +27,7 @@ namespace Meadow.Gateway
         /// In this case, the return result indicates if the interface was started successfully and a
         /// connection to the access point was made.
         /// </remarks>
-        /// <returns>true if teh adapter was started successfully, false if there was an error.</returns>
+        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
         bool StartNetwork();
 
         /// <summary>
@@ -59,6 +59,50 @@ namespace Meadow.Gateway
         /// Default gateway for the adapter.
         /// </summary>
         IPAddress Gateway { get; }
+
+        /// <summary>
+        /// Get the network time when the WiFi adapter starts?
+        /// </summary>
+        bool GetNetworkTimeAtStartup { get; set; }
+
+        /// <summary>
+        /// Address of the NTP server.
+        /// </summary>
+        string NtpServer { get; set; }
+
+        /// <summary>
+        /// Name of the board on the network.
+        /// </summary>
+        string DeviceName { get; }
+
+        /// <summary>
+        /// MAC address of the board when acting as a client.
+        /// </summary>
+        byte[] MacAddress { get; }
+
+        /// <summary>
+        /// MAC address of the board when acting as a sft access point.
+        /// </summary>
+        byte[] ApMacAddress { get; }
+
+        /// <summary>
+        /// Automatically start the network interface when the board reboots?
+        /// </summary>
+        /// <remarks>
+        /// This will automatically connect to any preconfigured access points if they are available.
+        /// </remarks>
+        bool AutomaticallyStartNetwork { get; set; }
+
+        /// <summary>
+        /// Automatically try to reconnect to an access point if there is a problem / disconnection?
+        /// </summary>
+        bool AutomaticallyReconnect { get; set; }
+
+        /// <summary>
+        /// Default access point to try to connect to if the network interface is started and the board
+        /// is configured to automatically reconnect.
+        /// </summary>
+        string DefaultAcessPoint { get; set; }
 
         /// <summary>
         /// Get the list of access points.
