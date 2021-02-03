@@ -1,4 +1,4 @@
-﻿using Meadow.Gateway.WiFi;
+﻿using Meadow.Gateway;
 using Meadow.Hardware;
 using System;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Meadow.Devices
         private SynchronizationContext _context;
         private Esp32Coprocessor esp32;
 
-        public WiFiAdapter WiFiAdapter { get; protected set; }
+        public IWiFiAdapter WiFiAdapter { get; protected set; }
 
         public event EventHandler WiFiAdapterInitilaized = delegate {};
 
@@ -66,26 +66,16 @@ namespace Meadow.Devices
 
         public Task<bool> InitWiFiAdapter()
         {
-            return InitEsp32CoProc();
-        }
-
-        protected Task<bool> InitEsp32CoProc()
-        {
             return Task.Run<bool>(async () => {
-                try {
-                    //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                    //stopwatch.Start()
-                    //Console.WriteLine("creating Esp32 Coproc.");
-                    this.esp32 = new Esp32Coprocessor();
-                    this.WiFiAdapter = new WiFiAdapter(this.esp32);
-                } catch (Exception e) {
+                try
+                {
+                    WiFiAdapter = new Esp32WiFiAdapter();
+                }
+                catch (Exception e)
+                {
                     Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                     return false;
                 }
-
-                // this needs to be out of the exception block, otherwise user
-                // code exceptions get caught
-                //this.WiFiAdapterInitilaized(this, new EventArgs());
                 return true;
             });
         }
