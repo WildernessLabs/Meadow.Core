@@ -3,7 +3,7 @@
     // Internal note: The values for InternalPullUp and InternalPullDown are backwards from
     // what STM32F7 expects.
     /// <summary>
-    /// Describes the internal\external IO resistor states.
+    /// Describes the internal/external IO resistor states.
     /// </summary>
     public enum ResistorMode
     {
