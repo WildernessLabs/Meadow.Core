@@ -1,9 +1,9 @@
 ﻿namespace Meadow.Hardware
 {
-    // Internal note: The values for PullUp and PullDown are backwards from
+    // Internal note: The values for InternalPullUp and InternalPullDown are backwards from
     // what STM32F7 expects.
     /// <summary>
-    /// Describes the internal IO resistor state.
+    /// Describes the internal\external IO resistor states.
     /// </summary>
     public enum ResistorMode
     {
@@ -12,12 +12,20 @@
         /// </summary>
         Disabled = 0,
         /// <summary>
-        /// Pulled down to `0V` by default.
+        /// Internal resistor pulled down to `0V` by default.
         /// </summary>
-        PullDown = 1,
+        InternalPullDown = 1,
         /// <summary>
-        /// Pulled up to `VCC` by default.
+        /// Internal resistor pulled up to `VCC` by default.
         /// </summary>
-        PullUp = 2
+        InternalPullUp = 2,
+        /// <summary>
+        /// External pull down resistor.
+        /// </summary>
+        ExternalPullDown = 3,
+        /// <summary>
+        /// External Pull up ressistor.
+        /// </summary>
+        ExternalPullUp = 4
     }
 }
