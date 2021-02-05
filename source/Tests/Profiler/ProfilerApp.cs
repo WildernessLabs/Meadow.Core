@@ -226,7 +226,7 @@ namespace Profiler
             //  Requires a jumper wire from D04 to D05
 
             var outp = Device.CreateDigitalOutputPort(Device.Pins.D04);
-            var inp = Device.CreateDigitalInputPort(Device.Pins.D05,InterruptMode.EdgeRising, ResistorMode.PullDown);
+            var inp = Device.CreateDigitalInputPort(Device.Pins.D05,InterruptMode.EdgeRising, ResistorMode.InternalPullDown);
 
             inp.Changed += InterruptHandler;
             _intComplete = new AutoResetEvent(false);

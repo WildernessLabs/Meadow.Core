@@ -14,8 +14,8 @@
 
 //        public SoftwareI2C(IPin pinSda, IPin pinScl)
 //        {
-//            sdaPort = new BiDirectionalPort(pinSda, false, false, ResistorMode.PullUp);
-//            sclPort = new BiDirectionalPort(pinScl, false, false, ResistorMode.PullUp);
+//            sdaPort = new BiDirectionalPort(pinSda, false, false, ResistorMode.InternalPullUp);
+//            sclPort = new BiDirectionalPort(pinScl, false, false, ResistorMode.InternalPullUp);
 
 //        }
 
