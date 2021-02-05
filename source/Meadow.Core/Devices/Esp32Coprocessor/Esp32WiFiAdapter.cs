@@ -78,7 +78,7 @@ namespace Meadow.Devices
                 }
                 return (_config.Value.GetTimeAtStartup == 1);
             }
-            set { SetProperty(ConfigurationItems.GetTimeAtStartup, value); }
+            //set { SetProperty(ConfigurationItems.GetTimeAtStartup, value); }
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Meadow.Devices
                 }
                 return (_config.Value.NtpServer);
             }
-            set { SetProperty(ConfigurationItems.NtpServer, value); }
+            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Meadow.Devices
                 }
                 return (_config.Value.AutomaticallyStartNetwork == 1);
             }
-            set { SetProperty(ConfigurationItems.NtpServer, value); }
+            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Meadow.Devices
                 }
                 return (_config.Value.AutomaticallyReconnect == 1);
             }
-            set { SetProperty(ConfigurationItems.NtpServer, value); }
+            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace Meadow.Devices
                 }
                 return (_config.Value.DefaultAccessPoint);
             }
-            set { SetProperty(ConfigurationItems.NtpServer, value); }
+            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
 
         /// <summary>

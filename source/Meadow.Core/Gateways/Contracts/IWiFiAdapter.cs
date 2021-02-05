@@ -29,12 +29,12 @@ namespace Meadow.Gateway
         /// <summary>
         /// Get the network time when the WiFi adapter starts?
         /// </summary>
-        bool GetNetworkTimeAtStartup { get; set; }
+        bool GetNetworkTimeAtStartup { get; }
 
         /// <summary>
         /// Address of the NTP server.
         /// </summary>
-        string NtpServer { get; set; }
+        string NtpServer { get; }
 
         /// <summary>
         /// Name of the board on the network.
@@ -57,18 +57,18 @@ namespace Meadow.Gateway
         /// <remarks>
         /// This will automatically connect to any preconfigured access points if they are available.
         /// </remarks>
-        bool AutomaticallyStartNetwork { get; set; }
+        bool AutomaticallyStartNetwork { get; }
 
         /// <summary>
         /// Automatically try to reconnect to an access point if there is a problem / disconnection?
         /// </summary>
-        bool AutomaticallyReconnect { get; set; }
+        bool AutomaticallyReconnect { get; }
 
         /// <summary>
         /// Default access point to try to connect to if the network interface is started and the board
         /// is configured to automatically reconnect.
         /// </summary>
-        string DefaultAcessPoint { get; set; }
+        string DefaultAcessPoint { get; }
 
         /// <summary>
         /// Start the network interface on the WiFi adapter.
