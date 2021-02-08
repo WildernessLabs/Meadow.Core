@@ -290,7 +290,6 @@ namespace Meadow.Hardware
                                 //todo: should this run on a new thread?
                                 // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
-                                    Console.WriteLine($"raising message received, msg.length: {msg.Length}");
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
                                 });
 
@@ -304,8 +303,6 @@ namespace Meadow.Hardware
 
         protected void RaiseMessageReceivedAndNotify(SerialMessageData messageData)
         {
-            Console.WriteLine($"+RaiseMessageReceivedAndNotify");
-
             try
             {
                 MessageReceived(this, messageData);
@@ -314,7 +311,6 @@ namespace Meadow.Hardware
             {
                 Console.WriteLine($"!! {ex.Message}");
             }
-            Console.WriteLine($"-RaiseMessageReceivedAndNotify");
             //TODO: figure out the IObservable when there's no change context
             //base.NotifyObservers(messageResult);
         }

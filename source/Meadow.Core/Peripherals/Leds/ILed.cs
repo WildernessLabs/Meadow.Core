@@ -1,6 +1,4 @@
-﻿using Meadow.Hardware;
-
-namespace Meadow.Peripherals.Leds
+﻿namespace Meadow.Peripherals.Leds
 {
     /// <summary>
     /// Defines a simple Light Emitting Diode (LED).
@@ -24,12 +22,11 @@ namespace Meadow.Peripherals.Leds
         /// </summary>
         /// <param name="onDuration"></param>
         /// <param name="offDuration"></param>
-        void StartBlink(uint onDuration = 200, uint offDuration = 200);
+        void StartBlink(int onDuration = 200, int offDuration = 200);
 
         /// <summary>
         /// Stops blink animation.
         /// </summary>
         void Stop();
-
     }
 }

@@ -46,11 +46,11 @@ namespace Meadow.Hardware
             }
             if (!mosi.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MOSI) != SpiLineType.None))
             {
-                throw new NotSupportedException($"Pin {clock.Name} does not support SPI MOSI capability");
+                throw new NotSupportedException($"Pin {mosi.Name} does not support SPI MOSI capability");
             }
             if (!miso.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MISO) != SpiLineType.None))
             {
-                throw new NotSupportedException($"Pin {clock.Name} does not support SPI MISO capability");
+                throw new NotSupportedException($"Pin {miso.Name} does not support SPI MISO capability");
             }
             
             // we can't set the speed here yet because the caller has to set the bus number first
