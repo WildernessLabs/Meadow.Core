@@ -34,6 +34,8 @@
   <ItemGroup>
     <Compile Include="TemperatureTests.cs" />
     <Compile Include="PressureTests.cs" />
+    <Compile Include="VelocityTests.cs" />
+    <Compile Include="Helpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
