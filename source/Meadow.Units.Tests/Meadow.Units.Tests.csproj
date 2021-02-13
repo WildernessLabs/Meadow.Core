@@ -36,6 +36,7 @@
     <Compile Include="PressureTests.cs" />
     <Compile Include="VelocityTests.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="AzimuthTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
