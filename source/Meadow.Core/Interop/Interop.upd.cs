@@ -164,6 +164,7 @@ namespace Meadow.Core
                 GetLastError = 51,
 
                 Esp32Command = 61,
+                Esp32GetEventData = 62,
 
                 PowerReset = 71,
                 PowerSleep1 = 72,
@@ -305,14 +306,26 @@ namespace Meadow.Core
             /// </summary>
             public struct UpdEsp32Command
             {
-                public byte Interface;         // Interface (WiFi, System etc.) to perform the request.
-                public UInt32 Function;        // Function number to be executed by the specified interface.
-                public UInt32 StatusCode;      // Status code returned by the ESP32.
-                public IntPtr Payload;         // Pointer to the data required by the function.
-                public UInt32 PayloadLength;   // Length of the payload data block.
-                public IntPtr Result;          // Pointer to the result.
-                public UInt32 ResultLength;    // Length of the result data block.
-                public byte Block;             // Is this a blocking call (1 = yes, 0 = no).
+                public byte Interface;          // Interface (WiFi, System etc.) to perform the request.
+                public UInt32 Function;         // Function number to be executed by the specified interface.
+                public UInt32 StatusCode;       // Status code returned by the ESP32.
+                public IntPtr Payload;          // Pointer to the data required by the function.
+                public UInt32 PayloadLength;    // Length of the payload data block.
+                public IntPtr Result;           // Pointer to the result.
+                public UInt32 ResultLength;     // Length of the result data block.
+                public byte Block;              // Is this a blocking call (1 = yes, 0 = no).
+            }
+
+            /// <summary>
+            /// Information from the ESP32 when an event is generated.
+            /// </summary>
+            public struct UpdEsp32EventData
+            {
+                public byte Interface;          // Interface (WiFi, System etc.) generating the event.
+                public UInt32 EventID;          // Event ID
+                public UInt32 StatusCode;       // Status code returned by the ESP32.
+                public IntPtr Payload;          // Pointer to the data associated with the event.
+                public UInt32 PayloadLength;    // Length of the payload data block.
             }
 
             public struct UpdDeviceInfo
