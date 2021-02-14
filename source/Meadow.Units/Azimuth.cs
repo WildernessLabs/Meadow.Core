@@ -20,7 +20,7 @@ namespace Meadow.Units
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
-    [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct Azimuth : IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
@@ -35,7 +35,7 @@ namespace Meadow.Units
             Unit = UnitType.DecimalDegrees;
         }
 
-        public Azimuth(Compass16PointCardinalNames cardinalPoint)
+        public Azimuth(Azimuth16PointCardinalNames cardinalPoint)
         {
             Value = AzimuthConversions.Compass16CardinalsToDegrees(cardinalPoint);
             Unit = UnitType.DecimalDegrees;
@@ -76,7 +76,7 @@ namespace Meadow.Units
         /// Gets the cardinal direction value expressed as a unit a 16 division cardinal point
         /// name.
         /// </summary>
-        public Compass16PointCardinalNames Compass16PointCardinalName {
+        public Azimuth16PointCardinalNames Compass16PointCardinalName {
             get {
                 return AzimuthConversions.DegressToCompass16PointCardinalName(Value);
             }
@@ -97,7 +97,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="value">The cardinal direction value.</param>
         /// <returns>A new cardinal direction object.</returns>
-        [Pure] public static Azimuth FromCompass16PointCardinalName(Compass16PointCardinalNames name) => new Azimuth(name);
+        [Pure] public static Azimuth FromCompass16PointCardinalName(Azimuth16PointCardinalNames name) => new Azimuth(name);
 
         //=============================
         // Boilerplate interface stuff.

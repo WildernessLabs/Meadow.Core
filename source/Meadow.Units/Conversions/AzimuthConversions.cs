@@ -1,42 +1,43 @@
 ﻿using System;
+
 namespace Meadow.Units.Conversions
 {
     public static class AzimuthConversions
     {
         // To Base (`CompassDegrees`)
-        public static Func<Compass16PointCardinalNames, double> Compass16CardinalsToDegrees = (value) => {
+        public static Func<Azimuth16PointCardinalNames, double> Compass16CardinalsToDegrees = (value) => {
             switch (value) {
-                case Compass16PointCardinalNames.N:
+                case Azimuth16PointCardinalNames.N:
                     return 0f;
-                case Compass16PointCardinalNames.NNE:
+                case Azimuth16PointCardinalNames.NNE:
                     return 22.5f;
-                case Compass16PointCardinalNames.NE:
+                case Azimuth16PointCardinalNames.NE:
                     return 45f;
-                case Compass16PointCardinalNames.ENE:
+                case Azimuth16PointCardinalNames.ENE:
                     return 67.5f;
-                case Compass16PointCardinalNames.E:
+                case Azimuth16PointCardinalNames.E:
                     return 90f;
-                case Compass16PointCardinalNames.ESE:
+                case Azimuth16PointCardinalNames.ESE:
                     return 112.5f;
-                case Compass16PointCardinalNames.SE:
+                case Azimuth16PointCardinalNames.SE:
                     return 135f;
-                case Compass16PointCardinalNames.SSE:
+                case Azimuth16PointCardinalNames.SSE:
                     return 157.5f;
-                case Compass16PointCardinalNames.S:
+                case Azimuth16PointCardinalNames.S:
                     return 180f;
-                case Compass16PointCardinalNames.SSW:
+                case Azimuth16PointCardinalNames.SSW:
                     return 202.5f;
-                case Compass16PointCardinalNames.SW:
+                case Azimuth16PointCardinalNames.SW:
                     return 225f;
-                case Compass16PointCardinalNames.WSW:
+                case Azimuth16PointCardinalNames.WSW:
                     return 247.5f;
-                case Compass16PointCardinalNames.W:
+                case Azimuth16PointCardinalNames.W:
                     return 270;
-                case Compass16PointCardinalNames.WNW:
+                case Azimuth16PointCardinalNames.WNW:
                     return 292.5;
-                case Compass16PointCardinalNames.NW:
+                case Azimuth16PointCardinalNames.NW:
                     return 315f;
-                case Compass16PointCardinalNames.NNW:
+                case Azimuth16PointCardinalNames.NNW:
                     return 337.5f;
                 default:
                     return 0;
@@ -44,7 +45,7 @@ namespace Meadow.Units.Conversions
         };
 
         // From Base
-        public static Func<double, Compass16PointCardinalNames> DegressToCompass16PointCardinalName = (value) => {
+        public static Func<double, Azimuth16PointCardinalNames> DegressToCompass16PointCardinalName = (value) => {
             /*
             N 348.75 - 11.25
             NNE 11.25 - 33.75
@@ -66,39 +67,39 @@ namespace Meadow.Units.Conversions
 
             switch (value){
                 case double v when (v >= 348.75f && v < 11.25):
-                    return Compass16PointCardinalNames.N;
+                    return Azimuth16PointCardinalNames.N;
                 case double v when (v >= 11.25f && v < 33.75):
-                    return Compass16PointCardinalNames.NNE;
+                    return Azimuth16PointCardinalNames.NNE;
                 case double v when (v >= 33.75f && v < 56.25):
-                    return Compass16PointCardinalNames.NE;
+                    return Azimuth16PointCardinalNames.NE;
                 case double v when (v >= 56.25f && v < 78.75):
-                    return Compass16PointCardinalNames.ENE;
+                    return Azimuth16PointCardinalNames.ENE;
                 case double v when (v >= 78.75f && v < 101.25):
-                    return Compass16PointCardinalNames.E;
+                    return Azimuth16PointCardinalNames.E;
                 case double v when (v >= 101.25f && v < 123.75):
-                    return Compass16PointCardinalNames.ESE;
+                    return Azimuth16PointCardinalNames.ESE;
                 case double v when (v >= 123.75f && v < 146.25):
-                    return Compass16PointCardinalNames.SE;
+                    return Azimuth16PointCardinalNames.SE;
                 case double v when (v >= 146.25f && v < 168.75):
-                    return Compass16PointCardinalNames.SSW;
+                    return Azimuth16PointCardinalNames.SSW;
                 case double v when (v >= 168.75f && v < 191.25):
-                    return Compass16PointCardinalNames.S;
+                    return Azimuth16PointCardinalNames.S;
                 case double v when (v >= 191.25f && v < 213.75):
-                    return Compass16PointCardinalNames.SSW;
+                    return Azimuth16PointCardinalNames.SSW;
                 case double v when (v >= 213.75f && v < 236.25):
-                    return Compass16PointCardinalNames.SW;
+                    return Azimuth16PointCardinalNames.SW;
                 case double v when (v >= 236.25f && v < 258.75):
-                    return Compass16PointCardinalNames.WSW;
+                    return Azimuth16PointCardinalNames.WSW;
                 case double v when (v >= 258.75f && v < 281.25):
-                    return Compass16PointCardinalNames.W;
+                    return Azimuth16PointCardinalNames.W;
                 case double v when (v >= 281.25f && v < 303.75):
-                    return Compass16PointCardinalNames.WNW;
+                    return Azimuth16PointCardinalNames.WNW;
                 case double v when (v >= 303.75f && v < 326.25):
-                    return Compass16PointCardinalNames.NW;
+                    return Azimuth16PointCardinalNames.NW;
                 case double v when (v >= 326.25f && v < 348.75):
-                    return Compass16PointCardinalNames.NNW;
+                    return Azimuth16PointCardinalNames.NNW;
                 default:
-                    return Compass16PointCardinalNames.N;
+                    return Azimuth16PointCardinalNames.N;
             }
         };
 

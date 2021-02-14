@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Units
 {
-    public enum Compass16PointCardinalNames
+    public enum Azimuth16PointCardinalNames
     {
         N,
         NNE,
