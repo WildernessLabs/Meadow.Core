@@ -81,7 +81,7 @@ namespace Meadow.Units.Conversions
                 case double v when (v >= 123.75f && v < 146.25):
                     return Azimuth16PointCardinalNames.SE;
                 case double v when (v >= 146.25f && v < 168.75):
-                    return Azimuth16PointCardinalNames.SSW;
+                    return Azimuth16PointCardinalNames.SSE;
                 case double v when (v >= 168.75f && v < 191.25):
                     return Azimuth16PointCardinalNames.S;
                 case double v when (v >= 191.25f && v < 213.75):
