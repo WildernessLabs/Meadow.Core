@@ -306,4 +306,13 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Int32 ResponseErrno;
     };
 
+    public struct EventData
+    {
+        public Byte Interface;
+        public UInt32 Function;
+        public UInt32 StatusCode;
+        public UInt32 Payload;
+        public UInt32 PayloadLength;
+    };
+
 }

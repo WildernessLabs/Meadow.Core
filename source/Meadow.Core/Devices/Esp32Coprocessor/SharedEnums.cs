@@ -66,7 +66,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         GetConfiguration = 0,
         SetConfigurationItem = 1,
         DeepSleep = 2,
-        GetBatteryChargeLevel = 3
+        GetBatteryChargeLevel = 3,
+        ErrorEvent = 4
     };
 
     // <summary>
@@ -97,7 +98,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Accept = 20,
         Ioctl = 21,
         GetSockName = 22,
-        SetTimeOfDay = 23
+        SetTimeOfDayEvent = 23,
+        ConnectEvent = 24,
+        DisconnectEvent = 25,
+        StartInterfaceEvent = 26,
+        StopInterfaceEvent = 27
     };
 
     // <summary>
@@ -128,7 +133,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Ack = 0x00,
         Nak = 0x01,
         Reset = 0x02,
-        Interrupt = 0x04,
+        Event = 0x04,
         Response = 0x10,
         Transport = 0x20,
         Header = 0x40,
