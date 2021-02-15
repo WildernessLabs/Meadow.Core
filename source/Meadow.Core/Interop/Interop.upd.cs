@@ -321,9 +321,8 @@ namespace Meadow.Core
             /// </summary>
             public struct UpdEsp32EventData
             {
-                public byte Interface;          // Interface (WiFi, System etc.) generating the event.
-                public UInt32 EventID;          // Event ID
-                public UInt32 StatusCode;       // Status code returned by the ESP32.
+                public UInt32 StatusCode;       // Status code from the message.
+                public UInt32 MessageAddress;   // Pointer to the original message.
                 public IntPtr Payload;          // Pointer to the data associated with the event.
                 public UInt32 PayloadLength;    // Length of the payload data block.
             }

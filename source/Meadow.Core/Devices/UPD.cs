@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using static Meadow.Core.Interop;
+using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Devices
 {

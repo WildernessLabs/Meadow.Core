@@ -189,9 +189,10 @@ namespace Meadow.Devices
         /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        private StatusCodes GetEventData(EventData eventData)
+        private StatusCodes GetEventData(EventData eventData, out byte[] payload)
         {
-            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data for interface {eventData.Interface} held at 0x{eventData.StatusCode:x08}");
+            Thread.Sleep(1000);
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data held at 0x{eventData.StatusCode:x08}");
             var resultGcHandle = default(GCHandle);
             StatusCodes result = StatusCodes.CompletedOk;
             try
@@ -200,18 +201,27 @@ namespace Meadow.Devices
                 Array.Clear(encodedResult, 0, encodedResult.Length);
                 resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
 
-                eventData.Payload = (UInt32) resultGcHandle.AddrOfPinnedObject();
-                eventData.PayloadLength = (UInt32) encodedResult.Length;
+                var request = new Nuttx.UpdEsp32EventData()
+                {
+                    StatusCode = 0,
+                    MessageAddress = eventData.StatusCode,
+                    Payload = resultGcHandle.AddrOfPinnedObject(),
+                    PayloadLength = (UInt32) encodedResult.Length
+                };
 
-                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32GetEventData, ref eventData);
+                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32GetEventData, ref request);
                 if (updResult == 0)
                 {
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Payload: ");
                     Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
+                    eventData.StatusCode = request.StatusCode;
+                    payload = new byte[request.PayloadLength];
+                    Array.Copy(encodedResult, payload, request.PayloadLength);
                     result = StatusCodes.CompletedOk;
                 }
                 else
                 {
+                    payload = null;
                     result = StatusCodes.Failure;
                 }
             }
@@ -254,8 +264,12 @@ namespace Meadow.Devices
                         }
                         else
                         {
-                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
-                            GetEventData(eventData);
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, location of message 0x{eventData.StatusCode:x08}");
+                            byte[] payload;
+                            GetEventData(eventData, out payload);
+                            //
+                            //  Need to check status and work out how this hooks into the other classes.
+                            //
                         }
                         //lock (_interruptPins)
                         //{
@@ -271,12 +285,12 @@ namespace Meadow.Devices
                     }
                     else
                     {
-                        Console.WriteLine($"ESP32 Coprocessor ISR error code {result}");
+                        Console.WriteLine($"ESP32 Coprocessor event handler error code {result}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ESP32 Coprocessor ISR: {ex.Message}");
+                    Console.WriteLine($"ESP32 Coprocessor event handler: {ex.Message}");
                 }
             }
         }
