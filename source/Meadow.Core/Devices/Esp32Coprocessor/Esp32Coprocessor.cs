@@ -66,7 +66,7 @@ namespace Meadow.Devices
         /// </summary>
         internal Esp32Coprocessor()
         {
-            _debugLevel = DebugOptions.EventHandling;
+            _debugLevel = DebugOptions.None;
             if (_eventHandlerThread == null)
             {
                 _eventHandlerThread = new Thread(EventHandlerServiceThread)
