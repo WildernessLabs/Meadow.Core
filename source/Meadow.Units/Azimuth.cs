@@ -11,10 +11,7 @@ namespace Meadow.Units
 
     // Notes:
     //  1. there are additional precision compass cardinal points: http://tamivox.org/dave/compass/index.html
-    //  2. this class is a little different from other units in that the value
-    //     type is always stored as the canonical type decimal degrees, because
-    //     other types are not `double`
-
+    
     /// <summary>
     /// Represents a cardinal direction; 
     /// </summary>
@@ -123,6 +120,13 @@ namespace Meadow.Units
         [Pure] public static bool operator >=(Azimuth left, Azimuth right) => Comparer<Azimuth>.Default.Compare(left, right) >= 0;
 
         [Pure] public static implicit operator Azimuth(int value) => new Azimuth(value);
+        [Pure] public static implicit operator Azimuth(float value) => new Azimuth(value);
+        [Pure] public static implicit operator Azimuth(double value) => new Azimuth(value);
+        [Pure] public static implicit operator Azimuth(decimal value) => new Azimuth((double)value);
+
+        [Pure] public static Azimuth operator /(Azimuth left, Azimuth right) => new Azimuth(left.Value / right.Value);
+        [Pure] public static Azimuth operator -(Azimuth left, Azimuth right) => new Azimuth(left.Value - right.Value);
+        [Pure] public static Azimuth operator *(Azimuth left, Azimuth right) => new Azimuth(left.Value * right.Value);
 
         [Pure] public override string ToString() => Value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
