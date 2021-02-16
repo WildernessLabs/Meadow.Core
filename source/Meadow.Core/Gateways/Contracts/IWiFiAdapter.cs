@@ -1,11 +1,14 @@
 using System.Net;
 using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
+using System;
 
 namespace Meadow.Gateway
 {
     public interface IWiFiAdapter
     {
+        #region Properties
+
         /// <summary>
         /// Indicate if the network adapter is connected to an access point.
         /// </summary>
@@ -70,6 +73,19 @@ namespace Meadow.Gateway
         /// </summary>
         string DefaultAcessPoint { get; }
 
+        #endregion Properties
+
+        #region Delegates and Events
+
+        public event EventHandler ConnectionCompleted;
+        public event EventHandler Disconnected;
+        public event EventHandler InterfaceStarted;
+        public event EventHandler InterfaceStopped;
+
+        #endregion Delegates and Events
+
+        #region Methods
+
         /// <summary>
         /// Start the network interface on the WiFi adapter.
         /// </summary>
@@ -112,5 +128,7 @@ namespace Meadow.Gateway
         /// </remarks>
         /// <returns>ObservableCollection (possibly empty) of access points.</returns>
         ObservableCollection<WifiNetwork> Scan();
+
+        #endregion Methods
     }
 }

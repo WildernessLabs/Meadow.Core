@@ -230,6 +230,78 @@ namespace Meadow.Devices
 
         #endregion Properties
 
+        #region Delegates and Events
+
+        /// <summary>
+        /// User code to process the ConnectionCompleted event.
+        /// </summary>
+        public event EventHandler ConnectionCompleted;
+
+        /// <summary>
+        /// Process the ConnectionCompleted event extracing any event data from the
+        /// payload and create an EventArg object if necessary
+        /// </summary>
+        /// <param name="statusCode">Status code for the WiFi connection</param>
+        /// <param name="payload">Event data encoded in the payload.</param>
+        protected void OnConnectionCompleted(StatusCodes statusCode, byte[] payload)
+        {
+            EventArgs e = EventArgs.Empty;
+            ConnectionCompleted?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// User code to process the Disconnected event.
+        /// </summary>
+        public event EventHandler Disconnected;
+
+        /// <summary>
+        /// Process the Disconnected event extracing any event data from the
+        /// payload and create an EventArg object if necessary
+        /// </summary>
+        /// <param name="statusCode">Status code for the WiFi disconnection request.</param>
+        /// <param name="payload">Event data encoded in the payload.</param>
+        protected void OnDisconnected(StatusCodes statusCode, byte[] payload)
+        {
+            EventArgs e = EventArgs.Empty;
+            Disconnected?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// User code to process the InterfaceStarted event.
+        /// </summary>
+        public event EventHandler InterfaceStarted;
+
+        /// <summary>
+        /// Process the InterfaceStarted event extracing any event data from the
+        /// payload and create an EventArg object if necessary
+        /// </summary>
+        /// <param name="statusCode">Status code for the WiFi interface start event (should be CompletedOK).</param>
+        /// <param name="payload">Event data encoded in the payload.</param>
+        protected void OnInterfaceStarted(StatusCodes statusCode, byte[] payload)
+        {
+            EventArgs e = EventArgs.Empty;
+            InterfaceStarted?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// User code to process the InterfaceStopped event.
+        /// </summary>
+        public event EventHandler InterfaceStopped;
+
+        /// <summary>
+        /// Process the InterfaceStopped event extracing any event data from the
+        /// payload and create an EventArg object if necessary
+        /// </summary>
+        /// <param name="statusCode">Status code for the WiFi interface stop event (should be CompletedOK).</param>
+        /// <param name="payload">Event data encoded in the payload.</param>
+        protected void OnInterfaceStopped(StatusCodes statusCode, byte[] payload)
+        {
+            EventArgs e = EventArgs.Empty;
+            InterfaceStopped?.Invoke(this, e);
+        }
+
+        #endregion Delegates and Events
+
         #region Constructor(s)
 
         /// <summary>
@@ -245,6 +317,38 @@ namespace Meadow.Devices
         #endregion Constructor(s)
 
         #region Methods
+
+        /// <summary>
+        /// Use the event data to work out which event to invoke and create any event args that will be consumed.
+        /// </summary>
+        /// <param name="source">ESP32 interface that generated the event.</param>
+        /// <param name="eventId">Event ID.</param>
+        /// <param name="statusCode">Status of the event.</param>
+        /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
+        protected override void InvokeEvent(Esp32Interfaces source, UInt32 eventId, StatusCodes statusCode, byte[] payload)
+        {
+            if ((Esp32Interfaces) source != Esp32Interfaces.WiFi)
+            {
+                throw new ArgumentException($"Invalid event source {source}");
+            }
+            switch ((WiFiFunction) eventId)
+            {
+                case WiFiFunction.ConnectEvent:
+                    OnConnectionCompleted(statusCode, payload);
+                    break;
+                case WiFiFunction.DisconnectEvent:
+                    OnDisconnected(statusCode, payload);
+                    break;
+                case WiFiFunction.StartInterfaceEvent:
+                    OnInterfaceStarted(statusCode, payload);
+                    break;
+                case WiFiFunction.StopInterfaceEvent:
+                    OnInterfaceStopped(statusCode, payload);
+                    break;
+                default:
+                    throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
+            }
+        }
 
         /// <summary>
         /// Clear the IP address, subnet mask and gateway details.

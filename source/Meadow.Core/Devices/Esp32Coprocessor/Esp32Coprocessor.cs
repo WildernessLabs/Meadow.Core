@@ -5,6 +5,7 @@ using Meadow.Devices.Esp32.MessagePayloads;
 using System.Text;
 using Meadow.Core;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices
 {
@@ -107,6 +108,20 @@ namespace Meadow.Devices
         {
         }
 
+        /// <summary>
+        /// Use the event data to work out which event to invoke and create any event args that will be consumed.
+        /// </summary>
+        /// <remarks>
+        /// An override for this method needs to be provided in the derived class.
+        /// </remarks>
+        /// <param name="source">ESP32 interface that generated the event.</param>
+        /// <param name="eventId">ID of the event generated.</param>
+        /// <param name="statusCode">Status of the event.</param>
+        /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
+        protected virtual void InvokeEvent(Esp32Interfaces source, UInt32 eventId, StatusCodes statusCode, byte[]? payload)
+        {
+            throw new NotImplementedException("InvokeEvent needs to be overridden in a derived class.");
+        }
 
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
@@ -130,7 +145,7 @@ namespace Meadow.Devices
         /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[] payload, byte[] encodedResult)
+        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? payload, byte[] encodedResult)
         {
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
@@ -189,7 +204,7 @@ namespace Meadow.Devices
         /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        private StatusCodes GetEventData(EventData eventData, out byte[] payload)
+        private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
         {
             Thread.Sleep(1000);
             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data held at 0x{eventData.StatusCode:x08}");
@@ -257,7 +272,7 @@ namespace Meadow.Devices
                         Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Processing event.");
                         Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), rxBuffer);
                         EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
-                        
+                        byte[]? payload = null;
                         if (eventData.PayloadLength == 0)
                         {
                             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
@@ -265,23 +280,13 @@ namespace Meadow.Devices
                         else
                         {
                             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, location of message 0x{eventData.StatusCode:x08}");
-                            byte[] payload;
                             GetEventData(eventData, out payload);
-                            //
-                            //  Need to check status and work out how this hooks into the other classes.
-                            //
                         }
-                        //lock (_interruptPins)
-                        //{
-                        //    if (_interruptPins.ContainsKey(key))
-                        //    {
-                        //        Task.Run(() =>
-                        //        {
-                        //            var ipin = _interruptPins[key];
-                        //            Interrupt?.Invoke(ipin, state);
-                        //        });
-                        //    }
-                        //}
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");
+                        Task.Run(() =>
+                        {
+                            InvokeEvent((Esp32Interfaces) eventData.Interface, eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                        });
                     }
                     else
                     {
