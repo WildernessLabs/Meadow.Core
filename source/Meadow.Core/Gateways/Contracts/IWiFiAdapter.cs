@@ -77,10 +77,25 @@ namespace Meadow.Gateway
 
         #region Delegates and Events
 
-        public event EventHandler ConnectionCompleted;
-        public event EventHandler Disconnected;
-        public event EventHandler InterfaceStarted;
-        public event EventHandler InterfaceStopped;
+        /// <summary>
+        /// User code to process the ConnectionCompleted event.
+        /// </summary>
+        event EventHandler ConnectionCompleted;
+
+        /// <summary>
+        /// User code to process the Disconnected event.
+        /// </summary>
+        event EventHandler Disconnected;
+
+        /// <summary>
+        /// User code to process the InterfaceStarted event.
+        /// </summary>
+        event EventHandler InterfaceStarted;
+
+        /// <summary>
+        /// User code to process the InterfaceStopped event.
+        /// </summary>
+        event EventHandler InterfaceStopped;
 
         #endregion Delegates and Events
 
