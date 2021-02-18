@@ -80,22 +80,22 @@ namespace Meadow.Gateway
         /// <summary>
         /// User code to process the ConnectionCompleted event.
         /// </summary>
-        event EventHandler ConnectionCompleted;
+        event EventHandler WiFiConnected;
 
         /// <summary>
         /// User code to process the Disconnected event.
         /// </summary>
-        event EventHandler Disconnected;
+        event EventHandler WiFiDisconnected;
 
         /// <summary>
         /// User code to process the InterfaceStarted event.
         /// </summary>
-        event EventHandler InterfaceStarted;
+        event EventHandler WiFiInterfaceStarted;
 
         /// <summary>
         /// User code to process the InterfaceStopped event.
         /// </summary>
-        event EventHandler InterfaceStopped;
+        event EventHandler WiFiInterfaceStopped;
 
         #endregion Delegates and Events
 

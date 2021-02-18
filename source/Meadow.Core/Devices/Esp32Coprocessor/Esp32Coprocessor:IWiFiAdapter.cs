@@ -17,22 +17,22 @@ namespace Meadow.Devices
         /// <summary>
         /// Raised when the device connects to WiFi.
         /// </summary>
-        public event EventHandler ConnectionCompleted = delegate { };
+        public event EventHandler WiFiConnected = delegate { };
 
         /// <summary>
         /// Raised when the device disconnects from WiFi.
         /// </summary>
-        public event EventHandler Disconnected = delegate { };
+        public event EventHandler WiFiDisconnected = delegate { };
 
         /// <summary>
         /// User code to process the InterfaceStarted event.
         /// </summary>
-        public event EventHandler InterfaceStarted = delegate { };
+        public event EventHandler WiFiInterfaceStarted = delegate { };
 
         /// <summary>
         /// User code to process the InterfaceStopped event.
         /// </summary>
-        public event EventHandler InterfaceStopped;
+        public event EventHandler WiFiInterfaceStopped = delegate { };
 
 
         //==== internals
@@ -244,16 +244,16 @@ namespace Meadow.Devices
             }
             switch ((WiFiFunction)eventId) {
                 case WiFiFunction.ConnectEvent:
-                    OnConnectionCompleted(statusCode, payload);
+                    RaiseConnected(statusCode, payload);
                     break;
                 case WiFiFunction.DisconnectEvent:
-                    OnDisconnected(statusCode, payload);
+                    RaiseDisconnected(statusCode, payload);
                     break;
                 case WiFiFunction.StartInterfaceEvent:
-                    OnInterfaceStarted(statusCode, payload);
+                    RaiseInterfaceStarted(statusCode, payload);
                     break;
                 case WiFiFunction.StopInterfaceEvent:
-                    OnInterfaceStopped(statusCode, payload);
+                    RaiseInterfaceStopped(statusCode, payload);
                     break;
                 default:
                     throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
@@ -443,10 +443,10 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi connection</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void OnConnectionCompleted(StatusCodes statusCode, byte[] payload)
+        protected void RaiseConnected(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
-            ConnectionCompleted?.Invoke(this, e);
+            WiFiConnected?.Invoke(this, e);
         }
 
         // TODO: rename to "RaiseDisconnected"
@@ -456,10 +456,10 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi disconnection request.</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void OnDisconnected(StatusCodes statusCode, byte[] payload)
+        protected void RaiseDisconnected(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
-            Disconnected?.Invoke(this, e);
+            WiFiDisconnected?.Invoke(this, e);
         }
 
         // TODO: rename to `RaiseInterfaceStarted`
@@ -469,10 +469,10 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi interface start event (should be CompletedOK).</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void OnInterfaceStarted(StatusCodes statusCode, byte[] payload)
+        protected void RaiseInterfaceStarted(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
-            InterfaceStarted?.Invoke(this, e);
+            WiFiInterfaceStarted?.Invoke(this, e);
         }
 
         // TODO: rename to `RaiseInterfaceStoppped`
@@ -482,10 +482,10 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi interface stop event (should be CompletedOK).</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void OnInterfaceStopped(StatusCodes statusCode, byte[] payload)
+        protected void RaiseInterfaceStopped(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
-            InterfaceStopped?.Invoke(this, e);
+            WiFiInterfaceStopped?.Invoke(this, e);
         }
     }
 }
