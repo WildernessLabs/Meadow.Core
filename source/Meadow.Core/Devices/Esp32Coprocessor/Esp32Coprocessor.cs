@@ -12,7 +12,7 @@ namespace Meadow.Devices
     /// <summary>
     ///
     /// </summary>
-    public class Esp32Coprocessor
+    public partial class Esp32Coprocessor
     {
         #region Constants
 
@@ -68,6 +68,11 @@ namespace Meadow.Devices
         internal Esp32Coprocessor()
         {
             _debugLevel = DebugOptions.None;
+
+            IsConnected = false;
+            ClearIpDetails();
+            HasInternetAccess = false;
+
             if (_eventHandlerThread == null)
             {
                 _eventHandlerThread = new Thread(EventHandlerServiceThread)
@@ -108,20 +113,20 @@ namespace Meadow.Devices
         {
         }
 
-        /// <summary>
-        /// Use the event data to work out which event to invoke and create any event args that will be consumed.
-        /// </summary>
-        /// <remarks>
-        /// An override for this method needs to be provided in the derived class.
-        /// </remarks>
-        /// <param name="source">ESP32 interface that generated the event.</param>
-        /// <param name="eventId">ID of the event generated.</param>
-        /// <param name="statusCode">Status of the event.</param>
-        /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
-        protected virtual void InvokeEvent(Esp32Interfaces source, UInt32 eventId, StatusCodes statusCode, byte[]? payload)
-        {
-            throw new NotImplementedException("InvokeEvent needs to be overridden in a derived class.");
-        }
+        ///// <summary>
+        ///// Use the event data to work out which event to invoke and create any event args that will be consumed.
+        ///// </summary>
+        ///// <remarks>
+        ///// An override for this method needs to be provided in the derived class.
+        ///// </remarks>
+        ///// <param name="source">ESP32 interface that generated the event.</param>
+        ///// <param name="eventId">ID of the event generated.</param>
+        ///// <param name="statusCode">Status of the event.</param>
+        ///// <param name="payload">Optional payload containing data specific to the result of the event.</param>
+        //protected virtual void InvokeEvent(Esp32Interfaces source, UInt32 eventId, StatusCodes statusCode, byte[]? payload)
+        //{
+        //    throw new NotImplementedException("InvokeEvent needs to be overridden in a derived class.");
+        //}
 
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
