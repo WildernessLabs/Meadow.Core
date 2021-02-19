@@ -321,37 +321,37 @@ namespace Meadow.Devices
         /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
         /// <returns></returns>
         //TODO: we should probably be using some sort of password credential and secure storage see: https://docs.microsoft.com/en-us/uwp/api/windows.security.credentials.passwordcredential
-        // public Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
-        public ConnectionResult Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
+        public async Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
         {
-            // return new Task<ConnectionResult>(() =>
-            // {
-            ConnectionResult result;
-            if (ConnectToAccessPoint(ssid, password, reconnection)) {
-                HasInternetAccess = true;
-                result = new ConnectionResult(ConnectionStatus.Success);
-            } else {
-                HasInternetAccess = false;
-                result = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
-            }
-            return result;
-            // });
+            // spin up a thread to start connecting
+            var t = await Task.Run<ConnectionResult>(() => {
+                ConnectionResult connectionResult;
+                if (ConnectToAccessPoint(ssid, password, reconnection)) {
+                    HasInternetAccess = true;
+                    connectionResult = new ConnectionResult(ConnectionStatus.Success);
+                } else {
+                    HasInternetAccess = false;
+                    connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
+                }
+                return connectionResult;
+            });
+            return t;
         }
 
-        /// <summary>
-        /// Connect to a WiFi network.
-        /// </summary>
-        /// <param name="network"><see cref="WifiNetwork"/> access point to connect to.</param>
-        /// <param name="password">Password for the WiFi access point.</param>
-        /// <param name="ssid">SSID (Service Set Identifier) for the access point.</param>
-        /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
-        /// <returns></returns>
-        public Task<ConnectionResult> Connect(WifiNetwork network, string password, string ssid, ReconnectionType reconnection = ReconnectionType.Automatic, NetworkAuthenticationType authentication = NetworkAuthenticationType.Wpa2Psk)
-        {
-            return new Task<ConnectionResult>(() => {
-                return new ConnectionResult(ConnectionStatus.Timeout);
-            });
-        }
+        ///// <summary>
+        ///// Connect to a WiFi network.
+        ///// </summary>
+        ///// <param name="network"><see cref="WifiNetwork"/> access point to connect to.</param>
+        ///// <param name="password">Password for the WiFi access point.</param>
+        ///// <param name="ssid">SSID (Service Set Identifier) for the access point.</param>
+        ///// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
+        ///// <returns></returns>
+        //public Task<ConnectionResult> Connect(WifiNetwork network, string password, string ssid, ReconnectionType reconnection = ReconnectionType.Automatic, NetworkAuthenticationType authentication = NetworkAuthenticationType.Wpa2Psk)
+        //{
+        //    return new Task<ConnectionResult>(() => {
+        //        return new ConnectionResult(ConnectionStatus.Timeout);
+        //    });
+        //}
 
         /// <summary>
         /// Disconnect from the current network.
@@ -413,6 +413,7 @@ namespace Meadow.Devices
             byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
             byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
 
+            // TODO: should be async and awaited
             StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
 
             if ((result == StatusCodes.CompletedOk)) {
@@ -436,7 +437,6 @@ namespace Meadow.Devices
 
         //==== Event raising methods
 
-        // TODO: rename to "RaiseConnected"
         /// <summary>
         /// Process the ConnectionCompleted event extracing any event data from the
         /// payload and create an EventArg object if necessary
@@ -449,7 +449,6 @@ namespace Meadow.Devices
             WiFiConnected?.Invoke(this, e);
         }
 
-        // TODO: rename to "RaiseDisconnected"
         /// <summary>
         /// Process the Disconnected event extracing any event data from the
         /// payload and create an EventArg object if necessary
@@ -462,7 +461,6 @@ namespace Meadow.Devices
             WiFiDisconnected?.Invoke(this, e);
         }
 
-        // TODO: rename to `RaiseInterfaceStarted`
         /// <summary>
         /// Process the InterfaceStarted event extracing any event data from the
         /// payload and create an EventArg object if necessary
@@ -475,7 +473,6 @@ namespace Meadow.Devices
             WiFiInterfaceStarted?.Invoke(this, e);
         }
 
-        // TODO: rename to `RaiseInterfaceStoppped`
         /// <summary>
         /// Process the InterfaceStopped event extracing any event data from the
         /// payload and create an EventArg object if necessary

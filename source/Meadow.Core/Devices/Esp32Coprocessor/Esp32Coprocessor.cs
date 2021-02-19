@@ -126,6 +126,7 @@ namespace Meadow.Devices
             return(SendCommand(where, function, block, null, encodedResult));
         }
 
+        // TODO: shouldn't this be async?
         /// <summary>
         /// Send a command and its payload to the ESP32.
         /// </summary>

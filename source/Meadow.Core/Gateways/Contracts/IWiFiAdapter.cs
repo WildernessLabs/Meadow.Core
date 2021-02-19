@@ -2,6 +2,7 @@ using System.Net;
 using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
 using System;
+using System.Threading.Tasks;
 
 namespace Meadow.Gateway
 {
@@ -133,7 +134,7 @@ namespace Meadow.Gateway
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
-        ConnectionResult Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
+        Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
 
         /// <summary>
         /// Get the list of access points.
