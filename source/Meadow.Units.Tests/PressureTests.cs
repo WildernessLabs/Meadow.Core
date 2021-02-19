@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using Meadow.Units;
+using static Meadow.Units.Tests.Helpers;
 
 namespace Meadow.Units.Tests
 {
@@ -42,11 +43,6 @@ namespace Meadow.Units.Tests
             Assert.That(Equals4DigitPrecision(p4.Bar, 1.01325));
             Assert.That(Equals4DigitPrecision(p4.Pascal, 101325));
             Assert.That(Equals4DigitPrecision(p4.Psi, 14.695948775));
-        }
-
-        static bool Equals4DigitPrecision(double left, double right)
-        {
-            return Math.Abs(left - right) < 0.0001;
         }
     }
 }
