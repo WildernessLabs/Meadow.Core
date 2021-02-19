@@ -6,6 +6,7 @@ using System.Text;
 using Meadow.Core;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow.Gateway;
 
 namespace Meadow.Devices
 {
@@ -16,7 +17,7 @@ namespace Meadow.Devices
     /// This file contains the generic code (for example communication with the ESP32) used to support the higher
     /// level functionality (such as WiFi).  Interface specific functionality is provided in separate files.
     /// </remarks>
-    public partial class Esp32Coprocessor
+    public partial class Esp32Coprocessor : ICoprocessor
     {
         #region Constants
 
@@ -34,6 +35,27 @@ namespace Meadow.Devices
         /// </summary>
         [Flags]
         private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, EventHandling = 0x04, Full = 0xffffffff }
+
+        ///// <summary>
+        ///// State of the ESP32 coprocessor.
+        ///// </summary>
+        //public enum CoprocessorState
+        //{
+        //    /// <summary>
+        //    /// Coprocessor is not ready or has not been detected.
+        //    /// </summary>
+        //    NotReady,
+
+        //    /// <summary>
+        //    /// Coprocessor is available.
+        //    /// </summary>
+        //    Ready,
+
+        //    /// <summary>
+        //    /// Coprocessor is available but is currently sleeping.
+        //    /// </summary>
+        //    Sleeping
+        //}
 
         #endregion Enums
 
@@ -62,6 +84,29 @@ namespace Meadow.Devices
 
         #region Properties
 
+        /// <summary>
+        /// Current status of the coprocessor.
+        /// </summary>
+        public ICoprocessor.CoprocessorState Status { get; private set; }
+
+        /// <summary>
+        /// Battery charge level in millivolts.
+        /// </summary>
+        public UInt32 BatteryLevel
+        {
+            get
+            {
+                byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+                UInt32 voltage = 0;
+                if (SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
+                {
+                    GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
+                    voltage = response.Level;
+                }
+                return (voltage);
+            }
+        }
+
         #endregion Properties
 
         #region Constructor(s)
@@ -76,6 +121,7 @@ namespace Meadow.Devices
             IsConnected = false;
             ClearIpDetails();
             HasInternetAccess = false;
+            Status = ICoprocessor.CoprocessorState.NotReady;
 
             if (_eventHandlerThread == null)
             {
@@ -91,31 +137,30 @@ namespace Meadow.Devices
 
         #region Methods
 
+        //protected void SetProperty(ConfigurationItems item, UInt32 value)
+        //{
+        //    throw new NotImplementedException("SetProperty is not implemented.");
+        //}
 
-        protected void SetProperty(ConfigurationItems item, UInt32 value)
-        {
-            throw new NotImplementedException("SetProperty is not implemented.");
-        }
+        //protected void SetProperty(ConfigurationItems item, byte value)
+        //{
+        //    UInt32 v = value;
+        //    SetProperty(item, v);
+        //}
 
-        protected void SetProperty(ConfigurationItems item, byte value)
-        {
-            UInt32 v = value;
-            SetProperty(item, v);
-        }
+        //protected void SetProperty(ConfigurationItems item, bool value)
+        //{
+        //    UInt32 v = 0;
+        //    if (value)
+        //    {
+        //        v = 1;
+        //    }
+        //    SetProperty(item, v);
+        //}
 
-        protected void SetProperty(ConfigurationItems item, bool value)
-        {
-            UInt32 v = 0;
-            if (value)
-            {
-                v = 1;
-            }
-            SetProperty(item, v);
-        }
-
-        protected void SetProperty(ConfigurationItems item, string value)
-        {
-        }
+        //protected void SetProperty(ConfigurationItems item, string value)
+        //{
+        //}
 
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.

@@ -17,6 +17,7 @@ namespace Meadow.Devices
         private Esp32Coprocessor esp32;
 
         public IWiFiAdapter WiFiAdapter { get; protected set; }
+        public ICoprocessor Coprocessor { get; protected set; }
 
         public event EventHandler WiFiAdapterInitilaized = delegate {};
 
@@ -57,6 +58,9 @@ namespace Meadow.Devices
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.
             //this.InitEsp32CoProc();
+
+            this.esp32 = new Esp32Coprocessor();
+            Coprocessor = esp32;
         }
 
         public IPin GetPin(string pinName)
