@@ -1,11 +1,15 @@
 using System.Net;
 using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
+using System;
+using System.Threading.Tasks;
 
 namespace Meadow.Gateway
 {
     public interface IWiFiAdapter
     {
+        #region Properties
+
         /// <summary>
         /// Indicate if the network adapter is connected to an access point.
         /// </summary>
@@ -70,6 +74,34 @@ namespace Meadow.Gateway
         /// </summary>
         string DefaultAcessPoint { get; }
 
+        #endregion Properties
+
+        #region Delegates and Events
+
+        /// <summary>
+        /// User code to process the ConnectionCompleted event.
+        /// </summary>
+        event EventHandler WiFiConnected;
+
+        /// <summary>
+        /// User code to process the Disconnected event.
+        /// </summary>
+        event EventHandler WiFiDisconnected;
+
+        /// <summary>
+        /// User code to process the InterfaceStarted event.
+        /// </summary>
+        event EventHandler WiFiInterfaceStarted;
+
+        /// <summary>
+        /// User code to process the InterfaceStopped event.
+        /// </summary>
+        event EventHandler WiFiInterfaceStopped;
+
+        #endregion Delegates and Events
+
+        #region Methods
+
         /// <summary>
         /// Start the network interface on the WiFi adapter.
         /// </summary>
@@ -102,7 +134,7 @@ namespace Meadow.Gateway
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
-        ConnectionResult Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
+        Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
 
         /// <summary>
         /// Get the list of access points.
@@ -112,5 +144,7 @@ namespace Meadow.Gateway
         /// </remarks>
         /// <returns>ObservableCollection (possibly empty) of access points.</returns>
         ObservableCollection<WifiNetwork> Scan();
+
+        #endregion Methods
     }
 }

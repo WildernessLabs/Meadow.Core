@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Core
 {
@@ -135,7 +136,17 @@ namespace Meadow.Core
             /// <param name="espCommand">Data structure holding the information about the command / request.</param>
             /// <returns>0 on success, error code if a problem was encountered.</returns>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdEsp32Command espCommand);
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEsp32Command espCommand);
+
+            /// <summary>
+            /// Get the extended event data from the STM32.
+            /// </summary>
+            /// <param name="fd">File descriptor for the UPD driver.</param>
+            /// <param name="request">Function number (should be IoctlFn.Esp32GetEventData).</param>
+            /// <param name="eventData">Data structure holding the event data.</param>
+            /// <returns>0 on success, error code if a problem was encountered.</returns>
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEsp32EventData eventData);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdDeviceInfo deviceInfo);

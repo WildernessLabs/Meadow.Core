@@ -69,7 +69,9 @@ namespace Meadow.Devices
             return Task.Run<bool>(async () => {
                 try
                 {
-                    WiFiAdapter = new Esp32WiFiAdapter();
+                    //Console.WriteLine($"InitWiFiAdapter()");
+                    this.esp32 = new Esp32Coprocessor();
+                    WiFiAdapter = esp32;
                 }
                 catch (Exception e)
                 {

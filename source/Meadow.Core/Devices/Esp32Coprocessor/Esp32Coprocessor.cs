@@ -2,13 +2,17 @@ using System;
 using System.Runtime.InteropServices;
 using static Meadow.Core.Interop;
 using Meadow.Devices.Esp32.MessagePayloads;
+using System.Text;
+using Meadow.Core;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices
 {
     /// <summary>
     ///
     /// </summary>
-    public class Esp32Coprocessor
+    public partial class Esp32Coprocessor
     {
         #region Constants
 
@@ -25,7 +29,7 @@ namespace Meadow.Devices
         /// Possible debug levels.
         /// </summary>
         [Flags]
-        private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, Full = 0xffffffff }
+        private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, EventHandling = 0x04, Full = 0xffffffff }
 
         #endregion Enums
 
@@ -45,6 +49,11 @@ namespace Meadow.Devices
         /// </summary>
         protected SystemConfiguration? _config = null;
 
+        /// <summary>
+        /// Event handler service thread.
+        /// </summary>
+        private Thread _eventHandlerThread = null;
+
         #endregion Private fields / variables
 
         #region Properties
@@ -59,6 +68,19 @@ namespace Meadow.Devices
         internal Esp32Coprocessor()
         {
             _debugLevel = DebugOptions.None;
+
+            IsConnected = false;
+            ClearIpDetails();
+            HasInternetAccess = false;
+
+            if (_eventHandlerThread == null)
+            {
+                _eventHandlerThread = new Thread(EventHandlerServiceThread)
+                {
+                    IsBackground = true
+                };
+                _eventHandlerThread.Start();
+            }
         }
 
         #endregion Constructor(s)
@@ -91,7 +113,6 @@ namespace Meadow.Devices
         {
         }
 
-
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
         /// </summary>
@@ -105,6 +126,7 @@ namespace Meadow.Devices
             return(SendCommand(where, function, block, null, encodedResult));
         }
 
+        // TODO: shouldn't this be async?
         /// <summary>
         /// Send a command and its payload to the ESP32.
         /// </summary>
@@ -114,7 +136,7 @@ namespace Meadow.Devices
         /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[] payload, byte[] encodedResult)
+        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? payload, byte[] encodedResult)
         {
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
@@ -162,6 +184,111 @@ namespace Meadow.Devices
                 }
             }
             return (result);
+        }
+
+        /// <summary>
+        /// Get event data from NuttX.
+        /// </summary>
+        /// <param name="where">Interface the command is destined for.</param>
+        /// <param name="function">Command to be sent.</param>
+        /// <param name="block">Is this a blocking command?</param>
+        /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
+        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
+        /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
+        private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
+        {
+            Thread.Sleep(1000);
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data held at 0x{eventData.StatusCode:x08}");
+            var resultGcHandle = default(GCHandle);
+            StatusCodes result = StatusCodes.CompletedOk;
+            try
+            {
+                byte[] encodedResult = new byte[4000];
+                Array.Clear(encodedResult, 0, encodedResult.Length);
+                resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
+
+                var request = new Nuttx.UpdEsp32EventData()
+                {
+                    StatusCode = 0,
+                    MessageAddress = eventData.StatusCode,
+                    Payload = resultGcHandle.AddrOfPinnedObject(),
+                    PayloadLength = (UInt32) encodedResult.Length
+                };
+
+                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32GetEventData, ref request);
+                if (updResult == 0)
+                {
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Payload: ");
+                    Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
+                    eventData.StatusCode = request.StatusCode;
+                    payload = new byte[request.PayloadLength];
+                    Array.Copy(encodedResult, payload, request.PayloadLength);
+                    result = StatusCodes.CompletedOk;
+                }
+                else
+                {
+                    payload = null;
+                    result = StatusCodes.Failure;
+                }
+            }
+            finally
+            {
+                if (resultGcHandle.IsAllocated)
+                {
+                    resultGcHandle.Free();
+                }
+            }
+            return (result);
+        }
+
+        /// <summary>
+        /// Interrupt service handler for the ESP32 coprocessor.
+        /// </summary>`
+        /// <param name="o"></param>
+        private void EventHandlerServiceThread(object o)
+        {
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Starting Esp32Coprocessor event handler thread.");
+            IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
+            byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
+            while (true)
+            {
+                int priority = 0;
+                try
+                {
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
+                    int result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event received.");
+                    if (result >= 0)
+                    {
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Processing event.");
+                        Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), rxBuffer);
+                        EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
+                        byte[]? payload = null;
+                        if (eventData.PayloadLength == 0)
+                        {
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
+                        }
+                        else
+                        {
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, location of message 0x{eventData.StatusCode:x08}");
+                            GetEventData(eventData, out payload);
+                        }
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");
+                        Task.Run(() =>
+                        {
+                            InvokeEvent((Esp32Interfaces) eventData.Interface, eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                        });
+                    }
+                    else
+                    {
+                        Console.WriteLine($"ESP32 Coprocessor event handler error code {result}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"ESP32 Coprocessor event handler: {ex.Message}");
+                }
+            }
         }
 
         /// <summary>
