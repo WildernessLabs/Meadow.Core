@@ -83,9 +83,12 @@ namespace Meadow.Devices
         /// <summary>
         /// Should the system automatically get the time when the board is connected to an access point?
         /// </summary>
-        public bool GetNetworkTimeAtStartup {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public bool GetNetworkTimeAtStartup
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.GetTimeAtStartup == 1);
@@ -96,9 +99,12 @@ namespace Meadow.Devices
         /// <summary>
         /// Name of the NTP server to use for time retrieval.
         /// </summary>
-        public string NtpServer {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public string NtpServer
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.NtpServer);
@@ -112,9 +118,12 @@ namespace Meadow.Devices
         /// <remarks>
         /// This value should be changed through the meadow.cfg file.
         /// </remarks>
-        public string DeviceName {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public string DeviceName
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.DeviceName);
@@ -124,9 +133,12 @@ namespace Meadow.Devices
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
-        public byte[] MacAddress {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public byte[] MacAddress
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.BoardMacAddress);
@@ -137,9 +149,12 @@ namespace Meadow.Devices
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
         /// </summary>
-        public byte[] ApMacAddress {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public byte[] ApMacAddress
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.SoftApMacAddress);
@@ -153,9 +168,11 @@ namespace Meadow.Devices
         /// <remarks>
         /// This will automatically connect to any preconfigured access points if they are available.
         /// </remarks>
-        public bool AutomaticallyStartNetwork {
+        public bool AutomaticallyStartNetwork
+        {
             get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.AutomaticallyStartNetwork == 1);
@@ -166,9 +183,12 @@ namespace Meadow.Devices
         /// <summary>
         /// Automatically try to reconnect to an access point if there is a problem / disconnection?
         /// </summary>
-        public bool AutomaticallyReconnect {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public bool AutomaticallyReconnect
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.AutomaticallyReconnect == 1);
@@ -180,9 +200,12 @@ namespace Meadow.Devices
         /// Default access point to try to connect to if the network interface is started and the board
         /// is configured to automatically reconnect.
         /// </summary>
-        public string DefaultAcessPoint {
-            get {
-                if (GetConfiguration() != StatusCodes.CompletedOk) {
+        public string DefaultAcessPoint
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
                 }
                 return (_config.Value.DefaultAccessPoint);
@@ -206,29 +229,19 @@ namespace Meadow.Devices
         /// </remarks>
         /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if value is less than <see cref="MINIMUM_SCAN_FREQUENCY"/> or greater than <see cref="MAXIMUM_SCAN_FREQUENCY"/>.</exception>
         private ushort _scanFrequency = DEFAULT_SCAN_FREQUENCY;
-        public ushort ScanFrequency {
+        public ushort ScanFrequency
+        {
             get { return (_scanFrequency); }
-            set {
-                if ((value < MINIMUM_SCAN_FREQUENCY) || (value > MAXIMUM_SCAN_FREQUENCY)) {
+            set
+            {
+                if ((value < MINIMUM_SCAN_FREQUENCY) || (value > MAXIMUM_SCAN_FREQUENCY))
+                {
                     throw new ArgumentOutOfRangeException($"{nameof(ScanFrequency)} should be between {MINIMUM_SCAN_FREQUENCY} and {MAXIMUM_SCAN_FREQUENCY} (inclusive).");
                 }
                 _scanFrequency = value;
             }
         }
 
-
-        // TODO: move these to the ctor
-        /// <summary>
-        /// Create a new WiFi adapter that implements the <see cref="IWifiAdapter"/> interface.
-        /// </summary>
-        //internal Esp32WiFiAdapter()
-        //{
-        //    IsConnected = false;
-        //    ClearIpDetails();
-        //    HasInternetAccess = false;
-        //}
-
-        //====
         /// <summary>
         /// Use the event data to work out which event to invoke and create any event args that will be consumed.
         /// </summary>
@@ -238,10 +251,12 @@ namespace Meadow.Devices
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
         protected void InvokeEvent(Esp32Interfaces source, UInt32 eventId, StatusCodes statusCode, byte[] payload)
         {
-            if ((Esp32Interfaces)source != Esp32Interfaces.WiFi) {
+            if ((Esp32Interfaces)source != Esp32Interfaces.WiFi)
+            {
                 throw new ArgumentException($"Invalid event source {source}");
             }
-            switch ((WiFiFunction)eventId) {
+            switch ((WiFiFunction)eventId)
+            {
                 case WiFiFunction.ConnectEvent:
                     RaiseConnected(statusCode, payload);
                     break;
@@ -288,15 +303,19 @@ namespace Meadow.Devices
                 var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
                 var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
 
-                if (accessPointList.NumberOfAccessPoints > 0) {
+                if (accessPointList.NumberOfAccessPoints > 0)
+                {
                     int accessPointOffset = 0;
-                    for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++) {
+                    for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+                    {
                         var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
                         accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
                         string bssid = "";
-                        for (int index = 0; index < accessPoint.Bssid.Length; index++) {
+                        for (int index = 0; index < accessPoint.Bssid.Length; index++)
+                        {
                             bssid += accessPoint.Bssid[index].ToString("x2");
-                            if (index != accessPoint.Bssid.Length - 1) {
+                            if (index != accessPoint.Bssid.Length - 1)
+                            {
                                 bssid += ":";
                             }
                         }
@@ -322,13 +341,15 @@ namespace Meadow.Devices
         //TODO: we should probably be using some sort of password credential and secure storage see: https://docs.microsoft.com/en-us/uwp/api/windows.security.credentials.passwordcredential
         public async Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
         {
-            // spin up a thread to start connecting
             var t = await Task.Run<ConnectionResult>(() => {
                 ConnectionResult connectionResult;
-                if (ConnectToAccessPoint(ssid, password, reconnection)) {
+                if (ConnectToAccessPoint(ssid, password, reconnection))
+                {
                     HasInternetAccess = true;
                     connectionResult = new ConnectionResult(ConnectionStatus.Success);
-                } else {
+                }
+                else
+                {
                     HasInternetAccess = false;
                     connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
                 }
@@ -336,21 +357,6 @@ namespace Meadow.Devices
             });
             return t;
         }
-
-        ///// <summary>
-        ///// Connect to a WiFi network.
-        ///// </summary>
-        ///// <param name="network"><see cref="WifiNetwork"/> access point to connect to.</param>
-        ///// <param name="password">Password for the WiFi access point.</param>
-        ///// <param name="ssid">SSID (Service Set Identifier) for the access point.</param>
-        ///// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
-        ///// <returns></returns>
-        //public Task<ConnectionResult> Connect(WifiNetwork network, string password, string ssid, ReconnectionType reconnection = ReconnectionType.Automatic, NetworkAuthenticationType authentication = NetworkAuthenticationType.Wpa2Psk)
-        //{
-        //    return new Task<ConnectionResult>(() => {
-        //        return new ConnectionResult(ConnectionStatus.Timeout);
-        //    });
-        //}
 
         /// <summary>
         /// Disconnect from the current network.
@@ -398,14 +404,17 @@ namespace Meadow.Devices
         /// <returns>true if the connection was successfully made.</returns>
         private bool ConnectToAccessPoint(string ssid, string password, ReconnectionType reconnection)
         {
-            if (string.IsNullOrEmpty(ssid)) {
+            if (string.IsNullOrEmpty(ssid))
+            {
                 throw new ArgumentNullException("Invalid SSID.");
             }
-            if (password == null) {
+            if (password == null)
+            {
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
 
-            WiFiCredentials request = new WiFiCredentials() {
+            WiFiCredentials request = new WiFiCredentials()
+            {
                 NetworkName = ssid,
                 Password = password
             };
@@ -413,9 +422,10 @@ namespace Meadow.Devices
             byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
 
             // TODO: should be async and awaited
-            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
 
-            if ((result == StatusCodes.CompletedOk)) {
+            if ((result == StatusCodes.CompletedOk))
+            {
                 byte[] addressBytes = new byte[4];
                 Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
                 IpAddress = new IPAddress(addressBytes);
@@ -424,10 +434,13 @@ namespace Meadow.Devices
                 Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
                 Gateway = new IPAddress(addressBytes);
                 IsConnected = true;
-            } else {
+            }
+            else
+            {
                 ClearIpDetails();
                 IsConnected = false;
-                if (result == StatusCodes.CoprocessorNotResponding) {
+                if (result == StatusCodes.CoprocessorNotResponding)
+                {
                     throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
                 }
             }
