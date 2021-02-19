@@ -405,11 +405,13 @@ namespace Meadow.Devices
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
 
+        // TODO: this should move to the MeadowOS class.
         public void SetSynchronizationContext(SynchronizationContext context)
         {
             _context = context;
         }
 
+        // TODO: this should move to the MeadowOS class.
         public void BeginInvokeOnMainThread(Action action)
         {
             if (_context == null)
