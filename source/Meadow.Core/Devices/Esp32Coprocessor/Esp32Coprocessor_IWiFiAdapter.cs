@@ -13,7 +13,6 @@ namespace Meadow.Devices
     {
         //==== Events
 
-        // TODO: Rename to `Connected`
         /// <summary>
         /// Raised when the device connects to WiFi.
         /// </summary>
