@@ -9,9 +9,12 @@ using Meadow.Gateways.Exceptions;
 
 namespace Meadow.Devices
 {
+    /// <summary>
+	/// This file holds the WiFi specifi methods, properties etc for the IWiFiAdapter interface.
+	/// </summary>
     public partial class Esp32Coprocessor : IWiFiAdapter
     {
-        //==== Events
+        #region Events
 
         /// <summary>
         /// Raised when the device connects to WiFi.
@@ -24,17 +27,19 @@ namespace Meadow.Devices
         public event EventHandler WiFiDisconnected = delegate { };
 
         /// <summary>
-        /// User code to process the InterfaceStarted event.
+        /// Raised when the WiFi interface starts.
         /// </summary>
         public event EventHandler WiFiInterfaceStarted = delegate { };
 
         /// <summary>
-        /// User code to process the InterfaceStopped event.
+        /// Raised when the WiFi interface stops.
         /// </summary>
         public event EventHandler WiFiInterfaceStopped = delegate { };
 
+        #endregion Events
 
-        //==== internals
+
+        #region Constants
 
         /// <summary>
         /// Default delay (in milliseconds) between WiFi network scans <see cref="ScanFrequency"/>.
@@ -51,14 +56,9 @@ namespace Meadow.Devices
         /// </summary>
         public const ushort MAXIMUM_SCAN_FREQUENCY = 60000;
 
-        /// <summary>
-        /// Possible debug levels.
-        /// </summary>
-        //[Flags]
-        //private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, Full = 0xffffffff }
+        #endregion Constants
 
-
-        //==== Properties
+        #region Properties
 
         /// <summary>
         /// IP Address of the network adapter.
@@ -170,7 +170,8 @@ namespace Meadow.Devices
         /// </remarks>
         public bool AutomaticallyStartNetwork
         {
-            get {
+            get
+            {
                 if (GetConfiguration() != StatusCodes.CompletedOk)
                 {
                     throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
@@ -218,6 +219,10 @@ namespace Meadow.Devices
         /// </summary>
         public bool HasInternetAccess { get; protected set; }
 
+        #endregion Properties
+
+        #region Methods
+
         /// <summary>
         /// Delay (in milliseconds) between network scans.
         /// </summary>
@@ -245,29 +250,24 @@ namespace Meadow.Devices
         /// <summary>
         /// Use the event data to work out which event to invoke and create any event args that will be consumed.
         /// </summary>
-        /// <param name="source">ESP32 interface that generated the event.</param>
         /// <param name="eventId">Event ID.</param>
         /// <param name="statusCode">Status of the event.</param>
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
-        protected void InvokeEvent(Esp32Interfaces source, UInt32 eventId, StatusCodes statusCode, byte[] payload)
+        protected void InvokeEvent(WiFiFunction eventId, StatusCodes statusCode, byte[] payload)
         {
-            if ((Esp32Interfaces)source != Esp32Interfaces.WiFi)
-            {
-                throw new ArgumentException($"Invalid event source {source}");
-            }
-            switch ((WiFiFunction)eventId)
+            switch (eventId)
             {
                 case WiFiFunction.ConnectEvent:
-                    RaiseConnected(statusCode, payload);
+                    RaiseWiFiConnected(statusCode, payload);
                     break;
                 case WiFiFunction.DisconnectEvent:
-                    RaiseDisconnected(statusCode, payload);
+                    RaiseWiFiDisconnected(statusCode, payload);
                     break;
                 case WiFiFunction.StartInterfaceEvent:
-                    RaiseInterfaceStarted(statusCode, payload);
+                    RaiseWiFiInterfaceStarted(statusCode, payload);
                     break;
                 case WiFiFunction.StopInterfaceEvent:
-                    RaiseInterfaceStopped(statusCode, payload);
+                    RaiseWiFiInterfaceStopped(statusCode, payload);
                     break;
                 default:
                     throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
@@ -298,8 +298,9 @@ namespace Meadow.Devices
         {
             var networks = new ObservableCollection<WifiNetwork>();
             byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
-            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.GetAccessPoints, true, resultBuffer);
-            if (result == StatusCodes.CompletedOk) {
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
+            if (result == StatusCodes.CompletedOk)
+            {
                 var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
                 var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
 
@@ -325,7 +326,9 @@ namespace Meadow.Devices
                         networks.Add(network);
                     }
                 }
-            } else {
+            }
+            else
+            {
                 Console.WriteLine($"Error getting access points: {result}");
             }
             return (networks);
@@ -363,7 +366,6 @@ namespace Meadow.Devices
         /// </summary>
         public void Disconect()
         {
-            //  TODO: Determine if we should automatically reconnect and also should we use a retry count?
         }
 
         /// <summary>
@@ -390,7 +392,7 @@ namespace Meadow.Devices
         /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
         public bool StartNetwork()
         {
-            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StartNetwork, true, null);
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartNetwork, true, null);
             return (result == StatusCodes.CompletedOk);
         }
 
@@ -447,7 +449,9 @@ namespace Meadow.Devices
             return (IsConnected);
         }
 
-        //==== Event raising methods
+        #endregion Methods
+
+        #region Event raising methods
 
         /// <summary>
         /// Process the ConnectionCompleted event extracing any event data from the
@@ -455,7 +459,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi connection</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseConnected(StatusCodes statusCode, byte[] payload)
+        protected void RaiseWiFiConnected(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
             WiFiConnected?.Invoke(this, e);
@@ -467,7 +471,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi disconnection request.</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseDisconnected(StatusCodes statusCode, byte[] payload)
+        protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
             WiFiDisconnected?.Invoke(this, e);
@@ -479,7 +483,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi interface start event (should be CompletedOK).</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseInterfaceStarted(StatusCodes statusCode, byte[] payload)
+        protected void RaiseWiFiInterfaceStarted(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
             WiFiInterfaceStarted?.Invoke(this, e);
@@ -491,10 +495,12 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi interface stop event (should be CompletedOK).</param>
         /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseInterfaceStopped(StatusCodes statusCode, byte[] payload)
+        protected void RaiseWiFiInterfaceStopped(StatusCodes statusCode, byte[] payload)
         {
             EventArgs e = EventArgs.Empty;
             WiFiInterfaceStopped?.Invoke(this, e);
         }
+
+        #endregion Event raising methods
     }
 }

@@ -10,14 +10,18 @@ using System.Threading.Tasks;
 namespace Meadow.Devices
 {
     /// <summary>
-    ///
+    /// The Esp32Coprocessor class provide access to the features and functionality of the ESP32 coprocessor.
     /// </summary>
+    /// <remarks>
+    /// This file contains the generic code (for example communication with the ESP32) used to support the higher
+    /// level functionality (such as WiFi).  Interface specific functionality is provided in separate files.
+    /// </remarks>
     public partial class Esp32Coprocessor
     {
         #region Constants
 
         /// <summary>
-        /// Maximum length od the SPI buffer that can be used for communication with the ESP32.
+        /// Maximum length of the SPI buffer that can be used for communication with the ESP32.
         /// </summary>
         public const uint MAXIMUM_SPI_BUFFER_LENGTH = 4000;
 
@@ -36,7 +40,7 @@ namespace Meadow.Devices
         #region Private fields / variables
 
         /// <summary>
-        /// Current debug for this class.
+        /// Current debug level for this class.
         /// </summary>
         /// <remarks>
         /// The flags set in this variable determine the type and amount of output generated when
@@ -126,7 +130,6 @@ namespace Meadow.Devices
             return(SendCommand(where, function, block, null, encodedResult));
         }
 
-        // TODO: shouldn't this be async?
         /// <summary>
         /// Send a command and its payload to the ESP32.
         /// </summary>
@@ -187,14 +190,11 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Get event data from NuttX.
+        /// Get complex event data from NuttX
         /// </summary>
-        /// <param name="where">Interface the command is destined for.</param>
-        /// <param name="function">Command to be sent.</param>
-        /// <param name="block">Is this a blocking command?</param>
-        /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
-        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
-        /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
+        /// <param name="eventData">Basic event data already retrieved.</param>
+        /// <param name="payload">Data buffer that can receive the event data.</param>
+        /// <returns>StatusCodes enum indicating if the operation was successful or if an error occurred.</returns>
         private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
         {
             Thread.Sleep(1000);
@@ -276,17 +276,27 @@ namespace Meadow.Devices
                         Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");
                         Task.Run(() =>
                         {
-                            InvokeEvent((Esp32Interfaces) eventData.Interface, eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                            switch ((Esp32Interfaces) eventData.Interface)
+                            {
+                                case Esp32Interfaces.WiFi:
+                                    InvokeEvent((WiFiFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                                    break;
+                                case Esp32Interfaces.BlueTooth:
+                                    InvokeEvent((BluetoothFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                                    break;
+                                default:
+                                    throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
+                            }
                         });
                     }
                     else
                     {
-                        Console.WriteLine($"ESP32 Coprocessor event handler error code {result}");
+                        throw new Exception($"ESP32 Coprocessor event handler error code {result}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"ESP32 Coprocessor event handler: {ex.Message}");
+                    throw ex;
                 }
             }
         }
