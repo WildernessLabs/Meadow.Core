@@ -1,4 +1,5 @@
 ﻿using Meadow.Gateway;
+using Meadow.Gateways;
 using Meadow.Hardware;
 using System;
 using System.Linq;
@@ -24,6 +25,7 @@ namespace Meadow.Devices
         /// <summary>
         /// The default resolution for analog inputs
         /// </summary>
+        // TODO: should this be public?
         public const int DefaultA2DResolution = 12;
 
         public DeviceCapabilities Capabilities { get; protected set; }
@@ -418,6 +420,28 @@ namespace Meadow.Devices
             {
                 _context.Send(delegate { action(); }, null);
             }
+        }
+
+        //==== antenna stuff
+
+        public AntennaType CurrentAntenna {
+            get {
+                // TODO:
+                return _currentAntenna;
+            }
+        } protected AntennaType _currentAntenna = AntennaType.OnBoard; // cache
+
+        public void SetAntenna(AntennaType antenna)
+        {
+            // do a check to see if we have the co processor initialized
+            // should probably check status.
+            if (this.esp32 == null) { }
+
+            // set the antenna
+            // TODO
+
+            // cache so we don't have to query the coprocessor
+            this._currentAntenna = antenna;
         }
     }
 }
