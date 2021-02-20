@@ -75,12 +75,14 @@ namespace Meadow.Devices
             return Task.Run<bool>(async () => {
                 try
                 {
+                    //TODO: looks like we're also instantiating this in the ctor
+                    // need to cleanup.
                     //Console.WriteLine($"InitWiFiAdapter()");
-                    this.esp32 = new Esp32Coprocessor();
+                    if (this.esp32 == null) {
+                        this.esp32 = new Esp32Coprocessor();
+                    }
                     WiFiAdapter = esp32;
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                     return false;
                 }
