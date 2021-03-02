@@ -41,9 +41,9 @@ namespace Meadow.Gateways
         CoprocessorState Status { get; }
 
         /// <summary>
-        /// Battery charge level in millivolts.
+        /// Gets the current battery charge level in Volts (`V`).
         /// </summary>
-        UInt32 BatteryLevel { get; }
+        double GetBatteryLevel();
 
         #endregion Properties
     }

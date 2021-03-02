@@ -70,26 +70,40 @@ namespace Meadow.Devices
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
+        public Task<bool> InitCoProcessor()
+        {
+            if (!IsCoprocessorInitialized()) {
+                return Task.Run<bool>(async () => {
+                    try {
+                        //TODO: looks like we're also instantiating this in the ctor
+                        // need to cleanup.
+                        //Console.WriteLine($"InitWiFiAdapter()");
+                        if (this.esp32 == null) {
+                            this.esp32 = new Esp32Coprocessor();
+                        }
+                        WiFiAdapter = esp32;
+                        Coprocessor = esp32;
+                    } catch (Exception e) {
+                        Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
+                        return false;
+                    }
+                    return true;
+                });
+            } else {
+                return Task.FromResult<bool>(true);
+            }
+        }
+
         public Task<bool> InitWiFiAdapter()
         {
-            return Task.Run<bool>(async () => {
-                try
-                {
-                    //TODO: looks like we're also instantiating this in the ctor
-                    // need to cleanup.
-                    //Console.WriteLine($"InitWiFiAdapter()");
-                    if (this.esp32 == null) {
-                        this.esp32 = new Esp32Coprocessor();
-                    }
-                    WiFiAdapter = esp32;
-                    Coprocessor = esp32;
-                } catch (Exception e) {
-                    Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
-                    return false;
-                }
-                return true;
-            });
+            return InitCoProcessor();
         }
+
+        // when bluetooth is ready:
+        //public Task<bool> InitBluetoothAdapter()
+        //{
+        //    return InitCoProcessor();
+        //}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
@@ -431,11 +445,12 @@ namespace Meadow.Devices
         /// Check if the coprocessor is available / ready and throw an exception if it
         /// has not been setup.
         /// </summary>
-        void CheckCoprocessorAvaialability()
+        protected bool IsCoprocessorInitialized()
         {
-            if (esp32 == null)
-            {
-                throw new Exception("Coprocessor is not ready.");
+            if (esp32 == null) {
+                return false;
+            } else {
+                return true;
             }
         }
 
@@ -448,8 +463,11 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckCoprocessorAvaialability();
-                return WiFiAdapter.Antenna;
+                if(IsCoprocessorInitialized()) {
+                    return WiFiAdapter.Antenna;
+                } else {
+                    throw new Exception("Coprocessor not initialized.");
+                }
             }
         }
 
@@ -465,20 +483,24 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            CheckCoprocessorAvaialability();
-            WiFiAdapter.SetAntenna(antenna, persist);
+            if (IsCoprocessorInitialized()) {
+                WiFiAdapter.SetAntenna(antenna, persist);
+            } else {
+                throw new Exception("Coprocessor not initialized.");
+            }
         }
 
 
+        //TODO: need the Read()/StartUpdating()/StopUpdating() pattern here.
         /// <summary>
-        /// Battery charge level in millivolts.
+        /// Gets the current battery charge level in volts (`V`).
         /// </summary>
-        UInt32 BatteryLevel
+        public double GetBatteryLevel()
         {
-            get
-            {
-                CheckCoprocessorAvaialability();
-                return (Coprocessor.BatteryLevel);
+            if (IsCoprocessorInitialized()) {
+                return (Coprocessor.GetBatteryLevel());
+            } else {
+                throw new Exception("Coprocessor not initialized.");
             }
         }
     }

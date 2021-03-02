@@ -89,24 +89,6 @@ namespace Meadow.Devices
         /// </summary>
         public ICoprocessor.CoprocessorState Status { get; private set; }
 
-        /// <summary>
-        /// Battery charge level in millivolts.
-        /// </summary>
-        public UInt32 BatteryLevel
-        {
-            get
-            {
-                byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
-                UInt32 voltage = 0;
-                if (SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
-                {
-                    GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
-                    voltage = response.Level;
-                }
-                return (voltage);
-            }
-        }
-
         #endregion Properties
 
         #region Constructor(s)
@@ -372,6 +354,20 @@ namespace Meadow.Devices
         public void Reset()
         {
             SendCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
+        }
+
+        /// <summary>
+        /// Battery charge level in volts.
+        /// </summary>
+        public double GetBatteryLevel()
+        {
+            byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            double voltage = 0;
+            if (SendCommand((byte)Esp32Interfaces.System, (UInt32)SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk) {
+                GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
+                voltage = (float)(response.Level) / 1000f;
+            }
+            return (voltage);
         }
 
         #endregion Methods
