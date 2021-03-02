@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System;
 using System.Threading.Tasks;
 
-namespace Meadow.Gateway
+namespace Meadow.Gateways
 {
     public interface ICoprocessor
     {
@@ -41,9 +41,9 @@ namespace Meadow.Gateway
         CoprocessorState Status { get; }
 
         /// <summary>
-        /// Battery charge level in millivolts.
+        /// Gets the current battery charge level in Volts (`V`).
         /// </summary>
-        UInt32 BatteryLevel { get; }
+        double GetBatteryLevel();
 
         #endregion Properties
     }

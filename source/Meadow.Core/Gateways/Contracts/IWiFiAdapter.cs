@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System;
 using System.Threading.Tasks;
 
-namespace Meadow.Gateway
+namespace Meadow.Gateways
 {
     public interface IWiFiAdapter
     {
@@ -54,6 +54,11 @@ namespace Meadow.Gateway
         /// MAC address of the board when acting as a sft access point.
         /// </summary>
         byte[] ApMacAddress { get; }
+
+        /// <summary>
+        /// Current antenna in use.
+        /// </summary>
+        AntennaType Antenna { get; }
 
         /// <summary>
         /// Automatically start the network interface when the board reboots?
@@ -144,6 +149,18 @@ namespace Meadow.Gateway
         /// </remarks>
         /// <returns>ObservableCollection (possibly empty) of access points.</returns>
         ObservableCollection<WifiNetwork> Scan();
+
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        void SetAntenna(AntennaType antenna, bool persist = true);
 
         #endregion Methods
     }

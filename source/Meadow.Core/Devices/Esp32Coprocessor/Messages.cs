@@ -315,4 +315,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public UInt32 PayloadLength;
     };
 
+    public struct SetAntennaRequest
+    {
+        public Byte Antenna;
+        public Byte Persist;
+    };
+
 }

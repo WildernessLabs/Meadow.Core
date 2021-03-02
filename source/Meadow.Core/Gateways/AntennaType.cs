@@ -7,8 +7,6 @@ namespace Meadow.Gateways
     public enum AntennaType
     {
         OnBoard = 0,
-        External = 1,
-        // TODO: remove this and change `if` condition per Mark.
-        Max = 1
+        External = 1
     };
 }

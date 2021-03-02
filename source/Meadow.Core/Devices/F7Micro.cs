@@ -1,5 +1,4 @@
-﻿using Meadow.Gateway;
-using Meadow.Gateways;
+﻿using Meadow.Gateways;
 using Meadow.Hardware;
 using System;
 using System.Linq;
@@ -62,6 +61,7 @@ namespace Meadow.Devices
             //this.InitEsp32CoProc();
 
             this.esp32 = new Esp32Coprocessor();
+            WiFiAdapter = esp32;
             Coprocessor = esp32;
         }
 
@@ -70,25 +70,40 @@ namespace Meadow.Devices
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
+        public Task<bool> InitCoProcessor()
+        {
+            if (!IsCoprocessorInitialized()) {
+                return Task.Run<bool>(async () => {
+                    try {
+                        //TODO: looks like we're also instantiating this in the ctor
+                        // need to cleanup.
+                        //Console.WriteLine($"InitWiFiAdapter()");
+                        if (this.esp32 == null) {
+                            this.esp32 = new Esp32Coprocessor();
+                        }
+                        WiFiAdapter = esp32;
+                        Coprocessor = esp32;
+                    } catch (Exception e) {
+                        Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
+                        return false;
+                    }
+                    return true;
+                });
+            } else {
+                return Task.FromResult<bool>(true);
+            }
+        }
+
         public Task<bool> InitWiFiAdapter()
         {
-            return Task.Run<bool>(async () => {
-                try
-                {
-                    //TODO: looks like we're also instantiating this in the ctor
-                    // need to cleanup.
-                    //Console.WriteLine($"InitWiFiAdapter()");
-                    if (this.esp32 == null) {
-                        this.esp32 = new Esp32Coprocessor();
-                    }
-                    WiFiAdapter = esp32;
-                } catch (Exception e) {
-                    Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
-                    return false;
-                }
-                return true;
-            });
+            return InitCoProcessor();
         }
+
+        // when bluetooth is ready:
+        //public Task<bool> InitBluetoothAdapter()
+        //{
+        //    return InitCoProcessor();
+        //}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
@@ -426,26 +441,67 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Check if the coprocessor is available / ready and throw an exception if it
+        /// has not been setup.
+        /// </summary>
+        protected bool IsCoprocessorInitialized()
+        {
+            if (esp32 == null) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         //==== antenna stuff
 
-        public AntennaType CurrentAntenna {
-            get {
-                // TODO:
-                return _currentAntenna;
-            }
-        } protected AntennaType _currentAntenna = AntennaType.OnBoard; // cache
-
-        public void SetAntenna(AntennaType antenna)
+        /// <summary>
+        /// Get the currently setlected WiFi antenna.
+        /// </summary>
+        public AntennaType CurrentAntenna
         {
-            // do a check to see if we have the co processor initialized
-            // should probably check status.
-            if (this.esp32 == null) { }
+            get
+            {
+                if(IsCoprocessorInitialized()) {
+                    return WiFiAdapter.Antenna;
+                } else {
+                    throw new Exception("Coprocessor not initialized.");
+                }
+            }
+        }
 
-            // set the antenna
-            // TODO
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        public void SetAntenna(AntennaType antenna, bool persist = true)
+        {
+            if (IsCoprocessorInitialized()) {
+                WiFiAdapter.SetAntenna(antenna, persist);
+            } else {
+                throw new Exception("Coprocessor not initialized.");
+            }
+        }
 
-            // cache so we don't have to query the coprocessor
-            this._currentAntenna = antenna;
+
+        //TODO: need the Read()/StartUpdating()/StopUpdating() pattern here.
+        /// <summary>
+        /// Gets the current battery charge level in volts (`V`).
+        /// </summary>
+        public double GetBatteryLevel()
+        {
+            if (IsCoprocessorInitialized()) {
+                return (Coprocessor.GetBatteryLevel());
+            } else {
+                throw new Exception("Coprocessor not initialized.");
+            }
         }
     }
 }
