@@ -6,7 +6,7 @@ using System.Text;
 using Meadow.Core;
 using System.Threading;
 using System.Threading.Tasks;
-using Meadow.Gateway;
+using Meadow.Gateways;
 
 namespace Meadow.Devices
 {

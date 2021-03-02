@@ -1,5 +1,4 @@
-﻿using Meadow.Gateway;
-using Meadow.Gateways;
+﻿using Meadow.Gateways;
 using Meadow.Hardware;
 using System;
 using System.Linq;
@@ -62,6 +61,7 @@ namespace Meadow.Devices
             //this.InitEsp32CoProc();
 
             this.esp32 = new Esp32Coprocessor();
+            WiFiAdapter = esp32;
             Coprocessor = esp32;
         }
 
@@ -82,6 +82,7 @@ namespace Meadow.Devices
                         this.esp32 = new Esp32Coprocessor();
                     }
                     WiFiAdapter = esp32;
+                    Coprocessor = esp32;
                 } catch (Exception e) {
                     Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                     return false;
@@ -426,26 +427,59 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Check if the coprocessor is available / ready and throw an exception if it
+        /// has not been setup.
+        /// </summary>
+        void CheckCoprocessorAvaialability()
+        {
+            if (esp32 == null)
+            {
+                throw new Exception("Coprocessor is not ready.");
+            }
+        }
+
         //==== antenna stuff
 
-        public AntennaType CurrentAntenna {
-            get {
-                // TODO:
-                return _currentAntenna;
-            }
-        } protected AntennaType _currentAntenna = AntennaType.OnBoard; // cache
-
-        public void SetAntenna(AntennaType antenna)
+        /// <summary>
+        /// Get the currently setlected WiFi antenna.
+        /// </summary>
+        public AntennaType CurrentAntenna
         {
-            // do a check to see if we have the co processor initialized
-            // should probably check status.
-            if (this.esp32 == null) { }
+            get
+            {
+                CheckCoprocessorAvaialability();
+                return WiFiAdapter.Antenna;
+            }
+        }
 
-            // set the antenna
-            // TODO
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        public void SetAntenna(AntennaType antenna, bool persist = true)
+        {
+            CheckCoprocessorAvaialability();
+            WiFiAdapter.SetAntenna(antenna, persist);
+        }
 
-            // cache so we don't have to query the coprocessor
-            this._currentAntenna = antenna;
+
+        /// <summary>
+        /// Battery charge level in millivolts.
+        /// </summary>
+        UInt32 BatteryLevel
+        {
+            get
+            {
+                CheckCoprocessorAvaialability();
+                return (Coprocessor.BatteryLevel);
+            }
         }
     }
 }

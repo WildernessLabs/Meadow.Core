@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.Threading.Tasks;
 using Meadow.Devices.Esp32.MessagePayloads;
-using Meadow.Gateway;
+using Meadow.Gateways;
 using Meadow.Gateway.WiFi;
 using Meadow.Gateways.Exceptions;
 
@@ -79,6 +79,30 @@ namespace Meadow.Devices
         /// Record if the WiFi ESP32 is connected to an access point.
         /// </summary>
         public bool IsConnected { get; private set; }
+
+        /// <summary>
+        /// Current onboard antenna in use.
+        /// </summary>
+        public AntennaType Antenna
+        {
+            get
+            {
+                if (GetConfiguration() != StatusCodes.CompletedOk)
+                {
+                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
+                }
+                AntennaType result;
+                if (_config.Value.Antenna == (byte) AntennaTypes.OnBoard)
+                {
+                    result = AntennaType.OnBoard;
+                }
+                else
+                {
+                    result = AntennaType.External;
+                }
+                return (result);
+            }
+        }
 
         /// <summary>
         /// Should the system automatically get the time when the board is connected to an access point?
@@ -447,6 +471,47 @@ namespace Meadow.Devices
                 }
             }
             return (IsConnected);
+        }
+
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        public void SetAntenna(AntennaType antenna, bool persist = true)
+        {
+            //
+            //  TODO: Work out what checks we need to do here.
+            //
+            SetAntennaRequest request = new SetAntennaRequest();
+            if (persist)
+            {
+                request.Persist = 1;
+            }
+            else
+            {
+                request.Persist = 0;
+            }
+            if (antenna == AntennaType.OnBoard)
+            {
+                request.Antenna = (byte) AntennaTypes.OnBoard;
+            }
+            else
+            {
+                request.Antenna = (byte) AntennaTypes.External;
+            }
+            byte[] encodedPayload = Encoders.EncodeSetAntennaRequest(request);
+            byte[] encodedResult = new byte[4000];
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
+            if (result != StatusCodes.CompletedOk)
+            {
+                throw new Exception("Failed to change the antenna in use.");
+            }
         }
 
         #endregion Methods

@@ -2700,5 +2700,56 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(17);
         }
 
+        /// <summary>
+        /// Encode a SetAntennaRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="setAntennaRequest">SetAntennaRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded SetAntennaRequest object.</returns>
+        public static byte[] EncodeSetAntennaRequest(MessagePayloads.SetAntennaRequest setAntennaRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 2;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            buffer[offset] = setAntennaRequest.Antenna;
+            offset += 1;
+            buffer[offset] = setAntennaRequest.Persist;
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a SetAntennaRequest object from a byte array.
+        /// </summary>
+        /// <param name="setAntennaRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>SetAntennaRequest object.</returns>
+        public static MessagePayloads.SetAntennaRequest ExtractSetAntennaRequest(byte[] buffer, int offset)
+        {
+            SetAntennaRequest setAntennaRequest = new MessagePayloads.SetAntennaRequest();
+
+            setAntennaRequest.Antenna = buffer[offset];
+            offset += 1;
+            setAntennaRequest.Persist = buffer[offset];
+            return(setAntennaRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the SetAntennaRequest object.
+        /// </summary>
+        /// <param name="setAntennaRequest">SetAntennaRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded SetAntennaRequest object.</returns>
+        public static int EncodedSetAntennaRequestBufferSize(MessagePayloads.SetAntennaRequest setAntennaRequest)
+        {
+            return(2);
+        }
+
     }
 }

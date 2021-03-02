@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System;
 using System.Threading.Tasks;
 
-namespace Meadow.Gateway
+namespace Meadow.Gateways
 {
     public interface ICoprocessor
     {

@@ -98,11 +98,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Accept = 20,
         Ioctl = 21,
         GetSockName = 22,
-        SetTimeOfDayEvent = 23,
-        ConnectEvent = 24,
-        DisconnectEvent = 25,
-        StartInterfaceEvent = 26,
-        StopInterfaceEvent = 27
+        SetAntenna = 23,
+        SetTimeOfDayEvent = 24,
+        ConnectEvent = 25,
+        DisconnectEvent = 26,
+        StartInterfaceEvent = 27,
+        StopInterfaceEvent = 28
     };
 
     // <summary>
@@ -203,16 +204,15 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Passive = 1
     };
 
-    // BC: moved out to expose more publicly
-    //// <summary>
-    //// Types of antennas that can be selected.
-    //// </summary>
-    //public enum AntennaType
-    //{
-    //    OnBoard = 0,
-    //    External = 1,
-    //    Max = 1
-    //};
+    // <summary>
+    // Types of antennas that can be selected.
+    // </summary>
+    public enum AntennaTypes
+    {
+        OnBoard = 0,
+        External = 1,
+        Max = 1
+    };
 
     // <summary>
     // Encryption method used by the access point.
