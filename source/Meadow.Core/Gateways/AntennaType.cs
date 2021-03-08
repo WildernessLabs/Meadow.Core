@@ -6,7 +6,8 @@ namespace Meadow.Gateways
     // </summary>
     public enum AntennaType
     {
-        OnBoard = 0,
-        External = 1
+        NotKnown = 0,
+        OnBoard = 1,
+        External = 2
     };
 }
