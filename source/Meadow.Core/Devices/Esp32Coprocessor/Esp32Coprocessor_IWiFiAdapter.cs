@@ -87,22 +87,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                AntennaType result;
-                if (_config.Value.Antenna == (byte) AntennaTypes.OnBoard)
-                {
-                    result = AntennaType.OnBoard;
-                }
-                else
-                {
-                    result = AntennaType.External;
-                }
-                return (result);
+                CheckStatus();
+                return (_antenna);
             }
         }
+        protected AntennaType _antenna;
 
         /// <summary>
         /// Should the system automatically get the time when the board is connected to an access point?
@@ -111,14 +100,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.GetTimeAtStartup == 1);
+                CheckStatus();
+                return (_getNetworkTimeAtStartup);
             }
-            //set { SetProperty(ConfigurationItems.GetTimeAtStartup, value); }
         }
+        protected bool _getNetworkTimeAtStartup;
 
         /// <summary>
         /// Name of the NTP server to use for time retrieval.
@@ -127,14 +113,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.NtpServer);
+                CheckStatus();
+                return (_ntpServer);
             }
-            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
+        protected string _ntpServer;
 
         /// <summary>
         /// Get the device name.
@@ -146,13 +129,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.DeviceName);
+                CheckStatus();
+                return (_deviceName);
             }
         }
+        protected string _deviceName;
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
@@ -161,14 +142,12 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.BoardMacAddress);
+                CheckStatus();
+                return (_macAddress);
             }
 
         }
+        protected byte[] _macAddress;
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
@@ -177,14 +156,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.SoftApMacAddress);
+                CheckStatus();
+                return (_apMacAddress);
             }
-
         }
+        protected byte[] _apMacAddress;
 
         /// <summary>
         /// Automatically start the network interface when the board reboots?
@@ -196,14 +172,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.AutomaticallyStartNetwork == 1);
+                CheckStatus();
+                return (_automaticallyStartNetwork);
             }
-            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
+        protected bool _automaticallyStartNetwork;
 
         /// <summary>
         /// Automatically try to reconnect to an access point if there is a problem / disconnection?
@@ -212,14 +185,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.AutomaticallyReconnect == 1);
+                CheckStatus();
+                return (_automaticallyReconect);
             }
-            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
+        protected bool _automaticallyReconect;
 
         /// <summary>
         /// Default access point to try to connect to if the network interface is started and the board
@@ -229,14 +199,11 @@ namespace Meadow.Devices
         {
             get
             {
-                if (GetConfiguration() != StatusCodes.CompletedOk)
-                {
-                    throw new InvalidNetworkOperationException("Cannot retrieve ESP32 configuration.");
-                }
-                return (_config.Value.DefaultAccessPoint);
+                CheckStatus();
+                return (_defaultAccessPoint);
             }
-            //set { SetProperty(ConfigurationItems.NtpServer, value); }
         }
+        protected string _defaultAccessPoint;
 
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
@@ -246,6 +213,18 @@ namespace Meadow.Devices
         #endregion Properties
 
         #region Methods
+
+        /// <summary>
+        /// Check to if the coprocessor is ready and throw an exception if it is not.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if the coprocessor has not completed setup or if it is sleeping.</exception>
+        private void CheckStatus()
+        {
+            if (Status != ICoprocessor.CoprocessorState.Ready)
+            {
+                throw new InvalidOperationException("Coprocessor is not ready or is sleeping.");
+            }
+        }
 
         /// <summary>
         /// Delay (in milliseconds) between network scans.
@@ -485,9 +464,12 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            //
-            //  TODO: Work out what checks we need to do here.
-            //
+            if (antenna == AntennaType.NotKnown)
+            {
+                throw new ArgumentException("Setting the antenna type NotKnown is not allowed.");
+            }
+
+            CheckStatus();
             SetAntennaRequest request = new SetAntennaRequest();
             if (persist)
             {
@@ -508,10 +490,55 @@ namespace Meadow.Devices
             byte[] encodedPayload = Encoders.EncodeSetAntennaRequest(request);
             byte[] encodedResult = new byte[4000];
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
-            if (result != StatusCodes.CompletedOk)
+            if (result == StatusCodes.CompletedOk)
+            {
+                CheckStatus();
+                _antenna = antenna;
+            }
+            else
             {
                 throw new Exception("Failed to change the antenna in use.");
             }
+        }
+
+        public void SetGetNetworkTimeAtStartup(bool getNetworkTimeAtStartup)
+        {
+            throw new NotImplementedException($"Method {nameof(SetGetNetworkTimeAtStartup)} is not currently implemented.");
+        }
+
+        public void SetNtpServer(string ntpServer)
+        {
+            throw new NotImplementedException($"Method {nameof(SetNtpServer)} is not currently implemented.");
+        }
+
+        public void SetDeviceName(string deviceName)
+        {
+            throw new NotImplementedException($"Method {nameof(SetDeviceName)} is not currently implemented.");
+        }
+
+        public void SetMacAddress(byte[] macAddress)
+        {
+            throw new NotImplementedException($"Method {nameof(SetMacAddress)} is not currently implemented.");
+        }
+
+        public void SetApMacAddress(byte[] apMacAddress)
+        {
+            throw new NotImplementedException($"Method {nameof(SetApMacAddress)} is not currently implemented.");
+        }
+
+        public void SetAutomaticallyStartNetwork(bool automaticallyStartNetwork)
+        {
+            throw new NotImplementedException($"Method {nameof(SetAutomaticallyStartNetwork)} is not currently implemented.");
+        }
+
+        public void SetAutomatiacallyReconnect(bool automaticallyReconnect)
+        {
+            throw new NotImplementedException($"Method {nameof(SetAutomatiacallyReconnect)} is not currently implemented.");
+        }
+
+        public void SetDefaultAccessPoint(string defaultAccessPoint)
+        {
+            throw new NotImplementedException($"Method {nameof(SetDefaultAccessPoint)} is not currently implemented.");
         }
 
         #endregion Methods
