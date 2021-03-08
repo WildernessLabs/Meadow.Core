@@ -36,27 +36,6 @@ namespace Meadow.Devices
         [Flags]
         private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, EventHandling = 0x04, Full = 0xffffffff }
 
-        ///// <summary>
-        ///// State of the ESP32 coprocessor.
-        ///// </summary>
-        //public enum CoprocessorState
-        //{
-        //    /// <summary>
-        //    /// Coprocessor is not ready or has not been detected.
-        //    /// </summary>
-        //    NotReady,
-
-        //    /// <summary>
-        //    /// Coprocessor is available.
-        //    /// </summary>
-        //    Ready,
-
-        //    /// <summary>
-        //    /// Coprocessor is available but is currently sleeping.
-        //    /// </summary>
-        //    Sleeping
-        //}
-
         #endregion Enums
 
         #region Private fields / variables
@@ -69,11 +48,6 @@ namespace Meadow.Devices
         /// debugging this class.
         /// </remarks>
         private static DebugOptions _debugLevel;
-
-        /// <summary>
-        /// Hold the ESP32 configuration.
-        /// </summary>
-        protected SystemConfiguration? _config = null;
 
         /// <summary>
         /// Event handler service thread.
@@ -104,6 +78,11 @@ namespace Meadow.Devices
             ClearIpDetails();
             HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
+            _antenna = AntennaType.NotKnown;
+            if (GetConfiguration() == StatusCodes.CompletedOk)
+            {
+                Status = ICoprocessor.CoprocessorState.Ready;
+            }
 
             if (_eventHandlerThread == null)
             {
@@ -331,19 +310,37 @@ namespace Meadow.Devices
         /// <summary>
         /// Get the configuration data structure from the ESP32.
         /// </summary>
-        /// <param name="force">Get the configuration from the ESP32 anyway?  Can be used to refresh the previously retrieved configuration.</param>
         /// <returns>Result of getting the configuration from the ESP32.</returns>
-        protected StatusCodes GetConfiguration(bool force = false)
+        protected StatusCodes GetConfiguration()
         {
             StatusCodes result = StatusCodes.CompletedOk;
-            if ((_config is null) || force)
+            byte[] encodedResult = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            result = SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetConfiguration, true, encodedResult);
+            if (result == StatusCodes.CompletedOk)
             {
-                byte[] encodedResult = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
-                result = SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetConfiguration, true, encodedResult);
-                if (result == StatusCodes.CompletedOk)
+                SystemConfiguration config = Encoders.ExtractSystemConfiguration(encodedResult, 0);
+                switch ((AntennaTypes) config.Antenna)
                 {
-                    _config = Encoders.ExtractSystemConfiguration(encodedResult, 0);
+                    case AntennaTypes.External:
+                        _antenna = AntennaType.External;
+                        break;
+                    case AntennaTypes.OnBoard:
+                        _antenna = AntennaType.OnBoard;
+                        break;
+                    default:
+                        _antenna = AntennaType.NotKnown;
+                        break;
                 }
+                _automaticallyStartNetwork = (config.AutomaticallyStartNetwork ==1);
+                _automaticallyReconect = (config.AutomaticallyReconnect == 1);
+                _getNetworkTimeAtStartup = (config.GetTimeAtStartup == 1);
+                _ntpServer = config.NtpServer;
+                _apMacAddress = new byte[config.SoftApMacAddress.Length];
+                Array.Copy(config.SoftApMacAddress, _apMacAddress, config.SoftApMacAddress.Length);
+                _macAddress = new byte[config.BoardMacAddress.Length];
+                Array.Copy(config.BoardMacAddress, _macAddress, config.BoardMacAddress.Length);
+                _defaultAccessPoint = config.DefaultAccessPoint;
+                _deviceName = config.DeviceName;
             }
             return (result);
         }
@@ -363,9 +360,10 @@ namespace Meadow.Devices
         {
             byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
             double voltage = 0;
-            if (SendCommand((byte)Esp32Interfaces.System, (UInt32)SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk) {
+            if (SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
+            {
                 GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
-                voltage = (float)(response.Level) / 1000f;
+                voltage = (float) (response.Level) / 1000f;
             }
             return (voltage);
         }
