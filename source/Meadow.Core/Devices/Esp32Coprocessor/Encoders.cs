@@ -489,6 +489,96 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
+        /// Encode a ConnectDisconnectData object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="connectDisconnectData">ConnectDisconnectData object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ConnectDisconnectData object.</returns>
+        public static byte[] EncodeConnectDisconnectData(MessagePayloads.ConnectDisconnectData connectDisconnectData)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) 33;
+            length += (int) 6;
+            length += 19;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(connectDisconnectData.IpAddress, buffer, offset);
+            offset += 4;
+            EncodeUInt32(connectDisconnectData.SubnetMask, buffer, offset);
+            offset += 4;
+            EncodeUInt32(connectDisconnectData.Gateway, buffer, offset);
+            offset += 4;
+            int amount = connectDisconnectData.Ssid.Length >= 33 ? 33 - 1 : connectDisconnectData.Ssid.Length;
+            for (int index = 0; index < amount; index++)
+            {
+                buffer[index] = (byte) connectDisconnectData.Ssid[index];
+            }
+            buffer[amount] = 0;
+            offset += (int) 33;
+            Array.Copy(connectDisconnectData.Bssid, 0, buffer, offset, 6);
+            offset += (int) 6;
+            buffer[offset] = connectDisconnectData.Channel;
+            offset += 1;
+            buffer[offset] = connectDisconnectData.AuthenticationMode;
+            offset += 1;
+            buffer[offset] = connectDisconnectData.Connect;
+            offset += 1;
+            EncodeUInt32(connectDisconnectData.Reason, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a ConnectDisconnectData object from a byte array.
+        /// </summary>
+        /// <param name="connectDisconnectData">Byte array containing the object to the extracted.</param>
+        /// <returns>ConnectDisconnectData object.</returns>
+        public static MessagePayloads.ConnectDisconnectData ExtractConnectDisconnectData(byte[] buffer, int offset)
+        {
+            ConnectDisconnectData connectDisconnectData = new MessagePayloads.ConnectDisconnectData();
+
+            connectDisconnectData.IpAddress = ExtractUInt32(buffer, offset);
+            offset += 4;
+            connectDisconnectData.SubnetMask = ExtractUInt32(buffer, offset);
+            offset += 4;
+            connectDisconnectData.Gateway = ExtractUInt32(buffer, offset);
+            offset += 4;
+            for (int index = 0; (buffer[index + offset] != 0) && (index < (33 - 1)); index++)
+            {
+                connectDisconnectData.Ssid += Convert.ToChar(buffer[index + offset]);
+            }
+            offset += (int) 33;
+            connectDisconnectData.Bssid = new byte[6];
+            Array.Copy(buffer, offset, connectDisconnectData.Bssid, 0, 6);
+            offset += (int) 6;
+            connectDisconnectData.Channel = buffer[offset];
+            offset += 1;
+            connectDisconnectData.AuthenticationMode = buffer[offset];
+            offset += 1;
+            connectDisconnectData.Connect = buffer[offset];
+            offset += 1;
+            connectDisconnectData.Reason = ExtractUInt32(buffer, offset);
+            return(connectDisconnectData);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the ConnectDisconnectData object.
+        /// </summary>
+        /// <param name="connectDisconnectData">ConnectDisconnectData object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded ConnectDisconnectData object.</returns>
+        public static int EncodedConnectDisconnectDataBufferSize(MessagePayloads.ConnectDisconnectData connectDisconnectData)
+        {
+            return(58);
+        }
+
+        /// <summary>
         /// Encode a AccessPoint object and return a byte array containing the encoded message.
         /// </summary>
         /// <param name="accessPoint">AccessPoint object to be encoded.</param>
