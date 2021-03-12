@@ -10,7 +10,7 @@ using Meadow.Gateways.Exceptions;
 namespace Meadow.Devices
 {
     /// <summary>
-	/// This file holds the WiFi specifi methods, properties etc for the IWiFiAdapter interface.
+	/// This file holds the WiFi specific methods, properties etc for the IWiFiAdapter interface.
 	/// </summary>
     public partial class Esp32Coprocessor : IWiFiAdapter
     {
@@ -291,6 +291,10 @@ namespace Meadow.Devices
 
         // TODO: this really should probably not return the networks, but rather
         // populate the collection that it used to do.
+        //
+        //  MS: Or should it?  The list of available networks is only valid at the point it is collected.
+        //      Having the list of networks in this class suggests that they are availalbe now and in say 2 hours time.
+        //      This might not be the case.
         /// <summary>
         /// Scan for networks.
         /// </summary>
@@ -349,16 +353,35 @@ namespace Meadow.Devices
         {
             var t = await Task.Run<ConnectionResult>(() => {
                 ConnectionResult connectionResult;
-                if (ConnectToAccessPoint(ssid, password, reconnection))
+                StatusCodes result = ConnectToAccessPoint(ssid, password, reconnection);
+                switch (result)
                 {
-                    HasInternetAccess = true;
-                    connectionResult = new ConnectionResult(ConnectionStatus.Success);
+                    case StatusCodes.CompletedOk:
+                        connectionResult = new ConnectionResult(ConnectionStatus.Success);
+                        break;
+                    case StatusCodes.AuthenticationFailed:
+                    case StatusCodes.CannotConnectToAccessPoint:
+                        connectionResult = new ConnectionResult(ConnectionStatus.ConnectionRefused);
+                        break;
+                    case StatusCodes.CannotStartNetworkInterface:
+                        connectionResult = new ConnectionResult(ConnectionStatus.NetworkInterfaceCannotBeStarted);
+                        break;
+                    case StatusCodes.AccessPointNotFound:
+                    case StatusCodes.EspWiFiInvalidSsid:
+                        connectionResult = new ConnectionResult(ConnectionStatus.NetworkNotAvailable);
+                        break;
+                    case StatusCodes.Timeout:
+                        connectionResult = new ConnectionResult(ConnectionStatus.Timeout);
+                        break;
+                    case StatusCodes.ConnectionFailed:
+                        connectionResult = new ConnectionResult(ConnectionStatus.ConnectionRefused);
+                        break;
+                    case StatusCodes.UnmappedErrorCode:
+                    default:
+                        connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
+                        break;
                 }
-                else
-                {
-                    HasInternetAccess = false;
-                    connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
-                }
+                HasInternetAccess = (result == StatusCodes.CompletedOk);
                 return connectionResult;
             });
             return t;
@@ -407,7 +430,7 @@ namespace Meadow.Devices
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
-        private bool ConnectToAccessPoint(string ssid, string password, ReconnectionType reconnection)
+        private StatusCodes ConnectToAccessPoint(string ssid, string password, ReconnectionType reconnection)
         {
             if (string.IsNullOrEmpty(ssid))
             {
@@ -429,27 +452,41 @@ namespace Meadow.Devices
             // TODO: should be async and awaited
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
 
-            if ((result == StatusCodes.CompletedOk))
+            ClearIpDetails();
+            IsConnected = false;
+            ConnectDisconnectData data;
+            switch (result)
             {
-                byte[] addressBytes = new byte[4];
-                Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
-                IpAddress = new IPAddress(addressBytes);
-                Array.Copy(resultBuffer, 4, addressBytes, 0, addressBytes.Length);
-                SubnetMask = new IPAddress(addressBytes);
-                Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
-                Gateway = new IPAddress(addressBytes);
-                IsConnected = true;
-            }
-            else
-            {
-                ClearIpDetails();
-                IsConnected = false;
-                if (result == StatusCodes.CoprocessorNotResponding)
-                {
+                case StatusCodes.CompletedOk:
+                    data = Encoders.ExtractConnectDisconnectData(resultBuffer, 0);
+                    IpAddress = new IPAddress(data.IpAddress);
+                    SubnetMask = new IPAddress(data.SubnetMask);
+                    Gateway = new IPAddress(data.Gateway);
+                    IsConnected = true;
+                    break;
+                case StatusCodes.WiFiDisconnected:
+                    data = Encoders.ExtractConnectDisconnectData(resultBuffer, 0);
+                    switch ((WiFiReasons) data.Reason)
+                    {
+                        case WiFiReasons.AuthenticationFailed:
+                            result = StatusCodes.AuthenticationFailed;
+                            break;
+                        case WiFiReasons.NoAccessPointFound:
+                            result = StatusCodes.AccessPointNotFound;
+                            break;
+                        case WiFiReasons.FourWayHandshakeTimeout:
+                        case WiFiReasons.ConnectionFailed:
+                            result = StatusCodes.ConnectionFailed;
+                            break;
+                        default:
+                            result = StatusCodes.ConnectionFailed;
+                            break;
+                    }
+                    break;
+                case StatusCodes.CoprocessorNotResponding:
                     throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
-                }
             }
-            return (IsConnected);
+            return (result);
         }
 
         /// <summary>
