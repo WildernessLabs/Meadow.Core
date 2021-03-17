@@ -148,10 +148,22 @@ namespace Meadow.Devices
         /// <param name="buffer">Byte array of the buffer to be converted to printable format.</param>
         public static void BufferIf(bool test, byte[] buffer)
         {
+            BufferIf(test, buffer, 0, buffer.Length);
+        }
+
+        /// <summary>
+        /// Output the buffer in hexadecimal if the condition is met.
+        /// </summary>
+        /// <param name="test">Determine if the method should generate any output.</param>
+        /// <param name="buffer">Byte array of the buffer to be converted to printable format.</param>
+        /// <param name="offset">Offset into the buffer to start the data display.</param>
+        /// <param name="length">Amount of data to display.</param>
+        public static void BufferIf(bool test, byte[] buffer, int offset, int length)
+        {
             if (test)
             {
                 WriteLine(HEXADECIMAL_BUFFER_HEADER);
-                for (var index = 0; index < buffer.Length; index += 16)
+                for (var index = offset; index < length; index += 16)
                 {
                     WriteLine(BufferLine(index, buffer));
                 }

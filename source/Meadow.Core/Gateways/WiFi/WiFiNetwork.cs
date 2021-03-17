@@ -73,8 +73,10 @@ namespace Meadow.Gateway.WiFi
         /// Gets the signal bar strength.
         /// </summary>
         /// <value>The signal bar strength.</value>
-        public byte SignalBarStrength {
-            get {
+        public byte SignalBarStrength
+        {
+            get
+            {
                 // TODO: a function of RSSI
                 return 0;
             }

@@ -47,6 +47,19 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public String Password;
     };
 
+    public struct ConnectDisconnectData
+    {
+        public UInt32 IpAddress;
+        public UInt32 SubnetMask;
+        public UInt32 Gateway;
+        public string Ssid;
+        public Byte[] Bssid;
+        public Byte Channel;
+        public Byte AuthenticationMode;
+        public Byte Connect;
+        public UInt32 Reason;
+    };
+
     public struct AccessPoint
     {
         public string Ssid;
@@ -304,6 +317,21 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public byte[] Addr;
         public Int32 Result;
         public Int32 ResponseErrno;
+    };
+
+    public struct EventData
+    {
+        public Byte Interface;
+        public UInt32 Function;
+        public UInt32 StatusCode;
+        public UInt32 Payload;
+        public UInt32 PayloadLength;
+    };
+
+    public struct SetAntennaRequest
+    {
+        public Byte Antenna;
+        public Byte Persist;
     };
 
 }

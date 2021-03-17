@@ -20,8 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileSystem", "Tests\FileSys
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic_FileSystem", "Tests\Basic_FileSystem\Basic_FileSystem.csproj", "{FD33EDFB-E868-45A4-993D-13959D9D718D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Units", "Meadow.Units\Meadow.Units.csproj", "{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Units.Tests", "Meadow.Units.Tests\Meadow.Units.Tests.csproj", "{6037106D-06D4-4990-91BA-7E06DF23B9CD}"
 EndProject
 Global
@@ -67,12 +65,6 @@ Global
 		{FD33EDFB-E868-45A4-993D-13959D9D718D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD33EDFB-E868-45A4-993D-13959D9D718D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD33EDFB-E868-45A4-993D-13959D9D718D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}.Core|Any CPU.ActiveCfg = Debug|Any CPU
-		{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}.Core|Any CPU.Build.0 = Debug|Any CPU
-		{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Core|Any CPU.ActiveCfg = Debug|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Core|Any CPU.Build.0 = Debug|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU

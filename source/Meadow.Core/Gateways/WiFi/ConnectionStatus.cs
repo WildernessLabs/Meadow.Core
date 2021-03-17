@@ -20,12 +20,12 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Connection failed because access to the network has been revoked.
         /// </summary>
-        AccessRevoked = 2,
+        //AccessRevoked = 2,
 
         /// <summary>
         /// Connection failed because an invalid credential was presented.
         /// </summary>
-        InvalidCredential = 3,
+        //InvalidCredential = 3,
 
         /// <summary>
         /// Connection failed because the network is not available.
@@ -40,6 +40,16 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Connection failed because the authentication protocol is not supported.
         /// </summary>
-        UnsupportedAuthenticationProtocol = 6
+        //UnsupportedAuthenticationProtocol = 6
+
+        /// <summary>
+        /// Connection to the access point has been refused.
+        /// </summary>
+        ConnectionRefused = 7,
+
+        /// <summary>
+        /// The network interface cannot be initialised.
+        /// </summary>
+        NetworkInterfaceCannotBeStarted = 8,
     }
 }

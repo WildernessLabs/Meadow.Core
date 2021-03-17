@@ -1,11 +1,15 @@
 using System.Net;
 using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
+using System;
+using System.Threading.Tasks;
 
-namespace Meadow.Gateway
+namespace Meadow.Gateways
 {
     public interface IWiFiAdapter
     {
+        #region Properties
+
         /// <summary>
         /// Indicate if the network adapter is connected to an access point.
         /// </summary>
@@ -52,6 +56,11 @@ namespace Meadow.Gateway
         byte[] ApMacAddress { get; }
 
         /// <summary>
+        /// Current antenna in use.
+        /// </summary>
+        AntennaType Antenna { get; }
+
+        /// <summary>
         /// Automatically start the network interface when the board reboots?
         /// </summary>
         /// <remarks>
@@ -69,6 +78,34 @@ namespace Meadow.Gateway
         /// is configured to automatically reconnect.
         /// </summary>
         string DefaultAcessPoint { get; }
+
+        #endregion Properties
+
+        #region Delegates and Events
+
+        /// <summary>
+        /// User code to process the ConnectionCompleted event.
+        /// </summary>
+        event EventHandler WiFiConnected;
+
+        /// <summary>
+        /// User code to process the Disconnected event.
+        /// </summary>
+        event EventHandler WiFiDisconnected;
+
+        /// <summary>
+        /// User code to process the InterfaceStarted event.
+        /// </summary>
+        event EventHandler WiFiInterfaceStarted;
+
+        /// <summary>
+        /// User code to process the InterfaceStopped event.
+        /// </summary>
+        event EventHandler WiFiInterfaceStopped;
+
+        #endregion Delegates and Events
+
+        #region Methods
 
         /// <summary>
         /// Start the network interface on the WiFi adapter.
@@ -102,7 +139,7 @@ namespace Meadow.Gateway
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
-        ConnectionResult Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
+        Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
 
         /// <summary>
         /// Get the list of access points.
@@ -112,5 +149,19 @@ namespace Meadow.Gateway
         /// </remarks>
         /// <returns>ObservableCollection (possibly empty) of access points.</returns>
         ObservableCollection<WifiNetwork> Scan();
+
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        void SetAntenna(AntennaType antenna, bool persist = true);
+
+        #endregion Methods
     }
 }

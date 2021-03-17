@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using static Meadow.Core.Interop;
+using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Devices
 {
@@ -260,7 +261,19 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Console.WriteLine($"ioctl {request} failed {err}");
-                return (int)err;
+                return (int) err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdEsp32EventData eventData)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref eventData);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request} failed {err}");
+                return (int) err;
             }
             return result;
         }
