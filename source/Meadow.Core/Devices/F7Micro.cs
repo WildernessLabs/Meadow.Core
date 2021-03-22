@@ -19,7 +19,7 @@ namespace Meadow.Devices
         public IWiFiAdapter WiFiAdapter { get; protected set; }
         public ICoprocessor Coprocessor { get; protected set; }
 
-        public event EventHandler WiFiAdapterInitilaized = delegate {};
+        public event EventHandler WiFiAdapterInitialized = delegate {};
 
         /// <summary>
         /// The default resolution for analog inputs
