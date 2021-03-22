@@ -261,7 +261,7 @@ namespace Meadow.Devices
             {
                 mode32 = STM32.ResistorMode.Float;
             }
-            else if (resistorMode == ResistorMode.PullUp)
+            else if (resistorMode == ResistorMode.InternalPullUp)
             {
                 mode32 = STM32.ResistorMode.PullUp;
             }
@@ -456,10 +456,10 @@ namespace Meadow.Devices
             int setting = 0;
             switch (mode)
             {
-                case ResistorMode.PullDown:
+                case ResistorMode.InternalPullDown:
                     setting = (int)STM32.ResistorMode.PullDown;
                     break;
-                case ResistorMode.PullUp:
+                case ResistorMode.InternalPullUp:
                     setting = (int)STM32.ResistorMode.PullUp;
                     break;
                 default:

@@ -1,5 +1,4 @@
-﻿using Meadow.Gateway.WiFi;
-using Meadow.Gateways.Bluetooth;
+﻿using Meadow.Gateways;
 using Meadow.Hardware;
 using System;
 using System.Linq;
@@ -16,17 +15,16 @@ namespace Meadow.Devices
     {
         private SynchronizationContext _context;
         private Esp32Coprocessor esp32;
-        private WiFiAdapter _wifiAdapter;
-        private BluetoothAdapter _bleAdapter;
+
+        public IWiFiAdapter WiFiAdapter { get; protected set; }
+        public ICoprocessor Coprocessor { get; protected set; }
 
         public event EventHandler WiFiAdapterInitilaized = delegate {};
-
-        private bool coProcInitialized;
-        private bool initializingCoProc;
 
         /// <summary>
         /// The default resolution for analog inputs
         /// </summary>
+        // TODO: should this be public?
         public const int DefaultA2DResolution = 12;
 
         public DeviceCapabilities Capabilities { get; protected set; }
@@ -61,32 +59,10 @@ namespace Meadow.Devices
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.
             //this.InitEsp32CoProc();
-        }
 
-        public WiFiAdapter WiFiAdapter
-        {
-            get
-            {
-                if(_wifiAdapter == null)
-                {
-                    throw new Exception("ESP32 Is not initialized.  Call InitWiFiAdapter()");
-                }
-                return _wifiAdapter;
-            }
-            protected set => _wifiAdapter = value;
-        }
-
-        public BluetoothAdapter BluetoothAdapter
-        {
-            get
-            {
-                if (_bleAdapter == null)
-                {
-                    throw new Exception("ESP32 Is not initialized.  Call InitBluetoothAdapter()");
-                }
-                return _bleAdapter;
-            }
-            protected set => _bleAdapter = value;
+            this.esp32 = new Esp32Coprocessor();
+            WiFiAdapter = esp32;
+            Coprocessor = esp32;
         }
 
         public IPin GetPin(string pinName)
@@ -94,48 +70,40 @@ namespace Meadow.Devices
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
-        public Task<bool> InitWiFiAdapter()
+        public Task<bool> InitCoProcessor()
         {
-            return InitEsp32CoProc();
-        }
-
-        public Task<bool> InitBluetoothAdapter()
-        {
-            return InitEsp32CoProc();
-        }
-
-        protected Task<bool> InitEsp32CoProc()
-        {
-            if (!initializingCoProc && !coProcInitialized) {
-                this.initializingCoProc = true;
-
-                Console.WriteLine("Initializing Esp32 coproc.");
+            if (!IsCoprocessorInitialized()) {
                 return Task.Run<bool>(async () => {
                     try {
-                        //System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                        //stopwatch.Start()
-                        //Console.WriteLine("creating Esp32 Coproc.");
-                        this.esp32 = new Esp32Coprocessor();
-                        this.WiFiAdapter = new WiFiAdapter(this.esp32);
-                        this.BluetoothAdapter = new BluetoothAdapter(this.esp32);
-                        Console.WriteLine("Esp32 coproc initialization complete.");
+                        //TODO: looks like we're also instantiating this in the ctor
+                        // need to cleanup.
+                        //Console.WriteLine($"InitWiFiAdapter()");
+                        if (this.esp32 == null) {
+                            this.esp32 = new Esp32Coprocessor();
+                        }
+                        WiFiAdapter = esp32;
+                        Coprocessor = esp32;
                     } catch (Exception e) {
-                        Console.WriteLine($"Unable to create Esp32 coproc: {e.Message}");
+                        Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
                     }
-
-                    // this needs to be out of the exception block, otherwise user
-                    // code exceptions get caught
-                    //this.WiFiAdapterInitilaized(this, new EventArgs());
-
-                    this.initializingCoProc = false;
-                    this.coProcInitialized = true;
                     return true;
                 });
             } else {
-                return Task.FromResult(false);
+                return Task.FromResult<bool>(true);
             }
         }
+
+        public Task<bool> InitWiFiAdapter()
+        {
+            return InitCoProcessor();
+        }
+
+        // when bluetooth is ready:
+        //public Task<bool> InitBluetoothAdapter()
+        //{
+        //    return InitCoProcessor();
+        //}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
@@ -454,11 +422,13 @@ namespace Meadow.Devices
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
 
+        // TODO: this should move to the MeadowOS class.
         public void SetSynchronizationContext(SynchronizationContext context)
         {
             _context = context;
         }
 
+        // TODO: this should move to the MeadowOS class.
         public void BeginInvokeOnMainThread(Action action)
         {
             if (_context == null)
@@ -468,6 +438,69 @@ namespace Meadow.Devices
             else
             {
                 _context.Send(delegate { action(); }, null);
+            }
+        }
+
+        /// <summary>
+        /// Check if the coprocessor is available / ready and throw an exception if it
+        /// has not been setup.
+        /// </summary>
+        protected bool IsCoprocessorInitialized()
+        {
+            if (esp32 == null) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        //==== antenna stuff
+
+        /// <summary>
+        /// Get the currently setlected WiFi antenna.
+        /// </summary>
+        public AntennaType CurrentAntenna
+        {
+            get
+            {
+                if(IsCoprocessorInitialized()) {
+                    return WiFiAdapter.Antenna;
+                } else {
+                    throw new Exception("Coprocessor not initialized.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        public void SetAntenna(AntennaType antenna, bool persist = true)
+        {
+            if (IsCoprocessorInitialized()) {
+                WiFiAdapter.SetAntenna(antenna, persist);
+            } else {
+                throw new Exception("Coprocessor not initialized.");
+            }
+        }
+
+
+        //TODO: need the Read()/StartUpdating()/StopUpdating() pattern here.
+        /// <summary>
+        /// Gets the current battery charge level in volts (`V`).
+        /// </summary>
+        public double GetBatteryLevel()
+        {
+            if (IsCoprocessorInitialized()) {
+                return (Coprocessor.GetBatteryLevel());
+            } else {
+                throw new Exception("Coprocessor not initialized.");
             }
         }
     }

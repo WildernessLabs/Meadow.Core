@@ -28,10 +28,10 @@ namespace Meadow.Devices
 
             switch (resistorMode)
             {
-                case Meadow.Hardware.ResistorMode.PullDown:
+                case Meadow.Hardware.ResistorMode.InternalPullDown:
                     stm32Resistor = STM32.ResistorMode.PullDown;
                     break;
-                case Meadow.Hardware.ResistorMode.PullUp:
+                case Meadow.Hardware.ResistorMode.InternalPullUp:
                     stm32Resistor = STM32.ResistorMode.PullUp;
                     break;
                 default:

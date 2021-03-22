@@ -1,67 +1,67 @@
-using Meadow.Devices;
 using System;
 using System.Runtime.InteropServices;
 using static Meadow.Core.Interop;
 using Meadow.Devices.Esp32.MessagePayloads;
-using System.Net;
-using Meadow.Gateway.WiFi;
-using Meadow.Gateway; //TODO: all the stuff in that namespace should be `Gateways`
+using System.Text;
+using Meadow.Core;
+using System.Threading;
+using System.Threading.Tasks;
 using Meadow.Gateways;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Meadow.Gateways.Exceptions;
 
 namespace Meadow.Devices
 {
     /// <summary>
-    ///
+    /// The Esp32Coprocessor class provide access to the features and functionality of the ESP32 coprocessor.
     /// </summary>
-    public partial class Esp32Coprocessor : IWiFiAdapter, IBluetoothDevice
+    /// <remarks>
+    /// This file contains the generic code (for example communication with the ESP32) used to support the higher
+    /// level functionality (such as WiFi).  Interface specific functionality is provided in separate files.
+    /// </remarks>
+    public partial class Esp32Coprocessor : ICoprocessor
     {
+        #region Constants
+
+        /// <summary>
+        /// Maximum length of the SPI buffer that can be used for communication with the ESP32.
+        /// </summary>
+        public const uint MAXIMUM_SPI_BUFFER_LENGTH = 4000;
+
+        #endregion Constants
+
         #region Enums
 
         /// <summary>
         /// Possible debug levels.
         /// </summary>
         [Flags]
-        private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, Full = 0xffffffff }
+        private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, EventHandling = 0x04, Full = 0xffffffff }
 
         #endregion Enums
 
         #region Private fields / variables
 
         /// <summary>
-        /// Current debug for this class.
+        /// Current debug level for this class.
         /// </summary>
         /// <remarks>
         /// The flags set in this variable determine the type and amount of output generated when
         /// debugging this class.
         /// </remarks>
-        private static DebugOptions DebugLevel;
+        private static DebugOptions _debugLevel;
+
+        /// <summary>
+        /// Event handler service thread.
+        /// </summary>
+        private Thread _eventHandlerThread = null;
 
         #endregion Private fields / variables
 
         #region Properties
 
         /// <summary>
-        /// IP Address of the network adapter.
+        /// Current status of the coprocessor.
         /// </summary>
-        public IPAddress IpAddress { get; private set; }
-
-        /// <summary>
-        /// Subnet mask of the adapter.
-        /// </summary>
-        public IPAddress SubnetMask { get; private set; }
-
-        /// <summary>
-        /// Default gateway for the adapter.
-        /// </summary>
-        public IPAddress Gateway { get; private set; }
-
-        /// <summary>
-        /// Record if the WiFi ESP32 is connected to an access point.
-        /// </summary>
-        public bool IsConnected { get; private set; }
+        public ICoprocessor.CoprocessorState Status { get; private set; }
 
         #endregion Properties
 
@@ -72,41 +72,102 @@ namespace Meadow.Devices
         /// </summary>
         internal Esp32Coprocessor()
         {
-            DebugLevel = DebugOptions.None;
+            _debugLevel = DebugOptions.None;
+
             IsConnected = false;
+            ClearIpDetails();
+            HasInternetAccess = false;
+            Status = ICoprocessor.CoprocessorState.NotReady;
+            _antenna = AntennaType.NotKnown;
+            if (GetConfiguration() == StatusCodes.CompletedOk)
+            {
+                Status = ICoprocessor.CoprocessorState.Ready;
+            }
+
+            if (_eventHandlerThread == null)
+            {
+                _eventHandlerThread = new Thread(EventHandlerServiceThread)
+                {
+                    IsBackground = true
+                };
+                _eventHandlerThread.Start();
+            }
         }
 
         #endregion Constructor(s)
 
         #region Methods
 
+        //protected void SetProperty(ConfigurationItems item, UInt32 value)
+        //{
+        //    throw new NotImplementedException("SetProperty is not implemented.");
+        //}
+
+        //protected void SetProperty(ConfigurationItems item, byte value)
+        //{
+        //    UInt32 v = value;
+        //    SetProperty(item, v);
+        //}
+
+        //protected void SetProperty(ConfigurationItems item, bool value)
+        //{
+        //    UInt32 v = 0;
+        //    if (value)
+        //    {
+        //        v = 1;
+        //    }
+        //    SetProperty(item, v);
+        //}
+
+        //protected void SetProperty(ConfigurationItems item, string value)
+        //{
+        //}
+
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
         /// </summary>
         /// <param name="where">Interface the command is destined for.</param>
-        /// <param name="command">Command to be sent.</param>
+        /// <param name="function">Command to be sent.</param>
         /// <param name="block">Is this a blocking command?</param>
-        /// <param name="resultBuffer">4000 byte array to hold any data returned by the command.</param>
+        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        private StatusCodes SendParameterlessCommand(byte where, UInt32 function, bool block, byte[] resultBuffer)
+        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[] encodedResult)
         {
-            byte[] encodedPayload = null;
+            return(SendCommand(where, function, block, null, encodedResult));
+        }
+
+        /// <summary>
+        /// Send a command and its payload to the ESP32.
+        /// </summary>
+        /// <param name="where">Interface the command is destined for.</param>
+        /// <param name="function">Command to be sent.</param>
+        /// <param name="block">Is this a blocking command?</param>
+        /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
+        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
+        /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
+        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? payload, byte[] encodedResult)
+        {
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
             StatusCodes result = StatusCodes.CompletedOk;
             try
             {
-                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
-                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
+                payloadGcHandle = GCHandle.Alloc(payload, GCHandleType.Pinned);
+                resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
+                UInt32 payloadLength = 0;
+                if (!(payload is null))
+                {
+                    payloadLength = (UInt32) payload.Length;
+                }
                 var command = new Nuttx.UpdEsp32Command()
                 {
                     Interface = where,
                     Function = function,
                     StatusCode = (UInt32) StatusCodes.CompletedOk,
                     Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = 0,
+                    PayloadLength = payloadLength,
                     Result = resultGcHandle.AddrOfPinnedObject(),
-                    ResultLength = (UInt32) resultBuffer.Length,
+                    ResultLength = (UInt32) encodedResult.Length,
                     Block = (byte) (block ? 1 : 0)
                 };
 
@@ -131,7 +192,157 @@ namespace Meadow.Devices
                     resultGcHandle.Free();
                 }
             }
-            return(result);
+            return (result);
+        }
+
+        /// <summary>
+        /// Get complex event data from NuttX
+        /// </summary>
+        /// <param name="eventData">Basic event data already retrieved.</param>
+        /// <param name="payload">Data buffer that can receive the event data.</param>
+        /// <returns>StatusCodes enum indicating if the operation was successful or if an error occurred.</returns>
+        private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
+        {
+            Thread.Sleep(1000);
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data held at 0x{eventData.StatusCode:x08}");
+            var resultGcHandle = default(GCHandle);
+            StatusCodes result = StatusCodes.CompletedOk;
+            try
+            {
+                byte[] encodedResult = new byte[4000];
+                Array.Clear(encodedResult, 0, encodedResult.Length);
+                resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
+
+                var request = new Nuttx.UpdEsp32EventData()
+                {
+                    StatusCode = 0,
+                    MessageAddress = eventData.StatusCode,
+                    Payload = resultGcHandle.AddrOfPinnedObject(),
+                    PayloadLength = (UInt32) encodedResult.Length
+                };
+
+                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32GetEventData, ref request);
+                if (updResult == 0)
+                {
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Payload: ");
+                    Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
+                    eventData.StatusCode = request.StatusCode;
+                    payload = new byte[request.PayloadLength];
+                    Array.Copy(encodedResult, payload, request.PayloadLength);
+                    result = StatusCodes.CompletedOk;
+                }
+                else
+                {
+                    payload = null;
+                    result = StatusCodes.Failure;
+                }
+            }
+            finally
+            {
+                if (resultGcHandle.IsAllocated)
+                {
+                    resultGcHandle.Free();
+                }
+            }
+            return (result);
+        }
+
+        /// <summary>
+        /// Interrupt service handler for the ESP32 coprocessor.
+        /// </summary>`
+        /// <param name="o"></param>
+        private void EventHandlerServiceThread(object o)
+        {
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Starting Esp32Coprocessor event handler thread.");
+            IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
+            byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
+            while (true)
+            {
+                int priority = 0;
+                try
+                {
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
+                    int result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event received.");
+                    if (result >= 0)
+                    {
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Processing event.");
+                        Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), rxBuffer);
+                        EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
+                        byte[]? payload = null;
+                        if (eventData.PayloadLength == 0)
+                        {
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
+                        }
+                        else
+                        {
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, location of message 0x{eventData.StatusCode:x08}");
+                            GetEventData(eventData, out payload);
+                        }
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");
+                        Task.Run(() =>
+                        {
+                            switch ((Esp32Interfaces) eventData.Interface)
+                            {
+                                case Esp32Interfaces.WiFi:
+                                    InvokeEvent((WiFiFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                                    break;
+                                case Esp32Interfaces.BlueTooth:
+                                    InvokeEvent((BluetoothFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                                    break;
+                                default:
+                                    throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
+                            }
+                        });
+                    }
+                    else
+                    {
+                        throw new Exception($"ESP32 Coprocessor event handler error code {result}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the configuration data structure from the ESP32.
+        /// </summary>
+        /// <returns>Result of getting the configuration from the ESP32.</returns>
+        protected StatusCodes GetConfiguration()
+        {
+            StatusCodes result = StatusCodes.CompletedOk;
+            byte[] encodedResult = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            result = SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetConfiguration, true, encodedResult);
+            if (result == StatusCodes.CompletedOk)
+            {
+                SystemConfiguration config = Encoders.ExtractSystemConfiguration(encodedResult, 0);
+                switch ((AntennaTypes) config.Antenna)
+                {
+                    case AntennaTypes.External:
+                        _antenna = AntennaType.External;
+                        break;
+                    case AntennaTypes.OnBoard:
+                        _antenna = AntennaType.OnBoard;
+                        break;
+                    default:
+                        _antenna = AntennaType.NotKnown;
+                        break;
+                }
+                _automaticallyStartNetwork = (config.AutomaticallyStartNetwork ==1);
+                _automaticallyReconect = (config.AutomaticallyReconnect == 1);
+                _getNetworkTimeAtStartup = (config.GetTimeAtStartup == 1);
+                _ntpServer = config.NtpServer;
+                _apMacAddress = new byte[config.SoftApMacAddress.Length];
+                Array.Copy(config.SoftApMacAddress, _apMacAddress, config.SoftApMacAddress.Length);
+                _macAddress = new byte[config.BoardMacAddress.Length];
+                Array.Copy(config.BoardMacAddress, _macAddress, config.BoardMacAddress.Length);
+                _defaultAccessPoint = config.DefaultAccessPoint;
+                _deviceName = config.DeviceName;
+            }
+            return (result);
         }
 
         /// <summary>
@@ -139,184 +350,22 @@ namespace Meadow.Devices
         /// </summary>
         public void Reset()
         {
-            SendParameterlessCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
+            SendCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
         }
 
         /// <summary>
-        /// Start the network interface on the WiFi adapter.
+        /// Battery charge level in volts.
         /// </summary>
-        /// <remarks>
-        /// This method starts the network interface hardware.  The result of this action depends upon the
-        /// settings stored in the WiFi adapter memory.
-        ///
-        /// No Stored Configuration
-        /// If no settings are stored in the adapter then the hardware will simply start.  IP addresses
-        /// will not be obtained in this mode.
-        ///
-        /// In this case, the return result indicates if the hardware started successfully.
-        ///
-        /// Stored Configuration Present NOTE NOT IMPLEMENTED IN THIS RELEASE
-        /// If a default access point (and optional password) are stored in the adapter then the network
-        /// interface and the system is set to connect at startup then the system will then attempt to
-        /// connect to the specified access point.
-        ///
-        /// In this case, the return result indicates if the interface was started successfully and a
-        /// connection to the access point was made.
-        /// </remarks>
-        /// <returns>true if teh adapter was started successfully, false if there was an error.</returns>
-        public bool StartNetwork()
+        public double GetBatteryLevel()
         {
-            StatusCodes result = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartNetwork, true, null);
-            return (result == StatusCodes.CompletedOk);
-        }
-
-        /// <summary>
-        /// Request the ESP32 to connect to the specified network.
-        /// </summary>
-        /// <param name="ssid">Name of the network to connect to.</param>
-        /// <param name="password">Password for the network.</param>
-        /// <param name="reconnection">Should the adapter reconnect automatically?</param>
-        /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
-        /// <returns>true if the connection was successfully made.</returns>
-        [Obsolete("StartNetwork(ssid, password, reconnection) is deprecated, please use ConnectToAccessPoint instead.")]
-        public bool StartNetwork(string ssid, string password, ReconnectionType reconnection)
-        {
-            return (ConnectToAccessPoint(ssid, password, reconnection));
-        }
-
-        /// <summary>
-        /// Request the ESP32 to connect to the specified network.
-        /// </summary>
-        /// <param name="ssid">Name of the network to connect to.</param>
-        /// <param name="password">Password for the network.</param>
-        /// <param name="reconnection">Should the adapter reconnect automatically?</param>
-        /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
-        /// <returns>true if the connection was successfully made.</returns>
-        public bool ConnectToAccessPoint(string ssid, string password, ReconnectionType reconnection)
-        {
-            if (string.IsNullOrEmpty(ssid))
+            byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            double voltage = 0;
+            if (SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
             {
-                throw new ArgumentNullException("Invalid SSID.");
+                GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
+                voltage = (float) (response.Level) / 1000f;
             }
-            if (password == null)
-            {
-                throw new ArgumentNullException($"{nameof(password)} cannot be null.");
-            }
-
-            var payloadGcHandle = default(GCHandle);
-            var resultGcHandle = default(GCHandle);
-
-            try
-            {
-                WiFiCredentials request = new WiFiCredentials()
-                {
-                    NetworkName = ssid,
-                    Password = password
-                };
-                byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
-                byte[] resultBuffer = new byte[4000];
-
-                payloadGcHandle = GCHandle.Alloc(encodedPayload, GCHandleType.Pinned);
-                resultGcHandle = GCHandle.Alloc(resultBuffer, GCHandleType.Pinned);
-
-                var command = new Nuttx.UpdEsp32Command()
-                {
-                    Interface = (byte) Esp32Interfaces.WiFi,
-                    Function = (UInt32) WiFiFunction.ConnectToAccessPoint,
-                    StatusCode = (UInt32) StatusCodes.CompletedOk,
-                    Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = (UInt32) encodedPayload.Length,
-                    Result = resultGcHandle.AddrOfPinnedObject(),
-                    ResultLength = (UInt32) resultBuffer.Length,
-                    Block = 1
-                };
-
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
-
-                if ((result == 0) && (command.StatusCode == (UInt32) StatusCodes.CompletedOk))
-                {
-                    byte[] addressBytes = new byte[4];
-                    Array.Copy(resultBuffer, addressBytes, addressBytes.Length);
-                    IpAddress = new IPAddress(addressBytes);
-                    Array.Copy(resultBuffer, 4, addressBytes, 0, addressBytes.Length);
-                    SubnetMask = new IPAddress(addressBytes);
-                    Array.Copy(resultBuffer, 8, addressBytes, 0, addressBytes.Length);
-                    Gateway = new IPAddress(addressBytes);
-                    IsConnected = true;
-                }
-                else
-                {
-                    byte[] addressBytes = new byte[4];
-                    Array.Clear(addressBytes, 0, addressBytes.Length);
-                    IpAddress = new IPAddress(addressBytes);
-                    SubnetMask = new IPAddress(addressBytes);
-                    Gateway = new IPAddress(addressBytes);
-                    IsConnected = false;
-                    if (command.StatusCode == (UInt32) StatusCodes.CoprocessorNotResponding)
-                    {
-                        throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
-                    }
-                }
-            }
-            finally
-            {
-                if (payloadGcHandle.IsAllocated)
-                {
-                    payloadGcHandle.Free();
-                }
-                if (resultGcHandle.IsAllocated)
-                {
-                    resultGcHandle.Free();
-                }
-            }
-            return (IsConnected);
-        }
-
-        /// <summary>
-        /// Get the list of access points.
-        /// </summary>
-        /// <remarks>
-        /// The network must be started before this method can be called.
-        /// </remarks>
-        /// <returns>ObservableCollection (possibly empty) of access points.</returns>
-        public ObservableCollection<WifiNetwork> GetAccessPoints()
-        {
-            var networks = new ObservableCollection<WifiNetwork>();
-            byte[] resultBuffer = new byte[4000];
-            StatusCodes result = SendParameterlessCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
-            if (result == StatusCodes.CompletedOk)
-            {
-                var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
-                var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
-
-                if (accessPointList.NumberOfAccessPoints > 0)
-                {
-                    int accessPointOffset = 0;
-                    for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
-                    {
-                        var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
-                        accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
-                        string bssid = "";
-                        for (int index = 0; index < accessPoint.Bssid.Length; index++)
-                        {
-                            bssid += accessPoint.Bssid[index].ToString("x2");
-                            if (index != accessPoint.Bssid.Length - 1)
-                            {
-                                bssid += ":";
-                            }
-                        }
-                        var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown,
-                            new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
-                            accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
-                        networks.Add(network);
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Error getting access points: {result}");
-            }
-            return(networks);
+            return (voltage);
         }
 
         #endregion Methods

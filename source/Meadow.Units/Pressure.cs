@@ -8,10 +8,8 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents temperature; the physical quantity that expresses hot and cold.
-    /// It is the manifestation of thermal energy, present in all matter, which
-    /// is the source of the occurrence of heat, a flow of energy, when a body
-    /// is in contact with another that is colder or hotter.
+    /// Represents pressure; the force applied perpendicular to the surface of
+    /// an object per unit area over which that force is distributed.
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]

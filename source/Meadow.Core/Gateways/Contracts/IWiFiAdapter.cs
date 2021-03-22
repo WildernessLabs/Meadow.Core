@@ -1,12 +1,112 @@
 using System.Net;
 using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
+using System;
+using System.Threading.Tasks;
 
-//TODO: this should be Meadow.Gateways
-namespace Meadow.Gateway
+namespace Meadow.Gateways
 {
     public interface IWiFiAdapter
     {
+        #region Properties
+
+        /// <summary>
+        /// Indicate if the network adapter is connected to an access point.
+        /// </summary>
+        bool IsConnected { get; }
+
+        /// <summary>
+        /// IP Address of the network adapter.
+        /// </summary>
+        IPAddress IpAddress { get; }
+
+        /// <summary>
+        /// Subnet mask of the adapter.
+        /// </summary>
+        IPAddress SubnetMask { get; }
+
+        /// <summary>
+        /// Default gateway for the adapter.
+        /// </summary>
+        IPAddress Gateway { get; }
+
+        /// <summary>
+        /// Get the network time when the WiFi adapter starts?
+        /// </summary>
+        bool GetNetworkTimeAtStartup { get; }
+
+        /// <summary>
+        /// Address of the NTP server.
+        /// </summary>
+        string NtpServer { get; }
+
+        /// <summary>
+        /// Name of the board on the network.
+        /// </summary>
+        string DeviceName { get; }
+
+        /// <summary>
+        /// MAC address of the board when acting as a client.
+        /// </summary>
+        byte[] MacAddress { get; }
+
+        /// <summary>
+        /// MAC address of the board when acting as a sft access point.
+        /// </summary>
+        byte[] ApMacAddress { get; }
+
+        /// <summary>
+        /// Current antenna in use.
+        /// </summary>
+        AntennaType Antenna { get; }
+
+        /// <summary>
+        /// Automatically start the network interface when the board reboots?
+        /// </summary>
+        /// <remarks>
+        /// This will automatically connect to any preconfigured access points if they are available.
+        /// </remarks>
+        bool AutomaticallyStartNetwork { get; }
+
+        /// <summary>
+        /// Automatically try to reconnect to an access point if there is a problem / disconnection?
+        /// </summary>
+        bool AutomaticallyReconnect { get; }
+
+        /// <summary>
+        /// Default access point to try to connect to if the network interface is started and the board
+        /// is configured to automatically reconnect.
+        /// </summary>
+        string DefaultAcessPoint { get; }
+
+        #endregion Properties
+
+        #region Delegates and Events
+
+        /// <summary>
+        /// User code to process the ConnectionCompleted event.
+        /// </summary>
+        event EventHandler WiFiConnected;
+
+        /// <summary>
+        /// User code to process the Disconnected event.
+        /// </summary>
+        event EventHandler WiFiDisconnected;
+
+        /// <summary>
+        /// User code to process the InterfaceStarted event.
+        /// </summary>
+        event EventHandler WiFiInterfaceStarted;
+
+        /// <summary>
+        /// User code to process the InterfaceStopped event.
+        /// </summary>
+        event EventHandler WiFiInterfaceStopped;
+
+        #endregion Delegates and Events
+
+        #region Methods
+
         /// <summary>
         /// Start the network interface on the WiFi adapter.
         /// </summary>
@@ -28,7 +128,7 @@ namespace Meadow.Gateway
         /// In this case, the return result indicates if the interface was started successfully and a
         /// connection to the access point was made.
         /// </remarks>
-        /// <returns>true if teh adapter was started successfully, false if there was an error.</returns>
+        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
         bool StartNetwork();
 
         /// <summary>
@@ -39,14 +139,29 @@ namespace Meadow.Gateway
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
-        bool ConnectToAccessPoint(string ssid, string password, ReconnectionType reconnection);
+        Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
 
         /// <summary>
-        /// Indicate if the network adapter is connected to an access point.
+        /// Get the list of access points.
         /// </summary>
-        bool IsConnected { get; }
+        /// <remarks>
+        /// The network must be started before this method can be called.
+        /// </remarks>
+        /// <returns>ObservableCollection (possibly empty) of access points.</returns>
+        ObservableCollection<WifiNetwork> Scan();
 
-        ObservableCollection<WifiNetwork> GetAccessPoints();
+        /// <summary>
+        /// Change the current WiFi antenna.
+        /// </summary>
+        /// <remarks>
+        /// Allows the application to change the current antenna used by the WiFi adapter.  This
+        /// can be made to persist between reboots / power cycles by setting the persist option
+        /// to true.
+        /// </remarks>
+        /// <param name="antenna">New antenna to use.</param>
+        /// <param name="persist">Make the antenna change persistent.</param>
+        void SetAntenna(AntennaType antenna, bool persist = true);
 
+        #endregion Methods
     }
 }

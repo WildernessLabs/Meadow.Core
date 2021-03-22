@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\packages\NUnit.3.12.0\build\NUnit.props')" />
   <PropertyGroup>
@@ -34,14 +34,17 @@
   <ItemGroup>
     <Compile Include="TemperatureTests.cs" />
     <Compile Include="PressureTests.cs" />
+    <Compile Include="VelocityTests.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="AzimuthTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Meadow.Units\Meadow.Units.csproj">
-      <Project>{F880D3CC-9A14-4044-99E2-18DE35CE8CFF}</Project>
-      <Name>Meadow.Units</Name>
+    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj">
+      <Project>{b13c7bdd-77f5-45f8-bdb9-6cd368c67410}</Project>
+      <Name>Meadow.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

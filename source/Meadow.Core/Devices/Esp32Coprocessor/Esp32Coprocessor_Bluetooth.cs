@@ -13,26 +13,25 @@ namespace Meadow.Devices
             return "Meadow BLE";
         }
 
-        public bool StartBluetoothStack(string deviceName)
+        public bool StartBluetoothStack(string configuration)
         {
-            if (string.IsNullOrWhiteSpace(deviceName))
+            if (string.IsNullOrWhiteSpace(configuration))
             {
                 throw new ArgumentException("Invalid deviceName");
             }
 
-            // TODO: filter bad characters or too-long names
+            // TODO: sanity checking of the config
 
             var payloadGcHandle = default(GCHandle);
 
             try
             {
-                var req = new BTServicesDescription
+                var req = new BTStackConfig
                 {
-                    DeviceName = deviceName,
-                    PrimaryService = "MeadowSvc" // TODO
+                    Config = configuration
                 };
 
-                var requestBytes = Encoders.EncodeBTServicesDescription(req);
+                var requestBytes = Encoders.EncodeBTStackConfig(req);
 
                 // TODO: do we expect a result?  If so create a buffer and pin it.
 
