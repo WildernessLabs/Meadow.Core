@@ -70,7 +70,7 @@ namespace Meadow.Devices
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
-        public Task<bool> InitCoProcessor()
+        public Task<bool> InitCoprocessor()
         {
             if (!IsCoprocessorInitialized()) {
                 return Task.Run<bool>(async () => {
@@ -96,13 +96,13 @@ namespace Meadow.Devices
 
         public Task<bool> InitWiFiAdapter()
         {
-            return InitCoProcessor();
+            return InitCoprocessor();
         }
 
         // when bluetooth is ready:
         //public Task<bool> InitBluetoothAdapter()
         //{
-        //    return InitCoProcessor();
+        //    return InitCoprocessor();
         //}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
