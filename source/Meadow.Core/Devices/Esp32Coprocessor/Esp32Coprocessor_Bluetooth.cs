@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Meadow.Devices.Esp32.MessagePayloads;
+using Meadow.Gateways;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
-    public partial class Esp32Coprocessor
+    public partial class Esp32Coprocessor : IBluetoothAdapter
     {
         internal string GetDefaultName()
         {

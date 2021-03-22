@@ -12,7 +12,7 @@ namespace Meadow.Gateways.Bluetooth
         public ObservableDictionary<Guid, IDescriptor> Descriptors { get; } = new ObservableDictionary<Guid, IDescriptor>();
 
         /// <summary>
-        /// Event gets raised, when the davice notifies a value change on this characteristic.
+        /// Event gets raised, when the device notifies a value change on this characteristic.
         /// </summary>
         public event EventHandler<CharacteristicUpdatedEventArgs> ValueUpdated = delegate { };
 
@@ -28,7 +28,7 @@ namespace Meadow.Gateways.Bluetooth
         //public string Uuid { get; set; }
 
         /// <summary>
-        /// Name of the charakteristic.
+        /// Name of the characteristic.
         /// </summary>
         public string? Name { get; set; }
 
