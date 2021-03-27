@@ -8,7 +8,8 @@ namespace Meadow.Devices
     {
         public partial class F7MicroPinDefinitions : IPinDefinitions
         {
-
+            // TODO: are these even used? if not, let's delete.
+            // also; COM4 is missing, which makes me think we're not even using these.
             public class F7NamedPinGroups : INamedPinGroups
             {
                 protected F7MicroPinDefinitions _parent;
