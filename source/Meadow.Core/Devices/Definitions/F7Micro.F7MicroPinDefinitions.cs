@@ -115,7 +115,7 @@ namespace Meadow.Devices
                 "D07", "PB7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7", interruptGroup: 7),
-                    new PwmChannelInfo("TIM2_CH2", 4, 2),
+                    new PwmChannelInfo("TIM4_CH2", 4, 2),
                     new I2cChannelInfo("I2C1_SDA", I2cChannelFunctionType.Data) // or I2C4_SDA
                 }
             );
