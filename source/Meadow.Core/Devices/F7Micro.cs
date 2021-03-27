@@ -16,11 +16,10 @@ namespace Meadow.Devices
         private SynchronizationContext _context;
         private Esp32Coprocessor esp32;
 
-        public IBluetoothAdapter BluetoothAdapter { get; protected set; }
         public IWiFiAdapter WiFiAdapter { get; protected set; }
         public ICoprocessor Coprocessor { get; protected set; }
 
-        public event EventHandler WiFiAdapterInitilaized = delegate {};
+        public event EventHandler WiFiAdapterInitialized = delegate {};
 
         /// <summary>
         /// The default resolution for analog inputs
@@ -71,61 +70,40 @@ namespace Meadow.Devices
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
-        private object _espSyncRoot = new object();
-
-        public Task<bool> InitCoProcessor()
+        public Task<bool> InitCoprocessor()
         {
-            Console.WriteLine("+InitCoProcessor");
-            lock (_espSyncRoot)
-            {
-                if (!IsCoprocessorInitialized())
-                {
-                    Console.WriteLine(" InitCoProcessor A");
-                    return Task.Run<bool>(() =>
-                    {
-                        try
-                        {
-                            Console.WriteLine(" InitCoProcessor B");
-
-                            //TODO: looks like we're also instantiating this in the ctor
-                            // need to cleanup.
-                            //Console.WriteLine($"InitWiFiAdapter()");
-                            if (this.esp32 == null)
-                            {
-                                this.esp32 = new Esp32Coprocessor();
-                            }
-                            BluetoothAdapter = esp32;
-                            WiFiAdapter = esp32;
-                            Coprocessor = esp32;
-
-                            Console.WriteLine(" InitCoProcessor C");
-
+            if (!IsCoprocessorInitialized()) {
+                return Task.Run<bool>(async () => {
+                    try {
+                        //TODO: looks like we're also instantiating this in the ctor
+                        // need to cleanup.
+                        //Console.WriteLine($"InitWiFiAdapter()");
+                        if (this.esp32 == null) {
+                            this.esp32 = new Esp32Coprocessor();
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
-                            return false;
-                        }
-                        return true;
-                    });
-                }
-                else
-                {
-                    return Task.FromResult<bool>(true);
-                }
+                        WiFiAdapter = esp32;
+                        Coprocessor = esp32;
+                    } catch (Exception e) {
+                        Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
+                        return false;
+                    }
+                    return true;
+                });
+            } else {
+                return Task.FromResult<bool>(true);
             }
         }
 
         public Task<bool> InitWiFiAdapter()
         {
-            return InitCoProcessor();
+            return InitCoprocessor();
         }
 
-        public Task<bool> InitBluetoothAdapter()
-        {
-            Console.WriteLine(" InitBluetoothAdapter");
-            return InitCoProcessor();
-        }
+        // when bluetooth is ready:
+        //public Task<bool> InitBluetoothAdapter()
+        //{
+        //    return InitCoprocessor();
+        //}
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
