@@ -26,7 +26,7 @@ namespace BLETest
             try
             {
                 Device.InitBluetoothAdapter();
-                Device.BluetoothAdapter.Start(deviceName);
+                Device.BluetoothAdapter.StartBluetoothStack(deviceName);
             }
             catch (Exception ex)
             {

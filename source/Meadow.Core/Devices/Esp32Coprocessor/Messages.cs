@@ -339,4 +339,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public String Config;
     };
 
+    public struct BTDataWriteRequest
+    {
+        public UInt16 Handle;
+        public UInt32 DataLength;
+        public byte[] Data;
+    };
+
 }

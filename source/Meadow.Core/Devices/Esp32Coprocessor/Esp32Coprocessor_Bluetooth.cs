@@ -76,5 +76,25 @@ namespace Meadow.Devices
                 }
             }
         }
+
+        /// <summary>
+        /// Use the event data to work out which event to invoke and create any event args that will be consumed.
+        /// </summary>
+        /// <param name="eventId">Event ID.</param>
+        /// <param name="statusCode">Status of the event.</param>
+        /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
+        protected void InvokeEvent(BluetoothFunction eventId, StatusCodes statusCode, byte[] payload)
+        {
+            Output.WriteIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"event {eventId} of status {statusCode} with {payload.Length} bytes : {BitConverter.ToString(payload)}");
+
+            //  Placeholder
+            switch (eventId)
+            {
+                case BluetoothFunction.WriteRequestEvent:
+                    break;
+                case BluetoothFunction.ReadRequestEvent:
+                    break;
+            }
+        }
     }
 }

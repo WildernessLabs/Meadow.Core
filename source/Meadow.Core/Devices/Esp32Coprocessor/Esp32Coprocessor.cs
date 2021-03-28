@@ -72,7 +72,7 @@ namespace Meadow.Devices
         /// </summary>
         internal Esp32Coprocessor()
         {
-            _debugLevel = DebugOptions.None;
+            _debugLevel = DebugOptions.EventHandling;
 
             IsConnected = false;
             ClearIpDetails();

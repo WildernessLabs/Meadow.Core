@@ -16,6 +16,7 @@ namespace Meadow.Devices
         private SynchronizationContext _context;
         private Esp32Coprocessor esp32;
 
+        public IBluetoothAdapter BluetoothAdapter { get; protected set; }
         public IWiFiAdapter WiFiAdapter { get; protected set; }
         public ICoprocessor Coprocessor { get; protected set; }
 
@@ -61,6 +62,7 @@ namespace Meadow.Devices
             //this.InitEsp32CoProc();
 
             this.esp32 = new Esp32Coprocessor();
+            BluetoothAdapter = esp32;
             WiFiAdapter = esp32;
             Coprocessor = esp32;
         }
@@ -99,11 +101,10 @@ namespace Meadow.Devices
             return InitCoprocessor();
         }
 
-        // when bluetooth is ready:
-        //public Task<bool> InitBluetoothAdapter()
-        //{
-        //    return InitCoprocessor();
-        //}
+        public Task<bool> InitBluetoothAdapter()
+        {
+            return InitCoprocessor();
+        }
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,

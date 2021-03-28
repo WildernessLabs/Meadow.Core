@@ -2890,5 +2890,70 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 1);
         }
 
+        /// <summary>
+        /// Encode a BTDataWriteRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="bTDataWriteRequest">BTDataWriteRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded BTDataWriteRequest object.</returns>
+        public static byte[] EncodeBTDataWriteRequest(MessagePayloads.BTDataWriteRequest bTDataWriteRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (bTDataWriteRequest.DataLength + 4);
+            length += 2;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt16(bTDataWriteRequest.Handle, buffer, offset);
+            offset += 2;
+            EncodeUInt32(bTDataWriteRequest.DataLength, buffer, offset);
+            offset += 4;
+            if (bTDataWriteRequest.DataLength > 0)
+            {
+                Array.Copy(bTDataWriteRequest.Data, 0, buffer, offset, bTDataWriteRequest.DataLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a BTDataWriteRequest object from a byte array.
+        /// </summary>
+        /// <param name="bTDataWriteRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>BTDataWriteRequest object.</returns>
+        public static MessagePayloads.BTDataWriteRequest ExtractBTDataWriteRequest(byte[] buffer, int offset)
+        {
+            BTDataWriteRequest bTDataWriteRequest = new MessagePayloads.BTDataWriteRequest();
+
+            bTDataWriteRequest.Handle = ExtractUInt16(buffer, offset);
+            offset += 2;
+            bTDataWriteRequest.DataLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (bTDataWriteRequest.DataLength > 0)
+            {
+                bTDataWriteRequest.Data = new byte[bTDataWriteRequest.DataLength];
+                Array.Copy(buffer, offset, bTDataWriteRequest.Data, 0, bTDataWriteRequest.DataLength);
+            }
+            return(bTDataWriteRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the BTDataWriteRequest object.
+        /// </summary>
+        /// <param name="bTDataWriteRequest">BTDataWriteRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded BTDataWriteRequest object.</returns>
+        public static int EncodedBTDataWriteRequestBufferSize(MessagePayloads.BTDataWriteRequest bTDataWriteRequest)
+        {
+            int result = 0;
+            result += (int) bTDataWriteRequest.DataLength;
+            return(result + 6);
+        }
+
     }
 }
