@@ -8,6 +8,9 @@ namespace Meadow.Devices
     {
         public partial class Pinout : IF7MicroPinout
         {
+            // TODO: we need to rethink this. are they useful? we know they're not
+            // actually used because we're not actually populating them. see the ctor
+            // below. if they are useful, we need to rethink the 
             //public F7NamedPinGroups Groups { get; protected set; }
 
             public IList<IPin> AllPins => new List<IPin> {
@@ -372,7 +375,8 @@ namespace Meadow.Devices
 
             public Pinout()
             {
-                //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
+                //TODO: This causes a NullReferenceException
+                //Groups = new F7NamedPinGroups(this); 
 
             }
         }

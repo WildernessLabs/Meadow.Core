@@ -15,14 +15,8 @@ namespace Meadow.Hardware
             this.Pins = pins;
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
 
-        public static implicit operator IPin[](NamedPinGroup namedPinGroup)
-        {
-            return namedPinGroup.Pins;
-        }
+        public static implicit operator IPin[](NamedPinGroup namedPinGroup) => namedPinGroup.Pins;
     }
 }
