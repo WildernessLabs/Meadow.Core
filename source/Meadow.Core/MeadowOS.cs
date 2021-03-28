@@ -7,12 +7,12 @@ namespace Meadow
 {
     public static class MeadowOS//<D> where D : IIODevice
     {
-        internal static void Init(IIODevice device)
+        internal static void Init(IMeadowDevice device)
         {
             CurrentDevice = device;
         }
 
-        public static IIODevice CurrentDevice { get; private set; }
+        public static IMeadowDevice CurrentDevice { get; private set; }
 
 
         public static void Sleep(DateTime until)

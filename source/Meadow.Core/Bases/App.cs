@@ -1,4 +1,5 @@
 ﻿using Meadow.Hardware;
+using Meadow.Devices;
 using System;
 using System.Threading;
 
@@ -11,7 +12,7 @@ namespace Meadow
     /// </summary>
     public abstract class App<D, A> : IApp 
         where A : class, IApp
-        where D : class, IIODevice//<P> where P : IPinDefinitions
+        where D : class, IMeadowDevice
     {
         /// <summary>
         /// </summary>

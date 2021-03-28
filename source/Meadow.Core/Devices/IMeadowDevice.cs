@@ -1,0 +1,41 @@
+﻿using System;
+using System.Threading;
+using Meadow.Hardware;
+
+namespace Meadow.Devices
+{
+    /// <summary>
+    /// Contract for Meadow boards.
+    /// </summary>
+    public interface IMeadowDevice :
+        IDigitalOutputDevice,
+        IDigitalInputDevice,
+        IBiDirectionalDevice,
+        IAnalogInputDevice,
+        IPwmOutputDevice,
+        ISerialDevice,
+        ISerialMessageDevice,
+        ISpiDevice,
+        II2cDevice,
+        IIODevice<IF7MicroPinout>
+    {
+        /// <summary>
+        /// Gets the device capabilities.
+        /// </summary>
+        DeviceCapabilities Capabilities { get; }
+
+        /// <summary>
+        /// Sets the device time
+        /// </summary>
+        /// <param name="dateTime"></param>
+        void SetClock(DateTime dateTime);
+
+        /// <summary>
+        /// Meadow Internal method for setting the device's primary (i.e. entry) SynchronizationContext
+        /// </summary>
+        /// <param name="context"></param>
+        // TODO: this really should get moved to MeadowOS
+        void SetSynchronizationContext(SynchronizationContext context);
+
+    }
+}
