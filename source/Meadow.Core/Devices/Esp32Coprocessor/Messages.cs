@@ -346,4 +346,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public byte[] Data;
     };
 
+    public struct BTGetHandlesResponse
+    {
+        public UInt32 HandlesLength;
+        public byte[] Handles;
+    };
+
 }

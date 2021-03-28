@@ -3,5 +3,6 @@
     public interface IBluetoothAdapter
     {
         bool StartBluetoothStack(string config);
+        ushort[] GetGraphHandles();
     }
 }

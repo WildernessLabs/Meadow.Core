@@ -77,6 +77,34 @@ namespace Meadow.Devices
             }
         }
 
+        public ushort[] GetGraphHandles()
+        {
+            // TODO: maybe this needs to be a dictionary where we set ID's in the graph config and we get an ID->handle dictionary back?
+
+            var resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Requesting graph handles...");
+
+            var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.GetHandles, true, resultBuffer);
+
+            var count = BitConverter.ToInt16(resultBuffer, 0);
+
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Received {count} graph handles");
+            Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), resultBuffer, 2, count * 2);
+
+            var handles = new ushort[count];
+            var index = 2;
+
+            for(int i = 0; i < count; i++)
+            {
+                handles[i] = BitConverter.ToUInt16(resultBuffer, index);
+                index += 2;
+            }
+
+
+            return handles;
+        }
+
         /// <summary>
         /// Use the event data to work out which event to invoke and create any event args that will be consumed.
         /// </summary>
@@ -85,7 +113,7 @@ namespace Meadow.Devices
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
         protected void InvokeEvent(BluetoothFunction eventId, StatusCodes statusCode, byte[] payload)
         {
-            Output.WriteIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"event {eventId} of status {statusCode} with {payload.Length} bytes : {BitConverter.ToString(payload)}");
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"event {eventId} of status {statusCode} with {payload.Length} bytes : {BitConverter.ToString(payload)}");
 
             //  Placeholder
             switch (eventId)

@@ -2955,5 +2955,65 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 6);
         }
 
+        /// <summary>
+        /// Encode a BTGetHandlesResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="bTGetHandlesResponse">BTGetHandlesResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded BTGetHandlesResponse object.</returns>
+        public static byte[] EncodeBTGetHandlesResponse(MessagePayloads.BTGetHandlesResponse bTGetHandlesResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (bTGetHandlesResponse.HandlesLength + 4);
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(bTGetHandlesResponse.HandlesLength, buffer, offset);
+            offset += 4;
+            if (bTGetHandlesResponse.HandlesLength > 0)
+            {
+                Array.Copy(bTGetHandlesResponse.Handles, 0, buffer, offset, bTGetHandlesResponse.HandlesLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a BTGetHandlesResponse object from a byte array.
+        /// </summary>
+        /// <param name="bTGetHandlesResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>BTGetHandlesResponse object.</returns>
+        public static MessagePayloads.BTGetHandlesResponse ExtractBTGetHandlesResponse(byte[] buffer, int offset)
+        {
+            BTGetHandlesResponse bTGetHandlesResponse = new MessagePayloads.BTGetHandlesResponse();
+
+            bTGetHandlesResponse.HandlesLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (bTGetHandlesResponse.HandlesLength > 0)
+            {
+                bTGetHandlesResponse.Handles = new byte[bTGetHandlesResponse.HandlesLength];
+                Array.Copy(buffer, offset, bTGetHandlesResponse.Handles, 0, bTGetHandlesResponse.HandlesLength);
+            }
+            return(bTGetHandlesResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the BTGetHandlesResponse object.
+        /// </summary>
+        /// <param name="bTGetHandlesResponse">BTGetHandlesResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded BTGetHandlesResponse object.</returns>
+        public static int EncodedBTGetHandlesResponseBufferSize(MessagePayloads.BTGetHandlesResponse bTGetHandlesResponse)
+        {
+            int result = 0;
+            result += (int) bTGetHandlesResponse.HandlesLength;
+            return(result + 4);
+        }
+
     }
 }
