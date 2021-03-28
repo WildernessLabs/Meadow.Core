@@ -4,12 +4,22 @@ using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
-    public partial class F7MicroV2
+    public partial class F7Micro
     {
-        public partial class F7MicroPinDefinitions : I32PinFeatherBoardPinout, IEspCoprocessorPinout, IPinDefinitions
+        public partial class Pinout : IF7MicroPinout
         {
-            public IList<IPin> AllPins { get; } = new List<IPin>();
             //public F7NamedPinGroups Groups { get; protected set; }
+
+            public IList<IPin> AllPins => new List<IPin> {
+                // left header
+                A00, A01, A02, A03, A04, A05, SCK, COPI, CIPO, D00, D01, D02, D03, D04,
+                // right header
+                D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
+                // Onboard LED
+                OnboardLedRed, OnboardLedGreen, OnboardLedBlue,
+                // ESP stuff TODO: Consider removing these from the `AllPins` list.
+                ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
+            };
 
             //==== LED
 
@@ -23,7 +33,6 @@ namespace Meadow.Devices
                     new PwmChannelInfo("TIM2_CH1", 2, 1)
                 }
             );
-
             // OnboardLedGreen
             // TIM2_CH2, TIM5_CH2, USART2_RTS, UART4_RX, QUADSPI_BK1_IO3, SAI2_MCLK_B, ETH_MII_RX_CLK/ETH_R MII_REF_CLK, LCD_R2, EVENTOUT
             // ADC1_IN1, ADC2_IN1, ADC3_IN1
@@ -78,38 +87,37 @@ namespace Meadow.Devices
                 }
             );
             // A03
-            // TIM1_CH2N, TIM3_CH3, TIM8_CH2N, DFSDM_CKOUT, UART4_CTS, LCD_R3, OTG_HS_ULPI_D1, ETH_MII_RXD2, LCD_G1, EVENTOUT
-            // ADC1_IN8, ADC2_IN8
+            // TIM1_CH1N, TIM3_CH2, TIM8_CH1N, SPI1_MOSI/I2S1_SD, SPI6_MOSI, TIM14_CH1, ETH_MII_RX_DV/ETH_RM II_CRS_DV, FMC_SDNWE, EVENTOUT
+            // ADC1_IN7, ADC2_IN7
             public IPin A03 => new Pin(
-                "A03", "PB0",
+                "A03", "PA7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB0", interruptGroup: 0),
-                    new AnalogChannelInfo("ADC1_IN8", 12) // TODO: should we move this to the second ADC?
+                    new DigitalChannelInfo("PA7", interruptGroup: 7),
+                    new AnalogChannelInfo("ADC1_IN7", 12)
                 }
             );
             // A04
-            // TIM1_CH3N, TIM3_CH4, TIM8_CH3N, DFSDM_DATIN1, LCD_R6, OTG_HS_ULPI_D2, ETH_MII_RXD3, LCD_G0, EVENTOUT
-            // ADC1_IN9, ADC2_IN9
-            public IPin A04 => new Pin(
-                "A04", "PB1",
-                new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB1", interruptGroup: 1),
-                    new AnalogChannelInfo("ADC1_IN9", 12)
-                }
-            );
-            // A05
             // DFSDM_CKIN0, DFSDM_DATIN4, SAI2_FS_B, OTG_HS_ULPI_STP, FMC_SDNWE, LCD_R5, EVENTOUT
             // ADC1_IN10, ADC2_IN10, ADC3_IN10
-            public IPin A05 => new Pin(
-                "A05", "PC0",
+            public IPin A04 => new Pin(
+                "A04", "PC0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC0", interruptGroup: 0),
                     new AnalogChannelInfo("ADC1_IN10", 12)
                 }
             );
+            // A05
+            // TRACED0, DFSDM_DATIN0, SPI2_MOSI/I2S2_SD, SAI1_SD_A, DFSDM_CKIN4, ETH_MDC, MDIOS_MDC, EVENTOUT
+            // ADC1_IN11, ADC2_IN11, ADC3_IN11, RTC_TAMP3/ WKUP3
+            public IPin A05 => new Pin(
+                "A05", "PC1",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PC1", interruptGroup: 1),
+                    new AnalogChannelInfo("ADC1_IN11", 12)
+                }
+            );
             // SCK
             // SPI3_CLK
-            // DFSDM_CKIN5, SPI3_SCK/I2S3_CK, USART3_TX, UART4_TX, QUADSPI_BK1_IO1, SDMMC1_D2, DCMI_D8, LCD_R2, EVENTOUT
             public IPin SCK => new Pin(
                 "SCK", "PC10",
                 new List<IChannelInfo> {
@@ -119,7 +127,6 @@ namespace Meadow.Devices
             );
             // MOSI
             // SPI3_MOSI
-            // UART5_RX, TIM3_CH2, I2C1_SMBA, SPI1_MOSI/I2S1_SD, SPI3_MOSI/I2S3_SD, SPI6_MOSI, CAN2_RX, OTG_HS_ULPI_D7, ETH_PPS_OUT, FMC_SDCKE1, DCMI_D10, LCD_G7, EVENTOUT
             public IPin MOSI => COPI; // TODO: let the interface handle this when we get to .NET Standard 2.1
             public IPin COPI => new Pin(
                 "MOSI", "PB5",
@@ -158,12 +165,12 @@ namespace Meadow.Devices
                 }
             );
             // D02
-            // TIM5_CH1, I2C4_SMBA, FMC_D18, DCMI_D1, LCD_R4, EVENTOUT
+            // TIM3_CH1, TIM8_CH1, I2S2_MCK, DFSDM_CKIN3, USART6_TX, FMC_NWAIT, SDMMC2_D6, SDMMC1_D6, DCMI_D0, LCD_HSYNC, EVENTOUT
             public IPin D02 => new Pin(
-                "D02", "PH10",
+                "D02", "PC6",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH10", interruptGroup: 10),
-                    new PwmChannelInfo("TIM5_CH1", 8, 1)
+                    new DigitalChannelInfo("PC6", interruptGroup: 6),
+                    new PwmChannelInfo("TIM8_CH1", 8, 1)
                 }
             );
             // D03
@@ -187,26 +194,26 @@ namespace Meadow.Devices
                 }
             );
 
-            //==== Right Header
+            //==== right header
 
             // D05
-            // JTDI, TIM2_CH1/TIM2_ETR, HDMI_CEC, SPI1_NSS/I2S1_WS, SPI3_NSS/I2S3_WS, SPI6_NSS, UART4_RTS, CAN3_TX, UART7_TX, EVENTOUT
+            // TIM3_CH2, TIM8_CH2, I2S3_MCK, DFSDM_DATIN3, USART6_RX, FMC_NE1, SDMMC2_D7, SDMMC1_D7, DCMI_D1, LCD_G6, EVENTOUT
             public IPin D05 => new Pin(
-                "D05", "PA15",
+                "D05", "PC7",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA15", interruptGroup: 15),
-                    //new PwmChannelInfo("TIM2_CH1", 1, 1), // Reserved for OnboardLED
-                    new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
+                    new DigitalChannelInfo("PC7", interruptGroup: 7),
+                    new PwmChannelInfo("TIM3_CH2", 3, 2)
                 }
             );
             // D06
-            // JTDO/TRACESWO, TIM2_CH2, SPI1_SCK/I2S1_CK, SPI3_SCK/I2S3_CK, SPI6_SCK, SDMMC2_D2, CAN3_RX, UART7_RX, EVENTOUT
+            // TIM1_CH2N, TIM3_CH3, TIM8_CH2N, DFSDM_CKOUT, UART4_CTS, LCD_R3, OTG_HS_ULPI_D1, ETH_MII_RXD2, LCD_G1, EVENTOUT
+            // ADC1_IN8, ADC2_IN8
             public IPin D06 => new Pin(
-                "D06", "PB3",
+                "D06", "PB0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB3", interruptGroup: 3),
-                    //new PwmChannelInfo("TIM2_CH2", 2, 2), // Reserved for OnboardLED
-                    new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
+                    new DigitalChannelInfo("PB0", interruptGroup: 0),
+                    new PwmChannelInfo("TIM3_CH3", 3, 3),
+                    new AnalogChannelInfo("ADC1_IN8", 12) // or ADC2_IN8?
                 }
             );
             // D07
@@ -230,21 +237,23 @@ namespace Meadow.Devices
                 }
             );
             // D09
-            // TIM3_CH1, TIM8_CH1, I2S2_MCK, DFSDM_CKIN3, USART6_TX, FMC_NWAIT, SDMMC2_D6, SDMMC1_D6, DCMI_D0, LCD_HSYNC, EVENTOUT
+            // TIM1_CH3N, TIM3_CH4, TIM8_CH3N, DFSDM_DATIN1, LCD_R6, OTG_HS_ULPI_D2, ETH_MII_RXD3, LCD_G0, EVENTOUT
+            // ADC1_IN9, ADC2_IN9
             public IPin D09 => new Pin(
-                "D09", "PC6",
+                "D09", "PB1",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC6", interruptGroup: 6),
-                    new PwmChannelInfo("TIM3_CH1", 3, 1), // or TIM8_CH1
+                    new DigitalChannelInfo("PB1", interruptGroup: 1),
+                    new PwmChannelInfo("TIM3_CH4", 3, 4),
+                    new AnalogChannelInfo("ADC1_IN9", 12) // or ADC2_IN9
                 }
             );
             // D10
-            // TIM3_CH2, TIM8_CH2, I2S3_MCK, DFSDM_DATIN3, USART6_RX, FMC_NE1, SDMMC2_D7, SDMMC1_D7, DCMI_D1, LCD_G6, EVENTOUT
+            // TIM5_CH1, I2C4_SMBA, FMC_D18, DCMI_D1, LCD_R4, EVENTOUT
             public IPin D10 => new Pin(
-                "D10", "PC7",
+                "D10", "PH10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC7", interruptGroup: 7),
-                    new PwmChannelInfo("TIM3_CH2", 3, 2) // or TIM8_CH2
+                    new DigitalChannelInfo("PH10", interruptGroup: 10),
+                    new PwmChannelInfo("TIM5_CH1", 5, 1)
                 }
             );
             // D11
@@ -277,30 +286,26 @@ namespace Meadow.Devices
                 }
             );
             // D14
-            // TIM1_BKIN, I2C2_SMBA, SPI2_NSS/I2S2_WS, DFSDM_DATIN1, USART3_CK, UART5_RX, CAN2_RX, OTG_HS_ULPI_D5, ETH_MII_TXD0/ETH_RMII _TXD0, OTG_HS_ID, EVENTOUT
+            // FMC_A13, EVENTOUT
             public IPin D14 => new Pin(
-                "D14", "PB12",
+                "D14", "PG3",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB12", interruptGroup: 12),
-                    //new PwmChannelInfo("TIM12_CH2", 12, 2),
+                    new DigitalChannelInfo("PG3", interruptGroup: 3),
                 }
             );
             // D15
-            // I2C2_SMBA, SPI5_SCK, TIM12_CH1, ETH_MII_RXD2, FMC_SDNE1, DCMI_D8, EVENTOUT
+            // TRACED0, SAI1_SD_B, FMC_A19, EVENTOUT
             public IPin D15 => new Pin(
-                "D15", "PB13",
+                "D15", "PE3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PE3", interruptGroup: 3),
-                    new PwmChannelInfo("TIM12_CH1", 12, 1),
                 }
             );
 
-            //==== ESP Coprocessor
-            // TODO: if C# ever allows it, it would be nice to make these internal
-            // even though they are on the interface
+            //==== ESP32
 
             // ESP_MOSI
-            public IPin ESP_COPI => new Pin(
+            public /*internal*/ IPin ESP_COPI => new Pin(
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI3"),
@@ -308,7 +313,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_MISO
-            public IPin ESP_CIPO => new Pin(
+            public /*internal*/ IPin ESP_CIPO => new Pin(
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI2", interruptGroup: 12),
@@ -316,7 +321,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_CLK
-            public IPin ESP_CLK => new Pin(
+            public /*internal*/ IPin ESP_CLK => new Pin(
                 "ESP_CLK", "PD3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD3", interruptGroup: 3),
@@ -324,7 +329,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_CS
-            public IPin ESP_CS => new Pin(
+            public /*internal*/ IPin ESP_CS => new Pin(
                 "ESP_CS", "PI0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI0", interruptGroup: 0),
@@ -332,32 +337,31 @@ namespace Meadow.Devices
                 }
             );
             // ESP_BOOT
-            public IPin ESP_BOOT => new Pin(
+            public /*internal*/ IPin ESP_BOOT => new Pin(
                 "ESP_BOOT", "PI10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI10", interruptGroup: 10),
                 }
             );
             // ESP_RST
-            public IPin ESP_RST => new Pin(
+            public /*internal*/ IPin ESP_RST => new Pin(
                 "ESP_RST", "PF7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF7", interruptGroup: 7),
                 }
             );
             // ESP_UART_RX
-            public IPin ESP_UART_RX => new Pin(
+            public /*internal*/ IPin ESP_UART_RX => new Pin(
                 "ESP_UART_RX", "PD2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD2", interruptGroup: 2),
                 }
             );
-            // NOTE: This changed in v2
             // ESP_UART_TX
-            public IPin ESP_UART_TX => new Pin(
-                "ESP_UART_TX", "PC12",
+            public /*internal*/ IPin ESP_UART_TX => new Pin(
+                "ESP_UART_TX", "PB13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC12", interruptGroup: 12),
+                    new DigitalChannelInfo("PB13", interruptGroup: 13),
                 }
             );
 
@@ -366,51 +370,10 @@ namespace Meadow.Devices
             public IPin I2C_SCL => D07;
 
 
-            public F7MicroPinDefinitions()
+            public Pinout()
             {
-                InitAllPins();
                 //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
-            }
 
-            protected void InitAllPins()
-            {
-                // add all our pins to the collection
-                AllPins.Add(this.A00);
-                AllPins.Add(this.A01);
-                AllPins.Add(this.A02);
-                AllPins.Add(this.A03);
-                AllPins.Add(this.A04);
-                AllPins.Add(this.A05);
-                AllPins.Add(this.SCK);
-                AllPins.Add(this.COPI);
-                AllPins.Add(this.CIPO);
-                AllPins.Add(this.D00);
-                AllPins.Add(this.D01);
-                AllPins.Add(this.D02);
-                AllPins.Add(this.D03);
-                AllPins.Add(this.D04);
-                AllPins.Add(this.D05);
-                AllPins.Add(this.D06);
-                AllPins.Add(this.D07);
-                AllPins.Add(this.D08);
-                AllPins.Add(this.D09);
-                AllPins.Add(this.D10);
-                AllPins.Add(this.D11);
-                AllPins.Add(this.D12);
-                AllPins.Add(this.D13);
-                AllPins.Add(this.D14);
-                AllPins.Add(this.D15);
-                AllPins.Add(this.OnboardLedRed);
-                AllPins.Add(this.OnboardLedGreen);
-                AllPins.Add(this.OnboardLedBlue);
-                AllPins.Add(this.ESP_COPI);
-                AllPins.Add(this.ESP_CIPO);
-                AllPins.Add(this.ESP_CLK);
-                AllPins.Add(this.ESP_CS);
-                AllPins.Add(this.ESP_BOOT);
-                AllPins.Add(this.ESP_RST);
-                AllPins.Add(this.ESP_UART_RX);
-                AllPins.Add(this.ESP_UART_TX);
             }
         }
     }

@@ -6,13 +6,13 @@ namespace Meadow.Devices
 {
     public partial class F7Micro
     {
-        public partial class F7MicroPinDefinitions : IPinDefinitions
+        public partial class Pinout
         {
             // TODO: are these even used? if not, let's delete.
             // also; COM4 is missing, which makes me think we're not even using these.
             public class F7NamedPinGroups : INamedPinGroups
             {
-                protected F7MicroPinDefinitions _parent;
+                protected Pinout _parent;
 
                 public IList<NamedPinGroup> AllGroups { get; } = new List<NamedPinGroup>();
 
@@ -20,7 +20,7 @@ namespace Meadow.Devices
                 public NamedPinGroup Spi1;
                 public NamedPinGroup I2c1;
 
-                public F7NamedPinGroups(F7MicroPinDefinitions parentDefinitions)
+                public F7NamedPinGroups(Pinout parentDefinitions)
                 {
                     _parent = parentDefinitions;
                     this.InitNamedPinGroups();
