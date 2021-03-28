@@ -10,7 +10,7 @@ namespace Meadow
     /// <typeparam name="T"></typeparam>
     public class CircularBuffer<T> : IEnumerable<T>
     {
-        public event EventHandler ItemAdded;
+        public event EventHandler ItemAdded = delegate { };
 
         // TODO: this should probably be Span<T>
         private T[] _list;
@@ -24,19 +24,19 @@ namespace Meadow
         /// <summary>
         /// Fires when an element is added to the buffer when it is already full
         /// </summary>
-        public event EventHandler Overrun;
+        public event EventHandler Overrun = delegate { };
         /// <summary>
         /// Fires when an attempt is made to remove an item from an empty buffer
         /// </summary>
-        public event EventHandler Underrun;
+        public event EventHandler Underrun = delegate { };
         /// <summary>
         /// Fires when the number of elements reaches a non-zero HighWaterLevel value on an Enqueue call.  This event fires only once when passing upward across the boundary.
         /// </summary>
-        public event EventHandler HighWater;
+        public event EventHandler HighWater = delegate { };
         /// <summary>
         /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Remove call.  This event fires only once when passing downward across the boundary.
         /// </summary>
-        public event EventHandler LowWater;
+        public event EventHandler LowWater = delegate { };
         /// <summary>
         /// Gets the maximum number of elements the buffer can hold.
         /// </summary>
