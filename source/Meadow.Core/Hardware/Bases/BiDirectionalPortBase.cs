@@ -9,7 +9,7 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class BiDirectionalPortBase : DigitalPortBase, IBiDirectionalPort, IDigitalInterruptPort, IDisposable
     {
-        public event EventHandler<DigitalInputPortEventArgs> Changed;
+        public event EventHandler<DigitalInputPortEventArgs> Changed = delegate { };
 
         // internals
         protected bool _currentState;

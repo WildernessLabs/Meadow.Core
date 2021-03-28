@@ -14,10 +14,10 @@ namespace Meadow.Devices
     public abstract class F7MicroBase : IMeadowDevice
     {
         protected SynchronizationContext _context;
-        protected Esp32Coprocessor esp32;
+        protected Esp32Coprocessor? esp32;
 
-        public IWiFiAdapter WiFiAdapter { get; protected set; }
-        public ICoprocessor Coprocessor { get; protected set; }
+        public IWiFiAdapter? WiFiAdapter { get; protected set; }
+        public ICoprocessor? Coprocessor { get; protected set; }
 
         public event EventHandler WiFiAdapterInitialized = delegate { };
 
