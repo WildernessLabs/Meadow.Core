@@ -295,6 +295,7 @@ namespace Meadow.Devices
         //  MS: Or should it?  The list of available networks is only valid at the point it is collected.
         //      Having the list of networks in this class suggests that they are availalbe now and in say 2 hours time.
         //      This might not be the case.
+        //  BC: Yeah, you're right. But it should return just an `IList<Network>` then.
         /// <summary>
         /// Scan for networks.
         /// </summary>
