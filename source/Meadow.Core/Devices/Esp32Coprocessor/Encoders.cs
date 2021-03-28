@@ -2969,12 +2969,15 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Calculate the amount of memory needed.
             //
             length += (int) (bTGetHandlesResponse.HandlesLength + 4);
+            length += 2;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt16(bTGetHandlesResponse.HandleCount, buffer, offset);
+            offset += 2;
             EncodeUInt32(bTGetHandlesResponse.HandlesLength, buffer, offset);
             offset += 4;
             if (bTGetHandlesResponse.HandlesLength > 0)
@@ -2993,6 +2996,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             BTGetHandlesResponse bTGetHandlesResponse = new MessagePayloads.BTGetHandlesResponse();
 
+            bTGetHandlesResponse.HandleCount = ExtractUInt16(buffer, offset);
+            offset += 2;
             bTGetHandlesResponse.HandlesLength = ExtractUInt32(buffer, offset);
             offset += 4;
             if (bTGetHandlesResponse.HandlesLength > 0)
@@ -3012,7 +3017,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int) bTGetHandlesResponse.HandlesLength;
-            return(result + 4);
+            return(result + 6);
         }
 
     }

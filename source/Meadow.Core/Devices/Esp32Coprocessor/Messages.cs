@@ -348,6 +348,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
 
     public struct BTGetHandlesResponse
     {
+        public UInt16 HandleCount;
         public UInt32 HandlesLength;
         public byte[] Handles;
     };

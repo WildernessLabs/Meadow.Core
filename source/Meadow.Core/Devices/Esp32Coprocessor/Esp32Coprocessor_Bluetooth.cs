@@ -93,7 +93,7 @@ namespace Meadow.Devices
             Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), resultBuffer, 2, count * 2);
 
             var handles = new ushort[count];
-            var index = 2;
+            var index = 6; // skip over the count *and* the uint length
 
             for(int i = 0; i < count; i++)
             {
