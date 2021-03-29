@@ -1,9 +1,9 @@
-﻿using Meadow.Gateways;
-using Meadow.Hardware;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow.Gateways;
+using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
