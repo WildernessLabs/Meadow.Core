@@ -137,9 +137,9 @@ namespace Meadow.Devices
         protected bool IsOnboardLed(IPin pin)
         {
             return (
-                pin == Pins.OnboardLedBlue ||
-                pin == Pins.OnboardLedGreen ||
-                pin == Pins.OnboardLedRed
+                pin.Name == Pins.OnboardLedBlue.Name ||
+                pin.Name == Pins.OnboardLedGreen.Name ||
+                pin.Name == Pins.OnboardLedRed.Name
                 );
         }
 
