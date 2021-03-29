@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Meadow.Hardware.Contracts.IOControllers
+namespace Meadow.Hardware
 {
     public interface IDigitalInputOutputController : IDigitalInputController, IDigitalOutputController
     {
