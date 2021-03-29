@@ -126,22 +126,22 @@ namespace Meadow.Devices
                     new SpiChannelInfo("PC10", SpiLineType.Clock)
                 }
             );
-            // MOSI
+            // COPI
             // SPI3_MOSI
             // UART5_RX, TIM3_CH2, I2C1_SMBA, SPI1_MOSI/I2S1_SD, SPI3_MOSI/I2S3_SD, SPI6_MOSI, CAN2_RX, OTG_HS_ULPI_D7, ETH_PPS_OUT, FMC_SDCKE1, DCMI_D10, LCD_G7, EVENTOUT
             public IPin MOSI => COPI; // TODO: let the interface handle this when we get to .NET Standard 2.1
             public IPin COPI => new Pin(
-                "MOSI", "PB5",
+                "COPI", "PB5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB5", interruptGroup: 5),
                     new SpiChannelInfo("PB5", SpiLineType.MOSI)
                 }
             );
-            // MISO
+            // CIPO
             // SPI3_MISO
             public IPin MISO => CIPO; // TODO: let the interface handle this when we get to .NET Standard 2.1
             public IPin CIPO => new Pin(
-                "MISO", "PC11",
+                "CIPO", "PC11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC11", interruptGroup: 11),
                     new SpiChannelInfo("PC11", SpiLineType.MISO)

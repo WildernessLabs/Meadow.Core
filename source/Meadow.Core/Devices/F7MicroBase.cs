@@ -136,6 +136,8 @@ namespace Meadow.Devices
         /// <returns>whether or no the pin belons to the onboard LED</returns>
         protected bool IsOnboardLed(IPin pin)
         {
+            // HACK NOTE: can't compare directly here, so we're comparing the name.
+            // might be able to cast and compare?
             return (
                 pin.Name == Pins.OnboardLedBlue.Name ||
                 pin.Name == Pins.OnboardLedGreen.Name ||
@@ -249,7 +251,7 @@ namespace Meadow.Devices
 
 
         /// <summary>
-        /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, MOSI and CIPO
+        /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO
         /// </summary>
         /// <param name="speedkHz">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
@@ -263,7 +265,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates a SPI bus instance for the requested control pins and bus speed
         /// </summary>
-        /// <param name="pins">IPint instances used for (in this order) CLK, MOSI, CIPO</param>
+        /// <param name="pins">IPin instances used for (in this order) CLK, COPI, CIPO</param>
         /// <param name="speedkHz">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
@@ -278,8 +280,8 @@ namespace Meadow.Devices
         /// Creates a SPI bus instance for the requested control pins and bus speed
         /// </summary>
         /// <param name="clock">The IPin instance to use as the bus clock</param>
-        /// <param name="copi">The IPin instance to use for data transmit (master out/slave in)</param>
-        /// <param name="cipo">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="copi">The IPin instance to use for data transmit (controller out/peripheral in)</param>
+        /// <param name="cipo">The IPin instance to use for data receive (controller in/peripheral out)</param>
         /// <param name="speedkHz">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
@@ -299,8 +301,8 @@ namespace Meadow.Devices
         /// Creates a SPI bus instance for the requested control pins and bus speed
         /// </summary>
         /// <param name="clock">The IPin instance to use as the bus clock</param>
-        /// <param name="copi">The IPin instance to use for data transmit (master out/slave in)</param>
-        /// <param name="cipo">The IPin instance to use for data receive (master in/slave out)</param>
+        /// <param name="copi">The IPin instance to use for data transmit (controller out/peripheral in)</param>
+        /// <param name="cipo">The IPin instance to use for data receive (controller in/peripheral out)</param>
         /// <param name="config">The bus clock configuration parameters</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
@@ -320,9 +322,11 @@ namespace Meadow.Devices
         {
             // we're only looking at clock pin.  
             // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
-            if (clock == Pins.ESP_CLK) {
+            // HACK NOTE: can't compare directly here, so we're comparing the name.
+            // might be able to cast and compare?
+            if (clock.Name == Pins.ESP_CLK.Name) {
                 return 2;
-            } else if (clock == Pins.SCK) {
+            } else if (clock.Name == Pins.SCK.Name) {
                 return 3;
             }
 
