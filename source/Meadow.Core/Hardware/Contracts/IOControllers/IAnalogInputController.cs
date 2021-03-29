@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for devices that expose `IAnalogInputPort(s)`.
     /// </summary>
-    public interface IAnalogInputDevice
+    public interface IAnalogInputController
     {
         public const float DefaultA2DReferenceVoltage = 3.3f;
 

@@ -4,7 +4,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for devices that expose `ISerialMessagePort(s)`.
     /// </summary>
-    public interface ISerialMessageDevice
+    public interface ISerialMessageController
     {
         /// <summary>
         /// Initializes a new instance of the `ISerialMessagePort` class that

@@ -35,7 +35,7 @@ namespace Meadow.Devices
         /// <value>The pins.</value>
         public IF7MicroPinout Pins { get; protected set; }
 
-        protected IIOController IoController { get; set; }
+        protected IMeadowIOController IoController { get; set; }
 
         public IPin GetPin(string pinName)
         {

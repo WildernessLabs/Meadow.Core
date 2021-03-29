@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Meadow.Hardware
 {
-    public interface ISerialDevice
+    public interface ISerialController
     {
         /// <summary>
         /// Initializes a new instance of a `ISerialPort`.

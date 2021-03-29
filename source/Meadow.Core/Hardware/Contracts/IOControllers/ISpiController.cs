@@ -4,7 +4,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for devices who expose `ISpiBus(es)`.
     /// </summary>
-    public interface ISpiDevice
+    public interface ISpiController : IDigitalOutputController
     {
         /// <summary>
         /// The default SPI Bus speed, in kHz, used when speed parameters are not provided

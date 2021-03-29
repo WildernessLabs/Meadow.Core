@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class DigitalOutputPort : DigitalOutputPortBase
     {
-        protected IIOController IOController { get; }
+        protected IMeadowIOController IOController { get; }
 
         /// <summary>
         /// Gets or sets the state of the port.
@@ -31,7 +31,7 @@ namespace Meadow.Hardware
         /// <param name="initialState"></param>
         protected DigitalOutputPort(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             IDigitalChannelInfo channel, 
             bool initialState,
             OutputType initialOutputType)
@@ -61,7 +61,7 @@ namespace Meadow.Hardware
         /// <param name="pin">Pin.</param>
         /// <param name="initialState">If set to <c>true</c> initial state.</param>
         internal static DigitalOutputPort From(IPin pin, 
-            IIOController ioController,
+            IMeadowIOController ioController,
             bool initialState = false,
             OutputType initialOutputType = OutputType.PushPull)
         {

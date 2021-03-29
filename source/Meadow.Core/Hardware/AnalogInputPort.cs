@@ -44,7 +44,7 @@ namespace Meadow.Hardware
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
         static readonly object _analogSyncRoot = new object();
 
-        protected IIOController IOController { get; }
+        protected IMeadowIOController IOController { get; }
 
         // internal thread lock
         private object _lock = new object();
@@ -61,7 +61,7 @@ namespace Meadow.Hardware
 
         protected AnalogInputPort(
                     IPin pin,
-                    IIOController ioController,
+                    IMeadowIOController ioController,
                     IAnalogChannelInfo channel,
                     float referenceVoltage)
             : base(pin, channel)
@@ -83,7 +83,7 @@ namespace Meadow.Hardware
 
         internal static AnalogInputPort From(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             float referenceVoltage)
         {
             var channel = pin.SupportedChannels.OfType<IAnalogChannelInfo>().FirstOrDefault();

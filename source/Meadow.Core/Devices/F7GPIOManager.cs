@@ -22,7 +22,7 @@ namespace Meadow.Devices
 
     }
 
-    public partial class F7GPIOManager : IIOController
+    public partial class F7GPIOManager : IMeadowIOController
     {
         private object _cacheLock = new object();
         private Dictionary<string, IPin> _interruptPins = new Dictionary<string, IPin>();
@@ -88,7 +88,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pin">Pin.</param>
         /// <param name="value">If set to <c>true</c> value.</param>
-        void IIOController.SetDiscrete(IPin pin, bool value)
+        void IMeadowIOController.SetDiscrete(IPin pin, bool value)
         {
             var designator = GetPortAndPin(pin);
             SetDiscrete(designator.address, designator.port, designator.pin, value);

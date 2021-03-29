@@ -4,7 +4,7 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDA0F516-977E-4F27-9434-9A0961EF91D1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppTemplates", "AppTemplates", "{897B80D1-CC82-4EF4-91D6-B3CFF44A88E3}"
 EndProject

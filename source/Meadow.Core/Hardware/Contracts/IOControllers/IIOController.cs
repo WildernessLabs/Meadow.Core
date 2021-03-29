@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for Meadow devices.
     /// </summary>
-    public interface IIODevice<T> where T : IPinDefinitions
+    public interface IIOController<T> where T : IPinDefinitions
     {
         /// <summary>
         /// Retrieves an IPin by name

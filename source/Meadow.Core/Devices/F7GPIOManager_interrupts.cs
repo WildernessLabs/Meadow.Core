@@ -13,7 +13,7 @@ using static Meadow.Core.Interop.STM32;
 namespace Meadow.Devices
 {
 
-    public partial class F7GPIOManager : IIOController
+    public partial class F7GPIOManager : IMeadowIOController
     {
         public event InterruptHandler Interrupt = delegate { };
 
