@@ -371,8 +371,8 @@ namespace Meadow.Devices
             );
 
             // TODO: let the interface handle this when we get to .NET Standard 2.1
-            public IPin I2C_SDA => D08;
-            public IPin I2C_SCL => D07;
+            public IPin I2C_SDA => D07;
+            public IPin I2C_SCL => D08;
 
 
             public Pinout()
