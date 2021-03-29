@@ -5,7 +5,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for devices that expose `IPwmPort(s)`.
     /// </summary>
-    public interface IPwmOutputDevice
+    public interface IPwmOutputController
     {
         public const float DefaultPwmFrequency = 100f;
         public const float DefaultPwmDutyCycle = 0.5f;

@@ -12,7 +12,7 @@ namespace Meadow.Devices
         IDigitalInputController,
         IBiDirectionalController,
         IAnalogInputController,
-        IPwmOutputDevice,
+        IPwmOutputController,
         ISerialController,
         ISerialMessageController,
         ISpiController,
