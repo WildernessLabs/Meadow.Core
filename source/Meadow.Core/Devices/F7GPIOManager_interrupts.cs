@@ -15,7 +15,7 @@ namespace Meadow.Devices
 
     public partial class F7GPIOManager : IIOController
     {
-        public event InterruptHandler Interrupt;
+        public event InterruptHandler Interrupt = delegate { };
 
         private Thread _ist = null;
         private List<int> _interruptGroupsInUse = new List<int>();

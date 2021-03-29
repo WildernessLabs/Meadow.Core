@@ -32,6 +32,9 @@
    <Folder Include="Peripherals\Sensors\Location\" />
    <Folder Include="Peripherals\Sensors\Location\Gnss\" />
    <Folder Include="Devices\Esp32Coprocessor\" />
+   <Folder Include="Hardware\Contracts\IODevices\" />
+   <Folder Include="Hardware\Contracts\PortsAndBuses\" />
+   <Folder Include="Hardware\Contracts\ChannelInfos\" />
  </ItemGroup>
  <ItemGroup>
    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.6.0" />
