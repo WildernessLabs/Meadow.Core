@@ -8,8 +8,7 @@ namespace Meadow.Devices
     /// Contract for Meadow boards.
     /// </summary>
     public interface IMeadowDevice :
-        IDigitalOutputController,
-        IDigitalInputController,
+        IDigitalInputOutputController,
         IBiDirectionalController,
         IAnalogInputController,
         IPwmOutputController,
