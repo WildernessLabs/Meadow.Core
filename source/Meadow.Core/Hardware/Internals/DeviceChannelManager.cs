@@ -106,7 +106,7 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static void AfterStartPwm(IPwmChannelInfo info, IIOController ioController)
+        internal static void AfterStartPwm(IPwmChannelInfo info, IMeadowIOController ioController)
         {
             // HACK HACK HACK
             // In Nuttx, the first time a PWM timer is started, it sets the AF bit for all pins in the timer

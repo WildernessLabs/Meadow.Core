@@ -13,13 +13,13 @@ namespace Meadow.Hardware
         private double _debounceDuration;
         private double _glitchDuration;
 
-        protected IIOController IOController { get; set; }
+        protected IMeadowIOController IOController { get; set; }
 
         private DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         protected DigitalInputPort(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             IDigitalChannelInfo channel,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
@@ -57,7 +57,7 @@ namespace Meadow.Hardware
 
         public static DigitalInputPort From(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
             double debounceDuration = 0.0,

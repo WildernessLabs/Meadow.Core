@@ -19,7 +19,7 @@ namespace Meadow.Hardware
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
         private int _frequency;
 
-        private IIOController IOController { get; }
+        private IMeadowIOController IOController { get; }
 
         /// <summary>
         /// Bus Clock speed in Hz
@@ -66,7 +66,7 @@ namespace Meadow.Hardware
         /// developer from calling it.
         /// </summary>
         private I2cBus(
-            IIOController ioController,
+            IMeadowIOController ioController,
             IPin clock,
             II2cChannelInfo clockChannel,
             IPin data,
@@ -101,7 +101,7 @@ namespace Meadow.Hardware
         /// <param name="frequencyHz">Bus clock speed, in Hz</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
-        public static I2cBus From(IIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
+        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
         {
             return From(ioController, clock, data, (int)busSpeed, transactionTimeout);
         }
@@ -115,7 +115,7 @@ namespace Meadow.Hardware
         /// <param name="frequencyHz">Bus clock speed, in Hz</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
-        public static I2cBus From(IIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
+        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
         {
             var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)

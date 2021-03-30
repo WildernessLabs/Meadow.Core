@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 namespace Meadow.Devices
 {
     /// <summary>
-    /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
+    /// Represents a Meadow F7 micro v2 device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public partial class F7Micro : F7MicroBase
+    public partial class F7MicroV2 : F7MicroBase
     {
         public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
 
-        public F7Micro()
+        public F7MicroV2()
         {
             this.Capabilities = new DeviceCapabilities(
                 new AnalogCapabilities(true, DefaultA2DResolution),

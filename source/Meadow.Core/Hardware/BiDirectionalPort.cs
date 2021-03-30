@@ -10,7 +10,7 @@ namespace Meadow.Hardware
   public class BiDirectionalPort : BiDirectionalPortBase
     {
         private PortDirectionType _currentDirection;
-        protected IIOController IOController { get; }
+        protected IMeadowIOController IOController { get; }
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         // Direction change
@@ -36,7 +36,7 @@ namespace Meadow.Hardware
 
         protected BiDirectionalPort(
             IPin pin,
-            IIOController gpioController,
+            IMeadowIOController gpioController,
             IDigitalChannelInfo channel,
             bool initialState = false, 
             InterruptMode interruptMode = InterruptMode.None,
@@ -102,7 +102,7 @@ namespace Meadow.Hardware
 
         public static BiDirectionalPort From(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             bool initialState = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,

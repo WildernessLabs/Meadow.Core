@@ -6,7 +6,7 @@ using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
-    public partial class F7GPIOManager : IIOController
+    public partial class F7GPIOManager : IMeadowIOController
     {
         private bool _debuggingADC = false;
         private bool _initialized = false;

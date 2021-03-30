@@ -11,7 +11,7 @@ namespace ByteCommsAPIScratchPad
         {
             //==== SPI Example
             // create the SPI bus
-            ISpiBus spiBus = Device.CreateSpiBus(Device.Pins.Groups.Spi1);
+            ISpiBus spiBus = Device.CreateSpiBus();
 
             // add a device
             IDigitalOutputPort spiPeriphChipSelect = Device.CreateDigitalOutputPort(Device.Pins.D03);
@@ -24,7 +24,7 @@ namespace ByteCommsAPIScratchPad
             //spiBus.WriteByte(spiPeriph.ChipSelect, 0x01);
 
             //==== I2C Example
-            II2cBus i2cBus = Device.CreateI2cBus(Device.Pins.Groups.I2c1, 100); //TODO: should have a default speed
+            II2cBus i2cBus = Device.CreateI2cBus(); //TODO: should have a default speed
 
             // add a device
             II2cPeripheral i2cPeripheral = new I2cPeripheral(i2cBus, 39);
@@ -37,7 +37,6 @@ namespace ByteCommsAPIScratchPad
             IPin[] spiPins;
             switch (MeadowOS.CurrentDevice) {
                 case F7Micro f7:
-                    spiPins = f7.Pins.Groups.Spi1;
                     // do whatever
                     break;
             }
