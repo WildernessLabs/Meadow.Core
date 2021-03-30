@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Meadow.Gateways.Bluetooth
 {
+    /*
     public class Characteristic : ICharacteristic
     {
         /// <summary>
@@ -76,4 +77,5 @@ namespace Meadow.Gateways.Bluetooth
             this.ID = id;
         }
     }
+    */
 }

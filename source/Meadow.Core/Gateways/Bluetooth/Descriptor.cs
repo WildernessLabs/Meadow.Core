@@ -1,6 +1,7 @@
 ﻿using System;
 namespace Meadow.Gateways.Bluetooth
 {
+    /*
     /// <summary>
     /// A descriptor for a GATT characteristic.
     /// </summary>
@@ -31,4 +32,5 @@ namespace Meadow.Gateways.Bluetooth
             this.Name = name;
         }
     }
+    */
 }

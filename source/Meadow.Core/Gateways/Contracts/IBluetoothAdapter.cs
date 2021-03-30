@@ -1,8 +1,9 @@
-﻿namespace Meadow.Gateways
+﻿using Meadow.Gateways.Bluetooth;
+
+namespace Meadow.Gateways
 {
     public interface IBluetoothAdapter
     {
-        bool StartBluetoothStack(string config);
-        ushort[] GetGraphHandles();
+        bool StartBluetoothStack(Definition configuration);
     }
 }

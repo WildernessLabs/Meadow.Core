@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Meadow.Gateways.Bluetooth
 {
+    /*
     public class Service : IService
     {
         private bool disposedValue;
@@ -66,4 +67,5 @@ namespace Meadow.Gateways.Bluetooth
             GC.SuppressFinalize(this);
         }
     }
+    */
 }

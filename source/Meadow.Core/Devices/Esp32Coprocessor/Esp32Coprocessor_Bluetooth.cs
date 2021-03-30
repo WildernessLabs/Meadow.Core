@@ -1,25 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateways;
+using Meadow.Gateways.Bluetooth;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
     public partial class Esp32Coprocessor : IBluetoothAdapter
     {
+        private Definition _definition;
+
         internal string GetDefaultName()
         {
             // TODO: query this
             return "Meadow BLE";
         }
 
-        public bool StartBluetoothStack(string configuration)
+        public bool StartBluetoothStack(Definition definition)
         {
-            if (string.IsNullOrWhiteSpace(configuration))
+            if (definition == null)
             {
-                throw new ArgumentException("Invalid deviceName");
+                throw new ArgumentException("Invalid definition");
             }
+
+            _definition = definition;
+
+            var configuration = definition.ToJson();
 
             // TODO: sanity checking of the config
 
@@ -70,6 +79,14 @@ namespace Meadow.Devices
             }
             finally
             {
+                Task.Run(async () =>
+                {
+                    // yes. this is ugly.
+                    // We wait for the BT stack to get created and then go get the handles
+                    await Task.Delay(100);
+                    UpdateDefinitionHandles();
+                });
+
                 if (payloadGcHandle.IsAllocated)
                 {
                     payloadGcHandle.Free();
@@ -77,7 +94,35 @@ namespace Meadow.Devices
             }
         }
 
-        public ushort[] GetGraphHandles()
+        private void UpdateDefinitionHandles()
+        {
+            var handles = GetGraphHandles();
+
+            var index = 0;
+
+            foreach(var service in _definition.Services)
+            {
+                service.Handle = handles[index++];
+                foreach(var characteristic in service.Characteristics)
+                {
+                    characteristic.DefinitionHandle = handles[index++];
+                    characteristic.ValueHandle = handles[index++];
+
+                    _handleToCharacteristicMap.Add(characteristic.ValueHandle, characteristic);
+
+                    foreach (var descriptor in characteristic.Descriptors)
+                    {
+                        descriptor.Handle = handles[index++];
+                    }
+                }
+            }
+            // TODO: assign handles
+            // TODO: wire events
+        }
+
+        private Dictionary<ushort, Characteristic> _handleToCharacteristicMap = new Dictionary<ushort, Characteristic>();
+
+        private ushort[] GetGraphHandles()
         {
             // TODO: maybe this needs to be a dictionary where we set ID's in the graph config and we get an ID->handle dictionary back?
 
@@ -119,6 +164,16 @@ namespace Meadow.Devices
             switch (eventId)
             {
                 case BluetoothFunction.WriteRequestEvent:
+                    var handle = BitConverter.ToUInt16(payload, 0);
+                    var value = new byte[BitConverter.ToInt32(payload, 2)];
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"BLE Data says it is {value.Length} bytes");
+                    Array.Copy(payload, 6, value, 0, value.Length);
+                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"BLE Data Write to Handle 0x{handle:x4}: {BitConverter.ToString(value)}");
+
+                    if(_handleToCharacteristicMap.ContainsKey(handle))
+                    {
+                        _handleToCharacteristicMap[handle].RaiseOnDataSet(value);
+                    }
                     break;
                 case BluetoothFunction.ReadRequestEvent:
                     break;
