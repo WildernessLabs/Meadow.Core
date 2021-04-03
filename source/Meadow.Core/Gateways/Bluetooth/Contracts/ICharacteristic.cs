@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Meadow.Gateways.Bluetooth
 {
+    /*
     /// <summary>
     /// A bluetooth LE GATT characteristic.
     /// </summary>
@@ -72,4 +73,5 @@ namespace Meadow.Gateways.Bluetooth
         //ObservableCollection<IDescriptor> Descriptors { get; set; }
         ObservableDictionary<Guid, IDescriptor> Descriptors { get; }
     }
+    */
 }
