@@ -172,7 +172,7 @@ namespace Meadow.Devices
 
                     if(_handleToCharacteristicMap.ContainsKey(handle))
                     {
-                        _handleToCharacteristicMap[handle].RaiseOnDataSet(value);
+                        _handleToCharacteristicMap[handle].HandleDataWrite(value);
                     }
                     break;
                 case BluetoothFunction.ReadRequestEvent:

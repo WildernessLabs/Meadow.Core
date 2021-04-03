@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Meadow.Gateways.Bluetooth
 {
@@ -108,12 +109,11 @@ namespace Meadow.Gateways.Bluetooth
         }
     }
 
-    public delegate void CharacteristicDataSetHandler<T>(Characteristic<T> c, T data) where T : struct;
-    public delegate void CharacteristicDataSetHandler(ICharacteristic c, byte[] data);
+    public delegate void CharacteristicValueSetHandler(ICharacteristic c, object data);
 
-    public interface ICharacteristic : IAttribute, IDataSetHandlerSource
+    public interface ICharacteristic : IAttribute
     {
-        event CharacteristicDataSetHandler OnDataSet;
+        event CharacteristicValueSetHandler ValueSet;
 
         string Name { get; } // only for user reference, not used in BLE anywhere
         string Uuid { get; }
@@ -125,6 +125,8 @@ namespace Meadow.Gateways.Bluetooth
 
     public interface IAttribute
     {
+        void HandleDataWrite(byte[] data);
+
         ushort DefinitionHandle { get; set; }
         ushort ValueHandle { get; set; }
     }
@@ -134,15 +136,85 @@ namespace Meadow.Gateways.Bluetooth
         string ToJson();
     }
 
-    // this really needs to be internal, but the interitance tree effs it up
-    public interface IDataSetHandlerSource
+    public class CharacteristicBool : Characteristic<bool>
     {
-        void RaiseOnDataSet(byte[] data);
+        public CharacteristicBool(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, params Descriptor[] descriptors)
+            : base(name, uuid, permissions, properties, descriptors)
+        {
+        }
+
+        public override void HandleDataWrite(byte[] data)
+        {
+            Console.WriteLine($"HandleDataWrite in {this.GetType().Name}");
+            RaiseValueSet(data[0] != 0);
+        }
+    }
+
+    public class CharacteristicInt32 : Characteristic<int>
+    {
+        public CharacteristicInt32(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, params Descriptor[] descriptors)
+            : base(name, uuid, permissions, properties, descriptors)
+        {
+        }
+
+        public override void HandleDataWrite(byte[] data)
+        {
+            Console.WriteLine($"HandleDataWrite in {this.GetType().Name}");
+
+            // TODO: if the written data isn't 4 bytes, then what??
+            // for now I'll right-pad with zeros
+            if (data.Length < 4)
+            {
+                Console.WriteLine($"HandleDataWrite only got {data.Length} bytes - padding");
+                var temp = new byte[4];
+                Array.Copy(data, temp, data.Length);
+                RaiseValueSet(BitConverter.ToInt32(temp));
+            }
+            else
+            {
+                if(data.Length > 4)
+                {
+                    Console.WriteLine($"HandleDataWrite got {data.Length} bytes - using only the first 4");
+                }
+                RaiseValueSet(BitConverter.ToInt32(data));
+            }
+        }
+    }
+
+    public class CharacteristicString : Characteristic<string>
+    {
+        public CharacteristicString(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, int maxLength, params Descriptor[] descriptors)
+            : base(name, uuid, permissions, properties, maxLength, descriptors)
+        {
+        }
+
+        public override void HandleDataWrite(byte[] data)
+        {
+            Console.WriteLine($"HandleDataWrite in {this.GetType().Name}");
+
+            RaiseValueSet(Encoding.UTF8.GetString(data));
+        }
+    }
+
+    public abstract class Characteristic<T> : Characteristic
+    {
+
+        public Characteristic(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, int maxLength, params Descriptor[] descriptors)
+            : base(name, uuid, permissions, properties, maxLength, descriptors)
+        {
+        }
+
+        public Characteristic(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, params Descriptor[] descriptors)
+            : base(name, uuid, permissions, properties, Marshal.SizeOf(typeof(T)), descriptors)
+        {
+        }
     }
 
     public abstract class Characteristic : ICharacteristic, IAttribute, IJsonSerializable
     {
-        public event CharacteristicDataSetHandler OnDataSet;
+        public event CharacteristicValueSetHandler ValueSet;
+
+        public abstract void HandleDataWrite(byte[] data);
 
         public ushort DefinitionHandle { get; set; }
         public ushort ValueHandle { get; set; }
@@ -166,16 +238,9 @@ namespace Meadow.Gateways.Bluetooth
             Console.WriteLine($"Characteristic {Name} is {maxLength} bytes.");
         }
 
-        public virtual void RaiseOnDataSet(byte[] data)
+        protected void RaiseValueSet(object data)
         {
-            // dev note: not a fan of much of this - but without specialization, not sure what the solution is
-            Console.WriteLine($"Received {data.Length} bytes.  Copying to {MaxLength} handle");
-            if (data.Length != MaxLength)
-            {
-                Console.WriteLine($"Houston, we have a problem!");
-            }
-
-            OnDataSet?.Invoke(this, data);
+            ValueSet?.Invoke(this, data);
         }
 
         string IJsonSerializable.ToJson()
@@ -207,53 +272,6 @@ namespace Meadow.Gateways.Bluetooth
             return json;
         }
     }
-
-    public class Characteristic<T> : Characteristic
-        where T : struct
-    {
-        public event CharacteristicDataSetHandler<T>? OnValueSet;
-
-
-        public Characteristic(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, params Descriptor[] descriptors)
-            : base(name, uuid, permissions, properties, Marshal.SizeOf(typeof(T)), descriptors)
-        {
-        }
-
-        public override void RaiseOnDataSet(byte[] data)
-        {
-            Console.WriteLine("Characteristic<T>:RaiseOnDataSet");
-
-            base.RaiseOnDataSet(data);
-
-            if (OnValueSet is { } vs)
-            {
-                Console.WriteLine("We have an OnValueSet");
-
-                if (typeof(T).Equals(typeof(bool)))
-                {
-                    Console.WriteLine("We have a bool");
-                    // yay managed code (len of bool == 4)!
-                    // yay generics (no, you can't specialize for bool)!
-                    vs.Invoke(this, (T)(object)(data[0] != 0));
-                }
-                else
-                {
-                    Console.WriteLine("We have a non-bool");
-                    // well this is not very friendly, but I can't yet think of a better way.  ugh.
-                    var result = default(T);
-                    var handle = GCHandle.Alloc(result);
-                    Marshal.Copy(data, 0, handle.AddrOfPinnedObject(), data.Length);
-                    handle.Free();
-                    vs.Invoke(this, result);
-                }
-            }
-            else
-            {
-                Console.WriteLine("no OnValueSet");
-            }
-        }
-    }
-
 
     public class Descriptor
     {
