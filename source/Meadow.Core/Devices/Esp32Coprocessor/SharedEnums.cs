@@ -125,8 +125,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         Start = 0,
         Stop = 1,
         GetHandles = 2,
-        ReadRequestEvent = 3,
-        WriteRequestEvent = 4
+        ServerDataWrite = 3,
+        ClientWriteRequestEvent = 4
     };
 
     // <summary>

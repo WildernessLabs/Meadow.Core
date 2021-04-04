@@ -25,8 +25,21 @@ namespace Meadow.Devices
             {
                 throw new ArgumentException("Invalid definition");
             }
+            if(_definition != null)
+            {
+                throw new Exception("Stack already initialized");
+            }
 
             _definition = definition;
+
+            // wire up the server write events
+            foreach(var s in _definition.Services)
+            {
+                foreach(var c in s.Characteristics)
+                {
+                    c.ServerValueSet += OnServerValueSet;
+                }
+            }
 
             var configuration = definition.ToJson();
 
@@ -95,6 +108,22 @@ namespace Meadow.Devices
                     payloadGcHandle.Free();
                 }
             }
+        }
+
+        private void OnServerValueSet(ICharacteristic c, byte[] valueBytes)
+        {
+            var message = new BTServerDataSet
+            {
+                Handle = c.ValueHandle,
+                Data = valueBytes,
+                DataLength = (uint)valueBytes.Length
+            };
+            var bytes = Encoders.EncodeBTServerDataSet(message);
+
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Sending server write data...");
+
+            var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.ServerDataWrite, false, bytes);
+
         }
 
         private void UpdateDefinitionHandles()
@@ -166,7 +195,7 @@ namespace Meadow.Devices
             //  Placeholder
             switch (eventId)
             {
-                case BluetoothFunction.WriteRequestEvent:
+                case BluetoothFunction.ClientWriteRequestEvent:
                     var handle = BitConverter.ToUInt16(payload, 0);
                     var value = new byte[BitConverter.ToInt32(payload, 2)];
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"BLE Data says it is {value.Length} bytes");
@@ -176,26 +205,6 @@ namespace Meadow.Devices
                     if(_handleToCharacteristicMap.ContainsKey(handle))
                     {
                         _handleToCharacteristicMap[handle].HandleDataWrite(value);
-                    }
-                    break;
-                case BluetoothFunction.ReadRequestEvent:
-                    var readHandle = BitConverter.ToUInt16(payload, 0);
-                    if (_handleToCharacteristicMap.ContainsKey(readHandle))
-                    {
-                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"We have a request for BLE Data for known handle 0x{readHandle:x4}");
-                        if (_handleToCharacteristicMap[readHandle].HandleDataRead != null)
-                        {
-                            var readData = _handleToCharacteristicMap[readHandle]?.HandleDataRead();
-                            // TODO: send this back
-                        }
-                        else
-                        {
-                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"No read delegate for handle 0x{readHandle:x4} defined");
-                        }
-                    }
-                    else
-                    {
-                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"We have a request for BLE Data for unknown handle 0x{readHandle:x4}");
                     }
                     break;
             }

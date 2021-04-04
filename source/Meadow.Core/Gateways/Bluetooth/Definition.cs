@@ -110,12 +110,12 @@ namespace Meadow.Gateways.Bluetooth
     }
 
     public delegate void CharacteristicValueSetHandler(ICharacteristic c, object data);
-    public delegate byte[] CharacteristicValueGetHandler(ICharacteristic c);
+    public delegate void ServerValueChangedHandler(ICharacteristic c, byte[] valueBytes);
 
     public interface ICharacteristic : IAttribute
     {
         event CharacteristicValueSetHandler ValueSet;
-        Func<byte[]>? HandleDataRead { get; } // TODO: should we use an event instead?  A bit odd since multiple delegates can be attached to an event
+        event ServerValueChangedHandler ServerValueSet;
 
         string Name { get; } // only for user reference, not used in BLE anywhere
         string Uuid { get; }
@@ -155,6 +155,11 @@ namespace Meadow.Gateways.Bluetooth
             Console.WriteLine($"HandleDataWrite in {this.GetType().Name}");
             RaiseValueSet(data[0] != 0);
         }
+
+        protected override byte[] SerializeValue(bool value)
+        {
+            return new byte[] { (byte)(value ? 1 : 0) };
+        }
     }
 
     public class CharacteristicInt32 : Characteristic<int>
@@ -186,6 +191,11 @@ namespace Meadow.Gateways.Bluetooth
                 RaiseValueSet(BitConverter.ToInt32(data));
             }
         }
+
+        protected override byte[] SerializeValue(int value)
+        {
+            return BitConverter.GetBytes(value);
+        }
     }
 
     public class CharacteristicString : Characteristic<string>
@@ -201,10 +211,16 @@ namespace Meadow.Gateways.Bluetooth
 
             RaiseValueSet(Encoding.UTF8.GetString(data));
         }
+
+        protected override byte[] SerializeValue(string value)
+        {
+            return Encoding.UTF8.GetBytes(value);
+        }
     }
 
     public abstract class Characteristic<T> : Characteristic
     {
+        protected abstract byte[] SerializeValue(T value);
 
         public Characteristic(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, int maxLength, params Descriptor[] descriptors)
             : base(name, uuid, permissions, properties, maxLength, descriptors)
@@ -226,11 +242,19 @@ namespace Meadow.Gateways.Bluetooth
             : base(name, uuid, permissions, properties, Marshal.SizeOf(typeof(T)), readFunction, descriptors)
         {
         }
+
+        public void SetValue(T value)
+        {
+            var bytes = SerializeValue(value);
+            base.SendValueToAdapter(bytes);
+        }
+
     }
 
     public abstract class Characteristic : ICharacteristic, IAttribute, IJsonSerializable
     {
         public event CharacteristicValueSetHandler ValueSet;
+        public event ServerValueChangedHandler ServerValueSet;
 
         public abstract void HandleDataWrite(byte[] data);
         public Func<byte[]>? HandleDataRead { get; }
@@ -262,6 +286,11 @@ namespace Meadow.Gateways.Bluetooth
             HandleDataRead = readFunction;
 
             Console.WriteLine($"Characteristic {Name} is {maxLength} bytes.");
+        }
+
+        internal void SendValueToAdapter(byte[] data)
+        {
+            ServerValueSet?.Invoke(this, data);
         }
 
         protected void RaiseValueSet(object data)
