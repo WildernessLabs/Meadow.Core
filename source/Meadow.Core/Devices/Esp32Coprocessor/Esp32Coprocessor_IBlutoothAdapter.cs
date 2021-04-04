@@ -179,6 +179,24 @@ namespace Meadow.Devices
                     }
                     break;
                 case BluetoothFunction.ReadRequestEvent:
+                    var readHandle = BitConverter.ToUInt16(payload, 0);
+                    if (_handleToCharacteristicMap.ContainsKey(readHandle))
+                    {
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"We have a request for BLE Data for known handle 0x{readHandle:x4}");
+                        if (_handleToCharacteristicMap[readHandle].HandleDataRead != null)
+                        {
+                            var readData = _handleToCharacteristicMap[readHandle]?.HandleDataRead();
+                            // TODO: send this back
+                        }
+                        else
+                        {
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"No read delegate for handle 0x{readHandle:x4} defined");
+                        }
+                    }
+                    else
+                    {
+                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"We have a request for BLE Data for unknown handle 0x{readHandle:x4}");
+                    }
                     break;
             }
         }

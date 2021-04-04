@@ -3020,5 +3020,117 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(result + 6);
         }
 
+        /// <summary>
+        /// Encode a BTDataReadRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="bTDataReadRequest">BTDataReadRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded BTDataReadRequest object.</returns>
+        public static byte[] EncodeBTDataReadRequest(MessagePayloads.BTDataReadRequest bTDataReadRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 2;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt16(bTDataReadRequest.Handle, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a BTDataReadRequest object from a byte array.
+        /// </summary>
+        /// <param name="bTDataReadRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>BTDataReadRequest object.</returns>
+        public static MessagePayloads.BTDataReadRequest ExtractBTDataReadRequest(byte[] buffer, int offset)
+        {
+            BTDataReadRequest bTDataReadRequest = new MessagePayloads.BTDataReadRequest();
+
+            bTDataReadRequest.Handle = ExtractUInt16(buffer, offset);
+            return(bTDataReadRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the BTDataReadRequest object.
+        /// </summary>
+        /// <param name="bTDataReadRequest">BTDataReadRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded BTDataReadRequest object.</returns>
+        public static int EncodedBTDataReadRequestBufferSize(MessagePayloads.BTDataReadRequest bTDataReadRequest)
+        {
+            return(2);
+        }
+
+        /// <summary>
+        /// Encode a BTDataReadResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="bTDataReadResponse">BTDataReadResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded BTDataReadResponse object.</returns>
+        public static byte[] EncodeBTDataReadResponse(MessagePayloads.BTDataReadResponse bTDataReadResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (bTDataReadResponse.DataLength + 4);
+            length += 2;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt16(bTDataReadResponse.Handle, buffer, offset);
+            offset += 2;
+            EncodeUInt32(bTDataReadResponse.DataLength, buffer, offset);
+            offset += 4;
+            if (bTDataReadResponse.DataLength > 0)
+            {
+                Array.Copy(bTDataReadResponse.Data, 0, buffer, offset, bTDataReadResponse.DataLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a BTDataReadResponse object from a byte array.
+        /// </summary>
+        /// <param name="bTDataReadResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>BTDataReadResponse object.</returns>
+        public static MessagePayloads.BTDataReadResponse ExtractBTDataReadResponse(byte[] buffer, int offset)
+        {
+            BTDataReadResponse bTDataReadResponse = new MessagePayloads.BTDataReadResponse();
+
+            bTDataReadResponse.Handle = ExtractUInt16(buffer, offset);
+            offset += 2;
+            bTDataReadResponse.DataLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (bTDataReadResponse.DataLength > 0)
+            {
+                bTDataReadResponse.Data = new byte[bTDataReadResponse.DataLength];
+                Array.Copy(buffer, offset, bTDataReadResponse.Data, 0, bTDataReadResponse.DataLength);
+            }
+            return(bTDataReadResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the BTDataReadResponse object.
+        /// </summary>
+        /// <param name="bTDataReadResponse">BTDataReadResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded BTDataReadResponse object.</returns>
+        public static int EncodedBTDataReadResponseBufferSize(MessagePayloads.BTDataReadResponse bTDataReadResponse)
+        {
+            int result = 0;
+            result += (int) bTDataReadResponse.DataLength;
+            return(result + 6);
+        }
+
     }
 }
