@@ -30,6 +30,9 @@ namespace Meadow.Devices
 
             var configuration = definition.ToJson();
 
+            Console.WriteLine("======================");
+            Console.WriteLine(configuration);
+            Console.WriteLine("======================");
             // TODO: sanity checking of the config
 
             var payloadGcHandle = default(GCHandle);
