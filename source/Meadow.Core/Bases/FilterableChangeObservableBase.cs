@@ -4,7 +4,7 @@ using System;
 namespace Meadow.Bases
 {
     public class FilterableChangeObservableBase<U1> : IObserver<CompositeChangeResult<U1>> 
-        where U1 : UnitType
+        where U1 : IUnitType
     {
         public void OnCompleted()
         {
@@ -26,8 +26,8 @@ namespace Meadow.Bases
 
     public class FilterableChangeObservableBase<T, U1, U2> : IObserver<T> 
         where T : CompositeChangeResult<U1, U2>
-        where U1 : UnitType
-        where U2 : UnitType
+        where U1 : IUnitType
+        where U2 : IUnitType
     {
         public void OnCompleted()
         {
@@ -47,9 +47,9 @@ namespace Meadow.Bases
 
     public class FilterableChangeObservableBase<T, U1, U2, U3> : IObserver<T>
         where T : CompositeChangeResult<U1, U2, U3>
-        where U1 : UnitType
-        where U2 : UnitType
-        where U3 : UnitType
+        where U1 : IUnitType
+        where U2 : IUnitType
+        where U3 : IUnitType
     {
         public void OnCompleted()
         {

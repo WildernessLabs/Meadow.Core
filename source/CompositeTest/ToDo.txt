@@ -1,0 +1,2 @@
+﻿- Change all sensor interfaces to use units - ITemperatureSensor, etc.
+- Configure delta in FilterableChangeObservableBase

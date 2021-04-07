@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Meadow.Units;
 
 namespace Meadow.Bases
 {
-    class SensorChangeResult
+    public class SensorChangeResult<U> where U : IUnitType
     {
+        public U Old { get; set; }
+        public U New { get; set; }
+        public U Delta { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace Meadow.Bases
     //https://stackoverflow.com/questions/15578668/constraining-class-generic-type-to-a-tuple/15578908
 
     public class CompositeChangeResult<U1> 
-        where U1 : UnitType
+        where U1 : IUnitType
     {
         public U1 New { get; set; }
 
@@ -31,12 +31,14 @@ namespace Meadow.Bases
             New = newValue;
 
             Old = oldValue;
+
+            //set delta here
         }
     }
 
     public class CompositeChangeResult<U1, U2>
-        where U1 : UnitType
-        where U2 : UnitType
+        where U1 : IUnitType
+        where U2 : IUnitType
     {
         public (U1 unit1, U2 unit2) New { get; set; }
 
@@ -58,9 +60,9 @@ namespace Meadow.Bases
     }
 
     public class CompositeChangeResult<U1, U2, U3>
-        where U1 : UnitType
-        where U2 : UnitType
-        where U3 : UnitType
+        where U1 : IUnitType
+        where U2 : IUnitType
+        where U3 : IUnitType
     {
         public (U1 unit1, U2 unit2, U3 unit3) New { get; set; }
 

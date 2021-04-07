@@ -1,6 +1,7 @@
-﻿using Meadow.Contracts;
+﻿//Adrian - ToDo - Delete 
+//Leaving here for reference until things are working
 
-namespace Meadow.Peripherals.Sensors.Atmospheric
+namespace Meadow.Peripherals.Sensors
 {
     public class SensorConditions<T1>
     {
@@ -23,8 +24,7 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
         public T1 Value1 { get; set; }
         public T2 Value2 { get; set; }
 
-          public SensorConditions(
-            T1 value1, T2 value2)
+          public SensorConditions(T1 value1, T2 value2)
         {
             Value1 = value1;
             Value2 = value2;
@@ -47,7 +47,7 @@ namespace Meadow.Peripherals.Sensors.Atmospheric
     }
 
     //public class AtmosphericConditionChangeResult : IChangeResult<AtmosphericConditions>
-    public class SensorConditionsChangeResult<T1> : ISensorChangeResult<SensorConditions<T1>>
+    public class SensorConditionsChangeResult<T1> //: ISensorChangeResult<SensorConditions<T1>>
     {
 
         public SensorConditions<T1> New

@@ -4,7 +4,7 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDA0F516-977E-4F27-9434-9A0961EF91D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "Meadow.Core\Meadow.Core.csproj", "{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppTemplates", "AppTemplates", "{897B80D1-CC82-4EF4-91D6-B3CFF44A88E3}"
 EndProject
@@ -21,6 +21,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic_FileSystem", "Tests\Basic_FileSystem\Basic_FileSystem.csproj", "{FD33EDFB-E868-45A4-993D-13959D9D718D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Units.Tests", "Meadow.Units.Tests\Meadow.Units.Tests.csproj", "{6037106D-06D4-4990-91BA-7E06DF23B9CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompositeTest", "CompositeTest\CompositeTest.csproj", "{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,15 @@ Global
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Core|Any CPU.Deploy.0 = Debug|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
