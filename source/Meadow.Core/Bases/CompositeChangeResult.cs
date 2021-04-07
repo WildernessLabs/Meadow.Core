@@ -1,19 +1,8 @@
 ﻿using Meadow.Units;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Meadow.Bases
 {
-    //public class CompositeChangeResult<(U1)> Result where U : SensorChangeResult<U>
-    // {} 
-    // public class CompositeChangeResult<(U1, U2)> where U1, : UnitType, U2 : UnitType
-
-    //https://stackoverflow.com/questions/15578668/constraining-class-generic-type-to-a-tuple/15578908
-
-    public class CompositeChangeResult<U1> 
+    public class CompositeChangeResult<U1> : IChangeResult<U1>
         where U1 : IUnitType
     {
         public U1 New { get; set; }
@@ -36,7 +25,7 @@ namespace Meadow.Bases
         }
     }
 
-    public class CompositeChangeResult<U1, U2>
+    public class CompositeChangeResult<U1, U2> : IChangeResult<(U1 unit1, U2 unit2)>
         where U1 : IUnitType
         where U2 : IUnitType
     {
@@ -59,7 +48,7 @@ namespace Meadow.Bases
         }
     }
 
-    public class CompositeChangeResult<U1, U2, U3>
+    public class CompositeChangeResult<U1, U2, U3> : IChangeResult<(U1 unit1, U2 unit2, U3 unit3)>
         where U1 : IUnitType
         where U2 : IUnitType
         where U3 : IUnitType
@@ -79,8 +68,4 @@ namespace Meadow.Bases
             Old = oldValue;
         }
     }
-
-
-    // public class CompositeChangeResult<(U1, U2, U3) > result 
-    // { 
 }

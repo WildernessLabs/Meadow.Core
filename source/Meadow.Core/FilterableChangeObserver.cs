@@ -73,5 +73,4 @@ namespace Meadow
             Console.WriteLine("Filtered Observer error: "+ error.Message);
         }
     }
-
 }

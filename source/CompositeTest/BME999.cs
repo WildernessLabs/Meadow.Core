@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Meadow;
 using Meadow.Bases;
 using Meadow.Peripherals.Sensors.Atmospheric;
 using Meadow.Peripherals.Sensors.Temperature;
@@ -15,7 +16,7 @@ namespace CompositeTest
 
     public class BME999 :
         FilterableChangeObservableBase<CompositeChangeResult<Mass, Pressure, Temperature>, Mass, Pressure, Temperature>
-        , IBarometricPressureSensor, ITemperatureSensor
+      //  , IBarometricPressureSensor, ITemperatureSensor
     {
         public float Pressure => 100;
 
@@ -23,11 +24,21 @@ namespace CompositeTest
 
         public float Mass => 0;
 
-        public event EventHandler<AtmosphericConditionChangeResult> Updated;
+        public event EventHandler<CompositeChangeResult<Mass, Pressure, Temperature>> Updated;
 
-        public IDisposable Subscribe(IObserver<AtmosphericConditionChangeResult> observer)
+        public IDisposable Subscribe(IObserver<CompositeChangeResult<Mass, Pressure, Temperature>> observer)
         {
             throw new NotImplementedException();
+        }
+
+        public FilterableChangeObserver<CompositeChangeResult<Mass, Pressure, Temperature>,
+                (Mass, Pressure, Temperature)> 
+            GetObserver(Action<CompositeChangeResult<Mass, Pressure, Temperature>> handler, 
+                        Predicate<CompositeChangeResult<Mass, Pressure, Temperature>> filter = null)
+        {
+            return new FilterableChangeObserver<CompositeChangeResult<Mass, Pressure, Temperature>,
+                (Mass, Pressure, Temperature)>
+            (handler, filter);
         }
     }
 }
