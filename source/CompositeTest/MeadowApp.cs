@@ -8,17 +8,41 @@ namespace CompositeTest
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
-        BME999 compositeSensor;
+        //  BME999 compositeSensor;
+
+        Bmp180 bmp180;
 
         public MeadowApp()
         {
             Initialize();
         }
 
-        void Initialize()
-        {
-            Console.WriteLine("Initialize hardware...");
+void Initialize()
+{
+    Console.WriteLine("Initialize hardware...");
 
+    bmp180 = new Bmp180(Device.CreateI2cBus());
+
+    Console.WriteLine("Event subscribe...");
+
+    //  bmp180.Updated += Bmp180_Updated;
+
+    Console.WriteLine("Start updating...");
+
+    var observer = new FilterableChangeObserver<CompositeChangeResult<Pressure, Temperature>,
+        (Pressure Pressure, Temperature Temperature)>
+    (
+        h => { Console.WriteLine($"Update: {h.New.unit1.StandardAtmosphere}, {h.New.unit2.Fahrenheit}"); },
+        e => { return true; }
+    );
+
+    bmp180.Subscribe(observer);
+
+    bmp180.StartUpdating();
+
+
+
+            /*
             compositeSensor = new BME999();
 
             var observer = compositeSensor.GetObserver(
@@ -26,7 +50,7 @@ namespace CompositeTest
                 e => { return true; }
             );
 
-            compositeSensor.Subscribe(observer);
+            compositeSensor.Subscribe(observer); */
 
             /*
             var observer = new FilterableChangeObserver<CompositeChangeResult<Mass, Pressure, Temperature>,
@@ -37,6 +61,11 @@ namespace CompositeTest
             );*/
 
             //compositeSensor.Subscribe(observer);
+        }
+
+        private void Bmp180_Updated(object sender, CompositeChangeResult<Pressure, Temperature> e)
+        {
+            Console.WriteLine($"Update: {e.New.unit1.Psi}, {e.New.unit2.Celsius}");
         }
     }
 }
