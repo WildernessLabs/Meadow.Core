@@ -23,6 +23,10 @@ namespace Meadow.Bases
 
             //set delta here
         }
+
+        public CompositeChangeResult()
+        {
+        }
     }
 
     public class CompositeChangeResult<U1, U2> : IChangeResult<(U1 unit1, U2 unit2)>
@@ -46,6 +50,10 @@ namespace Meadow.Bases
 
             Old = oldValue;
         }
+
+        public CompositeChangeResult()
+        {
+        }
     }
 
     public class CompositeChangeResult<U1, U2, U3> : IChangeResult<(U1 unit1, U2 unit2, U3 unit3)>
@@ -66,6 +74,10 @@ namespace Meadow.Bases
             New = newValue;
 
             Old = oldValue;
+        }
+
+        public CompositeChangeResult()
+        {
         }
     }
 }

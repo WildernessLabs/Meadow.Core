@@ -15,7 +15,7 @@ namespace CompositeTest
     //    IAtmosphericSensor, IBarometricPressureSensor, ITemperatureSensor
 
     public class BME999 :
-        FilterableChangeObservableBase<CompositeChangeResult<Mass, Pressure, Temperature>, Mass, Pressure, Temperature>
+        FilterableUnitChangeObservable<CompositeChangeResult<Mass, Pressure, Temperature>, Mass, Pressure, Temperature>
       //  , IBarometricPressureSensor, ITemperatureSensor
     {
         public float Pressure => 100;
