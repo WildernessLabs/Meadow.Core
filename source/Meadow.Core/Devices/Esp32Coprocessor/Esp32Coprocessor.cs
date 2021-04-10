@@ -145,31 +145,34 @@ namespace Meadow.Devices
         /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? payload, byte[] encodedResult)
+        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? payload, byte[]? encodedResult)
         {
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
             StatusCodes result = StatusCodes.CompletedOk;
             try
             {
-                payloadGcHandle = GCHandle.Alloc(payload, GCHandleType.Pinned);
-                resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
-                UInt32 payloadLength = 0;
-                if (!(payload is null))
-                {
-                    payloadLength = (UInt32) payload.Length;
-                }
                 var command = new Nuttx.UpdEsp32Command()
                 {
                     Interface = where,
                     Function = function,
-                    StatusCode = (UInt32) StatusCodes.CompletedOk,
-                    Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = payloadLength,
-                    Result = resultGcHandle.AddrOfPinnedObject(),
-                    ResultLength = (UInt32) encodedResult.Length,
-                    Block = (byte) (block ? 1 : 0)
+                    StatusCode = (UInt32)StatusCodes.CompletedOk,
+                    Block = (byte)(block ? 1 : 0)
                 };
+
+                if (payload != null && payload.Length > 0)
+                {
+                    payloadGcHandle = GCHandle.Alloc(payload, GCHandleType.Pinned);
+                    command.Payload = payloadGcHandle.AddrOfPinnedObject();
+                    command.PayloadLength = (uint)payload.Length;
+                }
+                if (encodedResult != null && encodedResult.Length > 0)
+                {
+                    resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
+                    command.Result = resultGcHandle.AddrOfPinnedObject();
+                    command.ResultLength = (UInt32)encodedResult.Length;
+                }
+
 
                 int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
                 if (updResult == 0)

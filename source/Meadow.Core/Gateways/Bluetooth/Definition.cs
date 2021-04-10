@@ -117,6 +117,8 @@ namespace Meadow.Gateways.Bluetooth
         event CharacteristicValueSetHandler ValueSet;
         event ServerValueChangedHandler ServerValueSet;
 
+        void SetValue(object value);
+
         string Name { get; } // only for user reference, not used in BLE anywhere
         string Uuid { get; }
         CharacteristicPermission Permissions { get; }
@@ -249,14 +251,24 @@ namespace Meadow.Gateways.Bluetooth
             base.SendValueToAdapter(bytes);
         }
 
+        public override void SetValue(object value)
+        {
+            // TODO: is this a problem?  it will coerce things like short->int for us.  Do we want it to?
+            SetValue((T)value);
+        }
+
     }
 
     public abstract class Characteristic : ICharacteristic, IAttribute, IJsonSerializable
     {
         public event CharacteristicValueSetHandler ValueSet;
-        public event ServerValueChangedHandler ServerValueSet;
+
+        public event ServerValueChangedHandler ServerValueSet; // this is an internally used event.  
 
         public abstract void HandleDataWrite(byte[] data);
+
+        public abstract void SetValue(object value);
+
         public Func<byte[]>? HandleDataRead { get; }
 
         public ushort DefinitionHandle { get; set; }

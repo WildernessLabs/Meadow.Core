@@ -59,6 +59,10 @@ namespace Meadow.Devices
 
                 var requestBytes = Encoders.EncodeBTStackConfig(req);
 
+                var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.Start, true, requestBytes, new byte[0]);
+                return result == StatusCodes.CompletedOk;
+
+                /*
                 // TODO: do we expect a result?  If so create a buffer and pin it.
 
                 payloadGcHandle = GCHandle.Alloc(requestBytes, GCHandleType.Pinned);
@@ -92,6 +96,7 @@ namespace Meadow.Devices
 
                     return false;
                 }
+                */
             }
             finally
             {
@@ -112,6 +117,13 @@ namespace Meadow.Devices
 
         private void OnServerValueSet(ICharacteristic c, byte[] valueBytes)
         {
+            if(c.ValueHandle == 0)
+            {
+                // we don't yet have a handle for this, can't set a value
+                Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Cannot write characteristic value without a handle.");
+                return;
+            }
+
             var message = new BTServerDataSet
             {
                 Handle = c.ValueHandle,
@@ -120,10 +132,11 @@ namespace Meadow.Devices
             };
             var bytes = Encoders.EncodeBTServerDataSet(message);
 
-            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Sending server write data...");
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Sending server write {valueBytes.Length} bytes of data to 0x{c.ValueHandle:x4}...");
 
-            var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.ServerDataWrite, false, bytes);
+            var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.ServerDataWrite, false, bytes, new byte[0]);
 
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Result: {result}");
         }
 
         private void UpdateDefinitionHandles()
