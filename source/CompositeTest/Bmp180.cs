@@ -10,18 +10,19 @@ using Meadow.Units;
 namespace CompositeTest
 {
     public class Bmp180 :
-        FilterableChangeObservable<CompositeChangeResult<Pressure, Temperature>, Pressure, Temperature>, 
-        ITemperatureSensor
+        FilterableChangeObservable<CompositeChangeResult<Pressure, Temperature>, Pressure, Temperature>,
+        ITemperatureSensor, IBarometricPressureSensor
     {
         /// <summary>
         /// Last value read from the Pressure sensor.
         /// </summary>
-        Pressure Pressure => Conditions.Pressure;
+        public Pressure Pressure => Conditions.Pressure;
 
         /// <summary>
         /// Last value read from the Pressure sensor.
         /// </summary>
-        Temperature Temperature => Conditions.Temperature;
+        public Temperature Temperature => Conditions.Temperature;
+        //Temperature Temperature => Conditions.Temperature;
 
         /// <summary>
         ///     BMP180 sensor communicates using I2C.
@@ -73,6 +74,7 @@ namespace CompositeTest
 
         public event EventHandler<CompositeChangeResult<Pressure, Temperature>> Updated;
         public event EventHandler<CompositeChangeResult<Temperature>> TemperatureUpdated;
+        public event EventHandler<CompositeChangeResult<Pressure>> PressureUpdated;
 
         /// <summary>
         /// Provide a mechanism for reading the temperature and humidity from
@@ -149,7 +151,9 @@ namespace CompositeTest
 
         protected void RaiseChangedAndNotify(CompositeChangeResult<Pressure, Temperature> changeResult)
         {
-            TemperatureUpdated?.Invoke(this, new CompositeChangeResult<Temperature>(changeResult.Old.unit2, changeResult.New.unit2));
+            PressureUpdated?.Invoke(this, new CompositeChangeResult<Pressure>(changeResult.Old.Value.unit1, changeResult.New.Value.unit1));
+            TemperatureUpdated?.Invoke(this, new CompositeChangeResult<Temperature>(changeResult.Old.Value.unit2, changeResult.New.Value.unit2));
+
             Updated?.Invoke(this, changeResult);
             base.NotifyObservers(changeResult);
         }

@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Meadow;
 using Meadow.Bases;
-using Meadow.Peripherals.Sensors.Atmospheric;
-using Meadow.Peripherals.Sensors.Temperature;
 using Meadow.Units;
 
 namespace CompositeTest
@@ -15,7 +9,7 @@ namespace CompositeTest
     //    IAtmosphericSensor, IBarometricPressureSensor, ITemperatureSensor
 
     public class BME999 :
-        FilterableUnitChangeObservable<CompositeChangeResult<Mass, Pressure, Temperature>, Mass, Pressure, Temperature>
+        FilterableChangeObservable<CompositeChangeResult<Mass, Pressure, Temperature>, Mass, Pressure, Temperature>
       //  , IBarometricPressureSensor, ITemperatureSensor
     {
         public float Pressure => 100;
@@ -31,6 +25,7 @@ namespace CompositeTest
             throw new NotImplementedException();
         }
 
+        /*
         public FilterableChangeObserver<CompositeChangeResult<Mass, Pressure, Temperature>,
                 (Mass, Pressure, Temperature)> 
             GetObserver(Action<CompositeChangeResult<Mass, Pressure, Temperature>> handler, 
@@ -39,6 +34,6 @@ namespace CompositeTest
             return new FilterableChangeObserver<CompositeChangeResult<Mass, Pressure, Temperature>,
                 (Mass, Pressure, Temperature)>
             (handler, filter);
-        }
+        }*/
     }
 }

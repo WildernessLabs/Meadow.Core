@@ -51,7 +51,7 @@ namespace Meadow.Bases
         }
     }
 
-    public class FilterableUnitChangeObservable<U1> : FilterableChangeObservableBase<U1>
+    public class FilterableChangeObservable<U1> : FilterableChangeObservableBase<U1>
         where U1 : IUnitType
     {
     }
@@ -63,7 +63,7 @@ namespace Meadow.Bases
     {
     }
 
-    public class FilterableUnitChangeObservable<T, U1, U2, U3> : FilterableChangeObservableBase<T>
+    public class FilterableChangeObservable<T, U1, U2, U3> : FilterableChangeObservableBase<T>
         where T : CompositeChangeResult<U1, U2, U3>
         where U1 : IUnitType
         where U2 : IUnitType

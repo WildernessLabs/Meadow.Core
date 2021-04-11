@@ -30,9 +30,9 @@ void Initialize()
     Console.WriteLine("Start updating...");
 
     var observer = new FilterableChangeObserver<CompositeChangeResult<Pressure, Temperature>,
-        (Pressure Pressure, Temperature Temperature)>
+        (Pressure Pressure, Temperature Temperature)?>
     (
-        h => { Console.WriteLine($"Update: {h.New.unit1.StandardAtmosphere}, {h.New.unit2.Fahrenheit}"); },
+        h => { Console.WriteLine($"Update: {h.New.Value.unit1.StandardAtmosphere}, {h.New.Value.unit2.Fahrenheit}"); },
         e => { return true; }
     );
 
@@ -65,7 +65,7 @@ void Initialize()
 
         private void Bmp180_Updated(object sender, CompositeChangeResult<Pressure, Temperature> e)
         {
-            Console.WriteLine($"Update: {e.New.unit1.Psi}, {e.New.unit2.Celsius}");
+            Console.WriteLine($"Update: {e.New.Value.unit1.Psi}, {e.New.Value.unit2.Celsius}");
         }
     }
 }
