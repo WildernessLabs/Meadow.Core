@@ -3033,7 +3033,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += (int) (bTServerDataSet.DataLength + 4);
+            length += (int) (bTServerDataSet.SetDataLength + 4);
             length += 2;
 
             //
@@ -3043,11 +3043,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt16(bTServerDataSet.Handle, buffer, offset);
             offset += 2;
-            EncodeUInt32(bTServerDataSet.DataLength, buffer, offset);
+            EncodeUInt32(bTServerDataSet.SetDataLength, buffer, offset);
             offset += 4;
-            if (bTServerDataSet.DataLength > 0)
+            if (bTServerDataSet.SetDataLength > 0)
             {
-                Array.Copy(bTServerDataSet.Data, 0, buffer, offset, bTServerDataSet.DataLength);
+                Array.Copy(bTServerDataSet.SetData, 0, buffer, offset, bTServerDataSet.SetDataLength);
             }
             return(buffer);
         }
@@ -3063,12 +3063,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
 
             bTServerDataSet.Handle = ExtractUInt16(buffer, offset);
             offset += 2;
-            bTServerDataSet.DataLength = ExtractUInt32(buffer, offset);
+            bTServerDataSet.SetDataLength = ExtractUInt32(buffer, offset);
             offset += 4;
-            if (bTServerDataSet.DataLength > 0)
+            if (bTServerDataSet.SetDataLength > 0)
             {
-                bTServerDataSet.Data = new byte[bTServerDataSet.DataLength];
-                Array.Copy(buffer, offset, bTServerDataSet.Data, 0, bTServerDataSet.DataLength);
+                bTServerDataSet.SetData = new byte[bTServerDataSet.SetDataLength];
+                Array.Copy(buffer, offset, bTServerDataSet.SetData, 0, bTServerDataSet.SetDataLength);
             }
             return(bTServerDataSet);
         }
@@ -3081,7 +3081,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public static int EncodedBTServerDataSetBufferSize(MessagePayloads.BTServerDataSet bTServerDataSet)
         {
             int result = 0;
-            result += (int) bTServerDataSet.DataLength;
+            result += (int) bTServerDataSet.SetDataLength;
             return(result + 6);
         }
 

@@ -88,19 +88,21 @@ namespace Meadow.Devices
                 return;
             }
 
-            var message = new BTServerDataSet
+            var msg = new BTServerDataSet
             {
                 Handle = c.ValueHandle,
-                Data = valueBytes,
-                DataLength = (uint)valueBytes.Length
+                SetData = valueBytes,
+                SetDataLength = (uint)valueBytes.Length
             };
-            var bytes = Encoders.EncodeBTServerDataSet(message);
+
+            var bytes = Encoders.EncodeBTServerDataSet(msg);
 
             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Writing {valueBytes.Length} bytes of data to 0x{c.ValueHandle:x4}...");
 
             try
             {
-                var result = SendBluetoothCommand(BluetoothFunction.ServerDataWrite, false, bytes, null);
+                var test = new byte[4];
+                var result = SendBluetoothCommand(BluetoothFunction.ServerDataSet, false, bytes, test);
 
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Result: {result}");
             }

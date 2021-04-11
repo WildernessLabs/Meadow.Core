@@ -187,10 +187,10 @@ namespace Meadow.Devices
                 if (updResult == 0)
                 {
                     result = (StatusCodes) command.StatusCode;
-                    Console.WriteLine($"ESP Ioctl failed: {result}");
                 }
                 else
                 {
+                    Console.WriteLine($"ESP Ioctl failed: {updResult}");
                     result = StatusCodes.Failure;
                 }
             }

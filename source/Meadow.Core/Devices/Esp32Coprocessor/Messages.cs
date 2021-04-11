@@ -356,8 +356,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     public struct BTServerDataSet
     {
         public UInt16 Handle;
-        public UInt32 DataLength;
-        public byte[] Data;
+        public UInt32 SetDataLength;
+        public byte[] SetData;
     };
 
 }
