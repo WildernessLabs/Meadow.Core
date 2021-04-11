@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow;
 using Meadow.Bases;
 using Meadow.Hardware;
+using Meadow.Peripherals.Sensors.Temperature;
 using Meadow.Units;
 
 namespace CompositeTest
 {
     public class Bmp180 :
-        FilterableChangeObservable<CompositeChangeResult<Pressure, Temperature>, Pressure, Temperature>
+        FilterableChangeObservable<CompositeChangeResult<Pressure, Temperature>, Pressure, Temperature>, 
+        ITemperatureSensor
     {
         /// <summary>
         /// Last value read from the Pressure sensor.
@@ -69,6 +72,7 @@ namespace CompositeTest
         }
 
         public event EventHandler<CompositeChangeResult<Pressure, Temperature>> Updated;
+        public event EventHandler<CompositeChangeResult<Temperature>> TemperatureUpdated;
 
         /// <summary>
         /// Provide a mechanism for reading the temperature and humidity from
@@ -145,6 +149,7 @@ namespace CompositeTest
 
         protected void RaiseChangedAndNotify(CompositeChangeResult<Pressure, Temperature> changeResult)
         {
+            TemperatureUpdated?.Invoke(this, new CompositeChangeResult<Temperature>(changeResult.Old.unit2, changeResult.New.unit2));
             Updated?.Invoke(this, changeResult);
             base.NotifyObservers(changeResult);
         }

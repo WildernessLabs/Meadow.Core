@@ -35,6 +35,7 @@
    <Folder Include="Hardware\Contracts\IOControllers\" />
    <Folder Include="Hardware\Contracts\PortsAndBuses\" />
    <Folder Include="Hardware\Contracts\ChannelInfos\" />
+   <Folder Include="Peripherals\Sensors\Proximity\" />
  </ItemGroup>
  <ItemGroup>
    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.6.0" />
