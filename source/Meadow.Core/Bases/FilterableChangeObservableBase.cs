@@ -70,4 +70,13 @@ namespace Meadow.Bases
         where U3 : IUnitType
     {
     }
+
+    public class FilterableUnitChangeObservable<T, U1, U2, U3, U4> : FilterableChangeObservableBase<T>
+        where T : CompositeChangeResult<U1, U2, U3, U4>
+        where U1 : IUnitType
+        where U2 : IUnitType
+        where U3 : IUnitType
+        where U4 : IUnitType
+    {
+    }
 }
