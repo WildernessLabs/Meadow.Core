@@ -59,44 +59,8 @@ namespace Meadow.Devices
 
                 var requestBytes = Encoders.EncodeBTStackConfig(req);
 
-                var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.Start, true, requestBytes, new byte[0]);
+                var result = SendBluetoothCommand(BluetoothFunction.Start, true, requestBytes, null);
                 return result == StatusCodes.CompletedOk;
-
-                /*
-                // TODO: do we expect a result?  If so create a buffer and pin it.
-
-                payloadGcHandle = GCHandle.Alloc(requestBytes, GCHandleType.Pinned);
-
-                var command = new Nuttx.UpdEsp32Command()
-                {
-                    Interface = (byte)Esp32Interfaces.BlueTooth,
-                    Function = (int)BluetoothFunction.Start,
-                    StatusCode = (int)StatusCodes.CompletedOk,
-                    Payload = payloadGcHandle.AddrOfPinnedObject(),
-                    PayloadLength = (UInt32)requestBytes.Length,
-                    Result = IntPtr.Zero,
-                    ResultLength = 0,
-                    Block = 1
-                };
-
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
-
-                if ((result == 0) && (command.StatusCode == (UInt32)StatusCodes.CompletedOk))
-                {
-                    return true;
-                }
-                else
-                {
-                    if (command.StatusCode == (UInt32)StatusCodes.CoprocessorNotResponding)
-                    {
-                        throw new Exception("ESP32 coprocessor is not responding.");
-                    }
-
-                    // TODO: if we have a response, we'd decode that here
-
-                    return false;
-                }
-                */
             }
             finally
             {
@@ -132,11 +96,18 @@ namespace Meadow.Devices
             };
             var bytes = Encoders.EncodeBTServerDataSet(message);
 
-            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Sending server write {valueBytes.Length} bytes of data to 0x{c.ValueHandle:x4}...");
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Writing {valueBytes.Length} bytes of data to 0x{c.ValueHandle:x4}...");
 
-            var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.ServerDataWrite, false, bytes, new byte[0]);
+            try
+            {
+                var result = SendBluetoothCommand(BluetoothFunction.ServerDataWrite, false, bytes, null);
 
-            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Result: {result}");
+                Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Result: {result}");
+            }
+            catch(Exception ex)
+            {
+                Output.WriteLine($"Result: {ex.Message}");
+            }
         }
 
         private void UpdateDefinitionHandles()
@@ -175,7 +146,7 @@ namespace Meadow.Devices
 
             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Requesting graph handles...");
 
-            var result = SendCommand((byte)Esp32Interfaces.BlueTooth, (int)BluetoothFunction.GetHandles, true, resultBuffer);
+            var result = SendBluetoothCommand(BluetoothFunction.GetHandles, true, null, resultBuffer);
 
             var count = BitConverter.ToInt16(resultBuffer, 0);
 

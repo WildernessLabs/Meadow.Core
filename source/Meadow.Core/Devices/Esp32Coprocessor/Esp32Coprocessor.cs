@@ -136,17 +136,24 @@ namespace Meadow.Devices
             return(SendCommand(where, function, block, null, encodedResult));
         }
 
+        protected StatusCodes SendBluetoothCommand(BluetoothFunction function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
+        {
+            return (SendCommand((byte)Esp32Interfaces.BlueTooth, (uint)function, block, encodedRequest, encodedResult));
+        }
+
         /// <summary>
         /// Send a command and its payload to the ESP32.
         /// </summary>
-        /// <param name="where">Interface the command is destined for.</param>
+        /// <param name="destination">Interface the command is destined for.</param>
         /// <param name="function">Command to be sent.</param>
         /// <param name="block">Is this a blocking command?</param>
-        /// <param name="payload">Payload for the command to be executed by the ESP32.</param>
+        /// <param name="encodedRequest">Payload for the command to be executed by the ESP32.</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? payload, byte[]? encodedResult)
+        protected StatusCodes SendCommand(byte destination, UInt32 function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
         {
+            Console.WriteLine($"SendCommand dest: {destination}  fn: {function}  {(!block ? "not " : "")}blocking");
+
             var payloadGcHandle = default(GCHandle);
             var resultGcHandle = default(GCHandle);
             StatusCodes result = StatusCodes.CompletedOk;
@@ -154,35 +161,42 @@ namespace Meadow.Devices
             {
                 var command = new Nuttx.UpdEsp32Command()
                 {
-                    Interface = where,
+                    Interface = destination,
                     Function = function,
                     StatusCode = (UInt32)StatusCodes.CompletedOk,
                     Block = (byte)(block ? 1 : 0)
                 };
 
-                if (payload != null && payload.Length > 0)
+                if (encodedRequest != null && encodedRequest.Length > 0)
                 {
-                    payloadGcHandle = GCHandle.Alloc(payload, GCHandleType.Pinned);
+                    payloadGcHandle = GCHandle.Alloc(encodedRequest, GCHandleType.Pinned);
                     command.Payload = payloadGcHandle.AddrOfPinnedObject();
-                    command.PayloadLength = (uint)payload.Length;
+                    command.PayloadLength = (uint)encodedRequest.Length;
+                    Console.WriteLine($"  request of {encodedRequest.Length} bytes pinned at 0x{payloadGcHandle.AddrOfPinnedObject():x8}");
                 }
                 if (encodedResult != null && encodedResult.Length > 0)
                 {
                     resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
                     command.Result = resultGcHandle.AddrOfPinnedObject();
                     command.ResultLength = (UInt32)encodedResult.Length;
+                    Console.WriteLine($"  result of {encodedResult.Length} bytes pinned at 0x{resultGcHandle.AddrOfPinnedObject():x8}");
                 }
 
-
+                Console.WriteLine("Calling Ioctl....");
                 int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
                 if (updResult == 0)
                 {
                     result = (StatusCodes) command.StatusCode;
+                    Console.WriteLine($"ESP Ioctl failed: {result}");
                 }
                 else
                 {
                     result = StatusCodes.Failure;
                 }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
             }
             finally
             {
