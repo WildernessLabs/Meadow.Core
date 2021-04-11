@@ -1,8 +1,17 @@
-﻿namespace Meadow.Units
+﻿using System;
+
+namespace Meadow.Units
 {
     public interface IUnitType
     {
-        //need to add substraction/comparison method for delta calculations
+        public static IUnitType operator -(IUnitType lvalue, IUnitType rvalue)
+        {
+            throw new Exception("Must override IUnitType subtraction operator");
+        }
 
+        public static IUnitType operator +(IUnitType lvalue, IUnitType rvalue)
+        {
+            throw new Exception("Must override IUnitType addition operator");
+        }
     }
 }
