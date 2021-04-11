@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Meadow;
 using Meadow.Bases;
 using Meadow.Hardware;
-using Meadow.Peripherals.Sensors.Temperature;
+using Meadow.Peripherals.Sensors;
 using Meadow.Units;
 
 namespace CompositeTest

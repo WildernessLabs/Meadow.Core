@@ -14,29 +14,11 @@
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
  </PropertyGroup>
- <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+ <PropertyGroup>
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
    <LangVersion>8.0</LangVersion>
+   <Nullable>enable</Nullable>
  </PropertyGroup>
- <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-   <LangVersion>8.0</LangVersion>
- </PropertyGroup>
- <ItemGroup>
-   <Compile Remove="Hardware\Communications\SoftwareSpiBus.cs" />
- </ItemGroup>
- <ItemGroup>
-   <None Include="Hardware\Communications\SoftwareSpiBus.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
- </ItemGroup>
- <ItemGroup>
-   <Folder Include="Peripherals\Sensors\Location\" />
-   <Folder Include="Peripherals\Sensors\Location\Gnss\" />
-   <Folder Include="Devices\Esp32Coprocessor\" />
-   <Folder Include="Hardware\Contracts\IOControllers\" />
-   <Folder Include="Hardware\Contracts\PortsAndBuses\" />
-   <Folder Include="Hardware\Contracts\ChannelInfos\" />
-   <Folder Include="Peripherals\Sensors\Proximity\" />
- </ItemGroup>
  <ItemGroup>
    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.6.0" />
  </ItemGroup>
