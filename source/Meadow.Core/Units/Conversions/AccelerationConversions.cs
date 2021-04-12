@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Meadow.Units.Conversions
+﻿namespace Meadow.Units.Conversions
 {
-    internal static class AccellerationConversions
+    internal static class AccelerationConversions
     {
-		public static double Convert(double value, Accelleration.UnitType from, Accelleration.UnitType to)
+		public static double Convert(double value, Acceleration.UnitType from, Acceleration.UnitType to)
 		{
 			if (from == to)
 			{

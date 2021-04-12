@@ -8,32 +8,32 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents Accelleration
+    /// Represents Acceleration
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Accelleration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Acceleration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Accelleration` object.
+        /// Creates a new `Acceleration` object.
         /// </summary>
-        /// <param name="value">The Accelleration value.</param>
+        /// <param name="value">The Acceleration value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public Accelleration(double value, UnitType type = UnitType.MetersPerSecondSquared)
+        public Acceleration(double value, UnitType type = UnitType.MetersPerSecondSquared)
         {
             //always store reference value
             Unit = type;
-            _value = AccellerationConversions.Convert(value, type, UnitType.MetersPerSecondSquared);
+            _value = AccelerationConversions.Convert(value, type, UnitType.MetersPerSecondSquared);
         }
 
         /// <summary>
-        /// The accelleration expressed as a value.
+        /// The acceleration expressed as a value.
         /// </summary>
         public double Value
         {
-            get => AccellerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, Unit);
-            set => _value = AccellerationConversions.Convert(value, Unit, UnitType.MetersPerSecondSquared);
+            get => AccelerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, Unit);
+            set => _value = AccelerationConversions.Convert(value, Unit, UnitType.MetersPerSecondSquared);
         }
 
         private double _value;
@@ -64,7 +64,7 @@ namespace Meadow.Units
         [Pure]
         public double From(UnitType convertTo)
         {
-            return AccellerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, convertTo);
+            return AccelerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, convertTo);
         }
 
         [Pure]
@@ -72,35 +72,35 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Accelleration)obj);
+            return obj.GetType() == GetType() && Equals((Acceleration)obj);
         }
 
-        [Pure] public bool Equals(Accelleration other) => _value == other._value;
+        [Pure] public bool Equals(Acceleration other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Accelleration left, Accelleration right) => Equals(left, right);
-        [Pure] public static bool operator !=(Accelleration left, Accelleration right) => !Equals(left, right);
-        [Pure] public int CompareTo(Accelleration other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Acceleration left, Acceleration right) => Equals(left, right);
+        [Pure] public static bool operator !=(Acceleration left, Acceleration right) => !Equals(left, right);
+        [Pure] public int CompareTo(Acceleration other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Accelleration(int value) => new Accelleration(value);
+        [Pure] public static implicit operator Acceleration(int value) => new Acceleration(value);
 
         [Pure]
-        public static Accelleration operator +(Accelleration lvalue, Accelleration rvalue)
+        public static Acceleration operator +(Acceleration lvalue, Acceleration rvalue)
         {
             var total = lvalue.From(UnitType.MetersPerSecondSquared) + rvalue.From(UnitType.MetersPerSecondSquared);
-            return new Accelleration(total, UnitType.MetersPerSecondSquared);
+            return new Acceleration(total, UnitType.MetersPerSecondSquared);
         }
 
         [Pure]
-        public static Accelleration operator -(Accelleration lvalue, Accelleration rvalue)
+        public static Acceleration operator -(Acceleration lvalue, Acceleration rvalue)
         {
             var total = lvalue.From(UnitType.MetersPerSecondSquared) - rvalue.From(UnitType.MetersPerSecondSquared);
-            return new Accelleration(total, UnitType.MetersPerSecondSquared);
+            return new Acceleration(total, UnitType.MetersPerSecondSquared);
         }
 
         [Pure] public override string ToString() => _value.ToString();
