@@ -19,7 +19,11 @@ namespace Meadow.Units.Conversions
 
 		private static readonly double[] accelConversions =
 		{
-			1.0,//		m/s^2		
-		};
+			1.0, //meters per second squared
+			100.0, //cm per s squared
+            0.1019716213,//gravity
+            3.280839895,//feet per second squared
+            39.37007874,//inches per s squared
+    	};
 	}
 }

@@ -49,8 +49,17 @@ namespace Meadow.Units
         public enum UnitType
         {
             MetersPerSecondSquared,
-            FeetPerSecondSquared
+            CentimetersPerSecondSquared,
+            Gravity,
+            FeetPerSecondSquared,
+            InchesPerSecondSquared,
         }
+
+        public double MetersPerSecondSquared => From(UnitType.MetersPerSecondSquared);
+        public double CentimetersPerSecondSquared => From(UnitType.CentimetersPerSecondSquared);
+        public double Gravity => From(UnitType.Gravity);
+        public double FeetPerSecondSquared => From(UnitType.FeetPerSecondSquared);
+        public double InchesPerSecondSquared => From(UnitType.InchesPerSecondSquared);
 
         [Pure]
         public double From(UnitType convertTo)
