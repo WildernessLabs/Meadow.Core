@@ -20,6 +20,6 @@ namespace Meadow.Units.Conversions
 		private static readonly double[] accelConversions =
 		{
 			1.0,//		m/s^2		
-		}
+		};
 	}
 }
