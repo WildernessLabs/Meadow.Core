@@ -29,6 +29,11 @@ namespace Meadow.Units
             Value = value; Unit = type;
         }
 
+        public Temperature()
+        {
+
+        }
+
         /// <summary>
         /// The temperature expressed as a value.
         /// </summary>
