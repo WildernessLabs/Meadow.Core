@@ -8,32 +8,32 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents Speed
+    /// Represents Accelleration
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Speed : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Accelleration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Speed` object.
+        /// Creates a new `Accelleration` object.
         /// </summary>
-        /// <param name="value">The Speed value.</param>
+        /// <param name="value">The Accelleration value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public Speed(double value, UnitType type = UnitType.KilometersPerSecond)
+        public Accelleration(double value, UnitType type = UnitType.MetersPerSecondSquared)
         {
             //always store reference value
             Unit = type;
-            _value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
+            _value = AccellerationConversions.Convert(value, type, UnitType.MetersPerSecondSquared);
         }
 
         /// <summary>
-        /// The speed expressed as a value.
+        /// The accelleration expressed as a value.
         /// </summary>
         public double Value
         {
-            get => SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, Unit);
-            set => _value = SpeedConversions.Convert(value, Unit, UnitType.KilometersPerSecond);
+            get => AccellerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, Unit);
+            set => _value = AccellerationConversions.Convert(value, Unit, UnitType.MetersPerSecondSquared);
         }
 
         private double _value;
@@ -44,43 +44,18 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the speed.
+        /// The type of units available to describe the temperature.
         /// </summary>
         public enum UnitType
         {
-            FeetPerMinute,
-            FeetPerSecond,
-            KilometersPerHour,
-            KilometersPerMinute,
-            KilometersPerSecond,
-            Knots,
-            MetersPerMinute,
-            MetersPerSecond,
-            MilesPerHour,
-            MilesPerMinute,
-            MilesPerSecond,
-            SpeedOfLight,
-            Mach,
+            MetersPerSecondSquared,
+            FeetPerSecondSquared
         }
-
-        public double FeetPerSecond => From(UnitType.FeetPerSecond);
-        public double FeetPerMinute => From(UnitType.FeetPerMinute);
-        public double KilometersPerHour => From(UnitType.KilometersPerHour);
-        public double KilometersPerMinute => From(UnitType.KilometersPerMinute);
-        public double KilometersPerSecond => From(UnitType.KilometersPerSecond);
-        public double Knots => From(UnitType.Knots);
-        public double MetersPerMinute => From(UnitType.MetersPerMinute);
-        public double MetersPerSecond => From(UnitType.MetersPerSecond);
-        public double MilesPerHour => From(UnitType.MilesPerHour);
-        public double MilesPerMinute => From(UnitType.MilesPerMinute);
-        public double MilesPerSecond => From(UnitType.MilesPerSecond);
-        public double SpeedOfLight => From(UnitType.SpeedOfLight);
-        public double Mach => From(UnitType.Mach);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, convertTo);
+            return AccellerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, convertTo);
         }
 
         [Pure]
@@ -88,35 +63,35 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Speed)obj);
+            return obj.GetType() == GetType() && Equals((Accelleration)obj);
         }
 
-        [Pure] public bool Equals(Speed other) => _value == other._value;
+        [Pure] public bool Equals(Accelleration other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Speed left, Speed right) => Equals(left, right);
-        [Pure] public static bool operator !=(Speed left, Speed right) => !Equals(left, right);
-        [Pure] public int CompareTo(Speed other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Accelleration left, Accelleration right) => Equals(left, right);
+        [Pure] public static bool operator !=(Accelleration left, Accelleration right) => !Equals(left, right);
+        [Pure] public int CompareTo(Accelleration other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Accelleration left, Accelleration right) => Comparer<Accelleration>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Speed(int value) => new Speed(value);
+        [Pure] public static implicit operator Accelleration(int value) => new Accelleration(value);
 
         [Pure]
-        public static Speed operator +(Speed lvalue, Speed rvalue)
+        public static Accelleration operator +(Accelleration lvalue, Accelleration rvalue)
         {
-            var total = lvalue.MetersPerSecond + rvalue.MetersPerSecond;
-            return new Speed(total, UnitType.MetersPerSecond);
+            var total = lvalue.From(UnitType.MetersPerSecondSquared) + rvalue.From(UnitType.MetersPerSecondSquared);
+            return new Accelleration(total, UnitType.MetersPerSecondSquared);
         }
 
         [Pure]
-        public static Speed operator -(Speed lvalue, Speed rvalue)
+        public static Accelleration operator -(Accelleration lvalue, Accelleration rvalue)
         {
-            var total = lvalue.MetersPerSecond - rvalue.MetersPerSecond;
-            return new Speed(total, UnitType.MetersPerSecond);
+            var total = lvalue.From(UnitType.MetersPerSecondSquared) - rvalue.From(UnitType.MetersPerSecondSquared);
+            return new Accelleration(total, UnitType.MetersPerSecondSquared);
         }
 
         [Pure] public override string ToString() => _value.ToString();
