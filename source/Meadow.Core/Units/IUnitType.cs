@@ -13,5 +13,16 @@ namespace Meadow.Units
         {
             throw new Exception("Must override IUnitType addition operator");
         }
+
+        public static IUnitType operator /(IUnitType lvalue, IUnitType rvalue)
+        {
+            throw new Exception("Must override IUnitType addition operator");
+        }
+
+        public static IUnitType operator *(IUnitType lvalue, IUnitType rvalue)
+        {
+            throw new Exception("Must override IUnitType addition operator");
+        }
+
     }
 }
