@@ -35,6 +35,7 @@ void Initialize()
         h => { Console.WriteLine($"Update: {h.New.Value.unit1.StandardAtmosphere}, {h.New.Value.unit2.Fahrenheit}"); },
         e => { return true; }
     );
+            (
 
     bmp180.Subscribe(observer);
 

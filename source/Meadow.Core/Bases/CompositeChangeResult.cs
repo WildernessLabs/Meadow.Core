@@ -1,6 +1,6 @@
 ﻿using Meadow.Units;
 
-namespace Meadow.Bases
+namespace Meadow
 {
     public class CompositeChangeResult<U1> : IChangeResult<U1>
         where U1 : IUnitType

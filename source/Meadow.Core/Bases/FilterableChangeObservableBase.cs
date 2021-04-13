@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Meadow.Bases
+namespace Meadow
 {
     public class FilterableChangeObservableBase<T> : IObservable<T>
     {
