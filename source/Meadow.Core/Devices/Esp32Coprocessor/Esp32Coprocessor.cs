@@ -174,12 +174,16 @@ namespace Meadow.Devices
                     command.PayloadLength = (uint)encodedRequest.Length;
                     Console.WriteLine($"  request of {encodedRequest.Length} bytes pinned at 0x{payloadGcHandle.AddrOfPinnedObject():x8}");
                 }
-                if (encodedResult != null && encodedResult.Length > 0)
+                if (encodedResult != null && encodedResult.Length > 0 && block)
                 {
                     resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
                     command.Result = resultGcHandle.AddrOfPinnedObject();
                     command.ResultLength = (UInt32)encodedResult.Length;
                     Console.WriteLine($"  result of {encodedResult.Length} bytes pinned at 0x{resultGcHandle.AddrOfPinnedObject():x8}");
+                }
+                else
+                {
+                    command.ResultLength = 0;
                 }
 
                 Console.WriteLine("Calling Ioctl....");
