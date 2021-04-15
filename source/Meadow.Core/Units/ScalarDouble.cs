@@ -12,14 +12,14 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Scalar : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class ScalarDouble : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Scalar` object.
         /// </summary>
         /// <param name="value">The Scalar value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public Scalar(double value)
+        public ScalarDouble(double value)
         {
             Value = value;
         }
@@ -34,35 +34,35 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Scalar)obj);
+            return obj.GetType() == GetType() && Equals((ScalarDouble)obj);
         }
 
-        [Pure] public bool Equals(Scalar other) => Value == other.Value;
+        [Pure] public bool Equals(ScalarDouble other) => Value == other.Value;
 
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public static bool operator ==(Scalar left, Scalar right) => Equals(left, right);
-        [Pure] public static bool operator !=(Scalar left, Scalar right) => !Equals(left, right);
-        [Pure] public int CompareTo(Scalar other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
-        [Pure] public static bool operator <(Scalar left, Scalar right) => Comparer<Scalar>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Scalar left, Scalar right) => Comparer<Scalar>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Scalar left, Scalar right) => Comparer<Scalar>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Scalar left, Scalar right) => Comparer<Scalar>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(ScalarDouble left, ScalarDouble right) => Equals(left, right);
+        [Pure] public static bool operator !=(ScalarDouble left, ScalarDouble right) => !Equals(left, right);
+        [Pure] public int CompareTo(ScalarDouble other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
+        [Pure] public static bool operator <(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Scalar(int value) => new Scalar(value);
+        [Pure] public static implicit operator ScalarDouble(int value) => new ScalarDouble(value);
 
         [Pure]
-        public static Scalar operator +(Scalar lvalue, Scalar rvalue)
+        public static ScalarDouble operator +(ScalarDouble lvalue, ScalarDouble rvalue)
         {
             var total = lvalue.Value + rvalue.Value;
-            return new Scalar(total);
+            return new ScalarDouble(total);
         }
 
         [Pure]
-        public static Scalar operator -(Scalar lvalue, Scalar rvalue)
+        public static ScalarDouble operator -(ScalarDouble lvalue, ScalarDouble rvalue)
         {
             var total = lvalue.Value - rvalue.Value;
-            return new Scalar(total);
+            return new ScalarDouble(total);
         }
 
         [Pure] public override string ToString() => Value.ToString();
