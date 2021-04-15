@@ -12,7 +12,7 @@ namespace Meadow.Peripherals.Sensors
         /// <summary>
         /// Last value read from the Temperature sensor.
         /// </summary>
-        Meadow.Units.Temperature Temperature { get; }
+        Meadow.Units.Temperature? Temperature { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised

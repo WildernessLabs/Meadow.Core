@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Meadow
 {
-    public class FilterableChangeObservableBase<T> : IObservable<T>
+    public abstract class FilterableChangeObservableBase<T> : IObservable<T>// where T : IUnitType
     {
         // collection of observers
         protected List<IObserver<T>> observers { get; set; } = new List<IObserver<T>>();
@@ -51,32 +51,4 @@ namespace Meadow
         }
     }
 
-    public class FilterableChangeObservable<U1> : FilterableChangeObservableBase<U1>
-        where U1 : IUnitType
-    {
-    }
-
-    public class FilterableChangeObservable<T, U1, U2> : FilterableChangeObservableBase<T> 
-        where T : CompositeChangeResult<U1, U2>
-        where U1 : IUnitType
-        where U2 : IUnitType
-    {
-    }
-
-    public class FilterableChangeObservable<T, U1, U2, U3> : FilterableChangeObservableBase<T>
-        where T : CompositeChangeResult<U1, U2, U3>
-        where U1 : IUnitType
-        where U2 : IUnitType
-        where U3 : IUnitType
-    {
-    }
-
-    public class FilterableUnitChangeObservable<T, U1, U2, U3, U4> : FilterableChangeObservableBase<T>
-        where T : CompositeChangeResult<U1, U2, U3, U4>
-        where U1 : IUnitType
-        where U2 : IUnitType
-        where U3 : IUnitType
-        where U4 : IUnitType
-    {
-    }
 }
