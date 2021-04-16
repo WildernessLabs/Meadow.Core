@@ -16,8 +16,8 @@
 		{
 			1, //revolutions per second
 			60, //revolutions per minute
-			6.283185307, //radians per second
-			376.991118431, //radians per minute
+			6.28318530717959, //radians per second
+			376.991118430775, //radians per minute
 			360, //degrees per second
 			21600, //degrees per minute
 		};
