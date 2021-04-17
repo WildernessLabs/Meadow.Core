@@ -469,5 +469,14 @@ namespace Meadow.Devices
                 throw new Exception("Coprocessor not initialized.");
             }
         }
+
+        /// <summary>
+        /// Gets the current processor temerpature
+        /// </summary>
+        /// <returns></returns>
+        public double GetProcessorTemperature()
+        {
+            return IoController.GetTemperature();
+        }
     }
 }
