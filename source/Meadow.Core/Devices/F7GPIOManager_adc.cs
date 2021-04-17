@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Meadow.Core;
 using Meadow.Hardware;
+using Meadow.Units;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -163,7 +164,7 @@ namespace Meadow.Devices
             }
         }
 
-        public double GetTemperature()
+        public Temperature GetTemperature()
         {
             if (!_initialized)
             {
@@ -190,7 +191,7 @@ namespace Meadow.Devices
             // voltage=(double)data/4095*3.3;
             // celsius = (voltage - 0.76) / 0.0025 + 25;
             var voltage = adc / 4095d * 3.3d;
-            var temperature = (voltage - 0.76) / 0.0025 + 25;
+            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Units.Temperature.UnitType.Celsius); ;
 
             // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
             //i.e. temp = 80d / (double)(*0x1FFF7A2E - *0x1FFF7A2C) * (adc - (double)*0x1FFF7A2C) + 30d;

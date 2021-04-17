@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Meadow.Gateways;
 using Meadow.Hardware;
+using Meadow.Units;
 
 namespace Meadow.Devices
 {
@@ -474,7 +475,7 @@ namespace Meadow.Devices
         /// Gets the current processor temerpature
         /// </summary>
         /// <returns></returns>
-        public double GetProcessorTemperature()
+        public Temperature GetProcessorTemperature()
         {
             return IoController.GetTemperature();
         }
