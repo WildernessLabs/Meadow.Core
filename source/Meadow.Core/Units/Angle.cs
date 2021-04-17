@@ -84,8 +84,8 @@ namespace Meadow.Units
         [Pure] public static bool operator ==(Angle left, Angle right) => Equals(left, right);
         [Pure] public static bool operator !=(Angle left, Angle right) => !Equals(left, right);
         [Pure] public int CompareTo(Angle other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Angle left, Angle right) => Comparer<Angle>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Angle left, Angle right) => Comparer<Angle>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <(Angle left, Angle right) => Comparer<double>.Default.Compare(left.Degrees, right.Degrees) < 0;
+        [Pure] public static bool operator >(Angle left, Angle right) => Comparer<double>.Default.Compare(left.Degrees, right.Degrees) > 0;
         [Pure] public static bool operator <=(Angle left, Angle right) => Comparer<Angle>.Default.Compare(left, right) <= 0;
         [Pure] public static bool operator >=(Angle left, Angle right) => Comparer<Angle>.Default.Compare(left, right) >= 0;
 
@@ -102,6 +102,20 @@ namespace Meadow.Units
         public static Angle operator -(Angle lvalue, Angle rvalue)
         {
             var total = lvalue.Degrees - rvalue.Degrees;
+            return new Angle(total, UnitType.Degrees);
+        }
+
+        [Pure]
+        public static Angle operator *(Angle lvalue, Angle rvalue)
+        {
+            var total = lvalue.Degrees * rvalue.Degrees;
+            return new Angle(total, UnitType.Degrees);
+        }
+
+        [Pure]
+        public static Angle operator /(Angle lvalue, Angle rvalue)
+        {
+            var total = lvalue.Degrees / rvalue.Degrees;
             return new Angle(total, UnitType.Degrees);
         }
 
