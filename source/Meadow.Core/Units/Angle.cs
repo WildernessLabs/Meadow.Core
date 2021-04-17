@@ -50,12 +50,18 @@ namespace Meadow.Units
         {
             Revolutions,
             Degrees,
-            Radians
+            Radians,
+            Gradians,
+            Minutes,
+            Seconds
         }
 
         public double Revolutions => From(UnitType.Revolutions);
         public double Degrees => From(UnitType.Degrees);
         public double Radians => From(UnitType.Radians);
+        public double Gradians => From(UnitType.Gradians);
+        public double Minutes => From(UnitType.Minutes);
+        public double Seconds => From(UnitType.Seconds);
 
         [Pure]
         public double From(UnitType convertTo)
