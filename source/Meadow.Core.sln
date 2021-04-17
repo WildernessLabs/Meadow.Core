@@ -22,8 +22,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic_FileSystem", "Tests\B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Units.Tests", "Meadow.Units.Tests\Meadow.Units.Tests.csproj", "{6037106D-06D4-4990-91BA-7E06DF23B9CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompositeTest", "CompositeTest\CompositeTest.csproj", "{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
@@ -73,15 +71,6 @@ Global
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Core|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Core|Any CPU.Build.0 = Debug|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Core|Any CPU.Deploy.0 = Debug|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0A79E80C-6B78-4FA1-BE5E-F2A4C4BED77D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
