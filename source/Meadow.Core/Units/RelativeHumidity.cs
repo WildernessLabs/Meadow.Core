@@ -61,13 +61,13 @@ namespace Meadow.Units
 
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public static bool operator ==(RelativeHumidity left, RelativeHumidity right) => Equals(left, right);
-        [Pure] public static bool operator !=(RelativeHumidity left, RelativeHumidity right) => !Equals(left, right);
+        [Pure] public static bool operator ==(RelativeHumidity left, RelativeHumidity right) => Equals(left.Value, right.Value);
+        [Pure] public static bool operator !=(RelativeHumidity left, RelativeHumidity right) => !Equals(left.Value, right.Value);
         [Pure] public int CompareTo(RelativeHumidity other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
-        [Pure] public static bool operator <(RelativeHumidity left, RelativeHumidity right) => Comparer<RelativeHumidity>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(RelativeHumidity left, RelativeHumidity right) => Comparer<RelativeHumidity>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(RelativeHumidity left, RelativeHumidity right) => Comparer<RelativeHumidity>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(RelativeHumidity left, RelativeHumidity right) => Comparer<RelativeHumidity>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator <(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+        [Pure] public static bool operator >(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+        [Pure] public static bool operator <=(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+        [Pure] public static bool operator >=(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         [Pure] public static implicit operator RelativeHumidity(int value) => new RelativeHumidity(value);
 
