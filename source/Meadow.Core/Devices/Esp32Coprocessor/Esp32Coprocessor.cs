@@ -164,7 +164,11 @@ namespace Meadow.Devices
                     Interface = destination,
                     Function = function,
                     StatusCode = (UInt32)StatusCodes.CompletedOk,
-                    Block = (byte)(block ? 1 : 0)
+                    Block = (byte)(block ? 1 : 0),
+                    PayloadLength = 0,
+                    Payload = IntPtr.Zero,
+                    ResultLength = 0,
+                    Result = IntPtr.Zero                    
                 };
 
                 if (encodedRequest != null && encodedRequest.Length > 0)
@@ -172,14 +176,14 @@ namespace Meadow.Devices
                     payloadGcHandle = GCHandle.Alloc(encodedRequest, GCHandleType.Pinned);
                     command.Payload = payloadGcHandle.AddrOfPinnedObject();
                     command.PayloadLength = (uint)encodedRequest.Length;
-                    Console.WriteLine($"  request of {encodedRequest.Length} bytes pinned at 0x{payloadGcHandle.AddrOfPinnedObject():x8}");
+                    Console.WriteLine($"  request of {command.PayloadLength} bytes pinned at 0x{command.Payload.ToInt32():x8}");
                 }
                 if (encodedResult != null && encodedResult.Length > 0 && block)
                 {
                     resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
                     command.Result = resultGcHandle.AddrOfPinnedObject();
                     command.ResultLength = (UInt32)encodedResult.Length;
-                    Console.WriteLine($"  result of {encodedResult.Length} bytes pinned at 0x{resultGcHandle.AddrOfPinnedObject():x8}");
+                    Console.WriteLine($"  result of {command.ResultLength} bytes pinned at 0x{command.Result.ToInt32():x8}");
                 }
                 else
                 {
@@ -188,6 +192,7 @@ namespace Meadow.Devices
 
                 Console.WriteLine("Calling Ioctl....");
                 int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
+                Console.WriteLine($"Ioctl returned {updResult}");
                 if (updResult == 0)
                 {
                     result = (StatusCodes) command.StatusCode;
@@ -204,14 +209,18 @@ namespace Meadow.Devices
             }
             finally
             {
+                Console.WriteLine($"+SendCommand finally");
                 if (payloadGcHandle.IsAllocated)
                 {
+                    Console.WriteLine($"payloadGcHandle.free");
                     payloadGcHandle.Free();
                 }
                 if (resultGcHandle.IsAllocated)
                 {
+                    Console.WriteLine($"resultGcHandle.free");
                     resultGcHandle.Free();
                 }
+                Console.WriteLine($"-SendCommand finally");
             }
             return (result);
         }

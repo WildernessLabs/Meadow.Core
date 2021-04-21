@@ -60,22 +60,31 @@ namespace Meadow.Devices
                 var requestBytes = Encoders.EncodeBTStackConfig(req);
 
                 var result = SendBluetoothCommand(BluetoothFunction.Start, true, requestBytes, null);
+                Console.WriteLine("SendBluetoothCommand completed");
+
                 return result == StatusCodes.CompletedOk;
             }
             finally
             {
+                Console.WriteLine("finally started");
+
                 Task.Run(async () =>
                 {
+                    Console.WriteLine("Getting BT handles...");
+
                     // yes. this is ugly.
                     // We wait for the BT stack to get created and then go get the handles
                     await Task.Delay(100);
                     UpdateDefinitionHandles();
                 });
 
+                Console.WriteLine("checking handle...");
                 if (payloadGcHandle.IsAllocated)
                 {
+                    Console.WriteLine("freeing handle...");
                     payloadGcHandle.Free();
                 }
+                Console.WriteLine("finally complete");
             }
         }
 
@@ -101,8 +110,7 @@ namespace Meadow.Devices
 
             try
             {
-                var test = new byte[4];
-                var result = SendBluetoothCommand(BluetoothFunction.ServerDataSet, false, bytes, test);
+                var result = SendBluetoothCommand(BluetoothFunction.ServerDataSet, false, bytes, null);
 
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Result: {result}");
             }
