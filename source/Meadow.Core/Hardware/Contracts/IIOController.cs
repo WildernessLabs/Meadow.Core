@@ -1,4 +1,5 @@
 ﻿using Meadow.Hardware;
+using Meadow.Units;
 
 namespace Meadow.Hardware
 {
@@ -84,5 +85,7 @@ namespace Meadow.Hardware
         void ConfigureAnalogInput(IPin pin);
         int GetAnalogValue(IPin pin);
         void ReassertConfig(IPin pin);
+
+        Temperature GetTemperature();
     }
 }

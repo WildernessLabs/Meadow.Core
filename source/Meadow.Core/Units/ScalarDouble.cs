@@ -3,80 +3,73 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
-using Meadow.Units.Conversions;
 
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents _relative humidity_; expressed as a percentage, indicates a
-    /// present state of absolute humidity relative to a maximum humidity given
-    /// the same temperature.
+    /// Represents Scalar
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
-    [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
-    public class RelativeHumidity : IUnitType, IComparable, IFormattable, IConvertible,
-        IEquatable<double>, IComparable<double>
+    [StructLayout(LayoutKind.Sequential)]
+    public class ScalarDouble : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `RelativeHumidity` object.
+        /// Creates a new `Scalar` object.
         /// </summary>
-        /// <param name="value">The relative humidity value.</param>
-        /// <param name="type">Percent, by default.</param>
-        public RelativeHumidity(double value, UnitType type = UnitType.Percent)
+        /// <param name="value">The Scalar value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public ScalarDouble(double value)
         {
-            Value = value; Unit = type;
+            Value = value;
         }
 
         /// <summary>
-        /// The relative expressed as a value percent.
+        /// The Scalar expressed as a value.
         /// </summary>
         public double Value { get; set; }
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
-
-        /// <summary>
-        /// The type of units available to describe the temperature.
-        /// </summary>
-        public enum UnitType
-        {
-            Percent
-        }
-
-        //=============================
-        // Boilerplate interface stuff.
 
         [Pure]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((RelativeHumidity)obj);
+            return obj.GetType() == GetType() && Equals((ScalarDouble)obj);
         }
 
-        [Pure] public bool Equals(RelativeHumidity other) => Value == other.Value;
+        [Pure] public bool Equals(ScalarDouble other) => Value == other.Value;
 
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public static bool operator ==(RelativeHumidity left, RelativeHumidity right) => Equals(left.Value, right.Value);
-        [Pure] public static bool operator !=(RelativeHumidity left, RelativeHumidity right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(RelativeHumidity other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
-        [Pure] public static bool operator <(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
-        [Pure] public static bool operator >(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
-        [Pure] public static bool operator <=(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
-        [Pure] public static bool operator >=(RelativeHumidity left, RelativeHumidity right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
+        [Pure] public static bool operator ==(ScalarDouble left, ScalarDouble right) => Equals(left, right);
+        [Pure] public static bool operator !=(ScalarDouble left, ScalarDouble right) => !Equals(left, right);
+        [Pure] public int CompareTo(ScalarDouble other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
+        [Pure] public static bool operator <(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(ScalarDouble left, ScalarDouble right) => Comparer<ScalarDouble>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator RelativeHumidity(int value) => new RelativeHumidity(value);
+        [Pure] public static implicit operator ScalarDouble(int value) => new ScalarDouble(value);
+
+        [Pure]
+        public static ScalarDouble operator +(ScalarDouble lvalue, ScalarDouble rvalue)
+        {
+            var total = lvalue.Value + rvalue.Value;
+            return new ScalarDouble(total);
+        }
+
+        [Pure]
+        public static ScalarDouble operator -(ScalarDouble lvalue, ScalarDouble rvalue)
+        {
+            var total = lvalue.Value - rvalue.Value;
+            return new ScalarDouble(total);
+        }
 
         [Pure] public override string ToString() => Value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
         // IComparable
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
-
 
         [Pure] public TypeCode GetTypeCode() => Value.GetTypeCode();
         [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)Value).ToBoolean(provider);
@@ -99,7 +92,7 @@ namespace Meadow.Units
         [Pure]
         public int CompareTo(double? other)
         {
-            return (other is null) ? -1 : ((IComparable<double>)Value).CompareTo(other.Value);
+            return (other is null) ? -1 : (Value).CompareTo(other.Value);
         }
 
         [Pure] public bool Equals(double? other) => Value.Equals(other);

@@ -16,7 +16,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
-    public struct Temperature : IComparable, IFormattable, IConvertible,
+    public class Temperature : IUnitType, IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>
@@ -27,6 +27,11 @@ namespace Meadow.Units
         public Temperature(double value, UnitType type = UnitType.Celsius)
         {
             Value = value; Unit = type;
+        }
+
+        public Temperature()
+        {
+
         }
 
         /// <summary>

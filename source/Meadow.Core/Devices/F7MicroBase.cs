@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Meadow.Gateways;
 using Meadow.Hardware;
+using Meadow.Units;
 
 namespace Meadow.Devices
 {
@@ -469,6 +470,15 @@ namespace Meadow.Devices
             } else {
                 throw new Exception("Coprocessor not initialized.");
             }
+        }
+
+        /// <summary>
+        /// Gets the current processor temerpature
+        /// </summary>
+        /// <returns></returns>
+        public Temperature GetProcessorTemperature()
+        {
+            return IoController.GetTemperature();
         }
     }
 }

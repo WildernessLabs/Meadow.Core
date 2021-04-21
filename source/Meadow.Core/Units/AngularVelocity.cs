@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents AngularVelocity
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class AngularVelocity : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `AngularVelocity` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The AngularVelocity value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public AngularVelocity(double value, UnitType type = UnitType.RevolutionsPerSecond)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = AngularVelocityConversions.Convert(value, type, UnitType.RevolutionsPerSecond);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The AngularVelocity expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => AngularVelocityConversions.Convert(_value, UnitType.RevolutionsPerSecond, Unit);
+            set => _value = AngularVelocityConversions.Convert(value, Unit, UnitType.RevolutionsPerSecond);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,29 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the AngularVelocity.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            RevolutionsPerSecond,
+			RevolutionsPerMinute,
+			RadiansPerSecond,
+			RadiansPerMinute,
+			DegreesPerSecond,
+			DegreesPerMinute
         }
+
+        public double RevolutionsPerSecond => From(UnitType.RevolutionsPerSecond);
+		public double RevolutionsPerMinute => From(UnitType.RevolutionsPerMinute);
+        public double RadiansPerSecond => From(UnitType.RadiansPerSecond);
+        public double RadiansPerMinute => From(UnitType.RadiansPerMinute);
+        public double DegreesPerSecond => From(UnitType.DegreesPerSecond);
+        public double DegreesPerMinute => From(UnitType.DegreesPerMinute);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return AngularVelocityConversions.Convert(_value, UnitType.RevolutionsPerSecond, convertTo);
         }
 
         [Pure]
@@ -68,22 +74,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((AngularVelocity)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(AngularVelocity other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(AngularVelocity left, AngularVelocity right) => Equals(left, right);
+        [Pure] public static bool operator !=(AngularVelocity left, AngularVelocity right) => !Equals(left, right);
+        [Pure] public int CompareTo(AngularVelocity other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(AngularVelocity left, AngularVelocity right) => Comparer<AngularVelocity>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(AngularVelocity left, AngularVelocity right) => Comparer<AngularVelocity>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(AngularVelocity left, AngularVelocity right) => Comparer<AngularVelocity>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(AngularVelocity left, AngularVelocity right) => Comparer<AngularVelocity>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator AngularVelocity(int value) => new AngularVelocity(value);
+
+        [Pure]
+        public static AngularVelocity operator +(AngularVelocity lvalue, AngularVelocity rvalue)
+        {
+            var total = lvalue.RevolutionsPerSecond + rvalue.RevolutionsPerSecond;
+            return new AngularVelocity(total, UnitType.RevolutionsPerSecond);
+        }
+
+        [Pure]
+        public static AngularVelocity operator -(AngularVelocity lvalue, AngularVelocity rvalue)
+        {
+            var total = lvalue.RevolutionsPerSecond - rvalue.RevolutionsPerSecond;
+            return new AngularVelocity(total, UnitType.RevolutionsPerSecond);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

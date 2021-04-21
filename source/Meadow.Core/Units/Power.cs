@@ -8,32 +8,32 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents Speed
+    /// Represents Power
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Speed : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Power : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Speed` object.
+        /// Creates a new `Power` object.
         /// </summary>
-        /// <param name="value">The Speed value.</param>
+        /// <param name="value">The Power value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public Speed(double value, UnitType type = UnitType.KilometersPerSecond)
+        public Power(double value, UnitType type = UnitType.Watts)
         {
             //always store reference value
             Unit = type;
-            _value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
+            _value = PowerConversions.Convert(value, type, UnitType.Watts);
         }
 
         /// <summary>
-        /// The speed expressed as a value.
+        /// The Power expressed as a value.
         /// </summary>
         public double Value
         {
-            get => SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, Unit);
-            set => _value = SpeedConversions.Convert(value, Unit, UnitType.KilometersPerSecond);
+            get => PowerConversions.Convert(_value, UnitType.Watts, Unit);
+            set => _value = PowerConversions.Convert(value, Unit, UnitType.Watts);
         }
 
         private double _value;
@@ -44,43 +44,52 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the speed.
+        /// The type of units available to describe the Power.
         /// </summary>
         public enum UnitType
         {
-            FeetPerMinute,
-            FeetPerSecond,
-            KilometersPerHour,
-            KilometersPerMinute,
-            KilometersPerSecond,
-            Knots,
-            MetersPerMinute,
-            MetersPerSecond,
-            MilesPerHour,
-            MilesPerMinute,
-            MilesPerSecond,
-            SpeedOfLight,
-            Mach,
+            Gigawatts,
+            Megawatts,
+            Kilowatts,
+            Watts,
+            Milliwatts,
+            HorsePowerMetric,
+            HorsePowerIT,
+            CaloriesPerSecond,
+            CaloriesPerMinute,
+            CaloriesPerHour,
+            BTUsPerSecond,
+            BTUsPerMinute,
+            BTUsPerHour,
+            FootPoundsPerSecond,
+            FootPoundsPerMinute,
+            FootPoundsPerHour,
+            TonsRefridgeration
         }
 
-        public double FeetPerSecond => From(UnitType.FeetPerSecond);
-        public double FeetPerMinute => From(UnitType.FeetPerMinute);
-        public double KilometersPerHour => From(UnitType.KilometersPerHour);
-        public double KilometersPerMinute => From(UnitType.KilometersPerMinute);
-        public double KilometersPerSecond => From(UnitType.KilometersPerSecond);
-        public double Knots => From(UnitType.Knots);
-        public double MetersPerMinute => From(UnitType.MetersPerMinute);
-        public double MetersPerSecond => From(UnitType.MetersPerSecond);
-        public double MilesPerHour => From(UnitType.MilesPerHour);
-        public double MilesPerMinute => From(UnitType.MilesPerMinute);
-        public double MilesPerSecond => From(UnitType.MilesPerSecond);
-        public double SpeedOfLight => From(UnitType.SpeedOfLight);
-        public double Mach => From(UnitType.Mach);
+        public double Gigawatts => From(UnitType.Gigawatts);
+        public double Megawatts => From(UnitType.Megawatts);
+        public double Kilowatts => From(UnitType.Kilowatts);
+        public double Watts => From(UnitType.Watts);
+        public double Milliwatts => From(UnitType.Milliwatts);
+        public double HorsePowerMetric => From(UnitType.HorsePowerMetric);
+        public double HorsePowerIT => From(UnitType.HorsePowerIT);
+        public double CaloriesPerSecond => From(UnitType.CaloriesPerSecond);
+        public double CaloriesPerMinute => From(UnitType.CaloriesPerMinute);
+        public double CaloriesPerHour => From(UnitType.CaloriesPerHour);
+        public double BTUsPerSecond => From(UnitType.BTUsPerSecond);
+        public double BTUsPerMinute => From(UnitType.BTUsPerMinute);
+        public double BTUsPerHour => From(UnitType.BTUsPerHour);
+        public double FootPoundsPerSecond => From(UnitType.FootPoundsPerSecond);
+        public double FootPoundsPerMinute => From(UnitType.FootPoundsPerMinute);
+        public double FootPoundsPerHour => From(UnitType.FootPoundsPerHour);
+        public double TonsRefridgeration => From(UnitType.TonsRefridgeration);
+
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, convertTo);
+            return PowerConversions.Convert(_value, UnitType.Watts, convertTo);
         }
 
         [Pure]
@@ -88,35 +97,35 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Speed)obj);
+            return obj.GetType() == GetType() && Equals((Power)obj);
         }
 
-        [Pure] public bool Equals(Speed other) => _value == other._value;
+        [Pure] public bool Equals(Power other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Speed left, Speed right) => Equals(left, right);
-        [Pure] public static bool operator !=(Speed left, Speed right) => !Equals(left, right);
-        [Pure] public int CompareTo(Speed other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Power left, Power right) => Equals(left, right);
+        [Pure] public static bool operator !=(Power left, Power right) => !Equals(left, right);
+        [Pure] public int CompareTo(Power other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Power left, Power right) => Comparer<Power>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Power left, Power right) => Comparer<Power>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Power left, Power right) => Comparer<Power>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Power left, Power right) => Comparer<Power>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Speed(int value) => new Speed(value);
+        [Pure] public static implicit operator Power(int value) => new Power(value);
 
         [Pure]
-        public static Speed operator +(Speed lvalue, Speed rvalue)
+        public static Power operator +(Power lvalue, Power rvalue)
         {
-            var total = lvalue.MetersPerSecond + rvalue.MetersPerSecond;
-            return new Speed(total, UnitType.MetersPerSecond);
+            var total = lvalue.Watts + rvalue.Watts;
+            return new Power(total, UnitType.Watts);
         }
 
         [Pure]
-        public static Speed operator -(Speed lvalue, Speed rvalue)
+        public static Power operator -(Power lvalue, Power rvalue)
         {
-            var total = lvalue.MetersPerSecond - rvalue.MetersPerSecond;
-            return new Speed(total, UnitType.MetersPerSecond);
+            var total = lvalue.Watts - rvalue.Watts;
+            return new Power(total, UnitType.Watts);
         }
 
         [Pure] public override string ToString() => _value.ToString();

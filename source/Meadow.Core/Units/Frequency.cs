@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents Frequency
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Frequency : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Frequency` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Frequency value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public Frequency(double value, UnitType type = UnitType.Hertz)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = FrequencyConversions.Convert(value, type, UnitType.Hertz);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The Frequency expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => FrequencyConversions.Convert(_value, UnitType.Hertz, Unit);
+            set => _value = FrequencyConversions.Convert(value, Unit, UnitType.Hertz);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,25 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the Frequency.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            Gigahertz,
+            Megahertz,
+            Kilohertz,
+            Hertz,
         }
+
+        public double Gigahertz => From(UnitType.Gigahertz);
+        public double Megahertz => From(UnitType.Megahertz);
+        public double Kilohertz => From(UnitType.Kilohertz);
+        public double Hertz => From(UnitType.Hertz);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return FrequencyConversions.Convert(_value, UnitType.Hertz, convertTo);
         }
 
         [Pure]
@@ -68,22 +70,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Frequency)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Frequency other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Frequency left, Frequency right) => Equals(left, right);
+        [Pure] public static bool operator !=(Frequency left, Frequency right) => !Equals(left, right);
+        [Pure] public int CompareTo(Frequency other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Frequency left, Frequency right) => Comparer<Frequency>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Frequency left, Frequency right) => Comparer<Frequency>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Frequency left, Frequency right) => Comparer<Frequency>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Frequency left, Frequency right) => Comparer<Frequency>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Frequency(int value) => new Frequency(value);
+
+        [Pure]
+        public static Frequency operator +(Frequency lvalue, Frequency rvalue)
+        {
+            var total = lvalue.Hertz + rvalue.Hertz;
+            return new Frequency(total, UnitType.Hertz);
+        }
+
+        [Pure]
+        public static Frequency operator -(Frequency lvalue, Frequency rvalue)
+        {
+            var total = lvalue.Hertz - rvalue.Hertz;
+            return new Frequency(total, UnitType.Hertz);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

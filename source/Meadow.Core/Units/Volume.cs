@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents Volume
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Volume : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Volume` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Volume value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public Volume(double value, UnitType type = UnitType.Liters)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = VolumeConversions.Convert(value, type, UnitType.Liters);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The Volume expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => VolumeConversions.Convert(_value, UnitType.Liters, Unit);
+            set => _value = VolumeConversions.Convert(value, Unit, UnitType.Liters);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,33 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the Volume.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            Gallons,
+            Ounces,
+            CubicFeet,
+            CubicInches,
+            Liters,
+            Centiliters,
+            Milliliters,
+            CubicMeters,
         }
+
+        public double Gallons => From(UnitType.Gallons);
+        public double Ounces => From(UnitType.Ounces);
+        public double CubicFeet => From(UnitType.CubicFeet);
+        public double CubicInches => From(UnitType.CubicInches);
+        public double Liters => From(UnitType.Liters);
+        public double Centiliters => From(UnitType.Centiliters);
+        public double Milliliters => From(UnitType.Milliliters);
+        public double CubicMeters => From(UnitType.CubicMeters);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return VolumeConversions.Convert(_value, UnitType.Liters, convertTo);
         }
 
         [Pure]
@@ -68,22 +78,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Volume)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Volume other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Volume left, Volume right) => Equals(left, right);
+        [Pure] public static bool operator !=(Volume left, Volume right) => !Equals(left, right);
+        [Pure] public int CompareTo(Volume other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Volume left, Volume right) => Comparer<Volume>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Volume left, Volume right) => Comparer<Volume>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Volume left, Volume right) => Comparer<Volume>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Volume left, Volume right) => Comparer<Volume>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Volume(int value) => new Volume(value);
+
+        [Pure]
+        public static Volume operator +(Volume lvalue, Volume rvalue)
+        {
+            var total = lvalue.Liters + rvalue.Liters;
+            return new Volume(total, UnitType.Liters);
+        }
+
+        [Pure]
+        public static Volume operator -(Volume lvalue, Volume rvalue)
+        {
+            var total = lvalue.Liters - rvalue.Liters;
+            return new Volume(total, UnitType.Liters);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

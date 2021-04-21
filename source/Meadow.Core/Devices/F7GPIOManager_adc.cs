@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Meadow.Core;
 using Meadow.Hardware;
+using Meadow.Units;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -10,6 +11,8 @@ namespace Meadow.Devices
     {
         private bool _debuggingADC = false;
         private bool _initialized = false;
+
+        private const int DefaultAdcTimeoutMs = 200;
 
         public void ConfigureAnalogInput(IPin pin)
         {
@@ -161,6 +164,41 @@ namespace Meadow.Devices
             }
         }
 
+        public Temperature GetTemperature()
+        {
+            if (!_initialized)
+            {
+                InitializeADC();
+                _initialized = true;
+            }
+
+            // read the CCR
+            var ccr = UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET);
+
+            // disable the VBAT and enable the temp sensor
+            var tempCCR = (int)ccr;
+            tempCCR &= ~(1 << STM32.ADC_CCR_VBATE_SHIFT);
+            tempCCR |= 1 << STM32.ADC_CCR_TSVREFE_SHIFT;
+            UPD.SetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET, (uint)tempCCR);
+
+            // read channel 18
+            var adc = GetAnalogValue(18, 500);
+
+            // restore the CCR
+            UPD.SetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET, ccr);
+
+            // calculate the temp
+            // voltage=(double)data/4095*3.3;
+            // celsius = (voltage - 0.76) / 0.0025 + 25;
+            var voltage = adc / 4095d * 3.3d;
+            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Units.Temperature.UnitType.Celsius); ;
+
+            // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
+            //i.e. temp = 80d / (double)(*0x1FFF7A2E - *0x1FFF7A2C) * (adc - (double)*0x1FFF7A2C) + 30d;
+
+            return temperature;
+        }
+
         public int GetAnalogValue(IPin pin)
         {
             var designator = GetPortAndPin(pin);
@@ -180,6 +218,11 @@ namespace Meadow.Devices
                     throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
             }
 
+            return GetAnalogValue(channel);
+        }
+
+        private int GetAnalogValue(int channel, int timeout = DefaultAdcTimeoutMs)
+        {
             Output.WriteLineIf(_debuggingADC, $"Starting process to get analog for channel {channel}");
 
             // adjust the SQR3 sequence register to tell it which channel to convert - we're doing 1 conversion only right now
@@ -206,7 +249,7 @@ namespace Meadow.Devices
             Output.WriteLineIf(_debuggingADC, $"Polling status register...");
 
             // poll the status register - wait for conversion complete
-            var ready = false;
+            bool ready;
             var tick = 0;
             do
             {
@@ -214,7 +257,7 @@ namespace Meadow.Devices
                 ready = (register_sr & STM32.ADC_SR_EOC) != 0;
 
                 // we need a timeout here to prevent deadlock if the SR never comes on
-                if (tick++ > 200)
+                if (tick++ > timeout)
                 {
                     // we've failed
                     Output.WriteLineIf(_debuggingADC, $"Conversion timed out");

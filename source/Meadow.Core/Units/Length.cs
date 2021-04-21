@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents Length
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Length : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Length` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Length value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public Length(double value, UnitType type = UnitType.Meters)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = LengthConversions.Convert(value, type, UnitType.Meters);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The Length expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => LengthConversions.Convert(_value, UnitType.Meters, Unit);
+            set => _value = LengthConversions.Convert(value, Unit, UnitType.Meters);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,40 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the Length.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            Kilometers,
+            Meters,
+            Centimeters,
+            Decimeters,
+            Millimeters,
+            Microns,
+            Miles,
+            NauticalMiles,
+            Yards,
+            Feet,
+            Inches,
         }
+
+
+        public double Kilometers => From(UnitType.Kilometers);
+        public double Meters => From(UnitType.Meters);
+        public double Centimeters => From(UnitType.Centimeters);
+        public double Decimeters => From(UnitType.Decimeters);
+        public double Millimeters => From(UnitType.Millimeters);
+        public double Microns => From(UnitType.Microns);
+        public double Miles => From(UnitType.Miles);
+        public double NauticalMiles => From(UnitType.NauticalMiles);
+        public double Yards => From(UnitType.Yards);
+        public double Feet => From(UnitType.Feet);
+        public double Inches => From(UnitType.Inches);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return LengthConversions.Convert(_value, UnitType.Meters, convertTo);
         }
 
         [Pure]
@@ -68,22 +85,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Length)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Length other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Length left, Length right) => Equals(left, right);
+        [Pure] public static bool operator !=(Length left, Length right) => !Equals(left, right);
+        [Pure] public int CompareTo(Length other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Length(int value) => new Length(value);
+
+        [Pure]
+        public static Length operator +(Length lvalue, Length rvalue)
+        {
+            var total = lvalue.Meters + rvalue.Meters;
+            return new Length(total, UnitType.Meters);
+        }
+
+        [Pure]
+        public static Length operator -(Length lvalue, Length rvalue)
+        {
+            var total = lvalue.Meters - rvalue.Meters;
+            return new Length(total, UnitType.Meters);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

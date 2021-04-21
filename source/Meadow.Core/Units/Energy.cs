@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents Energy
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Energy : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Energy` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Energy value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public Energy(double value, UnitType type = UnitType.Joules)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = EnergyConversions.Convert(value, type, UnitType.Joules);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The Energy expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => EnergyConversions.Convert(_value, UnitType.Joules, Unit);
+            set => _value = EnergyConversions.Convert(value, Unit, UnitType.Joules);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,36 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the Energy.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            BTU,
+            Calories,
+            Joules,
+            Kilocalories,
+            Kilojoules,
+            KilowattHours,
+            Therms,
+            WattHours,
+            WattSeconds
         }
+
+        public double BTU => From(UnitType.BTU);
+        public double Calories => From(UnitType.Calories);
+        public double Joules => From(UnitType.Joules);
+        public double Kilocalories => From(UnitType.Kilocalories);
+        public double Kilojoules => From(UnitType.Kilojoules);
+        public double KilowattHours => From(UnitType.KilowattHours);
+        public double Therms => From(UnitType.Therms);
+        public double WattHours => From(UnitType.WattHours);
+        public double WattSecond => From(UnitType.WattSeconds);
+
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return EnergyConversions.Convert(_value, UnitType.Joules, convertTo);
         }
 
         [Pure]
@@ -68,22 +81,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Energy)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Energy other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Energy left, Energy right) => Equals(left, right);
+        [Pure] public static bool operator !=(Energy left, Energy right) => !Equals(left, right);
+        [Pure] public int CompareTo(Energy other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Energy(int value) => new Energy(value);
+
+        [Pure]
+        public static Energy operator +(Energy lvalue, Energy rvalue)
+        {
+            var total = lvalue.Joules + rvalue.Joules;
+            return new Energy(total, UnitType.Joules);
+        }
+
+        [Pure]
+        public static Energy operator -(Energy lvalue, Energy rvalue)
+        {
+            var total = lvalue.Joules - rvalue.Joules;
+            return new Energy(total, UnitType.Joules);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents Torque
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Torque : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Torque` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Torque value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public Torque(double value, UnitType type = UnitType.NewtonMeter)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = TorqueConversions.Convert(value, type, UnitType.NewtonMeter);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The Torque expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => TorqueConversions.Convert(_value, UnitType.NewtonMeter, Unit);
+            set => _value = TorqueConversions.Convert(value, Unit, UnitType.NewtonMeter);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,33 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the Torque.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            NewtonMeter,
+            FootPound,
+            KilogramMeter,
+            KilogramCentimeter,
+            GramCentimeter,
+            InchPound,
+            InchOunce,
+            DyneCentimeter
         }
+
+        public double NewtonMeter => From(UnitType.NewtonMeter);
+        public double FootPound => From(UnitType.FootPound);
+        public double KilogramMeter => From(UnitType.KilogramMeter);
+        public double KilogramCentimeter => From(UnitType.KilogramCentimeter);
+        public double GramCentimeter => From(UnitType.GramCentimeter);
+        public double InchPound => From(UnitType.InchPound);
+        public double InchOunce => From(UnitType.InchOunce);
+        public double DyneCentimeter => From(UnitType.DyneCentimeter);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return TorqueConversions.Convert(_value, UnitType.NewtonMeter, convertTo);
         }
 
         [Pure]
@@ -68,22 +78,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Torque)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Torque other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Torque left, Torque right) => Equals(left, right);
+        [Pure] public static bool operator !=(Torque left, Torque right) => !Equals(left, right);
+        [Pure] public int CompareTo(Torque other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Torque left, Torque right) => Comparer<Torque>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Torque left, Torque right) => Comparer<Torque>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Torque left, Torque right) => Comparer<Torque>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Torque left, Torque right) => Comparer<Torque>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Torque(int value) => new Torque(value);
+
+        [Pure]
+        public static Torque operator +(Torque lvalue, Torque rvalue)
+        {
+            var total = lvalue.NewtonMeter + rvalue.NewtonMeter;
+            return new Torque(total, UnitType.NewtonMeter);
+        }
+
+        [Pure]
+        public static Torque operator -(Torque lvalue, Torque rvalue)
+        {
+            var total = lvalue.NewtonMeter - rvalue.NewtonMeter;
+            return new Torque(total, UnitType.NewtonMeter);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

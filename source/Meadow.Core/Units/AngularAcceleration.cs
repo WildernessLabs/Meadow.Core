@@ -8,32 +8,32 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents Speed
+    /// Represents AngularAcceleration
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Speed : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class AngularAcceleration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Speed` object.
+        /// Creates a new `AngularAcceleration` object.
         /// </summary>
-        /// <param name="value">The Speed value.</param>
+        /// <param name="value">The AngularAcceleration value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public Speed(double value, UnitType type = UnitType.KilometersPerSecond)
+        public AngularAcceleration(double value, UnitType type = UnitType.RevolutionsPerSecondSquared)
         {
             //always store reference value
             Unit = type;
-            _value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
+            _value = AngularAccelerationConversions.Convert(value, type, UnitType.RevolutionsPerSecondSquared);
         }
 
         /// <summary>
-        /// The speed expressed as a value.
+        /// The AngularAcceleration expressed as a value.
         /// </summary>
         public double Value
         {
-            get => SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, Unit);
-            set => _value = SpeedConversions.Convert(value, Unit, UnitType.KilometersPerSecond);
+            get => AngularAccelerationConversions.Convert(_value, UnitType.RevolutionsPerSecondSquared, Unit);
+            set => _value = AngularAccelerationConversions.Convert(value, Unit, UnitType.RevolutionsPerSecondSquared);
         }
 
         private double _value;
@@ -44,43 +44,29 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the speed.
+        /// The type of units available to describe the AngularAcceleration.
         /// </summary>
         public enum UnitType
         {
-            FeetPerMinute,
-            FeetPerSecond,
-            KilometersPerHour,
-            KilometersPerMinute,
-            KilometersPerSecond,
-            Knots,
-            MetersPerMinute,
-            MetersPerSecond,
-            MilesPerHour,
-            MilesPerMinute,
-            MilesPerSecond,
-            SpeedOfLight,
-            Mach,
+            RevolutionsPerSecondSquared,
+            RevolutionsPerMinuteSquared,
+            RadiansPerSecondSquared,
+            RadiansPerMinuteSquared,
+            DegreesPerSecondSquared,
+            DegreesPerMinuteSquared
         }
 
-        public double FeetPerSecond => From(UnitType.FeetPerSecond);
-        public double FeetPerMinute => From(UnitType.FeetPerMinute);
-        public double KilometersPerHour => From(UnitType.KilometersPerHour);
-        public double KilometersPerMinute => From(UnitType.KilometersPerMinute);
-        public double KilometersPerSecond => From(UnitType.KilometersPerSecond);
-        public double Knots => From(UnitType.Knots);
-        public double MetersPerMinute => From(UnitType.MetersPerMinute);
-        public double MetersPerSecond => From(UnitType.MetersPerSecond);
-        public double MilesPerHour => From(UnitType.MilesPerHour);
-        public double MilesPerMinute => From(UnitType.MilesPerMinute);
-        public double MilesPerSecond => From(UnitType.MilesPerSecond);
-        public double SpeedOfLight => From(UnitType.SpeedOfLight);
-        public double Mach => From(UnitType.Mach);
+        public double RevolutionsPerSecondSquared => From(UnitType.RevolutionsPerSecondSquared);
+        public double RevolutionsPerMinuteSquared => From(UnitType.RevolutionsPerMinuteSquared);
+        public double RadiansPerSecondSquared => From(UnitType.RadiansPerSecondSquared);
+        public double RadiansPerMinuteSquared => From(UnitType.RadiansPerMinuteSquared);
+        public double DegreesPerSecondSquared => From(UnitType.DegreesPerSecondSquared);
+        public double DegreesPerMinuteSquared => From(UnitType.DegreesPerMinuteSquared);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, convertTo);
+            return AngularAccelerationConversions.Convert(_value, UnitType.RevolutionsPerSecondSquared, convertTo);
         }
 
         [Pure]
@@ -88,35 +74,35 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Speed)obj);
+            return obj.GetType() == GetType() && Equals((AngularAcceleration)obj);
         }
 
-        [Pure] public bool Equals(Speed other) => _value == other._value;
+        [Pure] public bool Equals(AngularAcceleration other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Speed left, Speed right) => Equals(left, right);
-        [Pure] public static bool operator !=(Speed left, Speed right) => !Equals(left, right);
-        [Pure] public int CompareTo(Speed other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(AngularAcceleration left, AngularAcceleration right) => Equals(left, right);
+        [Pure] public static bool operator !=(AngularAcceleration left, AngularAcceleration right) => !Equals(left, right);
+        [Pure] public int CompareTo(AngularAcceleration other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(AngularAcceleration left, AngularAcceleration right) => Comparer<AngularAcceleration>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(AngularAcceleration left, AngularAcceleration right) => Comparer<AngularAcceleration>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(AngularAcceleration left, AngularAcceleration right) => Comparer<AngularAcceleration>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(AngularAcceleration left, AngularAcceleration right) => Comparer<AngularAcceleration>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Speed(int value) => new Speed(value);
+        [Pure] public static implicit operator AngularAcceleration(int value) => new AngularAcceleration(value);
 
         [Pure]
-        public static Speed operator +(Speed lvalue, Speed rvalue)
+        public static AngularAcceleration operator +(AngularAcceleration lvalue, AngularAcceleration rvalue)
         {
-            var total = lvalue.MetersPerSecond + rvalue.MetersPerSecond;
-            return new Speed(total, UnitType.MetersPerSecond);
+            var total = lvalue.RevolutionsPerSecondSquared + rvalue.RevolutionsPerSecondSquared;
+            return new AngularAcceleration(total, UnitType.RevolutionsPerSecondSquared);
         }
 
         [Pure]
-        public static Speed operator -(Speed lvalue, Speed rvalue)
+        public static AngularAcceleration operator -(AngularAcceleration lvalue, AngularAcceleration rvalue)
         {
-            var total = lvalue.MetersPerSecond - rvalue.MetersPerSecond;
-            return new Speed(total, UnitType.MetersPerSecond);
+            var total = lvalue.RevolutionsPerSecondSquared - rvalue.RevolutionsPerSecondSquared;
+            return new AngularAcceleration(total, UnitType.RevolutionsPerSecondSquared);
         }
 
         [Pure] public override string ToString() => _value.ToString();

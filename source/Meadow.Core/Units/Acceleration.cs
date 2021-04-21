@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents Acceleration
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Acceleration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Acceleration` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Acceleration value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public Acceleration(double value, UnitType type = UnitType.MetersPerSecondSquared)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = AccelerationConversions.Convert(value, type, UnitType.MetersPerSecondSquared);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The acceleration expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => AccelerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, Unit);
+            set => _value = AccelerationConversions.Convert(value, Unit, UnitType.MetersPerSecondSquared);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -47,20 +48,23 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            MetersPerSecondSquared,
+            CentimetersPerSecondSquared,
+            Gravity,
+            FeetPerSecondSquared,
+            InchesPerSecondSquared,
         }
+
+        public double MetersPerSecondSquared => From(UnitType.MetersPerSecondSquared);
+        public double CentimetersPerSecondSquared => From(UnitType.CentimetersPerSecondSquared);
+        public double Gravity => From(UnitType.Gravity);
+        public double FeetPerSecondSquared => From(UnitType.FeetPerSecondSquared);
+        public double InchesPerSecondSquared => From(UnitType.InchesPerSecondSquared);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return AccelerationConversions.Convert(_value, UnitType.MetersPerSecondSquared, convertTo);
         }
 
         [Pure]
@@ -68,22 +72,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Acceleration)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Acceleration other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Acceleration left, Acceleration right) => Equals(left, right);
+        [Pure] public static bool operator !=(Acceleration left, Acceleration right) => !Equals(left, right);
+        [Pure] public int CompareTo(Acceleration other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Acceleration left, Acceleration right) => Comparer<Acceleration>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Acceleration(int value) => new Acceleration(value);
+
+        [Pure]
+        public static Acceleration operator +(Acceleration lvalue, Acceleration rvalue)
+        {
+            var total = lvalue.From(UnitType.MetersPerSecondSquared) + rvalue.From(UnitType.MetersPerSecondSquared);
+            return new Acceleration(total, UnitType.MetersPerSecondSquared);
+        }
+
+        [Pure]
+        public static Acceleration operator -(Acceleration lvalue, Acceleration rvalue)
+        {
+            var total = lvalue.From(UnitType.MetersPerSecondSquared) - rvalue.From(UnitType.MetersPerSecondSquared);
+            return new Acceleration(total, UnitType.MetersPerSecondSquared);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);

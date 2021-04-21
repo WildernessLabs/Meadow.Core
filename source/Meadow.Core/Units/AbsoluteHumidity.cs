@@ -8,34 +8,35 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents AbsoluteHumidity
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Mass : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class AbsoluteHumidity : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `AbsoluteHumidity` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The AbsoluteHumidity value.</param>
+        /// <param name="type">kilometers meters per second by default.</param>
+        public AbsoluteHumidity(double value, UnitType type = UnitType.GramsPerCubicMeter)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = AbsoluteHumidityConversions.Convert(value, type, UnitType.GramsPerCubicMeter);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The AbsoluteHumidity expressed as a value.
         /// </summary>
         public double Value
         {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            get => AbsoluteHumidityConversions.Convert(_value, UnitType.GramsPerCubicMeter, Unit);
+            set => _value = AbsoluteHumidityConversions.Convert(value, Unit, UnitType.GramsPerCubicMeter);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +44,22 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the AbsoluteHumidity.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            GramsPerCubicMeter,
+            KilogramsPerCubicMeter,
         }
+
+        public double GramsPerCubicMeter => From(UnitType.GramsPerCubicMeter);
+        public double KilogramsPerCubicMeter => From(UnitType.KilogramsPerCubicMeter);
+
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return AbsoluteHumidityConversions.Convert(_value, UnitType.GramsPerCubicMeter, convertTo);
         }
 
         [Pure]
@@ -68,22 +67,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((AbsoluteHumidity)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(AbsoluteHumidity other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(AbsoluteHumidity left, AbsoluteHumidity right) => Equals(left, right);
+        [Pure] public static bool operator !=(AbsoluteHumidity left, AbsoluteHumidity right) => !Equals(left, right);
+        [Pure] public int CompareTo(AbsoluteHumidity other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(AbsoluteHumidity left, AbsoluteHumidity right) => Comparer<AbsoluteHumidity>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(AbsoluteHumidity left, AbsoluteHumidity right) => Comparer<AbsoluteHumidity>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(AbsoluteHumidity left, AbsoluteHumidity right) => Comparer<AbsoluteHumidity>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(AbsoluteHumidity left, AbsoluteHumidity right) => Comparer<AbsoluteHumidity>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator AbsoluteHumidity(int value) => new AbsoluteHumidity(value);
+
+        [Pure]
+        public static AbsoluteHumidity operator +(AbsoluteHumidity lvalue, AbsoluteHumidity rvalue)
+        {
+            var total = lvalue.GramsPerCubicMeter + rvalue.GramsPerCubicMeter;
+            return new AbsoluteHumidity(total, UnitType.GramsPerCubicMeter);
+        }
+
+        [Pure]
+        public static AbsoluteHumidity operator -(AbsoluteHumidity lvalue, AbsoluteHumidity rvalue)
+        {
+            var total = lvalue.GramsPerCubicMeter - rvalue.GramsPerCubicMeter;
+            return new AbsoluteHumidity(total, UnitType.GramsPerCubicMeter);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);
