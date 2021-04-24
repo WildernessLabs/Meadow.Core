@@ -14,7 +14,6 @@ namespace Meadow.Peripherals.Sensors
         /// </summary>
         Length Distance { get; }
 
-
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
