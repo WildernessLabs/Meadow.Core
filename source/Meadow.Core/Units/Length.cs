@@ -19,7 +19,7 @@ namespace Meadow.Units
         /// Creates a new `Length` object.
         /// </summary>
         /// <param name="value">The Length value.</param>
-        /// <param name="type">kilometers meters per second by default.</param>
+        /// <param name="type">Meters by default.</param>
         public Length(double value, UnitType type = UnitType.Meters)
         {
             //always store reference value
