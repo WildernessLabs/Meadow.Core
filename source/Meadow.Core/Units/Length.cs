@@ -95,10 +95,10 @@ namespace Meadow.Units
         [Pure] public static bool operator ==(Length left, Length right) => Equals(left, right);
         [Pure] public static bool operator !=(Length left, Length right) => !Equals(left, right);
         [Pure] public int CompareTo(Length other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Length left, Length right) => Comparer<Length>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator <(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) < 0;
+        [Pure] public static bool operator >(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) > 0;
+        [Pure] public static bool operator <=(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) <= 0;
+        [Pure] public static bool operator >=(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) >= 0;
 
         [Pure] public static implicit operator Length(int value) => new Length(value);
 
