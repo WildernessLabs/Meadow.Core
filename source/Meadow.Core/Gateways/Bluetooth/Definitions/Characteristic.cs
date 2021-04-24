@@ -31,8 +31,6 @@ namespace Meadow.Gateways.Bluetooth
             Properties = properties;
             MaxLength = maxLength;
             Descriptors = descriptors;
-
-            Console.WriteLine($"Characteristic {Name} is {maxLength} bytes.");
         }
 
         internal void SendValueToAdapter(byte[] data)
