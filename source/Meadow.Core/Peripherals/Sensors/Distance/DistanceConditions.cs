@@ -1,5 +1,6 @@
 ﻿namespace Meadow.Peripherals.Sensors.Distance
 {
+    // TODO: Remove this class after units conversion is done
     public class DistanceConditions
     {
         public float? Distance { get; set; }
