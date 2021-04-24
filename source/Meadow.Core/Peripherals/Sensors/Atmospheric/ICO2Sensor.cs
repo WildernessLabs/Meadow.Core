@@ -1,24 +1,23 @@
-﻿using Meadow.Bases;
-using Meadow.Units;
+﻿using Meadow.Units;
 using System;
 
 namespace Meadow.Peripherals.Sensors
 {
     /// <summary>
-    /// Interface for distance sensors classes.
+    /// CO2 sensor interface requirements.
     /// </summary>
-    public interface IRangeFinder : ISensor
+    public interface ICO2Sensor : ISensor
     {
         /// <summary>
-        /// Last value read from the Temperature sensor.
+        /// Last value read from the CO2 sensor.
         /// </summary>
-        Length Distance { get; }
+        Concentration CO2 { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Length>> DistanceUpdated;
+        event EventHandler<CompositeChangeResult<Concentration>> CO2Updated;
     }
 }
