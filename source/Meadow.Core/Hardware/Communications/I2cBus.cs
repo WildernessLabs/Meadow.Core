@@ -192,6 +192,11 @@ namespace Meadow.Hardware
         /// <param name="dataToWrite">Data buffer into which read data will go.  The size of this buffer determines the number of bytes to be read</param>
         public unsafe void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
         {
+            WriteReadData(peripheralAddress, writeBuffer, writeBuffer.Length, readBuffer, readBuffer.Length);
+        }
+
+        public unsafe void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount)
+        {
             _busSemaphore.Wait();
 
             try
@@ -203,9 +208,9 @@ namespace Meadow.Hardware
                     {
                         Address = peripheralAddress,
                         Frequency = this.Frequency,
-                        TxBufferLength = writeBuffer.Length,
+                        TxBufferLength = writeCount,
                         TxBuffer = (IntPtr)pWrite,
-                        RxBufferLength = readBuffer.Length,
+                        RxBufferLength = readCount,
                         RxBuffer = (IntPtr)pRead,
                     };
 

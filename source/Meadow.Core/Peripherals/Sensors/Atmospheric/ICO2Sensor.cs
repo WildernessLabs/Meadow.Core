@@ -20,4 +20,22 @@ namespace Meadow.Peripherals.Sensors
         /// </summary>
         event EventHandler<CompositeChangeResult<Concentration>> CO2Updated;
     }
+
+    /// <summary>
+    /// CO2 sensor interface requirements.
+    /// </summary>
+    public interface IVocSensor : ISensor
+    {
+        /// <summary>
+        /// Last value read from the CO2 sensor.
+        /// </summary>
+        Concentration VOC { get; }
+
+        /// <summary>
+        /// Raised when a new reading has been made. Events will only be raised
+        /// while the driver is updating. To start, call the `StartUpdating()`
+        /// method.
+        /// </summary>
+        event EventHandler<CompositeChangeResult<Concentration>> VOCUpdated;
+    }
 }

@@ -44,9 +44,11 @@ namespace Meadow.Units
         public enum UnitType
         {
             PartsPerMillion,
+            PartsPerBillion
         }
 
-        public double PartPerMillion => From(UnitType.PartsPerMillion);
+        public double PartsPerMillion => From(UnitType.PartsPerMillion);
+        public double PartsPerBillion => From(UnitType.PartsPerBillion);
 
         [Pure]
         public double From(UnitType convertTo)
