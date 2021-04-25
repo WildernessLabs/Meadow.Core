@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 
 namespace Meadow.Peripherals.Sensors.Motion
 {
@@ -10,13 +11,13 @@ namespace Meadow.Peripherals.Sensors.Motion
         /// <summary>
         /// Last value read from the Temperature sensor.
         /// </summary>
-        AccelerationConditions Conditions { get; }
+        Acceleration3d Acceleration3d { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<AccelerationConditionChangeResult> Updated;
+        event EventHandler<CompositeChangeResult<Acceleration3d>> Acceleration3dUpdated;
     }
 }

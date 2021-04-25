@@ -8,32 +8,32 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents Speed
+    /// Represents Illuminance
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Speed : IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Illuminance : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Speed` object.
+        /// Creates a new `Illuminance` object.
         /// </summary>
-        /// <param name="value">The Speed value.</param>
+        /// <param name="value">The Illuminance value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public Speed(double value, UnitType type = UnitType.KilometersPerSecond)
+        public Illuminance(double value, UnitType type = UnitType.Lux)
         {
             //always store reference value
             Unit = type;
-            _value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
+            _value = IlluminanceConversions.Convert(value, type, UnitType.Lux);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The Illuminance expressed as a value.
         /// </summary>
         public double Value
         {
-            get => SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, Unit);
-            set => _value = SpeedConversions.Convert(value, Unit, UnitType.KilometersPerSecond);
+            get => IlluminanceConversions.Convert(_value, UnitType.Lux, Unit);
+            set => _value = IlluminanceConversions.Convert(value, Unit, UnitType.Lux);
         }
 
         private double _value;
@@ -44,29 +44,21 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the Illuminance.
         /// </summary>
         public enum UnitType
         {
-            FeetPerMinute,
-            FeetPerSecond,
-            KilometersPerHour,
-            KilometersPerMinute,
-            KilometersPerSecond,
-            Knots,
-            MetersPerMinute,
-            MetersPerSecond,
-            MilesPerHour,
-            MilesPerMinute,
-            MilesPerSecond,
-            SpeedOfLight,
-            Mach,
+            Lux,
+            FootCandles,
         }
+
+        public double Lux => From(UnitType.Lux);
+        public double FootCandles => From(UnitType.FootCandles);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return SpeedConversions.Convert(_value, UnitType.KilometersPerSecond, convertTo);
+            return IlluminanceConversions.Convert(_value, UnitType.Lux, convertTo);
         }
 
         [Pure]
@@ -74,22 +66,36 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Illuminance)obj);
         }
 
-        [Pure] public bool Equals(Speed other) => _value == other._value;
+        [Pure] public bool Equals(Illuminance other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Speed left, Speed right) => Equals(left, right);
-        [Pure] public static bool operator !=(Speed left, Speed right) => !Equals(left, right);
-        [Pure] public int CompareTo(Speed other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Speed left, Speed right) => Comparer<Speed>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Illuminance left, Illuminance right) => Equals(left, right);
+        [Pure] public static bool operator !=(Illuminance left, Illuminance right) => !Equals(left, right);
+        [Pure] public int CompareTo(Illuminance other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Illuminance left, Illuminance right) => Comparer<Illuminance>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Illuminance left, Illuminance right) => Comparer<Illuminance>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Illuminance left, Illuminance right) => Comparer<Illuminance>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Illuminance left, Illuminance right) => Comparer<Illuminance>.Default.Compare(left, right) >= 0;
 
-        [Pure] public static implicit operator Speed(int value) => new Speed(value);
+        [Pure] public static implicit operator Illuminance(int value) => new Illuminance(value);
+
+        [Pure]
+        public static Illuminance operator +(Illuminance lvalue, Illuminance rvalue)
+        {
+            var total = lvalue.Lux + rvalue.Lux;
+            return new Illuminance(total, UnitType.Lux);
+        }
+
+        [Pure]
+        public static Illuminance operator -(Illuminance lvalue, Illuminance rvalue)
+        {
+            var total = lvalue.Lux - rvalue.Lux;
+            return new Illuminance(total, UnitType.Lux);
+        }
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);
