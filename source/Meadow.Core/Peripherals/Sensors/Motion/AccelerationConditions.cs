@@ -1,6 +1,7 @@
 ﻿using System;
 namespace Meadow.Peripherals.Sensors.Motion
 {
+    [Obsolete]
     public class AccelerationConditions
     {
         public float? XAcceleration { get; set; }
