@@ -48,6 +48,7 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            KiloLux,
             Lux,
             FootCandles,
         }
