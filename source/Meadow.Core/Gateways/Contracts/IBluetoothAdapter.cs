@@ -4,6 +4,6 @@ namespace Meadow.Gateways
 {
     public interface IBluetoothAdapter
     {
-        bool StartBluetoothStack(Definition configuration);
+        bool StartBluetoothServer(Definition configuration);
     }
 }

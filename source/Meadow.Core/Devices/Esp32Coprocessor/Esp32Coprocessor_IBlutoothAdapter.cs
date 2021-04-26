@@ -19,7 +19,7 @@ namespace Meadow.Devices
             return "Meadow BLE";
         }
 
-        public bool StartBluetoothStack(Definition definition)
+        public bool StartBluetoothServer(Definition definition)
         {
             if (definition == null)
             {
