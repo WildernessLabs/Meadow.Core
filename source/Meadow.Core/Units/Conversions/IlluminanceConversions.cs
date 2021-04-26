@@ -14,6 +14,7 @@
 		//must align to enum
 		private static readonly double[] illuminanceConversions =
 		{
+			0.001, //kilo lux 
 			1.0, //lux
 			0.0930578820026056//foot-candle
 	    };
