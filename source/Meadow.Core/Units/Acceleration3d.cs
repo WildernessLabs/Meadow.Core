@@ -32,6 +32,11 @@ namespace Meadow.Units
             AccelerationZ = new Acceleration(valueZ, Unit);
         }
 
+        public Acceleration3d()
+        {
+
+        }
+
         public Acceleration3d(Acceleration accelerationX, Acceleration accelerationY, Acceleration accelerationZ)
         {
             AccelerationX = new Acceleration(accelerationX.Value, accelerationX.Unit);
