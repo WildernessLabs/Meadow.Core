@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Meadow;
+﻿using Meadow;
 using Meadow.Devices;
-using Meadow.Hardware;
+using Meadow.Gateways.Bluetooth;
+using System;
 
 namespace BLETest
 {
@@ -16,7 +14,6 @@ namespace BLETest
             TurnBluetoothOn("BLE TEST");
 
             Console.WriteLine("Testing complete");
-
         }
 
         public void TurnBluetoothOn(string deviceName)
@@ -25,8 +22,9 @@ namespace BLETest
 
             try
             {
+                var bleDefinition = new Definition(deviceName);
                 Device.InitBluetoothAdapter();
-                Device.BluetoothAdapter.StartBluetoothStack(deviceName);
+                Device.BluetoothAdapter.StartBluetoothServer(bleDefinition);
             }
             catch (Exception ex)
             {
