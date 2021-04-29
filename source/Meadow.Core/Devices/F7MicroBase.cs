@@ -341,6 +341,16 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
+        public II2cBus CreateI2cBus()
+        {
+            return CreateI2cBus(IMeadowDevice.DefaultI2cBusSpeed);
+        }
+
+        /// <summary>
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             I2cBusSpeed busSpeed
         )

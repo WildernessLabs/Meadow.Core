@@ -12,6 +12,12 @@ namespace Meadow.Hardware
         public const int DefaultI2cBusSpeed = 100000;
 
         /// <summary>
+        /// Creates an I2C bus instance for the default pins.
+        /// </summary>
+        /// <returns>An instance of an I2cBus</returns>
+        II2cBus CreateI2cBus();
+
+        /// <summary>
         /// Creates an I2C bus instance for the default pins and the requested bus speed
         /// </summary>
         /// <param name="frequencyHz">The bus speed in (in Hz).</param>
