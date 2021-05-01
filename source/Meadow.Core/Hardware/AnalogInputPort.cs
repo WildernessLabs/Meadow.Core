@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow.Units;
 //using System.Collections.Generic;
 //using System.Threading.Tasks;
 
@@ -39,7 +40,7 @@ namespace Meadow.Hardware
     //    StartSampling();
     //    ConfigureNotifications();
     //    ```
-    public class AnalogInputPort : AnalogInputPortBase, IObservable<FloatChangeResult>
+    public class AnalogInputPort : AnalogInputPortBase, IObservable<CompositeChangeResult<Voltage>>
     {
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
         static readonly object _analogSyncRoot = new object();
@@ -57,7 +58,7 @@ namespace Meadow.Hardware
         /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
         public bool IsSampling { get; protected set; } = false;
 
-        protected float _previousVoltageReading = 0;
+        protected Voltage _previousVoltageReading = 0;
 
         protected AnalogInputPort(
                     IPin pin,
@@ -133,7 +134,7 @@ namespace Meadow.Hardware
 
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
-                    float[] sampleBuffer = new float[sampleCount];
+                    double[] sampleBuffer = new double[sampleCount];
                     // loop until we're supposed to stop
                     while (true) {
                         // TODO: someone please review; is this the correct
@@ -143,7 +144,7 @@ namespace Meadow.Hardware
                         // cleanup
                         if (ct.IsCancellationRequested) {
                             // do task clean up here
-                            _observers.ForEach(x => x.OnCompleted());
+                            observers.ForEach(x => x.OnCompleted());
                             break;
                         }
 
@@ -151,7 +152,7 @@ namespace Meadow.Hardware
                         lock (_analogSyncRoot) {
                             var rawValue = this.IOController.GetAnalogValue(this.Pin);
                             // convert the raw valute into an actual voltage.
-                            sampleBuffer[currentSampleCount] = ((float)rawValue / (float)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage;
+                            sampleBuffer[currentSampleCount] = ((double)rawValue / (double)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage.Volts;
                         }
 
                         // increment our counter
@@ -177,7 +178,7 @@ namespace Meadow.Hardware
                             var newVoltage = Voltage;
 
                             // create a result set
-                            FloatChangeResult result = new FloatChangeResult(newVoltage, _previousVoltageReading);
+                            CompositeChangeResult<Voltage> result = new CompositeChangeResult<Voltage>(newVoltage, _previousVoltageReading);
 
                             // raise our events and notify our subs
                             base.RaiseChangedAndNotify(result);
@@ -224,21 +225,22 @@ namespace Meadow.Hardware
         /// <param name="sampleInterval">The interval, in milliseconds, between
         /// sample readings.</param>
         /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
-        public async override Task<float> Read(int sampleCount = 10, int sampleInterval = 40)
+        public async override Task<Voltage> Read(int sampleCount = 10, int sampleInterval = 40)
         {
-            float[] sampleBuffer = new float[sampleCount];
+            // TODO: should this be Span<double>?
+            double[] sampleBuffer = new double[sampleCount];
             for (int i = 0; i < sampleCount; i++) {
                 // read into the buffer
                 lock (_analogSyncRoot) {
                     var rawValue = this.IOController.GetAnalogValue(this.Pin);
                     // convert the raw valute into an actual voltage.
-                    sampleBuffer[i] = ((float)rawValue / (float)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage;
+                    sampleBuffer[i] = ((double)rawValue / (double)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage.Volts;
                 }
                 await Task.Delay(sampleInterval);
             }
 
             // return the average of the samples
-            return (float)(sampleBuffer.Select(x => (float)x).Sum() / sampleCount);
+            return new Voltage((float)(sampleBuffer.Select(x => (float)x).Sum() / sampleCount), Units.Voltage.UnitType.Volts);
         }
 
         public override void Dispose()

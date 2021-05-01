@@ -33,6 +33,7 @@ namespace Meadow.Devices
             //this.InitEsp32CoProc();
 
             this.esp32 = new Esp32Coprocessor();
+            BluetoothAdapter = esp32;
             WiFiAdapter = esp32;
             Coprocessor = esp32;
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Meadow.Units;
 
 namespace Meadow.Hardware
 {
@@ -8,24 +9,24 @@ namespace Meadow.Hardware
     /// Contract for ports that implement an analog input channel.
     /// </summary>
     // TODO: should this also be IObservable?
-    public interface IAnalogInputPort : IAnalogPort
+    public interface IAnalogInputPort : IAnalogPort, IObservable<CompositeChangeResult<Voltage>>
     {
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        event EventHandler<FloatChangeResult> Changed;
+        event EventHandler<CompositeChangeResult<Voltage>> Changed;
 
         /// <summary>
         /// Gets the sample buffer.
         /// </summary>
         /// <value>The sample buffer.</value>
-        IList<float> VoltageSampleBuffer { get; }
+        IList<Voltage> VoltageSampleBuffer { get; }
 
         /// <summary>
         /// The maximum voltage that the Analog Port can read. Typically 3.3V.
         /// This value is used to convert raw ADC values into voltage.
         /// </summary>
-        float ReferenceVoltage { get; }
+        Voltage ReferenceVoltage { get; }
 
         /// <summary>
         /// Gets the average value of the values in the buffer. Use in conjunction
@@ -33,9 +34,9 @@ namespace Meadow.Hardware
         /// sampling, use Read().
         /// </summary>
         /// <value>The average buffer value.</value>
-        float Voltage { get; }
+        Voltage Voltage { get; }
 
-        IDisposable Subscribe(IObserver<FloatChangeResult> observer);
+        //IDisposable Subscribe(IObserver<CompositeChangeResult<Voltage>> observer);
 
         /// <summary>
         /// Convenience method to get the current voltage. For frequent reads, use
@@ -46,7 +47,7 @@ namespace Meadow.Hardware
         /// <param name="sampleIntervalDuration">The time, in milliseconds,
         /// to wait in between samples during a reading.</param>
         /// <returns>A float value that's ann average value of all the samples taken.</returns>
-        Task<float> Read(int sampleCount = 10, int sampleIntervalDuration = 40);
+        Task<Voltage> Read(int sampleCount = 10, int sampleIntervalDuration = 40);
 
         /// <summary>
         /// Starts continuously sampling the analog port.
@@ -68,5 +69,15 @@ namespace Meadow.Hardware
         /// Stops sampling the analog port.
         /// </summary>
         void StopSampling();
+
+        public static FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage?>
+            CreateObserver(
+                Action<CompositeChangeResult<Voltage>> handler,
+                Predicate<CompositeChangeResult<Voltage>>? filter = null)
+        {
+            return new FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage?>(
+                handler, filter);
+        }
+
     }
 }

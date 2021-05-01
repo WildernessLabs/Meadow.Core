@@ -17,6 +17,7 @@ namespace Meadow.Devices
         protected SynchronizationContext _context;
         protected Esp32Coprocessor? esp32;
 
+        public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
         public IWiFiAdapter? WiFiAdapter { get; protected set; }
         public ICoprocessor? Coprocessor { get; protected set; }
 
@@ -54,6 +55,7 @@ namespace Meadow.Devices
                         if (this.esp32 == null) {
                             this.esp32 = new Esp32Coprocessor();
                         }
+                        BluetoothAdapter = esp32;
                         WiFiAdapter = esp32;
                         Coprocessor = esp32;
                     } catch (Exception e) {
@@ -72,11 +74,10 @@ namespace Meadow.Devices
             return InitCoprocessor();
         }
 
-        // when bluetooth is ready:
-        //public Task<bool> InitBluetoothAdapter()
-        //{
-        //    return InitCoprocessor();
-        //}
+        public Task<bool> InitBluetoothAdapter()
+        {
+            return InitCoprocessor();
+        }
 
         public IDigitalOutputPort CreateDigitalOutputPort(
             IPin pin,
@@ -333,6 +334,16 @@ namespace Meadow.Devices
 
             // this is an unsupported bus, but will get caught elsewhere
             return -1;
+        }
+
+        /// <summary>
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// </summary>
+        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <returns>An instance of an I2cBus</returns>
+        public II2cBus CreateI2cBus()
+        {
+            return CreateI2cBus(IMeadowDevice.DefaultI2cBusSpeed);
         }
 
         /// <summary>

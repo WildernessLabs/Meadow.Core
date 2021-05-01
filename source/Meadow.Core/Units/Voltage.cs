@@ -8,34 +8,34 @@ using Meadow.Units.Conversions;
 namespace Meadow.Units
 {
     /// <summary>
-    /// Represents mass, or weight of an object
+    /// Represents a value of Electric Potential, or _Voltage_.
     /// </summary>
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Mass : IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public class Voltage : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `Mass` object.
+        /// Creates a new `Voltage` object.
         /// </summary>
-        /// <param name="value">The mass value.</param>
-        /// <param name="type">Grams by default.</param>
-        public Mass(double value, UnitType type = UnitType.Grams)
+        /// <param name="value">The Voltage value.</param>
+        /// <param name="type">Volts by default.</param>
+        public Voltage(double value, UnitType type = UnitType.Volts)
         {
             //always store reference value
             Unit = type;
-            _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            _value = VoltageConversions.Convert(value, type, UnitType.Volts);
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// The voltage expressed as a value.
         /// </summary>
-        public double Value
-        {
-            get => MassConversions.Convert(_value, UnitType.Grams, Unit);
-            set => _value = MassConversions.Convert(value, Unit, UnitType.Grams);
+        public double Value {
+            get => VoltageConversions.Convert(_value, UnitType.Volts, Unit);
+            set => _value = VoltageConversions.Convert(value, Unit, UnitType.Volts);
         }
-        public double _value;
+
+        private double _value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -43,24 +43,42 @@ namespace Meadow.Units
         public UnitType Unit { get; set; }
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the voltage.
         /// </summary>
         public enum UnitType
         {
-            Grams,
-            Kilograms,
-            Onces,
-            Pounds,
-            TonsMetric,
-            TonsUSShort,
-            TonsUKLong,
-            count
+            Volts,
+            Millivolts,
+            Microvolts,
+            Kilovolts,
+            Megavolts,
+            Gigavolts,
+            Statvolts //hahhhahahah
         }
+
+        public double Volts => From(UnitType.Volts);
+        public double Millivolts => From(UnitType.Millivolts);
+        public double Microvolts => From(UnitType.Microvolts);
+        public double Kilovolts => From(UnitType.Kilovolts);
+        public double Megavolts => From(UnitType.Megavolts);
+        public double Gigavolts => From(UnitType.Gigavolts);
+        public double Statvolts => From(UnitType.Statvolts);
 
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MassConversions.Convert(_value, UnitType.Grams, convertTo);
+            return VoltageConversions.Convert(_value, Voltage.UnitType.Volts, convertTo);
+        }
+
+        /// <summary>
+        /// Returns the absolute voltage, that is, the voltage without regards to
+        /// negative polarity
+        /// </summary>
+        /// <returns></returns>
+        [Pure]
+        public Voltage Abs()
+        {
+            return new Voltage(Math.Abs(this._value), UnitType.Volts);
         }
 
         [Pure]
@@ -68,22 +86,27 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Voltage)obj);
         }
 
-        [Pure] public bool Equals(Mass other) => _value == other._value;
+        [Pure] public bool Equals(Voltage other) => _value == other._value;
 
         [Pure] public override int GetHashCode() => _value.GetHashCode();
 
-        [Pure] public static bool operator ==(Mass left, Mass right) => Equals(left, right);
-        [Pure] public static bool operator !=(Mass left, Mass right) => !Equals(left, right);
-        [Pure] public int CompareTo(Mass other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Mass left, Mass right) => Comparer<Mass>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator ==(Voltage left, Voltage right) => Equals(left, right);
+        [Pure] public static bool operator !=(Voltage left, Voltage right) => !Equals(left, right);
+        [Pure] public int CompareTo(Voltage other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
+        [Pure] public static bool operator <(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) < 0;
+        [Pure] public static bool operator >(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) > 0;
+        [Pure] public static bool operator <=(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) <= 0;
+        [Pure] public static bool operator >=(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) >= 0;
 
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
+        [Pure] public static implicit operator Voltage(double value) => new Voltage(value);
+
+        [Pure] public static Voltage operator +(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts + rvalue.Volts, UnitType.Volts);
+        [Pure] public static Voltage operator -(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts - rvalue.Volts, UnitType.Volts);
+        [Pure] public static Voltage operator /(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts / rvalue.Volts, UnitType.Volts);
+        [Pure] public static Voltage operator *(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts * rvalue.Volts, UnitType.Volts);
 
         [Pure] public override string ToString() => _value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);
@@ -95,6 +118,7 @@ namespace Meadow.Units
         [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)_value).ToBoolean(provider);
         [Pure] public byte ToByte(IFormatProvider provider) => ((IConvertible)_value).ToByte(provider);
         [Pure] public char ToChar(IFormatProvider provider) => ((IConvertible)_value).ToChar(provider);
+        // TODO: maybe this shouldn't be here? heh
         [Pure] public DateTime ToDateTime(IFormatProvider provider) => ((IConvertible)_value).ToDateTime(provider);
         [Pure] public decimal ToDecimal(IFormatProvider provider) => ((IConvertible)_value).ToDecimal(provider);
         [Pure] public double ToDouble(IFormatProvider provider) => _value;

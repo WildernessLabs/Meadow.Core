@@ -334,4 +334,30 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Byte Persist;
     };
 
+    public struct BTStackConfig
+    {
+        public String Config;
+    };
+
+    public struct BTDataWriteRequest
+    {
+        public UInt16 Handle;
+        public UInt32 DataLength;
+        public byte[] Data;
+    };
+
+    public struct BTGetHandlesResponse
+    {
+        public UInt16 HandleCount;
+        public UInt32 HandlesLength;
+        public byte[] Handles;
+    };
+
+    public struct BTServerDataSet
+    {
+        public UInt16 Handle;
+        public UInt32 SetDataLength;
+        public byte[] SetData;
+    };
+
 }
