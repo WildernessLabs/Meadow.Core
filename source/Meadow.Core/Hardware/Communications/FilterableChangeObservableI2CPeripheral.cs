@@ -1,4 +1,5 @@
-﻿using Meadow.Units;
+﻿using System;
+using Meadow.Units;
 
 namespace Meadow.Hardware
 {
@@ -7,6 +8,11 @@ namespace Meadow.Hardware
         where T : CompositeChangeResult<U1>
         where U1 : IUnitType
     {
+        /// <summary>
+        /// The peripheral's address on the I2C Bus
+        /// </summary>
+        public byte Address { get => Bus.Address; }
+
         protected I2CBusAccessor Bus { get; private set; }
 
         protected FilterableChangeObservableI2CPeripheral(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
@@ -20,6 +26,11 @@ namespace Meadow.Hardware
         where U1 : IUnitType
         where U2 : IUnitType
     {
+        /// <summary>
+        /// The peripheral's address on the I2C Bus
+        /// </summary>
+        public byte Address { get => Bus.Address; }
+
         protected I2CBusAccessor Bus { get; private set; }
 
         protected FilterableChangeObservableI2CPeripheral(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
@@ -29,11 +40,12 @@ namespace Meadow.Hardware
     }
 
     public class I2CBusAccessor
-    { 
+    {
+        private object SyncRoot { get; } = new object();
         private byte[] _txBuffer;
         private byte[] _rxBuffer;
 
-        protected II2cBus Bus { get; private set; }
+        public II2cBus Bus { get; private set; }
         public byte Address { get; private set; }
 
         public I2CBusAccessor(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
@@ -47,46 +59,110 @@ namespace Meadow.Hardware
 
         public byte ReadRegisterByte(byte register)
         {
-            _txBuffer[0] = (byte)register;
-            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 1);
-            return _rxBuffer[0];
+            lock (SyncRoot)
+            {
+                Bus.WriteData(Address, register);
+                return Bus.ReadData(Address, 1)[0];
+            }
+//            _txBuffer[0] = (byte)register;
+//            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 1);
+//            return _rxBuffer[0];
         }
 
         public ushort ReadRegisterShort(byte register)
         {
-            _txBuffer[0] = (byte)register;
-            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 2);
-            return (ushort)(_rxBuffer[0] << 8 | _rxBuffer[1]);
+            lock (SyncRoot)
+            {
+                Bus.WriteData(Address, register);
+                var data = Bus.ReadData(Address, 2);
+                return (ushort)(data[0] << 8 | data[1]);
+            }
+//            _txBuffer[0] = (byte)register;
+//            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 2);
+//            return (ushort)(_rxBuffer[0] << 8 | _rxBuffer[1]);
         }
 
         public uint ReadRegisterInt(byte register)
         {
-            _txBuffer[0] = (byte)register;
-            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 4);
-            return (uint)(_rxBuffer[0] << 24 | _rxBuffer[1] << 16 | _rxBuffer[2] << 8 | _rxBuffer[3]);
+            lock (SyncRoot)
+            {
+                Bus.WriteData(Address, register);
+                var data = Bus.ReadData(Address, 4);
+                return (uint)(data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3]);
+            }
+
+//            _txBuffer[0] = (byte)register;
+//            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 4);
+//            return (uint)(_rxBuffer[0] << 24 | _rxBuffer[1] << 16 | _rxBuffer[2] << 8 | _rxBuffer[3]);
         }
 
-        public void ReadRegisterBytes(byte register, byte[] outputBuffer)
+        public void ReadRegisterBytes(byte register, byte[] readBuffer)
         {
-            ReadRegisterBytes(register, outputBuffer, outputBuffer.Length);
+            ReadRegisterBytes(register, readBuffer, readBuffer.Length);
         }
 
-        public void ReadRegisterBytes(byte register, byte[] outputBuffer, int bytesToRead)
+        public void ReadRegisterBytes(byte register, byte[] readBuffer, int bytesToRead)
         {
-            _txBuffer[0] = register;
-            Bus.WriteReadData(Address, _txBuffer, 1, outputBuffer, bytesToRead);
+            lock (SyncRoot)
+            {
+                _txBuffer[0] = register;
+                Bus.WriteReadData(Address, _txBuffer, 1, readBuffer, bytesToRead);
+            }
         }
 
         public void WriteRegister(byte register, byte value)
         {
-            _txBuffer[0] = register;
-            _txBuffer[1] = value;
-            Bus.WriteReadData(Address, _txBuffer, 2, null, 0);
+            lock (SyncRoot)
+            {
+                _txBuffer[0] = register;
+                _txBuffer[1] = value;
+                Bus.WriteData(Address, _txBuffer, 2);
+            }
         }
 
-        public void WriteData(byte[] data)
+        public void WriteRegister(byte register, ushort value, bool littleEndian = true)
         {
-            Bus.WriteReadData(Address, data, data.Length, null, 0);
+            _txBuffer[0] = register;
+            if (littleEndian)
+            {
+                _txBuffer[1] = (byte)(value & 0xff);
+                _txBuffer[2] = (byte)((value >> 8) & 0xff);
+            }
+            else
+            {
+                _txBuffer[1] = (byte)((value >> 8) & 0xff);
+                _txBuffer[2] = (byte)(value & 0xff);
+            }
+            lock (SyncRoot)
+            {
+                Bus.WriteData(Address, _txBuffer, 3);
+            }
+        }
+
+        public void WriteBytes(byte[] data)
+        {
+            lock (SyncRoot)
+            {
+                Bus.WriteData(Address, data, data.Length);
+            }
+        }
+
+        public void ReadBytes(byte[] buffer)
+        {
+            lock (SyncRoot)
+            {
+                var c = Bus.ReadData(Address, buffer.Length);
+                Array.Copy(c, buffer, buffer.Length);
+            }
+        }
+
+        public void ReadBytes(byte[] buffer, int readCount)
+        {
+            lock (SyncRoot)
+            {
+                var c = Bus.ReadData(Address, readCount);
+                Array.Copy(c, buffer, readCount);
+            }
         }
     }
 }

@@ -285,6 +285,11 @@ namespace Meadow.Hardware
             SendData(peripheralAddress, data);
         }
 
+        public void WriteData(byte peripheralAddress, byte[] data, int length)
+        {
+            SendData(peripheralAddress, data, length);
+        }
+
         /// <summary>
         /// Writes a number of bytes to the device.
         /// </summary>
@@ -311,6 +316,11 @@ namespace Meadow.Hardware
 
         private unsafe void SendData(byte address, Span<byte> data)
         {
+            SendData(address, data, data.Length);
+        }
+
+        private unsafe void SendData(byte address, Span<byte> data, int count)
+        {
             _busSemaphore.Wait();
 
             try
@@ -321,7 +331,7 @@ namespace Meadow.Hardware
                     {
                         Address = address,
                         Frequency = this.Frequency,
-                        TxBufferLength = data.Length,
+                        TxBufferLength = count,
                         TxBuffer = (IntPtr)pData,
                         RxBufferLength = 0,
                         RxBuffer = IntPtr.Zero

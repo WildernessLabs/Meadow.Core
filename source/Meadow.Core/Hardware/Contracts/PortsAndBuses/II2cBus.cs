@@ -19,6 +19,7 @@ namespace Meadow.Hardware
         /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
         /// <param name="data">Data to be written.</param>
         void WriteData(byte peripheralAddress, params byte[] data);
+        void WriteData(byte peripheralAddress, byte[] data, int length);
 
         /// <summary>
         /// Writes a number of bytes to the bus.
