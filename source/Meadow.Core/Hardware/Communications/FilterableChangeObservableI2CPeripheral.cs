@@ -61,39 +61,30 @@ namespace Meadow.Hardware
         {
             lock (SyncRoot)
             {
-                Bus.WriteData(Address, register);
-                return Bus.ReadData(Address, 1)[0];
+                _txBuffer[0] = (byte)register;
+                Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 1);
+                return _rxBuffer[0];
             }
-//            _txBuffer[0] = (byte)register;
-//            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 1);
-//            return _rxBuffer[0];
         }
 
         public ushort ReadRegisterShort(byte register)
         {
             lock (SyncRoot)
             {
-                Bus.WriteData(Address, register);
-                var data = Bus.ReadData(Address, 2);
-                return (ushort)(data[0] << 8 | data[1]);
+                _txBuffer[0] = (byte)register;
+                Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 2);
+                return (ushort)(_rxBuffer[0] << 8 | _rxBuffer[1]);
             }
-//            _txBuffer[0] = (byte)register;
-//            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 2);
-//            return (ushort)(_rxBuffer[0] << 8 | _rxBuffer[1]);
         }
 
         public uint ReadRegisterInt(byte register)
         {
             lock (SyncRoot)
             {
-                Bus.WriteData(Address, register);
-                var data = Bus.ReadData(Address, 4);
-                return (uint)(data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3]);
+                _txBuffer[0] = (byte)register;
+                Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 4);
+                return (uint)(_rxBuffer[0] << 24 | _rxBuffer[1] << 16 | _rxBuffer[2] << 8 | _rxBuffer[3]);
             }
-
-//            _txBuffer[0] = (byte)register;
-//            Bus.WriteReadData(Address, _txBuffer, 1, _rxBuffer, 4);
-//            return (uint)(_rxBuffer[0] << 24 | _rxBuffer[1] << 16 | _rxBuffer[2] << 8 | _rxBuffer[3]);
         }
 
         public void ReadRegisterBytes(byte register, byte[] readBuffer)
