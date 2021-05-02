@@ -54,8 +54,19 @@ namespace Meadow.Units
             TonsMetric,
             TonsUSShort,
             TonsUKLong,
-            count
+            Grains,
+            Karats
         }
+
+        public double Grams => From(UnitType.Grams);
+        public double Kilograms => From(UnitType.Kilograms);
+        public double Onces => From(UnitType.Onces);
+        public double Pounds => From(UnitType.Pounds);
+        public double TonsMetric => From(UnitType.TonsMetric);
+        public double TonsUSShort => From(UnitType.TonsUSShort);
+        public double TonsUKLong => From(UnitType.TonsUKLong);
+        public double Grains => From(UnitType.Grains);
+        public double Karats => From(UnitType.Karats);
 
         [Pure]
         public double From(UnitType convertTo)
