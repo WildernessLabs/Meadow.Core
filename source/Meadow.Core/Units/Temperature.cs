@@ -157,6 +157,11 @@ namespace Meadow.Units
 
         [Pure] public static implicit operator Temperature(int value) => new Temperature(value);
 
+        [Pure] public static Temperature operator +(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Celsius + rvalue.Celsius, UnitType.Celsius);
+        [Pure] public static Temperature operator -(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Celsius - rvalue.Celsius, UnitType.Celsius);
+        [Pure] public static Temperature operator /(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Celsius / rvalue.Celsius, UnitType.Celsius);
+        [Pure] public static Temperature operator *(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Celsius * rvalue.Celsius, UnitType.Celsius);
+
         [Pure] public override string ToString() => Value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
