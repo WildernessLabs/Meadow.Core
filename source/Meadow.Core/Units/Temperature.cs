@@ -147,13 +147,13 @@ namespace Meadow.Units
 
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public static bool operator ==(Temperature left, Temperature right) => Equals(left, right);
-        [Pure] public static bool operator !=(Temperature left, Temperature right) => !Equals(left, right);
+        [Pure] public static bool operator ==(Temperature left, Temperature right) => Equals(left.Celsius, right.Celsius);
+        [Pure] public static bool operator !=(Temperature left, Temperature right) => !Equals(left.Celsius, right.Celsius);
         [Pure] public int CompareTo(Temperature other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
-        [Pure] public static bool operator <(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Temperature left, Temperature right) => Comparer<Temperature>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator <(Temperature left, Temperature right) => Comparer<double>.Default.Compare(left.Celsius, right.Celsius) < 0;
+        [Pure] public static bool operator >(Temperature left, Temperature right) => Comparer<double>.Default.Compare(left.Celsius, right.Celsius) > 0;
+        [Pure] public static bool operator <=(Temperature left, Temperature right) => Comparer<double>.Default.Compare(left.Celsius, right.Celsius) <= 0;
+        [Pure] public static bool operator >=(Temperature left, Temperature right) => Comparer<double>.Default.Compare(left.Celsius, right.Celsius) >= 0;
 
         [Pure] public static implicit operator Temperature(int value) => new Temperature(value);
 

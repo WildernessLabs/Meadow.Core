@@ -35,5 +35,31 @@ namespace Meadow.Units.Tests
             Assert.That(t3.Fahrenheit == 32);
             Assert.That(t3.Celsius == 0);
         }
+
+        [Test()]
+        public void TemperatureMathOps()
+        {
+            Temperature t1 = new Temperature(1);
+            Temperature t2 = new Temperature(10);
+            Assert.That(t1 != t2);
+            Assert.That((t1 + t2) == new Temperature(11));
+            Assert.That((t2 - t1) == new Temperature(9));
+            Assert.That((t1 * t2) == new Temperature(10));
+        }
+
+        [Test()]
+        public void TemperatureComparisons()
+        {
+            Temperature t1 = new Temperature(1);
+            Temperature t2 = new Temperature(10);
+            Temperature t3 = new Temperature(10);
+
+            Assert.That(t1 < t2);
+            Assert.That(t2 <= t3);
+            Assert.That(t2 > t1);
+            Assert.That(t3 >= t2);
+
+            Assert.That(t2 == t3);
+        }
     }
 }
