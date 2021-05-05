@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class MagneticField3d : IUnitType, IFormattable, IComparable, IEquatable<(double ValueX, double ValueY, double ValueZ)>, IComparable<(double, double, double)>
+    public struct MagneticField3d : IUnitType, IFormattable, IComparable, IEquatable<(double ValueX, double ValueY, double ValueZ)>, IComparable<(double, double, double)>
     {
         /// <summary>
         /// Creates a new `MagneticField3d` object.
@@ -27,28 +27,24 @@ namespace Meadow.Units
         {
             //always store reference value
             Unit = type;
-            magneticFieldX = new MagneticField(valueX, Unit);
-            magneticFieldY = new MagneticField(valueY, Unit);
-            magneticFieldZ = new MagneticField(valueZ, Unit);
-        }
-
-        public MagneticField3d()
-        {
-
+            MagneticFieldX = new MagneticField(valueX, Unit);
+            MagneticFieldY = new MagneticField(valueY, Unit);
+            MagneticFieldZ = new MagneticField(valueZ, Unit);
         }
 
         public MagneticField3d(MagneticField magneticFieldX, MagneticField magneticFieldY, MagneticField magneticFieldZ)
         {
-            magneticFieldX = new MagneticField(magneticFieldX.Value, magneticFieldX.Unit);
-            magneticFieldY = new MagneticField(magneticFieldY.Value, magneticFieldY.Unit);
-            magneticFieldZ = new MagneticField(magneticFieldZ.Value, magneticFieldZ.Unit);
+            MagneticFieldX = new MagneticField(magneticFieldX.Value, magneticFieldX.Unit);
+            MagneticFieldY = new MagneticField(magneticFieldY.Value, magneticFieldY.Unit);
+            MagneticFieldZ = new MagneticField(magneticFieldZ.Value, magneticFieldZ.Unit);
 
             Unit = magneticFieldX.Unit;
         }
 
-        public MagneticField magneticFieldX { get; set; }
-        public MagneticField magneticFieldY { get; set; }
-        public MagneticField magneticFieldZ { get; set; }
+        // TODO: why aren't these just XYZ?
+        public MagneticField MagneticFieldX { get; set; }
+        public MagneticField MagneticFieldY { get; set; }
+        public MagneticField MagneticFieldZ { get; set; }
 
         /// <summary>
         /// The unit that describes the value.
@@ -65,12 +61,12 @@ namespace Meadow.Units
 
         [Pure]
         public bool Equals(MagneticField3d other) =>
-            magneticFieldX == other.magneticFieldX &&
-            magneticFieldY == other.magneticFieldY &&
-            magneticFieldZ == other.magneticFieldZ;
+            MagneticFieldX == other.MagneticFieldX &&
+            MagneticFieldY == other.MagneticFieldY &&
+            MagneticFieldZ == other.MagneticFieldZ;
 
 
-        [Pure] public override int GetHashCode() => (magneticFieldX.GetHashCode() + magneticFieldY.GetHashCode() + magneticFieldZ.GetHashCode()) / 3;
+        [Pure] public override int GetHashCode() => (MagneticFieldX.GetHashCode() + MagneticFieldY.GetHashCode() + MagneticFieldZ.GetHashCode()) / 3;
 
         [Pure] public static bool operator ==(MagneticField3d left, MagneticField3d right) => Equals(left, right);
         [Pure] public static bool operator !=(MagneticField3d left, MagneticField3d right) => !Equals(left, right);
@@ -83,9 +79,9 @@ namespace Meadow.Units
         [Pure]
         public static MagneticField3d operator +(MagneticField3d lvalue, MagneticField3d rvalue)
         {
-            var x = lvalue.magneticFieldX + rvalue.magneticFieldX;
-            var y = lvalue.magneticFieldY + rvalue.magneticFieldY;
-            var z = lvalue.magneticFieldZ + rvalue.magneticFieldZ;
+            var x = lvalue.MagneticFieldX + rvalue.MagneticFieldX;
+            var y = lvalue.MagneticFieldY + rvalue.MagneticFieldY;
+            var z = lvalue.MagneticFieldZ + rvalue.MagneticFieldZ;
 
             return new MagneticField3d(x, y, z);
         }
@@ -93,15 +89,15 @@ namespace Meadow.Units
         [Pure]
         public static MagneticField3d operator -(MagneticField3d lvalue, MagneticField3d rvalue)
         {
-            var x = lvalue.magneticFieldX - rvalue.magneticFieldX;
-            var y = lvalue.magneticFieldY - rvalue.magneticFieldY;
-            var z = lvalue.magneticFieldZ - rvalue.magneticFieldZ;
+            var x = lvalue.MagneticFieldX - rvalue.MagneticFieldX;
+            var y = lvalue.MagneticFieldY - rvalue.MagneticFieldY;
+            var z = lvalue.MagneticFieldZ - rvalue.MagneticFieldZ;
 
             return new MagneticField3d(x, y, z);
         }
 
-        [Pure] public override string ToString() => $"{magneticFieldX}, {magneticFieldY}, {magneticFieldZ}";
-        [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{magneticFieldX.ToString(format, formatProvider)}, {magneticFieldY.ToString(format, formatProvider)}, {magneticFieldZ.ToString(format, formatProvider)}";
+        [Pure] public override string ToString() => $"{MagneticFieldX}, {MagneticFieldY}, {MagneticFieldZ}";
+        [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{MagneticFieldX.ToString(format, formatProvider)}, {MagneticFieldY.ToString(format, formatProvider)}, {MagneticFieldZ.ToString(format, formatProvider)}";
 
         public int CompareTo(object obj)
         {
@@ -110,9 +106,9 @@ namespace Meadow.Units
 
         public bool Equals((double ValueX, double ValueY, double ValueZ) other)
         {
-            return magneticFieldX.Equals(other.ValueX) &&
-                magneticFieldY.Equals(other.ValueY) &&
-                magneticFieldZ.Equals(other.ValueZ);
+            return MagneticFieldX.Equals(other.ValueX) &&
+                   MagneticFieldY.Equals(other.ValueY) &&
+                   MagneticFieldZ.Equals(other.ValueZ);
         }
 
         public int CompareTo((double, double, double) other)

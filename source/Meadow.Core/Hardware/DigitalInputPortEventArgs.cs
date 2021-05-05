@@ -9,9 +9,9 @@ namespace Meadow.Hardware
     {
         public bool Value { get; set; }
         public DateTime New { get; set; }
-        public DateTime Old { get; set; }
+        public DateTime? Old { get; set; }
 
-        public TimeSpan Delta { get { return New - Old; } }
+        public TimeSpan? Delta { get { return New - Old; } }
         //public DateTime Delta { get { return DateTime.MinValue.Add(New - Old); } }
 
         public DigitalInputPortEventArgs() { }

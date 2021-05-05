@@ -70,12 +70,12 @@ namespace Meadow.Hardware
         /// </summary>
         void StopSampling();
 
-        public static FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage?>
+        public static FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage>
             CreateObserver(
                 Action<CompositeChangeResult<Voltage>> handler,
                 Predicate<CompositeChangeResult<Voltage>>? filter = null)
         {
-            return new FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage?>(
+            return new FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage>(
                 handler, filter);
         }
 

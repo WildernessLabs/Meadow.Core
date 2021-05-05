@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Length : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Length : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Length` object.

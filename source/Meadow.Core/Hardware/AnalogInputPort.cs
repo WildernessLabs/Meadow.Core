@@ -58,7 +58,7 @@ namespace Meadow.Hardware
         /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
         public bool IsSampling { get; protected set; } = false;
 
-        protected Voltage _previousVoltageReading = 0;
+        protected Voltage? _previousVoltageReading;
 
         protected AnalogInputPort(
                     IPin pin,

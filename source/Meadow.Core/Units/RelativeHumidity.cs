@@ -15,7 +15,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
-    public class RelativeHumidity : IUnitType, IComparable, IFormattable, IConvertible,
+    public struct RelativeHumidity : IUnitType, IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>

@@ -14,7 +14,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [System.Runtime.InteropServices.StructLayout(LayoutKind.Sequential)]
-    public class Pressure : IUnitType, IComparable, IFormattable, IConvertible,
+    public struct Pressure : IUnitType, IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>
@@ -25,11 +25,6 @@ namespace Meadow.Units
         public Pressure(double value, UnitType type = UnitType.Bar)
         {
             Value = value; Unit = type;
-        }
-
-        public Pressure ()
-        {
-
         }
 
         /// <summary>

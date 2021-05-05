@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Energy : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Energy : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Energy` object.

@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Density : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Density : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Density` object.

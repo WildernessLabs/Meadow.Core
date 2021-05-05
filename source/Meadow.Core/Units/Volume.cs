@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public class Volume : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Volume : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Volume` object.

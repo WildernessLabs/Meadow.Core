@@ -9,13 +9,13 @@ namespace Meadow
         /// <summary>
         /// Change in value between `New` and `Old`.
         /// </summary>
-        public override float Delta {
+        public override float? Delta {
             get => New - Old;
         }
         /// <summary>
         /// Change in value, as a percentage, between `New` and `Old`.
         /// </summary>
-        public override float DeltaPercent {
+        public override float? DeltaPercent {
             get => (Delta / Old) * 100;
         }
 

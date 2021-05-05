@@ -8,7 +8,7 @@ namespace Meadow.Units
     /// <summary>
     /// Represents Concentration
     /// </summary>
-    public class Concentration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Concentration : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Acceleration` object.

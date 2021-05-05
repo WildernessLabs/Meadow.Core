@@ -12,13 +12,16 @@ namespace Meadow
     /// <typeparam name="C">The `IChangeResult` notification data.</typeparam>
     /// <typeparam name="T">The datatype that contains the notification data.
     /// I.e. `AtmosphericConditions` or `decimal`.</typeparam>
-    public class FilterableChangeObserver<C, T> : IObserver<C> where C : IChangeResult<T>
+    public class FilterableChangeObserver<C, T> : IObserver<C>
+        where C : struct, IChangeResult<T>
+        //where T : notnull //struct
+        where T : struct//, IComparable
     {
         protected Action<C> _handler;// = null;
         protected Predicate<C>? _filter = null;
 
         protected bool _isInitialized = false;
-        protected T _lastNotifedValue;
+        protected T? _lastNotifedValue;
 
         /// <summary>
         /// Creates a new `FilterableChangeObserver` that will execute the handler
@@ -52,7 +55,10 @@ namespace Meadow
             }
             // inject the actual last notified value into the result
             // (each last notified is specific to the observer)
-            result.Old = _lastNotifedValue;
+            if (_lastNotifedValue is { } last) {
+                result.Old = last;
+            }
+            //result.Old = _lastNotifedValue;
 
             // if there is no filter, or if the filter satisfies the result,
             if (_filter == null || _filter(result))
