@@ -2,25 +2,31 @@
 
 namespace Meadow
 {
-    public struct ChangeResult<U1> : IChangeResult<U1>
-        where U1 : struct
+    /// <summary>
+    /// Represents a change result from an event. Contains a `New` and an optional
+    /// `Old` value which will likely be null on the first result within an event
+    /// series.
+    /// </summary>
+    /// <typeparam name="UNIT">A unit type that carries the result data. Must be
+    /// a `struct`. Will most often be a unit such as `Temperature` or `Mass`,
+    /// but can also be a primitive datatype such as `int`, `float`, or even
+    /// `DateTime`.</typeparam>
+    public struct ChangeResult<UNIT> : IChangeResult<UNIT>
+        where UNIT : struct
     {
-        public U1 New { get; set; }
-        public U1? Old { get; set; }
+        public UNIT New { get; set; }
+        public UNIT? Old { get; set; }
 
-        public U1? Delta {
+        public UNIT? Delta {
             get //TODO: need maths here
                 ;// return (new UnitType(), new UnitType()); // (New.Unit1 - Old.Unit1, New.Unit2 - Old.Unit2);
         }
 
-        //public CompositeChangeResult() { }
-
-        public ChangeResult(U1 newValue, U1? oldValue)
+        public ChangeResult(UNIT newValue, UNIT? oldValue)
         {
             New = newValue;
             Old = oldValue;
             Delta = null;
-            //TODO: set delta here
         }
     }
 

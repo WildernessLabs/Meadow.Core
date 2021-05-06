@@ -5,34 +5,34 @@ namespace Meadow
     /// Base class for event data that is numeric based and contains new and old
     /// value.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class NumericChangeResultBase<T> : INumericChangeResult<T>
-        where T : struct
+    /// <typeparam name="UNIT"></typeparam>
+    public abstract class NumericChangeResultBase<UNIT> : INumericChangeResult<UNIT>
+        where UNIT : struct
     {
         /// <summary>
         /// Current/new event value.
         /// </summary>
-        public T New { get; set; }
+        public UNIT New { get; set; }
         /// <summary>
         /// Previous value.
         /// </summary>
-        public T? Old { get; set; }
+        public UNIT? Old { get; set; }
 
         /// <summary>
         /// Change in value between `New` and `Old`.
         /// </summary>
-        public abstract T? Delta { get; }
+        public abstract UNIT? Delta { get; }
         /// <summary>
         /// Change in value, as a percentage, between `New` and `Old`.
         /// </summary>
-        public abstract T? DeltaPercent { get; }
+        public abstract UNIT? DeltaPercent { get; }
 
         /// <summary>
         /// Creates a new `NumericChangeResultBase`.
         /// </summary>
         /// <param name="newValue">Current event value.</param>
         /// <param name="oldValue">Previous event value.</param>
-        public NumericChangeResultBase(T newValue, T? oldValue)
+        public NumericChangeResultBase(UNIT newValue, UNIT? oldValue)
         {
             New = newValue;
             Old = oldValue;

@@ -4,14 +4,23 @@ using System.Collections.Generic;
 
 namespace Meadow
 {
-    public abstract class FilterableChangeObservableBase<T, U1> : IObservable<T>
-        where T : struct, IChangeResult<U1>
-        where U1 : struct
+    /// <summary>
+    /// Base class for sensors and other updating classes that want to support
+    /// having their updates consumed by observers that can optionally use filters.
+    ///
+    /// Keeps an internal collection of `observers`, and provides methods such
+    /// as `NotifyObservers` and `Subscribe`.
+    /// </summary>
+    /// <typeparam name="RESULT">An `IChangeResult` that holds a `UNIT` type.</typeparam>
+    /// <typeparam name="UNIT"></typeparam>
+    public abstract class FilterableChangeObservableBase<RESULT, UNIT> : IObservable<RESULT>
+        where RESULT : struct, IChangeResult<UNIT>
+        where UNIT : struct
     {
         // collection of observers
-        protected List<IObserver<T>> observers { get; set; } = new List<IObserver<T>>();
+        protected List<IObserver<RESULT>> observers { get; set; } = new List<IObserver<RESULT>>();
 
-        protected void NotifyObservers(T changeResult)
+        protected void NotifyObservers(RESULT changeResult)
         {
             observers.ForEach(x => x.OnNext(changeResult));
         }
@@ -22,7 +31,7 @@ namespace Meadow
         /// <param name="observer">The `IObserver` that will receive the
         /// change notifications.</param>
         /// <returns></returns>
-        public IDisposable Subscribe(IObserver<T> observer)
+        public IDisposable Subscribe(IObserver<RESULT> observer)
         {
             if (!observers.Contains(observer))
             {
@@ -37,10 +46,10 @@ namespace Meadow
         /// </summary>
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<T>> observers;
-            private IObserver<T> observer;
+            private List<IObserver<RESULT>> observers;
+            private IObserver<RESULT> observer;
 
-            public Unsubscriber(List<IObserver<T>> observers, IObserver<T> observer)
+            public Unsubscriber(List<IObserver<RESULT>> observers, IObserver<RESULT> observer)
             {
                 this.observers = observers;
                 this.observer = observer;
@@ -52,9 +61,16 @@ namespace Meadow
             }
         }
 
-        public static FilterableChangeObserver<T, U1> CreateObserver(Action<T> handler, Predicate<T>? filter = null)
+        /// <summary>
+        /// Convenience method to generate a an `FilterableChangeObserver` with
+        /// the correct signature.
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public static FilterableChangeObserver<RESULT, UNIT> CreateObserver(Action<RESULT> handler, Predicate<RESULT>? filter = null)
         {
-            return new FilterableChangeObserver<T, U1>(
+            return new FilterableChangeObserver<RESULT, UNIT>(
                 handler, filter);
         }
 

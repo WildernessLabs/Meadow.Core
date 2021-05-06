@@ -3,9 +3,9 @@ using Meadow.Units;
 
 namespace Meadow.Hardware
 {
-    public class FilterableChangeObservableI2CPeripheral<T, U1> : FilterableChangeObservableBase<T, U1>
-        where T : struct, IChangeResult<U1>
-        where U1 : struct //struct
+    public class FilterableChangeObservableI2CPeripheral<RESULT, UNIT> : FilterableChangeObservableBase<RESULT, UNIT>
+        where RESULT : struct, IChangeResult<UNIT>
+        where UNIT : struct
     {
         /// <summary>
         /// The peripheral's address on the I2C Bus

@@ -9,19 +9,18 @@ namespace Meadow
     /// predicate that automatically filters results so only results that match
     /// the predicate will reach the subscriber.
     /// </summary>
-    /// <typeparam name="C">The `IChangeResult` notification data.</typeparam>
-    /// <typeparam name="T">The datatype that contains the notification data.
-    /// I.e. `AtmosphericConditions` or `decimal`.</typeparam>
-    public class FilterableChangeObserver<C, T> : IObserver<C>
-        where C : struct, IChangeResult<T>
-        //where T : notnull //struct
-        where T : struct//, IComparable
+    /// <typeparam name="RESULT">The `IChangeResult` notification data.</typeparam>
+    /// <typeparam name="UNIT">The datatype that contains the notification data.
+    /// I.e. `Temperature` or `decimal`. Must be a `struct`.</typeparam>
+    public class FilterableChangeObserver<RESULT, UNIT> : IObserver<RESULT>
+        where RESULT : struct, IChangeResult<UNIT>
+        where UNIT : struct
     {
-        protected Action<C> _handler;// = null;
-        protected Predicate<C>? _filter = null;
+        protected Action<RESULT> _handler;// = null;
+        protected Predicate<RESULT>? _filter = null;
 
         protected bool _isInitialized = false;
-        protected T? _lastNotifedValue;
+        protected UNIT? _lastNotifedValue;
 
         /// <summary>
         /// Creates a new `FilterableChangeObserver` that will execute the handler
@@ -34,7 +33,7 @@ namespace Meadow
         /// <param name="filter">An optional `Predicate` that filters out any
         /// notifications that don't satisfy (return `true`) the predicate condition.</param>
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public FilterableChangeObserver(Action<C> handler/* = null*/, Predicate<C>? filter = null)
+        public FilterableChangeObserver(Action<RESULT> handler/* = null*/, Predicate<RESULT>? filter = null)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         {
             this._handler = handler;
@@ -45,7 +44,7 @@ namespace Meadow
         /// Called by an Observable when a change occurs.
         /// </summary>
         /// <param name="result"></param>
-        public void OnNext(C result)
+        public void OnNext(RESULT result)
         {
             // first time through, save initial state
             if (!_isInitialized)
