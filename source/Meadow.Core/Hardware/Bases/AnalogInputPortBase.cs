@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        public event EventHandler<CompositeChangeResult<Voltage>> Changed = delegate { };
+        public event EventHandler<ChangeResult<Voltage>> Changed = delegate { };
 
         /// <summary>
         /// Gets the sample buffer. Make sure to call StartSampling() before 
@@ -43,7 +43,7 @@ namespace Meadow.Hardware
 
 
         // collection of observers
-        protected List<IObserver<CompositeChangeResult<Voltage>>> observers { get; set; } = new List<IObserver<CompositeChangeResult<Voltage>>>();
+        protected List<IObserver<ChangeResult<Voltage>>> observers { get; set; } = new List<IObserver<ChangeResult<Voltage>>>();
 
 
         protected AnalogInputPortBase(IPin pin, IAnalogChannelInfo channel)
@@ -59,13 +59,13 @@ namespace Meadow.Hardware
         public abstract void StopSampling();
 
 
-        protected void RaiseChangedAndNotify(CompositeChangeResult<Voltage> changeResult)
+        protected void RaiseChangedAndNotify(ChangeResult<Voltage> changeResult)
         {
             Changed?.Invoke(this, changeResult);
             observers.ForEach(x => x.OnNext(changeResult));
         }
 
-        public IDisposable Subscribe(IObserver<CompositeChangeResult<Voltage>> observer)
+        public IDisposable Subscribe(IObserver<ChangeResult<Voltage>> observer)
         {
             if (!observers.Contains(observer)) observers.Add(observer);
             return new Unsubscriber(observers, observer);
@@ -73,10 +73,10 @@ namespace Meadow.Hardware
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<CompositeChangeResult<Voltage>>> _observers;
-            private IObserver<CompositeChangeResult<Voltage>> _observer;
+            private List<IObserver<ChangeResult<Voltage>>> _observers;
+            private IObserver<ChangeResult<Voltage>> _observer;
 
-            public Unsubscriber(List<IObserver<CompositeChangeResult<Voltage>>> observers, IObserver<CompositeChangeResult<Voltage>> observer)
+            public Unsubscriber(List<IObserver<ChangeResult<Voltage>>> observers, IObserver<ChangeResult<Voltage>> observer)
             {
                 this._observers = observers;
                 this._observer = observer;

@@ -1,6 +1,5 @@
 ﻿using System;
 using Meadow.Units;
-using Meadow.Bases;
 
 namespace Meadow.Peripherals.Sensors
 {
@@ -19,6 +18,6 @@ namespace Meadow.Peripherals.Sensors
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Temperature>> TemperatureUpdated;
+        event EventHandler<ChangeResult<Temperature>> TemperatureUpdated;
     }
 }

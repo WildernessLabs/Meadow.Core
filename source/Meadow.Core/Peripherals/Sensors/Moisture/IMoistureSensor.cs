@@ -1,5 +1,4 @@
-﻿using Meadow.Bases;
-using Meadow.Units;
+﻿using Meadow.Units;
 using System;
 
 namespace Meadow.Peripherals.Sensors.Moisture
@@ -14,6 +13,6 @@ namespace Meadow.Peripherals.Sensors.Moisture
         /// <summary>
         /// Raised when a new sensor reading has been made. To enable, call StartSampling().
         /// </summary>
-        event EventHandler<CompositeChangeResult<ScalarDouble>> HumidityUpdated;
+        event EventHandler<ChangeResult<ScalarDouble>> HumidityUpdated;
     }
 }

@@ -40,7 +40,7 @@ namespace Meadow.Hardware
     //    StartSampling();
     //    ConfigureNotifications();
     //    ```
-    public class AnalogInputPort : AnalogInputPortBase, IObservable<CompositeChangeResult<Voltage>>
+    public class AnalogInputPort : AnalogInputPortBase, IObservable<ChangeResult<Voltage>>
     {
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
         static readonly object _analogSyncRoot = new object();
@@ -178,7 +178,7 @@ namespace Meadow.Hardware
                             var newVoltage = Voltage;
 
                             // create a result set
-                            CompositeChangeResult<Voltage> result = new CompositeChangeResult<Voltage>(newVoltage, _previousVoltageReading);
+                            ChangeResult<Voltage> result = new ChangeResult<Voltage>(newVoltage, _previousVoltageReading);
 
                             // raise our events and notify our subs
                             base.RaiseChangedAndNotify(result);

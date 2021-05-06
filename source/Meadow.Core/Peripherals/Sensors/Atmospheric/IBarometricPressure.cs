@@ -1,5 +1,4 @@
-﻿using Meadow.Bases;
-using Meadow.Units;
+﻿using Meadow.Units;
 using System;
 
 namespace Meadow.Peripherals.Sensors
@@ -12,13 +11,13 @@ namespace Meadow.Peripherals.Sensors
         /// <summary>
         /// Last value read from the Pressure sensor.
         /// </summary>
-        Pressure Pressure { get; }
+        Pressure? Pressure { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Pressure>> PressureUpdated;
+        event EventHandler<ChangeResult<Pressure>> PressureUpdated;
     }
 }

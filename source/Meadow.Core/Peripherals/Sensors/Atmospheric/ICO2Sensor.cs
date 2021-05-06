@@ -18,7 +18,7 @@ namespace Meadow.Peripherals.Sensors
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Concentration>> CO2Updated;
+        event EventHandler<ChangeResult<Concentration>> CO2Updated;
     }
 
     /// <summary>
@@ -36,6 +36,6 @@ namespace Meadow.Peripherals.Sensors
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Concentration>> VOCUpdated;
+        event EventHandler<ChangeResult<Concentration>> VOCUpdated;
     }
 }

@@ -1,5 +1,4 @@
-﻿using Meadow.Bases;
-using Meadow.Units;
+﻿using Meadow.Units;
 using System;
 
 namespace Meadow.Peripherals.Sensors
@@ -19,6 +18,6 @@ namespace Meadow.Peripherals.Sensors
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Length>> DistanceUpdated;
+        event EventHandler<ChangeResult<Length>> DistanceUpdated;
     }
 }

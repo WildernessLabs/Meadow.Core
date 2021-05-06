@@ -2,7 +2,7 @@
 
 namespace Meadow.Peripherals.Sensors.Hid
 {
-    public interface IJoystickSensor : ISensor, IObservable<CompositeChangeResult<JoystickPosition>>
+    public interface IJoystickSensor : ISensor, IObservable<ChangeResult<JoystickPosition>>
     {
         /// <summary>
         /// Last horizontal value read from the Joystick.
@@ -20,6 +20,6 @@ namespace Meadow.Peripherals.Sensors.Hid
         /// method.
         /// </summary>
         //event EventHandler<JoystickPositionChangeResult> Updated;
-        event EventHandler<CompositeChangeResult<JoystickPosition>> Updated;
+        event EventHandler<ChangeResult<JoystickPosition>> Updated;
     }
 }

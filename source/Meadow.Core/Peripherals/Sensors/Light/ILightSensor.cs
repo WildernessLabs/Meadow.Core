@@ -1,5 +1,4 @@
-﻿using Meadow.Bases;
-using Meadow.Units;
+﻿using Meadow.Units;
 using System;
 
 namespace Meadow.Peripherals.Sensors.Light
@@ -17,6 +16,6 @@ namespace Meadow.Peripherals.Sensors.Light
         /// <summary>
         /// Raised when a change in light is detected.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Illuminance>> LuminosityUpdated;
+        event EventHandler<ChangeResult<Illuminance>> LuminosityUpdated;
     }
 }

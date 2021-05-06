@@ -18,6 +18,6 @@ namespace Meadow.Peripherals.Sensors.Motion
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<CompositeChangeResult<AngularAcceleration3d>> AngularAcceleration3dUpdated;
+        event EventHandler<ChangeResult<AngularAcceleration3d>> AngularAcceleration3dUpdated;
     }
 }

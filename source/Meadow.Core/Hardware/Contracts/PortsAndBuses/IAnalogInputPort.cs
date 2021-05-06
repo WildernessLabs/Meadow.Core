@@ -9,12 +9,12 @@ namespace Meadow.Hardware
     /// Contract for ports that implement an analog input channel.
     /// </summary>
     // TODO: should this also be IObservable?
-    public interface IAnalogInputPort : IAnalogPort, IObservable<CompositeChangeResult<Voltage>>
+    public interface IAnalogInputPort : IAnalogPort, IObservable<ChangeResult<Voltage>>
     {
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        event EventHandler<CompositeChangeResult<Voltage>> Changed;
+        event EventHandler<ChangeResult<Voltage>> Changed;
 
         /// <summary>
         /// Gets the sample buffer.
@@ -36,7 +36,7 @@ namespace Meadow.Hardware
         /// <value>The average buffer value.</value>
         Voltage Voltage { get; }
 
-        //IDisposable Subscribe(IObserver<CompositeChangeResult<Voltage>> observer);
+        //IDisposable Subscribe(IObserver<ChangeResult<Voltage>> observer);
 
         /// <summary>
         /// Convenience method to get the current voltage. For frequent reads, use
@@ -70,12 +70,12 @@ namespace Meadow.Hardware
         /// </summary>
         void StopSampling();
 
-        public static FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage>
+        public static FilterableChangeObserver<ChangeResult<Voltage>, Voltage>
             CreateObserver(
-                Action<CompositeChangeResult<Voltage>> handler,
-                Predicate<CompositeChangeResult<Voltage>>? filter = null)
+                Action<ChangeResult<Voltage>> handler,
+                Predicate<ChangeResult<Voltage>>? filter = null)
         {
-            return new FilterableChangeObserver<CompositeChangeResult<Voltage>, Voltage>(
+            return new FilterableChangeObserver<ChangeResult<Voltage>, Voltage>(
                 handler, filter);
         }
 
