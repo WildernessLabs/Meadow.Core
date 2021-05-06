@@ -1,3 +1,5 @@
+#!/bin/bash
+
 scriptdir="$( cd "$(dirname "$0")" ; pwd -P )"
 
 SLN=$scriptdir/source/Meadow.Core.sln
@@ -9,10 +11,19 @@ fi
 
 $NUGET restore $SLN
 
-MSBUILD=msbuild
-if [[ $(command -v msbuild) == "" ]]; then
-    MSBUILD=/Library/Frameworks/Mono.framework/Versions/Current/bin/msbuild
+UNAMECMD=`uname`
+if [[ "$UNAMECMD" == "Darwin" ]]; then
+    echo "Mac OS detected, using MSBuild from Visual Studio."
+    MSBUILD="mono '/Applications/Visual Studio.app/Contents/Resources/lib/monodevelop/bin/MSBuild/Current/bin/msbuild.dll'"
+else
+    echo "Unknown OS, defaulting to msbuild."
+    MSBUILD=msbuild
 fi
 
-$MSBUILD /t:restore $SLN
-$MSBUILD $SLN
+# MSBUILD=msbuild
+if [[ $(command -v msbuild) == "" ]]; then
+    MSBUILD=/Library/Frameworks/Mono.frame/work/Versions/Current/bin/msbuild
+fi
+
+eval $MSBUILD /t:restore $SLN
+eval $MSBUILD $SLN
