@@ -8,11 +8,11 @@ namespace Meadow.Peripherals.Sensors.Moisture
         /// <summary>
         /// Last value read from the moisture sensor.
         /// </summary>
-        ScalarDouble Moisture { get; }
+        double Moisture { get; }
 
         /// <summary>
         /// Raised when a new sensor reading has been made. To enable, call StartSampling().
         /// </summary>
-        event EventHandler<ChangeResult<ScalarDouble>> HumidityUpdated;
+        event EventHandler<ChangeResult<double>> HumidityUpdated;
     }
 }
