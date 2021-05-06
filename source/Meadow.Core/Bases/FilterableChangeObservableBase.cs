@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Meadow
 {
-    public abstract class FilterableChangeObservableBase<T> : IObservable<T>
-        where T : struct//, IChangeResult<T>
-        // where T : IUnitType
+    public abstract class FilterableChangeObservableBase<T, U1> : IObservable<T>
+        where T : struct, IChangeResult<U1>
+        where U1 : struct
     {
         // collection of observers
         protected List<IObserver<T>> observers { get; set; } = new List<IObserver<T>>();
@@ -51,6 +51,12 @@ namespace Meadow
                 if (!(observer == null)) { observers.Remove(observer); }
             }
         }
-    }
 
+        public static FilterableChangeObserver<T, U1> CreateObserver(Action<T> handler, Predicate<T>? filter = null)
+        {
+            return new FilterableChangeObserver<T, U1>(
+                handler, filter);
+        }
+
+    }
 }

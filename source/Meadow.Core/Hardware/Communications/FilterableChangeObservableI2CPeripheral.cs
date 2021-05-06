@@ -3,8 +3,7 @@ using Meadow.Units;
 
 namespace Meadow.Hardware
 {
-
-    public class FilterableChangeObservableI2CPeripheral<T, U1> : FilterableChangeObservable<T, U1>
+    public class FilterableChangeObservableI2CPeripheral<T, U1> : FilterableChangeObservableBase<T, U1>
         where T : struct, IChangeResult<U1>
         where U1 : struct //struct
     {
