@@ -4,20 +4,20 @@ namespace Meadow
     /// <summary>
     /// Contract for change notifications.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IChangeResult<T>
+    /// <typeparam name="UNIT"></typeparam>
+    public interface IChangeResult<UNIT>
         //where T : notnull //struct
         //where T: notnull//, IComparable //System.Collections.IStructuralEquatable, System.Collections.IStructuralComparable,
-        where T: struct
+        where UNIT: struct
     {
         /// <summary>
         /// Current/new event value.
         /// </summary>
-        T New { get; set; }
+        UNIT New { get; set; }
         /// <summary>
         /// Previous value.
         /// </summary>
-        T? Old { get; set; }
+        UNIT? Old { get; set; }
         ///// <summary>
         ///// Change in value between `New` and `Old`.
         ///// </summary>
@@ -27,17 +27,17 @@ namespace Meadow
     /// <summary>
     /// Contract for change notifications, where the values are numeric.
     /// </summary>
-    /// <typeparam name="T">The type, such as a float or int.</typeparam>
-    public interface INumericChangeResult<T> : IChangeResult<T>
-        where T : struct
+    /// <typeparam name="UNIT">The type, such as a float or int.</typeparam>
+    public interface INumericChangeResult<UNIT> : IChangeResult<UNIT>
+        where UNIT : struct
         //where T : notnull//, IComparable// System.Collections.IStructuralEquatable, System.Collections.IStructuralComparable, 
     {
         /// <summary>
         /// Change in value, as a percentage, between `New` and `Old`.
         /// </summary>
-        T? DeltaPercent { get; }
+        UNIT? DeltaPercent { get; }
 
-        T? Delta {get;}
+        UNIT? Delta {get;}
     }
 
     public interface ITimeChangeResult : IChangeResult<DateTime>

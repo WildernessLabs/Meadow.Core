@@ -57,6 +57,7 @@ namespace Meadow
             if (_lastNotifedValue is { } last) {
                 result.Old = last;
             }
+            // TODO: Delta bug document here
             //result.Old = _lastNotifedValue;
 
             // if there is no filter, or if the filter satisfies the result,
