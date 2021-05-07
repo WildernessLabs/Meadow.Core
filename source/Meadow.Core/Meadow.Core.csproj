@@ -24,5 +24,6 @@
  </ItemGroup>
  <ItemGroup>
    <Folder Include="Gateways\Bluetooth\Definitions\" />
+   <Folder Include="Peripherals\Sensors\Weather\" />
  </ItemGroup>
 </Project>

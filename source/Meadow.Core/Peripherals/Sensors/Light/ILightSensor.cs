@@ -16,6 +16,6 @@ namespace Meadow.Peripherals.Sensors.Light
         /// <summary>
         /// Raised when a change in light is detected.
         /// </summary>
-        event EventHandler<ChangeResult<Illuminance>> LuminosityUpdated;
+        event EventHandler<IChangeResult<Illuminance>> LuminosityUpdated;
     }
 }

@@ -13,6 +13,6 @@ namespace Meadow.Peripherals.Sensors.Moisture
         /// <summary>
         /// Raised when a new sensor reading has been made. To enable, call StartSampling().
         /// </summary>
-        event EventHandler<ChangeResult<double>> HumidityUpdated;
+        event EventHandler<IChangeResult<double>> HumidityUpdated;
     }
 }

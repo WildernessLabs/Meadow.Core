@@ -19,6 +19,6 @@ namespace Meadow.Peripherals.Sensors
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<ChangeResult<RelativeHumidity>> HumidityUpdated;
+        event EventHandler<IChangeResult<RelativeHumidity>> HumidityUpdated;
     }
 }
