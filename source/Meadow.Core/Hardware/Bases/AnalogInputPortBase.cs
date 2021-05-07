@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        public event EventHandler<ChangeResult<Voltage>> Changed = delegate { };
+        public event EventHandler<IChangeResult<Voltage>> Changed = delegate { };
 
         /// <summary>
         /// Gets the sample buffer. Make sure to call StartSampling() before 
@@ -43,7 +43,7 @@ namespace Meadow.Hardware
 
 
         // collection of observers
-        protected List<IObserver<ChangeResult<Voltage>>> observers { get; set; } = new List<IObserver<ChangeResult<Voltage>>>();
+        protected List<IObserver<IChangeResult<Voltage>>> observers { get; set; } = new List<IObserver<IChangeResult<Voltage>>>();
 
 
         protected AnalogInputPortBase(IPin pin, IAnalogChannelInfo channel)
@@ -59,13 +59,13 @@ namespace Meadow.Hardware
         public abstract void StopSampling();
 
 
-        protected void RaiseChangedAndNotify(ChangeResult<Voltage> changeResult)
+        protected void RaiseChangedAndNotify(IChangeResult<Voltage> changeResult)
         {
             Changed?.Invoke(this, changeResult);
             observers.ForEach(x => x.OnNext(changeResult));
         }
 
-        public IDisposable Subscribe(IObserver<ChangeResult<Voltage>> observer)
+        public IDisposable Subscribe(IObserver<IChangeResult<Voltage>> observer)
         {
             if (!observers.Contains(observer)) observers.Add(observer);
             return new Unsubscriber(observers, observer);
@@ -73,10 +73,10 @@ namespace Meadow.Hardware
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<ChangeResult<Voltage>>> _observers;
-            private IObserver<ChangeResult<Voltage>> _observer;
+            private List<IObserver<IChangeResult<Voltage>>> _observers;
+            private IObserver<IChangeResult<Voltage>> _observer;
 
-            public Unsubscriber(List<IObserver<ChangeResult<Voltage>>> observers, IObserver<ChangeResult<Voltage>> observer)
+            public Unsubscriber(List<IObserver<IChangeResult<Voltage>>> observers, IObserver<IChangeResult<Voltage>> observer)
             {
                 this._observers = observers;
                 this._observer = observer;

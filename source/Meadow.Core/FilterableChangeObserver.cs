@@ -12,12 +12,12 @@ namespace Meadow
     /// <typeparam name="RESULT">The `IChangeResult` notification data.</typeparam>
     /// <typeparam name="UNIT">The datatype that contains the notification data.
     /// I.e. `Temperature` or `decimal`. Must be a `struct`.</typeparam>
-    public class FilterableChangeObserver<RESULT, UNIT> : IObserver<RESULT>
-        where RESULT : struct, IChangeResult<UNIT>
+    public class FilterableChangeObserver<UNIT> : IObserver<IChangeResult<UNIT>>
+        //where RESULT : struct, IChangeResult<UNIT>
         where UNIT : struct
     {
-        protected Action<RESULT> _handler;// = null;
-        protected Predicate<RESULT>? _filter = null;
+        protected Action<IChangeResult<UNIT>> _handler;// = null;
+        protected Predicate<IChangeResult<UNIT>>? _filter = null;
 
         protected bool _isInitialized = false;
         protected UNIT? _lastNotifedValue;
@@ -33,7 +33,7 @@ namespace Meadow
         /// <param name="filter">An optional `Predicate` that filters out any
         /// notifications that don't satisfy (return `true`) the predicate condition.</param>
 #pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public FilterableChangeObserver(Action<RESULT> handler/* = null*/, Predicate<RESULT>? filter = null)
+        public FilterableChangeObserver(Action<IChangeResult<UNIT>> handler/* = null*/, Predicate<IChangeResult<UNIT>>? filter = null)
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         {
             this._handler = handler;
@@ -44,7 +44,7 @@ namespace Meadow
         /// Called by an Observable when a change occurs.
         /// </summary>
         /// <param name="result"></param>
-        public void OnNext(RESULT result)
+        public void OnNext(IChangeResult<UNIT> result)
         {
             // first time through, save initial state
             if (!_isInitialized)

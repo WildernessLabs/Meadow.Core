@@ -8,13 +8,14 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for ports that implement an analog input channel.
     /// </summary>
-    // TODO: should this also be IObservable?
-    public interface IAnalogInputPort : IAnalogPort, IObservable<ChangeResult<Voltage>>
+    // todo: get rid of the `IObservable` here? will it ever be composable?
+    // todo: should it be IChangeResult or `ChangeResult`?
+    public interface IAnalogInputPort : IAnalogPort, IObservable<IChangeResult<Voltage>>
     {
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        event EventHandler<ChangeResult<Voltage>> Changed;
+        event EventHandler<IChangeResult<Voltage>> Changed;
 
         /// <summary>
         /// Gets the sample buffer.
@@ -70,12 +71,12 @@ namespace Meadow.Hardware
         /// </summary>
         void StopSampling();
 
-        public static FilterableChangeObserver<ChangeResult<Voltage>, Voltage>
+        public static FilterableChangeObserver<Voltage>
             CreateObserver(
-                Action<ChangeResult<Voltage>> handler,
-                Predicate<ChangeResult<Voltage>>? filter = null)
+                Action<IChangeResult<Voltage>> handler,
+                Predicate<IChangeResult<Voltage>>? filter = null)
         {
-            return new FilterableChangeObserver<ChangeResult<Voltage>, Voltage>(
+            return new FilterableChangeObserver<Voltage>(
                 handler, filter);
         }
 

@@ -13,14 +13,14 @@ namespace Meadow
     /// </summary>
     /// <typeparam name="RESULT">An `IChangeResult` that holds a `UNIT` type.</typeparam>
     /// <typeparam name="UNIT"></typeparam>
-    public abstract class FilterableChangeObservableBase<RESULT, UNIT> : IObservable<RESULT>
-        where RESULT : struct, IChangeResult<UNIT>
+    public abstract class FilterableChangeObservableBase<UNIT> : IObservable<IChangeResult<UNIT>>
+        //where RESULT : struct, IChangeResult<UNIT>
         where UNIT : struct
     {
         // collection of observers
-        protected List<IObserver<RESULT>> observers { get; set; } = new List<IObserver<RESULT>>();
+        protected List<IObserver<IChangeResult<UNIT>>> observers { get; set; } = new List<IObserver<IChangeResult<UNIT>>>();
 
-        protected void NotifyObservers(RESULT changeResult)
+        protected void NotifyObservers(IChangeResult<UNIT> changeResult)
         {
             observers.ForEach(x => x.OnNext(changeResult));
         }
@@ -31,7 +31,7 @@ namespace Meadow
         /// <param name="observer">The `IObserver` that will receive the
         /// change notifications.</param>
         /// <returns></returns>
-        public IDisposable Subscribe(IObserver<RESULT> observer)
+        public IDisposable Subscribe(IObserver<IChangeResult<UNIT>> observer)
         {
             if (!observers.Contains(observer))
             {
@@ -46,10 +46,10 @@ namespace Meadow
         /// </summary>
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<RESULT>> observers;
-            private IObserver<RESULT> observer;
+            private List<IObserver<IChangeResult<UNIT>>> observers;
+            private IObserver<IChangeResult<UNIT>> observer;
 
-            public Unsubscriber(List<IObserver<RESULT>> observers, IObserver<RESULT> observer)
+            public Unsubscriber(List<IObserver<IChangeResult<UNIT>>> observers, IObserver<IChangeResult<UNIT>> observer)
             {
                 this.observers = observers;
                 this.observer = observer;
@@ -68,9 +68,9 @@ namespace Meadow
         /// <param name="handler"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public static FilterableChangeObserver<RESULT, UNIT> CreateObserver(Action<RESULT> handler, Predicate<RESULT>? filter = null)
+        public static FilterableChangeObserver<UNIT> CreateObserver(Action<IChangeResult<UNIT>> handler, Predicate<IChangeResult<UNIT>>? filter = null)
         {
-            return new FilterableChangeObserver<RESULT, UNIT>(
+            return new FilterableChangeObserver<UNIT>(
                 handler, filter);
         }
 
