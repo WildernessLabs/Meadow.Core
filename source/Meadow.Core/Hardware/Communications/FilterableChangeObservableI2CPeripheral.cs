@@ -20,24 +20,6 @@ namespace Meadow.Hardware
         }
     }
 
-    //public class FilterableChangeObservableI2CPeripheral<T, U1, U2> : FilterableChangeObservable<T, U1, U2>
-    //    where T : CompositeChangeResult<U1, U2>
-    //    where U1 : IUnitType
-    //    where U2 : IUnitType
-    //{
-    //    /// <summary>
-    //    /// The peripheral's address on the I2C Bus
-    //    /// </summary>
-    //    public byte Address { get => Bus.Address; }
-
-    //    protected I2CBusAccessor Bus { get; private set; }
-
-    //    protected FilterableChangeObservableI2CPeripheral(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
-    //    {
-    //        Bus = new I2CBusAccessor(i2cBus, address, rxBufferSize, txBufferSize);
-    //    }
-    //}
-
     public class I2CBusAccessor
     {
         private object SyncRoot { get; } = new object();
