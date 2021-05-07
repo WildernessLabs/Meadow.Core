@@ -13,37 +13,37 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Acceleration3d : IUnitType, IFormattable, IComparable, IEquatable<(double ValueX, double ValueY, double ValueZ)>, IComparable<(double, double, double)>
+    public struct Acceleration3d : IUnitType, IFormattable, IComparable, IEquatable<(double X, double Y, double Z)>, IComparable<(double, double, double)>
     {
         /// <summary>
         /// Creates a new `Acceleration3d` object.
         /// </summary>
-        /// <param name="valueX">The X Acceleration3d value.</param>
-        /// <param name="valueY">The Y Acceleration3d value.</param>
-        /// <param name="valueZ">The Z Acceleration3d value.</param>
+        /// <param name="x">The X Acceleration3d value.</param>
+        /// <param name="y">The Y Acceleration3d value.</param>
+        /// <param name="y">The Z Acceleration3d value.</param>
         /// <param name="type"></param>
-        public Acceleration3d(double valueX, double valueY, double valueZ,
+        public Acceleration3d(double x, double y, double z,
             Acceleration.UnitType type = Acceleration.UnitType.MetersPerSecondSquared)
         {
             //always store reference value
             Unit = type;
-            AccelerationX = new Acceleration(valueX, Unit);
-            AccelerationY = new Acceleration(valueY, Unit);
-            AccelerationZ = new Acceleration(valueZ, Unit);
+            X = new Acceleration(x, Unit);
+            Y = new Acceleration(y, Unit);
+            Z = new Acceleration(z, Unit);
         }
 
-        public Acceleration3d(Acceleration accelerationX, Acceleration accelerationY, Acceleration accelerationZ)
+        public Acceleration3d(Acceleration x, Acceleration y, Acceleration z)
         {
-            AccelerationX = new Acceleration(accelerationX.Value, accelerationX.Unit);
-            AccelerationY = new Acceleration(accelerationY.Value, accelerationY.Unit);
-            AccelerationZ = new Acceleration(accelerationZ.Value, accelerationZ.Unit);
+            X = new Acceleration(x.Value, x.Unit);
+            Y = new Acceleration(y.Value, y.Unit);
+            Z = new Acceleration(z.Value, z.Unit);
 
-            Unit = AccelerationX.Unit;
+            Unit = X.Unit;
         }
 
-        public Acceleration AccelerationX { get; set; }
-        public Acceleration AccelerationY { get; set; }
-        public Acceleration AccelerationZ { get; set; }
+        public Acceleration X { get; set; }
+        public Acceleration Y { get; set; }
+        public Acceleration Z { get; set; }
 
         /// <summary>
         /// The unit that describes the value.
@@ -60,12 +60,12 @@ namespace Meadow.Units
 
         [Pure]
         public bool Equals(Acceleration3d other) =>
-            AccelerationX == other.AccelerationX &&
-            AccelerationY == other.AccelerationY &&
-            AccelerationZ == other.AccelerationZ;
+            X == other.X &&
+            Y == other.Y &&
+            Z == other.Z;
 
 
-        [Pure] public override int GetHashCode() => (AccelerationX.GetHashCode() + AccelerationY.GetHashCode() + AccelerationZ.GetHashCode()) / 3;
+        [Pure] public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode()) / 3;
 
         [Pure] public static bool operator ==(Acceleration3d left, Acceleration3d right) => Equals(left, right);
         [Pure] public static bool operator !=(Acceleration3d left, Acceleration3d right) => !Equals(left, right);
@@ -78,9 +78,9 @@ namespace Meadow.Units
         [Pure]
         public static Acceleration3d operator +(Acceleration3d lvalue, Acceleration3d rvalue)
         {
-            var x = lvalue.AccelerationX + rvalue.AccelerationX;
-            var y = lvalue.AccelerationY + rvalue.AccelerationY;
-            var z = lvalue.AccelerationZ + rvalue.AccelerationZ;
+            var x = lvalue.X + rvalue.X;
+            var y = lvalue.Y + rvalue.Y;
+            var z = lvalue.Z + rvalue.Z;
 
             return new Acceleration3d(x, y, z);
         }
@@ -88,26 +88,26 @@ namespace Meadow.Units
         [Pure]
         public static Acceleration3d operator -(Acceleration3d lvalue, Acceleration3d rvalue)
         {
-            var x = lvalue.AccelerationX - rvalue.AccelerationX;
-            var y = lvalue.AccelerationY - rvalue.AccelerationY;
-            var z = lvalue.AccelerationZ - rvalue.AccelerationZ;
+            var x = lvalue.X - rvalue.X;
+            var y = lvalue.Y - rvalue.Y;
+            var z = lvalue.Z - rvalue.Z;
 
             return new Acceleration3d(x, y, z);
         }
 
-        [Pure] public override string ToString() => $"{AccelerationX}, {AccelerationY}, {AccelerationZ}";
-        [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{AccelerationX.ToString(format, formatProvider)}, {AccelerationY.ToString(format, formatProvider)}, {AccelerationZ.ToString(format, formatProvider)}";
+        [Pure] public override string ToString() => $"{X}, {Y}, {Z}";
+        [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{X.ToString(format, formatProvider)}, {Y.ToString(format, formatProvider)}, {Z.ToString(format, formatProvider)}";
 
         public int CompareTo(object obj)
         {
             throw new NotImplementedException();
         }
 
-        public bool Equals((double ValueX, double ValueY, double ValueZ) other)
+        public bool Equals((double X, double Y, double Z) other)
         {
-            return AccelerationX.Equals(other.ValueX) &&
-                AccelerationY.Equals(other.ValueY) &&
-                AccelerationZ.Equals(other.ValueZ);
+            return X.Equals(other.X) &&
+                Y.Equals(other.Y) &&
+                Z.Equals(other.Z);
         }
 
         public int CompareTo((double, double, double) other)
