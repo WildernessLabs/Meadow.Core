@@ -79,7 +79,7 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Velocity)obj);
+            return obj.GetType() == GetType() && Equals((Mass)obj);
         }
 
         [Pure] public bool Equals(Mass other) => _value == other._value;
