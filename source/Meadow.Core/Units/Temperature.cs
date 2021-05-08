@@ -188,6 +188,14 @@ namespace Meadow.Units
             return (other is null) ? -1 : ((IComparable<double>)Value).CompareTo(other.Value);
         }
 
+        /// <summary>
+        /// Returns the absolute voltage, that is, the voltage without regards to
+        /// negative polarity
+        /// </summary>
+        /// <returns></returns>
+        [Pure] public Temperature Abs() { return new Temperature(Math.Abs(this.Celsius), UnitType.Celsius); }
+
+
         [Pure] public bool Equals(double? other) => Value.Equals(other);
         [Pure] public bool Equals(double other) => Value.Equals(other);
         [Pure] public int CompareTo(double other) => Value.CompareTo(other);

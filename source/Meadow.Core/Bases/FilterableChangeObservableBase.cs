@@ -14,7 +14,6 @@ namespace Meadow
     /// <typeparam name="RESULT">An `IChangeResult` that holds a `UNIT` type.</typeparam>
     /// <typeparam name="UNIT"></typeparam>
     public abstract class FilterableChangeObservableBase<UNIT> : IObservable<IChangeResult<UNIT>>
-        //where RESULT : struct, IChangeResult<UNIT>
         where UNIT : struct
     {
         // collection of observers

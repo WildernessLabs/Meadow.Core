@@ -75,11 +75,7 @@ namespace Meadow.Units
         /// negative polarity
         /// </summary>
         /// <returns></returns>
-        [Pure]
-        public Voltage Abs()
-        {
-            return new Voltage(Math.Abs(this._value), UnitType.Volts);
-        }
+        [Pure] public Voltage Abs() { return new Voltage(Math.Abs(this._value), UnitType.Volts); }
 
         [Pure]
         public override bool Equals(object obj)
