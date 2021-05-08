@@ -29,7 +29,8 @@ namespace Meadow
         /// <param name="handler">An `Action` that will be invoked when a
         /// change occurs.</param>
         /// <param name="filter">An optional `Predicate` that filters out any
-        /// notifications that don't satisfy (return `true`) the predicate condition.</param>
+        /// notifications that don't satisfy (return `true`) the predicate condition.
+        /// Note that the first reading will always call the handler.</param>
         public FilterableChangeObserver(Action<IChangeResult<UNIT>> handler, Predicate<IChangeResult<UNIT>>? filter = null)
         {
             this.Handler = handler;
@@ -48,8 +49,12 @@ namespace Meadow
                 result.Old = last;
             }
 
-            // if there is no filter, or if the filter satisfies the result,
-            if (Filter == null || Filter(result))
+            // if there is no filter,
+            //  OR
+            // if the filter satisfies the result,
+            //  OR
+            // if it's the first time (result.Old == null)
+            if (Filter == null || Filter(result) || result.Old is null)
             {
                 // save the last notified value as this new value
                 lastNotifedValue = result.New;
