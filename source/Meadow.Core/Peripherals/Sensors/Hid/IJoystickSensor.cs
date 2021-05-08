@@ -19,7 +19,6 @@ namespace Meadow.Peripherals.Sensors.Hid
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        //event EventHandler<JoystickPositionChangeResult> Updated;
         event EventHandler<ChangeResult<JoystickPosition>> Updated;
     }
 }
