@@ -5,9 +5,9 @@ namespace Meadow.Gateways.Bluetooth
 {
     public abstract class Characteristic : ICharacteristic, IAttribute, IJsonSerializable
     {
-        public event CharacteristicValueSetHandler ValueSet;
+        public event CharacteristicValueSetHandler ValueSet = delegate { };
 
-        public event ServerValueChangedHandler ServerValueSet; // this is an internally used event.  
+        public event ServerValueChangedHandler ServerValueSet = delegate { }; // this is an internally used event.  
 
         public abstract void HandleDataWrite(byte[] data);
 

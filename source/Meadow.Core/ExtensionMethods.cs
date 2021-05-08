@@ -15,7 +15,7 @@ namespace Meadow
         /// <returns></returns>
         static public bool Contains<TSource>(this IEnumerable<TSource> source, TSource[] pattern)
         {
-            return (source.FirstIndexOf(pattern) == -1 ? false : true);
+            return (source.FirstIndexOf(pattern) != -1);
 
             //int patternLength = pattern.Length;
             //int totalLength = source.Count();
@@ -48,9 +48,13 @@ namespace Meadow
         /// TODO: move this into the `CircularBuffer` class? or is it broadly applicable?
         static public int FirstIndexOf<TSource>(this IEnumerable<TSource> source, TSource[] pattern)
         {
+            if (pattern == null) throw new ArgumentNullException();
+
             int patternLength = pattern.Length;
             int totalLength = source.Count();
             TSource firstMatch = pattern[0];
+
+            if (firstMatch == null) return -1;
 
             for (int i = 0; i < totalLength; i++) {
                 // is this the right equality?

@@ -17,7 +17,7 @@ namespace Meadow.Hardware
         private static readonly object _channelLock = new object();
         private static IDictionary<uint, float> _pwmTimerFrequencies;
         private static List<uint> _pwmTimersInitialized = new List<uint>();
-        private static KeyValuePair<IPin, ChannelConfig>[] _pinsToReasssertForPwm = null;
+        private static KeyValuePair<IPin, ChannelConfig>[]? _pinsToReasssertForPwm = null;
 
         internal static bool ShowDebug { get; set; } = false;
 
@@ -77,7 +77,7 @@ namespace Meadow.Hardware
             var pinsToReassert = new int[0];
             if (!_pwmTimersInitialized.Contains(info.Timer))
             {
-                string[] c = null;
+                string[]? c = null;
 
                 // first time this timer has been touched
                 switch (info.Timer)

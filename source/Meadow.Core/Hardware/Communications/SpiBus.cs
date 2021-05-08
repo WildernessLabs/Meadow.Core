@@ -16,7 +16,7 @@ namespace Meadow.Hardware
     {
         private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private SpiClockConfiguration _clockConfig;
+        private SpiClockConfiguration? _clockConfig;
 
         internal int BusNumber { get; set; }
 
@@ -67,6 +67,7 @@ namespace Meadow.Hardware
                 if(_clockConfig == null)
                 {
                     Configuration = new SpiClockConfiguration(375, SpiClockConfiguration.Mode.Mode0);
+                    return Configuration;
                 }
                 return _clockConfig;
             }

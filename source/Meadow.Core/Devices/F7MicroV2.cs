@@ -31,10 +31,7 @@ namespace Meadow.Devices
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.
             //this.InitEsp32CoProc();
-
-            this.esp32 = new Esp32Coprocessor();
-            WiFiAdapter = esp32;
-            Coprocessor = esp32;
+            this.InitCoprocessor();
         }
     }
 }

@@ -47,12 +47,12 @@ namespace Meadow.Devices
         /// The flags set in this variable determine the type and amount of output generated when
         /// debugging this class.
         /// </remarks>
-        private static DebugOptions _debugLevel;
+        private static DebugOptions _debugLevel = DebugOptions.None;
 
         /// <summary>
         /// Event handler service thread.
         /// </summary>
-        private Thread _eventHandlerThread = null;
+        private Thread? _eventHandlerThread = null;
 
         #endregion Private fields / variables
 
@@ -90,6 +90,10 @@ namespace Meadow.Devices
                 };
                 _eventHandlerThread.Start();
             }
+
+            IpAddress = System.Net.IPAddress.None;
+            SubnetMask = System.Net.IPAddress.None;
+            Gateway = System.Net.IPAddress.None;
         }
 
         #endregion Constructor(s)
@@ -129,7 +133,7 @@ namespace Meadow.Devices
         /// <param name="block">Is this a blocking command?</param>
         /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
         /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[] encodedResult)
+        protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? encodedResult)
         {
             return(SendCommand(where, function, block, null, encodedResult));
         }
@@ -303,10 +307,10 @@ namespace Meadow.Devices
                             switch ((Esp32Interfaces) eventData.Interface)
                             {
                                 case Esp32Interfaces.WiFi:
-                                    InvokeEvent((WiFiFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                                    InvokeEvent((WiFiFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload ?? new byte[0]);
                                     break;
                                 case Esp32Interfaces.BlueTooth:
-                                    InvokeEvent((BluetoothFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload);
+                                    InvokeEvent((BluetoothFunction) eventData.Function, (StatusCodes) eventData.StatusCode, payload ?? new byte[0]);
                                     break;
                                 default:
                                     throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
@@ -368,7 +372,7 @@ namespace Meadow.Devices
         /// </summary>
         public void Reset()
         {
-            SendCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, null);
+            SendCommand((byte) Esp32Interfaces.Transport, (UInt32) TransportFunction.ResetEsp32, false, new byte[0]);
         }
 
         /// <summary>

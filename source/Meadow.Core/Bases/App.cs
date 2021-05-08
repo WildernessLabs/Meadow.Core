@@ -20,7 +20,7 @@ namespace Meadow
         public static A Current
         {
             get { return _current; }
-        } private static A _current;
+        } private static A? _current;
 
         private static SynchronizationContext _mainContext { get; }
 
@@ -54,7 +54,7 @@ namespace Meadow
                 }
                 return _device; 
             }
-        } private static D _device;
+        } private static D? _device;
 
         /// <summary>
         /// Called when the application is put to sleep.

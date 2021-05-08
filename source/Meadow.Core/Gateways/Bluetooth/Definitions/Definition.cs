@@ -26,10 +26,13 @@ namespace Meadow.Gateways.Bluetooth
                 json += ", \"services\": [";
                 for (int i = 0; i < Services.Count; i++)
                 {
-                    json += Services[i].ToJson();
-                    if (i < (Services.Count - 1))
+                    if (Services[i] != null)
                     {
-                        json += ",";
+                        json += Services[i]?.ToJson();
+                        if (i < (Services.Count - 1))
+                        {
+                            json += ",";
+                        }
                     }
                 }
                 json += "]";

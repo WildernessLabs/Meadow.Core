@@ -49,7 +49,7 @@ namespace Meadow.Hardware
 
         // internal thread lock
         private object _lock = new object();
-        private CancellationTokenSource SamplingTokenSource;
+        private CancellationTokenSource? SamplingTokenSource;
 
         /// <summary>
         /// Gets a value indicating whether the analog input port is currently
@@ -152,7 +152,7 @@ namespace Meadow.Hardware
                         lock (_analogSyncRoot) {
                             var rawValue = this.IOController.GetAnalogValue(this.Pin);
                             // convert the raw valute into an actual voltage.
-                            sampleBuffer[currentSampleCount] = ((double)rawValue / (double)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage.Volts;
+                            sampleBuffer[currentSampleCount] = ((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts;
                         }
 
                         // increment our counter
@@ -234,7 +234,7 @@ namespace Meadow.Hardware
                 lock (_analogSyncRoot) {
                     var rawValue = this.IOController.GetAnalogValue(this.Pin);
                     // convert the raw valute into an actual voltage.
-                    sampleBuffer[i] = ((double)rawValue / (double)MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue) * ReferenceVoltage.Volts;
+                    sampleBuffer[i] = ((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts;
                 }
                 await Task.Delay(sampleInterval);
             }

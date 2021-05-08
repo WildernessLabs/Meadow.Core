@@ -47,7 +47,7 @@ namespace Meadow.Devices
         public Task<bool> InitCoprocessor()
         {
             if (!IsCoprocessorInitialized()) {
-                return Task.Run<bool>(async () => {
+                return Task.Run<bool>(() => {
                     try {
                         //TODO: looks like we're also instantiating this in the ctor
                         // need to cleanup.
@@ -442,7 +442,7 @@ namespace Meadow.Devices
         /// </summary>
         public AntennaType CurrentAntenna {
             get {
-                if (IsCoprocessorInitialized()) {
+                if (WiFiAdapter != null) {
                     return WiFiAdapter.Antenna;
                 } else {
                     throw new Exception("Coprocessor not initialized.");
@@ -461,7 +461,7 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            if (IsCoprocessorInitialized()) {
+            if (WiFiAdapter != null) {
                 WiFiAdapter.SetAntenna(antenna, persist);
             } else {
                 throw new Exception("Coprocessor not initialized.");
@@ -475,7 +475,7 @@ namespace Meadow.Devices
         /// </summary>
         public double GetBatteryLevel()
         {
-            if (IsCoprocessorInitialized()) {
+            if (Coprocessor != null) {
                 return (Coprocessor.GetBatteryLevel());
             } else {
                 throw new Exception("Coprocessor not initialized.");

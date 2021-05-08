@@ -117,7 +117,7 @@ namespace Meadow.Devices
                 return (_ntpServer);
             }
         }
-        protected string _ntpServer;
+        protected string _ntpServer = string.Empty;
 
         /// <summary>
         /// Get the device name.
@@ -133,7 +133,7 @@ namespace Meadow.Devices
                 return (_deviceName);
             }
         }
-        protected string _deviceName;
+        protected string _deviceName = string.Empty;
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
@@ -147,7 +147,7 @@ namespace Meadow.Devices
             }
 
         }
-        protected byte[] _macAddress;
+        protected byte[] _macAddress = new byte[0];
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
@@ -160,7 +160,7 @@ namespace Meadow.Devices
                 return (_apMacAddress);
             }
         }
-        protected byte[] _apMacAddress;
+        protected byte[] _apMacAddress = new byte[0];
 
         /// <summary>
         /// Automatically start the network interface when the board reboots?
@@ -203,7 +203,7 @@ namespace Meadow.Devices
                 return (_defaultAccessPoint);
             }
         }
-        protected string _defaultAccessPoint;
+        protected string _defaultAccessPoint = string.Empty;
 
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?

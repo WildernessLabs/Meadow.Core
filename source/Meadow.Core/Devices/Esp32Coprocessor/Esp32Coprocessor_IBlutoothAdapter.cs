@@ -11,7 +11,7 @@ namespace Meadow.Devices
 {
     public partial class Esp32Coprocessor : IBluetoothAdapter
     {
-        private Definition _definition;
+        private Definition? _definition;
 
         internal string GetDefaultName()
         {
@@ -115,24 +115,25 @@ namespace Meadow.Devices
 
             var index = 0;
 
-            foreach(var service in _definition.Services)
+            if (_definition != null)
             {
-                service.Handle = handles[index++];
-                foreach(var characteristic in service.Characteristics)
+                foreach (var service in _definition.Services)
                 {
-                    characteristic.DefinitionHandle = handles[index++];
-                    characteristic.ValueHandle = handles[index++];
-
-                    _handleToCharacteristicMap.Add(characteristic.ValueHandle, characteristic);
-
-                    foreach (var descriptor in characteristic.Descriptors)
+                    service.Handle = handles[index++];
+                    foreach (var characteristic in service.Characteristics)
                     {
-                        descriptor.Handle = handles[index++];
+                        characteristic.DefinitionHandle = handles[index++];
+                        characteristic.ValueHandle = handles[index++];
+
+                        _handleToCharacteristicMap.Add(characteristic.ValueHandle, characteristic);
+
+                        foreach (var descriptor in characteristic.Descriptors)
+                        {
+                            descriptor.Handle = handles[index++];
+                        }
                     }
                 }
             }
-            // TODO: assign handles
-            // TODO: wire events
         }
 
         private Dictionary<ushort, ICharacteristic> _handleToCharacteristicMap = new Dictionary<ushort, ICharacteristic>();

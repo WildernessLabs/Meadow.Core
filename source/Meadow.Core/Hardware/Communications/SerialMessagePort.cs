@@ -64,7 +64,7 @@ namespace Meadow.Hardware
         protected int _messageLength;
         protected bool _preserveDelimiter;
 
-        protected CircularBuffer<byte> _readBuffer;
+        protected CircularBuffer<byte>? _readBuffer;
         protected object _msgParseLock = new object();
 
         internal static SerialMessagePort From(
@@ -194,6 +194,8 @@ namespace Meadow.Hardware
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            if (_readBuffer == null) return;
+
             // only one message processor at a time
             lock (_msgParseLock) {
 

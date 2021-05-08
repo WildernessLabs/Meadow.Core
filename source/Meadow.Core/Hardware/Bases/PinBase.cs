@@ -9,7 +9,7 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class PinBase : IPin
     {
-        public IList<IChannelInfo> SupportedChannels { get; protected set; }
+        public IList<IChannelInfo>? SupportedChannels { get; protected set; }
 
         public string Name { get; protected set; }
         /// <summary>
@@ -20,16 +20,19 @@ namespace Meadow.Hardware
 
         //public abstract IChannelInfo ActiveChannel { get; protected set; }
 
-        protected PinBase(string name, object key, IList<IChannelInfo> supportedChannels)
+        protected PinBase(string name, object key, IList<IChannelInfo>? supportedChannels)
         {
             this.Name = name;
             this.Key = key;
             this.SupportedChannels = supportedChannels;
         }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private PinBase()
         {
+            // make default non-callable
         }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         public override string ToString()
         {
