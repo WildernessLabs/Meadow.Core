@@ -11,7 +11,7 @@ namespace Meadow.Peripherals.Sensors
         /// <summary>
         /// Last value read from the Temperature sensor.
         /// </summary>
-        Length Distance { get; }
+        Length? Distance { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
