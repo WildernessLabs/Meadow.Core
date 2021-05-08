@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct AngularAcceleration3d : IUnitType, IFormattable, IComparable, IEquatable<(double ValueX, double ValueY, double ValueZ)>, IComparable<(double, double, double)>
+    public struct AngularAcceleration3D : IUnitType, IFormattable, IComparable, IEquatable<(double ValueX, double ValueY, double ValueZ)>, IComparable<(double, double, double)>
     {
         /// <summary>
         /// Creates a new `AngularAcceleration3d` object.
@@ -22,28 +22,28 @@ namespace Meadow.Units
         /// <param name="valueY">The Y AngularAcceleration3d value.</param>
         /// <param name="valueZ">The Z AngularAcceleration3d value.</param>
         /// <param name="type"></param>
-        public AngularAcceleration3d(double valueX, double valueY, double valueZ,
+        public AngularAcceleration3D(double valueX, double valueY, double valueZ,
             AngularAcceleration.UnitType type = AngularAcceleration.UnitType.RadiansPerSecondSquared)
         {
             //always store reference value
             Unit = type;
-            AccelerationX = new AngularAcceleration(valueX, Unit);
-            AccelerationY = new AngularAcceleration(valueY, Unit);
-            AccelerationZ = new AngularAcceleration(valueZ, Unit);
+            X = new AngularAcceleration(valueX, Unit);
+            Y = new AngularAcceleration(valueY, Unit);
+            Z = new AngularAcceleration(valueZ, Unit);
         }
 
-        public AngularAcceleration3d(AngularAcceleration accelerationX, AngularAcceleration accelerationY, AngularAcceleration accelerationZ)
+        public AngularAcceleration3D(AngularAcceleration accelerationX, AngularAcceleration accelerationY, AngularAcceleration accelerationZ)
         {
-            AccelerationX = new AngularAcceleration(accelerationX.Value, accelerationX.Unit);
-            AccelerationY = new AngularAcceleration(accelerationY.Value, accelerationY.Unit);
-            AccelerationZ = new AngularAcceleration(accelerationZ.Value, accelerationZ.Unit);
+            X = new AngularAcceleration(accelerationX.Value, accelerationX.Unit);
+            Y = new AngularAcceleration(accelerationY.Value, accelerationY.Unit);
+            Z = new AngularAcceleration(accelerationZ.Value, accelerationZ.Unit);
 
-            Unit = AccelerationX.Unit;
+            Unit = X.Unit;
         }
 
-        public AngularAcceleration AccelerationX { get; set; }
-        public AngularAcceleration AccelerationY { get; set; }
-        public AngularAcceleration AccelerationZ { get; set; }
+        public AngularAcceleration X { get; set; }
+        public AngularAcceleration Y { get; set; }
+        public AngularAcceleration Z { get; set; }
 
         /// <summary>
         /// The unit that describes the value.
@@ -55,48 +55,48 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((AngularAcceleration3d)obj);
+            return obj.GetType() == GetType() && Equals((AngularAcceleration3D)obj);
         }
 
         [Pure]
-        public bool Equals(AngularAcceleration3d other) =>
-            AccelerationX == other.AccelerationX &&
-            AccelerationY == other.AccelerationY &&
-            AccelerationZ == other.AccelerationZ;
+        public bool Equals(AngularAcceleration3D other) =>
+            X == other.X &&
+            Y == other.Y &&
+            Z == other.Z;
 
 
-        [Pure] public override int GetHashCode() => (AccelerationX.GetHashCode() + AccelerationY.GetHashCode() + AccelerationZ.GetHashCode()) / 3;
+        [Pure] public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode()) / 3;
 
-        [Pure] public static bool operator ==(AngularAcceleration3d left, AngularAcceleration3d right) => Equals(left, right);
-        [Pure] public static bool operator !=(AngularAcceleration3d left, AngularAcceleration3d right) => !Equals(left, right);
+        [Pure] public static bool operator ==(AngularAcceleration3D left, AngularAcceleration3D right) => Equals(left, right);
+        [Pure] public static bool operator !=(AngularAcceleration3D left, AngularAcceleration3D right) => !Equals(left, right);
         //ToDo [Pure] public int CompareTo(AngularAcceleration3d other) => Equals(this, other) ? 0 : AccelerationX.CompareTo(other.AccelerationX);
-        [Pure] public static bool operator <(AngularAcceleration3d left, AngularAcceleration3d right) => Comparer<AngularAcceleration3d>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(AngularAcceleration3d left, AngularAcceleration3d right) => Comparer<AngularAcceleration3d>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(AngularAcceleration3d left, AngularAcceleration3d right) => Comparer<AngularAcceleration3d>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(AngularAcceleration3d left, AngularAcceleration3d right) => Comparer<AngularAcceleration3d>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator <(AngularAcceleration3D left, AngularAcceleration3D right) => Comparer<AngularAcceleration3D>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(AngularAcceleration3D left, AngularAcceleration3D right) => Comparer<AngularAcceleration3D>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(AngularAcceleration3D left, AngularAcceleration3D right) => Comparer<AngularAcceleration3D>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(AngularAcceleration3D left, AngularAcceleration3D right) => Comparer<AngularAcceleration3D>.Default.Compare(left, right) >= 0;
 
         [Pure]
-        public static AngularAcceleration3d operator +(AngularAcceleration3d lvalue, AngularAcceleration3d rvalue)
+        public static AngularAcceleration3D operator +(AngularAcceleration3D lvalue, AngularAcceleration3D rvalue)
         {
-            var x = lvalue.AccelerationX + rvalue.AccelerationX;
-            var y = lvalue.AccelerationY + rvalue.AccelerationY;
-            var z = lvalue.AccelerationZ + rvalue.AccelerationZ;
+            var x = lvalue.X + rvalue.X;
+            var y = lvalue.Y + rvalue.Y;
+            var z = lvalue.Z + rvalue.Z;
 
-            return new AngularAcceleration3d(x, y, z);
+            return new AngularAcceleration3D(x, y, z);
         }
 
         [Pure]
-        public static AngularAcceleration3d operator -(AngularAcceleration3d lvalue, AngularAcceleration3d rvalue)
+        public static AngularAcceleration3D operator -(AngularAcceleration3D lvalue, AngularAcceleration3D rvalue)
         {
-            var x = lvalue.AccelerationX - rvalue.AccelerationX;
-            var y = lvalue.AccelerationY - rvalue.AccelerationY;
-            var z = lvalue.AccelerationZ - rvalue.AccelerationZ;
+            var x = lvalue.X - rvalue.X;
+            var y = lvalue.Y - rvalue.Y;
+            var z = lvalue.Z - rvalue.Z;
 
-            return new AngularAcceleration3d(x, y, z);
+            return new AngularAcceleration3D(x, y, z);
         }
 
-        [Pure] public override string ToString() => $"{AccelerationX}, {AccelerationY}, {AccelerationZ}";
-        [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{AccelerationX.ToString(format, formatProvider)}, {AccelerationY.ToString(format, formatProvider)}, {AccelerationZ.ToString(format, formatProvider)}";
+        [Pure] public override string ToString() => $"{X}, {Y}, {Z}";
+        [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{X.ToString(format, formatProvider)}, {Y.ToString(format, formatProvider)}, {Z.ToString(format, formatProvider)}";
 
         public int CompareTo(object obj)
         {
@@ -105,9 +105,9 @@ namespace Meadow.Units
 
         public bool Equals((double ValueX, double ValueY, double ValueZ) other)
         {
-            return AccelerationX.Equals(other.ValueX) &&
-                AccelerationY.Equals(other.ValueY) &&
-                AccelerationZ.Equals(other.ValueZ);
+            return X.Equals(other.ValueX) &&
+                Y.Equals(other.ValueY) &&
+                Z.Equals(other.ValueZ);
         }
 
         public int CompareTo((double, double, double) other)

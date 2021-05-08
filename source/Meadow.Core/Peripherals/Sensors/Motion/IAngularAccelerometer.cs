@@ -11,13 +11,13 @@ namespace Meadow.Peripherals.Sensors.Motion
         /// <summary>
         /// Last value read from the Temperature sensor.
         /// </summary>
-        AngularAcceleration3d AngularAcceleration3d { get; }
+        AngularAcceleration3D AngularAcceleration3d { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<IChangeResult<AngularAcceleration3d>> AngularAcceleration3dUpdated;
+        event EventHandler<IChangeResult<AngularAcceleration3D>> AngularAcceleration3dUpdated;
     }
 }
