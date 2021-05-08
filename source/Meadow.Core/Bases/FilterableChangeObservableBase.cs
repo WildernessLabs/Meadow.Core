@@ -67,7 +67,9 @@ namespace Meadow
         /// <param name="filter">An optional filter that determines whether or not the
         /// consumer should be notified.</param>
         /// <returns>A FilterableChangeObserver</returns>
-        public static FilterableChangeObserver<UNIT> CreateObserver(Action<IChangeResult<UNIT>> handler, Predicate<IChangeResult<UNIT>>? filter = null)
+        public static FilterableChangeObserver<UNIT> CreateObserver(
+            Action<IChangeResult<UNIT>> handler,
+            Predicate<IChangeResult<UNIT>>? filter = null)
         {
             return new FilterableChangeObserver<UNIT>(
                 handler, filter);
