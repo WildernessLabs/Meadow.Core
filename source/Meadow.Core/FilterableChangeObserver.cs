@@ -9,15 +9,25 @@ namespace Meadow
     /// predicate that automatically filters results so only results that match
     /// the predicate will reach the subscriber.
     /// </summary>
-    /// <typeparam name="RESULT">The `IChangeResult` notification data.</typeparam>
     /// <typeparam name="UNIT">The datatype that contains the notification data.
     /// I.e. `Temperature` or `decimal`. Must be a `struct`.</typeparam>
     public class FilterableChangeObserver<UNIT> : IObserver<IChangeResult<UNIT>>
         where UNIT : struct
     {
+        /// <summary>
+        /// Than handler that is called in `OnNext` if the filter is satisfied.
+        /// </summary>
         protected Action<IChangeResult<UNIT>> Handler { get; } = delegate { };
+        /// <summary>
+        /// A filter that specifies whether or not the observer should get notified.
+        /// </summary>
         protected Predicate<IChangeResult<UNIT>>? Filter { get; } = null;
 
+        /// <summary>
+        /// The last notified value. Note that this may differ from the `Old`
+        /// property on the result, because this only gets updated if the filter
+        /// is satisfied and the result is sent to the observer.
+        /// </summary>
         protected UNIT? lastNotifedValue;
 
         /// <summary>
