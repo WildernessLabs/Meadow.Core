@@ -111,7 +111,7 @@ namespace Meadow.Hardware
             }
         }
 
-        public void WriteBytes(byte[] data)
+        public void WriteBytes(params byte[] data)
         {
             lock (SyncRoot)
             {
@@ -136,5 +136,6 @@ namespace Meadow.Hardware
                 Array.Copy(c, buffer, readCount);
             }
         }
+
     }
 }
