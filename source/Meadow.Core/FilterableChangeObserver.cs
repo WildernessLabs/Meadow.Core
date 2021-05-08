@@ -13,14 +13,12 @@ namespace Meadow
     /// <typeparam name="UNIT">The datatype that contains the notification data.
     /// I.e. `Temperature` or `decimal`. Must be a `struct`.</typeparam>
     public class FilterableChangeObserver<UNIT> : IObserver<IChangeResult<UNIT>>
-        //where RESULT : struct, IChangeResult<UNIT>
         where UNIT : struct
     {
-        protected Action<IChangeResult<UNIT>> _handler;// = null;
-        protected Predicate<IChangeResult<UNIT>>? _filter = null;
+        protected Action<IChangeResult<UNIT>> Handler { get; } = delegate { };
+        protected Predicate<IChangeResult<UNIT>>? Filter { get; } = null;
 
-        protected bool _isInitialized = false;
-        protected UNIT? _lastNotifedValue;
+        protected UNIT? lastNotifedValue;
 
         /// <summary>
         /// Creates a new `FilterableChangeObserver` that will execute the handler
@@ -32,12 +30,10 @@ namespace Meadow
         /// change occurs.</param>
         /// <param name="filter">An optional `Predicate` that filters out any
         /// notifications that don't satisfy (return `true`) the predicate condition.</param>
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public FilterableChangeObserver(Action<IChangeResult<UNIT>> handler/* = null*/, Predicate<IChangeResult<UNIT>>? filter = null)
-#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+        public FilterableChangeObserver(Action<IChangeResult<UNIT>> handler, Predicate<IChangeResult<UNIT>>? filter = null)
         {
-            this._handler = handler;
-            this._filter = filter;
+            this.Handler = handler;
+            this.Filter = filter;
         }
 
         /// <summary>
@@ -46,27 +42,19 @@ namespace Meadow
         /// <param name="result"></param>
         public void OnNext(IChangeResult<UNIT> result)
         {
-            // first time through, save initial state
-            if (!_isInitialized)
-            {
-                _lastNotifedValue = result.New;
-                _isInitialized = true;
-            }
-            // inject the actual last notified value into the result
+            // if the last notified value isn't null, inject it into the result.
             // (each last notified is specific to the observer)
-            if (_lastNotifedValue is { } last) {
+            if (lastNotifedValue is { } last) {
                 result.Old = last;
             }
-            // TODO: Delta bug document here
-            //result.Old = _lastNotifedValue;
 
             // if there is no filter, or if the filter satisfies the result,
-            if (_filter == null || _filter(result))
+            if (Filter == null || Filter(result))
             {
-                // update our state
-                _lastNotifedValue = result.New;
+                // save the last notified value as this new value
+                lastNotifedValue = result.New;
                 // invoke (execute) the handler
-                _handler?.Invoke(result);
+                Handler?.Invoke(result);
             }
         }
 
