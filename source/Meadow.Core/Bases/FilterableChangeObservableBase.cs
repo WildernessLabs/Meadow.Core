@@ -11,7 +11,6 @@ namespace Meadow
     /// Keeps an internal collection of `observers`, and provides methods such
     /// as `NotifyObservers` and `Subscribe`.
     /// </summary>
-    /// <typeparam name="RESULT">An `IChangeResult` that holds a `UNIT` type.</typeparam>
     /// <typeparam name="UNIT"></typeparam>
     public abstract class FilterableChangeObservableBase<UNIT> : IObservable<IChangeResult<UNIT>>
         where UNIT : struct
