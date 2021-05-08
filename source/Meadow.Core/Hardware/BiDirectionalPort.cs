@@ -195,7 +195,7 @@ namespace Meadow.Hardware
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = DateTime.Now;
-                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, this.LastEventTime, capturedLastTime));
+                RaiseChangedAndNotify(new DigitalInputPortChangeResult(state, this.LastEventTime, capturedLastTime));
             }
         }
     }

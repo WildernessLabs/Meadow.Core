@@ -6,7 +6,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Provides data for events that come from an IDigitalInputPort.
     /// </summary>
-    public class DigitalInputPortEventArgs : EventArgs, IChangeResult<DateTime> //, ITimeChangeResult
+    public struct DigitalInputPortChangeResult : IChangeResult<DateTime>
     {
         public bool Value { get; set; }
         public DateTime New { get; set; }
@@ -14,9 +14,9 @@ namespace Meadow.Hardware
 
         public TimeSpan? Delta { get { return New - Old; } }
 
-        public DigitalInputPortEventArgs() { }
+        //public DigitalInputPortEventArgs() { }
 
-        public DigitalInputPortEventArgs(bool value, DateTime time, DateTime previous) {
+        public DigitalInputPortChangeResult(bool value, DateTime time, DateTime previous) {
             this.Value = value;
             this.New = time;
             this.Old = previous;

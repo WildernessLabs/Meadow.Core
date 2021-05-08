@@ -9,7 +9,7 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class BiDirectionalPortBase : DigitalPortBase, IBiDirectionalPort, IDigitalInterruptPort, IDisposable
     {
-        public event EventHandler<DigitalInputPortEventArgs> Changed = delegate { };
+        public event EventHandler<DigitalInputPortChangeResult> Changed = delegate { };
 
         // internals
         protected bool _currentState;
@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         public bool InitialState { get; }
         public OutputType InitialOutputType { get; }
         public ResistorMode Resistor { get; }
-        protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
+        protected List<IObserver<DigitalInputPortChangeResult>> _observers { get; set; } = new List<IObserver<DigitalInputPortChangeResult>>();
 
         public abstract bool State { get; set; }
         public abstract PortDirectionType Direction { get; set; }
@@ -65,7 +65,7 @@ namespace Meadow.Hardware
             GC.SuppressFinalize(this);
         }
 
-        protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)
+        protected void RaiseChangedAndNotify(DigitalInputPortChangeResult changeResult)
         {
             if (_isDisposed) return;
             
