@@ -2,8 +2,6 @@
 
 namespace Meadow
 {
-    //public class FilterableChangeObserver<C, T> : IObserver<C> where C : IChangeResult<T>
-
     /// <summary>
     /// An `IObserver` that handles change notifications and has an optional
     /// predicate that automatically filters results so only results that match
