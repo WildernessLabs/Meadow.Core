@@ -14,9 +14,20 @@ namespace Meadow
     public struct ChangeResult<UNIT> : IChangeResult<UNIT>
         where UNIT : struct
     {
+        /// <summary>
+        /// The value at the time of event or notification.
+        /// </summary>
         public UNIT New { get; set; }
+        /// <summary>
+        /// The previous value evented or notified.
+        /// </summary>
         public UNIT? Old { get; set; }
 
+        /// <summary>
+        /// Creates a new ChangeResult.
+        /// </summary>
+        /// <param name="newValue">The value at the time of event or notification.</param>
+        /// <param name="oldValue">The previous value evented or notified.</param>
         public ChangeResult(UNIT newValue, UNIT? oldValue)
         {
             New = newValue;
