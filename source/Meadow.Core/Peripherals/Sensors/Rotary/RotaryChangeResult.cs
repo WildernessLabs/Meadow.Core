@@ -18,17 +18,6 @@ namespace Meadow.Peripherals.Sensors.Rotary
         public RotationDirection New { get; set; }
         public RotationDirection? Old { get; set; }
 
-        ///// <summary>
-        ///// Constructor for SensorVectorEventArgs objects.
-        ///// </summary>
-        ///// <param name="lastValue">Last sensor value sent through the eventing mechanism.</param>
-        ///// <param name="currentValue">Current sensor reading.</param>
-        //public RotaryChangeResult(RotationDirection direction)
-        //{
-        //    New = direction;
-        //    Old = null;
-        //}
-
         /// <summary>
         /// Creates a new `RotaryChangeResult` with the new direction of rotation
         /// and, optionally, the previous.
