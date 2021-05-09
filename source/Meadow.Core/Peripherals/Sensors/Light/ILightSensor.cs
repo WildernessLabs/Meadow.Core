@@ -11,7 +11,7 @@ namespace Meadow.Peripherals.Sensors.Light
         /// <summary>
         /// Last value read from the Light sensor.
         /// </summary>
-        Illuminance Illuminance { get; }
+        Illuminance? Illuminance { get; }
 
         /// <summary>
         /// Raised when a change in light is detected.
