@@ -11,9 +11,12 @@ namespace Meadow.Units
     /// Represents Acceleration3d
     /// </summary>
     [Serializable]
-    [ImmutableObject(false)]
+    [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Acceleration3d : IUnitType, IFormattable, IComparable, IEquatable<(double X, double Y, double Z)>, IComparable<(double, double, double)>
+    public struct Acceleration3d :
+        IUnitType, IFormattable, IComparable,
+        IEquatable<(double X, double Y, double Z)>,
+        IComparable<(double, double, double)>
     {
         /// <summary>
         /// Creates a new `Acceleration3d` object.
@@ -34,9 +37,9 @@ namespace Meadow.Units
 
         public Acceleration3d(Acceleration x, Acceleration y, Acceleration z)
         {
-            X = new Acceleration(x.Value, x.Unit);
-            Y = new Acceleration(y.Value, y.Unit);
-            Z = new Acceleration(z.Value, z.Unit);
+            X = new Acceleration(x);
+            Y = new Acceleration(y);
+            Z = new Acceleration(z);
 
             Unit = X.Unit;
         }

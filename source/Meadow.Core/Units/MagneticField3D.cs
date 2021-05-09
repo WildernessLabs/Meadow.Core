@@ -11,9 +11,11 @@ namespace Meadow.Units
     /// Represents a 3-dimensional (X,Y,Z) magnetic field.
     /// </summary>
     [Serializable]
-    [ImmutableObject(false)]
+    [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct MagneticField3D : IUnitType, IFormattable, IComparable, IEquatable<(double X, double Y, double Z)>, IComparable<(double, double, double)>
+    public struct MagneticField3D :
+        IUnitType, IFormattable, IComparable,
+        IEquatable<(double X, double Y, double Z)>, IComparable<(double, double, double)>
     {
         /// <summary>
         /// Creates a new `MagneticField3d` object.
@@ -34,14 +36,13 @@ namespace Meadow.Units
 
         public MagneticField3D(MagneticField x, MagneticField y, MagneticField z)
         {
-            X = new MagneticField(x.Value, x.Unit);
-            Y = new MagneticField(y.Value, y.Unit);
-            Z = new MagneticField(z.Value, z.Unit);
+            X = new MagneticField(x);
+            Y = new MagneticField(y);
+            Z = new MagneticField(z);
 
             Unit = x.Unit;
         }
 
-        // TODO: why aren't these just XYZ?
         public MagneticField X { get; set; }
         public MagneticField Y { get; set; }
         public MagneticField Z { get; set; }

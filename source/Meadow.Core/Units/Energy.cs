@@ -11,32 +11,28 @@ namespace Meadow.Units
     /// Represents Energy
     /// </summary>
     [Serializable]
-    [ImmutableObject(false)]
+    [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Energy : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Energy :
+        IUnitType, IComparable, IFormattable, IConvertible,
+        IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Energy` object.
         /// </summary>
         /// <param name="value">The Energy value.</param>
-        /// <param name="type">kilometers meters per second by default.</param>
+        /// <param name="type">Joules by default.</param>
         public Energy(double value, UnitType type = UnitType.Joules)
         {
             //always store reference value
             Unit = type;
-            _value = EnergyConversions.Convert(value, type, UnitType.Joules);
+            Value = EnergyConversions.Convert(value, type, UnitType.Joules);
         }
 
         /// <summary>
-        /// The Energy expressed as a value.
+        /// Internal canonical value.
         /// </summary>
-        public double Value
-        {
-            get => EnergyConversions.Convert(_value, UnitType.Joules, Unit);
-            set => _value = EnergyConversions.Convert(value, Unit, UnitType.Joules);
-        }
-
-        private double _value;
+        private readonly double Value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -73,7 +69,7 @@ namespace Meadow.Units
         [Pure]
         public double From(UnitType convertTo)
         {
-            return EnergyConversions.Convert(_value, UnitType.Joules, convertTo);
+            return EnergyConversions.Convert(Value, UnitType.Joules, convertTo);
         }
 
         [Pure]
@@ -84,68 +80,72 @@ namespace Meadow.Units
             return obj.GetType() == GetType() && Equals((Energy)obj);
         }
 
-        [Pure] public bool Equals(Energy other) => _value == other._value;
+        [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public override int GetHashCode() => _value.GetHashCode();
-
-        [Pure] public static bool operator ==(Energy left, Energy right) => Equals(left, right);
-        [Pure] public static bool operator !=(Energy left, Energy right) => !Equals(left, right);
-        [Pure] public int CompareTo(Energy other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Energy left, Energy right) => Comparer<Energy>.Default.Compare(left, right) >= 0;
-
+        // implicit conversions
+        [Pure] public static implicit operator Energy(ushort value) => new Energy(value);
+        [Pure] public static implicit operator Energy(short value) => new Energy(value);
+        [Pure] public static implicit operator Energy(uint value) => new Energy(value);
+        [Pure] public static implicit operator Energy(long value) => new Energy(value);
         [Pure] public static implicit operator Energy(int value) => new Energy(value);
+        [Pure] public static implicit operator Energy(float value) => new Energy(value);
+        [Pure] public static implicit operator Energy(double value) => new Energy(value);
+        [Pure] public static implicit operator Energy(decimal value) => new Energy((double)value);
 
-        [Pure]
-        public static Energy operator +(Energy lvalue, Energy rvalue)
-        {
-            var total = lvalue.Joules + rvalue.Joules;
-            return new Energy(total, UnitType.Joules);
-        }
+        // Comparison
+        [Pure] public bool Equals(Energy other) => Value == other.Value;
+        [Pure] public static bool operator ==(Energy left, Energy right) => Equals(left.Value, right.Value);
+        [Pure] public static bool operator !=(Energy left, Energy right) => !Equals(left.Value, right.Value);
+        [Pure] public int CompareTo(Energy other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+        [Pure] public static bool operator <(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+        [Pure] public static bool operator >(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+        [Pure] public static bool operator <=(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+        [Pure] public static bool operator >=(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
-        [Pure]
-        public static Energy operator -(Energy lvalue, Energy rvalue)
-        {
-            var total = lvalue.Joules - rvalue.Joules;
-            return new Energy(total, UnitType.Joules);
-        }
+        // Math
+        [Pure] public static Energy operator +(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value + rvalue.Value);
+        [Pure] public static Energy operator -(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value - rvalue.Value);
+        [Pure] public static Energy operator /(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value / rvalue.Value);
+        [Pure] public static Energy operator *(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value * rvalue.Value);
+        /// <summary>
+        /// Returns the absolute length, that is, the length without regards to
+        /// negative polarity
+        /// </summary>
+        /// <returns></returns>
+        [Pure] public Energy Abs() { return new Energy(Math.Abs(this.Value)); }
 
-        [Pure] public override string ToString() => _value.ToString();
-        [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);
+        // ToString()
+        [Pure] public override string ToString() => Value.ToString();
+        [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
         // IComparable
-        [Pure] public int CompareTo(object obj) => _value.CompareTo(obj);
-
-        [Pure] public TypeCode GetTypeCode() => _value.GetTypeCode();
-        [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)_value).ToBoolean(provider);
-        [Pure] public byte ToByte(IFormatProvider provider) => ((IConvertible)_value).ToByte(provider);
-        [Pure] public char ToChar(IFormatProvider provider) => ((IConvertible)_value).ToChar(provider);
-        [Pure] public DateTime ToDateTime(IFormatProvider provider) => ((IConvertible)_value).ToDateTime(provider);
-        [Pure] public decimal ToDecimal(IFormatProvider provider) => ((IConvertible)_value).ToDecimal(provider);
-        [Pure] public double ToDouble(IFormatProvider provider) => _value;
-        [Pure] public short ToInt16(IFormatProvider provider) => ((IConvertible)_value).ToInt16(provider);
-        [Pure] public int ToInt32(IFormatProvider provider) => ((IConvertible)_value).ToInt32(provider);
-        [Pure] public long ToInt64(IFormatProvider provider) => ((IConvertible)_value).ToInt64(provider);
-        [Pure] public sbyte ToSByte(IFormatProvider provider) => ((IConvertible)_value).ToSByte(provider);
-        [Pure] public float ToSingle(IFormatProvider provider) => ((IConvertible)_value).ToSingle(provider);
-        [Pure] public string ToString(IFormatProvider provider) => _value.ToString(provider);
-        [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)_value).ToType(conversionType, provider);
-        [Pure] public ushort ToUInt16(IFormatProvider provider) => ((IConvertible)_value).ToUInt16(provider);
-        [Pure] public uint ToUInt32(IFormatProvider provider) => ((IConvertible)_value).ToUInt32(provider);
-        [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)_value).ToUInt64(provider);
+        [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
+        [Pure] public TypeCode GetTypeCode() => Value.GetTypeCode();
+        [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)Value).ToBoolean(provider);
+        [Pure] public byte ToByte(IFormatProvider provider) => ((IConvertible)Value).ToByte(provider);
+        [Pure] public char ToChar(IFormatProvider provider) => ((IConvertible)Value).ToChar(provider);
+        [Pure] public DateTime ToDateTime(IFormatProvider provider) => ((IConvertible)Value).ToDateTime(provider);
+        [Pure] public decimal ToDecimal(IFormatProvider provider) => ((IConvertible)Value).ToDecimal(provider);
+        [Pure] public double ToDouble(IFormatProvider provider) => Value;
+        [Pure] public short ToInt16(IFormatProvider provider) => ((IConvertible)Value).ToInt16(provider);
+        [Pure] public int ToInt32(IFormatProvider provider) => ((IConvertible)Value).ToInt32(provider);
+        [Pure] public long ToInt64(IFormatProvider provider) => ((IConvertible)Value).ToInt64(provider);
+        [Pure] public sbyte ToSByte(IFormatProvider provider) => ((IConvertible)Value).ToSByte(provider);
+        [Pure] public float ToSingle(IFormatProvider provider) => ((IConvertible)Value).ToSingle(provider);
+        [Pure] public string ToString(IFormatProvider provider) => Value.ToString(provider);
+        [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
+        [Pure] public ushort ToUInt16(IFormatProvider provider) => ((IConvertible)Value).ToUInt16(provider);
+        [Pure] public uint ToUInt32(IFormatProvider provider) => ((IConvertible)Value).ToUInt32(provider);
+        [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
 
         [Pure]
         public int CompareTo(double? other)
         {
-            return (other is null) ? -1 : (_value).CompareTo(other.Value);
+            return (other is null) ? -1 : (Value).CompareTo(other.Value);
         }
 
-        [Pure] public bool Equals(double? other) => _value.Equals(other);
-        [Pure] public bool Equals(double other) => _value.Equals(other);
-        [Pure] public int CompareTo(double other) => _value.CompareTo(other);
-        // can't do this.
-        //public int CompareTo(double? other) => Value.CompareTo(other);
+        [Pure] public bool Equals(double? other) => Value.Equals(other);
+        [Pure] public bool Equals(double other) => Value.Equals(other);
+        [Pure] public int CompareTo(double other) => Value.CompareTo(other);
     }
 }

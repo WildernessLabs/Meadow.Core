@@ -11,9 +11,11 @@ namespace Meadow.Units
     /// Represents a value of Electric Potential, or _Voltage_.
     /// </summary>
     [Serializable]
-    [ImmutableObject(false)]
+    [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Voltage : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Voltage :
+        IUnitType, IComparable, IFormattable, IConvertible,
+        IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Voltage` object.
@@ -24,18 +26,13 @@ namespace Meadow.Units
         {
             //always store reference value
             Unit = type;
-            _value = VoltageConversions.Convert(value, type, UnitType.Volts);
+            Value = VoltageConversions.Convert(value, type, UnitType.Volts);
         }
 
         /// <summary>
-        /// The voltage expressed as a value.
+        /// Internal canonical value.
         /// </summary>
-        public double Value {
-            get => VoltageConversions.Convert(_value, UnitType.Volts, Unit);
-            set => _value = VoltageConversions.Convert(value, Unit, UnitType.Volts);
-        }
-
-        private double _value;
+        private readonly double Value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -67,15 +64,8 @@ namespace Meadow.Units
         [Pure]
         public double From(UnitType convertTo)
         {
-            return VoltageConversions.Convert(_value, Voltage.UnitType.Volts, convertTo);
+            return VoltageConversions.Convert(Value, Voltage.UnitType.Volts, convertTo);
         }
-
-        /// <summary>
-        /// Returns the absolute voltage, that is, the voltage without regards to
-        /// negative polarity
-        /// </summary>
-        /// <returns></returns>
-        [Pure] public Voltage Abs() { return new Voltage(Math.Abs(this._value), UnitType.Volts); }
 
         [Pure]
         public override bool Equals(object obj)
@@ -85,60 +75,72 @@ namespace Meadow.Units
             return obj.GetType() == GetType() && Equals((Voltage)obj);
         }
 
-        [Pure] public bool Equals(Voltage other) => _value == other._value;
+        [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public override int GetHashCode() => _value.GetHashCode();
-
-        [Pure] public static bool operator ==(Voltage left, Voltage right) => Equals(left, right);
-        [Pure] public static bool operator !=(Voltage left, Voltage right) => !Equals(left, right);
-        [Pure] public int CompareTo(Voltage other) => Equals(this, other) ? 0 : _value.CompareTo(other._value);
-        [Pure] public static bool operator <(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) < 0;
-        [Pure] public static bool operator >(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) > 0;
-        [Pure] public static bool operator <=(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) <= 0;
-        [Pure] public static bool operator >=(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Volts, right.Volts) >= 0;
-
+        // implicit conversions
+        [Pure] public static implicit operator Voltage(ushort value) => new Voltage(value);
+        [Pure] public static implicit operator Voltage(short value) => new Voltage(value);
+        [Pure] public static implicit operator Voltage(uint value) => new Voltage(value);
+        [Pure] public static implicit operator Voltage(long value) => new Voltage(value);
+        [Pure] public static implicit operator Voltage(int value) => new Voltage(value);
+        [Pure] public static implicit operator Voltage(float value) => new Voltage(value);
         [Pure] public static implicit operator Voltage(double value) => new Voltage(value);
+        [Pure] public static implicit operator Voltage(decimal value) => new Voltage((double)value);
 
-        [Pure] public static Voltage operator +(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts + rvalue.Volts, UnitType.Volts);
-        [Pure] public static Voltage operator -(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts - rvalue.Volts, UnitType.Volts);
-        [Pure] public static Voltage operator /(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts / rvalue.Volts, UnitType.Volts);
-        [Pure] public static Voltage operator *(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Volts * rvalue.Volts, UnitType.Volts);
+        // Comparison
+        [Pure] public bool Equals(Voltage other) => Value == other.Value;
+        [Pure] public static bool operator ==(Voltage left, Voltage right) => Equals(left.Value, right.Value);
+        [Pure] public static bool operator !=(Voltage left, Voltage right) => !Equals(left.Value, right.Value);
+        [Pure] public int CompareTo(Voltage other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+        [Pure] public static bool operator <(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+        [Pure] public static bool operator >(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+        [Pure] public static bool operator <=(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+        [Pure] public static bool operator >=(Voltage left, Voltage right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
-        [Pure] public override string ToString() => _value.ToString();
-        [Pure] public string ToString(string format, IFormatProvider formatProvider) => _value.ToString(format, formatProvider);
+        // Math
+        [Pure] public static Voltage operator +(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Value + rvalue.Value);
+        [Pure] public static Voltage operator -(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Value - rvalue.Value);
+        [Pure] public static Voltage operator /(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Value / rvalue.Value);
+        [Pure] public static Voltage operator *(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Value * rvalue.Value);
+        /// <summary>
+        /// Returns the absolute length, that is, the length without regards to
+        /// negative polarity
+        /// </summary>
+        /// <returns></returns>
+        [Pure] public Voltage Abs() { return new Voltage(Math.Abs(this.Value)); }
+
+        // ToString()
+        [Pure] public override string ToString() => Value.ToString();
+        [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
         // IComparable
-        [Pure] public int CompareTo(object obj) => _value.CompareTo(obj);
-
-        [Pure] public TypeCode GetTypeCode() => _value.GetTypeCode();
-        [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)_value).ToBoolean(provider);
-        [Pure] public byte ToByte(IFormatProvider provider) => ((IConvertible)_value).ToByte(provider);
-        [Pure] public char ToChar(IFormatProvider provider) => ((IConvertible)_value).ToChar(provider);
-        // TODO: maybe this shouldn't be here? heh
-        [Pure] public DateTime ToDateTime(IFormatProvider provider) => ((IConvertible)_value).ToDateTime(provider);
-        [Pure] public decimal ToDecimal(IFormatProvider provider) => ((IConvertible)_value).ToDecimal(provider);
-        [Pure] public double ToDouble(IFormatProvider provider) => _value;
-        [Pure] public short ToInt16(IFormatProvider provider) => ((IConvertible)_value).ToInt16(provider);
-        [Pure] public int ToInt32(IFormatProvider provider) => ((IConvertible)_value).ToInt32(provider);
-        [Pure] public long ToInt64(IFormatProvider provider) => ((IConvertible)_value).ToInt64(provider);
-        [Pure] public sbyte ToSByte(IFormatProvider provider) => ((IConvertible)_value).ToSByte(provider);
-        [Pure] public float ToSingle(IFormatProvider provider) => ((IConvertible)_value).ToSingle(provider);
-        [Pure] public string ToString(IFormatProvider provider) => _value.ToString(provider);
-        [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)_value).ToType(conversionType, provider);
-        [Pure] public ushort ToUInt16(IFormatProvider provider) => ((IConvertible)_value).ToUInt16(provider);
-        [Pure] public uint ToUInt32(IFormatProvider provider) => ((IConvertible)_value).ToUInt32(provider);
-        [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)_value).ToUInt64(provider);
+        [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
+        [Pure] public TypeCode GetTypeCode() => Value.GetTypeCode();
+        [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)Value).ToBoolean(provider);
+        [Pure] public byte ToByte(IFormatProvider provider) => ((IConvertible)Value).ToByte(provider);
+        [Pure] public char ToChar(IFormatProvider provider) => ((IConvertible)Value).ToChar(provider);
+        [Pure] public DateTime ToDateTime(IFormatProvider provider) => ((IConvertible)Value).ToDateTime(provider);
+        [Pure] public decimal ToDecimal(IFormatProvider provider) => ((IConvertible)Value).ToDecimal(provider);
+        [Pure] public double ToDouble(IFormatProvider provider) => Value;
+        [Pure] public short ToInt16(IFormatProvider provider) => ((IConvertible)Value).ToInt16(provider);
+        [Pure] public int ToInt32(IFormatProvider provider) => ((IConvertible)Value).ToInt32(provider);
+        [Pure] public long ToInt64(IFormatProvider provider) => ((IConvertible)Value).ToInt64(provider);
+        [Pure] public sbyte ToSByte(IFormatProvider provider) => ((IConvertible)Value).ToSByte(provider);
+        [Pure] public float ToSingle(IFormatProvider provider) => ((IConvertible)Value).ToSingle(provider);
+        [Pure] public string ToString(IFormatProvider provider) => Value.ToString(provider);
+        [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
+        [Pure] public ushort ToUInt16(IFormatProvider provider) => ((IConvertible)Value).ToUInt16(provider);
+        [Pure] public uint ToUInt32(IFormatProvider provider) => ((IConvertible)Value).ToUInt32(provider);
+        [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
 
         [Pure]
         public int CompareTo(double? other)
         {
-            return (other is null) ? -1 : (_value).CompareTo(other.Value);
+            return (other is null) ? -1 : (Value).CompareTo(other.Value);
         }
 
-        [Pure] public bool Equals(double? other) => _value.Equals(other);
-        [Pure] public bool Equals(double other) => _value.Equals(other);
-        [Pure] public int CompareTo(double other) => _value.CompareTo(other);
-        // can't do this.
-        //public int CompareTo(double? other) => Value.CompareTo(other);
+        [Pure] public bool Equals(double? other) => Value.Equals(other);
+        [Pure] public bool Equals(double other) => Value.Equals(other);
+        [Pure] public int CompareTo(double other) => Value.CompareTo(other);
     }
 }

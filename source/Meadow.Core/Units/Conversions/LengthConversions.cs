@@ -15,17 +15,17 @@
 		private static readonly double[] lengthConversions =
 		{
 			0.001,//km
-		    1,//meter
-            100,//cm
-		    10,//dm
-		    1000,//millimeter
+			1,//meter
+			100,//cm
+			10,//dm
+			1000,//millimeter
 			1000000,//micron / micrometer 
-            1000000000,//nm
-		    0.00062137119224,//mile
-		    0.000539956803,//nautical miles
+			1000000000,//nm
+			0.00062137119224,//mile
+			0.000539956803,//nautical miles
 			1.0936132983,//yard
-            3.280839895,//ft
-            39.37007874,//inch
-	    };
+			3.280839895,//ft
+			39.37007874,//inch
+		};
 	}
 }

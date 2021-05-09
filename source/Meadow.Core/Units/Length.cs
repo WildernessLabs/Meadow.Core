@@ -11,9 +11,11 @@ namespace Meadow.Units
     /// Represents Length
     /// </summary>
     [Serializable]
-    [ImmutableObject(false)]
+    [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Length : IUnitType, IComparable, IFormattable, IConvertible, IEquatable<double>, IComparable<double>
+    public struct Length :
+        IUnitType, IComparable, IFormattable, IConvertible,
+        IEquatable<double>, IComparable<double>
     {
         /// <summary>
         /// Creates a new `Length` object.
@@ -28,9 +30,9 @@ namespace Meadow.Units
         }
 
         /// <summary>
-        /// The Length expressed as a value.
+        /// Internal canonical value.
         /// </summary>
-        public double Value { get; set; }
+        private readonly double Value;
 
         /// <summary>
         /// The unit that describes the value.
@@ -56,7 +58,7 @@ namespace Meadow.Units
             Inches,
         }
 
-
+        //==== Typed "To" methods
         public double Kilometers => From(UnitType.Kilometers);
         public double Meters => From(UnitType.Meters);
         public double Centimeters => From(UnitType.Centimeters);
@@ -84,39 +86,46 @@ namespace Meadow.Units
             return obj.GetType() == GetType() && Equals((Length)obj);
         }
 
-        [Pure] public bool Equals(Length other) => Value == other.Value;
-
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
-        [Pure] public static bool operator ==(Length left, Length right) => Equals(left.Meters, right.Meters);
-        [Pure] public static bool operator !=(Length left, Length right) => !Equals(left.Meters, right.Meters);
-        [Pure] public int CompareTo(Length other) => Equals(this, other) ? 0 : Value.CompareTo(other.Value);
-        [Pure] public static bool operator <(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) < 0;
-        [Pure] public static bool operator >(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) > 0;
-        [Pure] public static bool operator <=(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) <= 0;
-        [Pure] public static bool operator >=(Length left, Length right) => Comparer<double>.Default.Compare(left.Meters, right.Meters) >= 0;
-
+        // implicit conversions
+        [Pure] public static implicit operator Length(ushort value) => new Length(value);
+        [Pure] public static implicit operator Length(short value) => new Length(value);
+        [Pure] public static implicit operator Length(uint value) => new Length(value);
+        [Pure] public static implicit operator Length(long value) => new Length(value);
         [Pure] public static implicit operator Length(int value) => new Length(value);
+        [Pure] public static implicit operator Length(float value) => new Length(value);
+        [Pure] public static implicit operator Length(double value) => new Length(value);
+        [Pure] public static implicit operator Length(decimal value) => new Length((double)value);
 
-        [Pure] public static Length operator +(Length lvalue, Length rvalue) => new Length(lvalue.Meters + rvalue.Meters, UnitType.Meters);
-        [Pure] public static Length operator -(Length lvalue, Length rvalue) => new Length(lvalue.Meters - rvalue.Meters, UnitType.Meters);
-        [Pure] public static Length operator /(Length lvalue, Length rvalue) => new Length(lvalue.Meters / rvalue.Meters, UnitType.Meters);
-        [Pure] public static Length operator *(Length lvalue, Length rvalue) => new Length(lvalue.Meters * rvalue.Meters, UnitType.Meters);
+        // Comparison
+        [Pure] public bool Equals(Length other) => Value == other.Value;
+        [Pure] public static bool operator ==(Length left, Length right) => Equals(left.Value, right.Value);
+        [Pure] public static bool operator !=(Length left, Length right) => !Equals(left.Value, right.Value);
+        [Pure] public int CompareTo(Length other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+        [Pure] public static bool operator <(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+        [Pure] public static bool operator >(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+        [Pure] public static bool operator <=(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+        [Pure] public static bool operator >=(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
-        [Pure] public override string ToString() => Value.ToString();
-        [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
-
+        // Math
+        [Pure] public static Length operator +(Length lvalue, Length rvalue) => new Length(lvalue.Value + rvalue.Value);
+        [Pure] public static Length operator -(Length lvalue, Length rvalue) => new Length(lvalue.Value - rvalue.Value);
+        [Pure] public static Length operator /(Length lvalue, Length rvalue) => new Length(lvalue.Value / rvalue.Value);
+        [Pure] public static Length operator *(Length lvalue, Length rvalue) => new Length(lvalue.Value * rvalue.Value);
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity
         /// </summary>
         /// <returns></returns>
-        [Pure] public Length Abs() { return new Length(Math.Abs(this.Meters), UnitType.Meters); }
+        [Pure] public Length Abs() { return new Length(Math.Abs(this.Value)); }
 
+        // ToString()
+        [Pure] public override string ToString() => Value.ToString();
+        [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
         // IComparable
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
-
         [Pure] public TypeCode GetTypeCode() => Value.GetTypeCode();
         [Pure] public bool ToBoolean(IFormatProvider provider) => ((IConvertible)Value).ToBoolean(provider);
         [Pure] public byte ToByte(IFormatProvider provider) => ((IConvertible)Value).ToByte(provider);
@@ -144,7 +153,5 @@ namespace Meadow.Units
         [Pure] public bool Equals(double? other) => Value.Equals(other);
         [Pure] public bool Equals(double other) => Value.Equals(other);
         [Pure] public int CompareTo(double other) => Value.CompareTo(other);
-        // can't do this.
-        //public int CompareTo(double? other) => Value.CompareTo(other);
     }
 }
