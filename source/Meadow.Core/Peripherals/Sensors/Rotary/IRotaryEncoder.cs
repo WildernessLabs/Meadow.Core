@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using System;
+using Meadow.Hardware;
 
 namespace Meadow.Peripherals.Sensors.Rotary
 {
@@ -18,8 +19,13 @@ namespace Meadow.Peripherals.Sensors.Rotary
         IDigitalInputPort BPhasePort { get; }
 
         /// <summary>
+        /// Gets the last direction of rotation
+        /// </summary>
+        RotationDirection? LastDirectionOfRotation { get; }
+
+        /// <summary>
         /// Raised when the encoder detects a rotation
         /// </summary>
-        event RotaryTurnedEventHandler Rotated;
+        event EventHandler<RotaryChangeResult> Rotated;
     }
 }
