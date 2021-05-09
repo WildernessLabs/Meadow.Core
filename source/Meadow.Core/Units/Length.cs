@@ -31,12 +31,6 @@ namespace Meadow.Units
         /// The Length expressed as a value.
         /// </summary>
         public double Value { get; set; }
-        //{
-        //    get => LengthConversions.Convert(Value, UnitType.Meters, Unit);
-        //    set => Value = LengthConversions.Convert(value, Unit, UnitType.Meters);
-        //}
-
-        //private double Value;
 
         /// <summary>
         /// The unit that describes the value.
