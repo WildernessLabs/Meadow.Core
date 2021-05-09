@@ -34,7 +34,7 @@
   <ItemGroup>
     <Compile Include="TemperatureTests.cs" />
     <Compile Include="PressureTests.cs" />
-    <Compile Include="VelocityTests.cs" />
+    <Compile Include="SpeedTests.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="AzimuthTests.cs" />
   </ItemGroup>
