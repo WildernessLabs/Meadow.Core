@@ -41,10 +41,12 @@ namespace Meadow.Units.Tests
         {
             Temperature t1 = new Temperature(1);
             Temperature t2 = new Temperature(10);
+            Temperature t3 = new Temperature(-3);
             Assert.That(t1 != t2);
             Assert.That((t1 + t2) == new Temperature(11));
             Assert.That((t2 - t1) == new Temperature(9));
             Assert.That((t1 * t2) == new Temperature(10));
+            Assert.That(t3.Abs() == new Temperature(3));
         }
 
         [Test()]
@@ -60,6 +62,9 @@ namespace Meadow.Units.Tests
             Assert.That(t3 >= t2);
 
             Assert.That(t2 == t3);
+
+            Assert.That(t2 == 10);
+            Assert.That(t2 > 5);
         }
     }
 }

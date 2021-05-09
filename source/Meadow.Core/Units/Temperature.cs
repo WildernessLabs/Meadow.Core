@@ -160,6 +160,13 @@ namespace Meadow.Units
         [Pure] public override string ToString() => Value.ToString();
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => Value.ToString(format, formatProvider);
 
+        /// <summary>
+        /// Returns the absolute temperature, that is, the temperature without regards to
+        /// negative polarity
+        /// </summary>
+        /// <returns></returns>
+        [Pure] public Temperature Abs() { return new Temperature(Math.Abs(this.Celsius), UnitType.Celsius); }
+
         // IComparable
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 
@@ -187,13 +194,6 @@ namespace Meadow.Units
         {
             return (other is null) ? -1 : ((IComparable<double>)Value).CompareTo(other.Value);
         }
-
-        /// <summary>
-        /// Returns the absolute voltage, that is, the voltage without regards to
-        /// negative polarity
-        /// </summary>
-        /// <returns></returns>
-        [Pure] public Temperature Abs() { return new Temperature(Math.Abs(this.Celsius), UnitType.Celsius); }
 
 
         [Pure] public bool Equals(double? other) => Value.Equals(other);
