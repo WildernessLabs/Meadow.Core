@@ -11,14 +11,14 @@ namespace Meadow.Peripherals.Sensors.Hid
         /// <summary>
         /// 
         /// </summary>
-        public float Horizontal { get; set; }
+        public float? Horizontal { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public float Vertical { get; set; }
+        public float? Vertical { get; set; }
 
-        public JoystickPosition(float horizontal, float vertical) 
+        public JoystickPosition(float? horizontal, float? vertical) 
         {
             Horizontal = horizontal;
             Vertical = vertical;

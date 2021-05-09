@@ -4,15 +4,19 @@ namespace Meadow.Peripherals.Sensors.Hid
 {
     public interface IJoystickSensor : ISensor, IObservable<ChangeResult<JoystickPosition>>
     {
-        /// <summary>
-        /// Last horizontal value read from the Joystick.
-        /// </summary>
-        float HorizontalValue { get; }
+        // TODO: why aren't these encapsulated into JoystickPosition?
 
-        /// <summary>
-        /// Last vertical value read from the Joystick.
-        /// </summary>
-        float VerticalValue { get; }
+        JoystickPosition? Position { get; }
+
+        ///// <summary>
+        ///// Last horizontal value read from the Joystick.
+        ///// </summary>
+        //float? HorizontalValue { get; }
+
+        ///// <summary>
+        ///// Last vertical value read from the Joystick.
+        ///// </summary>
+        //float? VerticalValue { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
