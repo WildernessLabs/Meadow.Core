@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = MassConversions.Convert(value, Unit, UnitType.Grams);
         }
 
+        public Mass(Mass mass)
+        {
+            this.Value = mass.Value;
+            this.Unit = mass.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

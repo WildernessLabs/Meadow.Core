@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = VolumeConversions.Convert(value, type, UnitType.Liters);
         }
 
+        public Volume(Volume volume)
+        {
+            this.Value = volume.Value;
+            this.Unit = volume.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

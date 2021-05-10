@@ -39,6 +39,12 @@ namespace Meadow.Units
             Unit = UnitType.DecimalDegrees;
         }
 
+        public Azimuth(Azimuth azimuth)
+        {
+            this.Value = azimuth.Value;
+            this.Unit = azimuth.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

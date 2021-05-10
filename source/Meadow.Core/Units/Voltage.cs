@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = VoltageConversions.Convert(value, type, UnitType.Volts);
         }
 
+        public Voltage(Voltage voltage)
+        {
+            this.Value = voltage.Value;
+            this.Unit = voltage.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

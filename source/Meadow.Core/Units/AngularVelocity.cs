@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = AngularVelocityConversions.Convert(value, type, UnitType.RevolutionsPerSecond);
         }
 
+        public AngularVelocity(AngularVelocity angularVelocity)
+        {
+            this.Value = angularVelocity.Value;
+            this.Unit = angularVelocity.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

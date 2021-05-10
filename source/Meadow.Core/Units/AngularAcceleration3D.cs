@@ -44,6 +44,14 @@ namespace Meadow.Units
             Unit = X.Unit;
         }
 
+        public AngularAcceleration3D(AngularAcceleration3D angularAcceleration3D)
+        {
+            this.X = new AngularAcceleration(angularAcceleration3D.X);
+            this.Y = new AngularAcceleration(angularAcceleration3D.Y);
+            this.Z = new AngularAcceleration(angularAcceleration3D.Z);
+            this.Unit = angularAcceleration3D.Unit;
+        }
+
         public AngularAcceleration X { get; set; }
         public AngularAcceleration Y { get; set; }
         public AngularAcceleration Z { get; set; }

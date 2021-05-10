@@ -13,7 +13,7 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Acceleration3d :
+    public struct Acceleration3D :
         IUnitType, IFormattable, IComparable,
         IEquatable<(double X, double Y, double Z)>,
         IComparable<(double, double, double)>
@@ -25,7 +25,7 @@ namespace Meadow.Units
         /// <param name="y">The Y Acceleration3d value.</param>
         /// <param name="y">The Z Acceleration3d value.</param>
         /// <param name="type"></param>
-        public Acceleration3d(double x, double y, double z,
+        public Acceleration3D(double x, double y, double z,
             Acceleration.UnitType type = Acceleration.UnitType.MetersPerSecondSquared)
         {
             //always store reference value
@@ -35,7 +35,7 @@ namespace Meadow.Units
             Z = new Acceleration(z, Unit);
         }
 
-        public Acceleration3d(Acceleration x, Acceleration y, Acceleration z)
+        public Acceleration3D(Acceleration x, Acceleration y, Acceleration z)
         {
             X = new Acceleration(x);
             Y = new Acceleration(y);
@@ -43,6 +43,15 @@ namespace Meadow.Units
 
             Unit = X.Unit;
         }
+
+        public Acceleration3D(Acceleration3D acceleration3D)
+        {
+            this.X = new Acceleration(acceleration3D.X);
+            this.Y = new Acceleration(acceleration3D.Y);
+            this.Z = new Acceleration(acceleration3D.Z);
+            this.Unit = acceleration3D.Unit;
+        }
+
 
         public Acceleration X { get; set; }
         public Acceleration Y { get; set; }
@@ -58,11 +67,11 @@ namespace Meadow.Units
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
-            return obj.GetType() == GetType() && Equals((Acceleration3d)obj);
+            return obj.GetType() == GetType() && Equals((Acceleration3D)obj);
         }
 
         [Pure]
-        public bool Equals(Acceleration3d other) =>
+        public bool Equals(Acceleration3D other) =>
             X == other.X &&
             Y == other.Y &&
             Z == other.Z;
@@ -70,32 +79,32 @@ namespace Meadow.Units
 
         [Pure] public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode()) / 3;
 
-        [Pure] public static bool operator ==(Acceleration3d left, Acceleration3d right) => Equals(left, right);
-        [Pure] public static bool operator !=(Acceleration3d left, Acceleration3d right) => !Equals(left, right);
+        [Pure] public static bool operator ==(Acceleration3D left, Acceleration3D right) => Equals(left, right);
+        [Pure] public static bool operator !=(Acceleration3D left, Acceleration3D right) => !Equals(left, right);
         //ToDo [Pure] public int CompareTo(Acceleration3d other) => Equals(this, other) ? 0 : AccelerationX.CompareTo(other.AccelerationX);
-        [Pure] public static bool operator <(Acceleration3d left, Acceleration3d right) => Comparer<Acceleration3d>.Default.Compare(left, right) < 0;
-        [Pure] public static bool operator >(Acceleration3d left, Acceleration3d right) => Comparer<Acceleration3d>.Default.Compare(left, right) > 0;
-        [Pure] public static bool operator <=(Acceleration3d left, Acceleration3d right) => Comparer<Acceleration3d>.Default.Compare(left, right) <= 0;
-        [Pure] public static bool operator >=(Acceleration3d left, Acceleration3d right) => Comparer<Acceleration3d>.Default.Compare(left, right) >= 0;
+        [Pure] public static bool operator <(Acceleration3D left, Acceleration3D right) => Comparer<Acceleration3D>.Default.Compare(left, right) < 0;
+        [Pure] public static bool operator >(Acceleration3D left, Acceleration3D right) => Comparer<Acceleration3D>.Default.Compare(left, right) > 0;
+        [Pure] public static bool operator <=(Acceleration3D left, Acceleration3D right) => Comparer<Acceleration3D>.Default.Compare(left, right) <= 0;
+        [Pure] public static bool operator >=(Acceleration3D left, Acceleration3D right) => Comparer<Acceleration3D>.Default.Compare(left, right) >= 0;
 
         [Pure]
-        public static Acceleration3d operator +(Acceleration3d lvalue, Acceleration3d rvalue)
+        public static Acceleration3D operator +(Acceleration3D lvalue, Acceleration3D rvalue)
         {
             var x = lvalue.X + rvalue.X;
             var y = lvalue.Y + rvalue.Y;
             var z = lvalue.Z + rvalue.Z;
 
-            return new Acceleration3d(x, y, z);
+            return new Acceleration3D(x, y, z);
         }
 
         [Pure]
-        public static Acceleration3d operator -(Acceleration3d lvalue, Acceleration3d rvalue)
+        public static Acceleration3D operator -(Acceleration3D lvalue, Acceleration3D rvalue)
         {
             var x = lvalue.X - rvalue.X;
             var y = lvalue.Y - rvalue.Y;
             var z = lvalue.Z - rvalue.Z;
 
-            return new Acceleration3d(x, y, z);
+            return new Acceleration3D(x, y, z);
         }
 
         [Pure] public override string ToString() => $"{X}, {Y}, {Z}";

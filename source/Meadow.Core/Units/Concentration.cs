@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = ConcentrationConversions.Convert(value, type, UnitType.PartsPerMillion);
         }
 
+        public Concentration(Concentration concentration)
+        {
+            this.Value = concentration.Value;
+            this.Unit = concentration.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

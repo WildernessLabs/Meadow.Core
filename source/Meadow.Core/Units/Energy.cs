@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = EnergyConversions.Convert(value, type, UnitType.Joules);
         }
 
+        public Energy(Energy energy)
+        {
+            this.Value = energy.Value;
+            this.Unit = energy.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

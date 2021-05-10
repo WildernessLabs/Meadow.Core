@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
         }
 
+        public Speed(Speed speed)
+        {
+            this.Value = speed.Value;
+            this.Unit = speed.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

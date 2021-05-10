@@ -27,6 +27,12 @@ namespace Meadow.Units
             Value = value; Unit = type;
         }
 
+        public Pressure(Pressure pressure)
+        {
+            this.Value = pressure.Value;
+            this.Unit = pressure.Unit;
+        }
+
         /// <summary>
         /// The temperature expressed as a value.
         /// </summary>

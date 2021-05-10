@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = LengthConversions.Convert(value, type, UnitType.Meters);
         }
 
+        public Length(Length length)
+        {
+            this.Value = length.Value;
+            this.Unit = length.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

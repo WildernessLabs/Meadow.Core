@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = AbsoluteHumidityConversions.Convert(value, type, UnitType.GramsPerCubicMeter);
         }
 
+        public AbsoluteHumidity(AbsoluteHumidity absoluteHumidity)
+        {
+            this.Value = absoluteHumidity.Value;
+            this.Unit = absoluteHumidity.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

@@ -30,6 +30,12 @@ namespace Meadow.Units
             Value = value; Unit = type;
         }
 
+        public Temperature(Temperature temperature)
+        {
+            this.Value = temperature.Value;
+            this.Unit = temperature.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

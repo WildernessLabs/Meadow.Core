@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = AngleConversions.Convert(value, type, UnitType.Degrees);
         }
 
+        public Angle(Angle angle)
+        {
+            this.Value = angle.Value;
+            this.Unit = angle.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

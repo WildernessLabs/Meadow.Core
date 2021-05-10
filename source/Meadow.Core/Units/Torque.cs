@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = TorqueConversions.Convert(value, type, UnitType.NewtonMeter);
         }
 
+        public Torque(Torque torque)
+        {
+            this.Value = torque.Value;
+            this.Unit = torque.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

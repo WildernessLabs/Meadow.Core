@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = PowerConversions.Convert(value, type, UnitType.Watts);
         }
 
+        public Power(Power power)
+        {
+            this.Value = power.Value;
+            this.Unit = power.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

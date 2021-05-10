@@ -43,6 +43,14 @@ namespace Meadow.Units
             Unit = x.Unit;
         }
 
+        public MagneticField3D(MagneticField3D magneticField3D)
+        {
+            this.X = new MagneticField(magneticField3D.X);
+            this.Y = new MagneticField(magneticField3D.Y);
+            this.Z = new MagneticField(magneticField3D.Z);
+            this.Unit = magneticField3D.Unit;
+        }
+
         public MagneticField X { get; set; }
         public MagneticField Y { get; set; }
         public MagneticField Z { get; set; }

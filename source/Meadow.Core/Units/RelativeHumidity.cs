@@ -29,6 +29,12 @@ namespace Meadow.Units
             Percent = value; Unit = type;
         }
 
+        public RelativeHumidity(RelativeHumidity relativeHumidity)
+        {
+            this.Percent = relativeHumidity.Percent;
+            this.Unit = relativeHumidity.Unit;
+        }
+
         /// <summary>
         /// The relative expressed as a value percent.
         /// </summary>

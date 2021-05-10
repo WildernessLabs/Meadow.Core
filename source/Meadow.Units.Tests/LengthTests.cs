@@ -99,6 +99,13 @@ namespace Meadow.Units.Tests
             Length i1 = new Length(100, Length.UnitType.Meters);
             i1 = new Length(25);
             Assert.That(i1 == new Length(25));
+
+            // more assignment
+            Length i2 = i1;
+            Assert.That(i2 == new Length(25, Length.UnitType.Meters));
+
+            Length i3 = new Length(i2);
+            Assert.That(i3 == i2);
         }
 
         //[Test()]

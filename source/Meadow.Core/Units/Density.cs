@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = DensityConversions.Convert(value, type, UnitType.KilogramsPerMetersCubed);
         }
 
+        public Density(Density density)
+        {
+            this.Value = density.Value;
+            this.Unit = density.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

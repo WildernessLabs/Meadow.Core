@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = FrequencyConversions.Convert(value, type, UnitType.Hertz);
         }
 
+        public Frequency(Frequency frequency)
+        {
+            this.Value = frequency.Value;
+            this.Unit = frequency.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>

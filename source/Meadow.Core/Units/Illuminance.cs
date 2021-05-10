@@ -29,6 +29,12 @@ namespace Meadow.Units
             Value = IlluminanceConversions.Convert(value, type, UnitType.Lux);
         }
 
+        public Illuminance(Illuminance illuminance)
+        {
+            this.Value = illuminance.Value;
+            this.Unit = illuminance.Unit;
+        }
+
         /// <summary>
         /// Internal canonical value.
         /// </summary>
