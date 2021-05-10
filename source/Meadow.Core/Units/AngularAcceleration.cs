@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public AngularAcceleration(double value, UnitType type = UnitType.RevolutionsPerSecondSquared)
         {
-            //always store reference value
-            Unit = type;
             Value = AngularAccelerationConversions.Convert(value, type, UnitType.RevolutionsPerSecondSquared);
         }
 
         public AngularAcceleration(AngularAcceleration acceleration)
         {
             Value = acceleration.Value;
-            Unit = acceleration.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the AngularAcceleration.

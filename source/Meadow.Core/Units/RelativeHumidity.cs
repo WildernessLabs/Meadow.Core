@@ -26,25 +26,18 @@ namespace Meadow.Units
         /// <param name="type">Percent, by default.</param>
         public RelativeHumidity(double value, UnitType type = UnitType.Percent)
         {
-            Percent = value; Unit = type;
+            Percent = value;
         }
 
         public RelativeHumidity(RelativeHumidity relativeHumidity)
         {
             this.Percent = relativeHumidity.Percent;
-            this.Unit = relativeHumidity.Unit;
         }
 
         /// <summary>
         /// The relative expressed as a value percent.
         /// </summary>
         public double Percent { get; private set; }
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
-
         /// <summary>
         /// The type of units available to describe the temperature.
         /// </summary>

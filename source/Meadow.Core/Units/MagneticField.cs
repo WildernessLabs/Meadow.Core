@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public MagneticField(double value, UnitType type = UnitType.Telsa)
         {
-            //always store reference value
-            Unit = type;
             Value = MagneticFieldConversions.Convert(value, type, UnitType.Telsa);
         }
 
         public MagneticField(MagneticField magneticField)
         {
             Value = magneticField.Value;
-            Unit = magneticField.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the MagneticField.

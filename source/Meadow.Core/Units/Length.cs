@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">Meters by default.</param>
         public Length(double value, UnitType type = UnitType.Meters)
         {
-            //always store reference value
-            Unit = type;
             Value = LengthConversions.Convert(value, type, UnitType.Meters);
         }
 
         public Length(Length length)
         {
             this.Value = length.Value;
-            this.Unit = length.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the Length.

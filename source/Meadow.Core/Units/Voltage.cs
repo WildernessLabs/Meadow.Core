@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">Volts by default.</param>
         public Voltage(double value, UnitType type = UnitType.Volts)
         {
-            //always store reference value
-            Unit = type;
             Value = VoltageConversions.Convert(value, type, UnitType.Volts);
         }
 
         public Voltage(Voltage voltage)
         {
             this.Value = voltage.Value;
-            this.Unit = voltage.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the voltage.

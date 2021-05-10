@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public Power(double value, UnitType type = UnitType.Watts)
         {
-            //always store reference value
-            Unit = type;
             Value = PowerConversions.Convert(value, type, UnitType.Watts);
         }
 
         public Power(Power power)
         {
             this.Value = power.Value;
-            this.Unit = power.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the Power.

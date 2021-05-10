@@ -28,11 +28,9 @@ namespace Meadow.Units
         public Acceleration3D(double x, double y, double z,
             Acceleration.UnitType type = Acceleration.UnitType.MetersPerSecondSquared)
         {
-            //always store reference value
-            Unit = type;
-            X = new Acceleration(x, Unit);
-            Y = new Acceleration(y, Unit);
-            Z = new Acceleration(z, Unit);
+            X = new Acceleration(x, type);
+            Y = new Acceleration(y, type);
+            Z = new Acceleration(z, type);
         }
 
         public Acceleration3D(Acceleration x, Acceleration y, Acceleration z)
@@ -40,8 +38,6 @@ namespace Meadow.Units
             X = new Acceleration(x);
             Y = new Acceleration(y);
             Z = new Acceleration(z);
-
-            Unit = X.Unit;
         }
 
         public Acceleration3D(Acceleration3D acceleration3D)
@@ -49,18 +45,11 @@ namespace Meadow.Units
             this.X = new Acceleration(acceleration3D.X);
             this.Y = new Acceleration(acceleration3D.Y);
             this.Z = new Acceleration(acceleration3D.Z);
-            this.Unit = acceleration3D.Unit;
         }
-
 
         public Acceleration X { get; set; }
         public Acceleration Y { get; set; }
         public Acceleration Z { get; set; }
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public Acceleration.UnitType Unit { get; set; }
 
         [Pure]
         public override bool Equals(object obj)

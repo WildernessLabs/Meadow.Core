@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public Torque(double value, UnitType type = UnitType.NewtonMeter)
         {
-            //always store reference value
-            Unit = type;
             Value = TorqueConversions.Convert(value, type, UnitType.NewtonMeter);
         }
 
         public Torque(Torque torque)
         {
             this.Value = torque.Value;
-            this.Unit = torque.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the Torque.

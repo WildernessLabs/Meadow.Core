@@ -24,34 +24,28 @@ namespace Meadow.Units
         /// <param name="type">_Bar_ (`Bar`), by default.</param>
         public Pressure(double value, UnitType type = UnitType.Bar)
         {
-            Value = value; Unit = type;
+            Value = PressureConversions.Convert(value, type, UnitType.Bar);
         }
 
         public Pressure(Pressure pressure)
         {
             this.Value = pressure.Value;
-            this.Unit = pressure.Unit;
         }
 
         /// <summary>
-        /// The temperature expressed as a value.
+        /// Internal canonical value.
         /// </summary>
-        public double Value { get; set; }
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
+        private readonly double Value;
 
         /// <summary>
         /// The type of units available to describe the temperature.
         /// </summary>
         public enum UnitType
         {
+            Bar,
             Pascal,
             Psi,
-            StandardAtmosphere,
-            Bar
+            StandardAtmosphere
         }
 
         //========================
@@ -60,109 +54,25 @@ namespace Meadow.Units
         /// <summary>
         /// Gets the pressure value expressed as a unit _Bar_ (`Bar`)
         /// </summary>
-        public double Bar {
-            get {
-                switch (Unit) {
-                    case UnitType.Pascal:
-                        return PressureConversions.PaToBar(Value);
-                    case UnitType.Psi:
-                        return PressureConversions.PaToBar(PressureConversions.PsiToPa(Value));
-                    case UnitType.StandardAtmosphere:
-                        return PressureConversions.PaToBar(PressureConversions.AtToPa(Value));
-                    case UnitType.Bar:
-                        return Value;
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
-        }
-
+        public double Bar { get => Value; }
         /// <summary>
         /// Gets the pressure value expressed as a unit _Pascal_ (`Pa`).
         /// </summary>
-        public double Pascal {
-            get {
-                switch (Unit) {
-                    case UnitType.Pascal:
-                        return Value;
-                    case UnitType.Psi:
-                        return PressureConversions.PsiToPa(Value);
-                    case UnitType.StandardAtmosphere:
-                        return PressureConversions.AtToPa(Value);
-                    case UnitType.Bar:
-                        return PressureConversions.BarToPa(Value);
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
-        }
-
+        public double Pascal { get => From(UnitType.Pascal); }
         /// <summary>
         /// Gets the pressure value expressed as a unit _Pound-force per square inch_ (`Psi`).
         /// </summary>
-        public double Psi {
-            get {
-                switch (Unit) {
-                    case UnitType.Pascal:
-                        return PressureConversions.PaToPsi(Value);
-                    case UnitType.Psi:
-                        return Value;
-                    case UnitType.StandardAtmosphere:
-                        return PressureConversions.PaToPsi(PressureConversions.AtToPa(Value));
-                    case UnitType.Bar:
-                        return PressureConversions.PaToPsi(PressureConversions.BarToPa(Value));
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
-        }
-
+        public double Psi { get => From(UnitType.Psi); }
         /// <summary>
         /// Gets the pressure value expressed as a unit _Standard Atmosphere_ (`At`).
         /// </summary>
-        public double StandardAtmosphere {
-            get {
-                switch (Unit) {
-                    case UnitType.Pascal:
-                        return PressureConversions.PaToAt(Value);
-                    case UnitType.Psi:
-                        return PressureConversions.PaToAt(PressureConversions.PsiToPa(Value));
-                    case UnitType.StandardAtmosphere:
-                        return Value;
-                    case UnitType.Bar:
-                        return PressureConversions.PaToAt(PressureConversions.BarToPa(Value));
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
+        public double StandardAtmosphere { get => From(UnitType.StandardAtmosphere); }
+
+        [Pure]
+        public double From(UnitType convertTo)
+        {
+            return PressureConversions.Convert(Value, UnitType.Bar, convertTo);
         }
-
-        //=============================
-        // FROM convenience conversions
-
-        /// <summary>
-        /// Creates a new `Pressure` object from a unit value in _Bar_ (`Bar`).
-        /// </summary>
-        /// <param name="value">The pressure value.</param>
-        /// <returns>A new pressure object.</returns>
-        [Pure] public static Pressure FromBar(double value) => new Pressure(value, UnitType.Bar);
-
-        /// <summary>
-        /// Creates a new `Pressure` object from a unit value in _Pascal_ (`Pa`).
-        /// </summary>
-        /// <param name="value">The pressure value.</param>
-        /// <returns>A new pressure object.</returns>
-        [Pure] public static Pressure FromPascal(double value) => new Pressure(value, UnitType.Pascal);
-
-        /// <summary>
-        /// Creates a new `Pressure` object from a unit value in _Pounds-force per square inch_ (`Psi`).
-        /// </summary>
-        /// <param name="value">The pressure value.</param>
-        /// <returns>A new temperature object.</returns>
-        [Pure] public static Pressure FromPsi(double value) => new Pressure(value, UnitType.Psi);
-
-        /// <summary>
-        /// Creates a new `Pressure` object from a unit value in _Standard Atmosphere_ (`At`).
-        /// </summary>
-        /// <param name="value">The pressure value.</param>
-        /// <returns>A new pressure object.</returns>
-        public static Pressure FromAt(double value) => new Pressure(value, UnitType.StandardAtmosphere);
 
         //=============================
         // Boilerplate interface stuff.

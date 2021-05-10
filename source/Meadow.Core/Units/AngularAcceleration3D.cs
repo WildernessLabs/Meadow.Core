@@ -29,10 +29,9 @@ namespace Meadow.Units
             AngularAcceleration.UnitType type = AngularAcceleration.UnitType.RadiansPerSecondSquared)
         {
             //always store reference value
-            Unit = type;
-            X = new AngularAcceleration(valueX, Unit);
-            Y = new AngularAcceleration(valueY, Unit);
-            Z = new AngularAcceleration(valueZ, Unit);
+            X = new AngularAcceleration(valueX, type);
+            Y = new AngularAcceleration(valueY, type);
+            Z = new AngularAcceleration(valueZ, type);
         }
 
         public AngularAcceleration3D(AngularAcceleration x, AngularAcceleration y, AngularAcceleration z)
@@ -40,8 +39,6 @@ namespace Meadow.Units
             X = new AngularAcceleration(x);
             Y = new AngularAcceleration(y);
             Z = new AngularAcceleration(z);
-
-            Unit = X.Unit;
         }
 
         public AngularAcceleration3D(AngularAcceleration3D angularAcceleration3D)
@@ -49,17 +46,11 @@ namespace Meadow.Units
             this.X = new AngularAcceleration(angularAcceleration3D.X);
             this.Y = new AngularAcceleration(angularAcceleration3D.Y);
             this.Z = new AngularAcceleration(angularAcceleration3D.Z);
-            this.Unit = angularAcceleration3D.Unit;
         }
 
         public AngularAcceleration X { get; set; }
         public AngularAcceleration Y { get; set; }
         public AngularAcceleration Z { get; set; }
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public AngularAcceleration.UnitType Unit { get; set; }
 
         [Pure]
         public override bool Equals(object obj)

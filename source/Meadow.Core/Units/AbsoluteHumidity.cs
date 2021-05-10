@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public AbsoluteHumidity(double value, UnitType type = UnitType.GramsPerCubicMeter)
         {
-            //always store reference value
-            Unit = type;
             Value = AbsoluteHumidityConversions.Convert(value, type, UnitType.GramsPerCubicMeter);
         }
 
         public AbsoluteHumidity(AbsoluteHumidity absoluteHumidity)
         {
             this.Value = absoluteHumidity.Value;
-            this.Unit = absoluteHumidity.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the AbsoluteHumidity.

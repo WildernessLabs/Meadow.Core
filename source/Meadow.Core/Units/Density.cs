@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">Kilograms per meters cubed by default.</param>
         public Density(double value, UnitType type = UnitType.KilogramsPerMetersCubed)
         {
-            //always store reference value
-            Unit = type;
             Value = DensityConversions.Convert(value, type, UnitType.KilogramsPerMetersCubed);
         }
 
         public Density(Density density)
         {
             this.Value = density.Value;
-            this.Unit = density.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the Density.

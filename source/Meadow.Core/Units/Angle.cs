@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public Angle(double value, UnitType type = UnitType.Degrees)
         {
-            //always store reference value
-            Unit = type;
             Value = AngleConversions.Convert(value, type, UnitType.Degrees);
         }
 
         public Angle(Angle angle)
         {
             this.Value = angle.Value;
-            this.Unit = angle.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the Angle.

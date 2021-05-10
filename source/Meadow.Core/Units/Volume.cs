@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public Volume(double value, UnitType type = UnitType.Liters)
         {
-            //always store reference value
-            Unit = type;
             Value = VolumeConversions.Convert(value, type, UnitType.Liters);
         }
 
         public Volume(Volume volume)
         {
             this.Value = volume.Value;
-            this.Unit = volume.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the Volume.

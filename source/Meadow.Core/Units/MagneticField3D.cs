@@ -27,11 +27,9 @@ namespace Meadow.Units
         public MagneticField3D(double x, double y, double z,
             MagneticField.UnitType type = MagneticField.UnitType.Telsa)
         {
-            //always store reference value
-            Unit = type;
-            X = new MagneticField(x, Unit);
-            Y = new MagneticField(y, Unit);
-            Z = new MagneticField(z, Unit);
+            X = new MagneticField(x, type);
+            Y = new MagneticField(y, type);
+            Z = new MagneticField(z, type);
         }
 
         public MagneticField3D(MagneticField x, MagneticField y, MagneticField z)
@@ -39,8 +37,6 @@ namespace Meadow.Units
             X = new MagneticField(x);
             Y = new MagneticField(y);
             Z = new MagneticField(z);
-
-            Unit = x.Unit;
         }
 
         public MagneticField3D(MagneticField3D magneticField3D)
@@ -48,17 +44,11 @@ namespace Meadow.Units
             this.X = new MagneticField(magneticField3D.X);
             this.Y = new MagneticField(magneticField3D.Y);
             this.Z = new MagneticField(magneticField3D.Z);
-            this.Unit = magneticField3D.Unit;
         }
 
         public MagneticField X { get; set; }
         public MagneticField Y { get; set; }
         public MagneticField Z { get; set; }
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public MagneticField.UnitType Unit { get; set; }
 
         [Pure]
         public override bool Equals(object obj)

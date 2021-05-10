@@ -27,24 +27,29 @@ namespace Meadow.Units
         /// <param name="type">_Celsius_ (`C°`), by default.</param>
         public Temperature(double value, UnitType type = UnitType.Celsius)
         {
-            Value = value; Unit = type;
+            Value = 0;
+            switch (type) {
+                case UnitType.Celsius:
+                    Value = value;
+                    break;
+                case UnitType.Fahrenheit:
+                    Value = TempConversions.FToC(value);
+                    break;
+                case UnitType.Kelvin:
+                    Value = TempConversions.KToC(value);
+                    break;
+            }
         }
 
         public Temperature(Temperature temperature)
         {
             this.Value = temperature.Value;
-            this.Unit = temperature.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the temperature.
@@ -62,77 +67,48 @@ namespace Meadow.Units
         /// <summary>
         /// Gets the temperature value expressed as a unit _Celsius/Centrigrade_ (`C°`).
         /// </summary>
-        public double Celsius {
-            get {
-                switch (Unit) {
-                    case UnitType.Celsius:
-                        return Value;
-                    case UnitType.Fahrenheit:
-                        return TempConversions.FToC(Value);
-                    case UnitType.Kelvin:
-                        return TempConversions.KToC(Value);
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
-        }
+        public double Celsius { get => Value; }
 
         /// <summary>
         /// Gets the temperature value expressed as a unit _Fahrenheit_ (`F°`).
         /// </summary>
-        public double Fahrenheit {
-            get {
-                switch (Unit) {
-                    case UnitType.Celsius:
-                        return TempConversions.CToF(Value);
-                    case UnitType.Fahrenheit:
-                        return Value;
-                    case UnitType.Kelvin:
-                        return TempConversions.CToF(TempConversions.KToC(Value));
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
-        }
+        public double Fahrenheit { get => TempConversions.CToF(Value); }
 
         /// <summary>
         /// Gets the temperature value expressed as a unit _Kelvin_ (`K`).
         /// </summary>
-        public double Kelvin {
-            get {
-                switch (Unit) {
-                    case UnitType.Celsius:
-                        return TempConversions.CToK(Value);
-                    case UnitType.Fahrenheit:
-                        return TempConversions.CToK(TempConversions.FToC(Value));
-                    case UnitType.Kelvin:
-                        return Value;
-                    default: throw new Exception("the compiler lies.");
-                }
-            }
+        public double Kelvin { get => TempConversions.CToK(Value); }
+
+        [Pure]
+        public double From(UnitType convertTo)
+        {
+            return TempConversions.Convert(Value, UnitType.Celsius, convertTo);
         }
 
-        //=============================
-        // FROM convenience conversions
 
-        /// <summary>
-        /// Creates a new `Temperature` object from a unit value in _Celsius/Centigrade_ (`C°`).
-        /// </summary>
-        /// <param name="value">The temperature value.</param>
-        /// <returns>A new temperature object.</returns>
-        [Pure] public static Temperature FromCelsius(double value) => new Temperature(value, UnitType.Celsius);
+        ////=============================
+        //// FROM convenience conversions
 
-        /// <summary>
-        /// Creates a new `Temperature` object from a unit value in _Fahrenheit_ (`F°`).
-        /// </summary>
-        /// <param name="value">The temperature value.</param>
-        /// <returns>A new temperature object.</returns>
+        ///// <summary>
+        ///// Creates a new `Temperature` object from a unit value in _Celsius/Centigrade_ (`C°`).
+        ///// </summary>
+        ///// <param name="value">The temperature value.</param>
+        ///// <returns>A new temperature object.</returns>
+        //[Pure] public static Temperature FromCelsius(double value) => new Temperature(value, UnitType.Celsius);
 
-        [Pure] public static Temperature FromFahrenheit(double value) => new Temperature(value, UnitType.Fahrenheit);
-        /// <summary>
-        /// Creates a new `Temperature` object from a unit value in _Kelvin_ (`K°`).
-        /// </summary>
-        /// <param name="value">The temperature value.</param>
-        /// <returns>A new temperature object.</returns>
-        [Pure] public static Temperature FromKelvin(double value) => new Temperature(value, UnitType.Kelvin);
+        ///// <summary>
+        ///// Creates a new `Temperature` object from a unit value in _Fahrenheit_ (`F°`).
+        ///// </summary>
+        ///// <param name="value">The temperature value.</param>
+        ///// <returns>A new temperature object.</returns>
+
+        //[Pure] public static Temperature FromFahrenheit(double value) => new Temperature(value, UnitType.Fahrenheit);
+        ///// <summary>
+        ///// Creates a new `Temperature` object from a unit value in _Kelvin_ (`K°`).
+        ///// </summary>
+        ///// <param name="value">The temperature value.</param>
+        ///// <returns>A new temperature object.</returns>
+        //[Pure] public static Temperature FromKelvin(double value) => new Temperature(value, UnitType.Kelvin);
 
         //=============================
         // Boilerplate interface stuff.

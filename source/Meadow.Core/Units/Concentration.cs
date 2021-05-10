@@ -25,25 +25,18 @@ namespace Meadow.Units
         public Concentration(double value, UnitType type = UnitType.PartsPerMillion)
         {
             //always store reference value
-            Unit = type;
             Value = ConcentrationConversions.Convert(value, type, UnitType.PartsPerMillion);
         }
 
         public Concentration(Concentration concentration)
         {
-            Value = concentration.Value;
-            Unit = concentration.Unit;
+            this.Value = concentration.Value;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the temperature.

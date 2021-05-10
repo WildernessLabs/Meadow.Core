@@ -15,9 +15,6 @@ namespace Meadow.Units.Tests
 
             Temperature t2 = new Temperature();
             Assert.That(t2.Celsius == 0);
-
-            Temperature t3 = Temperature.FromFahrenheit(32);
-            Assert.That(t3.Fahrenheit == 32);
         }
 
         [Test()]

@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public AngularVelocity(double value, UnitType type = UnitType.RevolutionsPerSecond)
         {
-            //always store reference value
-            Unit = type;
             Value = AngularVelocityConversions.Convert(value, type, UnitType.RevolutionsPerSecond);
         }
 
         public AngularVelocity(AngularVelocity angularVelocity)
         {
             this.Value = angularVelocity.Value;
-            this.Unit = angularVelocity.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the AngularVelocity.

@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">kilometers meters per second by default.</param>
         public Speed(double value, UnitType type = UnitType.KilometersPerSecond)
         {
-            //always store reference value
-            Unit = type;
             Value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
         }
 
         public Speed(Speed speed)
         {
             this.Value = speed.Value;
-            this.Unit = speed.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the speed.

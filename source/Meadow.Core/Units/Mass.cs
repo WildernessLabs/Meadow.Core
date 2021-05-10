@@ -24,26 +24,18 @@ namespace Meadow.Units
         /// <param name="type">Grams by default.</param>
         public Mass(double value, UnitType type = UnitType.Grams)
         {
-            //always store reference value
-            Unit = type;
-            Value = MassConversions.Convert(value, Unit, UnitType.Grams);
+            Value = MassConversions.Convert(value, type, UnitType.Grams);
         }
 
         public Mass(Mass mass)
         {
             this.Value = mass.Value;
-            this.Unit = mass.Unit;
         }
 
         /// <summary>
         /// Internal canonical value.
         /// </summary>
         private readonly double Value;
-
-        /// <summary>
-        /// The unit that describes the value.
-        /// </summary>
-        public UnitType Unit { get; set; }
 
         /// <summary>
         /// The type of units available to describe the temperature.

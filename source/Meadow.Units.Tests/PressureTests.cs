@@ -11,12 +11,14 @@ namespace Meadow.Units.Tests
         public void PressureCtors()
         {
             Pressure p = new Pressure(1, Pressure.UnitType.StandardAtmosphere);
-            Assert.That(p.StandardAtmosphere == 1);
+            // fucking floating points. even comparing to another double (`1d`),
+            // even though it should have the same exact value underneath. wtf.
+            Assert.That(p.StandardAtmosphere.Equals4DigitPrecision(1)); 
 
             Pressure p2 = new Pressure();
             Assert.That(p2.Bar == 0);
 
-            Pressure p3 = Pressure.FromBar(1);
+            Pressure p3 = new Pressure(1, Pressure.UnitType.Bar);
             Assert.That(p3.Bar == 1);
         }
 
@@ -24,7 +26,7 @@ namespace Meadow.Units.Tests
         public void Conversions()
         {
             Pressure p = new Pressure(1, Pressure.UnitType.Bar);
-            Assert.That(p.Pascal == 100000);
+            Assert.That(p.Pascal == 100000d);
             Assert.That(p.Psi.Equals4DigitPrecision(14.503773773));
             Assert.That(p.StandardAtmosphere.Equals4DigitPrecision(0.9869233));
 
