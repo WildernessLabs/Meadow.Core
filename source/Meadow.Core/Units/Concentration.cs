@@ -31,8 +31,8 @@ namespace Meadow.Units
 
         public Concentration(Concentration concentration)
         {
-            this.Value = concentration.Value;
-            this.Unit = concentration.Unit;
+            Value = concentration.Value;
+            Unit = concentration.Unit;
         }
 
         /// <summary>
@@ -50,10 +50,14 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            PartsPerHundred,
+            PartsPerThousand,
             PartsPerMillion,
-            PartsPerBillion
+            PartsPerBillion,
         }
 
+        public double PartsPerHundred => From(UnitType.PartsPerHundred);
+        public double PartsPerThousand => From(UnitType.PartsPerThousand);
         public double PartsPerMillion => From(UnitType.PartsPerMillion);
         public double PartsPerBillion => From(UnitType.PartsPerBillion);
 

@@ -14,8 +14,10 @@
 
         private static readonly double[] concentrationConversions =
         {
-            1.0,    // ppm
-            1000,   // ppb
+            1.0,//pph
+            10.0,//ppt
+            10000.0,    // ppm
+            10000000.0,   // ppb
     	};
     }
 }
