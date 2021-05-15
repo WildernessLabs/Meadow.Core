@@ -13,6 +13,8 @@ namespace Meadow.Hardware
             bool inverted = false
             ) : base (pin, channelInfo)
         {
+            Channel = channelInfo;
+
             this.Inverted = inverted;
             this.Frequency = frequency;
             this.DutyCycle = dutyCycle;
