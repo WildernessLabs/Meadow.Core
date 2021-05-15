@@ -16,17 +16,12 @@ namespace Meadow.Devices
         public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
 
         public F7Micro()
+            : base(
+                  new Pinout(),
+                  new F7GPIOManager(),
+                  new AnalogCapabilities(true, DefaultA2DResolution),
+                  new NetworkCapabilities(true, true))
         {
-            this.Capabilities = new DeviceCapabilities(
-                new AnalogCapabilities(true, DefaultA2DResolution),
-                new NetworkCapabilities(true, true)
-                );
-
-            base.IoController = new F7GPIOManager();
-            base.IoController.Initialize();
-
-            this.Pins = new Pinout();
-
             // TODO: it would be nice to block on this initialization, but
             // because of the app architecture, this ctor runs asynchronously
             // with app startup, so right now we're raising an event.

@@ -14,7 +14,7 @@ namespace Meadow.Devices
     /// </summary>
     public abstract class F7MicroBase : IMeadowDevice
     {
-        protected SynchronizationContext _context;
+        private SynchronizationContext? _context;
         protected Esp32Coprocessor? esp32;
 
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
@@ -29,15 +29,25 @@ namespace Meadow.Devices
         // TODO: should this be public?
         public const int DefaultA2DResolution = 12;
 
-        public DeviceCapabilities Capabilities { get; protected set; }
+        public DeviceCapabilities Capabilities { get; }
 
         /// <summary>
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public IF7MicroPinout Pins { get; protected set; }
+        public IF7MicroPinout Pins { get; }
 
-        protected IMeadowIOController IoController { get; set; }
+        protected IMeadowIOController IoController { get; }
+
+        public F7MicroBase(IF7MicroPinout pins, IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
+        {
+            Pins = pins;
+            IoController = ioController;
+
+            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
+
+            IoController.Initialize();
+        }
 
         public IPin GetPin(string pinName)
         {
