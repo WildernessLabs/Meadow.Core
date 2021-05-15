@@ -137,5 +137,13 @@ namespace Meadow.Hardware
             }
         }
 
+        public void WriteReadData(Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount)
+        {
+            lock (SyncRoot)
+            {
+                Bus.WriteReadData(Address, writeBuffer, writeCount, readBuffer, readCount);
+            }
+        }
+
     }
 }
