@@ -29,6 +29,8 @@ namespace Meadow.Units.Conversions
 			100000, //Pascal,
 			14.503773773, //Psi,
 			0.9869232667, //StandardAtmosphere,
+			1000, // mBar
+			1000, // hPa (yes, same as millibar, but both are common)
 	    };
 
 	}

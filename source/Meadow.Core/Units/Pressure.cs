@@ -42,10 +42,12 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
-            Bar,
+            Bar,            
             Pascal,
             Psi,
-            StandardAtmosphere
+            StandardAtmosphere,
+            Millibar,
+            Hectopascal
         }
 
         //========================
@@ -67,6 +69,15 @@ namespace Meadow.Units
         /// Gets the pressure value expressed as a unit _Standard Atmosphere_ (`At`).
         /// </summary>
         public double StandardAtmosphere { get => From(UnitType.StandardAtmosphere); }
+        /// <summary>
+        /// Gets the pressure value expressed as a unit _Bar_ (`Bar`)
+        /// </summary>
+        public double Millibar { get => From(UnitType.Millibar); }
+        /// <summary>
+        /// Gets the pressure value expressed as a unit _Bar_ (`Bar`)
+        /// </summary>
+        public double Hectopascal { get => From(UnitType.Hectopascal); }
+
 
         [Pure]
         public double From(UnitType convertTo)
