@@ -7,12 +7,8 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class AnalogPortBase : PortBase<IAnalogChannelInfo>, IAnalogPort
     {
-        public new IAnalogChannelInfo Channel { get; protected set; }
-
         protected AnalogPortBase(IPin pin, IAnalogChannelInfo channel)
             : base(pin, channel)
-        {
-            this.Channel = channel;
-        }
+        { }
     }
 }
