@@ -3,8 +3,7 @@ using Meadow.Units;
 
 namespace Meadow.Hardware
 {
-    public class FilterableChangeObservableI2CPeripheral<UNIT> : FilterableChangeObservableBase<UNIT>
-        //where RESULT : struct, IChangeResult<UNIT>
+    public abstract class FilterableChangeObservableI2CPeripheral<UNIT> : FilterableChangeObservableBase<UNIT>, IDisposable
         where UNIT : struct
     {
         /// <summary>
@@ -17,6 +16,18 @@ namespace Meadow.Hardware
         protected FilterableChangeObservableI2CPeripheral(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
         {
             Bus = new I2CBusAccessor(i2cBus, address, rxBufferSize, txBufferSize);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+
+        /// <summary>
+        /// Dispose managed resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
         }
     }
 
