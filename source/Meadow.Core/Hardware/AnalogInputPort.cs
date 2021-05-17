@@ -116,7 +116,7 @@ namespace Meadow.Hardware
         /// <param name="standbyDuration">The time, in milliseconds, to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        public override void StartSampling(
+        public override void StartUpdating(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
             int standbyDuration = 100)
@@ -200,7 +200,7 @@ namespace Meadow.Hardware
         /// Spins down the process sampling the ADC. Any values in the 
         /// SampleBuffer will become stale after calling this method.
         /// </summary>
-        public override void StopSampling()
+        public override void StopUpdating()
         {
             lock (_lock)
             {

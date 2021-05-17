@@ -52,11 +52,11 @@ namespace Meadow.Hardware
         }
 
         public abstract Task<Voltage> Read(int sampleCount = 10, int sampleInterval = 40);
-        public abstract void StartSampling(
+        public abstract void StartUpdating(
             int sampleCount = 10,
             int sampleIntervalDuration = 40,
             int standbyDuration = 100);
-        public abstract void StopSampling();
+        public abstract void StopUpdating();
 
 
         protected void RaiseChangedAndNotify(IChangeResult<Voltage> changeResult)

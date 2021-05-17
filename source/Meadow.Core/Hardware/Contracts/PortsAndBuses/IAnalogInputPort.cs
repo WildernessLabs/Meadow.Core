@@ -8,8 +8,6 @@ namespace Meadow.Hardware
     /// <summary>
     /// Contract for ports that implement an analog input channel.
     /// </summary>
-    // todo: get rid of the `IObservable` here? will it ever be composable?
-    // todo: should it be IChangeResult or `ChangeResult`?
     public interface IAnalogInputPort : IAnalogPort, IObservable<IChangeResult<Voltage>>
     {
         /// <summary>
@@ -17,6 +15,8 @@ namespace Meadow.Hardware
         /// </summary>
         event EventHandler<IChangeResult<Voltage>> Changed;
 
+        // TODO should this be a Span<Voltage> or something? can Span<x> be
+        // implicitly cast to IList? maybe it should be IEnumerable?
         /// <summary>
         /// Gets the sample buffer.
         /// </summary>
@@ -36,8 +36,6 @@ namespace Meadow.Hardware
         /// </summary>
         /// <value>The average buffer value.</value>
         Voltage Voltage { get; }
-
-        //IDisposable Subscribe(IObserver<ChangeResult<Voltage>> observer);
 
         /// <summary>
         /// Convenience method to get the current voltage. For frequent reads, use
@@ -64,12 +62,12 @@ namespace Meadow.Hardware
         /// <param name="standbyDuration">The time, in milliseconds, to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        void StartSampling(int sampleCount = 10, int sampleIntervalDuration = 40, int standbyDuration = 100);
+        void StartUpdating(int sampleCount = 10, int sampleIntervalDuration = 40, int standbyDuration = 100);
 
         /// <summary>
         /// Stops sampling the analog port.
         /// </summary>
-        void StopSampling();
+        void StopUpdating();
 
         public static FilterableChangeObserver<Voltage>
             CreateObserver(
