@@ -69,7 +69,6 @@ namespace Meadow.Hardware
         {
             base.Pin = pin;
             this.IOController = ioController;
-            base.Channel = channel;
             base.ReferenceVoltage = referenceVoltage;
 
             // attempt to reserve

@@ -44,7 +44,7 @@ namespace Meadow.Units
         {
             Grams,
             Kilograms,
-            Onces,
+            Ounces,
             Pounds,
             TonsMetric,
             TonsUSShort,
@@ -55,7 +55,7 @@ namespace Meadow.Units
 
         public double Grams => From(UnitType.Grams);
         public double Kilograms => From(UnitType.Kilograms);
-        public double Onces => From(UnitType.Onces);
+        public double Ounces => From(UnitType.Ounces);
         public double Pounds => From(UnitType.Pounds);
         public double TonsMetric => From(UnitType.TonsMetric);
         public double TonsUSShort => From(UnitType.TonsUSShort);

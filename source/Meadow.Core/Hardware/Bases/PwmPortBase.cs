@@ -3,7 +3,10 @@ namespace Meadow.Hardware
 {
     public abstract class PwmPortBase : DigitalPortBase, IPwmPort
     {
-        public new IPwmChannelInfo Channel { get; protected set; }
+        public new IPwmChannelInfo Channel {
+            get => (IPwmChannelInfo)base.Channel;
+            protected set { base.Channel = value; }
+        }
 
         protected PwmPortBase(
             IPin pin,
@@ -13,8 +16,6 @@ namespace Meadow.Hardware
             bool inverted = false
             ) : base (pin, channelInfo)
         {
-            Channel = channelInfo;
-
             this.Inverted = inverted;
             this.Frequency = frequency;
             this.DutyCycle = dutyCycle;
