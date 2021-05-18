@@ -38,6 +38,7 @@
     <Compile Include="AzimuthTests.cs" />
     <Compile Include="LengthTests.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="MassTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -50,7 +50,7 @@ namespace Meadow.Units
             TonsUSShort,
             TonsUKLong,
             Grains,
-            Karats
+            Carats
         }
 
         public double Grams => From(UnitType.Grams);
@@ -61,7 +61,7 @@ namespace Meadow.Units
         public double TonsUSShort => From(UnitType.TonsUSShort);
         public double TonsUKLong => From(UnitType.TonsUKLong);
         public double Grains => From(UnitType.Grains);
-        public double Karats => From(UnitType.Karats);
+        public double Karats => From(UnitType.Carats);
 
         [Pure]
         public double From(UnitType convertTo)
