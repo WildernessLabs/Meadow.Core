@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        public event EventHandler<IChangeResult<Voltage>> Changed = delegate { };
+        public event EventHandler<IChangeResult<Voltage>> Updated = delegate { };
 
         /// <summary>
         /// Gets the sample buffer. Make sure to call StartSampling() before 
@@ -61,7 +61,7 @@ namespace Meadow.Hardware
 
         protected void RaiseChangedAndNotify(IChangeResult<Voltage> changeResult)
         {
-            Changed?.Invoke(this, changeResult);
+            Updated?.Invoke(this, changeResult);
             observers.ForEach(x => x.OnNext(changeResult));
         }
 

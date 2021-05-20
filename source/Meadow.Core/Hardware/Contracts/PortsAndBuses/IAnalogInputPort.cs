@@ -13,7 +13,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>
-        event EventHandler<IChangeResult<Voltage>> Changed;
+        event EventHandler<IChangeResult<Voltage>> Updated;
 
         // TODO should this be a Span<Voltage> or something? can Span<x> be
         // implicitly cast to IList? maybe it should be IEnumerable?
