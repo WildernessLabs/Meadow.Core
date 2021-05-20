@@ -7,6 +7,5 @@ namespace Meadow.Hardware
             IPin pin,
             bool initialState = false,
             OutputType initialOutputType = OutputType.PushPull);
-
     }
 }
