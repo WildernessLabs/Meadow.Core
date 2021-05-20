@@ -11,13 +11,13 @@
         /// </summary>
         None = 0,
         /// <summary>
-        /// The interrupt is triggered on the falling edge when changing from high
-        /// to low.
+        /// The interrupt is triggered on the falling edge when changing from `HIGH`
+        /// to `LOW`.
         /// </summary>
         EdgeFalling = 1,
         /// <summary>
         /// The interrupt is triggered on the rising edge when changing from 
-        /// low to high.
+        /// `LOW` to `HIGH`.
         /// </summary>
         EdgeRising = 2,
         /// <summary>
