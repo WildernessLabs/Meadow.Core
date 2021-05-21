@@ -24,7 +24,7 @@ namespace Meadow.Hardware
         public abstract double DebounceDuration { get; set; }
         public abstract double GlitchDuration { get; set; }
 
-        protected List<IObserver<DigitalPortResult>> _observers { get; set; } = new List<IObserver<DigitalPortResult>>();
+        protected List<IObserver<IChangeResult<DigitalState>>> _observers { get; set; } = new List<IObserver<IChangeResult<DigitalState>>>();
 
         protected DigitalInputPortBase(
             IPin pin,
@@ -42,7 +42,7 @@ namespace Meadow.Hardware
             _observers.ForEach(x => x.OnNext(changeResult));
         }
 
-        public IDisposable Subscribe(IObserver<DigitalPortResult> observer)
+        public IDisposable Subscribe(IObserver<IChangeResult<DigitalState>> observer)
         {
             if (!_observers.Contains(observer)) _observers.Add(observer);
             return new Unsubscriber(_observers, observer);
@@ -50,10 +50,10 @@ namespace Meadow.Hardware
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<DigitalPortResult>> _observers;
-            private IObserver<DigitalPortResult> _observer;
+            private List<IObserver<IChangeResult<DigitalState>>> _observers;
+            private IObserver<IChangeResult<DigitalState>> _observer;
 
-            public Unsubscriber(List<IObserver<DigitalPortResult>> observers, IObserver<DigitalPortResult> observer)
+            public Unsubscriber(List<IObserver<IChangeResult<DigitalState>>> observers, IObserver<IChangeResult<DigitalState>> observer)
             {
                 this._observers = observers;
                 this._observer = observer;
@@ -64,6 +64,5 @@ namespace Meadow.Hardware
                 if (!(_observer == null)) _observers.Remove(_observer);
             }
         }
-
     }
 }
