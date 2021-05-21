@@ -4,7 +4,7 @@ namespace Meadow.Hardware
 {
     public interface IDigitalInterruptPort
     {
-        event EventHandler<DigitalInputPortChangeResult> Changed;
+        event EventHandler<DigitalPortResult> Changed;
 
         InterruptMode InterruptMode { get; }
         double DebounceDuration { get; set; }

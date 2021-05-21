@@ -11,7 +11,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Occurs when the state is changed. To enable this, set the InterruptMode at construction
         /// </summary>
-        public event EventHandler<DigitalInputPortChangeResult> Changed = delegate { };
+        public event EventHandler<DigitalPortResult> Changed = delegate { };
 
         /// <summary>
         /// Gets or sets a value indicating the type of interrupt monitoring this input.
@@ -24,7 +24,7 @@ namespace Meadow.Hardware
         public abstract double DebounceDuration { get; set; }
         public abstract double GlitchDuration { get; set; }
 
-        protected List<IObserver<DigitalInputPortChangeResult>> _observers { get; set; } = new List<IObserver<DigitalInputPortChangeResult>>();
+        protected List<IObserver<DigitalPortResult>> _observers { get; set; } = new List<IObserver<DigitalPortResult>>();
 
         protected DigitalInputPortBase(
             IPin pin,
@@ -36,13 +36,13 @@ namespace Meadow.Hardware
             this.InterruptMode = interruptMode;
         }
 
-        protected void RaiseChangedAndNotify(DigitalInputPortChangeResult changeResult)
+        protected void RaiseChangedAndNotify(DigitalPortResult changeResult)
         {
             Changed?.Invoke(this, changeResult);
             _observers.ForEach(x => x.OnNext(changeResult));
         }
 
-        public IDisposable Subscribe(IObserver<DigitalInputPortChangeResult> observer)
+        public IDisposable Subscribe(IObserver<DigitalPortResult> observer)
         {
             if (!_observers.Contains(observer)) _observers.Add(observer);
             return new Unsubscriber(_observers, observer);
@@ -50,10 +50,10 @@ namespace Meadow.Hardware
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<DigitalInputPortChangeResult>> _observers;
-            private IObserver<DigitalInputPortChangeResult> _observer;
+            private List<IObserver<DigitalPortResult>> _observers;
+            private IObserver<DigitalPortResult> _observer;
 
-            public Unsubscriber(List<IObserver<DigitalInputPortChangeResult>> observers, IObserver<DigitalInputPortChangeResult> observer)
+            public Unsubscriber(List<IObserver<DigitalPortResult>> observers, IObserver<DigitalPortResult> observer)
             {
                 this._observers = observers;
                 this._observer = observer;
