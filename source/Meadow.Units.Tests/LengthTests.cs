@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using Meadow.Units;
+using LU = Meadow.Units.Length.UnitType;
 
 namespace Meadow.Units.Tests
 {
@@ -10,7 +11,7 @@ namespace Meadow.Units.Tests
         [Test()]
         public void LengthCtors()
         {
-            Length t = new Length(10, Length.UnitType.Meters);
+            Length t = new Length(10, LU.Meters);
             Assert.That(t.Meters == 10);
 
             Length t2 = new Length(40);
@@ -20,7 +21,7 @@ namespace Meadow.Units.Tests
         [Test()]
         public void LengthConversions()
         {
-            Length t = new Length(10, Length.UnitType.Meters);
+            Length t = new Length(10, LU.Meters);
             Assert.That(t.Kilometers == 0.01);
             Assert.That(t.Centimeters == 1000);
             Assert.That(t.Decimeters == 100);
@@ -60,8 +61,8 @@ namespace Meadow.Units.Tests
 
             Assert.That(t2 == t3);
 
-            Assert.That(t2 == 10);
-            Assert.That(t2 > 5);
+            Assert.That(t2 == new Length(10, LU.Meters));
+            Assert.That(t2 > new Length(5, LU.Meters));
 
             Assert.That(t2.CompareTo(t3) == 0);
             Assert.That(t2.CompareTo(t1) > 0);
@@ -72,37 +73,16 @@ namespace Meadow.Units.Tests
         }
 
         [Test()]
-        public void ImplicitConversions()
-        {
-            Length i1 = (ushort)10;
-            Assert.That(i1 == new Length(10));
-            Length i2 = (short)10;
-            Assert.That(i2 == new Length(10));
-            Length i3 = (uint)10;
-            Assert.That(i3 == new Length(10));
-            Length i4 = (long)10;
-            Assert.That(i4 == new Length(10));
-            Length i5 = 10; // int32
-            Assert.That(i5 == new Length(10));
-            Length i6 = 10f; // float
-            Assert.That(i6 == new Length(10));
-            Length i7 = (double)10;
-            Assert.That(i7 == new Length(10));
-            Length i8 = 10m; // decimal
-            Assert.That(i8 == new Length(10));
-        }
-
-        [Test()]
         public void RandomTests()
         {
             // assignment
-            Length i1 = new Length(100, Length.UnitType.Meters);
+            Length i1 = new Length(100, LU.Meters);
             i1 = new Length(25);
             Assert.That(i1 == new Length(25));
 
             // more assignment
             Length i2 = i1;
-            Assert.That(i2 == new Length(25, Length.UnitType.Meters));
+            Assert.That(i2 == new Length(25, LU.Meters));
 
             Length i3 = new Length(i2);
             Assert.That(i3 == i2);
@@ -111,7 +91,7 @@ namespace Meadow.Units.Tests
         //[Test()]
         //public void LengthTypeConversions()
         //{
-        //    Length t1 = new Length(50, Length.UnitType.Meters);
+        //    Length t1 = new Length(50, LU.Meters);
 
         //    Assert.That(t1.ToInt32(FormatProi) == 50);
         //}
