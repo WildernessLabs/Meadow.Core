@@ -48,11 +48,6 @@ namespace Meadow.Units.Tests
             Assert.That((t1 + t2) == new Mass(11, Mass.UnitType.Kilograms));
             Assert.That((t2 - t1) == new Mass(9, Mass.UnitType.Kilograms));
 
-            // problem: this doesn't make any sense
-            Assert.That((t1 * t2) == new Mass(10, Mass.UnitType.Kilograms));
-
-            // problem: this uses an implicit operator of `Mass(int value)`
-            Assert.That((t1 * 10) == new Mass(10, Mass.UnitType.Kilograms));
             Assert.That(t3.Abs() == new Mass(3, Mass.UnitType.Kilograms));
         }
 

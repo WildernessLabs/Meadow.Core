@@ -96,8 +96,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Angle operator +(Angle lvalue, Angle rvalue) => new Angle(lvalue.Value + rvalue.Value, UnitType.Degrees);
         [Pure] public static Angle operator -(Angle lvalue, Angle rvalue) => new Angle(lvalue.Value - rvalue.Value, UnitType.Degrees);
-        [Pure] public static Angle operator /(Angle lvalue, Angle rvalue) => new Angle(lvalue.Value / rvalue.Value, UnitType.Degrees);
-        [Pure] public static Angle operator *(Angle lvalue, Angle rvalue) => new Angle(lvalue.Value * rvalue.Value, UnitType.Degrees);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

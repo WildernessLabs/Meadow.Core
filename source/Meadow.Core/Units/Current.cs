@@ -104,8 +104,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Current operator +(Current lvalue, Current rvalue) => new Current(lvalue.Value + rvalue.Value);
         [Pure] public static Current operator -(Current lvalue, Current rvalue) => new Current(lvalue.Value - rvalue.Value);
-        [Pure] public static Current operator /(Current lvalue, Current rvalue) => new Current(lvalue.Value / rvalue.Value);
-        [Pure] public static Current operator *(Current lvalue, Current rvalue) => new Current(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

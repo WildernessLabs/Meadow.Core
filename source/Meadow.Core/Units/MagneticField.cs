@@ -100,8 +100,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static MagneticField operator +(MagneticField lvalue, MagneticField rvalue) => new MagneticField(lvalue.Value + rvalue.Value);
         [Pure] public static MagneticField operator -(MagneticField lvalue, MagneticField rvalue) => new MagneticField(lvalue.Value - rvalue.Value);
-        [Pure] public static MagneticField operator /(MagneticField lvalue, MagneticField rvalue) => new MagneticField(lvalue.Value / rvalue.Value);
-        [Pure] public static MagneticField operator *(MagneticField lvalue, MagneticField rvalue) => new MagneticField(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

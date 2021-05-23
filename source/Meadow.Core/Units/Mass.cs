@@ -102,8 +102,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Mass operator +(Mass lvalue, Mass rvalue) => new Mass(lvalue.Value + rvalue.Value);
         [Pure] public static Mass operator -(Mass lvalue, Mass rvalue) => new Mass(lvalue.Value - rvalue.Value);
-        [Pure] public static Mass operator /(Mass lvalue, Mass rvalue) => new Mass(lvalue.Value / rvalue.Value);
-        [Pure] public static Mass operator *(Mass lvalue, Mass rvalue) => new Mass(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

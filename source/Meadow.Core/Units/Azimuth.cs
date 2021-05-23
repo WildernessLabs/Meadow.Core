@@ -131,8 +131,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Azimuth operator +(Azimuth lvalue, Azimuth rvalue) => new Azimuth(lvalue.Value + rvalue.Value);
         [Pure] public static Azimuth operator -(Azimuth lvalue, Azimuth rvalue) => new Azimuth(lvalue.Value - rvalue.Value);
-        [Pure] public static Azimuth operator /(Azimuth lvalue, Azimuth rvalue) => new Azimuth(lvalue.Value / rvalue.Value);
-        [Pure] public static Azimuth operator *(Azimuth lvalue, Azimuth rvalue) => new Azimuth(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

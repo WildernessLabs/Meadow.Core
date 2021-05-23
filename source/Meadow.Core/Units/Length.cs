@@ -109,8 +109,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Length operator +(Length lvalue, Length rvalue) => new Length(lvalue.Value + rvalue.Value);
         [Pure] public static Length operator -(Length lvalue, Length rvalue) => new Length(lvalue.Value - rvalue.Value);
-        [Pure] public static Length operator /(Length lvalue, Length rvalue) => new Length(lvalue.Value / rvalue.Value);
-        [Pure] public static Length operator *(Length lvalue, Length rvalue) => new Length(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

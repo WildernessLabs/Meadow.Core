@@ -42,7 +42,7 @@ namespace Meadow.Units.Tests
             Assert.That(t1 != t2);
             Assert.That((t1 + t2) == new Temperature(11));
             Assert.That((t2 - t1) == new Temperature(9));
-            Assert.That((t1 * t2) == new Temperature(10));
+
             Assert.That(t3.Abs() == new Temperature(3));
         }
 

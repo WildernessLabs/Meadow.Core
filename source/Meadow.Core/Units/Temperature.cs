@@ -146,8 +146,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Temperature operator +(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Value + rvalue.Value);
         [Pure] public static Temperature operator -(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Value - rvalue.Value);
-        [Pure] public static Temperature operator /(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Value / rvalue.Value);
-        [Pure] public static Temperature operator *(Temperature lvalue, Temperature rvalue) => new Temperature(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

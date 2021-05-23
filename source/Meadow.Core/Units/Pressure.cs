@@ -121,8 +121,7 @@ namespace Meadow.Units
         // Math
         [Pure] public static Pressure operator +(Pressure lvalue, Pressure rvalue) => new Pressure(lvalue.Value + rvalue.Value);
         [Pure] public static Pressure operator -(Pressure lvalue, Pressure rvalue) => new Pressure(lvalue.Value - rvalue.Value);
-        [Pure] public static Pressure operator /(Pressure lvalue, Pressure rvalue) => new Pressure(lvalue.Value / rvalue.Value);
-        [Pure] public static Pressure operator *(Pressure lvalue, Pressure rvalue) => new Pressure(lvalue.Value * rvalue.Value);
+
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity

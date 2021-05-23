@@ -42,7 +42,7 @@ namespace Meadow.Units.Tests
             Assert.That(t1 != t2);
             Assert.That((t1 + t2) == new Length(11));
             Assert.That((t2 - t1) == new Length(9));
-            Assert.That((t1 * t2) == new Length(10));
+
             Assert.That(t3.Abs() == new Length(3));
         }
 
