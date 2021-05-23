@@ -71,14 +71,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Concentration(ushort value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(short value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(uint value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(long value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(int value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(float value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(double value) => new Concentration(value);
-        [Pure] public static implicit operator Concentration(decimal value) => new Concentration((double)value);
+        //[Pure] public static implicit operator Concentration(ushort value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(short value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(uint value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(long value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(int value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(float value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(double value) => new Concentration(value);
+        //[Pure] public static implicit operator Concentration(decimal value) => new Concentration((double)value);
 
         // Comparison
         [Pure] public bool Equals(Concentration other) => Value == other.Value;

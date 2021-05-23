@@ -80,14 +80,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Mass(ushort value) => new Mass(value);
-        [Pure] public static implicit operator Mass(short value) => new Mass(value);
-        [Pure] public static implicit operator Mass(uint value) => new Mass(value);
-        [Pure] public static implicit operator Mass(long value) => new Mass(value);
-        [Pure] public static implicit operator Mass(int value) => new Mass(value);
-        [Pure] public static implicit operator Mass(float value) => new Mass(value);
-        [Pure] public static implicit operator Mass(double value) => new Mass(value);
-        [Pure] public static implicit operator Mass(decimal value) => new Mass((double)value);
+        //[Pure] public static implicit operator Mass(ushort value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(short value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(uint value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(long value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(int value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(float value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(double value) => new Mass(value);
+        //[Pure] public static implicit operator Mass(decimal value) => new Mass((double)value);
 
         // Comparison
         [Pure] public bool Equals(Mass other) => Value == other.Value;

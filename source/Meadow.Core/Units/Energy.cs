@@ -81,14 +81,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Energy(ushort value) => new Energy(value);
-        [Pure] public static implicit operator Energy(short value) => new Energy(value);
-        [Pure] public static implicit operator Energy(uint value) => new Energy(value);
-        [Pure] public static implicit operator Energy(long value) => new Energy(value);
-        [Pure] public static implicit operator Energy(int value) => new Energy(value);
-        [Pure] public static implicit operator Energy(float value) => new Energy(value);
-        [Pure] public static implicit operator Energy(double value) => new Energy(value);
-        [Pure] public static implicit operator Energy(decimal value) => new Energy((double)value);
+        //[Pure] public static implicit operator Energy(ushort value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(short value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(uint value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(long value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(int value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(float value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(double value) => new Energy(value);
+        //[Pure] public static implicit operator Energy(decimal value) => new Energy((double)value);
 
         // Comparison
         [Pure] public bool Equals(Energy other) => Value == other.Value;

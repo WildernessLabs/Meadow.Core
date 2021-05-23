@@ -78,14 +78,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator MagneticField(ushort value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(short value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(uint value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(long value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(int value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(float value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(double value) => new MagneticField(value);
-        [Pure] public static implicit operator MagneticField(decimal value) => new MagneticField((double)value);
+        //[Pure] public static implicit operator MagneticField(ushort value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(short value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(uint value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(long value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(int value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(float value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(double value) => new MagneticField(value);
+        //[Pure] public static implicit operator MagneticField(decimal value) => new MagneticField((double)value);
 
         // Comparison
         [Pure] public bool Equals(MagneticField other) => Value == other.Value;

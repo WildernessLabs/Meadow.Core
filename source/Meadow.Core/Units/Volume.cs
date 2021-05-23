@@ -78,14 +78,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Volume(ushort value) => new Volume(value);
-        [Pure] public static implicit operator Volume(short value) => new Volume(value);
-        [Pure] public static implicit operator Volume(uint value) => new Volume(value);
-        [Pure] public static implicit operator Volume(long value) => new Volume(value);
-        [Pure] public static implicit operator Volume(int value) => new Volume(value);
-        [Pure] public static implicit operator Volume(float value) => new Volume(value);
-        [Pure] public static implicit operator Volume(double value) => new Volume(value);
-        [Pure] public static implicit operator Volume(decimal value) => new Volume((double)value);
+        //[Pure] public static implicit operator Volume(ushort value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(short value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(uint value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(long value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(int value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(float value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(double value) => new Volume(value);
+        //[Pure] public static implicit operator Volume(decimal value) => new Volume((double)value);
 
         // Comparison
         [Pure] public bool Equals(Volume other) => Value == other.Value;

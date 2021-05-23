@@ -97,14 +97,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Power(ushort value) => new Power(value);
-        [Pure] public static implicit operator Power(short value) => new Power(value);
-        [Pure] public static implicit operator Power(uint value) => new Power(value);
-        [Pure] public static implicit operator Power(long value) => new Power(value);
-        [Pure] public static implicit operator Power(int value) => new Power(value);
-        [Pure] public static implicit operator Power(float value) => new Power(value);
-        [Pure] public static implicit operator Power(double value) => new Power(value);
-        [Pure] public static implicit operator Power(decimal value) => new Power((double)value);
+        //[Pure] public static implicit operator Power(ushort value) => new Power(value);
+        //[Pure] public static implicit operator Power(short value) => new Power(value);
+        //[Pure] public static implicit operator Power(uint value) => new Power(value);
+        //[Pure] public static implicit operator Power(long value) => new Power(value);
+        //[Pure] public static implicit operator Power(int value) => new Power(value);
+        //[Pure] public static implicit operator Power(float value) => new Power(value);
+        //[Pure] public static implicit operator Power(double value) => new Power(value);
+        //[Pure] public static implicit operator Power(decimal value) => new Power((double)value);
 
         // Comparison
         [Pure] public bool Equals(Power other) => Value == other.Value;

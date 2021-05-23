@@ -60,8 +60,8 @@ namespace Meadow.Units.Tests
 
             Assert.That(t2 == t3);
 
-            Assert.That(t2 == 10);
-            Assert.That(t2 > 5);
+            Assert.That(t2.Celsius == 10);
+            Assert.That(t2.Celsius > 5);
         }
     }
 }

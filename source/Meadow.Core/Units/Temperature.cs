@@ -124,14 +124,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Temperature(ushort value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(short value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(uint value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(long value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(int value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(float value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(double value) => new Temperature(value);
-        [Pure] public static implicit operator Temperature(decimal value) => new Temperature((double)value);
+        //[Pure] public static implicit operator Temperature(ushort value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(short value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(uint value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(long value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(int value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(float value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(double value) => new Temperature(value);
+        //[Pure] public static implicit operator Temperature(decimal value) => new Temperature((double)value);
 
         // Comparison
         [Pure] public bool Equals(Temperature other) => Value == other.Value;

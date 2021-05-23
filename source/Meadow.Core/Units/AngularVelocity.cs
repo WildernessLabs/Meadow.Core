@@ -74,14 +74,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator AngularVelocity(ushort value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(short value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(uint value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(long value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(int value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(float value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(double value) => new AngularVelocity(value);
-        [Pure] public static implicit operator AngularVelocity(decimal value) => new AngularVelocity((double)value);
+        //[Pure] public static implicit operator AngularVelocity(ushort value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(short value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(uint value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(long value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(int value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(float value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(double value) => new AngularVelocity(value);
+        //[Pure] public static implicit operator AngularVelocity(decimal value) => new AngularVelocity((double)value);
 
         // Comparison
         [Pure] public bool Equals(AngularVelocity other) => Value == other.Value;

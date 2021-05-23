@@ -69,7 +69,7 @@ namespace Meadow.Hardware
         {
             base.Pin = pin;
             this.IOController = ioController;
-            base.ReferenceVoltage = referenceVoltage;
+            base.ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
 
             // attempt to reserve
             var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
@@ -133,7 +133,7 @@ namespace Meadow.Hardware
 
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
-                    double[] sampleBuffer = new double[sampleCount];
+                    Voltage[] sampleBuffer = new Voltage[sampleCount];
                     // loop until we're supposed to stop
                     while (true) {
                         // TODO: someone please review; is this the correct
@@ -151,7 +151,7 @@ namespace Meadow.Hardware
                         lock (_analogSyncRoot) {
                             var rawValue = this.IOController.GetAnalogValue(this.Pin);
                             // convert the raw valute into an actual voltage.
-                            sampleBuffer[currentSampleCount] = ((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts;
+                            sampleBuffer[currentSampleCount] = new Voltage(((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts);
                         }
 
                         // increment our counter

@@ -72,14 +72,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Acceleration(ushort value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(short value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(uint value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(long value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(int value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(float value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(double value) => new Acceleration(value);
-        [Pure] public static implicit operator Acceleration(decimal value) => new Acceleration((double)value);
+        //[Pure] public static implicit operator Acceleration(ushort value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(short value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(uint value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(long value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(int value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(float value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(double value) => new Acceleration(value);
+        //[Pure] public static implicit operator Acceleration(decimal value) => new Acceleration((double)value);
 
         // Comparison
         [Pure] public bool Equals(Acceleration other) => Value == other.Value;

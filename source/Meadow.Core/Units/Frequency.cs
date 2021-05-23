@@ -70,14 +70,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Frequency(ushort value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(short value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(uint value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(long value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(int value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(float value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(double value) => new Frequency(value);
-        [Pure] public static implicit operator Frequency(decimal value) => new Frequency((double)value);
+        //[Pure] public static implicit operator Frequency(ushort value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(short value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(uint value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(long value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(int value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(float value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(double value) => new Frequency(value);
+        //[Pure] public static implicit operator Frequency(decimal value) => new Frequency((double)value);
 
         // Comparison
         [Pure] public bool Equals(Frequency other) => Value == other.Value;

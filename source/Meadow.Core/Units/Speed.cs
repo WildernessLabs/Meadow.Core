@@ -88,14 +88,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Speed(ushort value) => new Speed(value);
-        [Pure] public static implicit operator Speed(short value) => new Speed(value);
-        [Pure] public static implicit operator Speed(uint value) => new Speed(value);
-        [Pure] public static implicit operator Speed(long value) => new Speed(value);
-        [Pure] public static implicit operator Speed(int value) => new Speed(value);
-        [Pure] public static implicit operator Speed(float value) => new Speed(value);
-        [Pure] public static implicit operator Speed(double value) => new Speed(value);
-        [Pure] public static implicit operator Speed(decimal value) => new Speed((double)value);
+        //[Pure] public static implicit operator Speed(ushort value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(short value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(uint value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(long value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(int value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(float value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(double value) => new Speed(value);
+        //[Pure] public static implicit operator Speed(decimal value) => new Speed((double)value);
 
         // Comparison
         [Pure] public bool Equals(Speed other) => Value == other.Value;

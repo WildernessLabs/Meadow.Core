@@ -87,14 +87,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Length(ushort value) => new Length(value);
-        [Pure] public static implicit operator Length(short value) => new Length(value);
-        [Pure] public static implicit operator Length(uint value) => new Length(value);
-        [Pure] public static implicit operator Length(long value) => new Length(value);
-        [Pure] public static implicit operator Length(int value) => new Length(value);
-        [Pure] public static implicit operator Length(float value) => new Length(value);
-        [Pure] public static implicit operator Length(double value) => new Length(value);
-        [Pure] public static implicit operator Length(decimal value) => new Length((double)value);
+        //[Pure] public static implicit operator Length(ushort value) => new Length(value);
+        //[Pure] public static implicit operator Length(short value) => new Length(value);
+        //[Pure] public static implicit operator Length(uint value) => new Length(value);
+        //[Pure] public static implicit operator Length(long value) => new Length(value);
+        //[Pure] public static implicit operator Length(int value) => new Length(value);
+        //[Pure] public static implicit operator Length(float value) => new Length(value);
+        //[Pure] public static implicit operator Length(double value) => new Length(value);
+        //[Pure] public static implicit operator Length(decimal value) => new Length((double)value);
 
         // Comparison
         [Pure] public bool Equals(Length other) => Value == other.Value;

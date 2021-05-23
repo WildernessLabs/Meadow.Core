@@ -76,14 +76,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Voltage(ushort value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(short value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(uint value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(long value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(int value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(float value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(double value) => new Voltage(value);
-        [Pure] public static implicit operator Voltage(decimal value) => new Voltage((double)value);
+        //[Pure] public static implicit operator Voltage(ushort value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(short value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(uint value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(long value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(int value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(float value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(double value) => new Voltage(value);
+        //[Pure] public static implicit operator Voltage(decimal value) => new Voltage((double)value);
 
         // Comparison
         [Pure] public bool Equals(Voltage other) => Value == other.Value;

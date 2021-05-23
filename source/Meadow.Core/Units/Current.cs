@@ -82,14 +82,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Current(ushort value) => new Current(value);
-        [Pure] public static implicit operator Current(short value) => new Current(value);
-        [Pure] public static implicit operator Current(uint value) => new Current(value);
-        [Pure] public static implicit operator Current(long value) => new Current(value);
-        [Pure] public static implicit operator Current(int value) => new Current(value);
-        [Pure] public static implicit operator Current(float value) => new Current(value);
-        [Pure] public static implicit operator Current(double value) => new Current(value);
-        [Pure] public static implicit operator Current(decimal value) => new Current((double)value);
+        //[Pure] public static implicit operator Current(ushort value) => new Current(value);
+        //[Pure] public static implicit operator Current(short value) => new Current(value);
+        //[Pure] public static implicit operator Current(uint value) => new Current(value);
+        //[Pure] public static implicit operator Current(long value) => new Current(value);
+        //[Pure] public static implicit operator Current(int value) => new Current(value);
+        //[Pure] public static implicit operator Current(float value) => new Current(value);
+        //[Pure] public static implicit operator Current(double value) => new Current(value);
+        //[Pure] public static implicit operator Current(decimal value) => new Current((double)value);
 
         // Comparison
         [Pure] public bool Equals(Current other) => Value == other.Value;

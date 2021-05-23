@@ -74,14 +74,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Angle(ushort value) => new Angle(value);
-        [Pure] public static implicit operator Angle(short value) => new Angle(value);
-        [Pure] public static implicit operator Angle(uint value) => new Angle(value);
-        [Pure] public static implicit operator Angle(long value) => new Angle(value);
-        [Pure] public static implicit operator Angle(int value) => new Angle(value);
-        [Pure] public static implicit operator Angle(float value) => new Angle(value);
-        [Pure] public static implicit operator Angle(double value) => new Angle(value);
-        [Pure] public static implicit operator Angle(decimal value) => new Angle((double)value);
+        //[Pure] public static implicit operator Angle(ushort value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(short value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(uint value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(long value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(int value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(float value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(double value) => new Angle(value);
+        //[Pure] public static implicit operator Angle(decimal value) => new Angle((double)value);
 
         // Comparison
         [Pure] public bool Equals(Angle other) => Value == other.Value;

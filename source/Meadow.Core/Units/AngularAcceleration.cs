@@ -74,14 +74,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator AngularAcceleration(ushort value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(short value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(uint value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(long value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(int value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(float value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(double value) => new AngularAcceleration(value);
-        [Pure] public static implicit operator AngularAcceleration(decimal value) => new AngularAcceleration((double)value);
+        //[Pure] public static implicit operator AngularAcceleration(ushort value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(short value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(uint value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(long value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(int value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(float value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(double value) => new AngularAcceleration(value);
+        //[Pure] public static implicit operator AngularAcceleration(decimal value) => new AngularAcceleration((double)value);
 
         // Comparison
         [Pure] public bool Equals(AngularAcceleration other) => Value == other.Value;

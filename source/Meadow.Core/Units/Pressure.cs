@@ -99,14 +99,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Pressure(ushort value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(short value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(uint value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(long value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(int value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(float value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(double value) => new Pressure(value);
-        [Pure] public static implicit operator Pressure(decimal value) => new Pressure((double)value);
+        //[Pure] public static implicit operator Pressure(ushort value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(short value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(uint value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(long value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(int value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(float value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(double value) => new Pressure(value);
+        //[Pure] public static implicit operator Pressure(decimal value) => new Pressure((double)value);
 
         // Comparison
         [Pure] public bool Equals(Pressure other) => Value == other.Value;

@@ -67,14 +67,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator AbsoluteHumidity(ushort value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(short value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(uint value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(long value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(int value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(float value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(double value) => new AbsoluteHumidity(value);
-        [Pure] public static implicit operator AbsoluteHumidity(decimal value) => new AbsoluteHumidity((double)value);
+        //[Pure] public static implicit operator AbsoluteHumidity(ushort value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(short value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(uint value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(long value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(int value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(float value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(double value) => new AbsoluteHumidity(value);
+        //[Pure] public static implicit operator AbsoluteHumidity(decimal value) => new AbsoluteHumidity((double)value);
 
         // Comparison
         [Pure] public bool Equals(AbsoluteHumidity other) => Value == other.Value;

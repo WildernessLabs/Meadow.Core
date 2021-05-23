@@ -60,14 +60,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Percent.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator RelativeHumidity(ushort value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(short value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(uint value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(long value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(int value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(float value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(double value) => new RelativeHumidity(value);
-        [Pure] public static implicit operator RelativeHumidity(decimal value) => new RelativeHumidity((double)value);
+        //[Pure] public static implicit operator RelativeHumidity(ushort value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(short value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(uint value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(long value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(int value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(float value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(double value) => new RelativeHumidity(value);
+        //[Pure] public static implicit operator RelativeHumidity(decimal value) => new RelativeHumidity((double)value);
 
         // Comparison
         [Pure] public bool Equals(RelativeHumidity other) => Percent == other.Percent;

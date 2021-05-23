@@ -109,14 +109,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Azimuth(ushort value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(short value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(uint value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(long value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(int value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(float value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(double value) => new Azimuth(value);
-        [Pure] public static implicit operator Azimuth(decimal value) => new Azimuth((double)value);
+        //[Pure] public static implicit operator Azimuth(ushort value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(short value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(uint value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(long value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(int value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(float value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(double value) => new Azimuth(value);
+        //[Pure] public static implicit operator Azimuth(decimal value) => new Azimuth((double)value);
 
         // Comparison
         [Pure] public bool Equals(Azimuth other) => Value == other.Value;

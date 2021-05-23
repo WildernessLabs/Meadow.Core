@@ -80,14 +80,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Density(ushort value) => new Density(value);
-        [Pure] public static implicit operator Density(short value) => new Density(value);
-        [Pure] public static implicit operator Density(uint value) => new Density(value);
-        [Pure] public static implicit operator Density(long value) => new Density(value);
-        [Pure] public static implicit operator Density(int value) => new Density(value);
-        [Pure] public static implicit operator Density(float value) => new Density(value);
-        [Pure] public static implicit operator Density(double value) => new Density(value);
-        [Pure] public static implicit operator Density(decimal value) => new Density((double)value);
+        //[Pure] public static implicit operator Density(ushort value) => new Density(value);
+        //[Pure] public static implicit operator Density(short value) => new Density(value);
+        //[Pure] public static implicit operator Density(uint value) => new Density(value);
+        //[Pure] public static implicit operator Density(long value) => new Density(value);
+        //[Pure] public static implicit operator Density(int value) => new Density(value);
+        //[Pure] public static implicit operator Density(float value) => new Density(value);
+        //[Pure] public static implicit operator Density(double value) => new Density(value);
+        //[Pure] public static implicit operator Density(decimal value) => new Density((double)value);
 
         // Comparison
         [Pure] public bool Equals(Density other) => Value == other.Value;

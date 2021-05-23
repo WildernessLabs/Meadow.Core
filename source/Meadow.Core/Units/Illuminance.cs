@@ -68,14 +68,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Illuminance(ushort value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(short value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(uint value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(long value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(int value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(float value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(double value) => new Illuminance(value);
-        [Pure] public static implicit operator Illuminance(decimal value) => new Illuminance((double)value);
+        //[Pure] public static implicit operator Illuminance(ushort value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(short value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(uint value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(long value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(int value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(float value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(double value) => new Illuminance(value);
+        //[Pure] public static implicit operator Illuminance(decimal value) => new Illuminance((double)value);
 
         // Comparison
         [Pure] public bool Equals(Illuminance other) => Value == other.Value;

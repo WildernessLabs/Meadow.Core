@@ -78,14 +78,14 @@ namespace Meadow.Units
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
-        [Pure] public static implicit operator Torque(ushort value) => new Torque(value);
-        [Pure] public static implicit operator Torque(short value) => new Torque(value);
-        [Pure] public static implicit operator Torque(uint value) => new Torque(value);
-        [Pure] public static implicit operator Torque(long value) => new Torque(value);
-        [Pure] public static implicit operator Torque(int value) => new Torque(value);
-        [Pure] public static implicit operator Torque(float value) => new Torque(value);
-        [Pure] public static implicit operator Torque(double value) => new Torque(value);
-        [Pure] public static implicit operator Torque(decimal value) => new Torque((double)value);
+        //[Pure] public static implicit operator Torque(ushort value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(short value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(uint value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(long value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(int value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(float value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(double value) => new Torque(value);
+        //[Pure] public static implicit operator Torque(decimal value) => new Torque((double)value);
 
         // Comparison
         [Pure] public bool Equals(Torque other) => Value == other.Value;
