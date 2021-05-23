@@ -481,12 +481,12 @@ namespace Meadow.Devices
 
         //TODO: need the Read()/StartUpdating()/StopUpdating() pattern here.
         /// <summary>
-        /// Gets the current battery charge level in volts (`V`).
+        /// Gets the current battery charge level in voltage.
         /// </summary>
-        public double GetBatteryLevel()
+        public Voltage GetBatteryLevel()
         {
             if (Coprocessor != null) {
-                return (Coprocessor.GetBatteryLevel());
+                return (new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts));
             } else {
                 throw new Exception("Coprocessor not initialized.");
             }
