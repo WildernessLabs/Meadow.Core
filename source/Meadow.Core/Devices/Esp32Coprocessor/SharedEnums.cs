@@ -122,8 +122,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     // </summary>
     public enum BluetoothFunction
     {
-        GetConfiguration = 0,
-        SetConfiguration = 1
+        Start = 0,
+        Stop = 1,
+        GetHandles = 2,
+        ServerDataSet = 3,
+        ClientWriteRequestEvent = 4
     };
 
     // <summary>

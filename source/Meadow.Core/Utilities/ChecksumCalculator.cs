@@ -11,7 +11,7 @@ namespace Meadow.Utilities
         /// <summary>
         ///     Lookup table for the polynomial CRC 8 method.
         /// </summary>
-        private static byte[] _lookupTable = null;
+        private static byte[]? _lookupTable = null;
 
         /// <summary>
         ///     When the _lookupTable is not null then _polynomial will contain the 
@@ -81,11 +81,16 @@ namespace Meadow.Utilities
             if ((_lookupTable == null) || ((_lookupTable != null) && (_polynomial != polynomial))) {
                 PopulateLookupTable(polynomial);
             }
-            byte crc = 0;
-            foreach (byte b in data) {
-                crc = _lookupTable[crc ^ b];
+            if (_lookupTable != null) // shouldn't ever happen due to above, but prevents compiler warning
+            {
+                byte crc = 0;
+                foreach (byte b in data)
+                {
+                    crc = _lookupTable[crc ^ b];
+                }
+                return crc;
             }
-            return crc;
+            return 0;
         }
     }
 }

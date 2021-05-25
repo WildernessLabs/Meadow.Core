@@ -1,20 +1,21 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 
 namespace Meadow.Peripherals.Sensors.Light
 {
     /// <summary>
     /// Light sensor interface requirements.
     /// </summary>
-    public interface ILightSensor : ISensor, IObservable<FloatChangeResult>
+    public interface ILightSensor : ISensor
     {
         /// <summary>
         /// Last value read from the Light sensor.
         /// </summary>
-        float Luminosity { get; }
+        Illuminance? Illuminance { get; }
 
         /// <summary>
         /// Raised when a change in light is detected.
         /// </summary>
-        event EventHandler<FloatChangeResult> LightLevelChanged;
+        event EventHandler<IChangeResult<Illuminance>> LuminosityUpdated;
     }
 }

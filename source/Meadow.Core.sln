@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Basic_FileSystem", "Tests\B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Units.Tests", "Meadow.Units.Tests\Meadow.Units.Tests.csproj", "{6037106D-06D4-4990-91BA-7E06DF23B9CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLETest", "Tests\Bluetooth\BLETest.csproj", "{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
@@ -71,6 +73,12 @@ Global
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6037106D-06D4-4990-91BA-7E06DF23B9CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +89,7 @@ Global
 		{4B689705-4092-4104-A4EC-B4C2696141A1} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{31BF92DD-008D-43C6-A644-19A7C857A42C} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 		{FD33EDFB-E868-45A4-993D-13959D9D718D} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
+		{121F55EC-96A6-43FF-82DB-D5DEEC753B3F} = {CDA0F516-977E-4F27-9434-9A0961EF91D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}

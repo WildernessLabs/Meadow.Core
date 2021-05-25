@@ -10,7 +10,7 @@ namespace Meadow
     /// <typeparam name="T"></typeparam>
     public class CircularBuffer<T> : IEnumerable<T>
     {
-        public event EventHandler ItemAdded;
+        public event EventHandler ItemAdded = delegate { };
 
         // TODO: this should probably be Span<T>
         private T[] _list;
@@ -24,19 +24,19 @@ namespace Meadow
         /// <summary>
         /// Fires when an element is added to the buffer when it is already full
         /// </summary>
-        public event EventHandler Overrun;
+        public event EventHandler Overrun = delegate { };
         /// <summary>
         /// Fires when an attempt is made to remove an item from an empty buffer
         /// </summary>
-        public event EventHandler Underrun;
+        public event EventHandler Underrun = delegate { };
         /// <summary>
         /// Fires when the number of elements reaches a non-zero HighWaterLevel value on an Enqueue call.  This event fires only once when passing upward across the boundary.
         /// </summary>
-        public event EventHandler HighWater;
+        public event EventHandler HighWater = delegate { };
         /// <summary>
         /// Fires when the number of elements reaches a non-zero LowWaterLevel value on a Remove call.  This event fires only once when passing downward across the boundary.
         /// </summary>
-        public event EventHandler LowWater;
+        public event EventHandler LowWater = delegate { };
         /// <summary>
         /// Gets the maximum number of elements the buffer can hold.
         /// </summary>
@@ -245,7 +245,7 @@ namespace Meadow
         /// Removes the element from the tail of the buffer, if one exists
         /// </summary>
         /// <returns></returns>
-        public T Remove()
+        public T? Remove()
         {
             return GetOldest(true);
         }
@@ -254,19 +254,19 @@ namespace Meadow
         /// Returns the element currently at the head of the buffer, if one exists, without removing it
         /// </summary>
         /// <returns></returns>
-        public T Peek()
+        public T? Peek()
         {
             return GetOldest(false);
         }
 
-        private T GetOldest(bool remove)
+        private T? GetOldest(bool remove)
         {
             lock (_syncRoot)
             {
                 if ((Count == 0) && !(IsFull))
                 {
                     OnUnderrun();
-                    return default(T);
+                    return default;
                 }
 
                 T item = _list[_tail];
@@ -323,7 +323,7 @@ namespace Meadow
         /// <param name="findFunction"></param>
         /// <param name="defaultValue">The value to return if find function finds nothing</param>
         /// <returns></returns>
-        public T Last(Func<T, bool> findFunction, T defaultValue = default(T))
+        public T? Last(Func<T, bool> findFunction, T? defaultValue = default)
         {
             lock (_syncRoot)
             {
@@ -353,7 +353,7 @@ namespace Meadow
         /// <param name="findFunction"></param>
         /// <param name="defaultValue">The value to return if find function finds nothing</param>
         /// <returns></returns>
-        public T First(Func<T, bool> findFunction, T defaultValue = default(T))
+        public T? First(Func<T, bool> findFunction, T? defaultValue = default)
         {
             lock (_syncRoot)
             {
@@ -379,6 +379,8 @@ namespace Meadow
         /// <returns></returns>
         public bool Contains(T searchFor)
         {
+            if (_list == null) return false;
+            
             lock (_syncRoot)
             {
                 // we don't want to enumerate values outside of our "valid" range
@@ -391,7 +393,7 @@ namespace Meadow
                         index -= MaxElements;
                     }
 
-                    if (_list[index].Equals(searchFor)) return true;
+                    if (_list[index]?.Equals(searchFor) ?? false) return true;
                 }
 
                 return false;
@@ -427,11 +429,11 @@ namespace Meadow
         /// <remarks>
         /// Similar to the Take() Linq method, if the buffer contains less items than requested, and empty array of items is returned and no items are Removed
         /// </remarks>
-        public T[] Remove(int count)
+        public T?[] Remove(int count)
         {
             if (Count < count) return new T[] { };
 
-            var result = new T[count];
+            var result = new T?[count];
 
             lock (_syncRoot)
             {

@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class Pin : PinBase
     {
-        public Pin(string name, object key, IList<IChannelInfo> supportedChannels = null) 
+        public Pin(string name, object key, IList<IChannelInfo>? supportedChannels = null) 
             : base (name, key, supportedChannels)
         {
         }

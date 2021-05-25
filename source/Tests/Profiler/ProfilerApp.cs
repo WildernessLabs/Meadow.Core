@@ -235,7 +235,7 @@ namespace Profiler
             _intResults = new long[iterations];
 
             _intIndex = -1;
-            InterruptHandler(null, null);
+            InterruptHandler(null, new DigitalPortResult());
 
             for (_intIndex = 0; _intIndex < iterations; _intIndex++)
             {
@@ -254,7 +254,7 @@ namespace Profiler
             Console.WriteLine($"mean: {(sum / (float)_intResults.Length):0}ms");
         }
 
-        private void InterruptHandler(object sender, DigitalInputPortEventArgs e)
+        private void InterruptHandler(object sender, DigitalPortResult e)
         {
             if (_intIndex >= 0)
             {

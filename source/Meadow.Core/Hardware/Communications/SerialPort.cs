@@ -25,8 +25,8 @@ namespace Meadow.Hardware
 
         protected IntPtr _driverHandle = IntPtr.Zero;
         protected bool _showSerialDebug = false;
-        protected CircularBuffer<byte> _readBuffer;
-        protected Thread _readThread;
+        protected CircularBuffer<byte>? _readBuffer;
+        protected Thread? _readThread;
         protected int _readTimeout;
         protected int _baudRate;
 
@@ -36,12 +36,12 @@ namespace Meadow.Hardware
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
         /// </summary>
-        public event SerialDataReceivedEventHandler DataReceived;
+        public event SerialDataReceivedEventHandler DataReceived = delegate { };
 
         /// <summary>
         /// Indicates that the internal data buffer has overrun and data has been lost.
         /// </summary>
-        public event EventHandler BufferOverrun;
+        public event EventHandler BufferOverrun = delegate { };
 
         /// <summary>
         /// Gets the port name used for communications.
@@ -351,7 +351,7 @@ namespace Meadow.Hardware
                 Output.WriteLineIf(_showSerialDebug, $"count:{count}, maxCount:{maxCount}");
                 Output.WriteLineIf(_showSerialDebug, $"Starting with: {(BitConverter.ToString(buffer, 0, (buffer.Length > 6) ? 6 : buffer.Length))}");
 
-                Timer writeTimeoutTimer = null;
+                Timer? writeTimeoutTimer = null;
 
                 if(WriteTimeout > 0)
                 {
@@ -441,7 +441,7 @@ namespace Meadow.Hardware
                         {
                             Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
                             
-                            _readBuffer.Append(readBuffer, 0, result);
+                            _readBuffer?.Append(readBuffer, 0, result);
 
                             if (DataReceived != null)
                             {
@@ -498,7 +498,7 @@ namespace Meadow.Hardware
                 throw new InvalidOperationException("Cannot read from a closed port");
             }
 
-            if (_readBuffer.Count == 0) return -1;
+            if (_readBuffer == null || _readBuffer.Count == 0) return -1;
             return _readBuffer.Remove();
         }
 
@@ -523,6 +523,8 @@ namespace Meadow.Hardware
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
             if (buffer == null) { throw new ArgumentNullException(); }
             if (index < 0) { throw new ArgumentException("Invalid index"); }
+
+            if (_readBuffer == null) return 0;
 
             // capture the count
             int readCount = _readBuffer.Count;
@@ -640,6 +642,8 @@ namespace Meadow.Hardware
         /// <exception cref="TimeoutException">No bytes were available to read.</exception>
         public int Read(byte[] buffer, int index, int count)
         {
+            if (_readBuffer == null) return 0;
+
             // all the checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
             if (buffer == null) { throw new ArgumentNullException(); }

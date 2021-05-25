@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
 using Meadow.Units;
-using static Meadow.Units.Tests.Helpers;
 
 namespace Meadow.Units.Tests
 {

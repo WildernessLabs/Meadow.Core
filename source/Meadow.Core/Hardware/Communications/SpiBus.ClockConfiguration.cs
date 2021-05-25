@@ -11,7 +11,7 @@ namespace Meadow.Hardware
         private ClockPhase _phase;
         private ClockPolarity _polarity;
 
-        internal event EventHandler Changed;
+        internal event EventHandler Changed = delegate { };
 
         /// <summary>
         /// SPI Bus Clock Polarity (CPOL)

@@ -20,12 +20,12 @@ namespace Meadow.Hardware
         // dirty dirty hack
         internal bool IsOnboard { get; set; }
 
-        protected IIOController IOController { get; set; }
+        protected IMeadowIOController IOController { get; set; }
         protected IPwmChannelInfo PwmChannelInfo { get; set; }
 
         protected PwmPort(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             IPwmChannelInfo channel,
             bool inverted = false,
             bool isOnboard = false)
@@ -39,7 +39,7 @@ namespace Meadow.Hardware
 
         internal static PwmPort From(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             float frequency = 100f,
             float dutyCycle = 0.5f,
             bool inverted = false,

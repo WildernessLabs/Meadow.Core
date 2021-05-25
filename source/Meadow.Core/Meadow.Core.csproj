@@ -9,31 +9,22 @@
    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
-   <Version>0.22.0</Version>
+   <Version>0.23.0</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
  </PropertyGroup>
- <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+ <PropertyGroup>
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-   <LangVersion>8.0</LangVersion>
- </PropertyGroup>
- <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-   <LangVersion>8.0</LangVersion>
+   <LangVersion>9.0</LangVersion>
+   <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <Compile Remove="Hardware\Communications\SoftwareSpiBus.cs" />
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" />
  </ItemGroup>
  <ItemGroup>
-   <None Include="Hardware\Communications\SoftwareSpiBus.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
- </ItemGroup>
- <ItemGroup>
-   <Folder Include="Peripherals\Sensors\Location\" />
-   <Folder Include="Peripherals\Sensors\Location\Gnss\" />
-   <Folder Include="Devices\Esp32Coprocessor\" />
- </ItemGroup>
- <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.6.0" />
+   <Folder Include="Gateways\Bluetooth\Definitions\" />
+   <Folder Include="Peripherals\Sensors\Weather\" />
+   <Folder Include="Peripherals\Sensors\Mass\" />
  </ItemGroup>
 </Project>

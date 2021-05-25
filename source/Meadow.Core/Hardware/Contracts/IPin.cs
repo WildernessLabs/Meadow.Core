@@ -9,7 +9,7 @@ namespace Meadow.Hardware
     /// </summary>
     public interface IPin
     {
-        IList<IChannelInfo> SupportedChannels { get; }
+        IList<IChannelInfo>? SupportedChannels { get; }
         string Name { get; }
         object Key { get; }
 

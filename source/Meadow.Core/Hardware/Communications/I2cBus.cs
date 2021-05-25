@@ -19,7 +19,7 @@ namespace Meadow.Hardware
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
         private int _frequency;
 
-        private IIOController IOController { get; }
+        private IMeadowIOController IOController { get; }
 
         /// <summary>
         /// Bus Clock speed in Hz
@@ -66,7 +66,7 @@ namespace Meadow.Hardware
         /// developer from calling it.
         /// </summary>
         private I2cBus(
-            IIOController ioController,
+            IMeadowIOController ioController,
             IPin clock,
             II2cChannelInfo clockChannel,
             IPin data,
@@ -101,7 +101,7 @@ namespace Meadow.Hardware
         /// <param name="frequencyHz">Bus clock speed, in Hz</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
-        public static I2cBus From(IIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
+        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
         {
             return From(ioController, clock, data, (int)busSpeed, transactionTimeout);
         }
@@ -115,7 +115,7 @@ namespace Meadow.Hardware
         /// <param name="frequencyHz">Bus clock speed, in Hz</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
-        public static I2cBus From(IIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
+        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
         {
             var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
@@ -192,6 +192,11 @@ namespace Meadow.Hardware
         /// <param name="dataToWrite">Data buffer into which read data will go.  The size of this buffer determines the number of bytes to be read</param>
         public unsafe void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
         {
+            WriteReadData(peripheralAddress, writeBuffer, writeBuffer.Length, readBuffer, readBuffer.Length);
+        }
+
+        public unsafe void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount)
+        {
             _busSemaphore.Wait();
 
             try
@@ -203,9 +208,9 @@ namespace Meadow.Hardware
                     {
                         Address = peripheralAddress,
                         Frequency = this.Frequency,
-                        TxBufferLength = writeBuffer.Length,
+                        TxBufferLength = writeCount,
                         TxBuffer = (IntPtr)pWrite,
-                        RxBufferLength = readBuffer.Length,
+                        RxBufferLength = readCount,
                         RxBuffer = (IntPtr)pRead,
                     };
 
@@ -280,6 +285,11 @@ namespace Meadow.Hardware
             SendData(peripheralAddress, data);
         }
 
+        public void WriteData(byte peripheralAddress, byte[] data, int length)
+        {
+            SendData(peripheralAddress, data, length);
+        }
+
         /// <summary>
         /// Writes a number of bytes to the device.
         /// </summary>
@@ -306,6 +316,11 @@ namespace Meadow.Hardware
 
         private unsafe void SendData(byte address, Span<byte> data)
         {
+            SendData(address, data, data.Length);
+        }
+
+        private unsafe void SendData(byte address, Span<byte> data, int count)
+        {
             _busSemaphore.Wait();
 
             try
@@ -316,7 +331,7 @@ namespace Meadow.Hardware
                     {
                         Address = address,
                         Frequency = this.Frequency,
-                        TxBufferLength = data.Length,
+                        TxBufferLength = count,
                         TxBuffer = (IntPtr)pData,
                         RxBufferLength = 0,
                         RxBuffer = IntPtr.Zero

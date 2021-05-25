@@ -2,63 +2,31 @@
 
 namespace Meadow.Peripherals.Sensors.Hid
 {
-    public class JoystickPosition
+    /// <summary>
+    /// Represents a position that an analog joystick can havin, including both
+    /// the `Horizontal` and `Vertical` components.
+    /// </summary>
+    public struct JoystickPosition
     {
         /// <summary>
         /// 
         /// </summary>
-        public float HorizontalValue { get; set; }
+        public float? Horizontal { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public float VerticalValue { get; set; }
+        public float? Vertical { get; set; }
 
-        public JoystickPosition() { }
-
-        public JoystickPosition(float horizontalValue, float verticalValue) 
+        public JoystickPosition(float? horizontal, float? vertical) 
         {
-            HorizontalValue = horizontalValue;
-            VerticalValue = verticalValue;
+            Horizontal = horizontal;
+            Vertical = vertical;
         }
 
-        public static JoystickPosition From(JoystickPosition conditions) 
+        public static JoystickPosition From(JoystickPosition position) 
         {
-            return new JoystickPosition(
-                conditions.HorizontalValue,
-                conditions.VerticalValue
-                );
-        }
-    }
-
-    public class JoystickPositionChangeResult : IChangeResult<JoystickPosition>
-    {
-        public JoystickPosition New 
-        { 
-            get => _newValue; 
-            set { _newValue = value;  } 
-        } protected JoystickPosition _newValue = new JoystickPosition();
-        
-        public JoystickPosition Old 
-        { 
-            get => _oldValue;
-            set { _oldValue = value; }
-        } protected JoystickPosition _oldValue = new JoystickPosition();
-
-        public JoystickPosition Delta { get; protected set; } = new JoystickPosition();
-
-        public JoystickPositionChangeResult(JoystickPosition newValue, JoystickPosition oldValue) 
-        {
-            New = newValue;
-            Old = oldValue;
-        }
-
-        protected void RecalcDelta() 
-        {
-            JoystickPosition delta = new JoystickPosition();
-            delta.HorizontalValue = New.HorizontalValue - Old.HorizontalValue;
-            delta.VerticalValue = New.VerticalValue - Old.VerticalValue;
-            Delta = delta;
+            return new JoystickPosition(position.Horizontal, position.Vertical );
         }
     }
 }

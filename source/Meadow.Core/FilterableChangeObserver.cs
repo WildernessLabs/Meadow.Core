@@ -2,23 +2,31 @@
 
 namespace Meadow
 {
-    //public class FilterableChangeObserver<C, T> : IObserver<C> where C : IChangeResult<T>
-
     /// <summary>
     /// An `IObserver` that handles change notifications and has an optional
     /// predicate that automatically filters results so only results that match
     /// the predicate will reach the subscriber.
     /// </summary>
-    /// <typeparam name="C">The `IChangeResult` notification data.</typeparam>
-    /// <typeparam name="T">The datatype that contains the notification data.
-    /// I.e. `AtmosphericConditions` or `decimal`.</typeparam>
-    public class FilterableChangeObserver<C, T> : IObserver<C> where C : IChangeResult<T>
+    /// <typeparam name="UNIT">The datatype that contains the notification data.
+    /// I.e. `Temperature` or `decimal`. Must be a `struct`.</typeparam>
+    public class FilterableChangeObserver<UNIT> : IObserver<IChangeResult<UNIT>>
+        where UNIT : struct
     {
-        protected Action<C> _handler;// = null;
-        protected Predicate<C>? _filter = null;
+        /// <summary>
+        /// Than handler that is called in `OnNext` if the filter is satisfied.
+        /// </summary>
+        protected Action<IChangeResult<UNIT>> Handler { get; } = delegate { };
+        /// <summary>
+        /// A filter that specifies whether or not the observer should get notified.
+        /// </summary>
+        protected Predicate<IChangeResult<UNIT>>? Filter { get; } = null;
 
-        protected bool _isInitialized = false;
-        protected T _lastNotifedValue;
+        /// <summary>
+        /// The last notified value. Note that this may differ from the `Old`
+        /// property on the result, because this only gets updated if the filter
+        /// is satisfied and the result is sent to the observer.
+        /// </summary>
+        protected UNIT? lastNotifedValue;
 
         /// <summary>
         /// Creates a new `FilterableChangeObserver` that will execute the handler
@@ -29,38 +37,37 @@ namespace Meadow
         /// <param name="handler">An `Action` that will be invoked when a
         /// change occurs.</param>
         /// <param name="filter">An optional `Predicate` that filters out any
-        /// notifications that don't satisfy (return `true`) the predicate condition.</param>
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-        public FilterableChangeObserver(Action<C> handler/* = null*/, Predicate<C>? filter = null)
-#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+        /// notifications that don't satisfy (return `true`) the predicate condition.
+        /// Note that the first reading will always call the handler.</param>
+        public FilterableChangeObserver(Action<IChangeResult<UNIT>> handler, Predicate<IChangeResult<UNIT>>? filter = null)
         {
-            this._handler = handler;
-            this._filter = filter;
+            this.Handler = handler;
+            this.Filter = filter;
         }
 
         /// <summary>
         /// Called by an Observable when a change occurs.
         /// </summary>
         /// <param name="result"></param>
-        public void OnNext(C result)
+        public void OnNext(IChangeResult<UNIT> result)
         {
-            // first time through, save initial state
-            if (!_isInitialized)
-            {
-                _lastNotifedValue = result.New;
-                _isInitialized = true;
-            }
-            // inject the actual last notified value into the result
+            // if the last notified value isn't null, inject it into the result.
             // (each last notified is specific to the observer)
-            result.Old = _lastNotifedValue;
+            if (lastNotifedValue is { } last) {
+                result.Old = last;
+            }
 
-            // if there is no filter, or if the filter satisfies the result,
-            if (_filter == null || _filter(result))
+            // if there is no filter,
+            //  OR
+            // if the filter satisfies the result,
+            //  OR
+            // if it's the first time (result.Old == null)
+            if (Filter == null || Filter(result) || result.Old is null)
             {
-                // update our state
-                _lastNotifedValue = result.New;
+                // save the last notified value as this new value
+                lastNotifedValue = result.New;
                 // invoke (execute) the handler
-                _handler?.Invoke(result);
+                Handler?.Invoke(result);
             }
         }
 
@@ -73,5 +80,4 @@ namespace Meadow
             Console.WriteLine("Filtered Observer error: "+ error.Message);
         }
     }
-
 }

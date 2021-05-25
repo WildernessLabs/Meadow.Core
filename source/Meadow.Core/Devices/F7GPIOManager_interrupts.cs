@@ -13,12 +13,12 @@ using static Meadow.Core.Interop.STM32;
 namespace Meadow.Devices
 {
 
-    public partial class F7GPIOManager : IIOController
+    public partial class F7GPIOManager : IMeadowIOController
     {
-        public event InterruptHandler Interrupt;
+        public event InterruptHandler Interrupt = delegate { };
 
-        private Thread _ist = null;
-        private List<int> _interruptGroupsInUse = new List<int>();
+        private Thread? _ist;
+        private List<int> _interruptGroupsInUse = new();
 
         public void WireInterrupt(IPin pin, InterruptMode interruptMode,
                      Meadow.Hardware.ResistorMode resistorMode,

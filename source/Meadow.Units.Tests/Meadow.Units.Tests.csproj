@@ -34,9 +34,11 @@
   <ItemGroup>
     <Compile Include="TemperatureTests.cs" />
     <Compile Include="PressureTests.cs" />
-    <Compile Include="VelocityTests.cs" />
-    <Compile Include="Helpers.cs" />
+    <Compile Include="SpeedTests.cs" />
     <Compile Include="AzimuthTests.cs" />
+    <Compile Include="LengthTests.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="MassTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

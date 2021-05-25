@@ -1,22 +1,23 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 
-namespace Meadow.Peripherals.Sensors.Distance
+namespace Meadow.Peripherals.Sensors
 {
     /// <summary>
     /// Interface for distance sensors classes.
     /// </summary>
-    public interface IRangeFinder : ISensor, IObservable<DistanceConditionChangeResult>
+    public interface IRangeFinder : ISensor
     {
         /// <summary>
         /// Last value read from the Temperature sensor.
         /// </summary>
-        DistanceConditions Conditions { get; }
+        Length? Distance { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<DistanceConditionChangeResult> Updated;
+        event EventHandler<IChangeResult<Length>> DistanceUpdated;
     }
 }

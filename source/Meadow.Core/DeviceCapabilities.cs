@@ -34,7 +34,7 @@ namespace Meadow
                 if (_maxRawAdcVoltageValue != null) {
                     return _maxRawAdcVoltageValue;
                 } else {
-                    _maxRawAdcVoltageValue = (int?)Math.Pow(2, (double)AdcResolution);
+                    _maxRawAdcVoltageValue = (int?)Math.Pow(2, (double)(AdcResolution ?? 1));
                     return _maxRawAdcVoltageValue;
                 }
             }

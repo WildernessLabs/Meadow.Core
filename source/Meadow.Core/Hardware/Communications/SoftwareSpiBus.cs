@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
+/*
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -55,7 +56,7 @@ namespace Meadow.Hardware
         /// <param name="clock">Clock pin.</param>
         /// <param name="cpha">Clock phase (0 or 1, default is 0).</param>
         /// <param name="cpol">Clock polarity (0 or 1, default is 0).</param>
-        public SoftwareSPIBus(IIODevice device, IPin mosi, IPin miso, IPin clock/*, IPin chipSelect*/, byte cpha = 0, byte cpol = 0)
+        public SoftwareSPIBus(IIODevice device, IPin mosi, IPin miso, IPin clock, byte cpha = 0, byte cpol = 0)
         {
             if (mosi == null)
             {
@@ -363,3 +364,4 @@ namespace Meadow.Hardware
         #endregion Methods
     }
 }
+*/

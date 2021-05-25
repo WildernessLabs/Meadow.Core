@@ -10,7 +10,7 @@ namespace Meadow.Hardware
   public class BiDirectionalPort : BiDirectionalPortBase
     {
         private PortDirectionType _currentDirection;
-        protected IIOController IOController { get; }
+        protected IMeadowIOController IOController { get; }
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         // Direction change
@@ -36,7 +36,7 @@ namespace Meadow.Hardware
 
         protected BiDirectionalPort(
             IPin pin,
-            IIOController gpioController,
+            IMeadowIOController gpioController,
             IDigitalChannelInfo channel,
             bool initialState = false, 
             InterruptMode interruptMode = InterruptMode.None,
@@ -102,7 +102,7 @@ namespace Meadow.Hardware
 
         public static BiDirectionalPort From(
             IPin pin,
-            IIOController ioController,
+            IMeadowIOController ioController,
             bool initialState = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
@@ -195,7 +195,10 @@ namespace Meadow.Hardware
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = DateTime.Now;
-                RaiseChangedAndNotify(new DigitalInputPortEventArgs(state, this.LastEventTime, capturedLastTime));
+                // BC 2021.05.21 b5.0: Changed this to the new result type.
+                // assuming that old state is just an inversion of the new state, yeah?
+                RaiseChangedAndNotify(new DigitalPortResult(new DigitalState(state, this.LastEventTime), new DigitalState(!state, capturedLastTime)));
+                //RaiseChangedAndNotify(new DigitalInputPortChangeResult(state, this.LastEventTime, capturedLastTime));
             }
         }
     }

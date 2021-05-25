@@ -91,6 +91,14 @@ namespace Meadow.Gateway.WiFi
         /// </summary>
         private WifiNetwork()
         {
+            Ssid = string.Empty;
+            Bssid = string.Empty;
+            TypeOfNetwork = NetworkType.Any;
+            Phy =  PhyType.Unknown;
+            SecuritySettings = new NetworkSecuritySettings(NetworkAuthenticationType.Unknown, NetworkEncryptionType.Unknown);
+            ChannelCenterFrequency = 0;
+            Protocol =  NetworkProtocol.ProtocolLow;
+            SignalDbStrength = 0;
         }
 
         /// <summary>

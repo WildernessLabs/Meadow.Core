@@ -11,7 +11,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Occurs when the state is changed. To enable this, set the InterruptMode at construction
         /// </summary>
-        public event EventHandler<DigitalInputPortEventArgs> Changed = delegate { };
+        public event EventHandler<DigitalPortResult> Changed = delegate { };
 
         /// <summary>
         /// Gets or sets a value indicating the type of interrupt monitoring this input.
@@ -24,7 +24,7 @@ namespace Meadow.Hardware
         public abstract double DebounceDuration { get; set; }
         public abstract double GlitchDuration { get; set; }
 
-        protected List<IObserver<DigitalInputPortEventArgs>> _observers { get; set; } = new List<IObserver<DigitalInputPortEventArgs>>();
+        protected List<IObserver<IChangeResult<DigitalState>>> _observers { get; set; } = new List<IObserver<IChangeResult<DigitalState>>>();
 
         protected DigitalInputPortBase(
             IPin pin,
@@ -36,13 +36,13 @@ namespace Meadow.Hardware
             this.InterruptMode = interruptMode;
         }
 
-        protected void RaiseChangedAndNotify(DigitalInputPortEventArgs changeResult)
+        protected void RaiseChangedAndNotify(DigitalPortResult changeResult)
         {
             Changed?.Invoke(this, changeResult);
             _observers.ForEach(x => x.OnNext(changeResult));
         }
 
-        public IDisposable Subscribe(IObserver<DigitalInputPortEventArgs> observer)
+        public IDisposable Subscribe(IObserver<IChangeResult<DigitalState>> observer)
         {
             if (!_observers.Contains(observer)) _observers.Add(observer);
             return new Unsubscriber(_observers, observer);
@@ -50,10 +50,10 @@ namespace Meadow.Hardware
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<DigitalInputPortEventArgs>> _observers;
-            private IObserver<DigitalInputPortEventArgs> _observer;
+            private List<IObserver<IChangeResult<DigitalState>>> _observers;
+            private IObserver<IChangeResult<DigitalState>> _observer;
 
-            public Unsubscriber(List<IObserver<DigitalInputPortEventArgs>> observers, IObserver<DigitalInputPortEventArgs> observer)
+            public Unsubscriber(List<IObserver<IChangeResult<DigitalState>>> observers, IObserver<IChangeResult<DigitalState>> observer)
             {
                 this._observers = observers;
                 this._observer = observer;
@@ -64,6 +64,5 @@ namespace Meadow.Hardware
                 if (!(_observer == null)) _observers.Remove(_observer);
             }
         }
-
     }
 }

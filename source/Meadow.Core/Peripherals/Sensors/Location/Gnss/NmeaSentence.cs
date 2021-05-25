@@ -43,7 +43,7 @@ namespace Meadow.Peripherals.Sensors.Location.Gnss
         /// The prefix, excluding the `$` symbol and first two letters of the
         /// sentence, i.e.: `RMC`.
         /// </summary>
-        public string Prefix { get; set; }
+        public string? Prefix { get; set; }
 
         /// <summary>
         /// A list of strings that represent the data elements within a NMEA
