@@ -9,7 +9,7 @@
    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
-   <Version>0.23.0-beta01</Version>
+   <Version>0.23.0</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
@@ -20,7 +20,7 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.6.0" />
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" />
  </ItemGroup>
  <ItemGroup>
    <Folder Include="Gateways\Bluetooth\Definitions\" />
