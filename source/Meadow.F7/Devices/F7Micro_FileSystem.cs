@@ -33,7 +33,7 @@ namespace Meadow.Devices
                     if (result != 0)
                     {
                         var error = UPD.GetLastError();
-                        throw new NativeException(error);
+                        throw new NativeException(error.ToString());
                     }
 
                     var all = Encoding.ASCII.GetString(buffer2).TrimEnd('\0');

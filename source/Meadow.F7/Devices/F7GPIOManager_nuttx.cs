@@ -10,7 +10,7 @@ using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
-    public partial class F7GPIOManager : INuttxIOController
+    public partial class F7GPIOManager
     {
         private class GpioConfig
         {

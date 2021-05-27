@@ -11,7 +11,7 @@ namespace Meadow.Hardware
         private ClockPhase _phase;
         private ClockPolarity _polarity;
 
-        internal event EventHandler Changed = delegate { };
+        public event EventHandler Changed = delegate { };
 
         /// <summary>
         /// SPI Bus Clock Polarity (CPOL)
@@ -116,7 +116,7 @@ namespace Meadow.Hardware
         /// Provided to allow setting speed value without raising a Changed event.  This method is used internally.
         /// </summary>
         /// <param name="speed"></param>
-        internal void SetActualSpeedKHz(long speed)
+        public void SetActualSpeedKHz(long speed)
         {
             _speedKHz = speed;
         }

@@ -72,7 +72,7 @@ namespace Meadow.Hardware
             base.ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
 
             // attempt to reserve
-            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
+            var success = IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
             if (success.Item1) {
                 // make sure the pin is configured as an analog input
                 ioController.ConfigureAnalogInput(pin);
@@ -81,7 +81,7 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static AnalogInputPort From(
+        public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
             float referenceVoltage)

@@ -2,7 +2,7 @@
 {
     public class Service
     {
-        internal ushort Handle { get; set; }
+        public ushort Handle { get; set; }
         public string Name { get; }
         public ushort Uuid { get; }
         public CharacteristicCollection Characteristics { get; }

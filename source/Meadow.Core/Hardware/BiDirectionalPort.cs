@@ -73,7 +73,7 @@ namespace Meadow.Hardware
             this.IOController.Interrupt += OnInterrupt;
 
             // attempt to reserve the pin - we'll reserve it as an input even though we use it for bi-directional
-            var result = DeviceChannelManager.ReservePin(
+            var result = this.IOController.DeviceChannelManager.ReservePin(
                 this.Pin, 
                 ChannelConfigurationType.DigitalInput);
 
@@ -144,7 +144,7 @@ namespace Meadow.Hardware
                 {
                     this.IOController.Interrupt -= OnInterrupt;
                     this.IOController.UnconfigureGpio(this.Pin);
-                    bool success = DeviceChannelManager.ReleasePin(this.Pin);
+                    bool success = this.IOController.DeviceChannelManager.ReleasePin(this.Pin);
                 }
                 disposed = true;
             }

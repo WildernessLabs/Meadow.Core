@@ -32,10 +32,12 @@ namespace Meadow.Devices
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
         internal DebugFeature DebugFeatures { get; set; }
+        public IDeviceChannelManager DeviceChannelManager { get; }
 
         internal F7GPIOManager()
         {
             DebugFeatures = DebugFeature.None;
+            DeviceChannelManager = new DeviceChannelManager();
 #if DEBUG
             //Console.WriteLine($"DirectRegisterAccess = {DirectRegisterAccess}");
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
@@ -44,6 +46,7 @@ namespace Meadow.Devices
             // DebugFeatures = DebugFeature.Interrupts;
 #endif
         }
+
 
         public void Initialize()
         {
@@ -123,7 +126,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var error = UPD.GetLastError();
-                throw new NativeException(error);
+                throw new NativeException(error.ToString());
             }
         }
 

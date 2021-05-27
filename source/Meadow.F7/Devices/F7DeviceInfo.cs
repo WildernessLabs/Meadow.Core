@@ -66,7 +66,7 @@ namespace Meadow.Devices
             //  Make the request
             int ret = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetDeviceInfo, ref rqst);
             if(ret < 0)
-              throw new NativeException(UPD.GetLastError());   // Error
+              throw new NativeException(UPD.GetLastError().ToString());   // Error
 
             // Returns a single long string containing the device information
             string infoStr = Encoding.ASCII.GetString(strBuffer, 0, rqst.devInfoRetLen);

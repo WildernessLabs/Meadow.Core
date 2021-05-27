@@ -14,7 +14,7 @@ namespace Meadow.Gateways.Bluetooth
             Services.AddRange(services);
         }
 
-        internal string ToJson()
+        public string ToJson()
         {
             // serialize to JSON, but without pulling in a JSON lib dependency
             var json = $@"{{

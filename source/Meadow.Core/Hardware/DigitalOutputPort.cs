@@ -40,7 +40,7 @@ namespace Meadow.Hardware
             this.IOController = ioController;
 
             // attempt to reserve
-            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
+            var success = this.IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalOutput);
             if (success.Item1)
             {
                 _state = this.InverseLogic ? !initialState : initialState;
@@ -60,7 +60,7 @@ namespace Meadow.Hardware
         /// <returns>The from.</returns>
         /// <param name="pin">Pin.</param>
         /// <param name="initialState">If set to <c>true</c> initial state.</param>
-        internal static DigitalOutputPort From(IPin pin, 
+        public static DigitalOutputPort From(IPin pin, 
             IMeadowIOController ioController,
             bool initialState = false,
             OutputType initialOutputType = OutputType.PushPull)
@@ -92,7 +92,7 @@ namespace Meadow.Hardware
             {
                 if (disposing)
                 {
-                    DeviceChannelManager.ReleasePin(Pin);
+                    this.IOController.DeviceChannelManager.ReleasePin(Pin);
                 }
                 disposed = true;
             }

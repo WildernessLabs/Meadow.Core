@@ -48,7 +48,7 @@ namespace Meadow.Hardware
             var channel = pin.SupportedChannels.OfType<IPwmChannelInfo>().FirstOrDefault();
             if (channel != null)
             {
-                var success = DeviceChannelManager.ReservePwm(pin, channel, frequency);
+                var success = ioController.DeviceChannelManager.ReservePwm(pin, channel, frequency);
 
                 if (success.Item1)
                 {
@@ -186,9 +186,9 @@ namespace Meadow.Hardware
         /// </summary>
         public override void Start()
         {
-            DeviceChannelManager.BeforeStartPwm(this.PwmChannelInfo);
+            this.IOController.DeviceChannelManager.BeforeStartPwm(this.PwmChannelInfo);
             UpdateChannel();
-            DeviceChannelManager.AfterStartPwm(this.PwmChannelInfo, this.IOController);
+            this.IOController.DeviceChannelManager.AfterStartPwm(this.PwmChannelInfo, this.IOController);
             _isRunning = true;
         }
 

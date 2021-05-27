@@ -4,7 +4,7 @@ namespace Meadow.Gateways.Bluetooth
 {
     public class Descriptor
     {
-        internal ushort Handle { get; set; }
+        public ushort Handle { get; set; }
 
         private CharacteristicPermission Permissions { get; }
         private CharacteristicProperty Properties { get; }

@@ -3,6 +3,7 @@ using Meadow.Units;
 
 namespace Meadow.Hardware
 {
+
     public delegate void InterruptHandler(IPin pin, bool state);
 
     /// <summary>
@@ -87,5 +88,7 @@ namespace Meadow.Hardware
         void ReassertConfig(IPin pin);
 
         Temperature GetTemperature();
+
+        IDeviceChannelManager DeviceChannelManager { get; }
     }
 }

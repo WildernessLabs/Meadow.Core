@@ -1,6 +1,6 @@
 ﻿namespace Meadow.Hardware
 {
-    internal enum ChannelState
+    public enum ChannelState
     {
         Unknown,
         NotInUse,

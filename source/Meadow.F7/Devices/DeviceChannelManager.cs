@@ -5,21 +5,21 @@ using System.Linq;
 
 namespace Meadow.Hardware
 {
-    public static class DeviceChannelManager
+    internal class DeviceChannelManager : IDeviceChannelManager
     {
         /// <summary>
         /// Stores the current state of the various pin/channels on the device. 
         /// Used internally so that we can safely new up ports.
         /// </summary>
-        private static IDictionary<IPin, ChannelConfig> _channelStates;
-        private static readonly object _channelLock = new object();
-        private static IDictionary<uint, float> _pwmTimerFrequencies;
-        private static List<uint> _pwmTimersInitialized = new List<uint>();
-        private static KeyValuePair<IPin, ChannelConfig>[]? _pinsToReasssertForPwm = null;
+        private IDictionary<IPin, ChannelConfig> _channelStates;
+        private readonly object _channelLock = new object();
+        private IDictionary<uint, float> _pwmTimerFrequencies;
+        private List<uint> _pwmTimersInitialized = new List<uint>();
+        private KeyValuePair<IPin, ChannelConfig>[]? _pinsToReasssertForPwm = null;
 
-        internal static bool ShowDebug { get; set; } = false;
+        internal bool ShowDebug { get; set; } = false;
 
-        static DeviceChannelManager()
+        internal DeviceChannelManager()
         {
             _channelStates = new Dictionary<IPin, ChannelConfig>();
             _pwmTimerFrequencies = new Dictionary<uint, float>();
@@ -31,7 +31,7 @@ namespace Meadow.Hardware
         /// </summary>
         // NOTE: this method makes me long for F#. Oh pattern matching :D
         // TODO: should also check to see if that particular pin has the capapbility it's asking for? we can address later.
-        internal static Tuple<bool, string> ReservePin(IPin pin, ChannelConfigurationType configType)
+        public Tuple<bool, string> ReservePin(IPin pin, ChannelConfigurationType configType)
         {
             Output.WriteLineIf(ShowDebug, "+ReservePin");
             // thread sync
@@ -67,7 +67,7 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static void BeforeStartPwm(IPwmChannelInfo info)
+        public void BeforeStartPwm(IPwmChannelInfo info)
         {
             // HACK HACK HACK
             // In Nuttx, the first time a PWM timer is started, it sets the AF bit for all pins in the timer
@@ -104,7 +104,7 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static void AfterStartPwm(IPwmChannelInfo info, IMeadowIOController ioController)
+        public void AfterStartPwm(IPwmChannelInfo info, IMeadowIOController ioController)
         {
             // HACK HACK HACK
             // In Nuttx, the first time a PWM timer is started, it sets the AF bit for all pins in the timer
@@ -116,7 +116,7 @@ namespace Meadow.Hardware
                 {
                     foreach(var p in _pinsToReasssertForPwm)
                     {
-                        (ioController as INuttxIOController)?.ReassertConfig(p.Key);
+                        ioController.ReassertConfig(p.Key);
                     }
                 }
                 _pinsToReasssertForPwm = null;
@@ -124,7 +124,7 @@ namespace Meadow.Hardware
             }
         }
 
-        internal static Tuple<bool, string> ReservePwm(IPin pin, IPwmChannelInfo channelInfo, float frequency)
+        public Tuple<bool, string> ReservePwm(IPin pin, IPwmChannelInfo channelInfo, float frequency)
         {
             lock (_channelLock)
             {
@@ -164,7 +164,7 @@ namespace Meadow.Hardware
             }
         }
         // TODO: do we want to message back any information?
-        internal static bool ReleasePin(IPin pin)
+        public bool ReleasePin(IPin pin)
         {
             // thread sync
             lock (_channelLock)

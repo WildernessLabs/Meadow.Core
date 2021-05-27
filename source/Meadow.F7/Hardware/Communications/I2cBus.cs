@@ -88,7 +88,7 @@ namespace Meadow.Hardware
             if (result != 0)
             {
                 var error = UPD.GetLastError();
-                throw new NativeException(error);
+                throw new NativeException(error.ToString());
             }
         }
 
