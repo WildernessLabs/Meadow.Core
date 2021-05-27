@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
+    public delegate void SerialDataReceivedEventHandler(object sender, SerialDataReceivedEventArgs e);
+
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// </summary>

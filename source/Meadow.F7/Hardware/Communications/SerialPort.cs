@@ -8,8 +8,6 @@ using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
-    public delegate void SerialDataReceivedEventHandler(object sender, SerialDataReceivedEventArgs e);
-
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// Preserved for legacy API compatibility. For a more modern approach, use
@@ -288,7 +286,7 @@ namespace Meadow.Hardware
             var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput | Nuttx.DriverFlags.NonBlocking);
             if (handle.ToInt32() < 0)
             {
-                throw new NativeException(UPD.GetLastError());
+                throw new NativeException(UPD.GetLastError().ToString());
             }
             _driverHandle = handle;
             SetPortSettings();
@@ -380,7 +378,7 @@ namespace Meadow.Hardware
                         // if there was an error, pull it out of NuttX
                         if (result < 0)
                         {
-                            throw new NativeException(UPD.GetLastError());
+                            throw new NativeException(UPD.GetLastError().ToString());
                         }
                         // otherwise,
                         totalBytesWritten += result;
@@ -430,7 +428,7 @@ namespace Meadow.Hardware
                         }
                         else
                         {
-                            throw new NativeException(ec);
+                            throw new NativeException(ec.ToString());
                         }
                     }
                     else
@@ -676,7 +674,7 @@ namespace Meadow.Hardware
             if (result != 0)
             {
                 var error = UPD.GetLastError();
-                throw new NativeException(error);
+                throw new NativeException(error.ToString());
             }
 
             if (_showSerialDebug)
@@ -733,7 +731,7 @@ namespace Meadow.Hardware
 
             if (result != 0)
             {
-                throw new NativeException(UPD.GetLastError());
+                throw new NativeException(UPD.GetLastError().ToString());
             }
 
             if (_showSerialDebug)
@@ -743,7 +741,7 @@ namespace Meadow.Hardware
                 if (result != 0)
                 {
                     var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    throw new NativeException(error.ToString());
                 }
                 ShowSettings(settings);
             }
@@ -761,7 +759,7 @@ namespace Meadow.Hardware
             if (result != 0)
             {
                 var error = UPD.GetLastError();
-                throw new NativeException(error);
+                throw new NativeException(error.ToString());
             }
 
             if (_showSerialDebug)
@@ -818,7 +816,7 @@ namespace Meadow.Hardware
             result = Nuttx.ioctl(_driverHandle, TCSETS, p);
             if (result != 0)
             {
-                throw new NativeException(UPD.GetLastError());
+                throw new NativeException(UPD.GetLastError().ToString());
             }
 
             if (_showSerialDebug)
@@ -828,7 +826,7 @@ namespace Meadow.Hardware
                 if (result != 0)
                 {
                     var error = UPD.GetLastError();
-                    throw new NativeException(error);
+                    throw new NativeException(error.ToString());
                 }
                 ShowSettings(settings);
             }

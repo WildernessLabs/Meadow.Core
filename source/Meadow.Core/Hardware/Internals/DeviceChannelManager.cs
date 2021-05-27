@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Meadow.Devices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Meadow.Core;
-using Meadow.Devices;
-using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {

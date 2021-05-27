@@ -6,7 +6,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class SerialDataReceivedEventArgs
     {
-        internal SerialDataReceivedEventArgs(SerialDataType eventType)
+        public SerialDataReceivedEventArgs(SerialDataType eventType)
         {
             EventType = eventType;
         }

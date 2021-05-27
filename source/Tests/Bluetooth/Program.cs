@@ -11,6 +11,7 @@ namespace BLETest
         public static void Main(string[] args)
         {
             app = new BLEApp();
+            BLEApp.Device.
             Thread.Sleep(Timeout.Infinite);
         }
     }

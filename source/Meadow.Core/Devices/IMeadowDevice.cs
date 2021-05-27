@@ -36,5 +36,10 @@ namespace Meadow.Devices
         // TODO: this really should get moved to MeadowOS
         void SetSynchronizationContext(SynchronizationContext context);
 
+        void Initialize();
+
+        void Reset();
+        void WatchdogEnable(TimeSpan timeout);
+        void WatchdogReset();
     }
 }

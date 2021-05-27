@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Meadow.Devices
 {
-    internal static class Output
+    public static class Output
     {
         /// <summary>
         /// Header string for a 16-byte buffer plus address prefix.
