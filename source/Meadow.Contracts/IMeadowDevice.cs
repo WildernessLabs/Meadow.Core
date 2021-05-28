@@ -16,7 +16,7 @@ namespace Meadow.Devices
         ISerialMessageController,
         ISpiController,
         II2cController,
-        IIOController<IF7MicroPinout>
+        IIOController<IPinDefinitions>
     {
         /// <summary>
         /// Gets the device capabilities.

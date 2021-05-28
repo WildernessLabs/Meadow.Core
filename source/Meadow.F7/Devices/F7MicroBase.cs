@@ -36,7 +36,7 @@ namespace Meadow.Devices
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public IF7MicroPinout Pins { get; }
+        public IPinDefinitions Pins { get; }
 
         protected IMeadowIOController IoController { get; }
 
@@ -155,9 +155,9 @@ namespace Meadow.Devices
             // HACK NOTE: can't compare directly here, so we're comparing the name.
             // might be able to cast and compare?
             return (
-                pin.Name == Pins.OnboardLedBlue.Name ||
-                pin.Name == Pins.OnboardLedGreen.Name ||
-                pin.Name == Pins.OnboardLedRed.Name
+                pin.Name == (Pins as IF7MicroPinout)?.OnboardLedBlue.Name ||
+                pin.Name == (Pins as IF7MicroPinout)?.OnboardLedGreen.Name ||
+                pin.Name == (Pins as IF7MicroPinout)?.OnboardLedRed.Name
                 );
         }
 
@@ -275,7 +275,7 @@ namespace Meadow.Devices
             long speedkHz = IMeadowDevice.DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speedkHz);
+            return CreateSpiBus((Pins as IF7MicroPinout)?.SCK, (Pins as IF7MicroPinout)?.COPI, (Pins as IF7MicroPinout)?.CIPO, speedkHz);
         }
 
         /// <summary>
@@ -340,9 +340,9 @@ namespace Meadow.Devices
             // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
             // HACK NOTE: can't compare directly here, so we're comparing the name.
             // might be able to cast and compare?
-            if (clock.Name == Pins.ESP_CLK.Name) {
+            if (clock.Name == (Pins as IF7MicroPinout)?.ESP_CLK.Name) {
                 return 2;
-            } else if (clock.Name == Pins.SCK.Name) {
+            } else if (clock.Name == (Pins as IF7MicroPinout)?.SCK.Name) {
                 return 3;
             }
 
@@ -369,7 +369,7 @@ namespace Meadow.Devices
             I2cBusSpeed busSpeed
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, (int)busSpeed);
+            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, (int)busSpeed);
         }
 
         /// <summary>
@@ -381,7 +381,7 @@ namespace Meadow.Devices
             int frequencyHz = IMeadowDevice.DefaultI2cBusSpeed
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequencyHz);
+            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, frequencyHz);
         }
 
         /// <summary>

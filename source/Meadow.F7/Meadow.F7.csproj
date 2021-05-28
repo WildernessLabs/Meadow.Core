@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Meadow.Sdk/1.1.0">
  <PropertyGroup>
-   <TargetFramework>net472</TargetFramework>
+   <TargetFramework>netstandard2.1</TargetFramework>
    <OutputType>Library</OutputType>
    <AssemblyName>Meadow.F7</AssemblyName>   
    <Company>Wilderness Labs, Inc</Company>
@@ -20,7 +20,8 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" />
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0"
+       Condition="'$(TargetFramework)'=='net472'" />
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\Meadow.Contracts\Meadow.Contracts.csproj" />
