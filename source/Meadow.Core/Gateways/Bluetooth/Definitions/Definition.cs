@@ -2,12 +2,12 @@
 
 namespace Meadow.Gateways.Bluetooth
 {
-    public class Definition
+    public class Definition : IDefinition
     {
         public string DeviceName { get; }
         public ServiceCollection Services { get; }
 
-        public Definition(string deviceName, params Service[] services)
+        public Definition(string deviceName, params IService[] services)
         {
             DeviceName = deviceName;
             Services = new ServiceCollection();

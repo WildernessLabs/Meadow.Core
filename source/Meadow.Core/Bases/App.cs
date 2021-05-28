@@ -20,7 +20,7 @@ namespace Meadow
         public static A Current
         {
             get { return _current; }
-        } private static A? _current;
+        } private static A _current = null!;
 
         private static SynchronizationContext _mainContext { get; }
 
@@ -43,13 +43,13 @@ namespace Meadow
             // base ctor, then this might not ever run, or it might run
             // non-deterministically. so we need to figure out how to make sure
             // this stuff happens
-            _current = this as A;
+            _current = this as A ?? throw new Exception($"Unable to convert to {typeof(A).Name}");
         }
 
         public static D Device
         {
             get => _device;
-        } private static D _device;
+        } private static D _device = null!;
 
         /// <summary>
         /// Called when the application is put to sleep.

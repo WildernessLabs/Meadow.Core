@@ -1,9 +1,3 @@
-using System.Net;
-using Meadow.Gateway.WiFi;
-using System.Collections.ObjectModel;
-using System;
-using System.Threading.Tasks;
-
 namespace Meadow.Gateways
 {
     public interface ICoprocessor

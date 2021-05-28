@@ -2,7 +2,7 @@
 
 namespace Meadow.Gateways.Bluetooth
 {
-    public class Descriptor
+    public class Descriptor : IDescriptor
     {
         public ushort Handle { get; set; }
 
@@ -35,7 +35,7 @@ namespace Meadow.Gateways.Bluetooth
             Length = Data.Length;
         }
 
-        internal string ToJson()
+        public string ToJson()
         {
             // serialize to JSON, but without pulling in a JSON lib dependency
             // serialize to JSON, but without pulling in a JSON lib dependency

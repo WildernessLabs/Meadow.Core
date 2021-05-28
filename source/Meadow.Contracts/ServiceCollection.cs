@@ -6,11 +6,11 @@ using System.Collections.Generic;
 
 namespace Meadow.Gateways.Bluetooth
 {
-    public class ServiceCollection : IEnumerable<Service>
+    public class ServiceCollection : IEnumerable<IService>
     {
-        private Dictionary<string, Service> m_services = new Dictionary<string, Service>(StringComparer.InvariantCultureIgnoreCase);
+        private Dictionary<string, IService> m_services = new(StringComparer.InvariantCultureIgnoreCase);
 
-        internal ServiceCollection()
+        public ServiceCollection()
         {
 
         }
@@ -20,12 +20,12 @@ namespace Meadow.Gateways.Bluetooth
             get => m_services.Count;
         }
 
-        internal void Add(Service service)
+        public void Add(IService service)
         {
             m_services.Add(service.Name, service);
         }
 
-        internal void AddRange(IEnumerable<Service> services)
+        public void AddRange(IEnumerable<IService> services)
         {
             foreach (var s in services)
             {
@@ -33,7 +33,7 @@ namespace Meadow.Gateways.Bluetooth
             }
         }
 
-        public IEnumerator<Service> GetEnumerator()
+        public IEnumerator<IService> GetEnumerator()
         {
             return m_services.Values.GetEnumerator();
         }
@@ -43,12 +43,12 @@ namespace Meadow.Gateways.Bluetooth
             return GetEnumerator();
         }
 
-        public Service? this[string serviceName]
+        public IService? this[string serviceName]
         {
             get => m_services.ContainsKey(serviceName) ? m_services[serviceName] : null;
         }
 
-        public Service? this[int index]
+        public IService? this[int index]
         {
             get => m_services.Values.ElementAt(index);
         }

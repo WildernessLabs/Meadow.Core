@@ -11,7 +11,7 @@ namespace Meadow.Devices
 {
     public partial class Esp32Coprocessor : IBluetoothAdapter
     {
-        private Definition? _definition;
+        private IDefinition _definition = null!;
 
         internal string GetDefaultName()
         {
@@ -19,7 +19,7 @@ namespace Meadow.Devices
             return "Meadow BLE";
         }
 
-        public bool StartBluetoothServer(Definition definition)
+        public bool StartBluetoothServer(IDefinition definition)
         {
             if (definition == null)
             {

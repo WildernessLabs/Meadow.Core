@@ -15,6 +15,6 @@
         CharacteristicPermission Permissions { get; }
         CharacteristicProperty Properties { get; }
         int MaxLength { get; }
-        Descriptor[] Descriptors { get; }
+        IDescriptor[] Descriptors { get; }
     }
 }

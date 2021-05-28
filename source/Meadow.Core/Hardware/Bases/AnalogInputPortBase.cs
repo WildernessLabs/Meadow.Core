@@ -14,7 +14,6 @@ namespace Meadow.Hardware
     {
         //public bool IsSampling { get; protected set; } = false;
 
-
         /// <summary>
         /// Raised when the value of the reading changes.
         /// </summary>

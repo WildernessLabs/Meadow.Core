@@ -44,9 +44,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj">
-      <Project>{b13c7bdd-77f5-45f8-bdb9-6cd368c67410}</Project>
-      <Name>Meadow.Core</Name>
+    <ProjectReference Include="..\Meadow.Units\Meadow.Units.csproj">
+      <Project>{2369dadc-44d3-4c7e-b605-8dc80d626f10}</Project>
+      <Name>Meadow.Units</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

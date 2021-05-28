@@ -1,6 +1,6 @@
 ﻿namespace Meadow.Gateways.Bluetooth
 {
-    internal interface IJsonSerializable
+    public interface IJsonSerializable
     {
         string ToJson();
     }

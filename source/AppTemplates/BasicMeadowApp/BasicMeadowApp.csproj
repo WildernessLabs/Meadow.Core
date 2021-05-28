@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -35,9 +35,21 @@
     <Compile Include="MeadowApp.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Meadow.Contracts\Meadow.Contracts.csproj">
+      <Project>{1de72085-6e7c-4ffe-9efd-7fb97ea4b18f}</Project>
+      <Name>Meadow.Contracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj">
       <Project>{B13C7BDD-77F5-45F8-BDB9-6CD368C67410}</Project>
       <Name>Meadow.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Meadow.F7\Meadow.F7.csproj">
+      <Project>{68862169-c332-48df-be45-8a27aaa365b3}</Project>
+      <Name>Meadow.F7</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Meadow.Units\Meadow.Units.csproj">
+      <Project>{2369dadc-44d3-4c7e-b605-8dc80d626f10}</Project>
+      <Name>Meadow.Units</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

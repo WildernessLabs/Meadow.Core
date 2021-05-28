@@ -7,6 +7,7 @@ namespace Meadow.Units
 
     public interface IUnitType
     {
+        /*
         public static IUnitType operator -(IUnitType lvalue, IUnitType rvalue)
         {
             throw new Exception("Must override IUnitType subtraction operator");
@@ -26,6 +27,6 @@ namespace Meadow.Units
         {
             throw new Exception("Must override IUnitType addition operator");
         }
-
+        */
     }
 }

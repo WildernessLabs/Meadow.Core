@@ -5,7 +5,7 @@ namespace Meadow
 {
     public static class MeadowOS
     {
-        public static IMeadowDevice CurrentDevice { get; set; }
+        public static IMeadowDevice CurrentDevice { get; set; } = null!;
 
 
         public static void Sleep(DateTime until)

@@ -10,7 +10,7 @@ namespace Meadow.Gateways.Bluetooth
     {
         private Dictionary<string, ICharacteristic> m_characteristics = new Dictionary<string, ICharacteristic>(StringComparer.InvariantCultureIgnoreCase);
 
-        internal CharacteristicCollection()
+        public CharacteristicCollection()
         {
 
         }
@@ -20,12 +20,12 @@ namespace Meadow.Gateways.Bluetooth
             get => m_characteristics.Count;
         }
 
-        internal void Add(ICharacteristic characteristic)
+        public void Add(ICharacteristic characteristic)
         {
             m_characteristics.Add(characteristic.Name, characteristic);
         }
 
-        internal void AddRange(IEnumerable<ICharacteristic> characteristics)
+        public void AddRange(IEnumerable<ICharacteristic> characteristics)
         {
             foreach (var c in characteristics)
             {

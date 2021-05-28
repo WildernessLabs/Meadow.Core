@@ -1,21 +1,6 @@
 ﻿using System;
 namespace Meadow
 {
-    public class DeviceCapabilities
-    {
-        public NetworkCapabilities Network { get; protected set; }
-        public AnalogCapabilities Analog { get; protected set; }
-
-        public DeviceCapabilities(
-            AnalogCapabilities analog,
-            NetworkCapabilities network
-            )
-        {
-            this.Network = network;
-            this.Analog = analog;
-        }
-    }
-
     public class AnalogCapabilities
     {
         public AnalogCapabilities(
@@ -39,19 +24,6 @@ namespace Meadow
                 }
             }
         } protected int? _maxRawAdcVoltageValue;
-    }
-
-    public class NetworkCapabilities
-    {
-        public bool HasWiFi { get; protected set; }
-        public bool HasEthernet { get; protected set; }
-
-        public NetworkCapabilities(
-            bool hasWifi,
-            bool hasEthernet) {
-            this.HasWiFi = hasWifi;
-            this.HasEthernet = hasEthernet;
-        }
     }
 }
 
