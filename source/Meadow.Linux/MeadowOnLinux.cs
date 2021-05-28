@@ -7,10 +7,11 @@ using System.Threading;
 
 namespace Meadow
 {
-
     public class MeadowOnLinux<TPinout> : IMeadowDevice
         where TPinout : IPinDefinitions, new()
     {
+        private SynchronizationContext? _context;
+
         public IPinDefinitions Pins { get; }
         public DeviceCapabilities Capabilities { get; }
 
@@ -52,6 +53,22 @@ namespace Meadow
             // TODO: how do we affect frequency on these platforms?
 
             return new I2CBus(clock, data, frequencyHz);
+        }
+
+        // TODO: this should move to the MeadowOS class.
+        public void SetSynchronizationContext(SynchronizationContext context)
+        {
+            _context = context;
+        }
+
+        // TODO: this should move to the MeadowOS class.
+        public void BeginInvokeOnMainThread(Action action)
+        {
+            if (_context == null) {
+                action();
+            } else {
+                _context.Send(delegate { action(); }, null);
+            }
         }
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
@@ -117,11 +134,6 @@ namespace Meadow
         }
 
         public void SetClock(DateTime dateTime)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetSynchronizationContext(SynchronizationContext context)
         {
             throw new NotImplementedException();
         }

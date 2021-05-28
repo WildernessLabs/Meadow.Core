@@ -47,5 +47,14 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int open(string pathname, DriverFlags flags);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int write(int handle, byte[] buf, int count);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int read(int handle, byte[] buf, int n);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int ioctl(int fd, int request, IntPtr pData);
     }
 }

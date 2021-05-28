@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "I2CDetect (remote debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "deploy",
+            "program": "${config:device.DotNetPath}/dotnet",
+            "args": ["${config:app.Name}.dll"],
+            "cwd": "${config:remote.Folder}",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceFolder}",
+                "pipeProgram": "plink.exe",
+                "pipeArgs": [
+                    "-pw",
+                    "${config:device.Password}",
+                    "${config:device.User}@${config:device.Address}"
+                ],
+                "debuggerPath": "${config:device.VsdbgPath}/vsdbg"
+            }
+        },
+        {
+            // Use IntelliSense to find out which attributes exist for C# debugging
+            // Use hover for the description of the existing attributes
+            // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/dotnet-sensor-agent.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

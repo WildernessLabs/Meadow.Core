@@ -35,6 +35,7 @@ namespace Meadow.Devices
         /// <param name="context"></param>
         // TODO: this really should get moved to MeadowOS
         void SetSynchronizationContext(SynchronizationContext context);
+        void BeginInvokeOnMainThread(Action action);
 
         void Initialize();
 
