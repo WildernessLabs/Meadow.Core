@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Linq;
 using System.Text;
@@ -29,30 +30,33 @@ namespace Meadow
 //            IoController.Initialize();
         }
 
-        public II2cBus CreateI2cBus()
+        public II2cBus CreateI2cBus(int busNumber = 0)
         {
-            return CreateI2cBus(Pins["PIN05"], Pins["PIN03"]);
+            return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
         }
 
-        public II2cBus CreateI2cBus(int frequencyHz)
+        public II2cBus CreateI2cBus(int busNumber, Frequency frequency)
         {
-            // TODO: how do we affect frequency on these platforms?
-
-            return CreateI2cBus(Pins["PIN05"], Pins["PIN03"]);
+            return new I2CBus(busNumber, frequency);
         }
 
-        public II2cBus CreateI2cBus(IPin[] pins, int frequencyHz = 100000)
+        public II2cBus CreateI2cBus(IPin[] pins, Frequency frequency)
         {
-            // TODO: how do we affect frequency on these platforms?
-
-            return CreateI2cBus(Pins["PIN05"], Pins["PIN03"]);
+            return CreateI2cBus(Pins[0], Pins[1], frequency);
         }
 
-        public II2cBus CreateI2cBus(IPin clock, IPin data, int frequencyHz = 100000)
+        public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
         {
-            // TODO: how do we affect frequency on these platforms?
+            if (clock == Pins["PIN05"] && data == Pins["PIN03"])
+            {
+                return new I2CBus(1, frequency);
+            }
+            else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
+            {
+                return new I2CBus(0, frequency);
+            }
 
-            return new I2CBus(clock, data, frequencyHz);
+            throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");
         }
 
         // TODO: this should move to the MeadowOS class.

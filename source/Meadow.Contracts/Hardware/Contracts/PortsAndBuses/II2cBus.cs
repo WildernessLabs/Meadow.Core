@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
-    public interface II2cBus
+    public interface II2cBus : IDisposable
     {
         /// <summary>
-        /// Bus Clock speed in Hz
+        /// Bus Clock speed
         /// </summary>
-        int Frequency { get; set; }
+        Frequency Frequency { get; set; }
 
         /// <summary>
         /// Writes a number of bytes to the bus.

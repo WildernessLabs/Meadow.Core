@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,19 +18,23 @@ namespace Meadow.Hardware
     {
         private bool _showI2cDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private int _frequency;
+        private Frequency _frequency;
 
         private IMeadowIOController IOController { get; }
+
+        public void Dispose()
+        {
+        }
 
         /// <summary>
         /// Bus Clock speed in Hz
         /// </summary>
-        public int Frequency 
+        public Frequency Frequency 
         {
             get => _frequency;
             set
             {
-                switch (value)
+                switch (value.Hertz)
                 {
                     case 100000:
                     case 400000:
@@ -40,11 +45,11 @@ namespace Meadow.Hardware
                         int actual;
 
                         // always round down (except if we're below the floor)
-                        if (value > 1000000)
+                        if (value.Hertz > 1000000)
                         {
                             actual = 1000000;
                         }
-                        else if (value > 400000)
+                        else if (value.Hertz > 400000)
                         {
                             actual = 400000;
                         }
@@ -54,7 +59,7 @@ namespace Meadow.Hardware
                         }
 
                         Console.WriteLine($"Warning: Invalid I2C Frequency of {value}. Adjusting to {actual}");
-                        _frequency = actual;
+                        _frequency = new Frequency(actual, Frequency.UnitType.Hertz);
                         break;
 
                 }
@@ -71,11 +76,11 @@ namespace Meadow.Hardware
             II2cChannelInfo clockChannel,
             IPin data,
             II2cChannelInfo dataChannel,
-            int frequencyHz,
+            Frequency frequency,
             ushort transactionTimeout = 100)
         {
             IOController = ioController;
-            Frequency = frequencyHz;
+            Frequency = frequency;
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
             _showI2cDebug = false;
@@ -98,12 +103,11 @@ namespace Meadow.Hardware
         /// <param name="ioController">The Meadow IO Controller</param>
         /// <param name="clock">Clock (SCL) pin</param>
         /// <param name="data">Data (SDA) pin</param>
-        /// <param name="frequencyHz">Bus clock speed, in Hz</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
         public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
         {
-            return From(ioController, clock, data, (int)busSpeed, transactionTimeout);
+            return From(ioController, clock, data, new Frequency((int)busSpeed, Units.Frequency.UnitType.Hertz), transactionTimeout);
         }
 
         /// <summary>
@@ -112,10 +116,10 @@ namespace Meadow.Hardware
         /// <param name="ioController">The Meadow IO Controller</param>
         /// <param name="clock">Clock (SCL) pin</param>
         /// <param name="data">Data (SDA) pin</param>
-        /// <param name="frequencyHz">Bus clock speed, in Hz</param>
+        /// <param name="frequency">Bus clock speed</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
-        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, int frequencyHz, ushort transactionTimeout = 100)
+        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, Frequency frequency, ushort transactionTimeout = 100)
         {
             var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
@@ -129,7 +133,7 @@ namespace Meadow.Hardware
                 throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
             }
 
-            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, frequencyHz, transactionTimeout);
+            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, frequency, transactionTimeout);
         }
 
         /// <summary>
@@ -153,7 +157,7 @@ namespace Meadow.Hardware
                 var command = new Nuttx.UpdI2CCommand()
                 {
                     Address = peripheralAddress,
-                    Frequency = this.Frequency,
+                    Frequency = (int)this.Frequency.Hertz,
                     TxBufferLength = dataToWrite.Length,
                     TxBuffer = txGch.AddrOfPinnedObject(),
                     RxBufferLength = rxBuffer.Length,
@@ -207,7 +211,7 @@ namespace Meadow.Hardware
                     var command = new Nuttx.UpdI2CCommand()
                     {
                         Address = peripheralAddress,
-                        Frequency = this.Frequency,
+                        Frequency = (int)this.Frequency.Hertz,
                         TxBufferLength = writeCount,
                         TxBuffer = (IntPtr)pWrite,
                         RxBufferLength = readCount,
@@ -248,7 +252,7 @@ namespace Meadow.Hardware
                     var command = new Nuttx.UpdI2CCommand()
                     {
                         Address = peripheralAddress,
-                        Frequency = this.Frequency,
+                        Frequency = (int)this.Frequency.Hertz,
                         TxBufferLength = 0,
                         TxBuffer = IntPtr.Zero,
                         RxBufferLength = rxBuffer.Length,
@@ -330,7 +334,7 @@ namespace Meadow.Hardware
                     var command = new Nuttx.UpdI2CCommand()
                     {
                         Address = address,
-                        Frequency = this.Frequency,
+                        Frequency = (int)this.Frequency.Hertz,
                         TxBufferLength = count,
                         TxBuffer = (IntPtr)pData,
                         RxBufferLength = 0,

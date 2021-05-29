@@ -355,9 +355,9 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
-        public II2cBus CreateI2cBus()
+        public II2cBus CreateI2cBus(int busNumber = 0)
         {
-            return CreateI2cBus(IMeadowDevice.DefaultI2cBusSpeed);
+            return CreateI2cBus(busNumber, IMeadowDevice.DefaultI2cBusSpeed);
         }
 
         /// <summary>
@@ -366,10 +366,11 @@ namespace Meadow.Devices
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
+            int busNumber,
             I2cBusSpeed busSpeed
         )
         {
-            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, (int)busSpeed);
+            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
         }
 
         /// <summary>
@@ -378,10 +379,11 @@ namespace Meadow.Devices
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
-            int frequencyHz = IMeadowDevice.DefaultI2cBusSpeed
+            int busNumber,
+            Frequency frequency
         )
         {
-            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, frequencyHz);
+            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, frequency);
         }
 
         /// <summary>
@@ -391,10 +393,10 @@ namespace Meadow.Devices
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
-            int frequencyHz = IMeadowDevice.DefaultI2cBusSpeed
+            Frequency frequency
         )
         {
-            return CreateI2cBus(pins[0], pins[1], frequencyHz);
+            return CreateI2cBus(pins[0], pins[1], frequency);
         }
 
         /// <summary>
@@ -405,10 +407,10 @@ namespace Meadow.Devices
         public II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            int frequencyHz = IMeadowDevice.DefaultI2cBusSpeed
+            Frequency frequency
         )
         {
-            return I2cBus.From(this.IoController, clock, data, frequencyHz);
+            return I2cBus.From(this.IoController, clock, data, frequency);
         }
 
         public void SetClock(DateTime dateTime)

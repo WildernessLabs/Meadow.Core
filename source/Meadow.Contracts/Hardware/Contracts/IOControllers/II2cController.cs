@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 namespace Meadow.Hardware
 {
     /// <summary>
@@ -9,13 +10,14 @@ namespace Meadow.Hardware
         /// <summary>
         /// The default I2C Bus speed, in Hz, used when speed parameters are not provided
         /// </summary>
-        public const int DefaultI2cBusSpeed = 100000;
+        public static Frequency DefaultI2cBusSpeed = new Frequency(100000, Frequency.UnitType.Hertz);
 
         /// <summary>
         /// Creates an I2C bus instance for the default pins.
         /// </summary>
         /// <returns>An instance of an I2cBus</returns>
-        II2cBus CreateI2cBus();
+        II2cBus CreateI2cBus(
+            int busNumber = 0);
 
         /// <summary>
         /// Creates an I2C bus instance for the default pins and the requested bus speed
@@ -23,7 +25,8 @@ namespace Meadow.Hardware
         /// <param name="frequencyHz">The bus speed in (in Hz).</param>
         /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
-            int frequencyHz
+            int busNumber,
+            Frequency frequency
         );
 
         /// <summary>
@@ -33,7 +36,7 @@ namespace Meadow.Hardware
         /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin[] pins,
-            int frequencyHz = DefaultI2cBusSpeed
+            Frequency frequency
         );
 
         /// <summary>
@@ -44,7 +47,7 @@ namespace Meadow.Hardware
         II2cBus CreateI2cBus(
             IPin clock,
             IPin data,
-            int frequencyHz = DefaultI2cBusSpeed
+            Frequency frequency
         );
     }
 }
