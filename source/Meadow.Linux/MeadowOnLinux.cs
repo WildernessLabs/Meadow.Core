@@ -42,7 +42,7 @@ namespace Meadow
 
         public II2cBus CreateI2cBus(IPin[] pins, Frequency frequency)
         {
-            return CreateI2cBus(Pins[0], Pins[1], frequency);
+            return CreateI2cBus(pins[0], pins[1], frequency);
         }
 
         public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
