@@ -1,29 +1,25 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Meadow</RootNamespace>
-    <Version>0.0.0</Version>
-    <Authors>Wilderness Labs, Inc</Authors>
-    <Company>Wilderness Labs, Inc</Company>
-    <Product>Meadow</Product>
-    <PackageId>Meadow</PackageId>
-  </PropertyGroup>
-
-  <ItemGroup> 
-    <Folder Include="Utilities\" />
-    <Folder Include="Contracts\" />
-    <Folder Include="Devices\" />
-    <Folder Include="Hardware\Contracts\" />
-    <Folder Include="OSInterop\" />
-    <Folder Include="Enums\" />
-    <Folder Include="Gateways\" />
-    <Folder Include="Gateways\WiFi\" />
-    <Folder Include="Gateways\Bluetooth\" />
-    <Folder Include="Hardware\Communications\" />
-    <Folder Include="Hardware\Bases\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Hardware\Pins.cs" />
-  </ItemGroup>
-</Project>
+    <TargetFramework>netstandard2.1</TargetFramework>
+   <OutputType>Library</OutputType>
+   <AssemblyName>Meadow</AssemblyName>   
+   <Company>Wilderness Labs, Inc</Company>
+   <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+   <PackageId>Meadow</PackageId>
+   <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
+   <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+   <PackageTags>Meadow</PackageTags>
+   <Version>0.23.0</Version>
+   <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+   <RootNamespace>Meadow</RootNamespace>
+   <Nullable>enable</Nullable>
+ </PropertyGroup>
+ <PropertyGroup>
+   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+   <LangVersion>9.0</LangVersion>
+   <Nullable>enable</Nullable>
+ </PropertyGroup>
+ <ItemGroup>
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.2" />
+ </ItemGroup>
+ </Project>
