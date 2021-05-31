@@ -7,7 +7,7 @@ using Meadow.Hardware;
 
 namespace Benchmarks
 {
-    public class I2CDiscoverApp : App<MeadowOnLinux<JetsonNanoPinout>, I2CDiscoverApp>
+    public class I2CDiscoverApp : App<IJetsonNanoMeadowDevice, I2CDiscoverApp>
     {
         private const byte READ_ID_PART1 = 0xfa;
         private const byte READ_ID_PART2 = 0x0f;
