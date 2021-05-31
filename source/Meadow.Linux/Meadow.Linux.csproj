@@ -20,8 +20,7 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0"
-       Condition="'$(TargetFramework)'=='net472'" />
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" Condition="'$(TargetFramework)'=='net472'" />
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\Meadow.Contracts\Meadow.Contracts.csproj" />

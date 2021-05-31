@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using System.Threading;
 
 namespace Meadow.Hardware

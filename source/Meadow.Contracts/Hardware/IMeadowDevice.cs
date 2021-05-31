@@ -4,6 +4,8 @@ using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
+    // TODO: Some of this stuff might be specific to the F7 boards, and should
+    // be moved there. For instance, will all boards support a watchdog?
     /// <summary>
     /// Contract for Meadow boards.
     /// </summary>
@@ -15,8 +17,8 @@ namespace Meadow.Devices
         ISerialController,
         ISerialMessageController,
         ISpiController,
-        II2cController,
-        IIOController<IPinDefinitions>
+        II2cController
+        //IIOController<IPinDefinitions>
     {
         /// <summary>
         /// Gets the device capabilities.

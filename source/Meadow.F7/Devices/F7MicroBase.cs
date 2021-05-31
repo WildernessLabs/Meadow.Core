@@ -13,7 +13,7 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public abstract class F7MicroBase : IMeadowDevice
+    public abstract class F7MicroBase : IF7MeadowDevice
     {
         private SynchronizationContext? _context;
         protected Esp32Coprocessor? esp32;
@@ -36,7 +36,7 @@ namespace Meadow.Devices
         /// Gets the pins.
         /// </summary>
         /// <value>The pins.</value>
-        public IPinDefinitions Pins { get; }
+        public IF7MicroPinout Pins { get; }
 
         protected IMeadowIOController IoController { get; }
 
@@ -155,9 +155,9 @@ namespace Meadow.Devices
             // HACK NOTE: can't compare directly here, so we're comparing the name.
             // might be able to cast and compare?
             return (
-                pin.Name == (Pins as IF7MicroPinout)?.OnboardLedBlue.Name ||
-                pin.Name == (Pins as IF7MicroPinout)?.OnboardLedGreen.Name ||
-                pin.Name == (Pins as IF7MicroPinout)?.OnboardLedRed.Name
+                pin.Name == Pins.OnboardLedBlue.Name ||
+                pin.Name == Pins.OnboardLedGreen.Name ||
+                pin.Name == Pins.OnboardLedRed.Name
                 );
         }
 
@@ -275,7 +275,7 @@ namespace Meadow.Devices
             long speedkHz = IMeadowDevice.DefaultSpiBusSpeed
         )
         {
-            return CreateSpiBus((Pins as IF7MicroPinout)?.SCK, (Pins as IF7MicroPinout)?.COPI, (Pins as IF7MicroPinout)?.CIPO, speedkHz);
+            return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speedkHz);
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace Meadow.Devices
             I2cBusSpeed busSpeed
         )
         {
-            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
         }
 
         /// <summary>
@@ -383,7 +383,7 @@ namespace Meadow.Devices
             Frequency frequency
         )
         {
-            return CreateI2cBus((Pins as IF7MicroPinout)?.I2C_SCL, (Pins as IF7MicroPinout)?.I2C_SDA, frequency);
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequency);
         }
 
         /// <summary>
