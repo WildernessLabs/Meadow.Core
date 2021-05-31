@@ -20,6 +20,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.2" />
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.3.23" />
  </ItemGroup>
  </Project>
