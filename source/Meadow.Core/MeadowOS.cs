@@ -3,7 +3,7 @@ using Meadow.Devices;
 
 namespace Meadow
 {
-    public static class MeadowOS
+    public static partial class MeadowOS
     {
         public static IMeadowDevice CurrentDevice { get; set; } = null!;
 
