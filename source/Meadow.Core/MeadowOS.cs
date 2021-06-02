@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Meadow.Devices;
 
 namespace Meadow
@@ -48,6 +49,40 @@ namespace Meadow
         public static void WatchdogReset()
         {
             CurrentDevice.WatchdogReset();
+        }
+
+        /// <summary>
+        /// Creates the named OS directories if they don't exist, and makes sure
+        /// the `/Temp` directory is emptied out.
+        /// </summary>
+        internal static void InitializeFileSystem()
+        {
+            Console.WriteLine("Initializing file system...");
+
+            CreateFolderIfNeeded(FileSystem.CacheDirectory);
+            CreateFolderIfNeeded(FileSystem.DataDirectory);
+            CreateFolderIfNeeded(FileSystem.DocumentsDirectory);
+            EmptyDirectory(FileSystem.TempDirectory);
+            CreateFolderIfNeeded(FileSystem.TempDirectory);
+
+            Console.WriteLine("File system initialized.");
+        }
+
+        private static void EmptyDirectory(string path)
+        {
+            if (Directory.Exists(path)) {
+                foreach (var file in Directory.GetFiles(path)) {
+                    File.Delete(file);
+                }
+            }
+        }
+
+        private static void CreateFolderIfNeeded(string path)
+        {
+            if (!Directory.Exists(path)) {
+                Console.WriteLine("Directory doesn't exist, creating.");
+                Directory.CreateDirectory(path);
+            }
         }
     }
 }
