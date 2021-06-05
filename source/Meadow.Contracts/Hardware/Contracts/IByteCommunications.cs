@@ -72,6 +72,8 @@ namespace Meadow.Hardware
         /// <param name="readBuffer">Buffer where read data will be written.  Number of bytes read is determined by buffer size</param>
         void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer);
 
+        void Read(Span<byte> readBuffer);
+
         /// <summary>
         /// Read the specified number of bytes from the peripheral.
         /// </summary>
@@ -84,6 +86,8 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">Address of the register to read.</param>
         byte ReadRegister(byte address);
+
+        void ReadRegister(byte address, Span<byte> buffer);
 
         /// <summary>
         /// Read one or more registers from the peripheral.

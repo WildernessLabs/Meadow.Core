@@ -55,6 +55,9 @@ namespace Meadow.Hardware
         void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount);        
         void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer);
 
+
+        void ReadData(byte peripheralAddress, Span<byte> readBuffer);
+
         /// <summary>
         ///  Read the specified number of bytes from the I2C device.
         /// </summary>

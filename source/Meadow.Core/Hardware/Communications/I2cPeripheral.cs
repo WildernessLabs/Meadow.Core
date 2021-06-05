@@ -13,10 +13,23 @@ namespace Meadow.Hardware
         public byte Address { get; protected set; }
         public II2cBus Bus { get; protected set; }
 
+        protected readonly byte[] TxBuffer;
+        protected readonly byte[] RxBuffer;
+
+
         public I2cPeripheral(II2cBus bus, byte peripheralAddress)
         {
             Bus = bus;
             Address = peripheralAddress;
+
+            TxBuffer = new byte[8];
+            RxBuffer = new byte[8];
+        }
+
+        // NEW
+        public void Read(Span<byte> readBuffer)
+        {
+            Bus.ReadData(this.Address, readBuffer);
         }
 
         public byte[] ReadBytes(ushort numberOfBytes)
@@ -24,8 +37,16 @@ namespace Meadow.Hardware
             return Bus.ReadData(this.Address, numberOfBytes);
         }
 
+        // NEW
+        public void ReadRegister(byte address, Span<byte> readBuffer)
+        {
+            TxBuffer[0] = address;
+            Bus.WriteReadData(this.Address, TxBuffer, 1, readBuffer, 1);
+        }
+
         public byte ReadRegister(byte address)
         {
+            // TODO: can we use the new internal buffers?
             // write the register address, then read
             Span<byte> tx = stackalloc byte[1];
             tx[0] = address;
@@ -37,6 +58,7 @@ namespace Meadow.Hardware
 
         public byte[] ReadRegisters(byte address, ushort length)
         {
+            // TODO: can we use the new internal buffers?
             // write the register address, then read
             Span<byte> tx = stackalloc byte[1];
             tx[0] = address;

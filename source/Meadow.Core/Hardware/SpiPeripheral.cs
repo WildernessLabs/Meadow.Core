@@ -139,6 +139,18 @@ namespace Meadow.Hardware
             }
         }
 
+        // TODO:
+        public void Read(Span<byte> readBuffer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReadRegister(byte address, Span<byte> buffer)
+        {
+            throw new NotImplementedException();
+        }
+
+
         /// <summary>
         /// Reads the specified number of bytes from the bus
         /// </summary>
@@ -217,5 +229,6 @@ namespace Meadow.Hardware
             return result;
 
         }
+
     }
 }

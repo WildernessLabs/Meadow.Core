@@ -234,6 +234,34 @@ namespace Meadow.Hardware
 
         }
 
+        public unsafe void ReadData(byte peripheralAddress, Span<byte> readBuffer)
+        {
+            _busSemaphore.Wait();
+
+            try {
+                fixed (byte* pData = readBuffer) {
+                    var command = new Nuttx.UpdI2CCommand() {
+                        Address = peripheralAddress,
+                        Frequency = (int)this.Frequency.Hertz,
+                        TxBufferLength = 0,
+                        TxBuffer = IntPtr.Zero,
+                        RxBufferLength = readBuffer.Length,
+                        RxBuffer = (IntPtr)pData
+                    };
+
+                    Output.WriteIf(_showI2cDebug, " +SendData");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
+                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
+                    if (result != 0) {
+                        DecipherI2CError(UPD.GetLastError());
+                    }
+                }
+            } finally {
+                _busSemaphore.Release();
+            }
+
+        }
+
         /// <summary>
         /// Reads the specified number of bytes from a peripheral
         /// </summary>
