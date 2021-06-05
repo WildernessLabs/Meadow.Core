@@ -9,15 +9,15 @@ namespace Meadow.Hardware
         /// <summary>
         /// The peripheral's address on the I2C Bus
         /// </summary>
-        public byte Address { get => i2cPeripheral.Address; }
+        public byte Address { get => I2cPeripheral.Address; }
 
         //protected I2CBusAccessor Bus { get; private set; }
-        protected II2cPeripheral i2cPeripheral { get; private set; }
+        protected II2cPeripheral I2cPeripheral { get; private set; }
 
         protected FilterableChangeObservableI2CPeripheral(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
         {
             //Bus = new I2CBusAccessor(i2cBus, address, rxBufferSize, txBufferSize);
-            i2cPeripheral = new I2cPeripheral(i2cBus, address);
+            I2cPeripheral = new I2cPeripheral(i2cBus, address);
         }
 
         protected virtual void Dispose(bool disposing)
