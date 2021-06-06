@@ -44,7 +44,6 @@ namespace Meadow.Hardware
 
         public byte ReadRegister(byte address)
         {
-            // TODO: can we use the new internal buffers?
             // write the register address, then read
             //Span<byte> tx = stackalloc byte[1];
             //tx[0] = address;
@@ -60,7 +59,6 @@ namespace Meadow.Hardware
 
         public byte[] ReadRegisters(byte address, ushort length)
         {
-            //// TODO: can we use the new internal buffers?
             //// write the register address, then read
             //Span<byte> tx = stackalloc byte[1];
             //tx[0] = address;
