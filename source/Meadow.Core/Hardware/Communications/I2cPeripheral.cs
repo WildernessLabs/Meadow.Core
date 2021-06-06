@@ -13,17 +13,15 @@ namespace Meadow.Hardware
         public byte Address { get; protected set; }
         public II2cBus Bus { get; protected set; }
 
-        protected readonly byte[] TxBuffer;
-        protected readonly byte[] RxBuffer;
+        protected readonly Memory<byte> TxBuffer;
+        protected readonly Memory<byte> RxBuffer;
 
-
-        public I2cPeripheral(II2cBus bus, byte peripheralAddress)
+        public I2cPeripheral(II2cBus bus, byte peripheralAddress, int rxBufferSize = 8, int txBufferSize = 8)
         {
             Bus = bus;
             Address = peripheralAddress;
-
-            TxBuffer = new byte[8];
-            RxBuffer = new byte[8];
+            TxBuffer = new byte[txBufferSize];
+            RxBuffer = new byte[rxBufferSize];
         }
 
         // NEW
@@ -40,51 +38,95 @@ namespace Meadow.Hardware
         // NEW
         public void ReadRegister(byte address, Span<byte> readBuffer)
         {
-            TxBuffer[0] = address;
-            Bus.WriteReadData(this.Address, TxBuffer, 1, readBuffer, 1);
+            TxBuffer.Span[0] = address;
+            Bus.WriteReadData(this.Address, TxBuffer.Span, 1, readBuffer, 1);
         }
 
         public byte ReadRegister(byte address)
         {
             // TODO: can we use the new internal buffers?
             // write the register address, then read
-            Span<byte> tx = stackalloc byte[1];
-            tx[0] = address;
-            Span<byte> rx = stackalloc byte[1];
+            //Span<byte> tx = stackalloc byte[1];
+            //tx[0] = address;
+            //Span<byte> rx = stackalloc byte[1];
 
-            Bus.WriteReadData(this.Address, tx, rx);
-            return rx[0];
+            //Bus.WriteReadData(this.Address, tx, rx);
+            //return rx[0];
+
+            this.TxBuffer.Span[0] = address;
+            Bus.WriteReadData(this.Address, TxBuffer.Span, 1, RxBuffer.Span, 1);
+            return RxBuffer.Span[0];
         }
 
         public byte[] ReadRegisters(byte address, ushort length)
         {
-            // TODO: can we use the new internal buffers?
-            // write the register address, then read
-            Span<byte> tx = stackalloc byte[1];
-            tx[0] = address;
-            Span<byte> rx = stackalloc byte[length];
+            //// TODO: can we use the new internal buffers?
+            //// write the register address, then read
+            //Span<byte> tx = stackalloc byte[1];
+            //tx[0] = address;
+            //Span<byte> rx = stackalloc byte[length];
 
-            Bus.WriteReadData(this.Address, tx, rx);
-            return rx.ToArray();
+            //Bus.WriteReadData(this.Address, tx, rx);
+            //return rx.ToArray();
+
+            if (length > RxBuffer.Length) {
+                throw new ArgumentException("Read length exceeds RxBuffer size. " +
+                    "Please construct with a larger buffer to use this read length.");
+            }
+
+            this.TxBuffer.Span[0] = address;
+            Bus.WriteReadData(this.Address, TxBuffer.Span, 1, RxBuffer.Span, length);
+            return RxBuffer.Slice(0, length).ToArray();
         }
 
         public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
-            // write the register address, then read
-            Span<byte> tx = stackalloc byte[1];
-            tx[0] = address;
-            Span<byte> rx = stackalloc byte[2];
+            //// write the register address, then read
+            //Span<byte> tx = stackalloc byte[1];
+            //tx[0] = address;
+            //Span<byte> rx = stackalloc byte[2];
 
-            Bus.WriteReadData(this.Address, tx, rx);
-            if (order == ByteOrder.LittleEndian)
-            {
-                return (ushort)(rx[0] | (rx[1] << 8));
+            //Bus.WriteReadData(this.Address, tx, rx);
+            //if (order == ByteOrder.LittleEndian)
+            //{
+            //    return (ushort)(rx[0] | (rx[1] << 8));
+            //}
+            //return (ushort)((rx[0] << 8) | rx[1]);
+
+            // TODO to @CTACKE from BC: please confirm this code does the above
+            TxBuffer.Span[0] = address;
+            Bus.WriteReadData(this.Address, TxBuffer.Span, RxBuffer.Slice(0, 2).Span);
+            if (order == ByteOrder.LittleEndian) {
+                return (ushort)(RxBuffer.Span[0] | (RxBuffer.Span[1] << 8));
+            } else {
+                return (ushort)(RxBuffer.Span[0] << 8 | RxBuffer.Span[1]);
             }
-            return (ushort)((rx[0] << 8) | rx[1]);
+
+            // ALSO: for comparison, this was the code in your other class, not
+            // sure which is more efficient.
+    //        _txBuffer[0] = register;
+    //        if (littleEndian)
+    //        {
+    //            _txBuffer[1] = (byte)(value & 0xff);
+    //            _txBuffer[2] = (byte)((value >> 8) & 0xff);
+    //        }
+    //        else
+    //        {
+    //            _txBuffer[1] = (byte)((value >> 8) & 0xff);
+    //            _txBuffer[2] = (byte)(value & 0xff);
+    //        }
+    //        lock (SyncRoot)
+    //        {
+    //            Bus.WriteData(Address, _txBuffer, 3);
+    //        }
         }
 
         public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
+            //TODO to @CTACKE from BC; i'm not sure what this method does. i'm also concerned
+            // about the allocation of `number * 2` being larger than the buffer.
+            // please convert
+
             // write the register address, then read
             Span<byte> tx = stackalloc byte[1];
             tx[0] = address;

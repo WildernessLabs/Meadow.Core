@@ -205,8 +205,8 @@ namespace Meadow.Hardware
 
             try
             {
-                fixed (byte* pWrite = &writeBuffer.GetPinnableReference())
-                fixed (byte* pRead = &readBuffer.GetPinnableReference())
+                fixed (byte* pWrite = writeBuffer)
+                fixed (byte* pRead = readBuffer)
                 {
                     var command = new Nuttx.UpdI2CCommand()
                     {
@@ -357,7 +357,7 @@ namespace Meadow.Hardware
 
             try
             {
-                fixed (byte* pData = &data.GetPinnableReference())
+                fixed (byte* pData = data)
                 {
                     var command = new Nuttx.UpdI2CCommand()
                     {
