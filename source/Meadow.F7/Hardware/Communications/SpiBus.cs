@@ -202,6 +202,66 @@ namespace Meadow.Hardware
             }
         }
 
+        // NEW
+        /// <summary>
+        /// Writes data to the SPI bus
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
+        /// <param name="data">Data to write</param>
+        public void SendData(IDigitalOutputPort chipSelect, Span<byte> data)
+        {
+            SendData(chipSelect, ChipSelectMode.ActiveLow, data);
+        }
+
+        // NEW
+        /// <summary>
+        /// Writes data to the SPI bus
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        /// <param name="data">Data to write</param>
+        public unsafe void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, Span<byte> data)
+        {
+            //var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+            _busSemaphore.Wait();
+            Output.WriteLineIf(_showSpiDebug, $" +SendData");
+
+            try {
+                if (chipSelect != null) {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                // TODO: @Ctacke: doing this requires unsafe but gets rid of the GCHandle creation. worth?
+                fixed (byte* pWrite = data)
+                {
+                    var command = new Nuttx.UpdSPIDataCommand() {
+                        BufferLength = data.Length,
+                        TxBuffer = (IntPtr)pWrite,
+                        RxBuffer = IntPtr.Zero,
+                        BusNumber = BusNumber
+                    };
+
+                    Output.WriteLineIf(_showSpiDebug, $" sending {data.Length} bytes: {BitConverter.ToString(data.ToArray())}");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                    if (result != 0) {
+                        DecipherSPIError(UPD.GetLastError());
+                    }
+                    Output.WriteLineIf(_showSpiDebug, $" send complete");
+
+                    if (chipSelect != null) {
+                        // deactivate the chip select
+                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                    }
+
+                }
+            } finally {
+                _busSemaphore.Release();
+                Output.WriteLineIf(_showSpiDebug, $" -SendData");
+            }
+        }
+
         /// <summary>
         /// Reads data from the SPI bus
         /// </summary>
@@ -310,6 +370,7 @@ namespace Meadow.Hardware
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
+                // TODO: @Ctacke: doing this requires unsafe but gets rid of the GCHandle creation. worth?
                 fixed (byte* pWrite = sendBuffer)
                 fixed (byte* pRead = receiveBuffer)
                 {

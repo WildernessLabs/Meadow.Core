@@ -134,14 +134,13 @@ namespace Meadow.Hardware
 
         public void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer)
         {
-            // TODO: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
-
-            var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);
-
-            for (int i = 0; i < readBuffer.Length; i++)
-            {
-                readBuffer[i] = r[i];
-            }
+            //// TODO: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
+            //var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);
+            //for (int i = 0; i < readBuffer.Length; i++)
+            //{
+            //    readBuffer[i] = r[i];
+            //}
+            Bus.ExchangeData(ChipSelect, ChipSelectMode.ActiveLow, writeBuffer, readBuffer);
         }
 
         // TODO:
