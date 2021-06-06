@@ -15,6 +15,11 @@ namespace Meadow.Hardware
             this.ChipSelect = chipSelect;
         }
 
+        //public void SendData(Span<byte> data)
+        //{
+        //    Bus.SendData(ChipSelect, data);
+        //}
+
         /// <summary>
         /// Writes a single byte to the peripheral
         /// </summary>

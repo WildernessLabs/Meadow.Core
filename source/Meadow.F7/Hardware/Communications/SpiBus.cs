@@ -285,6 +285,59 @@ namespace Meadow.Hardware
             ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
         }
 
+        // NEW
+        public unsafe void ExchangeData(
+            IDigitalOutputPort chipSelect, ChipSelectMode csMode,
+            Span<byte> sendBuffer, Span<byte> receiveBuffer)
+        {
+            ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
+        }
+
+        // NEW
+        public unsafe void ExchangeData(
+            IDigitalOutputPort chipSelect, ChipSelectMode csMode,
+            Span<byte> sendBuffer, Span<byte> receiveBuffer, int bytesToExchange)
+        {
+            if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
+            if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+            if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
+
+            _busSemaphore.Wait();
+
+            try {
+                if (chipSelect != null) {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                fixed (byte* pWrite = sendBuffer)
+                fixed (byte* pRead = receiveBuffer)
+                {
+                    var command = new Nuttx.UpdSPIDataCommand() {
+                        BufferLength = bytesToExchange,
+                        TxBuffer = (IntPtr)pWrite,
+                        RxBuffer = (IntPtr)pRead,
+                        BusNumber = BusNumber
+                    };
+
+                    Output.WriteLineIf(_showSpiDebug, "+Exchange");
+                    Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                    if (result != 0) {
+                        DecipherSPIError(UPD.GetLastError());
+                    }
+                    Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
+
+                    if (chipSelect != null) {
+                        // deactivate the chip select
+                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                    }
+                }
+            } finally {
+                _busSemaphore.Release();
+            }
+        }
+
         /// <summary>
         /// Does a data exchange on the SPI bus.
         /// </summary>

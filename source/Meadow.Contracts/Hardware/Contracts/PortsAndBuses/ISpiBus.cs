@@ -24,5 +24,11 @@ namespace Meadow.Hardware
         byte[] ReceiveData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, int numberOfBytes);
         void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer);
         void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer, int bytesToExchange);
+
+
+        // new stuff
+        //void SendData(IDigitalOutputPort chipSelect, Span<byte> data);
+        void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, Span<byte> sendBuffer, Span<byte> receiveBuffer);
+        void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, Span<byte> sendBuffer, Span<byte> receiveBuffer, int bytesToExchange);
     }
 }
