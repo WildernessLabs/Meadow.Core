@@ -63,6 +63,7 @@ namespace Meadow.Hardware
         /// </remarks>
         /// <param name="write">Array of bytes to be written to the device.</param>
         /// <param name="length">Amount of data to read from the device.</param>
+        [Obsolete]
         byte[] WriteRead(byte[] write, ushort length);
 
         /// <summary>
