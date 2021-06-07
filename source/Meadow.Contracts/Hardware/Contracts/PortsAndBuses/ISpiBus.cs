@@ -50,7 +50,8 @@ namespace Meadow.Hardware
             Span<byte> writeBuffer, Span<byte> readBuffer,
             ChipSelectMode csMode = ChipSelectMode.ActiveLow);
 
-        //==== Old and busted.
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
+
         [Obsolete("Use the `Span<byte>` overload instead.")]
         void SendData(IDigitalOutputPort chipSelect, params byte[] data);
         [Obsolete("Use the `Span<byte>` overload instead.")]

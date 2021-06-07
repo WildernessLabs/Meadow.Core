@@ -41,7 +41,7 @@ namespace Meadow.Hardware
         /// <param name="readBuffer">Buffer to read returning data into.</param>
         void Exchange(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer);
 
-        //==== OLD AND BUSTED
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
         /// <summary>
         /// Writes a number of bytes to the bus.

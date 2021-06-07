@@ -122,24 +122,86 @@ namespace Meadow.Hardware
             Bus.Write(ChipSelect, WriteBuffer.Span[0..2], this.chipSelectMode);
         }
 
+        /// <summary>
+        /// Writes a single ushort value to a target register address on the peripheral (i.e. [address][ushort])
+        /// </summary>
+        /// <param name="address">The target write register address</param>
+        /// <param name="value">Value to write</param>
+        /// <param name="order">Endianness of the value to be written</param>
+        public void WriteRegister(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            // split the 16 bit ushort into two bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
+        }
+
+        /// <summary>
+        /// Write an unsigned integer to the peripheral.
+        /// </summary>
+        /// <param name="address">Address to write the first byte to.</param>
+        /// <param name="value">Value to be written.</param>
+        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
         public void WriteRegister(byte address, uint value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            // split the 32 bit ushort into four bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
         }
 
+        /// <summary>
+        /// Write an unsigned long to the peripheral.
+        /// </summary>
+        /// <param name="address">Address to write the first byte to.</param>
+        /// <param name="value">Value to be written.</param>
+        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
         public void WriteRegister(byte address, ulong value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            // split the 64 bit ushort into eight bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
         }
 
-        public void WriteRegisters(byte address, Span<byte> data)
+        /// <summary>
+        /// Helper method 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="data"></param>
+        /// <param name="order"></param>
+        protected void WriteRegister(byte address, Span<byte> data, ByteOrder order = ByteOrder.LittleEndian)
         {
-            throw new NotImplementedException();
+            if(WriteBuffer.Length < data.Length + 1) {
+                throw new ArgumentException("Data to write is too large for the write buffer. " +
+                    "Must be less than WriteBuffer.Length + 1 (to allow for address). " +
+                    "Instantiate this class with a larger WriteBuffer, or send a smaller" +
+                    "amount of data to fix.");
+            }
+
+            // stuff the register address into the write buffer
+            WriteBuffer.Span[0] = address;
+
+            // stuff the bytes into the write buffer (starting at `1` index,
+            // because `0` is the register address.
+            switch (order) {
+                case ByteOrder.LittleEndian:
+                    for (int i = 0; i < data.Length; i++) {
+                        WriteBuffer.Span[i + 1] = data[i];
+                    }
+                    break;
+                case ByteOrder.BigEndian:
+                    for (int i = 0; i < data.Length; i++) {
+                        // stuff them backwards
+                        WriteBuffer.Span[i + 1] = data[data.Length - (i + 1)];
+                    }
+                    break;
+            }
+            // write it
+            this.Bus.Write(this.ChipSelect, WriteBuffer.Span[0..(data.Length + 1)], this.chipSelectMode);
         }
 
-
-
-        //==== OLD AND BUSTED
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
 
         /// <summary>
@@ -149,17 +211,6 @@ namespace Meadow.Hardware
         public void WriteBytes(byte[] values)
         {
             Bus.SendData(ChipSelect, values);
-        }
-
-        /// <summary>
-        /// Writes a single ushort value to a target register address on the peripheral (i.e. [address][ushort])
-        /// </summary>
-        /// <param name="address">The target write register address</param>
-        /// <param name="value">Value to write</param>
-        /// <param name="order">Endianness of the value to be written</param>
-        public void WriteRegister(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            WriteUShorts(address, new ushort[] { value }, order);
         }
 
         /// <summary>

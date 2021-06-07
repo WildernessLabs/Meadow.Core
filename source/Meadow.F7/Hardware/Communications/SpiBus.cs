@@ -261,7 +261,7 @@ namespace Meadow.Hardware
         }
 
 
-        //==== OLD AND BUSTED METHODS
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
         /// <summary>
         /// Writes data to the SPI bus
