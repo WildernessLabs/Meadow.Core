@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Meadow.Units;
 
 namespace Meadow.Hardware
@@ -6,12 +8,23 @@ namespace Meadow.Hardware
     public abstract class I2cFilterableObservableBase<UNIT> :
         FilterableChangeObservableBase<UNIT>, IDisposable where UNIT : struct
     {
+        private object _lock = new object();
+        private CancellationTokenSource? SamplingTokenSource { get; set; }
+
         /// <summary>
         /// The peripheral's address on the I2C Bus
         /// </summary>
         public byte Address { get => I2cPeripheral.Address; }
 
         protected II2cPeripheral I2cPeripheral { get; private set; }
+
+        protected abstract Task<UNIT> ReadSensor();
+        protected abstract void RaiseChangedAndNotify(IChangeResult<UNIT> changeResult);
+
+        /// <summary>
+        /// The last read conditions.
+        /// </summary>
+        public UNIT Conditions { get; protected set; }
 
         protected I2cFilterableObservableBase(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
         {
@@ -20,6 +33,10 @@ namespace Meadow.Hardware
 
         protected virtual void Dispose(bool disposing)
         {
+            if(disposing)
+            {
+                StopUpdating();
+            }
         }
 
         /// <summary>
@@ -28,6 +45,86 @@ namespace Meadow.Hardware
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the sensor is currently in a sampling
+        /// loop. Call StartSampling() to spin up the sampling process.
+        /// </summary>
+        /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
+        public bool IsSampling { get; protected set; } = false;
+
+        /// <summary>
+        /// Convenience method to get the current sensor readings. For frequent reads, use
+        /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
+        /// </summary>
+        public async Task<UNIT> Read()
+        {
+            // update confiruation for a one-off read
+            this.Conditions = await ReadSensor();
+            return Conditions;
+        }
+
+        public void StartUpdating(int standbyDuration = 1000)
+        {
+            // thread safety
+            lock (_lock)
+            {
+                if (IsSampling) return;
+
+                IsSampling = true;
+
+                SamplingTokenSource = new CancellationTokenSource();
+                CancellationToken ct = SamplingTokenSource.Token;
+
+                UNIT oldConditions;
+                ChangeResult<UNIT> result;
+
+                Task.Factory.StartNew(async () =>
+                {
+                    while (true)
+                    {
+                        // cleanup
+                        if (ct.IsCancellationRequested)
+                        {
+                            // do task clean up here
+                            observers.ForEach(x => x.OnCompleted());
+                            IsSampling = false;
+                            break;
+                        }
+                        // capture history
+                        oldConditions = Conditions;
+
+                        // read
+                        Conditions = await Read();
+
+                        // build a new result with the old and new conditions
+                        result = new ChangeResult<UNIT>(Conditions, oldConditions);
+
+                        // let everyone know
+                        RaiseChangedAndNotify(result);
+
+                        // sleep for the appropriate interval
+                        await Task.Delay(standbyDuration);
+                    }
+                }, SamplingTokenSource.Token);
+            }
+        }
+
+        /// <summary>
+        /// Stops sampling the temperature.
+        /// </summary>
+        public void StopUpdating()
+        {
+            lock (_lock)
+            {
+                if (!IsSampling) return;
+
+                SamplingTokenSource?.Cancel();
+
+                // state muh-cheen
+                IsSampling = false;
+            }
         }
     }
 }
