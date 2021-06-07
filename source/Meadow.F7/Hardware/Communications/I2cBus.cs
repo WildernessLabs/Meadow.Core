@@ -242,7 +242,7 @@ namespace Meadow.Hardware
             }
         }
 
-        //==== OLD AND BUSTED
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
         /// <summary>
         /// Writes data to a specified I2C bus address and reads data back from the same address

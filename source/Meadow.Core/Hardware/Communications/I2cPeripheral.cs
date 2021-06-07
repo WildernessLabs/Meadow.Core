@@ -127,31 +127,10 @@ namespace Meadow.Hardware
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
         public void WriteRegister(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            // stuff the register address into the write buffer
-            WriteBuffer.Span[0] = address;
-
             // split the 16 bit ushort into two bytes
-            var b = BitConverter.GetBytes(value);
-
-            // stuff the bytes into the write buffer (starting at `1` index,
-            // because `0` is the register address.
-            switch (order) {
-                case ByteOrder.LittleEndian:
-                    //TODO: i couldn't figure out a way to copy the byte[]
-                    // contents into the span at an index, but there must be a way.
-                    for (int i = 0; i < b.Length; i++) {
-                        WriteBuffer.Span[i + 1] = b[i];
-                    }
-                    break;
-                case ByteOrder.BigEndian:
-                    for (int i = 0; i < b.Length; i++) {
-                        // stuff them backwards
-                        WriteBuffer.Span[i + 1] = b[b.Length - (i + 1)];
-                    }
-                    break;
-            }
-            // write it
-            this.Bus.Write(this.Address, WriteBuffer.Span[0..(b.Length + 1)]);
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
         }
 
         /// <summary>
@@ -162,31 +141,10 @@ namespace Meadow.Hardware
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
         public void WriteRegister(byte address, uint value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            // stuff the register address into the write buffer
-            WriteBuffer.Span[0] = address;
-
             // split the 32 bit uint into four bytes
-            var b = BitConverter.GetBytes(value);
-
-            // stuff the bytes into the write buffer (starting at `1` index,
-            // because `0` is the register address.
-            switch (order) {
-                case ByteOrder.LittleEndian:
-                    //TODO: i couldn't figure out a way to copy the byte[]
-                    // contents into the span at an index, but there must be a way.
-                    for (int i = 0; i < b.Length; i++) {
-                        WriteBuffer.Span[i+1] = b[i];
-                    }
-                    break;
-                case ByteOrder.BigEndian:
-                    for (int i = 0; i < b.Length; i++) {
-                        // stuff them backwards
-                        WriteBuffer.Span[i+1] = b[b.Length - (i + 1)];
-                    }
-                    break;
-            }
-            // write it
-            this.Bus.Write(this.Address, WriteBuffer.Span[0..(b.Length + 1)]);
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
         }
 
         /// <summary>
@@ -197,49 +155,50 @@ namespace Meadow.Hardware
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
         public void WriteRegister(byte address, ulong value, ByteOrder order = ByteOrder.LittleEndian)
         {
+            // split the 64 bit ulong into 8 bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
+        }
+
+        /// <summary>
+        /// Helper method 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="data"></param>
+        /// <param name="order"></param>
+        protected void WriteRegister(byte address, Span<byte> data, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            if (WriteBuffer.Length < data.Length + 1) {
+                throw new ArgumentException("Data to write is too large for the write buffer. " +
+                    "Must be less than WriteBuffer.Length + 1 (to allow for address). " +
+                    "Instantiate this class with a larger WriteBuffer, or send a smaller" +
+                    "amount of data to fix.");
+            }
+
             // stuff the register address into the write buffer
             WriteBuffer.Span[0] = address;
-
-            // split the 64 bit ulong into 8 bytes
-            var b = BitConverter.GetBytes(value);
 
             // stuff the bytes into the write buffer (starting at `1` index,
             // because `0` is the register address.
             switch (order) {
                 case ByteOrder.LittleEndian:
-                    //TODO: i couldn't figure out a way to copy the byte[]
-                    // contents into the span at an index, but there must be a way.
-                    for (int i = 0; i < b.Length; i++) {
-                        WriteBuffer.Span[i + 1] = b[i];
+                    for (int i = 0; i < data.Length; i++) {
+                        WriteBuffer.Span[i + 1] = data[i];
                     }
                     break;
                 case ByteOrder.BigEndian:
-                    for (int i = 0; i < b.Length; i++) {
+                    for (int i = 0; i < data.Length; i++) {
                         // stuff them backwards
-                        WriteBuffer.Span[i + 1] = b[b.Length - (i + 1)];
+                        WriteBuffer.Span[i + 1] = data[data.Length - (i + 1)];
                     }
                     break;
             }
             // write it
-            this.Bus.Write(this.Address, WriteBuffer.Span[0..(b.Length + 1)]);
+            this.Bus.Write(this.Address, WriteBuffer.Span[0..(data.Length + 1)]);
         }
 
-        // TODO: consider deleting. See `IByteCommunications` for more info.
-        /// <summary>
-        /// Write data to one or more registers.
-        /// </summary>
-        /// <param name="address">Address of the first register to write to.</param>
-        /// <param name="data">Data to write into the registers.</param>
-        public void WriteRegisters(byte address, Span<byte> data)
-        {
-            byte[] allTheThings = new byte[data.Length + 1];
-            allTheThings[0] = address;
-            data.CopyTo(allTheThings.AsSpan(1));
-            this.Bus.Write(this.Address, allTheThings);
-        }
-
-
-        //==== OLD AND BUSTED
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
         public byte[] ReadBytes(ushort numberOfBytes)
         {

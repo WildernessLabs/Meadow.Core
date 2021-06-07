@@ -86,21 +86,6 @@ namespace Meadow.Hardware
         /// <param name="order">Indicate if the data should be written as big or little endian.</param>
         void WriteRegister(byte address, ulong value, ByteOrder order = ByteOrder.LittleEndian);
 
-        // TODO: there's no way to make this work without creating allocations
-        // internally because we have to prepend `data` with the register address,
-        // and you can't really concatenate `Span`; it's not composable. So maybe
-        // we should get rid of this method and have folks call `Write(Span<byte>`
-        // and stuff their own address in there if they want.
-        //
-        // other option is to stuff `data` into the internal buffer, but that
-        // buffer is intentionally small.
-        /// <summary>
-        /// Write data to one or more registers.
-        /// </summary>
-        /// <param name="address">Address of the first register to write to.</param>
-        /// <param name="data">Data to write into the registers.</param>
-        void WriteRegisters(byte address, Span<byte> data);
-
         ///// <summary>
         ///// Write a number of unsigned shorts to the peripheral.
         ///// </summary>
@@ -112,7 +97,6 @@ namespace Meadow.Hardware
         ///// <param name="order">Indicate if the data should be written as big or little endian.</param>
         //void WriteUShorts(byte address, Span<ushort> values, ByteOrder order = ByteOrder.LittleEndian);
 
-        //NEW
         /// <summary>
         /// Write data to followed by read data from the peripheral.
         /// </summary>
@@ -120,6 +104,7 @@ namespace Meadow.Hardware
         /// <param name="readBuffer">Buffer where read data will be written.  Number of bytes read is determined by buffer size</param>
         void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer);
 
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
         /// <summary>
         /// Write an array of bytes to the peripheral.
