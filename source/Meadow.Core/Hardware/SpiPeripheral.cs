@@ -7,7 +7,7 @@ namespace Meadow.Hardware
     //TODO: BC: add internal buffer
     public class SpiPeripheral : ISpiPeripheral
     {
-        public IDigitalOutputPort ChipSelect { get; }
+        public IDigitalOutputPort? ChipSelect { get; }
         ChipSelectMode chipSelectMode;
         public ISpiBus Bus { get; }
 
@@ -22,9 +22,10 @@ namespace Meadow.Hardware
         /// </summary>
         protected Memory<byte> ReadBuffer { get; }
 
+        //TODO: should we allow chip select to be null? probably, right?
         public SpiPeripheral(
             ISpiBus bus,
-            IDigitalOutputPort chipSelect,
+            IDigitalOutputPort? chipSelect,
             ChipSelectMode csMode = ChipSelectMode.ActiveLow,
             int readBufferSize = 8, int writeBufferSize = 8)
         {

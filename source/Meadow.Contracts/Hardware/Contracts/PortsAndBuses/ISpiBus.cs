@@ -22,7 +22,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">Port to use as the chip select to activate the bus.</param>
         /// <param name="readBuffer">Data to write</param>
         /// <param name="csMode">Describes which level on the chip select activates the peripheral.</param>
-        void Read(IDigitalOutputPort chipSelect,
+        void Read(IDigitalOutputPort? chipSelect,
             Span<byte> readBuffer,
             ChipSelectMode csMode = ChipSelectMode.ActiveLow);
 
@@ -33,7 +33,7 @@ namespace Meadow.Hardware
         /// <param name="writeBuffer">Data to write</param>
         /// <param name="csMode">Describes which level on the chip select activates the peripheral.</param>
         void Write(
-            IDigitalOutputPort chipSelect,
+            IDigitalOutputPort? chipSelect,
             Span<byte> writeBuffer,
             ChipSelectMode csMode = ChipSelectMode.ActiveLow);
 
@@ -46,7 +46,7 @@ namespace Meadow.Hardware
         /// <param name="readBuffer">Buffer to read returning data into.</param>
         /// <param name="csMode">Describes which level on the chip select activates the peripheral.</param>
         void Exchange(
-            IDigitalOutputPort chipSelect,
+            IDigitalOutputPort? chipSelect,
             Span<byte> writeBuffer, Span<byte> readBuffer,
             ChipSelectMode csMode = ChipSelectMode.ActiveLow);
 
