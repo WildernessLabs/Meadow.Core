@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Meadow
 {
-    public class MeadowOnLinux<TPinout> : IMeadowDevice
+    public class MeadowOnLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
         private SynchronizationContext? _context;
@@ -148,6 +148,21 @@ namespace Meadow
         }
 
         public void WatchdogReset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WillSleep()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnWake()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WillReset()
         {
             throw new NotImplementedException();
         }

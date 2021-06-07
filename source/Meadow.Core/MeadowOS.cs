@@ -80,8 +80,15 @@ namespace Meadow
         private static void CreateFolderIfNeeded(string path)
         {
             if (!Directory.Exists(path)) {
-                Console.WriteLine("Directory doesn't exist, creating.");
-                Directory.CreateDirectory(path);
+                Console.WriteLine($"Directory doesn't exist, creating '{path}'");
+                try
+                {
+                    Directory.CreateDirectory(path);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"  Failed: {ex.Message}");
+                }
             }
         }
     }
