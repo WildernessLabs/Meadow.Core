@@ -22,12 +22,11 @@ namespace Meadow.Hardware
         /// </summary>
         protected Memory<byte> ReadBuffer { get; }
 
-        //TODO: should we allow chip select to be null? probably, right?
         public SpiPeripheral(
             ISpiBus bus,
             IDigitalOutputPort? chipSelect,
-            ChipSelectMode csMode = ChipSelectMode.ActiveLow,
-            int readBufferSize = 8, int writeBufferSize = 8)
+            int readBufferSize = 8, int writeBufferSize = 8,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
         {
             this.Bus = bus;
             this.ChipSelect = chipSelect;
