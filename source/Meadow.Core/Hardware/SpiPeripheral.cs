@@ -109,7 +109,7 @@ namespace Meadow.Hardware
         /// <remarks>The data read happens <b>after</b> all outbound data has been clocked out (i.e. there is no overlap).  If you need overlap, use the Exchange method of the bus.</remarks>
         public byte[] WriteRead(byte[] write, ushort length)
         {
-            // DEV NOTE: This is a terribly inefficient way to use a SPI bus
+            // TODO: This is a terribly inefficient way to use a SPI bus
 
             // create a buffer for both directions
             var txBuffer = new byte[write.Length + length];
@@ -132,7 +132,7 @@ namespace Meadow.Hardware
             return result;
         }
 
-        public void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer)
+        public void ExchangeData(Span<byte> writeBuffer, Span<byte> readBuffer)
         {
             //// TODO: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
             //var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);

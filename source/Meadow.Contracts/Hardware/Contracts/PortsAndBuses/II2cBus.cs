@@ -52,10 +52,9 @@ namespace Meadow.Hardware
         [Obsolete("This overload if WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
         byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite);
 
-        void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount);        
-        void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer);
-
-
+        // NEW stuff
+        void ExchangeData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount);        
+        void ExchangeData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer);
         void ReadData(byte peripheralAddress, Span<byte> readBuffer);
 
         /// <summary>

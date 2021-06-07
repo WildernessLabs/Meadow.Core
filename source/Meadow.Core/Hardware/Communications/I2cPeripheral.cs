@@ -39,7 +39,7 @@ namespace Meadow.Hardware
         public void ReadRegister(byte address, Span<byte> readBuffer)
         {
             TxBuffer.Span[0] = address;
-            Bus.WriteReadData(this.Address, TxBuffer.Span, 1, readBuffer, 1);
+            Bus.ExchangeData(this.Address, TxBuffer.Span, 1, readBuffer, 1);
         }
 
         public byte ReadRegister(byte address)
@@ -53,7 +53,7 @@ namespace Meadow.Hardware
             //return rx[0];
 
             this.TxBuffer.Span[0] = address;
-            Bus.WriteReadData(this.Address, TxBuffer.Span, 1, RxBuffer.Span, 1);
+            Bus.ExchangeData(this.Address, TxBuffer.Span, 1, RxBuffer.Span, 1);
             return RxBuffer.Span[0];
         }
 
@@ -73,7 +73,7 @@ namespace Meadow.Hardware
             }
 
             this.TxBuffer.Span[0] = address;
-            Bus.WriteReadData(this.Address, TxBuffer.Span, 1, RxBuffer.Span, length);
+            Bus.ExchangeData(this.Address, TxBuffer.Span, 1, RxBuffer.Span, length);
             return RxBuffer.Slice(0, length).ToArray();
         }
 
@@ -93,7 +93,7 @@ namespace Meadow.Hardware
 
             // TODO to @CTACKE from BC: please confirm this code does the above
             TxBuffer.Span[0] = address;
-            Bus.WriteReadData(this.Address, TxBuffer.Span, RxBuffer.Slice(0, 2).Span);
+            Bus.ExchangeData(this.Address, TxBuffer.Span, RxBuffer.Slice(0, 2).Span);
             if (order == ByteOrder.LittleEndian) {
                 return (ushort)(RxBuffer.Span[0] | (RxBuffer.Span[1] << 8));
             } else {
@@ -130,7 +130,7 @@ namespace Meadow.Hardware
             tx[0] = address;
             Span<byte> rx = stackalloc byte[number * 2];
 
-            Bus.WriteReadData(this.Address, tx, rx);
+            Bus.ExchangeData(this.Address, tx, rx);
 
             var result = new ushort[number];
             for (int i = 0; i < number; i++)
@@ -161,9 +161,9 @@ namespace Meadow.Hardware
             return this.Bus.WriteReadData(this.Address, length, write);
         }
 
-        public void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer)
+        public void ExchangeData(Span<byte> writeBuffer, Span<byte> readBuffer)
         {
-            Bus.WriteReadData(this.Address, writeBuffer, readBuffer);
+            Bus.ExchangeData(this.Address, writeBuffer, readBuffer);
         }
 
         public void WriteRegister(byte address, byte value)

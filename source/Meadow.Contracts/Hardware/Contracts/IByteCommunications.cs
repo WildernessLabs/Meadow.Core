@@ -71,7 +71,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="writeBuffer">Data to write</param>
         /// <param name="readBuffer">Buffer where read data will be written.  Number of bytes read is determined by buffer size</param>
-        void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer);
+        void ExchangeData(Span<byte> writeBuffer, Span<byte> readBuffer);
 
         void Read(Span<byte> readBuffer);
 

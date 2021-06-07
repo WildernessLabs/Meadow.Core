@@ -194,12 +194,12 @@ namespace Meadow.Hardware
         /// <param name="peripheralAddress">Peripheral address</param>
         /// <param name="writeBuffer">Data buffer holding the data to write</param>
         /// <param name="dataToWrite">Data buffer into which read data will go.  The size of this buffer determines the number of bytes to be read</param>
-        public unsafe void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
+        public unsafe void ExchangeData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
         {
-            WriteReadData(peripheralAddress, writeBuffer, writeBuffer.Length, readBuffer, readBuffer.Length);
+            ExchangeData(peripheralAddress, writeBuffer, writeBuffer.Length, readBuffer, readBuffer.Length);
         }
 
-        public unsafe void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount)
+        public unsafe void ExchangeData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount)
         {
             _busSemaphore.Wait();
 
