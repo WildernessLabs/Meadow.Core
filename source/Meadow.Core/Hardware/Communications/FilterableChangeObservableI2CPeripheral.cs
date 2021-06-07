@@ -8,6 +8,8 @@ namespace Meadow.Hardware
     public abstract class I2cFilterableObservableBase<UNIT> :
         FilterableChangeObservableBase<UNIT>, IDisposable where UNIT : struct
     {
+        public event EventHandler<IChangeResult<UNIT>> Updated = delegate { };
+
         private object _lock = new object();
         private CancellationTokenSource? SamplingTokenSource { get; set; }
 
@@ -19,7 +21,12 @@ namespace Meadow.Hardware
         protected II2cPeripheral I2cPeripheral { get; private set; }
 
         protected abstract Task<UNIT> ReadSensor();
-        protected abstract void RaiseChangedAndNotify(IChangeResult<UNIT> changeResult);
+            
+        protected virtual void RaiseChangedAndNotify(IChangeResult<UNIT> changeResult)
+        {
+            Updated.Invoke(this, changeResult);
+            NotifyObservers(changeResult);
+        }
 
         /// <summary>
         /// The last read conditions.
