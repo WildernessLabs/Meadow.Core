@@ -11,13 +11,13 @@ namespace Meadow.Peripherals.Sensors
         /// <summary>
         /// Last value read from the VOC sensor.
         /// </summary>
-        Concentration? VOC { get; }
+        Concentration? Voc { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<ChangeResult<Concentration>> VOCUpdated;
+        event EventHandler<ChangeResult<Concentration>> VocUpdated;
     }
 }
