@@ -7,14 +7,6 @@ using System.Runtime.InteropServices;
 
 namespace Meadow
 {
-    internal class I2CPeripheralInfo
-    {
-        public int BusNumber { get; set; }
-        public byte BusAddress { get; set; }
-        public int DriverHandle { get; set; }
-        public bool IsOpen { get; set; }
-    }
-
     public class I2CBus : II2cBus, IDisposable
     {
         private class SMBusIoctlData
@@ -114,6 +106,85 @@ namespace Meadow
             return info.DriverHandle;
         }
 
+        public unsafe void Read(byte peripheralAddress, Span<byte> readBuffer)
+        {
+            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
+            fixed (byte* pData = readBuffer)
+            {
+                var result = Interop.read(handle, pData, readBuffer.Length);
+                if (result < 0)
+                {
+                    var msg = $"ERROR: {Marshal.GetLastWin32Error()}";
+                    Console.WriteLine(msg);
+                    throw new NativeException(msg);
+                }
+            }
+        }
+
+        public unsafe void Write(byte peripheralAddress, Span<byte> writeBuffer)
+        {
+            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
+            fixed (byte* pData = writeBuffer)
+            {
+                var result = Interop.write(handle, pData, writeBuffer.Length);
+                if (result < 0)
+                {
+                    var msg = $"ERROR: {Marshal.GetLastWin32Error()}";
+                    Console.WriteLine(msg);
+                    throw new NativeException(msg);
+                }
+            }
+        }
+
+        public unsafe void Exchange(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
+            fixed (byte* pWrite = writeBuffer)
+            fixed (byte* pRead = writeBuffer)
+            {
+                var result = Interop.write(handle, pWrite, writeBuffer.Length);
+                if (result < 0)
+                {
+                    var msg = $"WRITE ERROR: {Marshal.GetLastWin32Error()}";
+                    Console.WriteLine(msg);
+                    throw new NativeException(msg);
+                }
+                result = Interop.read(handle, pRead, readBuffer.Length);
+                if (result < 0)
+                {
+                    var msg = $"READ ERROR: {Marshal.GetLastWin32Error()}";
+                    Console.WriteLine(msg);
+                    throw new NativeException(msg);
+                }
+            }
+        }
+
+        public void WriteData(byte peripheralAddress, params byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteData(byte peripheralAddress, byte[] data, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
+        {
+            throw new NotImplementedException();
+        }
+
+        /*
         public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
         {
             var data = new byte[numberOfBytes];
@@ -218,5 +289,6 @@ namespace Meadow
                 }
             }
         }
+        */
     }
 }

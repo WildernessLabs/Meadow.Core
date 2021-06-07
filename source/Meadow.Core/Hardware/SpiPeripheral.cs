@@ -243,7 +243,7 @@ namespace Meadow.Hardware
             //{
             //    readBuffer[i] = r[i];
             //}
-            Bus.Exchange(ChipSelect, ChipSelectMode.ActiveLow, writeBuffer, readBuffer);
+            Bus.Exchange(ChipSelect, writeBuffer, readBuffer, ChipSelectMode.ActiveLow);
         }
 
         /// <summary>

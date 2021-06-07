@@ -29,8 +29,8 @@ namespace Meadow.Hardware
         /// The number of bytes to be written will be determined by the length of the byte array.
         /// </remarks>
         /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
-        /// <param name="data">Data to be written.</param>
-        void Write(byte peripheralAddress, Span<byte> data);
+        /// <param name="writeBuffer">Data to be written.</param>
+        void Write(byte peripheralAddress, Span<byte> writeBuffer);
 
         /// <summary>
         /// Writes data from the write buffer to a peripheral on the bus, then
