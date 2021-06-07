@@ -348,19 +348,19 @@ namespace Meadow.Hardware
         // NEW
         public unsafe void ExchangeData(
             IDigitalOutputPort chipSelect, ChipSelectMode csMode,
-            Span<byte> sendBuffer, Span<byte> receiveBuffer)
+            Span<byte> writeBuffer, Span<byte> readBuffer)
         {
-            ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
+            ExchangeData(chipSelect, csMode, writeBuffer, readBuffer, writeBuffer.Length);
         }
 
         // NEW
         public unsafe void ExchangeData(
             IDigitalOutputPort chipSelect, ChipSelectMode csMode,
-            Span<byte> sendBuffer, Span<byte> receiveBuffer, int bytesToExchange)
+            Span<byte> writeBuffer, Span<byte> readBuffer, int bytesToExchange)
         {
-            if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
-            if (receiveBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
-            if (sendBuffer.Length != receiveBuffer.Length) throw new Exception("Both buffers must be equal size");
+            if (writeBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
+            if (readBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+            if (writeBuffer.Length != readBuffer.Length) throw new Exception("Both buffers must be equal size");
 
             _busSemaphore.Wait();
 
@@ -371,8 +371,8 @@ namespace Meadow.Hardware
                 }
 
                 // TODO: @Ctacke: doing this requires unsafe but gets rid of the GCHandle creation. worth?
-                fixed (byte* pWrite = sendBuffer)
-                fixed (byte* pRead = receiveBuffer)
+                fixed (byte* pWrite = writeBuffer)
+                fixed (byte* pRead = readBuffer)
                 {
                     var command = new Nuttx.UpdSPIDataCommand() {
                         BufferLength = bytesToExchange,
@@ -382,12 +382,12 @@ namespace Meadow.Hardware
                     };
 
                     Output.WriteLineIf(_showSpiDebug, "+Exchange");
-                    Output.WriteLineIf(_showSpiDebug, $" Sending {sendBuffer.Length} bytes");
+                    Output.WriteLineIf(_showSpiDebug, $" Sending {writeBuffer.Length} bytes");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
                     if (result != 0) {
                         DecipherSPIError(UPD.GetLastError());
                     }
-                    Output.WriteLineIf(_showSpiDebug, $" Received {receiveBuffer.Length} bytes");
+                    Output.WriteLineIf(_showSpiDebug, $" Received {readBuffer.Length} bytes");
 
                     if (chipSelect != null) {
                         // deactivate the chip select
