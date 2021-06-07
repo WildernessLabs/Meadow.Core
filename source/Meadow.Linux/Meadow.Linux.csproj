@@ -2,7 +2,7 @@
  <PropertyGroup>
    <TargetFramework>netstandard2.1</TargetFramework>
    <OutputType>Library</OutputType>
-   <AssemblyName>Meadow.F7</AssemblyName>   
+   <AssemblyName>Meadow.Linux</AssemblyName>   
    <Company>Wilderness Labs, Inc</Company>
    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
    <PackageId>Meadow.Linux</PackageId>
