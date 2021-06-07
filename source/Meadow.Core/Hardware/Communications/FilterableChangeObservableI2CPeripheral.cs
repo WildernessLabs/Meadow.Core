@@ -3,7 +3,7 @@ using Meadow.Units;
 
 namespace Meadow.Hardware
 {
-    public abstract class FilterableChangeObservableI2CPeripheral<UNIT> :
+    public abstract class I2cFilterableObservableBase<UNIT> :
         FilterableChangeObservableBase<UNIT>, IDisposable where UNIT : struct
     {
         /// <summary>
@@ -13,9 +13,9 @@ namespace Meadow.Hardware
 
         protected II2cPeripheral I2cPeripheral { get; private set; }
 
-        protected FilterableChangeObservableI2CPeripheral(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
+        protected I2cFilterableObservableBase(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
         {
-            I2cPeripheral = new I2cPeripheral(i2cBus, address);
+            I2cPeripheral = new I2cPeripheral(i2cBus, address, rxBufferSize, txBufferSize);
         }
 
         protected virtual void Dispose(bool disposing)
