@@ -122,6 +122,17 @@ namespace Meadow.Hardware
             Bus.Write(ChipSelect, WriteBuffer.Span[0..2], this.chipSelectMode);
         }
 
+        /// <summary>
+        /// Writes a single ushort value to a target register address on the peripheral (i.e. [address][ushort])
+        /// </summary>
+        /// <param name="address">The target write register address</param>
+        /// <param name="value">Value to write</param>
+        /// <param name="order">Endianness of the value to be written</param>
+        public void WriteRegister(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            WriteUShorts(address, new ushort[] { value }, order);
+        }
+
         public void WriteRegister(byte address, uint value, ByteOrder order = ByteOrder.LittleEndian)
         {
             throw new NotImplementedException();
@@ -132,12 +143,19 @@ namespace Meadow.Hardware
             throw new NotImplementedException();
         }
 
+        // TODO: consider deleting. See `IByteCommunications` for more info.
+        /// <summary>
+        /// Write data to one or more registers.
+        /// </summary>
+        /// <param name="address">Address of the first register to write to.</param>
+        /// <param name="data">Data to write into the registers.</param>
         public void WriteRegisters(byte address, Span<byte> data)
         {
-            throw new NotImplementedException();
+            byte[] allTheThings = new byte[data.Length + 1];
+            allTheThings[0] = address;
+            data.CopyTo(allTheThings.AsSpan(1));
+            this.Bus.Write(this.ChipSelect, allTheThings, this.chipSelectMode);
         }
-
-
 
         //==== OLD AND BUSTED
 
@@ -149,17 +167,6 @@ namespace Meadow.Hardware
         public void WriteBytes(byte[] values)
         {
             Bus.SendData(ChipSelect, values);
-        }
-
-        /// <summary>
-        /// Writes a single ushort value to a target register address on the peripheral (i.e. [address][ushort])
-        /// </summary>
-        /// <param name="address">The target write register address</param>
-        /// <param name="value">Value to write</param>
-        /// <param name="order">Endianness of the value to be written</param>
-        public void WriteRegister(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            WriteUShorts(address, new ushort[] { value }, order);
         }
 
         /// <summary>
