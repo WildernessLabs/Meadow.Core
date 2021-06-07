@@ -140,7 +140,7 @@ namespace Meadow
         {
             var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
             fixed (byte* pWrite = writeBuffer)
-            fixed (byte* pRead = writeBuffer)
+            fixed (byte* pRead = readBuffer)
             {
                 var result = Interop.write(handle, pWrite, writeBuffer.Length);
                 if (result < 0)
@@ -183,112 +183,5 @@ namespace Meadow
         {
             throw new NotImplementedException();
         }
-
-        /*
-        public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
-        {
-            var data = new byte[numberOfBytes];
-            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
-            var result = Interop.read(handle, data, numberOfBytes);
-            if(result < 0)
-            {
-                Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-            }
-            return data;
-        }
-
-        public void WriteData(byte peripheralAddress, params byte[] data)
-        {
-            WriteData(peripheralAddress, data, data.Length);
-        }
-
-        public void WriteData(byte peripheralAddress, byte[] data, int length)
-        {
-            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
-            var result = Interop.write(handle, data, length);
-            if(result < 0)
-            {
-                Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-            }
-        }
-
-        public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
-        {
-            WriteData(peripheralAddress, data.ToArray(), data.Count());
-        }
-
-        public void WriteData(byte peripheralAddress, Span<byte> data)
-        {
-            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
-            unsafe
-            {
-                fixed (byte* writePtr = &MemoryMarshal.GetReference(data))
-                {
-                    var result = Interop.write(handle, writePtr, data.Length);
-            if(result < 0)
-            {
-                Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-            }
-                }
-            }
-        }
-
-        public byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite)
-        {
-            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
-            var readBuffer = new byte[byteCountToRead];
-            var result = Interop.write(handle, dataToWrite, dataToWrite.Length);
-            result = Interop.read(handle, readBuffer, readBuffer.Length);
-            if(result < 0)
-            {
-                Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-            }
-            return readBuffer;
-        }
-
-        public void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, int writeCount, Span<byte> readBuffer, int readCount)
-        {
-            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
-            unsafe
-            {
-                fixed (byte* writePtr = &MemoryMarshal.GetReference(writeBuffer))
-                fixed (byte* readPtr = &MemoryMarshal.GetReference(readBuffer))
-                {
-                    var result = Interop.write(handle, writePtr, writeCount);
-                    if(result < 0)
-                    {
-                        Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-                    }
-                    result = Interop.read(handle, readPtr, readCount);
-                    if(result < 0)
-                    {
-                        Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-                    }
-                }
-            }
-        }
-
-        public void WriteReadData(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
-        {
-            var handle = GetPeripheralHandle(BusNumber, peripheralAddress);
-            unsafe
-            {
-                fixed (byte* writePtr = &MemoryMarshal.GetReference(writeBuffer))
-                fixed (byte* readPtr = &MemoryMarshal.GetReference(readBuffer))
-                {
-                    var result = Interop.write(handle, writePtr, writeBuffer.Length);
-                    if(result < 0)
-                    {
-                        Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-                    }
-                    result = Interop.read(handle, readPtr, readBuffer.Length);
-                    if(result < 0)
-                    {
-                        Console.WriteLine($"ERROR: {Marshal.GetLastWin32Error()}");
-                    }
-                }
-            }
-        }
-        */
     }
 }
