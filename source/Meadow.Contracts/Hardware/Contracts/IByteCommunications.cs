@@ -52,8 +52,8 @@ namespace Meadow.Hardware
         /// <summary>
         /// Write an array of bytes to the peripheral.
         /// </summary>
-        /// <param name="data">Values to be written.</param>
-        void Write(Span<byte> data);
+        /// <param name="writeBuffer">A buffer of byte values to be written.</param>
+        void Write(Span<byte> writeBuffer);
 
         /// <summary>
         /// Write data a register in the peripheral.
