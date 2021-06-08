@@ -12,7 +12,7 @@ namespace Meadow
     /// as `NotifyObservers` and `Subscribe`.
     /// </summary>
     /// <typeparam name="UNIT"></typeparam>
-    public abstract class FilterableChangeObservableBase<UNIT> : IObservable<IChangeResult<UNIT>>
+    public abstract class SensorBase<UNIT> : IObservable<IChangeResult<UNIT>>
         where UNIT : struct
     {
         // collection of observers
@@ -31,8 +31,7 @@ namespace Meadow
         /// <returns></returns>
         public IDisposable Subscribe(IObserver<IChangeResult<UNIT>> observer)
         {
-            if (!observers.Contains(observer))
-            {
+            if (!observers.Contains(observer)) {
                 observers.Add(observer);
             }
 

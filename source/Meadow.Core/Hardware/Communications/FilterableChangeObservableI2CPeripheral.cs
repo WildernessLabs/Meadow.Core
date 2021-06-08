@@ -5,8 +5,8 @@ using Meadow.Units;
 
 namespace Meadow.Hardware
 {
-    public abstract class I2cFilterableObservableBase<UNIT> :
-        FilterableChangeObservableBase<UNIT>, IDisposable where UNIT : struct
+    public abstract class I2cSensorBase<UNIT> :
+        SensorBase<UNIT>, IDisposable where UNIT : struct
     {
         public event EventHandler<IChangeResult<UNIT>> Updated = delegate { };
 
@@ -33,7 +33,7 @@ namespace Meadow.Hardware
         /// </summary>
         public UNIT Conditions { get; protected set; }
 
-        protected I2cFilterableObservableBase(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
+        protected I2cSensorBase(II2cBus i2cBus, byte address, int rxBufferSize = 8, int txBufferSize = 8)
         {
             I2cPeripheral = new I2cPeripheral(i2cBus, address, rxBufferSize, txBufferSize);
         }
