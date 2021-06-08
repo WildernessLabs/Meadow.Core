@@ -1,7 +1,17 @@
 ﻿namespace Meadow.Peripherals.Sensors
 {
-    public interface ISensor
+    //TODO: after Meadow.Foundation cleanup. Get rid of comments
+    // here and enforce this pattern.
+
+    public interface ISensor/*<UNIT>
+        where UNIT : struct*/
     {
-        //float NotificationThreshold { get; set; }
+        /*
+        bool IsSampling { get; }
+
+        UNIT Read();
+        void StartUpdating();
+        void StopUpdating();
+        */
     }
 }
