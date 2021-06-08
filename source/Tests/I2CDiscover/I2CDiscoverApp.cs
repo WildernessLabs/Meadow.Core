@@ -35,7 +35,7 @@ namespace Benchmarks
                 // this device is...interesting.  Most registers are 1-bye addressing, but a few are 2-bytes?
                 tx[0] = READ_ID_PART1;
                 tx[1] = READ_ID_PART2;
-                bus.WriteReadData(0x40, tx, 2, rx, 8);
+                bus.Exchange(0x40, tx, rx);
                 for (var index = 0; index < 4; index++)
                 {
                     SerialNumber <<= 8;
@@ -44,7 +44,7 @@ namespace Benchmarks
 
                 tx[0] = READ_2ND_ID_PART1;
                 tx[1] = READ_2ND_ID_PART2;
-                bus.WriteReadData(0x40, tx, 2, rx, 8);
+                bus.Exchange(0x40, tx, rx);
 
                 SerialNumber <<= 8;
                 SerialNumber += rx[0];

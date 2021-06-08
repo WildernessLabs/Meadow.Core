@@ -4,33 +4,122 @@ using System.Linq;
 
 namespace Meadow.Hardware
 {
+    //TODO: BC: add internal buffer
     public class SpiPeripheral : ISpiPeripheral
     {
-        public IDigitalOutputPort ChipSelect { get; }
+        public IDigitalOutputPort? ChipSelect { get; }
+        ChipSelectMode chipSelectMode;
         public ISpiBus Bus { get; }
 
-        public SpiPeripheral(ISpiBus bus, IDigitalOutputPort chipSelect)
+        /// <summary>
+        /// Internal write buffer. Used in methods in which the buffers aren't
+        /// passed in.
+        /// </summary>
+        protected Memory<byte> WriteBuffer { get; }
+        /// <summary>
+        /// Internal read buffer. Used in methods in which the buffers aren't
+        /// passed in.
+        /// </summary>
+        protected Memory<byte> ReadBuffer { get; }
+
+        public SpiPeripheral(
+            ISpiBus bus,
+            IDigitalOutputPort? chipSelect,
+            int readBufferSize = 8, int writeBufferSize = 8,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
         {
             this.Bus = bus;
             this.ChipSelect = chipSelect;
+            this.chipSelectMode = csMode;
+            WriteBuffer = new byte[writeBufferSize];
+            ReadBuffer = new byte[readBufferSize];
+        }
+
+
+        //==== NEW HOTNESS
+
+        /// <summary>
+        /// Reads data from the peripheral.
+        /// </summary>
+        /// <param name="readBuffer">The buffer to read from the peripheral into.</param>
+        /// <remarks>
+        /// The number of bytes to be read is determined by the length of the
+        /// `readBuffer`.
+        /// </remarks>
+        public void Read(Span<byte> readBuffer)
+        {
+            Bus.Read(this.ChipSelect, readBuffer, this.chipSelectMode);
+        }
+
+        /// <summary>
+        /// Reads data from the peripheral starting at the specified address.
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="readBuffer"></param>
+        public void ReadRegister(byte address, Span<byte> readBuffer)
+        {
+            WriteBuffer.Span[0] = address;
+            Bus.Exchange(this.ChipSelect, WriteBuffer.Span[0..1], readBuffer, this.chipSelectMode);
+        }
+
+        /// <summary>
+        /// Reads a single byte from the specified address of the peripheral
+        /// </summary>
+        /// <param name="address">Address to read</param>
+        /// <returns>The byte read</returns>
+        public byte ReadRegister(byte address)
+        {
+            WriteBuffer.Span[0] = address;
+            Bus.Exchange(this.ChipSelect, WriteBuffer.Span[0..1], ReadBuffer.Span[0..1], this.chipSelectMode);
+            return ReadBuffer.Span[0];
+        }
+
+        /// <summary>
+        /// Reads a single ushort value from the specified address of the peripheral
+        /// </summary>
+        /// <param name="address">Address of the read</param>
+        /// <param name="order">Endianness of the value read</param>
+        /// <returns>The value read</returns>
+        public ushort ReadRegisterAsUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            ReadRegister(address, ReadBuffer[0..2].Span);
+            if (order == ByteOrder.LittleEndian) {
+                return (ushort)(ReadBuffer.Span[0] | (ReadBuffer.Span[1] << 8));
+            } else {
+                return (ushort)(ReadBuffer.Span[0] << 8 | ReadBuffer.Span[1]);
+            }
         }
 
         /// <summary>
         /// Writes a single byte to the peripheral
         /// </summary>
         /// <param name="value">Value to write</param>
-        public void WriteByte(byte value)
+        public void Write(byte value)
         {
-            Bus.SendData(ChipSelect, value);
+            WriteBuffer.Span[0] = value;
+            Bus.Write(ChipSelect, WriteBuffer.Span[0..1], this.chipSelectMode);
         }
 
         /// <summary>
-        /// Writes an array of bytes to the peripheral
+        /// Write a single byte to the peripheral.
         /// </summary>
-        /// <param name="values">The data to write</param>
-        public void WriteBytes(byte[] values)
+        /// <param name="value">Value to be written (8-bits).</param>
+        public void Write(Span<byte> data)
         {
-            Bus.SendData(ChipSelect, values);
+            Bus.Write(this.ChipSelect, data, this.chipSelectMode);
+        }
+
+        /// <summary>
+        /// Writes a single byte to the specified address of the peripheral
+        /// </summary>
+        /// <param name="address">The target write register address</param>
+        /// <param name="value">Value to write</param>
+        public void WriteRegister(byte address, byte value)
+        {
+            // stuff the address and value into the write buffer
+            WriteBuffer.Span[0] = address;
+            WriteBuffer.Span[1] = value;
+            Bus.Write(ChipSelect, WriteBuffer.Span[0..2], this.chipSelectMode);
         }
 
         /// <summary>
@@ -39,9 +128,89 @@ namespace Meadow.Hardware
         /// <param name="address">The target write register address</param>
         /// <param name="value">Value to write</param>
         /// <param name="order">Endianness of the value to be written</param>
-        public void WriteUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
+        public void WriteRegister(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
-            WriteUShorts(address, new ushort[] { value }, order);
+            // split the 16 bit ushort into two bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
+        }
+
+        /// <summary>
+        /// Write an unsigned integer to the peripheral.
+        /// </summary>
+        /// <param name="address">Address to write the first byte to.</param>
+        /// <param name="value">Value to be written.</param>
+        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
+        public void WriteRegister(byte address, uint value, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            // split the 32 bit ushort into four bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
+        }
+
+        /// <summary>
+        /// Write an unsigned long to the peripheral.
+        /// </summary>
+        /// <param name="address">Address to write the first byte to.</param>
+        /// <param name="value">Value to be written.</param>
+        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
+        public void WriteRegister(byte address, ulong value, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            // split the 64 bit ushort into eight bytes
+            var bytes = BitConverter.GetBytes(value);
+            // call the helper method
+            WriteRegister(address, bytes, order);
+        }
+
+        /// <summary>
+        /// Helper method 
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="data"></param>
+        /// <param name="order"></param>
+        protected void WriteRegister(byte address, Span<byte> data, ByteOrder order = ByteOrder.LittleEndian)
+        {
+            if(WriteBuffer.Length < data.Length + 1) {
+                throw new ArgumentException("Data to write is too large for the write buffer. " +
+                    "Must be less than WriteBuffer.Length + 1 (to allow for address). " +
+                    "Instantiate this class with a larger WriteBuffer, or send a smaller" +
+                    "amount of data to fix.");
+            }
+
+            // stuff the register address into the write buffer
+            WriteBuffer.Span[0] = address;
+
+            // stuff the bytes into the write buffer (starting at `1` index,
+            // because `0` is the register address.
+            switch (order) {
+                case ByteOrder.LittleEndian:
+                    for (int i = 0; i < data.Length; i++) {
+                        WriteBuffer.Span[i + 1] = data[i];
+                    }
+                    break;
+                case ByteOrder.BigEndian:
+                    for (int i = 0; i < data.Length; i++) {
+                        // stuff them backwards
+                        WriteBuffer.Span[i + 1] = data[data.Length - (i + 1)];
+                    }
+                    break;
+            }
+            // write it
+            this.Bus.Write(this.ChipSelect, WriteBuffer.Span[0..(data.Length + 1)], this.chipSelectMode);
+        }
+
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
+
+
+        /// <summary>
+        /// Writes an array of bytes to the peripheral
+        /// </summary>
+        /// <param name="values">The data to write</param>
+        public void WriteBytes(byte[] values)
+        {
+            Bus.SendData(ChipSelect, values);
         }
 
         /// <summary>
@@ -73,16 +242,6 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Writes a single byte to the specified address of the peripheral
-        /// </summary>
-        /// <param name="address">The target write register address</param>
-        /// <param name="value">Value to write</param>
-        public void WriteRegister(byte address, byte value)
-        {
-            Bus.SendData(ChipSelect, address, value);
-        }
-
-        /// <summary>
         /// Writes an array of bytes to the specified address of the peripheral
         /// </summary>
         /// <param name="address">The target write register address</param>
@@ -104,7 +263,7 @@ namespace Meadow.Hardware
         /// <remarks>The data read happens <b>after</b> all outbound data has been clocked out (i.e. there is no overlap).  If you need overlap, use the Exchange method of the bus.</remarks>
         public byte[] WriteRead(byte[] write, ushort length)
         {
-            // DEV NOTE: This is a terribly inefficient way to use a SPI bus
+            // TODO: This is a terribly inefficient way to use a SPI bus
 
             // create a buffer for both directions
             var txBuffer = new byte[write.Length + length];
@@ -127,16 +286,15 @@ namespace Meadow.Hardware
             return result;
         }
 
-        public void WriteRead(Span<byte> writeBuffer, Span<byte> readBuffer)
+        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer)
         {
-            // DEV NOTE: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
-
-            var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);
-
-            for (int i = 0; i < readBuffer.Length; i++)
-            {
-                readBuffer[i] = r[i];
-            }
+            //// TODO: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
+            //var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);
+            //for (int i = 0; i < readBuffer.Length; i++)
+            //{
+            //    readBuffer[i] = r[i];
+            //}
+            Bus.Exchange(ChipSelect, writeBuffer, readBuffer, ChipSelectMode.ActiveLow);
         }
 
         /// <summary>
@@ -147,16 +305,6 @@ namespace Meadow.Hardware
         public byte[] ReadBytes(ushort numberOfBytes)
         {
             return Bus.ReceiveData(ChipSelect, numberOfBytes);
-        }
-
-        /// <summary>
-        /// Reads a single byte from the specified address of the peripheral
-        /// </summary>
-        /// <param name="address">Address to read</param>
-        /// <returns>The byte read</returns>
-        public byte ReadRegister(byte address)
-        {
-            return ReadRegisters(address, 1).First();
         }
 
         /// <summary>
@@ -171,22 +319,6 @@ namespace Meadow.Hardware
             buffer[0] = address;
 
             return WriteRead(buffer, length);
-        }
-
-        /// <summary>
-        /// Reads a single ushort value from the specified address of the peripheral
-        /// </summary>
-        /// <param name="address">Address of the read</param>
-        /// <param name="order">Endianness of the value read</param>
-        /// <returns>The value read</returns>
-        public ushort ReadUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var data = ReadRegisters(address, 2);
-            if (order == ByteOrder.LittleEndian)
-            {
-                return (ushort)((data[1] << 8) | data[0]);
-            }
-            return (ushort)((data[0] << 8) | data[1]);
         }
 
         /// <summary>

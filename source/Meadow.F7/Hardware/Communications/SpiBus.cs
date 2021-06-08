@@ -116,6 +116,153 @@ namespace Meadow.Hardware
             SetBitsPerWord(Configuration.BitsPerWord);
         }
 
+        //==== NEW HOTNESS
+
+        /// <summary>
+        /// Reads data from the SPI bus into the buffer.
+        /// </summary>
+        /// <param name="chipSelect">Port to use as the chip select to activate the bus.</param>
+        /// <param name="readBuffer">Data to write</param>
+        /// <param name="csMode">Describes which level on the chip select activates the peripheral.</param>
+        public unsafe void Read(
+            IDigitalOutputPort? chipSelect,
+            Span<byte> readBuffer,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
+        {
+            _busSemaphore.Wait();
+
+            try {
+                if (chipSelect != null) {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                fixed (byte* pRead = readBuffer)
+                {
+                    var command = new Nuttx.UpdSPIDataCommand() {
+                        TxBuffer = IntPtr.Zero,
+                        BufferLength = readBuffer.Length,
+                        RxBuffer = (IntPtr)pRead,
+                        BusNumber = BusNumber
+                    };
+
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                    if (result != 0) {
+                        DecipherSPIError(UPD.GetLastError());
+                    }
+
+                    if (chipSelect != null) {
+                        // deactivate the chip select
+                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                    }
+                }
+            } finally {
+                _busSemaphore.Release();
+            }
+        }
+
+        /// <summary>
+        /// Writes data to the SPI bus
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="writeBuffer">Data to write</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        public unsafe void Write(
+            IDigitalOutputPort? chipSelect,
+            Span<byte> writeBuffer,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
+        {
+            _busSemaphore.Wait();
+            Output.WriteLineIf(_showSpiDebug, $" +SendData");
+
+            try {
+                if (chipSelect != null) {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                fixed (byte* pWrite = writeBuffer) {
+                    var command = new Nuttx.UpdSPIDataCommand() {
+                        BufferLength = writeBuffer.Length,
+                        TxBuffer = (IntPtr)pWrite,
+                        RxBuffer = IntPtr.Zero,
+                        BusNumber = BusNumber
+                    };
+
+                    Output.WriteLineIf(_showSpiDebug, $" sending {writeBuffer.Length} bytes: {BitConverter.ToString(writeBuffer.ToArray())}");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                    if (result != 0) {
+                        DecipherSPIError(UPD.GetLastError());
+                    }
+                    Output.WriteLineIf(_showSpiDebug, $" send complete");
+
+                    if (chipSelect != null) {
+                        // deactivate the chip select
+                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                    }
+                }
+            } finally {
+                _busSemaphore.Release();
+                Output.WriteLineIf(_showSpiDebug, $" -SendData");
+            }
+        }
+
+        /// <summary>
+        /// Writes data from the write buffer to a peripheral on the bus while
+        /// at the same time reading return data into the read buffer.
+        /// </summary>
+        /// <param name="chipSelect">Port to use as the chip select to activate the peripheral.</param>
+        /// <param name="writeBuffer">Buffer to read data from.</param>
+        /// <param name="readBuffer">Buffer to read returning data into.</param>
+        /// <param name="csMode">Describes which level on the chip select activates the peripheral.</param>
+        public unsafe void Exchange(
+            IDigitalOutputPort? chipSelect,
+            Span<byte> writeBuffer, Span<byte> readBuffer,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
+        {
+            if (writeBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
+            if (readBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+            if (writeBuffer.Length != readBuffer.Length) throw new Exception("Both buffers must be equal size");
+
+            _busSemaphore.Wait();
+
+            try {
+                if (chipSelect != null) {
+                    // activate the chip select
+                    chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
+                }
+
+                // TODO: @Ctacke: doing this requires unsafe but gets rid of the GCHandle creation. worth?
+                fixed (byte* pWrite = writeBuffer)
+                fixed (byte* pRead = readBuffer) {
+                    var command = new Nuttx.UpdSPIDataCommand() {
+                        BufferLength = readBuffer.Length,
+                        TxBuffer = (IntPtr)pWrite,
+                        RxBuffer = (IntPtr)pRead,
+                        BusNumber = BusNumber
+                    };
+
+                    Output.WriteLineIf(_showSpiDebug, "+Exchange");
+                    Output.WriteLineIf(_showSpiDebug, $" Sending {writeBuffer.Length} bytes");
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
+                    if (result != 0) {
+                        DecipherSPIError(UPD.GetLastError());
+                    }
+                    Output.WriteLineIf(_showSpiDebug, $" Received {readBuffer.Length} bytes");
+
+                    if (chipSelect != null) {
+                        // deactivate the chip select
+                        chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
+                    }
+                }
+            } finally {
+                _busSemaphore.Release();
+            }
+        }
+
+
+        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
+
         /// <summary>
         /// Writes data to the SPI bus
         /// </summary>

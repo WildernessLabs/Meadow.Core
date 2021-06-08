@@ -367,8 +367,8 @@ namespace Meadow.Devices
         /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
-            int busNumber,
-            I2cBusSpeed busSpeed
+            I2cBusSpeed busSpeed,
+            int busNumber = 0
         )
         {
             return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));

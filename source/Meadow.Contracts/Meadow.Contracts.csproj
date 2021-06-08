@@ -20,7 +20,6 @@
  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.4" Condition="'$(TargetFramework)'=='netstandard2.0'" />
-    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" Condition="'$(TargetFramework)'=='net472'" />
   </ItemGroup>
   <ItemGroup>
    <ProjectReference Include="..\Meadow.Units\Meadow.Units.csproj" />

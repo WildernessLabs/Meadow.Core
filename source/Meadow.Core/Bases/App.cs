@@ -39,6 +39,9 @@ namespace Meadow
             _device.Initialize();
             MeadowOS.CurrentDevice = _device;
 
+            // initialize file system folders and such
+            MeadowOS.InitializeFileSystem();
+
             //BUGBUG: because a user's `App` class doesn't have to call this
             // base ctor, then this might not ever run, or it might run
             // non-deterministically. so we need to figure out how to make sure
