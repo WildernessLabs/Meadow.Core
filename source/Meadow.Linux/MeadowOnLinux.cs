@@ -8,6 +8,28 @@ using System.Threading;
 
 namespace Meadow
 {
+    public class LinuxSerialPortNameDefinitions
+    {
+        public SerialPortName UART1 { get; protected set; } = null!;
+        public SerialPortName UART2 { get; protected set; } = null!;
+    }
+
+    public class JetsonNanoSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
+    {
+        public JetsonNanoSerialPortNameDefinitions()
+        {
+            UART2 = new SerialPortName("UART2", "ttyTHS1");
+        }
+    }
+
+    public class RaspberryPiSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
+    {
+        public RaspberryPiSerialPortNameDefinitions()
+        {
+            // TODO:
+        }
+    }
+
     public class MeadowOnLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
@@ -15,6 +37,23 @@ namespace Meadow
 
         public IPinDefinitions Pins { get; }
         public DeviceCapabilities Capabilities { get; }
+
+        public LinuxSerialPortNameDefinitions SerialPortNames
+        {
+            get
+            {
+                if(typeof(TPinout) == typeof(JetsonNanoPinout))
+                {
+                    return new JetsonNanoSerialPortNameDefinitions();
+                }
+                else if (typeof(TPinout) == typeof(RaspberryPiPinout))
+                {
+                    return new RaspberryPiSerialPortNameDefinitions();
+                }
+
+                throw new PlatformNotSupportedException();
+            }
+        }
 
         public MeadowOnLinux()
         {

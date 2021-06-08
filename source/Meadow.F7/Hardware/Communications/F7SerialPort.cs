@@ -87,12 +87,12 @@ namespace Meadow.Hardware
 
         protected override void CloseHardwarePort(IntPtr handle)
         {
-            Nuttx.close(_driverHandle);
+            Nuttx.close(handle);
         }
 
         protected override int WriteHardwarePort(IntPtr handle, byte[] data, int count)
         {
-            var result = Nuttx.write(_driverHandle, data, count);
+            var result = Nuttx.write(handle, data, count);
 
             if (result < 0)
             {
@@ -104,7 +104,7 @@ namespace Meadow.Hardware
 
         protected override int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count)
         {
-            var result = Nuttx.read(_driverHandle, readBuffer, count);
+            var result = Nuttx.read(handle, readBuffer, count);
 
             if (result < 0)
             {
@@ -133,13 +133,13 @@ namespace Meadow.Hardware
             Console.WriteLine($"  Control Flags: 0x{settings.c_cflag:x}");
         }
 
-        protected override unsafe void SetHardwarePortSettings()
+        protected override unsafe void SetHardwarePortSettings(IntPtr handle)
         {
             var settings = new Nuttx.Termios();
 
             // get the current settings           
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
-            var result = Nuttx.tcgetattr(_driverHandle, ref settings);
+            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {handle}...");
+            var result = Nuttx.tcgetattr(handle, ref settings);
             if (result != 0)
             {
                 var error = UPD.GetLastError();
@@ -196,7 +196,7 @@ namespace Meadow.Hardware
                 ShowSettings(settings);
             }
 
-            result = Nuttx.tcsetattr(_driverHandle, TCSANOW, ref settings);
+            result = Nuttx.tcsetattr(handle, TCSANOW, ref settings);
 
             if (result != 0)
             {
@@ -206,7 +206,7 @@ namespace Meadow.Hardware
             if (_showSerialDebug)
             {
                 // get the settings again
-                result = Nuttx.tcgetattr(_driverHandle, ref settings);
+                result = Nuttx.tcgetattr(handle, ref settings);
                 if (result != 0)
                 {
                     var error = UPD.GetLastError();
@@ -216,15 +216,15 @@ namespace Meadow.Hardware
             }
         }
 
-        private unsafe void SetPortSettingsIoctl()
+        private unsafe void SetPortSettingsIoctl(IntPtr handle)
         {
             var settings = new Nuttx.Termios();
 
             // get the current settings
             var p = (IntPtr)(&settings);
 
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
-            var result = Nuttx.ioctl(_driverHandle, TCGETS, p);
+            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {handle}...");
+            var result = Nuttx.ioctl(handle, TCGETS, p);
             if (result != 0)
             {
                 var error = UPD.GetLastError();
@@ -282,7 +282,7 @@ namespace Meadow.Hardware
                 ShowSettings(settings);
             }
 
-            result = Nuttx.ioctl(_driverHandle, TCSETS, p);
+            result = Nuttx.ioctl(handle, TCSETS, p);
             if (result != 0)
             {
                 throw new NativeException(UPD.GetLastError().ToString());
@@ -291,7 +291,7 @@ namespace Meadow.Hardware
             if (_showSerialDebug)
             {
                 // get the settings again
-                result = Nuttx.ioctl(_driverHandle, TCGETS, p);
+                result = Nuttx.ioctl(handle, TCGETS, p);
                 if (result != 0)
                 {
                     var error = UPD.GetLastError();

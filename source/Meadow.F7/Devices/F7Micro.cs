@@ -13,7 +13,7 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7Micro : F7MicroBase
     {
-        public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
+        public F7SerialPortNameDefinitions SerialPortNames => new F7SerialPortNameDefinitions();
 
         public F7Micro()
             : base(

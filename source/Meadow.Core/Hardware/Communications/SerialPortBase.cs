@@ -14,6 +14,21 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class SerialPortBase : IDisposable, ISerialPort
     {
+        private IntPtr _driverHandle = IntPtr.Zero;
+        protected bool _showSerialDebug = false;
+        private CircularBuffer<byte>? _readBuffer;
+        protected Thread? _readThread;
+        protected int _readTimeout;
+        protected int _baudRate;
+        protected object _accessLock = new object();
+        private int _writeTimeout;
+
+        protected abstract void SetHardwarePortSettings(IntPtr handle);
+        protected abstract IntPtr OpenHardwarePort(string portName);
+        protected abstract void CloseHardwarePort(IntPtr handle);
+        protected abstract int WriteHardwarePort(IntPtr handle, byte[] writeBuffer, int count);
+        protected abstract int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count);
+
         /// <summary>
         /// Initializes a new instance of a legacy `ISerialPort`. `ISerialPort`
         /// is provided for legacy compatibility, we recommend using the more
@@ -55,17 +70,6 @@ namespace Meadow.Hardware
             ReadTimeout = Timeout.Infinite;
             ReceiveBufferSize = readBufferSize;
         }
-
-
-        protected IntPtr _driverHandle = IntPtr.Zero;
-        protected bool _showSerialDebug = false;
-        protected CircularBuffer<byte>? _readBuffer;
-        protected Thread? _readThread;
-        protected int _readTimeout;
-        protected int _baudRate;
-
-        protected object _accessLock = new object();
-        private int _writeTimeout;
 
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
@@ -238,17 +242,6 @@ namespace Meadow.Hardware
             }
         }
 
-        protected abstract void SetHardwarePortSettings();
-        protected abstract IntPtr OpenHardwarePort(string portName);
-        protected abstract void CloseHardwarePort(IntPtr handle);
-        protected abstract int WriteHardwarePort(IntPtr handle, byte[] data, int count);
-        protected abstract int ReadHardwarePort(IntPtr handle, byte[] data, int count);
-
-
-
-
-
-
         /// <summary>
         /// Opens a new serial port connection.
         /// </summary>
@@ -258,7 +251,7 @@ namespace Meadow.Hardware
 
             _driverHandle = OpenHardwarePort(PortName);
             
-            SetHardwarePortSettings();
+            SetHardwarePortSettings(_driverHandle);
 
             _readThread = new Thread(ReadThreadProc)
             {

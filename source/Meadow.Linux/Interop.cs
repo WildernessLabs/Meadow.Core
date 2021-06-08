@@ -5,20 +5,13 @@ using System.Security;
 namespace Meadow
 {
     [SuppressUnmanagedCodeSecurity]
-    internal static class Interop
+    internal static partial class Interop
     {
         public const string LIBC = "libc";
 
-        [Flags]
-        public enum DriverFlags
-        {
-            //#define O_RDONLY 00
-            //#define O_WRONLY 01
-            //#define O_RDWR 02
-            O_RDONLY =00,
-            O_WRONLY =01,
-            O_RDWR =02
-        }
+        public const int TCSANOW = 0;
+        public const int TCSADRAIN = 1;
+        public const int TCSAFLUSH = 2;
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int open(string pathname, DriverFlags flags);
@@ -43,5 +36,16 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int ioctl(int fd, int request, IntPtr pData);
+
+        //int tcgetattr(int fildes, struct termios *termios_p);
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int tcgetattr(int fd, ref termios termios_p);
+
+        // int tcsetattr(int fildes, int optional_actions, const struct termios *termios_p);
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int tcsetattr(int fd, int optional_actions, ref termios termios_p);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int cfsetspeed(ref termios termiosp, int speed);
     }
 }
