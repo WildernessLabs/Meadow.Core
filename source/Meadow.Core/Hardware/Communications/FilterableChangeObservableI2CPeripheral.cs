@@ -72,7 +72,12 @@ namespace Meadow.Hardware
             return Conditions;
         }
 
-        public void StartUpdating(int standbyDuration = 1000)
+        public virtual void StartUpdating()
+        {
+            StartUpdating(TimeSpan.FromSeconds(1));
+        }
+
+        public virtual void StartUpdating(TimeSpan period)
         {
             // thread safety
             lock (_lock)
@@ -112,7 +117,7 @@ namespace Meadow.Hardware
                         RaiseChangedAndNotify(result);
 
                         // sleep for the appropriate interval
-                        await Task.Delay(standbyDuration);
+                        await Task.Delay(period);
                     }
                 }, SamplingTokenSource.Token);
             }
