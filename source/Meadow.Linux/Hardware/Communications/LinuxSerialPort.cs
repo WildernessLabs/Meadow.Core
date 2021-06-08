@@ -25,12 +25,19 @@ namespace Meadow
 
         protected override IntPtr OpenHardwarePort(string portName)
         {
-            var driverName = $"/dev/{PortName}";
-            var handle = Interop.open(driverName, Interop.DriverFlags.O_RDWR);
+            var driverName = $"/dev/{portName}";
+            var handle = Interop.open(driverName, Interop.DriverFlags.O_RDWR | Interop.DriverFlags.O_NOCTTY);
 
             if (handle < 0)
             {
-                throw new NativeException($"Unable to open port '{driverName}'. Native error {Marshal.GetLastWin32Error()}");
+                var err = Marshal.GetLastWin32Error();
+                switch(err)
+                {
+                    case 13:
+                        throw new NativeException($"Unable to open port '{driverName}'. Permission Denied ({err})");
+                    default:
+                        throw new NativeException($"Unable to open port '{driverName}'. Native error {err}");
+                }                
             }
 
             return new IntPtr(handle);
@@ -60,7 +67,7 @@ namespace Meadow
             settings.c_iflag &= ~(Interop.InputFlags.IGNBRK | Interop.InputFlags.BRKINT | Interop.InputFlags.PARMRK | Interop.InputFlags.ISTRIP | Interop.InputFlags.INLCR | Interop.InputFlags.IGNCR | Interop.InputFlags.ICRNL | Interop.InputFlags.IXON);
             settings.c_oflag &= ~Interop.OutputFlags.OPOST;
             settings.c_lflag &= ~(Interop.LocalFlags.ECHO | Interop.LocalFlags.ECHONL | Interop.LocalFlags.ICANON | Interop.LocalFlags.ISIG | Interop.LocalFlags.IEXTEN);
-            settings.c_cflag &= ~(Interop.ControlFlags.CSIZE | Interop.ControlFlags.PARENB);
+            settings.c_cflag &= ~(Interop.ControlFlags.CSIZE | Interop.ControlFlags.PARENB | Interop.ControlFlags.CRTSCTS);
 
             // now set the user-requested settings
             switch (DataBits)
@@ -78,6 +85,9 @@ namespace Meadow
                     settings.c_cflag |= Interop.ControlFlags.CS8;
                     break;
             }
+
+            settings.c_cflag |= Interop.ControlFlags.CREAD | Interop.ControlFlags.CLOCAL;
+
             switch (Parity)
             {
                 case Parity.Odd:
@@ -87,6 +97,7 @@ namespace Meadow
                     settings.c_cflag |= Interop.ControlFlags.PARENB;
                     break;
             }
+
             switch (StopBits)
             {
                 case StopBits.Two:

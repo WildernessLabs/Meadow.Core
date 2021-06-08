@@ -8,28 +8,6 @@ using System.Threading;
 
 namespace Meadow
 {
-    public class LinuxSerialPortNameDefinitions
-    {
-        public SerialPortName UART1 { get; protected set; } = null!;
-        public SerialPortName UART2 { get; protected set; } = null!;
-    }
-
-    public class JetsonNanoSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
-    {
-        public JetsonNanoSerialPortNameDefinitions()
-        {
-            UART2 = new SerialPortName("UART2", "ttyTHS1");
-        }
-    }
-
-    public class RaspberryPiSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
-    {
-        public RaspberryPiSerialPortNameDefinitions()
-        {
-            // TODO:
-        }
-    }
-
     public class MeadowOnLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
@@ -116,17 +94,19 @@ namespace Meadow
 
         public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         {
-            throw new NotImplementedException();
+            var classicPort = CreateSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+            return SerialMessagePort.From(classicPort, suffixDelimiter, preserveDelimiter);
         }
 
         public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         {
-            throw new NotImplementedException();
+            var classicPort = CreateSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+            return SerialMessagePort.From(classicPort, prefixDelimiter, preserveDelimiter, messageLength);
         }
 
         public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
         {
-            throw new NotImplementedException();
+            return new LinuxSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----

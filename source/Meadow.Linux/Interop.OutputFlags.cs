@@ -7,8 +7,9 @@ namespace Meadow
         [Flags]
         public enum OutputFlags : int
         {
+            OPOST = 0x01,
             /* c_oflag bits */
-            OPOST = 0000001,
+            /*
             OLCUC = 0000002,
             ONLCR = 0000004,
             OCRNL = 0000010,
@@ -39,6 +40,7 @@ namespace Meadow
             FFDLY = 0100000,
             FF0 = 0000000,
             FF1 = 0100000
+            */
         }
     }
 }

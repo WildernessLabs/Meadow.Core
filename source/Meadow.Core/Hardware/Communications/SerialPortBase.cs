@@ -65,7 +65,7 @@ namespace Meadow.Hardware
             PortName = portName.SystemName;
             BaudRate = baudRate;
             Parity = Parity;
-            DataBits = dataBits;
+            DataBits = dataBits;    
             StopBits = stopBits;
             ReadTimeout = Timeout.Infinite;
             ReceiveBufferSize = readBufferSize;

@@ -7,14 +7,17 @@ namespace Meadow
         [Flags]
         public enum LocalFlags : int
         {
+            ISIG = 0x01,
+            ICANON = 0x02,
+            XCASE = 0x04,
+            ECHO = 0x08,
+            ECHOE = 0x10,
+            ECHOK = 0x20,
+            ECHONL = 0x40,
+            IEXTEN = 0x8000,
+
             /* c_lflag bits */
-            ISIG = 0000001,
-            ICANON = 0000002,
-            XCASE = 0000004,
-            ECHO = 0000010,
-            ECHOE = 0000020,
-            ECHOK = 0000040,
-            ECHONL = 0000100,
+            /*
             NOFLSH = 0000200,
             TOSTOP = 0000400,
             ECHOCTL = 0001000,
@@ -22,8 +25,8 @@ namespace Meadow
             ECHOKE = 0004000,
             FLUSHO = 0010000,
             PENDIN = 0040000,
-            IEXTEN = 0100000,
             EXTPROC = 0200000
+            */
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Meadow
             [FieldOffset(12)]
             public LocalFlags c_lflag;
             [FieldOffset(16)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
             public byte[] c_cc;
             [FieldOffset(36)] // I *think* this is the right offset (20 bytes of control characters)
             public int c_ispeed;

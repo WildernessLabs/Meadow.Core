@@ -16,7 +16,8 @@ namespace Meadow
             O_WRONLY = 0x0001,
             O_RDWR = 0x0002,
             O_NONBLOCK = 0x0004,
-            O_FSYNC = 0x0080
+            O_FSYNC = 0x0080,
+            O_NOCTTY = 0x0400,
         }
     }
 }
