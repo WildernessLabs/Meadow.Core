@@ -187,7 +187,7 @@ namespace Meadow.Devices
             StopBits stopBits = StopBits.One,
             int readBufferSize = 1024)
         {
-            return SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+            return F7SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
         /// <summary>
@@ -221,9 +221,9 @@ namespace Meadow.Devices
             StopBits stopBits = StopBits.One,
             int readBufferSize = 512)
         {
-            return SerialMessagePort.From(portName,
-                suffixDelimiter, preserveDelimiter, baudRate, dataBits, parity,
-                stopBits, readBufferSize);
+            var classicPort = F7SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+
+            return SerialMessagePort.From(classicPort, suffixDelimiter, preserveDelimiter);
         }
 
         /// <summary>
@@ -260,9 +260,10 @@ namespace Meadow.Devices
             StopBits stopBits = StopBits.One,
             int readBufferSize = 512)
         {
-            return SerialMessagePort.From(portName,
-                prefixDelimiter, preserveDelimiter, messageLength, baudRate,
-                dataBits, parity, stopBits, readBufferSize);
+            var classicPort = F7SerialPort.From(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+
+            return SerialMessagePort.From(classicPort,
+                prefixDelimiter, preserveDelimiter, messageLength);
         }
 
 

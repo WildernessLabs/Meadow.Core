@@ -1,25 +1,61 @@
 ﻿using Meadow.Devices;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
+
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// Preserved for legacy API compatibility. For a more modern approach, use
     /// `SerialMessagePort`.
     /// </summary>
-    public class SerialPort : IDisposable, ISerialPort
+    public abstract class SerialPortBase : IDisposable, ISerialPort
     {
-        protected const int TCSANOW = 0x00;
-        protected const int TCGETS = 0x0101;
-        protected const int TCSETS = 0x0102;
-        protected const string DriverFolder = "/dev";
-        protected const string SerialPortDriverPrefix = "tty";
+        /// <summary>
+        /// Initializes a new instance of a legacy `ISerialPort`. `ISerialPort`
+        /// is provided for legacy compatibility, we recommend using the more
+        /// modern, thread-safe `ISerialMessagePort`.
+        /// </summary>
+        /// <param name="portName">The 'SerialPortName` of port to use.</param>
+        /// <param name="baudRate">Speed, in bits per second, of the serial port.</param>
+        /// <param name="parity">`Parity` enum describing what type of
+        /// cyclic-redundancy-check (CRC) bit, if any, should be expected in the
+        /// serial message frame. Default is `Parity.None`.</param>
+        /// <param name="dataBits">Number of data bits expected in the serial
+        /// message frame. Default is `8`.</param>
+        /// <param name="stopBits">`StopBits` describing how many bits should be
+        /// expected at the end of every character in the serial message frame.
+        /// Default is `StopBits.One`.</param>
+        /// <param name="readBufferSize">Size, in bytes, of the read buffer. Default
+        /// is 1024.</param>
+        /// <returns></returns>
+        protected SerialPortBase(
+            SerialPortName portName,
+            int baudRate,
+            int dataBits = 8,
+            Parity parity = Parity.None,
+            StopBits stopBits = StopBits.One,
+            int readBufferSize = 4096)
+        {
+#if !DEBUG
+            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            _showSerialDebug = false;
+#endif
+            if (baudRate <= 0) { throw new ArgumentOutOfRangeException("Invalid baud rate"); }
+            if (dataBits < 5 || dataBits > 8) { throw new ArgumentOutOfRangeException("Invalid dataBits"); }
+
+            PortName = portName.SystemName;
+            BaudRate = baudRate;
+            Parity = Parity;
+            DataBits = dataBits;
+            StopBits = stopBits;
+            ReadTimeout = Timeout.Infinite;
+            ReceiveBufferSize = readBufferSize;
+        }
+
 
         protected IntPtr _driverHandle = IntPtr.Zero;
         protected bool _showSerialDebug = false;
@@ -99,61 +135,6 @@ namespace Meadow.Hardware
             get => _readBuffer == null ? 0 : _readBuffer.Count;
         }
 
-        internal static SerialPort From(
-            SerialPortName portName,
-            int baudRate,
-            int dataBits = 8,
-            Parity parity = Parity.None,
-            StopBits stopBits = StopBits.One,
-            int readBufferSize = 4096)
-        {
-
-            return new SerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of a legacy `ISerialPort`. `ISerialPort`
-        /// is provided for legacy compatibility, we recommend using the more
-        /// modern, thread-safe `ISerialMessagePort`.
-        /// </summary>
-        /// <param name="portName">The 'SerialPortName` of port to use.</param>
-        /// <param name="baudRate">Speed, in bits per second, of the serial port.</param>
-        /// <param name="parity">`Parity` enum describing what type of
-        /// cyclic-redundancy-check (CRC) bit, if any, should be expected in the
-        /// serial message frame. Default is `Parity.None`.</param>
-        /// <param name="dataBits">Number of data bits expected in the serial
-        /// message frame. Default is `8`.</param>
-        /// <param name="stopBits">`StopBits` describing how many bits should be
-        /// expected at the end of every character in the serial message frame.
-        /// Default is `StopBits.One`.</param>
-        /// <param name="readBufferSize">Size, in bytes, of the read buffer. Default
-        /// is 1024.</param>
-        /// <returns></returns>
-        protected SerialPort(
-            SerialPortName portName,
-            int baudRate,
-            int dataBits = 8,
-            Parity parity = Parity.None,
-            StopBits stopBits = StopBits.One,
-            int readBufferSize = 4096)
-        {
-#if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
-            _showSerialDebug = false;
-#endif
-            if (baudRate <= 0) { throw new ArgumentOutOfRangeException("Invalid baud rate"); }
-            if (dataBits < 5 || dataBits > 8) { throw new ArgumentOutOfRangeException("Invalid dataBits"); }
-
-            PortName = portName.SystemName;
-            BaudRate = baudRate;
-            Parity = Parity;
-            DataBits = dataBits;
-            StopBits = stopBits;
-            ReadTimeout = Timeout.Infinite;
-            ReceiveBufferSize = readBufferSize;
-        }
-
         /// <summary>
         /// Gets or sets the serial baud rate.
         /// </summary>
@@ -168,25 +149,6 @@ namespace Meadow.Hardware
 
                 _baudRate = value;
             }
-        }
-
-        /// <summary>
-        /// Gets an array of serial port names for the current device.
-        /// </summary>
-        /// <returns></returns>
-        public static string[] GetPortNames()
-        {
-            var allDevices = F7Micro.FileSystem.EnumDirectory(DriverFolder);
-            var list = new List<string>();
-            foreach (var s in allDevices)
-            {
-                if (s.StartsWith(SerialPortDriverPrefix))
-                {
-                    list.Add(s);
-                }
-            }
-
-            return list.ToArray();
         }
 
         /// <summary>
@@ -276,6 +238,17 @@ namespace Meadow.Hardware
             }
         }
 
+        protected abstract void SetHardwarePortSettings();
+        protected abstract IntPtr OpenHardwarePort(string portName);
+        protected abstract void CloseHardwarePort(IntPtr handle);
+        protected abstract int WriteHardwarePort(IntPtr handle, byte[] data, int count);
+        protected abstract int ReadHardwarePort(IntPtr handle, byte[] data, int count);
+
+
+
+
+
+
         /// <summary>
         /// Opens a new serial port connection.
         /// </summary>
@@ -283,13 +256,10 @@ namespace Meadow.Hardware
         {
             if (IsOpen) throw new InvalidOperationException("Port is already open");
 
-            var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput | Nuttx.DriverFlags.NonBlocking);
-            if (handle.ToInt32() < 0)
-            {
-                throw new NativeException(UPD.GetLastError().ToString());
-            }
-            _driverHandle = handle;
-            SetPortSettings();
+            _driverHandle = OpenHardwarePort(PortName);
+            
+            SetHardwarePortSettings();
+
             _readThread = new Thread(ReadThreadProc)
             {
                 IsBackground = true,
@@ -305,7 +275,8 @@ namespace Meadow.Hardware
         {
             if (!IsOpen) return;
 
-            Nuttx.close(_driverHandle);
+            CloseHardwarePort(_driverHandle);
+            
             _driverHandle = IntPtr.Zero;
         }
 
@@ -369,17 +340,13 @@ namespace Meadow.Hardware
                         {
                             Output.WriteLineIf(_showSerialDebug, $"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
                             Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
-                            result = Nuttx.write(_driverHandle, data.ToArray(), count);
+                            result = WriteHardwarePort(_driverHandle, data.ToArray(), count);
                         }
                         else
                         {
-                            result = Nuttx.write(_driverHandle, buffer, count);
+                            result = WriteHardwarePort(_driverHandle, buffer, count);
                         }
-                        // if there was an error, pull it out of NuttX
-                        if (result < 0)
-                        {
-                            throw new NativeException(UPD.GetLastError().ToString());
-                        }
+
                         // otherwise,
                         totalBytesWritten += result;
 
@@ -415,54 +382,40 @@ namespace Meadow.Hardware
             {
                 try
                 {
-                    var result = Nuttx.read(_driverHandle, readBuffer, readBuffer.Length);
+                    var result = ReadHardwarePort(_driverHandle, readBuffer, readBuffer.Length);
 
-                    if (result < 0)
-                    {
-                        var ec = UPD.GetLastError();
-
-                        if (ec == Nuttx.ErrorCode.TryAgain)
-                        {
-                            // no data available, just wait
-                            Thread.Sleep(200);
-                        }
-                        else
-                        {
-                            throw new NativeException(ec.ToString());
-                        }
-                    }
-                    else
+                    if (result > 0)
                     {
                         Output.WriteLineIf(_showSerialDebug, $"data read");
+                        Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
 
-                        if (result > 0)
+                        _readBuffer?.Append(readBuffer, 0, result);
+
+                        if (DataReceived != null)
                         {
-                            Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
-                            
-                            _readBuffer?.Append(readBuffer, 0, result);
-
-                            if (DataReceived != null)
+                            // put on a worker thread, else if the handler goes into some wait, we'll never process data
+                            Task.Run(() =>
                             {
-                                // put on a worker thread, else if the handler goes into some wait, we'll never process data
-                                Task.Run(() =>
+                                try
                                 {
-                                    try
-                                    {
-                                        Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
-                                        DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
-                                        Output.WriteLineIf(_showSerialDebug, $"event handler complete");
-                                    }
-                                    catch (Exception ex)
-                                    {
+                                    Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
+                                    DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
+                                    Output.WriteLineIf(_showSerialDebug, $"event handler complete");
+                                }
+                                catch (Exception ex)
+                                {
                                         // if the event handler throws, we don't want this to die
                                         Output.WriteLine($"Serial event handler threw: {ex.Message}");
-                                    }
-                                });
-                            }
+                                }
+                            });
                         }
 
                         // we *have* to yield to allow the receiver to process data or we'll just overrun
                         Thread.Sleep(10);
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
                     }
                 }
                 catch (Exception ex)
@@ -653,183 +606,6 @@ namespace Meadow.Hardware
 
             // read what we have into the buffer and return
             return _readBuffer.MoveItemsTo(buffer, index, count);
-        }
-
-        private void ShowSettings(Nuttx.Termios settings)
-        {
-            Console.WriteLine($"  Speed: {settings.c_speed}");
-            Console.WriteLine($"  Input Flags: 0x{settings.c_iflag:x}");
-            Console.WriteLine($"  OutputFlags: 0x{settings.c_oflag:x}");
-            Console.WriteLine($"  Local Flags: 0x{settings.c_lflag:x}");
-            Console.WriteLine($"  Control Flags: 0x{settings.c_cflag:x}");
-        }
-
-        private unsafe void SetPortSettings()
-        {
-            var settings = new Nuttx.Termios();
-
-            // get the current settings           
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
-            var result = Nuttx.tcgetattr(_driverHandle, ref settings);
-            if (result != 0)
-            {
-                var error = UPD.GetLastError();
-                throw new NativeException(error.ToString());
-            }
-
-            if (_showSerialDebug)
-            {
-                ShowSettings(settings);
-            }
-
-            // clear stuff that should be off
-            settings.c_iflag &= ~(Nuttx.InputFlags.IGNBRK | Nuttx.InputFlags.BRKINT | Nuttx.InputFlags.PARMRK | Nuttx.InputFlags.ISTRIP | Nuttx.InputFlags.INLCR | Nuttx.InputFlags.IGNCR | Nuttx.InputFlags.ICRNL | Nuttx.InputFlags.IXON);
-            settings.c_oflag &= ~Nuttx.OutputFlags.OPOST;
-            settings.c_lflag &= ~(Nuttx.LocalFlags.ECHO | Nuttx.LocalFlags.ECHONL | Nuttx.LocalFlags.ICANON | Nuttx.LocalFlags.ISIG | Nuttx.LocalFlags.IEXTEN);
-            settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
-
-            // now set the user-requested settings
-            switch (DataBits)
-            {
-                case 5:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS5;
-                    break;
-                case 6:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS6;
-                    break;
-                case 7:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS7;
-                    break;
-                case 8:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS8;
-                    break;
-            }
-            switch (Parity)
-            {
-                case Parity.Odd:
-                    settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
-                    break;
-                case Parity.Even:
-                    settings.c_cflag |= Nuttx.ControlFlags.PARENB;
-                    break;
-            }
-            switch (StopBits)
-            {
-                case StopBits.Two:
-                    settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
-                    break;
-            }
-
-            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (_showSerialDebug)
-            {
-                ShowSettings(settings);
-            }
-
-            result = Nuttx.tcsetattr(_driverHandle, TCSANOW, ref settings);
-
-            if (result != 0)
-            {
-                throw new NativeException(UPD.GetLastError().ToString());
-            }
-
-            if (_showSerialDebug)
-            {
-                // get the settings again
-                result = Nuttx.tcgetattr(_driverHandle, ref settings);
-                if (result != 0)
-                {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error.ToString());
-                }
-                ShowSettings(settings);
-            }
-        }
-
-        private unsafe void SetPortSettingsIoctl()
-        {
-            var settings = new Nuttx.Termios();
-
-            // get the current settings
-            var p = (IntPtr)(&settings);
-
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {_driverHandle}...");
-            var result = Nuttx.ioctl(_driverHandle, TCGETS, p);
-            if (result != 0)
-            {
-                var error = UPD.GetLastError();
-                throw new NativeException(error.ToString());
-            }
-
-            if (_showSerialDebug)
-            {
-                ShowSettings(settings);
-            }
-
-            // clear stuff that should be off
-            settings.c_iflag &= ~(Nuttx.InputFlags.IGNBRK | Nuttx.InputFlags.BRKINT | Nuttx.InputFlags.PARMRK | Nuttx.InputFlags.ISTRIP | Nuttx.InputFlags.INLCR | Nuttx.InputFlags.IGNCR | Nuttx.InputFlags.ICRNL | Nuttx.InputFlags.IXON);
-            settings.c_oflag &= ~Nuttx.OutputFlags.OPOST;
-            settings.c_lflag &= ~(Nuttx.LocalFlags.ECHO | Nuttx.LocalFlags.ECHONL | Nuttx.LocalFlags.ICANON | Nuttx.LocalFlags.ISIG | Nuttx.LocalFlags.IEXTEN);
-            settings.c_cflag &= ~(Nuttx.ControlFlags.CSIZE | Nuttx.ControlFlags.PARENB);
-
-            // now set the user-requested settings
-            switch (DataBits)
-            {
-                case 5:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS5;
-                    break;
-                case 6:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS6;
-                    break;
-                case 7:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS7;
-                    break;
-                case 8:
-                    settings.c_cflag |= Nuttx.ControlFlags.CS8;
-                    break;
-            }
-            switch (Parity)
-            {
-                case Parity.Odd:
-                    settings.c_cflag |= (Nuttx.ControlFlags.PARENB | Nuttx.ControlFlags.PARODD);
-                    break;
-                case Parity.Even:
-                    settings.c_cflag |= Nuttx.ControlFlags.PARENB;
-                    break;
-            }
-            switch (StopBits)
-            {
-                case StopBits.Two:
-                    settings.c_cflag |= Nuttx.ControlFlags.CSTOPB;
-                    break;
-            }
-
-            settings.c_speed = BaudRate;
-
-            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            if (_showSerialDebug)
-            {
-                ShowSettings(settings);
-            }
-
-            result = Nuttx.ioctl(_driverHandle, TCSETS, p);
-            if (result != 0)
-            {
-                throw new NativeException(UPD.GetLastError().ToString());
-            }
-
-            if (_showSerialDebug)
-            {
-                // get the settings again
-                result = Nuttx.ioctl(_driverHandle, TCGETS, p);
-                if (result != 0)
-                {
-                    var error = UPD.GetLastError();
-                    throw new NativeException(error.ToString());
-                }
-                ShowSettings(settings);
-            }
         }
     }
 }

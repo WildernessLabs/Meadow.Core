@@ -75,6 +75,21 @@ namespace Meadow
             }
         }
 
+        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
+        {
+            throw new NotImplementedException();
+        }
+
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, float voltageReference = 3.3F)
@@ -98,21 +113,6 @@ namespace Meadow
         }
 
         public IPwmPort CreatePwmPort(IPin pin, float frequency = 100, float dutyCycle = 0.5F, bool invert = false)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
         {
             throw new NotImplementedException();
         }

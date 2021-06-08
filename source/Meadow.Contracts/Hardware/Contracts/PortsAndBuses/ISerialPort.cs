@@ -103,6 +103,8 @@ namespace Meadow.Hardware
         /// <returns>The number of bytes read.</returns>
         int Read(byte[] buffer, int offset, int count);
 
+        int ReadAll(byte[] buffer);
+
         /// <summary>
         /// Synchronously reads one byte from the SerialPort input buffer.
         /// </summary>
