@@ -5,7 +5,40 @@ namespace Meadow
 {
     public class SysFsDigitalInputPort : IDigitalInputPort
     {
-        public bool State => throw new NotImplementedException();
+        public IPin Pin { get; private set; }
+        private int Gpio { get; set; } = -1;
+        private SysFsGpioDriver Driver { get; }
+
+        public bool State => Driver.GetValue(Gpio);
+
+        internal SysFsDigitalInputPort(SysFsGpioDriver driver, IPin pin)
+        {
+            Driver = driver;
+            Pin = pin;
+            if (pin is SysFsPin { } sp)
+            {
+                Gpio = sp.Gpio;
+            }
+            else
+            {
+                throw new NativeException($"Pin {pin.Name} does not support SYS FS GPIO operations");
+            }
+
+            Driver.Export(Gpio);
+            Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
+        }
+
+        public void Dispose()
+        {
+            if (Gpio >= 0)
+            {
+                Driver.Unexport(Gpio);
+            }
+        }
+
+        // TODO: ----- implement stuff below here -----
+
+        public event EventHandler<DigitalPortResult> Changed = delegate { };
 
         public ResistorMode Resistor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -15,28 +48,6 @@ namespace Meadow
         public double GlitchDuration { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public IDigitalChannelInfo Channel => throw new NotImplementedException();
-
-        public IPin Pin => throw new NotImplementedException();
-
-        public event EventHandler<DigitalPortResult> Changed;
-
-        event System.EventHandler<DigitalPortResult> IDigitalInterruptPort.Changed
-        {
-            add
-            {
-                throw new System.NotImplementedException();
-            }
-
-            remove
-            {
-                throw new System.NotImplementedException();
-            }
-        }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
 
         public IDisposable Subscribe(IObserver<IChangeResult<DigitalState>> observer)
         {

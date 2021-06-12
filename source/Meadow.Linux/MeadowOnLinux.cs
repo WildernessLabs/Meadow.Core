@@ -115,6 +115,11 @@ namespace Meadow
             return new SysFsDigitalOutputPort(_ioController, pin, initialState);
         }
 
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
+        {
+            return new SysFsDigitalInputPort(_ioController, pin);
+        }
+
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, float voltageReference = 3.3F)
@@ -124,13 +129,6 @@ namespace Meadow
 
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, double debounceDuration = 0, double glitchDuration = 0, OutputType output = OutputType.PushPull)
         {
-            throw new NotImplementedException();
-        }
-
-        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
-        {
-            // oh boy, this is fun.  We need to port this: https://developer.ridgerun.com/wiki/index.php/Gpio-int-test.c
-
             throw new NotImplementedException();
         }
 

@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Meadow
 {
+    // error codes:
+    // 13 = permission denied
+    // 16 = device busy
     internal class SysFsGpioDriver
     {
         private const string GpioFolder = "/sys/class/gpio";
@@ -31,10 +34,14 @@ namespace Meadow
 
             try
             {
+                // DEV NOTE: if a port was not properly disposed, it might still already be exported
+                // Should we unexport it and retry?  It could be a bad thing if another app is using the port...
+
                 var content = Encoding.ASCII.GetBytes($"{gpio}");
                 var result = Interop.write(handle, content, content.Length);
                 if (result < 0)
                 {
+                    // error 16 == DEVICE_BUSY, meaning it's already open
                     throw new NativeException($"Unable to export GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
                 }
             }
@@ -117,7 +124,7 @@ namespace Meadow
             }
         }
 
-        public unsafe bool GetValue(int gpio, bool value)
+        public unsafe bool GetValue(int gpio)
         {
             var path = $"{GpioFolder}/gpio{gpio}/value";
 

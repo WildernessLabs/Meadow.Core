@@ -17,7 +17,7 @@ namespace Meadow
         {
             Driver = driver;
             Pin = pin;
-            LastState = InitialState = initialState;
+            InitialState = initialState;
             if (pin is SysFsPin { } sp)
             {
                 Gpio = sp.Gpio;
@@ -29,6 +29,7 @@ namespace Meadow
 
             Driver.Export(Gpio);
             Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Output);
+            State = InitialState;
         }
 
         public bool State 
