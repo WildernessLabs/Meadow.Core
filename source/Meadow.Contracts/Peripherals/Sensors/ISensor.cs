@@ -11,6 +11,7 @@
 
         UNIT Read();
         void StartUpdating();
+        void StartUpdated(TimeSpan updateInterval, int sampleCount, TimeSpan sampleInterval);
         void StopUpdating();
         */
     }
