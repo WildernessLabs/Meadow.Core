@@ -9,6 +9,7 @@ namespace Meadow
         {
             OPOST = 0x01,
             /* c_oflag bits */
+            // THESE VALUES ARE OCTAL -- IF YOU USE THEM, CONVERT **
             /*
             OLCUC = 0000002,
             ONLCR = 0000004,

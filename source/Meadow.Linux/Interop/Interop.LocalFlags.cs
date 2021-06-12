@@ -17,6 +17,7 @@ namespace Meadow
             IEXTEN = 0x8000,
 
             /* c_lflag bits */
+            // THESE VALUES ARE OCTAL -- IF YOU USE THEM, CONVERT **
             /*
             NOFLSH = 0000200,
             TOSTOP = 0000400,

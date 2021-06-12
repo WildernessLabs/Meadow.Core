@@ -2,8 +2,8 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Meadow
@@ -12,8 +12,9 @@ namespace Meadow
         where TPinout : IPinDefinitions, new()
     {
         private SynchronizationContext? _context;
+        private SysFsGpioDriver _ioController;
 
-        public IPinDefinitions Pins { get; }
+        public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
 
         public LinuxSerialPortNameDefinitions SerialPortNames
@@ -44,7 +45,7 @@ namespace Meadow
 
         public void Initialize()
         {
-//            IoController.Initialize();
+            _ioController = new SysFsGpioDriver();
         }
 
         public II2cBus CreateI2cBus(int busNumber = 0)
@@ -109,6 +110,11 @@ namespace Meadow
             return new LinuxSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
+        public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
+        {
+            return new SysFsDigitalOutputPort(_ioController, pin, initialState);
+        }
+
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, float voltageReference = 3.3F)
@@ -123,11 +129,8 @@ namespace Meadow
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
         {
-            throw new NotImplementedException();
-        }
+            // oh boy, this is fun.  We need to port this: https://developer.ridgerun.com/wiki/index.php/Gpio-int-test.c
 
-        public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
-        {
             throw new NotImplementedException();
         }
 

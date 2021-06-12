@@ -11,6 +11,7 @@ namespace Meadow
 
         public IPin GPIO2 => new Pin("GPIO2", "PIN03");
         public IPin GPIO3 => new Pin("GPIO3", "PIN05");
+        public IPin GPIO4 => new Pin("GPIO4", "PIN07");
 
         public IPin I2C1_SDA => GPIO2;
         public IPin I2C1_SCL => GPIO3;
