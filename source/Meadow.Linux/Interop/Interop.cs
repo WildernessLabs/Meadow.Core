@@ -7,6 +7,7 @@ namespace Meadow
     [SuppressUnmanagedCodeSecurity]
     internal static partial class Interop
     {
+
         public const string LIBC = "libc";
 
         public const int TCSANOW = 0;
@@ -47,5 +48,21 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int cfsetspeed(ref termios termiosp, int speed);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int lseek(int fd, int offset, SeekWhence whence);
+        
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int poll(pollfd[] fds, int nfds, int timeout);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int poll(ref pollfd fds, int nfds, int timeout);
+
+        public enum SeekWhence
+        {
+            SEEK_SET = 0, /* set file offset to offset */
+            SEEK_CUR = 1, /* set file offset to current plus offset */
+            SEEK_END = 2 /* set file offset to EOF plus offset */
+        }
     }
 }

@@ -1,18 +1,35 @@
 ﻿using Meadow.Hardware;
 using System;
+using System.Threading;
 
 namespace Meadow
 {
-    public class SysFsDigitalInputPort : IDigitalInputPort
+    public class SysFsDigitalInputPort :DigitalInputPortBase, IDigitalInputPort
     {
-        public IPin Pin { get; private set; }
         private int Gpio { get; set; } = -1;
         private SysFsGpioDriver Driver { get; }
 
-        public bool State => Driver.GetValue(Gpio);
+        public override bool State => Driver.GetValue(Gpio);
 
-        internal SysFsDigitalInputPort(SysFsGpioDriver driver, IPin pin)
+        internal SysFsDigitalInputPort(
+            SysFsGpioDriver driver, 
+            IPin pin,
+            SysFsDigitalChannelInfo channel,
+            InterruptMode interruptMode = InterruptMode.None, 
+            ResistorMode resistorMode = ResistorMode.Disabled, 
+            double debounceDuration = 0, 
+            double glitchDuration = 0)
+            : base(pin, channel, interruptMode)
         {
+            if(resistorMode != ResistorMode.Disabled)
+            {
+                throw new NotSupportedException("Resistor Mode not supported on this platform");
+            }
+            if(debounceDuration > 0 || glitchDuration > 0)
+            {
+                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
+            }
+
             Driver = driver;
             Pin = pin;
             if (pin is SysFsPin { } sp)
@@ -25,33 +42,52 @@ namespace Meadow
             }
 
             Driver.Export(Gpio);
+            Thread.Sleep(100); // this seems to be required to prevent an error 13
             Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
+            switch(interruptMode)
+            {
+                case InterruptMode.None:
+                    // nothing to do
+                    break;
+                default:
+                    Driver.HookInterrupt(Gpio, interruptMode, InterruptCallback);
+                    break;
+            }
+
+            InterruptMode = interruptMode;
         }
 
-        public void Dispose()
+        private void InterruptCallback()
+        {
+            // TODO: implement old/new
+            RaiseChangedAndNotify(new DigitalPortResult());
+        }
+
+        public override void Dispose()
         {
             if (Gpio >= 0)
             {
+                Driver.UnhookInterrupt(Gpio);
                 Driver.Unexport(Gpio);
             }
         }
 
-        // TODO: ----- implement stuff below here -----
+        public override ResistorMode Resistor 
+        { 
+            get => ResistorMode.Disabled; 
+            set => throw new NotSupportedException("Resistor Mode not supported on this platform"); 
+        }
 
-        public event EventHandler<DigitalPortResult> Changed = delegate { };
+        public override double DebounceDuration
+        { 
+            get => 0;
+            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
+        }
 
-        public ResistorMode Resistor { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public InterruptMode InterruptMode => throw new NotImplementedException();
-
-        public double DebounceDuration { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public double GlitchDuration { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public IDigitalChannelInfo Channel => throw new NotImplementedException();
-
-        public IDisposable Subscribe(IObserver<IChangeResult<DigitalState>> observer)
+        public override double GlitchDuration
         {
-            throw new NotImplementedException();
+            get => 0;
+            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
     }
 }

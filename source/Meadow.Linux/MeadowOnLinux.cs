@@ -48,6 +48,11 @@ namespace Meadow
             _ioController = new SysFsGpioDriver();
         }
 
+        public IPin GetPin(string pinName)
+        {
+            return Pins.AllPins.First(p => string.Compare(p.Name, pinName) == 0);
+        }
+
         public II2cBus CreateI2cBus(int busNumber = 0)
         {
             return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
@@ -65,6 +70,8 @@ namespace Meadow
 
         public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
         {
+            // TODO: implement this based on channel caps (this is Jetson specific right now)
+
             if (clock == Pins["PIN05"] && data == Pins["PIN03"])
             {
                 return new I2CBus(1, frequency);
@@ -112,12 +119,14 @@ namespace Meadow
 
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
+            // TODO: move to the GPIO character driver to support things like resistor mode
             return new SysFsDigitalOutputPort(_ioController, pin, initialState);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
         {
-            return new SysFsDigitalInputPort(_ioController, pin);
+            // TODO: move to the GPIO character driver to support things like resistor mode
+            return new SysFsDigitalInputPort(_ioController, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode);
         }
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
@@ -143,11 +152,6 @@ namespace Meadow
         }
 
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, long speedkHz = 375)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IPin GetPin(string pinName)
         {
             throw new NotImplementedException();
         }
