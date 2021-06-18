@@ -47,7 +47,8 @@ namespace Meadow.Units
             Psi,
             StandardAtmosphere,
             Millibar,
-            Hectopascal
+            Hectopascal,
+            KiloPascal
         }
 
         //========================

@@ -31,6 +31,7 @@ namespace Meadow.Units.Conversions
 			0.9869232667, //StandardAtmosphere,
 			1000, // mBar
 			1000, // hPa (yes, same as millibar, but both are common)
+			100, //kPa
 	    };
 
 	}
