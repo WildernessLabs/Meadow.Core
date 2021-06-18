@@ -24,8 +24,6 @@ namespace Meadow.Devices
 
             var designator = GetPortAndPin(pin);
 
-            Console.WriteLine("HereHEREHereHEREHereHEREHereHEREHereHEREHereHERE");
-
             // set up the GPIO register to say this is now an anlog
             // on the Meadow, all ADCs are in in ADC1
             switch (designator.port)
