@@ -24,7 +24,28 @@ namespace Meadow.Hardware
         /// use.
         /// </summary>
         /// <value>The sample buffer.</value>
+        // TODO: make this a Memory<Voltage> if possible.
         public IList<Voltage> VoltageSampleBuffer { get; } = new List<Voltage>();
+
+        /// <summary>
+        /// A `TimeSpan` that specifies how long to
+        /// wait between readings. This value influences how often `*Updated`
+        /// events are raised and `IObservable` consumers are notified.
+        /// </summary>
+        public TimeSpan UpdateInterval { get; protected set; }
+
+        /// <summary>
+        /// Number of samples to take per reading. If > `1` then the port will
+        /// take multiple readings and These are automatically averaged to
+        /// reduce noise, a process known as _oversampling_.
+        /// </summary>
+        public int SampleCount { get; protected set; }
+
+        /// <summary>
+        /// Duration in between samples when oversampling.
+        /// </summary>
+        public TimeSpan SampleInterval { get; protected set; }
+
 
         public Voltage ReferenceVoltage { get; protected set; }
 
@@ -40,10 +61,8 @@ namespace Meadow.Hardware
             }
         }
 
-
         // collection of observers
         protected List<IObserver<IChangeResult<Voltage>>> observers { get; set; } = new List<IObserver<IChangeResult<Voltage>>>();
-
 
         protected AnalogInputPortBase(IPin pin, IAnalogChannelInfo channel)
             : base (pin, channel)
@@ -51,10 +70,9 @@ namespace Meadow.Hardware
         }
 
         public abstract Task<Voltage> Read(int sampleCount = 10, int sampleInterval = 40);
-        public abstract void StartUpdating(
-            int sampleCount = 10,
-            int sampleIntervalDuration = 40,
-            int standbyDuration = 100);
+
+        public abstract void StartUpdating();
+
         public abstract void StopUpdating();
 
 

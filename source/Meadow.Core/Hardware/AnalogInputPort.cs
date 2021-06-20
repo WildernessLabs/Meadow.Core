@@ -64,11 +64,18 @@ namespace Meadow.Hardware
                     IPin pin,
                     IMeadowIOController ioController,
                     IAnalogChannelInfo channel,
+                    int updateIntervalMs,
+                    int sampleCount,
+                    int sampleIntervalMs,
                     float referenceVoltage)
             : base(pin, channel)
         {
+            // save all the settings
             base.Pin = pin;
             this.IOController = ioController;
+            base.UpdateInterval = TimeSpan.FromMilliseconds(updateIntervalMs);
+            base.SampleCount = sampleCount;
+            base.SampleInterval = TimeSpan.FromMilliseconds(sampleIntervalMs);
             base.ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
 
             // attempt to reserve
@@ -84,12 +91,20 @@ namespace Meadow.Hardware
         public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
-            float referenceVoltage)
+            int updateIntervalMs = 1000,
+            int sampleCount = 5,
+            int sampleIntervalMs = 40,
+            float referenceVoltage = 3.3f)
         {
             var channel = pin.SupportedChannels.OfType<IAnalogChannelInfo>().FirstOrDefault();
             if (channel != null) {
                 //TODO: need other checks here.
-                return new AnalogInputPort(pin, ioController, channel, referenceVoltage);
+                if(sampleCount < 1) { throw new ArgumentException("sampleCount must be greater than zero."); }
+
+                return new AnalogInputPort(
+                    pin, ioController, channel,
+                    updateIntervalMs, sampleCount, sampleIntervalMs,
+                    referenceVoltage);
             } else {
                 var supported = pin.SupportedChannels.Select(c => c.Name);
                 var msg = $"Pin {pin.Name} does not support an analog input channel. It supports: {string.Join(",", supported)}";
@@ -116,10 +131,7 @@ namespace Meadow.Hardware
         /// <param name="standbyDuration">The time, in milliseconds, to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        public override void StartUpdating(
-            int sampleCount = 10,
-            int sampleIntervalDuration = 40,
-            int standbyDuration = 100)
+        public override void StartUpdating()
         {
             // thread safety
             lock (_lock) {
@@ -133,13 +145,10 @@ namespace Meadow.Hardware
 
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
-                    Voltage[] sampleBuffer = new Voltage[sampleCount];
+                    Voltage[] sampleBuffer = new Voltage[SampleCount];
                     // loop until we're supposed to stop
                     while (true) {
-                        // TODO: someone please review; is this the correct
-                        // place to do this?
-                        // check for cancel (doing this here instead of 
-                        // while(!ct.IsCancellationRequested), so we can perform 
+
                         // cleanup
                         if (ct.IsCancellationRequested) {
                             // do task clean up here
@@ -158,9 +167,9 @@ namespace Meadow.Hardware
                         currentSampleCount++;
 
                         // if we still have more samples to take
-                        if (currentSampleCount < sampleCount) {
+                        if (currentSampleCount < SampleCount) {
                             // go to sleep for a while
-                            await Task.Delay(sampleIntervalDuration);
+                            await Task.Delay(SampleInterval);
                         }
                         // if we've filled our temp sample buffer, dump it into
                         // the class one
@@ -189,7 +198,7 @@ namespace Meadow.Hardware
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            await Task.Delay(standbyDuration);
+                            await Task.Delay(UpdateInterval);
                         }
                     }
                 }, SamplingTokenSource.Token);
