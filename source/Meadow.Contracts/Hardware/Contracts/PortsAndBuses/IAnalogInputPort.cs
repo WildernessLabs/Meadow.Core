@@ -46,6 +46,10 @@ namespace Meadow.Hardware
         /// <param name="sampleIntervalDuration">The time, in milliseconds,
         /// to wait in between samples during a reading.</param>
         /// <returns>A float value that's ann average value of all the samples taken.</returns>
+
+        // TODO: get rid of these from here, and add properties:
+        // public int SampleCount { get; set; } = 5;
+        // public TimeSpan SampleInterval { get; set; } = TimeSpan.FromMilliseconds(40);
         Task<Voltage> Read(int sampleCount = 10, int sampleIntervalDuration = 40);
 
         /// <summary>
@@ -62,6 +66,11 @@ namespace Meadow.Hardware
         /// <param name="standbyDuration">The time, in milliseconds, to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
+
+        // TODO: get rid of these from here, and add properties:
+        // public TimeSpan UpdateInterval { get; set; } = TimeSpan.FromSeconds(5);
+        // public int SampleCount { get; set; } = 5;
+        // public TimeSpan SampleInterval { get; set; } = TimeSpan.FromMilliseconds(40);
         void StartUpdating(int sampleCount = 10, int sampleIntervalDuration = 40, int standbyDuration = 100);
 
         /// <summary>
