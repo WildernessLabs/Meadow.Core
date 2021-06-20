@@ -64,12 +64,21 @@ namespace Meadow.Hardware
         // collection of observers
         protected List<IObserver<IChangeResult<Voltage>>> observers { get; set; } = new List<IObserver<IChangeResult<Voltage>>>();
 
-        protected AnalogInputPortBase(IPin pin, IAnalogChannelInfo channel)
+        protected AnalogInputPortBase(
+            IPin pin, IAnalogChannelInfo channel,
+            int updateIntervalMs,
+            int sampleCount, int sampleIntervalMs,
+            float referenceVoltage)
             : base (pin, channel)
         {
+            Pin = pin;
+            UpdateInterval = TimeSpan.FromMilliseconds(updateIntervalMs);
+            SampleCount = sampleCount;
+            SampleInterval = TimeSpan.FromMilliseconds(sampleIntervalMs);
+            ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
         }
 
-        public abstract Task<Voltage> Read(int sampleCount = 10, int sampleInterval = 40);
+        public abstract Task<Voltage> Read();
 
         public abstract void StartUpdating();
 
