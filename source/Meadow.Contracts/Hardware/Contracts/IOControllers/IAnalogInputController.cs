@@ -24,7 +24,6 @@ namespace Meadow.Hardware
         /// <returns></returns>
         IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            int updateIntervalMs = 1000,
             int sampleCount = 5,
             int sampleIntervalMs = 40,
             float voltageReference = DefaultA2DReferenceVoltage

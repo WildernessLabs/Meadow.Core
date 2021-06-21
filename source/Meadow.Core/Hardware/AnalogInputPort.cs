@@ -62,10 +62,9 @@ namespace Meadow.Hardware
 
         protected AnalogInputPort(
                     IPin pin, IMeadowIOController ioController, IAnalogChannelInfo channel,
-                    int updateIntervalMs,
                     int sampleCount, int sampleIntervalMs,
                     float referenceVoltage)
-            : base(pin, channel, updateIntervalMs, sampleCount, sampleIntervalMs, referenceVoltage)
+            : base(pin, channel, sampleCount, sampleIntervalMs, referenceVoltage)
         {
             // save all the settings
             this.IOController = ioController;
@@ -83,7 +82,6 @@ namespace Meadow.Hardware
         public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
-            int updateIntervalMs = 1000,
             int sampleCount = 5,
             int sampleIntervalMs = 40,
             float referenceVoltage = 3.3f)
@@ -95,7 +93,7 @@ namespace Meadow.Hardware
 
                 return new AnalogInputPort(
                     pin, ioController, channel,
-                    updateIntervalMs, sampleCount, sampleIntervalMs,
+                    sampleCount, sampleIntervalMs,
                     referenceVoltage);
             } else {
                 var supported = pin.SupportedChannels.Select(c => c.Name);
@@ -116,14 +114,10 @@ namespace Meadow.Hardware
         /// subscribers to get notified. Use the `readIntervalDuration` parameter
         /// to specify how often events and notifications are raised/sent.
         /// </summary>
-        /// <param name="sampleCount">The number of samples to take within any
-        /// given reading. If 0, it will sample forever.</param>
-        /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
-        /// sample readings.</param>
-        /// <param name="standbyDuration">The time, in milliseconds, to wait
+        /// <param name="updateInterval">A `TimeSpan` to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        public override void StartUpdating()
+        public override void StartUpdating(TimeSpan? updateInterval)
         {
             // thread safety
             lock (_lock) {
@@ -131,6 +125,9 @@ namespace Meadow.Hardware
 
                 // state muh-cheen
                 IsSampling = true;
+
+                // if an update interval was passed in, override the default value
+                if (updateInterval is { } ui) { base.UpdateInterval = ui; }
 
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;

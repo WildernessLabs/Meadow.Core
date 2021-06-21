@@ -66,13 +66,11 @@ namespace Meadow.Hardware
 
         protected AnalogInputPortBase(
             IPin pin, IAnalogChannelInfo channel,
-            int updateIntervalMs,
             int sampleCount, int sampleIntervalMs,
             float referenceVoltage)
             : base (pin, channel)
         {
             Pin = pin;
-            UpdateInterval = TimeSpan.FromMilliseconds(updateIntervalMs);
             SampleCount = sampleCount;
             SampleInterval = TimeSpan.FromMilliseconds(sampleIntervalMs);
             ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
@@ -80,7 +78,7 @@ namespace Meadow.Hardware
 
         public abstract Task<Voltage> Read();
 
-        public abstract void StartUpdating();
+        public abstract void StartUpdating(TimeSpan? updateInterval);
 
         public abstract void StopUpdating();
 

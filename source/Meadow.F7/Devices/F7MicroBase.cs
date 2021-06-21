@@ -142,14 +142,12 @@ namespace Meadow.Devices
         /// <returns></returns>
         public IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
-            int updateIntervalMs = 1000,
             int sampleCount = 5,
             int sampleIntervalMs = 40,
             float voltageReference = IAnalogInputController.DefaultA2DReferenceVoltage)
         {
             return AnalogInputPort.From(
                 pin, this.IoController,
-                updateIntervalMs,
                 sampleCount, sampleIntervalMs,
                 voltageReference);
         }
