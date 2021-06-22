@@ -40,7 +40,7 @@ namespace Meadow.Utilities
         }
 
         /// <summary>
-        /// Returns the value of the bask at the given ordinal.
+        /// Returns the value of the mask at the given ordinal.
         /// </summary>
         /// <param name="mask"></param>
         /// <param name="bitIndex"></param>

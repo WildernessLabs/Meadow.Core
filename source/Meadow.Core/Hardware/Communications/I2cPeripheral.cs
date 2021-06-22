@@ -78,7 +78,7 @@ namespace Meadow.Hardware
         public ushort ReadRegisterAsUShort(byte address, ByteOrder order = ByteOrder.LittleEndian)
         {
             WriteBuffer.Span[0] = address;
-            Bus.Exchange(this.Address, WriteBuffer[0..1].Span, ReadBuffer[0..1].Span);
+            Bus.Exchange(this.Address, WriteBuffer[0..1].Span, ReadBuffer[0..2].Span);
             if (order == ByteOrder.LittleEndian) {
                 return (ushort)(ReadBuffer.Span[0] | (ReadBuffer.Span[1] << 8));
             } else {

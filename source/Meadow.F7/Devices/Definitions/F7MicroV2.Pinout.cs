@@ -198,26 +198,50 @@ namespace Meadow.Devices
 
             //==== Right Header
 
-            // D05
+            // D05 //NOTE: we can expose UART_7 if we want here
+            // F7v2.a
             // JTDI, TIM2_CH1/TIM2_ETR, HDMI_CEC, SPI1_NSS/I2S1_WS, SPI3_NSS/I2S3_WS, SPI6_NSS, UART4_RTS, CAN3_TX, UART7_TX, EVENTOUT
+            //public IPin D05 => new Pin(
+            //    "D05", "PA15",
+            //    new List<IChannelInfo> {
+            //        new DigitalChannelInfo("PA15", interruptGroup: 15),
+            //        //new PwmChannelInfo("TIM2_CH1", 1, 1), // Reserved for OnboardLED
+            //        new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
+            //    }
+            //);
+            // F7v2.b
+            // NJTRST, TIM3_CH1, SPI1_MISO, SPI3_MISO, SPI2_NSS/I2S2_WS, SPI6_MISO, SDMMC2_D3, CAN3_TX, UART7_TX, EVENTOUT
             public IPin D05 => new Pin(
-                "D05", "PA15",
+                "D05", "PB4",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA15", interruptGroup: 15),
-                    //new PwmChannelInfo("TIM2_CH1", 1, 1), // Reserved for OnboardLED
-                    new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
+                    new DigitalChannelInfo("PB4", interruptGroup: 4),
+                    new PwmChannelInfo("TIM3_CH1", 3, 1),
+                    //new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
                 }
             );
-            // D06
+
+            // D06 //NOTE: we can expose UART_7 if we want here
+            // F7v2.a
             // JTDO/TRACESWO, TIM2_CH2, SPI1_SCK/I2S1_CK, SPI3_SCK/I2S3_CK, SPI6_SCK, SDMMC2_D2, CAN3_RX, UART7_RX, EVENTOUT
+            //public IPin D06 => new Pin(
+            //    "D06", "PB3",
+            //    new List<IChannelInfo> {
+            //        new DigitalChannelInfo("PB3", interruptGroup: 3),
+            //        //new PwmChannelInfo("TIM2_CH2", 2, 2), // Reserved for OnboardLED
+            //        new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
+            //    }
+            //);
+            // F7v2.b
+            // I2C2_SMBA, SPI5_SCK, TIM12_CH1, ETH_MII_RXD2, FMC_SDNE1, DCMI_D8, EVENTOUT
             public IPin D06 => new Pin(
-                "D06", "PB3",
+                "D06", "PB13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB3", interruptGroup: 3),
-                    //new PwmChannelInfo("TIM2_CH2", 2, 2), // Reserved for OnboardLED
-                    new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
+                    new DigitalChannelInfo("PB13", interruptGroup: 13),
+                    new PwmChannelInfo("TIM12_CH1", 12, 1),
+                    //new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
                 }
             );
+
             // D07
             // TIM4_CH2, I2C1_SDA, DFSDM_CKIN5, USART1_RX, I2C4_SDA, FMC_NL, DCMI_VSYNC, EVENTOUT
             public IPin D07 => new Pin(
@@ -228,6 +252,8 @@ namespace Meadow.Devices
                     new I2cChannelInfo("I2C1_SDA", I2cChannelFunctionType.Data) // or I2C4_SDA
                 }
             );
+
+
             // D08
             // UART5_TX, TIM4_CH1, HDMI_CEC, I2C1_SCL, DFSDM_DATIN5, USART1_TX, CAN2_TX, QUADSPI_BK1_NCS, I2C4_SCL, FMC_SDNE1, DCMI_D5, EVENTOUT
             public IPin D08 => new Pin(
@@ -295,12 +321,23 @@ namespace Meadow.Devices
                 }
             );
             // D15
+            // F7v2.a
             // I2C2_SMBA, SPI5_SCK, TIM12_CH1, ETH_MII_RXD2, FMC_SDNE1, DCMI_D8, EVENTOUT
+            //public IPin D15 => new Pin(
+            //    "D15", "PB13",
+            //    new List<IChannelInfo> {
+            //        new DigitalChannelInfo("PB13", interruptGroup: 13),
+            //        new PwmChannelInfo("TIM12_CH1", 12, 1),
+            //    }
+            //);
+
+            // F7v2.b
+            // LPTIM1_IN1, SPI6_MISO, SPDIF_RX1, USART6_RTS, LCD_B4, SDMMC2_D3, FMC_NE4, LCD_B1, EVENTOUT
             public IPin D15 => new Pin(
-                "D15", "PB13",
+                "D15", "PG12",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PE3", interruptGroup: 3),
-                    new PwmChannelInfo("TIM12_CH1", 12, 1),
+                    new DigitalChannelInfo("PB12", interruptGroup: 12),
+                    //new PwmChannelInfo("TIM12_CH1", 12, 1),
                 }
             );
 

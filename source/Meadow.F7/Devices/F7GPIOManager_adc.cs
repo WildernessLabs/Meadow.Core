@@ -29,6 +29,7 @@ namespace Meadow.Devices
             switch (designator.port)
             {
                 case STM32.GpioPort.PortA:
+                case STM32.GpioPort.PortB:
                 case STM32.GpioPort.PortC:
                     // port C uses ADC1, but still gets *configured* as port C
                     ConfigureADC(designator.port, designator.pin);
@@ -209,6 +210,9 @@ namespace Meadow.Devices
             {
                 case STM32.GpioPort.PortA:
                     channel = designator.pin;
+                    break;
+                case STM32.GpioPort.PortB:
+                    channel = designator.pin + 8;
                     break;
                 case STM32.GpioPort.PortC:
                     // PC0 and PC1 have additional functions of ADC1_IN10 and 11 (see manual 'STM32F777xx STM32F778Ax STM32F779xx')

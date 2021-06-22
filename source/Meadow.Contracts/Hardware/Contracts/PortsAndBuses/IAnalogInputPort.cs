@@ -38,15 +38,29 @@ namespace Meadow.Hardware
         Voltage Voltage { get; }
 
         /// <summary>
+        /// A `TimeSpan` that specifies how long to
+        /// wait between readings. This value influences how often `*Updated`
+        /// events are raised and `IObservable` consumers are notified.
+        /// </summary>
+        public TimeSpan UpdateInterval { get; }
+
+        /// <summary>
+        /// Number of samples to take per reading. If > `0` then the port will
+        /// take multiple readings and These are automatically averaged to
+        /// reduce noise, a process known as _oversampling_.
+        /// </summary>
+        public int SampleCount { get; }
+
+        /// <summary>
+        /// Duration in between samples when oversampling.
+        /// </summary>
+        public TimeSpan SampleInterval { get; }
+
+        /// <summary>
         /// Convenience method to get the current voltage. For frequent reads, use
         /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. 
-        /// Must be greater than 0. These samples are automatically averaged.</param>
-        /// <param name="sampleIntervalDuration">The time, in milliseconds,
-        /// to wait in between samples during a reading.</param>
-        /// <returns>A float value that's ann average value of all the samples taken.</returns>
-        Task<Voltage> Read(int sampleCount = 10, int sampleIntervalDuration = 40);
+        Task<Voltage> Read();
 
         /// <summary>
         /// Starts continuously sampling the analog port.
@@ -55,14 +69,7 @@ namespace Meadow.Hardware
         /// subscribers getting notified. Use the `readIntervalDuration` parameter
         /// to specify how often events and notifications are raised/sent.
         /// </summary>
-        /// <param name="sampleCount">How many samples to take during a given
-        /// reading. These are automatically averaged to reduce noise.</param>
-        /// <param name="sampleIntervalDuration">The time, in milliseconds,
-        /// to wait in between samples during a reading.</param>
-        /// <param name="standbyDuration">The time, in milliseconds, to wait
-        /// between sets of sample readings. This value determines how often
-        /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        void StartUpdating(int sampleCount = 10, int sampleIntervalDuration = 40, int standbyDuration = 100);
+        void StartUpdating(TimeSpan? updateInterval);
 
         /// <summary>
         /// Stops sampling the analog port.

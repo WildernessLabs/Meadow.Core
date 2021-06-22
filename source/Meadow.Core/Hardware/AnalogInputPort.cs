@@ -61,15 +61,13 @@ namespace Meadow.Hardware
         protected Voltage? _previousVoltageReading;
 
         protected AnalogInputPort(
-                    IPin pin,
-                    IMeadowIOController ioController,
-                    IAnalogChannelInfo channel,
+                    IPin pin, IMeadowIOController ioController, IAnalogChannelInfo channel,
+                    int sampleCount, int sampleIntervalMs,
                     float referenceVoltage)
-            : base(pin, channel)
+            : base(pin, channel, sampleCount, sampleIntervalMs, referenceVoltage)
         {
-            base.Pin = pin;
+            // save all the settings
             this.IOController = ioController;
-            base.ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
 
             // attempt to reserve
             var success = IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
@@ -84,12 +82,19 @@ namespace Meadow.Hardware
         public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
-            float referenceVoltage)
+            int sampleCount = 5,
+            int sampleIntervalMs = 40,
+            float referenceVoltage = 3.3f)
         {
             var channel = pin.SupportedChannels.OfType<IAnalogChannelInfo>().FirstOrDefault();
             if (channel != null) {
                 //TODO: need other checks here.
-                return new AnalogInputPort(pin, ioController, channel, referenceVoltage);
+                if(sampleCount < 1) { throw new ArgumentException("sampleCount must be greater than zero."); }
+
+                return new AnalogInputPort(
+                    pin, ioController, channel,
+                    sampleCount, sampleIntervalMs,
+                    referenceVoltage);
             } else {
                 var supported = pin.SupportedChannels.Select(c => c.Name);
                 var msg = $"Pin {pin.Name} does not support an analog input channel. It supports: {string.Join(",", supported)}";
@@ -109,17 +114,10 @@ namespace Meadow.Hardware
         /// subscribers to get notified. Use the `readIntervalDuration` parameter
         /// to specify how often events and notifications are raised/sent.
         /// </summary>
-        /// <param name="sampleCount">The number of samples to take within any
-        /// given reading. If 0, it will sample forever.</param>
-        /// <param name="sampleIntervalDuration">The interval, in milliseconds, between
-        /// sample readings.</param>
-        /// <param name="standbyDuration">The time, in milliseconds, to wait
+        /// <param name="updateInterval">A `TimeSpan` to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        public override void StartUpdating(
-            int sampleCount = 10,
-            int sampleIntervalDuration = 40,
-            int standbyDuration = 100)
+        public override void StartUpdating(TimeSpan? updateInterval)
         {
             // thread safety
             lock (_lock) {
@@ -128,18 +126,18 @@ namespace Meadow.Hardware
                 // state muh-cheen
                 IsSampling = true;
 
+                // if an update interval was passed in, override the default value
+                if (updateInterval is { } ui) { base.UpdateInterval = ui; }
+
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
                 Task.Factory.StartNew(async () => {
                     int currentSampleCount = 0;
-                    Voltage[] sampleBuffer = new Voltage[sampleCount];
+                    Voltage[] sampleBuffer = new Voltage[SampleCount];
                     // loop until we're supposed to stop
                     while (true) {
-                        // TODO: someone please review; is this the correct
-                        // place to do this?
-                        // check for cancel (doing this here instead of 
-                        // while(!ct.IsCancellationRequested), so we can perform 
+
                         // cleanup
                         if (ct.IsCancellationRequested) {
                             // do task clean up here
@@ -158,9 +156,9 @@ namespace Meadow.Hardware
                         currentSampleCount++;
 
                         // if we still have more samples to take
-                        if (currentSampleCount < sampleCount) {
+                        if (currentSampleCount < SampleCount) {
                             // go to sleep for a while
-                            await Task.Delay(sampleIntervalDuration);
+                            await Task.Delay(SampleInterval);
                         }
                         // if we've filled our temp sample buffer, dump it into
                         // the class one
@@ -189,7 +187,7 @@ namespace Meadow.Hardware
                             currentSampleCount = 0;
 
                             // sleep for the appropriate interval
-                            await Task.Delay(standbyDuration);
+                            await Task.Delay(UpdateInterval);
                         }
                     }
                 }, SamplingTokenSource.Token);
@@ -219,27 +217,23 @@ namespace Meadow.Hardware
         /// Convenience method to get the voltage value. For frequent reads, use
         /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
         /// </summary>
-        /// <param name="sampleCount">The number of sample readings to take. 
-        /// must be greater than 0.</param>
-        /// <param name="sampleInterval">The interval, in milliseconds, between
-        /// sample readings.</param>
         /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
-        public async override Task<Voltage> Read(int sampleCount = 10, int sampleInterval = 40)
+        public async override Task<Voltage> Read()
         {
-            // TODO: should this be Span<double>?
-            double[] sampleBuffer = new double[sampleCount];
-            for (int i = 0; i < sampleCount; i++) {
+            // TODO: should this be class level Memory<double>?
+            double[] sampleBuffer = new double[SampleCount];
+            for (int i = 0; i < SampleCount; i++) {
                 // read into the buffer
                 lock (_analogSyncRoot) {
                     var rawValue = this.IOController.GetAnalogValue(this.Pin);
                     // convert the raw valute into an actual voltage.
                     sampleBuffer[i] = ((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts;
                 }
-                await Task.Delay(sampleInterval);
+                await Task.Delay(SampleInterval);
             }
 
             // return the average of the samples
-            return new Voltage((float)(sampleBuffer.Select(x => (float)x).Sum() / sampleCount), Units.Voltage.UnitType.Volts);
+            return new Voltage((float)(sampleBuffer.Select(x => (float)x).Sum() / SampleCount), Units.Voltage.UnitType.Volts);
         }
 
         public override void Dispose()

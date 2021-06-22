@@ -7,6 +7,8 @@ namespace Meadow.Hardware
     /// </summary>
     public interface IAnalogInputController
     {
+        // TODO: if Microsoft ever gets around to fixing the compile time const
+        // thing, we should make this a `Voltage` 
         /// <summary>
         /// The default Analog to Digital converter reference voltage.
         /// </summary>
@@ -22,6 +24,8 @@ namespace Meadow.Hardware
         /// <returns></returns>
         IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
+            int sampleCount = 5,
+            int sampleIntervalMs = 40,
             float voltageReference = DefaultA2DReferenceVoltage
         );
     }
