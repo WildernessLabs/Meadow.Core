@@ -201,6 +201,32 @@ namespace Meadow.Hardware
             this.Bus.Write(this.ChipSelect, WriteBuffer.Span[0..(data.Length + 1)], this.chipSelectMode);
         }
 
+        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            // Todo: we should move this functionality deeper into the stack
+            // and have nuttx write the write buffer, then continue clocking out
+            // 0x00's until it's hit writeBuffer.Length + readBuffer.Lenght
+            // and ignore the input until it hits writeBuffer.Length, and then
+            // start writing directly into the readBuffer starting at 0.
+            // that will prevent all the allocations and copying we're doing
+            // here.
+
+            // clock in and clock out data means that the buffers have to be as
+            // long as both tx and rx together
+            int length = writeBuffer.Length + readBuffer.Length;
+            Span<byte> txBuffer = stackalloc byte[length];
+            Span<byte> rxBuffer = stackalloc byte[length];
+
+            // copy the write into tx
+            writeBuffer.CopyTo(txBuffer);
+
+            // write/read the data
+            Bus.Exchange(ChipSelect, txBuffer, rxBuffer, ChipSelectMode.ActiveLow);
+
+            // move the rx data into the read buffer, starting it at zero
+            rxBuffer[writeBuffer.Length..length].CopyTo(ReadBuffer.Span);
+        }
+
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
 
@@ -284,17 +310,6 @@ namespace Meadow.Hardware
 
             // and return it
             return result;
-        }
-
-        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer)
-        {
-            //// TODO: This is a terribly inefficient way to use a SPI bus - underlying bus needs Span support
-            //var r = WriteRead(writeBuffer.ToArray(), (ushort)readBuffer.Length);
-            //for (int i = 0; i < readBuffer.Length; i++)
-            //{
-            //    readBuffer[i] = r[i];
-            //}
-            Bus.Exchange(ChipSelect, writeBuffer, readBuffer, ChipSelectMode.ActiveLow);
         }
 
         /// <summary>
