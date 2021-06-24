@@ -14,9 +14,9 @@
 		//must align to enum
 		private static readonly double[] magneticFieldConversions =
 		{
-			0.000001, //MegaTelsa
-			0.001, //KiloTelsa
-			1.0, //Telsa
+			0.000001, //MegaTesla
+			0.001, //KiloTesla
+			1.0, //Tesla
 			1000.0,//MilliTesla
 			1000000.0, //MicroTesla
 			1000000000.0, //NanoTesla
