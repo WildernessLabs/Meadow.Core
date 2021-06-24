@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using Meadow.Units.Conversions;
+using MU = Meadow.Units.MagneticField.UnitType;
 
 namespace Meadow.Units
 {
@@ -24,8 +25,7 @@ namespace Meadow.Units
         /// <param name="y">The Y MagneticField3d value.</param>
         /// <param name="valueZ">The Z MagneticField3d value.</param>
         /// <param name="type"></param>
-        public MagneticField3D(double x, double y, double z,
-            MagneticField.UnitType type = MagneticField.UnitType.Telsa)
+        public MagneticField3D(double x, double y, double z, MU type = MU.Tesla)
         {
             X = new MagneticField(x, type);
             Y = new MagneticField(y, type);
