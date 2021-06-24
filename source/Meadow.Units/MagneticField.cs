@@ -22,9 +22,9 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="value">The MagneticField value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
-        public MagneticField(double value, UnitType type = UnitType.Telsa)
+        public MagneticField(double value, UnitType type = UnitType.Tesla)
         {
-            Value = MagneticFieldConversions.Convert(value, type, UnitType.Telsa);
+            Value = MagneticFieldConversions.Convert(value, type, UnitType.Tesla);
         }
 
         public MagneticField(MagneticField magneticField)
@@ -42,9 +42,9 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
-            MegaTelsa,
-			KiloTelsa,
-			Telsa,
+            MegaTesla,
+			KiloTesla,
+			Tesla,
 			MilliTesla,
 			MicroTesla,
 			NanoTesla,
@@ -52,9 +52,9 @@ namespace Meadow.Units
 			Gauss
         }
 
-        public double MegaTelsa => From(UnitType.MegaTelsa);
-        public double KiloTelsa => From(UnitType.KiloTelsa);
-        public double Telsa => From(UnitType.Telsa);
+        public double MegaTesla => From(UnitType.MegaTesla);
+        public double KiloTesla => From(UnitType.KiloTesla);
+        public double Tesla => From(UnitType.Tesla);
         public double MilliTesla => From(UnitType.MilliTesla);
         public double MicroTesla => From(UnitType.MicroTesla);
         public double NanoTesla => From(UnitType.NanoTesla);
@@ -64,7 +64,7 @@ namespace Meadow.Units
         [Pure]
         public double From(UnitType convertTo)
         {
-            return MagneticFieldConversions.Convert(Value, UnitType.Telsa, convertTo);
+            return MagneticFieldConversions.Convert(Value, UnitType.Tesla, convertTo);
         }
 
         [Pure]
