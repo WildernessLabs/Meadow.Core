@@ -221,10 +221,10 @@ namespace Meadow.Hardware
             writeBuffer.CopyTo(txBuffer);
 
             // write/read the data
-            Bus.Exchange(ChipSelect, txBuffer, rxBuffer, ChipSelectMode.ActiveLow);
+            Bus.Exchange(ChipSelect, txBuffer, rxBuffer, this.chipSelectMode);
 
             // move the rx data into the read buffer, starting it at zero
-            rxBuffer[writeBuffer.Length..length].CopyTo(ReadBuffer.Span);
+            rxBuffer[writeBuffer.Length..length].CopyTo(readBuffer);
         }
 
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
