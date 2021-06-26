@@ -4,20 +4,20 @@ using System;
 namespace Meadow.Peripherals.Sensors.Motion
 {
     /// <summary>
-    /// Represents a generic accelerometer sensor.
+    /// Represents a generic gyroscopic sensor that measures angular velocity.
     /// </summary>
     public interface IGyroscope : ISensor
     {
         /// <summary>
         /// Last value read from the Temperature sensor.
         /// </summary>
-        AngularAcceleration3D? AngularAcceleration3D { get; }
+        AngularVelocity3D? AngularVelocity3D { get; }
 
         /// <summary>
         /// Raised when a new reading has been made. Events will only be raised
         /// while the driver is updating. To start, call the `StartUpdating()`
         /// method.
         /// </summary>
-        event EventHandler<IChangeResult<AngularAcceleration3D>> AngularAcceleration3DUpdated;
+        event EventHandler<IChangeResult<AngularVelocity3D>> AngularVelocity3DUpdated;
     }
 }
