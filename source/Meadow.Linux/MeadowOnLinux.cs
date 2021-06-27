@@ -131,7 +131,7 @@ namespace Meadow
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
-        public IAnalogInputPort CreateAnalogInputPort(IPin pin, float voltageReference = 3.3F)
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount = 5, int sampleIntervalMs = 40, float voltageReference = 3.3F)
         {
             throw new NotImplementedException();
         }
