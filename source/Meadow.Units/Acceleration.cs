@@ -44,6 +44,9 @@ namespace Meadow.Units
         {
             MetersPerSecondSquared,
             CentimetersPerSecondSquared,
+            Galileo,
+            MilliGalileo,
+            MilliGravity,
             Gravity,
             FeetPerSecondSquared,
             InchesPerSecondSquared,
