@@ -4,7 +4,6 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Meadow.Contracts\Meadow.Contracts.csproj" />
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
     <ProjectReference Include="..\..\Meadow.Linux\Meadow.Linux.csproj" />
   </ItemGroup>

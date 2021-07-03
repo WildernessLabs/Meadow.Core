@@ -4,6 +4,7 @@
 trigger:
   - main
   - develop
+  - staging
 
 variables:
   solution: "**/Meadow.Core.sln"
