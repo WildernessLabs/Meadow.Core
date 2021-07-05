@@ -9,7 +9,7 @@
    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
-   <Version>0.23.0</Version>
+   <Version>0.24.1</Version>
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
@@ -20,9 +20,14 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" Condition="'$(TargetFramework)'=='net472'" />
+   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.8.*" Condition="'$(TargetFramework)'=='net472'" />
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
+ </ItemGroup>
+ <ItemGroup>
+   <Content Include="netstandard.dll">
+     <PackageCopyToOutput>true</PackageCopyToOutput>
+   </Content>
  </ItemGroup>
 </Project>
