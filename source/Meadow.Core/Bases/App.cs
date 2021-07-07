@@ -20,7 +20,7 @@ namespace Meadow
         public static A Current
         {
             get { return _current; }
-        } private static A? _current;
+        } private static A _current = null!;
 
         private static SynchronizationContext _mainContext { get; }
 
@@ -34,27 +34,25 @@ namespace Meadow
 
         protected App()
         {
+            _device = Activator.CreateInstance<D>();
+            _device.SetSynchronizationContext(_mainContext);
+            _device.Initialize();
+            MeadowOS.CurrentDevice = _device;
+
+            // initialize file system folders and such
+            MeadowOS.InitializeFileSystem();
+
             //BUGBUG: because a user's `App` class doesn't have to call this
             // base ctor, then this might not ever run, or it might run
             // non-deterministically. so we need to figure out how to make sure
             // this stuff happens
-            _current = this as A;
+            _current = this as A ?? throw new Exception($"Unable to convert to {typeof(A).Name}");
         }
 
         public static D Device
         {
-            get 
-            {
-                if (_device == null) {
-                    _device = Activator.CreateInstance<D>();
-                    _device.SetSynchronizationContext(_mainContext);
-
-                    // set our device on the MeadowOS class
-                    MeadowOS.Init(_device);
-                }
-                return _device; 
-            }
-        } private static D? _device;
+            get => _device;
+        } private static D _device = null!;
 
         /// <summary>
         /// Called when the application is put to sleep.

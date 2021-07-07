@@ -6,7 +6,7 @@ namespace Meadow.Hardware
     {
         public int Group { get; }
 
-        internal InterruptGroupInUseException(int group)
+        public InterruptGroupInUseException(int group)
             : base($"Interrupt group {group} is already in use")
         {
         }

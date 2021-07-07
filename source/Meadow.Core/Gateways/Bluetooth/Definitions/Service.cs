@@ -1,8 +1,8 @@
 ﻿namespace Meadow.Gateways.Bluetooth
 {
-    public class Service
+    public class Service : IService
     {
-        internal ushort Handle { get; set; }
+        public ushort Handle { get; set; }
         public string Name { get; }
         public ushort Uuid { get; }
         public CharacteristicCollection Characteristics { get; }
@@ -15,7 +15,7 @@
             Characteristics.AddRange(characteristics);
         }
 
-        internal string ToJson()
+        public string ToJson()
         {
             // serialize to JSON, but without pulling in a JSON lib dependency
             var json = $@"{{

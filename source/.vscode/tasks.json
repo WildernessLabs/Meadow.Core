@@ -1,0 +1,59 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}\\Tests\\${config:app.Name}\\${config:app.Name}.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}\\Tests\\${config:app.Name}\\${config:app.Name}.csproj",
+                "-o",
+                "publish",
+                "-r",
+                "linux-arm64",
+                "--no-self-contained"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "deploy",
+            "dependsOn":"publish",
+            "command": "pscp",
+            "type": "process",
+            "args": [
+                "-pw",
+                "${config:device.Password}",
+                "-r", 
+                ".\\publish\\*",
+                "${config:device.User}@${config:device.Address}:${config:remote.Folder}"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}\\Tests\\${config:app.Name}.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

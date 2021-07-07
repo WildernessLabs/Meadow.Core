@@ -1,0 +1,14 @@
+﻿<Project Sdk="Meadow.Sdk/1.1.0">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Meadow.Linux\Meadow.Linux.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" 
+        Condition="'$(TargetFramework)'=='net472'" />
+
+  </ItemGroup>
+</Project>

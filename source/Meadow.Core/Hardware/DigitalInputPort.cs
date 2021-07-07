@@ -43,7 +43,7 @@ namespace Meadow.Hardware
             _glitchDuration = glitchDuration;
 
             // attempt to reserve
-            var success = DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
+            var success = this.IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
             if (success.Item1)
             {
                 // make sure the pin is configured as a digital input with the proper state
@@ -133,7 +133,7 @@ namespace Meadow.Hardware
                 if (disposing)
                 {
                     this.IOController.Interrupt -= OnInterrupt;
-                    DeviceChannelManager.ReleasePin(Pin);
+                    this.IOController.DeviceChannelManager.ReleasePin(Pin);
                     IOController.UnconfigureGpio(Pin);
                 }
                 disposed = true;

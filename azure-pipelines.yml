@@ -4,11 +4,14 @@
 trigger:
   - main
   - develop
+  - staging
+  - release
 
 variables:
   solution: "**/Meadow.Core.sln"
   buildPlatform: "Any CPU"
   buildConfiguration: "Release"
+  internalFeedName: "Meadow02"
 
 pool:
   vmImage: windows-2019
@@ -20,7 +23,10 @@ stages:
         steps:
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
+            displayName: Use_Nugets
             inputs:
+              feedsToUse: "select"
+              vstsFeed: $(internalFeedName) #use internal feed
               restoreSolution: "$(solution)"
           - task: VSBuild@1
             inputs:

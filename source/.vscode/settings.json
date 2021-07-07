@@ -1,0 +1,9 @@
+{
+    "device.User": "chameleon",
+    "device.Password": "hg123!",
+    "device.Address": "192.168.0.17",
+    "device.DotNetPath":"/home/chameleon/dotnet",
+    "device.VsdbgPath":"/home/chameleon/vsdbg",
+    "app.Name": "I2CDiscover",
+    "remote.Folder": "/home/chameleon/i2c"
+}
