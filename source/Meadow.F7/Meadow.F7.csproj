@@ -13,6 +13,7 @@
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
+   <Description>STM32F7 .NET libraries for Wilderness Labs Meadow</Description>
  </PropertyGroup>
  <PropertyGroup>
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

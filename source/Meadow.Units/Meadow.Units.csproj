@@ -13,6 +13,7 @@
    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
+   <Description>Unit types for Wilderness Labs Meadow</Description>
  </PropertyGroup>
  <PropertyGroup>
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
