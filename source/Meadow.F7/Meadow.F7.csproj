@@ -21,9 +21,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.8.*" Condition="'$(TargetFramework)'=='net472'" />
- </ItemGroup>
- <ItemGroup>
    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
  </ItemGroup>
  <ItemGroup>
