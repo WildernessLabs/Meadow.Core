@@ -132,6 +132,17 @@ namespace Meadow.Gateways
         bool StartNetwork();
 
         /// <summary>
+        /// Stop the WiFi interface,
+        /// </summary>
+        /// <remarks>
+        /// Stopping the WiFi interface will release all resources associated with the WiFi running on the ESP32.
+        /// 
+        /// Errors could occur if the adapter was not started.
+        /// </remarks>
+        /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
+        bool StopNetwork();
+
+        /// <summary>
         /// Start a WiFi network.
         /// </summary>
         /// <param name="ssid">Name of the network to connect to.</param>
@@ -140,6 +151,16 @@ namespace Meadow.Gateways
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
         Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic);
+
+        /// <summary>
+        /// Disconnect from the the currently active access point.
+        /// </summary>
+        /// <remarks>
+        /// Setting turnOffWiFiInterface to true will call <cref="StopWiFiInterface" /> following
+        /// the disconnection from the current access point.
+        /// </remarks>
+        /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
+        Task<ConnectionResult> Disconnect(bool turnOffWiFiInterface);
 
         /// <summary>
         /// Get the list of access points.
