@@ -1,4 +1,6 @@
-﻿namespace Meadow.Peripherals.Speakers
+﻿using System.Threading.Tasks;
+
+namespace Meadow.Peripherals.Speakers
 {
     /// <summary>
     /// Audio tones generator that plays tones at a given frequency.
@@ -10,7 +12,7 @@
         /// </summary>
         /// <param name="frequency"></param>
         /// <param name="duration"></param>
-        void PlayTone(float frequency, int duration = 0);
+        Task PlayTone(float frequency, int duration = 0);
 
         /// <summary>
         /// Stops the tone playing.
