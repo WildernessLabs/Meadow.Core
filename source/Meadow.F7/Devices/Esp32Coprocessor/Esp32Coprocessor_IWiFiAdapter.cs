@@ -260,16 +260,16 @@ namespace Meadow.Devices
         {
             switch (eventId)
             {
-                case WiFiFunction.ConnectEvent:
+                case WiFiFunction.ConnectToAccessPointEvent:
                     RaiseWiFiConnected(statusCode, payload);
                     break;
-                case WiFiFunction.DisconnectEvent:
+                case WiFiFunction.DisconnectFromAccessPointEvent:
                     RaiseWiFiDisconnected(statusCode, payload);
                     break;
-                case WiFiFunction.StartInterfaceEvent:
+                case WiFiFunction.StartWiFiInterfaceEvent:
                     RaiseWiFiInterfaceStarted(statusCode, payload);
                     break;
-                case WiFiFunction.StopInterfaceEvent:
+                case WiFiFunction.StopWiFiInterfaceEvent:
                     RaiseWiFiInterfaceStopped(statusCode, payload);
                     break;
                 default:
@@ -343,6 +343,50 @@ namespace Meadow.Devices
         }
 
         /// <summary>
+        /// Start the network interface on the WiFi adapter.
+        /// </summary>
+        /// <remarks>
+        /// This method starts the network interface hardware.  The result of this action depends upon the
+        /// settings stored in the WiFi adapter memory.
+        ///
+        /// No Stored Configuration
+        /// If no settings are stored in the adapter then the hardware will simply start.  IP addresses
+        /// will not be obtained in this mode.
+        ///
+        /// In this case, the return result indicates if the hardware started successfully.
+        ///
+        /// Stored Configuration Present NOTE NOT IMPLEMENTED IN THIS RELEASE
+        /// If a default access point (and optional password) are stored in the adapter then the network
+        /// interface and the system is set to connect at startup then the system will then attempt to
+        /// connect to the specified access point.
+        ///
+        /// In this case, the return result indicates if the interface was started successfully and a
+        /// connection to the access point was made.
+        /// </remarks>
+        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
+        public bool StartNetwork()
+        {
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartWiFiInterface, true, null);
+            return (result == StatusCodes.CompletedOk);
+        }
+
+        /// <summary>
+        /// Stop the WiFi interface,
+        /// </summary>
+        /// <remarks>
+        /// Stopping the WiFi interface will release all resources associated with the WiFi running on the ESP32.
+        ///
+        /// Errors could occur if the adapter was not started.
+        /// </remarks>
+        /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
+        public bool StopNetwork()
+        {
+            throw new NotImplementedException();
+            //StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StopWiFiInterface, true, null);
+            //return (result == StatusCodes.CompletedOk);
+        }
+
+        /// <summary>
         /// Connect to a WiFi network.
         /// </summary>
         /// <param name="ssid">SSID of the network to connect to</param>
@@ -386,41 +430,6 @@ namespace Meadow.Devices
                 return connectionResult;
             });
             return t;
-        }
-
-        /// <summary>
-        /// Disconnect from the current network.
-        /// </summary>
-        public void Disconect()
-        {
-        }
-
-        /// <summary>
-        /// Start the network interface on the WiFi adapter.
-        /// </summary>
-        /// <remarks>
-        /// This method starts the network interface hardware.  The result of this action depends upon the
-        /// settings stored in the WiFi adapter memory.
-        ///
-        /// No Stored Configuration
-        /// If no settings are stored in the adapter then the hardware will simply start.  IP addresses
-        /// will not be obtained in this mode.
-        ///
-        /// In this case, the return result indicates if the hardware started successfully.
-        ///
-        /// Stored Configuration Present NOTE NOT IMPLEMENTED IN THIS RELEASE
-        /// If a default access point (and optional password) are stored in the adapter then the network
-        /// interface and the system is set to connect at startup then the system will then attempt to
-        /// connect to the specified access point.
-        ///
-        /// In this case, the return result indicates if the interface was started successfully and a
-        /// connection to the access point was made.
-        /// </remarks>
-        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
-        public bool StartNetwork()
-        {
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartNetwork, true, null);
-            return (result == StatusCodes.CompletedOk);
         }
 
         /// <summary>
@@ -488,6 +497,38 @@ namespace Meadow.Devices
                     throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
             }
             return (result);
+        }
+
+        /// <summary>
+        /// Disconnect from the current access point.
+        /// </summary>
+        /// <param name="turnOffWiFiInterface">Stop the WiFi interface.</param>
+        /// <returns></returns>
+        public async Task<ConnectionResult> Disconnect(bool turnOffWiFiInterface)
+        {
+            throw new NotImplementedException();
+
+            //var t = await Task.Run<ConnectionResult>(() => {
+            //    ConnectionResult connectionResult;
+            //    StatusCodes result = DisconnectFromAccessPoint(turnOffWiFiInterface);
+            //    connectionResult = new ConnectionResult(ConnectionStatus.Success);
+            //    return (connectionResult);
+            //});
+            //return (t);
+        }
+
+        /// <summary>
+        /// Disconnect from the the currently active access point.
+        /// </summary>
+        /// <remarks>
+        /// Setting turnOffWiFiInterface to true will call <cref="StopWiFiInterface" /> following
+        /// the disconnection from the current access point.
+        /// </remarks>
+        /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
+        private StatusCodes DisconnectFromAccessPoint(bool turnOffWiFiInterface)
+        {
+            throw new NotImplementedException();
+            //return (StatusCodes.CompletedOk);
         }
 
         /// <summary>
