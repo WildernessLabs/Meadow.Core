@@ -489,6 +489,53 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
+        /// Encode a DisconnectFromAccessPointRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="disconnectFromAccessPointRequest">DisconnectFromAccessPointRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded DisconnectFromAccessPointRequest object.</returns>
+        public static byte[] EncodeDisconnectFromAccessPointRequest(MessagePayloads.DisconnectFromAccessPointRequest disconnectFromAccessPointRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 1;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            buffer[offset] = disconnectFromAccessPointRequest.TurnOffWiFiInterface;
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a DisconnectFromAccessPointRequest object from a byte array.
+        /// </summary>
+        /// <param name="disconnectFromAccessPointRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>DisconnectFromAccessPointRequest object.</returns>
+        public static MessagePayloads.DisconnectFromAccessPointRequest ExtractDisconnectFromAccessPointRequest(byte[] buffer, int offset)
+        {
+            DisconnectFromAccessPointRequest disconnectFromAccessPointRequest = new MessagePayloads.DisconnectFromAccessPointRequest();
+
+            disconnectFromAccessPointRequest.TurnOffWiFiInterface = buffer[offset];
+            return(disconnectFromAccessPointRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the DisconnectFromAccessPointRequest object.
+        /// </summary>
+        /// <param name="disconnectFromAccessPointRequest">DisconnectFromAccessPointRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded DisconnectFromAccessPointRequest object.</returns>
+        public static int EncodedDisconnectFromAccessPointRequestBufferSize(MessagePayloads.DisconnectFromAccessPointRequest disconnectFromAccessPointRequest)
+        {
+            return(1);
+        }
+
+        /// <summary>
         /// Encode a ConnectDisconnectData object and return a byte array containing the encoded message.
         /// </summary>
         /// <param name="connectDisconnectData">ConnectDisconnectData object to be encoded.</param>
@@ -905,7 +952,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             length += (int) (getAddrInfoRequest.NodeName.Length + 1);
             length += (int) (getAddrInfoRequest.ServName.Length + 1);
             length += (int) (getAddrInfoRequest.HintsLength + 4);
-            length += (int) (getAddrInfoRequest.ResultLength + 4);
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
@@ -921,13 +967,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (getAddrInfoRequest.HintsLength > 0)
             {
                 Array.Copy(getAddrInfoRequest.Hints, 0, buffer, offset, getAddrInfoRequest.HintsLength);
-                offset += (int) (getAddrInfoRequest.HintsLength);
-            }
-            EncodeUInt32(getAddrInfoRequest.ResultLength, buffer, offset);
-            offset += 4;
-            if (getAddrInfoRequest.ResultLength > 0)
-            {
-                Array.Copy(getAddrInfoRequest.Result, 0, buffer, offset, getAddrInfoRequest.ResultLength);
             }
             return(buffer);
         }
@@ -951,14 +990,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 getAddrInfoRequest.Hints = new byte[getAddrInfoRequest.HintsLength];
                 Array.Copy(buffer, offset, getAddrInfoRequest.Hints, 0, getAddrInfoRequest.HintsLength);
-                offset += (int) getAddrInfoRequest.HintsLength;
-            }
-            getAddrInfoRequest.ResultLength = ExtractUInt32(buffer, offset);
-            offset += 4;
-            if (getAddrInfoRequest.ResultLength > 0)
-            {
-                getAddrInfoRequest.Result = new byte[getAddrInfoRequest.ResultLength];
-                Array.Copy(buffer, offset, getAddrInfoRequest.Result, 0, getAddrInfoRequest.ResultLength);
             }
             return(getAddrInfoRequest);
         }
@@ -974,8 +1005,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result += (int) getAddrInfoRequest.NodeName.Length;
             result += (int) getAddrInfoRequest.ServName.Length;
             result += (int) getAddrInfoRequest.HintsLength;
-            result += (int) getAddrInfoRequest.ResultLength;
-            return(result + 10);
+            return(result + 6);
         }
 
         /// <summary>
@@ -2560,7 +2590,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Calculate the amount of memory needed.
             //
             length += (int) (ioctlResponse.AddrLength + 4);
-            length += 4;
+            length += 12;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
@@ -2575,6 +2605,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 offset += (int) (ioctlResponse.AddrLength);
             }
             EncodeInt32(ioctlResponse.Flags, buffer, offset);
+            offset += 4;
+            EncodeInt32(ioctlResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(ioctlResponse.ResponseErrno, buffer, offset);
             return(buffer);
         }
 
@@ -2596,6 +2630,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 offset += (int) ioctlResponse.AddrLength;
             }
             ioctlResponse.Flags = ExtractInt32(buffer, offset);
+            offset += 4;
+            ioctlResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            ioctlResponse.ResponseErrno = ExtractInt32(buffer, offset);
             return(ioctlResponse);
         }
 
@@ -2608,15 +2646,15 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int) ioctlResponse.AddrLength;
-            return(result + 8);
+            return(result + 16);
         }
 
         /// <summary>
-        /// Encode a GetSockNameRequest object and return a byte array containing the encoded message.
+        /// Encode a GetSockPeerNameRequest object and return a byte array containing the encoded message.
         /// </summary>
-        /// <param name="getSockNameRequest">GetSockNameRequest object to be encoded.</param>
-        /// <returns>Byte array containing the encoded GetSockNameRequest object.</returns>
-        public static byte[] EncodeGetSockNameRequest(MessagePayloads.GetSockNameRequest getSockNameRequest)
+        /// <param name="getSockPeerNameRequest">GetSockPeerNameRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetSockPeerNameRequest object.</returns>
+        public static byte[] EncodeGetSockPeerNameRequest(MessagePayloads.GetSockPeerNameRequest getSockPeerNameRequest)
         {
             int offset = 0;
             int length = 0;
@@ -2631,39 +2669,39 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeInt32(getSockNameRequest.SocketHandle, buffer, offset);
+            EncodeInt32(getSockPeerNameRequest.SocketHandle, buffer, offset);
             return(buffer);
         }
 
         /// <summary>
-        /// Extract a GetSockNameRequest object from a byte array.
+        /// Extract a GetSockPeerNameRequest object from a byte array.
         /// </summary>
-        /// <param name="getSockNameRequest">Byte array containing the object to the extracted.</param>
-        /// <returns>GetSockNameRequest object.</returns>
-        public static MessagePayloads.GetSockNameRequest ExtractGetSockNameRequest(byte[] buffer, int offset)
+        /// <param name="getSockPeerNameRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>GetSockPeerNameRequest object.</returns>
+        public static MessagePayloads.GetSockPeerNameRequest ExtractGetSockPeerNameRequest(byte[] buffer, int offset)
         {
-            GetSockNameRequest getSockNameRequest = new MessagePayloads.GetSockNameRequest();
+            GetSockPeerNameRequest getSockPeerNameRequest = new MessagePayloads.GetSockPeerNameRequest();
 
-            getSockNameRequest.SocketHandle = ExtractInt32(buffer, offset);
-            return(getSockNameRequest);
+            getSockPeerNameRequest.SocketHandle = ExtractInt32(buffer, offset);
+            return(getSockPeerNameRequest);
         }
 
         /// <summary>
-        /// Calculate the amount of memory required to hold the given instance of the GetSockNameRequest object.
+        /// Calculate the amount of memory required to hold the given instance of the GetSockPeerNameRequest object.
         /// </summary>
-        /// <param name="getSockNameRequest">GetSockNameRequest object to be encoded.</param>
-        /// <returns>Number of bytes required to hold the encoded GetSockNameRequest object.</returns>
-        public static int EncodedGetSockNameRequestBufferSize(MessagePayloads.GetSockNameRequest getSockNameRequest)
+        /// <param name="getSockPeerNameRequest">GetSockPeerNameRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded GetSockPeerNameRequest object.</returns>
+        public static int EncodedGetSockPeerNameRequestBufferSize(MessagePayloads.GetSockPeerNameRequest getSockPeerNameRequest)
         {
             return(4);
         }
 
         /// <summary>
-        /// Encode a GetSockNameResponse object and return a byte array containing the encoded message.
+        /// Encode a GetSockPeerNameResponse object and return a byte array containing the encoded message.
         /// </summary>
-        /// <param name="getSockNameResponse">GetSockNameResponse object to be encoded.</param>
-        /// <returns>Byte array containing the encoded GetSockNameResponse object.</returns>
-        public static byte[] EncodeGetSockNameResponse(MessagePayloads.GetSockNameResponse getSockNameResponse)
+        /// <param name="getSockPeerNameResponse">GetSockPeerNameResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetSockPeerNameResponse object.</returns>
+        public static byte[] EncodeGetSockPeerNameResponse(MessagePayloads.GetSockPeerNameResponse getSockPeerNameResponse)
         {
             int offset = 0;
             int length = 0;
@@ -2671,7 +2709,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += (int) (getSockNameResponse.AddrLength + 4);
+            length += (int) (getSockPeerNameResponse.AddrLength + 4);
             length += 8;
 
             //
@@ -2679,51 +2717,51 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeUInt32(getSockNameResponse.AddrLength, buffer, offset);
+            EncodeUInt32(getSockPeerNameResponse.AddrLength, buffer, offset);
             offset += 4;
-            if (getSockNameResponse.AddrLength > 0)
+            if (getSockPeerNameResponse.AddrLength > 0)
             {
-                Array.Copy(getSockNameResponse.Addr, 0, buffer, offset, getSockNameResponse.AddrLength);
-                offset += (int) (getSockNameResponse.AddrLength);
+                Array.Copy(getSockPeerNameResponse.Addr, 0, buffer, offset, getSockPeerNameResponse.AddrLength);
+                offset += (int) (getSockPeerNameResponse.AddrLength);
             }
-            EncodeInt32(getSockNameResponse.Result, buffer, offset);
+            EncodeInt32(getSockPeerNameResponse.Result, buffer, offset);
             offset += 4;
-            EncodeInt32(getSockNameResponse.ResponseErrno, buffer, offset);
+            EncodeInt32(getSockPeerNameResponse.ResponseErrno, buffer, offset);
             return(buffer);
         }
 
         /// <summary>
-        /// Extract a GetSockNameResponse object from a byte array.
+        /// Extract a GetSockPeerNameResponse object from a byte array.
         /// </summary>
-        /// <param name="getSockNameResponse">Byte array containing the object to the extracted.</param>
-        /// <returns>GetSockNameResponse object.</returns>
-        public static MessagePayloads.GetSockNameResponse ExtractGetSockNameResponse(byte[] buffer, int offset)
+        /// <param name="getSockPeerNameResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>GetSockPeerNameResponse object.</returns>
+        public static MessagePayloads.GetSockPeerNameResponse ExtractGetSockPeerNameResponse(byte[] buffer, int offset)
         {
-            GetSockNameResponse getSockNameResponse = new MessagePayloads.GetSockNameResponse();
+            GetSockPeerNameResponse getSockPeerNameResponse = new MessagePayloads.GetSockPeerNameResponse();
 
-            getSockNameResponse.AddrLength = ExtractUInt32(buffer, offset);
+            getSockPeerNameResponse.AddrLength = ExtractUInt32(buffer, offset);
             offset += 4;
-            if (getSockNameResponse.AddrLength > 0)
+            if (getSockPeerNameResponse.AddrLength > 0)
             {
-                getSockNameResponse.Addr = new byte[getSockNameResponse.AddrLength];
-                Array.Copy(buffer, offset, getSockNameResponse.Addr, 0, getSockNameResponse.AddrLength);
-                offset += (int) getSockNameResponse.AddrLength;
+                getSockPeerNameResponse.Addr = new byte[getSockPeerNameResponse.AddrLength];
+                Array.Copy(buffer, offset, getSockPeerNameResponse.Addr, 0, getSockPeerNameResponse.AddrLength);
+                offset += (int) getSockPeerNameResponse.AddrLength;
             }
-            getSockNameResponse.Result = ExtractInt32(buffer, offset);
+            getSockPeerNameResponse.Result = ExtractInt32(buffer, offset);
             offset += 4;
-            getSockNameResponse.ResponseErrno = ExtractInt32(buffer, offset);
-            return(getSockNameResponse);
+            getSockPeerNameResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            return(getSockPeerNameResponse);
         }
 
         /// <summary>
-        /// Calculate the amount of memory required to hold the given instance of the GetSockNameResponse object.
+        /// Calculate the amount of memory required to hold the given instance of the GetSockPeerNameResponse object.
         /// </summary>
-        /// <param name="getSockNameResponse">GetSockNameResponse object to be encoded.</param>
-        /// <returns>Number of bytes required to hold the encoded GetSockNameResponse object.</returns>
-        public static int EncodedGetSockNameResponseBufferSize(MessagePayloads.GetSockNameResponse getSockNameResponse)
+        /// <param name="getSockPeerNameResponse">GetSockPeerNameResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded GetSockPeerNameResponse object.</returns>
+        public static int EncodedGetSockPeerNameResponseBufferSize(MessagePayloads.GetSockPeerNameResponse getSockPeerNameResponse)
         {
             int result = 0;
-            result += (int) getSockNameResponse.AddrLength;
+            result += (int) getSockPeerNameResponse.AddrLength;
             return(result + 12);
         }
 

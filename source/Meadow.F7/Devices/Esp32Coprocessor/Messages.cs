@@ -47,6 +47,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public String Password;
     };
 
+    public struct DisconnectFromAccessPointRequest
+    {
+        public Byte TurnOffWiFiInterface;
+    };
+
     public struct ConnectDisconnectData
     {
         public UInt32 IpAddress;
@@ -108,8 +113,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public String ServName;
         public UInt32 HintsLength;
         public byte[] Hints;
-        public UInt32 ResultLength;
-        public byte[] Result;
     };
 
     public struct GetAddrInfoResponse
@@ -304,14 +307,16 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public UInt32 AddrLength;
         public byte[] Addr;
         public Int32 Flags;
+        public Int32 Result;
+        public Int32 ResponseErrno;
     };
 
-    public struct GetSockNameRequest
+    public struct GetSockPeerNameRequest
     {
         public Int32 SocketHandle;
     };
 
-    public struct GetSockNameResponse
+    public struct GetSockPeerNameResponse
     {
         public UInt32 AddrLength;
         public byte[] Addr;
