@@ -282,7 +282,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += 1;
             buffer[offset] = systemConfiguration.AutomaticallyReconnect;
             offset += 1;
-            EncodeUInt32(systemConfiguration.MaximumRetryCount, buffer, offset);
+            EncodeInt32(systemConfiguration.MaximumRetryCount, buffer, offset);
             offset += 4;
             buffer[offset] = systemConfiguration.Antenna;
             offset += 1;
@@ -325,7 +325,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += 1;
             systemConfiguration.AutomaticallyReconnect = buffer[offset];
             offset += 1;
-            systemConfiguration.MaximumRetryCount = ExtractUInt32(buffer, offset);
+            systemConfiguration.MaximumRetryCount = ExtractInt32(buffer, offset);
             offset += 4;
             systemConfiguration.Antenna = buffer[offset];
             offset += 1;
@@ -536,11 +536,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
-        /// Encode a ConnectDisconnectData object and return a byte array containing the encoded message.
+        /// Encode a ConnectEventData object and return a byte array containing the encoded message.
         /// </summary>
-        /// <param name="connectDisconnectData">ConnectDisconnectData object to be encoded.</param>
-        /// <returns>Byte array containing the encoded ConnectDisconnectData object.</returns>
-        public static byte[] EncodeConnectDisconnectData(MessagePayloads.ConnectDisconnectData connectDisconnectData)
+        /// <param name="connectEventData">ConnectEventData object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ConnectEventData object.</returns>
+        public static byte[] EncodeConnectEventData(MessagePayloads.ConnectEventData connectEventData)
         {
             int offset = 0;
             int length = 0;
@@ -550,79 +550,130 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             length += (int) 33;
             length += (int) 6;
-            length += 19;
+            length += 18;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeUInt32(connectDisconnectData.IpAddress, buffer, offset);
+            EncodeUInt32(connectEventData.IpAddress, buffer, offset);
             offset += 4;
-            EncodeUInt32(connectDisconnectData.SubnetMask, buffer, offset);
+            EncodeUInt32(connectEventData.SubnetMask, buffer, offset);
             offset += 4;
-            EncodeUInt32(connectDisconnectData.Gateway, buffer, offset);
+            EncodeUInt32(connectEventData.Gateway, buffer, offset);
             offset += 4;
-            int amount = connectDisconnectData.Ssid.Length >= 33 ? 33 - 1 : connectDisconnectData.Ssid.Length;
+            int amount = connectEventData.Ssid.Length >= 33 ? 33 - 1 : connectEventData.Ssid.Length;
             for (int index = 0; index < amount; index++)
             {
-                buffer[index] = (byte) connectDisconnectData.Ssid[index];
+                buffer[index] = (byte) connectEventData.Ssid[index];
             }
             buffer[amount] = 0;
             offset += (int) 33;
-            Array.Copy(connectDisconnectData.Bssid, 0, buffer, offset, 6);
+            Array.Copy(connectEventData.Bssid, 0, buffer, offset, 6);
             offset += (int) 6;
-            buffer[offset] = connectDisconnectData.Channel;
+            buffer[offset] = connectEventData.Channel;
             offset += 1;
-            buffer[offset] = connectDisconnectData.AuthenticationMode;
+            buffer[offset] = connectEventData.AuthenticationMode;
             offset += 1;
-            buffer[offset] = connectDisconnectData.Connect;
-            offset += 1;
-            EncodeUInt32(connectDisconnectData.Reason, buffer, offset);
+            EncodeUInt32(connectEventData.Reason, buffer, offset);
             return(buffer);
         }
 
         /// <summary>
-        /// Extract a ConnectDisconnectData object from a byte array.
+        /// Extract a ConnectEventData object from a byte array.
         /// </summary>
-        /// <param name="connectDisconnectData">Byte array containing the object to the extracted.</param>
-        /// <returns>ConnectDisconnectData object.</returns>
-        public static MessagePayloads.ConnectDisconnectData ExtractConnectDisconnectData(byte[] buffer, int offset)
+        /// <param name="connectEventData">Byte array containing the object to the extracted.</param>
+        /// <returns>ConnectEventData object.</returns>
+        public static MessagePayloads.ConnectEventData ExtractConnectEventData(byte[] buffer, int offset)
         {
-            ConnectDisconnectData connectDisconnectData = new MessagePayloads.ConnectDisconnectData();
+            ConnectEventData connectEventData = new MessagePayloads.ConnectEventData();
 
-            connectDisconnectData.IpAddress = ExtractUInt32(buffer, offset);
+            connectEventData.IpAddress = ExtractUInt32(buffer, offset);
             offset += 4;
-            connectDisconnectData.SubnetMask = ExtractUInt32(buffer, offset);
+            connectEventData.SubnetMask = ExtractUInt32(buffer, offset);
             offset += 4;
-            connectDisconnectData.Gateway = ExtractUInt32(buffer, offset);
+            connectEventData.Gateway = ExtractUInt32(buffer, offset);
             offset += 4;
             for (int index = 0; (buffer[index + offset] != 0) && (index < (33 - 1)); index++)
             {
-                connectDisconnectData.Ssid += Convert.ToChar(buffer[index + offset]);
+                connectEventData.Ssid += Convert.ToChar(buffer[index + offset]);
             }
             offset += (int) 33;
-            connectDisconnectData.Bssid = new byte[6];
-            Array.Copy(buffer, offset, connectDisconnectData.Bssid, 0, 6);
+            connectEventData.Bssid = new byte[6];
+            Array.Copy(buffer, offset, connectEventData.Bssid, 0, 6);
             offset += (int) 6;
-            connectDisconnectData.Channel = buffer[offset];
+            connectEventData.Channel = buffer[offset];
             offset += 1;
-            connectDisconnectData.AuthenticationMode = buffer[offset];
+            connectEventData.AuthenticationMode = buffer[offset];
             offset += 1;
-            connectDisconnectData.Connect = buffer[offset];
-            offset += 1;
-            connectDisconnectData.Reason = ExtractUInt32(buffer, offset);
-            return(connectDisconnectData);
+            connectEventData.Reason = ExtractUInt32(buffer, offset);
+            return(connectEventData);
         }
 
         /// <summary>
-        /// Calculate the amount of memory required to hold the given instance of the ConnectDisconnectData object.
+        /// Calculate the amount of memory required to hold the given instance of the ConnectEventData object.
         /// </summary>
-        /// <param name="connectDisconnectData">ConnectDisconnectData object to be encoded.</param>
-        /// <returns>Number of bytes required to hold the encoded ConnectDisconnectData object.</returns>
-        public static int EncodedConnectDisconnectDataBufferSize(MessagePayloads.ConnectDisconnectData connectDisconnectData)
+        /// <param name="connectEventData">ConnectEventData object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded ConnectEventData object.</returns>
+        public static int EncodedConnectEventDataBufferSize(MessagePayloads.ConnectEventData connectEventData)
         {
-            return(58);
+            return(57);
+        }
+
+        /// <summary>
+        /// Encode a DisconnectEventData object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="disconnectEventData">DisconnectEventData object to be encoded.</param>
+        /// <returns>Byte array containing the encoded DisconnectEventData object.</returns>
+        public static byte[] EncodeDisconnectEventData(MessagePayloads.DisconnectEventData disconnectEventData)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 9;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            buffer[offset] = disconnectEventData.Retrying;
+            offset += 1;
+            EncodeInt32(disconnectEventData.RetriesRemaining, buffer, offset);
+            offset += 4;
+            EncodeUInt32(disconnectEventData.Reason, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a DisconnectEventData object from a byte array.
+        /// </summary>
+        /// <param name="disconnectEventData">Byte array containing the object to the extracted.</param>
+        /// <returns>DisconnectEventData object.</returns>
+        public static MessagePayloads.DisconnectEventData ExtractDisconnectEventData(byte[] buffer, int offset)
+        {
+            DisconnectEventData disconnectEventData = new MessagePayloads.DisconnectEventData();
+
+            disconnectEventData.Retrying = buffer[offset];
+            offset += 1;
+            disconnectEventData.RetriesRemaining = ExtractInt32(buffer, offset);
+            offset += 4;
+            disconnectEventData.Reason = ExtractUInt32(buffer, offset);
+            return(disconnectEventData);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the DisconnectEventData object.
+        /// </summary>
+        /// <param name="disconnectEventData">DisconnectEventData object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded DisconnectEventData object.</returns>
+        public static int EncodedDisconnectEventDataBufferSize(MessagePayloads.DisconnectEventData disconnectEventData)
+        {
+            return(9);
         }
 
         /// <summary>
