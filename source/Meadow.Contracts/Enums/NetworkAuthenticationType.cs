@@ -82,7 +82,20 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Specifies an authentication type defined by an independent hardware vendor (IHV).
         /// </summary>
-        Ihv = 12,   
+        Ihv = 12,
+
+        /// <summary>
+        /// Specifies a Wi-Fi Protected Access 3 (WPAs) algorithm that uses pre-shared keys (PSK). IEEE 802.1X port
+        /// authorization is performed by the supplicant and authenticator. Cipher keys are dynamically derived
+        /// through a pre-shared key that is used on both the supplicant and authenticator.
+        /// </summary>
+        Wpa3Psk = 13,
+
+        /// <summary>
+        /// WPA PSK or WPA3 PSk encryption.
+        /// </summary>
+        WpaWap3Psk = 14,
+
         /// <summary>
         /// Unknown authentication type.
         /// </summary>
