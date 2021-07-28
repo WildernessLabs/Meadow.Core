@@ -335,8 +335,14 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Byte Interface;
         public UInt32 Function;
         public UInt32 StatusCode;
-        public UInt32 Payload;
+        public UInt32 MessageId;
+    };
+
+    public struct EventDataPayload
+    {
+        public UInt32 MessageId;
         public UInt32 PayloadLength;
+        public byte[] Payload;
     };
 
     public struct SetAntennaRequest

@@ -146,7 +146,7 @@ namespace Meadow.Core
             /// <param name="eventData">Data structure holding the event data.</param>
             /// <returns>0 on success, error code if a problem was encountered.</returns>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEsp32EventData eventData);
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEsp32EventDataPayload eventData);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdDeviceInfo deviceInfo);

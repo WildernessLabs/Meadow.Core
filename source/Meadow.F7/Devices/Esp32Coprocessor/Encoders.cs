@@ -2829,7 +2829,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += 17;
+            length += 13;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
@@ -2842,9 +2842,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += 4;
             EncodeUInt32(eventData.StatusCode, buffer, offset);
             offset += 4;
-            EncodeUInt32(eventData.Payload, buffer, offset);
-            offset += 4;
-            EncodeUInt32(eventData.PayloadLength, buffer, offset);
+            EncodeUInt32(eventData.MessageId, buffer, offset);
             return(buffer);
         }
 
@@ -2863,9 +2861,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += 4;
             eventData.StatusCode = ExtractUInt32(buffer, offset);
             offset += 4;
-            eventData.Payload = ExtractUInt32(buffer, offset);
-            offset += 4;
-            eventData.PayloadLength = ExtractUInt32(buffer, offset);
+            eventData.MessageId = ExtractUInt32(buffer, offset);
             return(eventData);
         }
 
@@ -2876,7 +2872,72 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded EventData object.</returns>
         public static int EncodedEventDataBufferSize(MessagePayloads.EventData eventData)
         {
-            return(17);
+            return(13);
+        }
+
+        /// <summary>
+        /// Encode a EventDataPayload object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="eventDataPayload">EventDataPayload object to be encoded.</param>
+        /// <returns>Byte array containing the encoded EventDataPayload object.</returns>
+        public static byte[] EncodeEventDataPayload(MessagePayloads.EventDataPayload eventDataPayload)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (eventDataPayload.PayloadLength + 4);
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(eventDataPayload.MessageId, buffer, offset);
+            offset += 4;
+            EncodeUInt32(eventDataPayload.PayloadLength, buffer, offset);
+            offset += 4;
+            if (eventDataPayload.PayloadLength > 0)
+            {
+                Array.Copy(eventDataPayload.Payload, 0, buffer, offset, eventDataPayload.PayloadLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a EventDataPayload object from a byte array.
+        /// </summary>
+        /// <param name="eventDataPayload">Byte array containing the object to the extracted.</param>
+        /// <returns>EventDataPayload object.</returns>
+        public static MessagePayloads.EventDataPayload ExtractEventDataPayload(byte[] buffer, int offset)
+        {
+            EventDataPayload eventDataPayload = new MessagePayloads.EventDataPayload();
+
+            eventDataPayload.MessageId = ExtractUInt32(buffer, offset);
+            offset += 4;
+            eventDataPayload.PayloadLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (eventDataPayload.PayloadLength > 0)
+            {
+                eventDataPayload.Payload = new byte[eventDataPayload.PayloadLength];
+                Array.Copy(buffer, offset, eventDataPayload.Payload, 0, eventDataPayload.PayloadLength);
+            }
+            return(eventDataPayload);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the EventDataPayload object.
+        /// </summary>
+        /// <param name="eventDataPayload">EventDataPayload object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded EventDataPayload object.</returns>
+        public static int EncodedEventDataPayloadBufferSize(MessagePayloads.EventDataPayload eventDataPayload)
+        {
+            int result = 0;
+            result += (int) eventDataPayload.PayloadLength;
+            return(result + 8);
         }
 
         /// <summary>

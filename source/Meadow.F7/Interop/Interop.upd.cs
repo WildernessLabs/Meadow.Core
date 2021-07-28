@@ -164,7 +164,7 @@ namespace Meadow.Core
                 GetLastError = 51,
 
                 Esp32Command = 61,
-                Esp32GetEventData = 62,
+                UpdEsp32EventDataPayload = 62,
 
                 PowerReset = 71,
                 PowerSleep1 = 72,
@@ -319,12 +319,11 @@ namespace Meadow.Core
             /// <summary>
             /// Information from the ESP32 when an event is generated.
             /// </summary>
-            public struct UpdEsp32EventData
+            public struct UpdEsp32EventDataPayload
             {
-                public UInt32 StatusCode;       // Status code from the message.
-                public UInt32 MessageAddress;   // Pointer to the original message.
-                public IntPtr Payload;          // Pointer to the data associated with the event.
+                public UInt32 MessageID;        // ID of the event.
                 public UInt32 PayloadLength;    // Length of the payload data block.
+                public IntPtr Payload;          // Pointer to the data associated with the event.
             }
 
             public struct UpdDeviceInfo
