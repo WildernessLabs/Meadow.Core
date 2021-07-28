@@ -631,8 +631,16 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiConnected(StatusCodes statusCode, byte[] payload)
         {
-            EventArgs e = EventArgs.Empty;
-            WiFiConnected?.Invoke(this, e);
+            ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
+            IPAddress ip = new IPAddress(connectEventData.IpAddress);
+            IPAddress subnet = new IPAddress(connectEventData.SubnetMask);
+            IPAddress gateway = new IPAddress(connectEventData.Gateway);
+            string ssid = connectEventData.Ssid;
+            string bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
+            byte channel = connectEventData.Channel;
+            NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
+            WiFiConnectEventArgs ea = new WiFiConnectEventArgs(ip, subnet, gateway, ssid, bssid, channel, authenticationType, statusCode);
+            WiFiConnected?.Invoke(this, ea);
         }
 
         /// <summary>
