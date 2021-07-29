@@ -32,4 +32,10 @@
      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
    </Content>
  </ItemGroup>
+ <ItemGroup>
+   <None Remove="Devices\Esp32Coprocessor\EventData\" />
+ </ItemGroup>
+ <ItemGroup>
+   <Folder Include="Devices\Esp32Coprocessor\EventData\" />
+ </ItemGroup>
 </Project>

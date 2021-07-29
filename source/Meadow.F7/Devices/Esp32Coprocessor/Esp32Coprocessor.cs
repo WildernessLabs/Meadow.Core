@@ -225,8 +225,7 @@ namespace Meadow.Devices
         /// <returns>StatusCodes enum indicating if the operation was successful or if an error occurred.</returns>
         private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
         {
-            Thread.Sleep(1000);
-            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data held at 0x{eventData.StatusCode:x08}");
+            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data for message ID 0x{eventData.MessageId:x08}");
             var resultGcHandle = default(GCHandle);
             StatusCodes result = StatusCodes.CompletedOk;
             try
@@ -235,20 +234,18 @@ namespace Meadow.Devices
                 Array.Clear(encodedResult, 0, encodedResult.Length);
                 resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
 
-                var request = new Nuttx.UpdEsp32EventData()
+                var request = new Nuttx.UpdEsp32EventDataPayload()
                 {
-                    StatusCode = 0,
-                    MessageAddress = eventData.StatusCode,
+                    MessageID = eventData.MessageId,
                     Payload = resultGcHandle.AddrOfPinnedObject(),
                     PayloadLength = (UInt32) encodedResult.Length
                 };
 
-                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32GetEventData, ref request);
+                int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.UpdEsp32EventDataPayload, ref request);
                 if (updResult == 0)
                 {
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Payload: ");
                     Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
-                    eventData.StatusCode = request.StatusCode;
                     payload = new byte[request.PayloadLength];
                     Array.Copy(encodedResult, payload, request.PayloadLength);
                     result = StatusCodes.CompletedOk;
@@ -292,13 +289,13 @@ namespace Meadow.Devices
                         Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), rxBuffer);
                         EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
                         byte[]? payload = null;
-                        if (eventData.PayloadLength == 0)
+                        if (eventData.MessageId == 0)
                         {
                             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
                         }
                         else
                         {
-                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, location of message 0x{eventData.StatusCode:x08}");
+                            Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, message ID: 0x{eventData.MessageId:x08}");
                             GetEventData(eventData, out payload);
                         }
                         Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");

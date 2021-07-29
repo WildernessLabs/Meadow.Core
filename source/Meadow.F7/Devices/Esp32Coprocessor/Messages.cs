@@ -20,7 +20,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Byte MaximumMessageQueueLength;
         public Byte AutomaticallyStartNetwork;
         public Byte AutomaticallyReconnect;
-        public UInt32 MaximumRetryCount;
+        public Int32 MaximumRetryCount;
         public Byte Antenna;
         public Byte[] BoardMacAddress;
         public Byte[] SoftApMacAddress;
@@ -52,7 +52,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Byte TurnOffWiFiInterface;
     };
 
-    public struct ConnectDisconnectData
+    public struct ConnectEventData
     {
         public UInt32 IpAddress;
         public UInt32 SubnetMask;
@@ -61,7 +61,13 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Byte[] Bssid;
         public Byte Channel;
         public Byte AuthenticationMode;
-        public Byte Connect;
+        public UInt32 Reason;
+    };
+
+    public struct DisconnectEventData
+    {
+        public Byte Retrying;
+        public Int32 RetriesRemaining;
         public UInt32 Reason;
     };
 
@@ -329,8 +335,14 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Byte Interface;
         public UInt32 Function;
         public UInt32 StatusCode;
-        public UInt32 Payload;
+        public UInt32 MessageId;
+    };
+
+    public struct EventDataPayload
+    {
+        public UInt32 MessageId;
         public UInt32 PayloadLength;
+        public byte[] Payload;
     };
 
     public struct SetAntennaRequest

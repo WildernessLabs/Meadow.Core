@@ -266,9 +266,21 @@ namespace Meadow.Devices
             return result;
         }
 
-        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdEsp32EventData eventData)
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdEsp32EventDataPayload eventData)
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref eventData);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request} failed {err}");
+                return (int) err;
+            }
+            return result;
+        }
+
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdConfigurationValue configData)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref configData);
             if (result != 0)
             {
                 var err = GetLastError();

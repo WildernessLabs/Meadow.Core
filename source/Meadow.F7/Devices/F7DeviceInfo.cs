@@ -25,69 +25,27 @@ namespace Meadow.Devices
           public string CoprocessorFirmwareVersion;
           public string MonoVersion;
         };
-        
-        // Keep in sync with 
-        /// <summary>
-        /// Describes the Elements in the Device Info string[]
-        /// </summary>
-        // This must remain in sync with the 'C' code in
-        // Meadow.OS\nuttx\configs\stm32f777zit6-meadow\src\meadow-upd.c
-        // function upd_handle_dev_info_request()
-        private enum DeviceInfoOffset
-        {
-          DeviceName,
-          Product,
-          Model,
-          OsVersion,
-          BuildDate,
-          ProcessorType,
-          UniqueId,
-          SerialNumber,
-          CoprocessorType,
-          CoprocessorFirmwareVersion,
-          MonoVersion
-        };
 
+        /// <summary>
+        /// Get the device information.
+        /// </summary>
+        /// <returns>DeviceInformation structure.</returns>
         public DeviceInformation GetDeviceInformation()
         {
-            // Make the request
             var devInfo = new DeviceInformation();
-            byte[] strBuffer = new byte[512];
-            GCHandle returnGcHandle = GCHandle.Alloc(strBuffer, GCHandleType.Pinned);
 
-            // Object to contain data
-            Interop.Nuttx.UpdDeviceInfo rqst = new Interop.Nuttx.UpdDeviceInfo()
-            {
-               devInfoBuffer = returnGcHandle.AddrOfPinnedObject(),
-               devInfoBufLen = strBuffer.Length,
-               devInfoRetLen = 0
-            };
+            devInfo.DeviceName = Configuration.GetDeviceName();
+            devInfo.Product = Configuration.GetProduct();
+            devInfo.Model = Configuration.GetModel();
+            devInfo.OsVersion = Configuration.GetOsVersion();
+            devInfo.BuildDate = Configuration.GetBuildDate();
+            devInfo.ProcessorType = Configuration.GetProcessorType();
+            devInfo.UniqueId = Configuration.GetUniqueId();
+            devInfo.SerialNumber = Configuration.GetSerialNumber();
+            devInfo.CoprocessorType = Configuration.GetCoprocessorType();
+            devInfo.CoprocessorFirmwareVersion = Configuration.GetCoprocessorFirmwareVersion();
+            devInfo.MonoVersion = Configuration.GetMonoVersion();
 
-            //  Make the request
-            int ret = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetDeviceInfo, ref rqst);
-            if(ret < 0)
-              throw new NativeException(UPD.GetLastError().ToString());   // Error
-
-            // Returns a single long string containing the device information
-            string infoStr = Encoding.ASCII.GetString(strBuffer, 0, rqst.devInfoRetLen);
-
-            // Split the ETX (0x03) delimited string
-            string[] splitStr = infoStr.Split((char) 0x03);
-
-            // Populate the structure
-            devInfo.DeviceName                  = splitStr[(int)DeviceInfoOffset.DeviceName];
-            devInfo.Product                     = splitStr[(int)DeviceInfoOffset.Product];
-            devInfo.Model                       = splitStr[(int)DeviceInfoOffset.Model];
-            devInfo.OsVersion                   = splitStr[(int)DeviceInfoOffset.OsVersion];
-            devInfo.BuildDate                   = splitStr[(int)DeviceInfoOffset.BuildDate];
-            devInfo.ProcessorType               = splitStr[(int)DeviceInfoOffset.ProcessorType];
-            devInfo.UniqueId                    = splitStr[(int)DeviceInfoOffset.UniqueId];
-            devInfo.SerialNumber                = splitStr[(int)DeviceInfoOffset.SerialNumber];
-            devInfo.CoprocessorType             = splitStr[(int)DeviceInfoOffset.CoprocessorType];
-            devInfo.CoprocessorFirmwareVersion  = splitStr[(int)DeviceInfoOffset.CoprocessorFirmwareVersion];
-            devInfo.MonoVersion                 = splitStr[(int)DeviceInfoOffset.MonoVersion];
-
-            returnGcHandle.Free();
             return devInfo;
         }
     }

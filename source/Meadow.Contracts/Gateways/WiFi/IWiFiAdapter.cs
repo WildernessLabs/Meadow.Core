@@ -129,7 +129,7 @@ namespace Meadow.Gateways
         /// connection to the access point was made.
         /// </remarks>
         /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
-        bool StartNetwork();
+        bool StartWiFiInterface();
 
         /// <summary>
         /// Stop the WiFi interface,
@@ -140,7 +140,7 @@ namespace Meadow.Gateways
         /// Errors could occur if the adapter was not started.
         /// </remarks>
         /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
-        bool StopNetwork();
+        bool StopWiFiInterface();
 
         /// <summary>
         /// Start a WiFi network.

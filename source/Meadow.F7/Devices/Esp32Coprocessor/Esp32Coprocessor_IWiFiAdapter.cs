@@ -364,7 +364,7 @@ namespace Meadow.Devices
         /// connection to the access point was made.
         /// </remarks>
         /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
-        public bool StartNetwork()
+        public bool StartWiFiInterface()
         {
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartWiFiInterface, true, null);
             return (result == StatusCodes.CompletedOk);
@@ -379,11 +379,10 @@ namespace Meadow.Devices
         /// Errors could occur if the adapter was not started.
         /// </remarks>
         /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
-        public bool StopNetwork()
+        public bool StopWiFiInterface()
         {
-            throw new NotImplementedException();
-            //StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StopWiFiInterface, true, null);
-            //return (result == StatusCodes.CompletedOk);
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StopWiFiInterface, true, null);
+            return (result == StatusCodes.CompletedOk);
         }
 
         /// <summary>
@@ -464,18 +463,18 @@ namespace Meadow.Devices
 
             ClearIpDetails();
             IsConnected = false;
-            ConnectDisconnectData data;
+            ConnectEventData data;
             switch (result)
             {
                 case StatusCodes.CompletedOk:
-                    data = Encoders.ExtractConnectDisconnectData(resultBuffer, 0);
+                    data = Encoders.ExtractConnectEventData(resultBuffer, 0);
                     IpAddress = new IPAddress(data.IpAddress);
                     SubnetMask = new IPAddress(data.SubnetMask);
                     Gateway = new IPAddress(data.Gateway);
                     IsConnected = true;
                     break;
                 case StatusCodes.WiFiDisconnected:
-                    data = Encoders.ExtractConnectDisconnectData(resultBuffer, 0);
+                    data = Encoders.ExtractConnectEventData(resultBuffer, 0);
                     switch ((WiFiReasons) data.Reason)
                     {
                         case WiFiReasons.AuthenticationFailed:
@@ -632,8 +631,16 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiConnected(StatusCodes statusCode, byte[] payload)
         {
-            EventArgs e = EventArgs.Empty;
-            WiFiConnected?.Invoke(this, e);
+            ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
+            IPAddress ip = new IPAddress(connectEventData.IpAddress);
+            IPAddress subnet = new IPAddress(connectEventData.SubnetMask);
+            IPAddress gateway = new IPAddress(connectEventData.Gateway);
+            string ssid = connectEventData.Ssid;
+            string bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
+            byte channel = connectEventData.Channel;
+            NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
+            WiFiConnectEventArgs ea = new WiFiConnectEventArgs(ip, subnet, gateway, ssid, bssid, channel, authenticationType, statusCode);
+            WiFiConnected?.Invoke(this, ea);
         }
 
         /// <summary>
@@ -656,7 +663,7 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiInterfaceStarted(StatusCodes statusCode, byte[] payload)
         {
-            EventArgs e = EventArgs.Empty;
+            WiFiInterfaceStartedEventArgs e = new WiFiInterfaceStartedEventArgs(statusCode);
             WiFiInterfaceStarted?.Invoke(this, e);
         }
 
@@ -668,7 +675,7 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiInterfaceStopped(StatusCodes statusCode, byte[] payload)
         {
-            EventArgs e = EventArgs.Empty;
+            WiFiInterfaceStoppedEventArgs e = new WiFiInterfaceStoppedEventArgs(statusCode);
             WiFiInterfaceStopped?.Invoke(this, e);
         }
 
