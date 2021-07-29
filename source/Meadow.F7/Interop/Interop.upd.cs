@@ -173,6 +173,7 @@ namespace Meadow.Core
                 PowerWDPet = 75,
 
                 GetDeviceInfo = 81,
+                GetSetConfigurationValue = 82,
             }
 
             public struct UpdRegisterValue
@@ -331,6 +332,18 @@ namespace Meadow.Core
                 public IntPtr devInfoBuffer;    // Points to return buffer
                 public int devInfoBufLen;       // Available space buffer
                 public int devInfoRetLen;       // Space used in buffer
+            }
+
+            /// <summary>
+            /// Structure used to read or write a configuration value held in the Kernel.
+            /// </summary>
+            public struct UpdConfigurationValue
+            {
+                public int Item;                // Item to read or write.
+                public byte Direction;          // 0 = get, 1 = set.
+                public int ValueBufferSize;     // Size of the buffer.
+                public IntPtr ValueBuffer;      // Value of the configuration item.
+                public int ReturnDataLength;    // Amount of data returned (relevant for strings and byte buffers).
             }
 
             public static bool TryGetRegister(IntPtr driverHandle, int address, out uint value)

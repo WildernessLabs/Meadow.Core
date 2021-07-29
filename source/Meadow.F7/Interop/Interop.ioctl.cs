@@ -148,6 +148,16 @@ namespace Meadow.Core
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEsp32EventDataPayload eventData);
 
+            /// <summary>
+            /// Process a request to read or write a configuration value from the underlying OS.
+            /// </summary>
+            /// <param name="fd">File descriptor for the UPD driver.</param>
+            /// <param name="request">Function number (should be IoctlFn.UpdConfigurationValue).</param>
+            /// <param name="eventData">Data structure holding the event data.</param>
+            /// <returns>0 on success, error code if a problem was encountered.</returns>
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdConfigurationValue eventData);
+
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdDeviceInfo deviceInfo);
 
