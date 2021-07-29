@@ -20,7 +20,9 @@ namespace Meadow.Devices
             private enum ConfigurationValues
             {
                 DeviceName = 0, Product, Model, OsVersion, BuildDate, ProcessorType, UniqueId, SerialNumber, CoprocessorType,
-                CoprocessorFirmwareVersion, MonoVersion
+                CoprocessorFirmwareVersion, MonoVersion,
+                AutomaticallyStartNetwork, AutomaticallyReconnect, MaximumNetworkRetryCount, GetTimeAtStartup,
+                NtpServer, MacAddress, SoftApMacAddress
             };
 
             /// <summary>
