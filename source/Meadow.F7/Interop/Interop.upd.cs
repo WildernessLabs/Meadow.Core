@@ -164,7 +164,7 @@ namespace Meadow.Core
                 GetLastError = 51,
 
                 Esp32Command = 61,
-                Esp32GetEventData = 62,
+                UpdEsp32EventDataPayload = 62,
 
                 PowerReset = 71,
                 PowerSleep1 = 72,
@@ -173,6 +173,7 @@ namespace Meadow.Core
                 PowerWDPet = 75,
 
                 GetDeviceInfo = 81,
+                GetSetConfigurationValue = 82,
             }
 
             public struct UpdRegisterValue
@@ -319,12 +320,11 @@ namespace Meadow.Core
             /// <summary>
             /// Information from the ESP32 when an event is generated.
             /// </summary>
-            public struct UpdEsp32EventData
+            public struct UpdEsp32EventDataPayload
             {
-                public UInt32 StatusCode;       // Status code from the message.
-                public UInt32 MessageAddress;   // Pointer to the original message.
-                public IntPtr Payload;          // Pointer to the data associated with the event.
+                public UInt32 MessageID;        // ID of the event.
                 public UInt32 PayloadLength;    // Length of the payload data block.
+                public IntPtr Payload;          // Pointer to the data associated with the event.
             }
 
             public struct UpdDeviceInfo
@@ -332,6 +332,18 @@ namespace Meadow.Core
                 public IntPtr devInfoBuffer;    // Points to return buffer
                 public int devInfoBufLen;       // Available space buffer
                 public int devInfoRetLen;       // Space used in buffer
+            }
+
+            /// <summary>
+            /// Structure used to read or write a configuration value held in the Kernel.
+            /// </summary>
+            public struct UpdConfigurationValue
+            {
+                public int Item;                // Item to read or write.
+                public byte Direction;          // 0 = get, 1 = set.
+                public int ValueBufferSize;     // Size of the buffer.
+                public IntPtr ValueBuffer;      // Value of the configuration item.
+                public int ReturnDataLength;    // Amount of data returned (relevant for strings and byte buffers).
             }
 
             public static bool TryGetRegister(IntPtr driverHandle, int address, out uint value)
