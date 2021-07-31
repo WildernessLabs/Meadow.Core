@@ -17,7 +17,8 @@ namespace Meadow.Devices
         ISerialController,
         ISerialMessageController,
         ISpiController,
-        II2cController
+        II2cController,
+        IWatchdogController
         //IIOController<IPinDefinitions>
     {
         /// <summary>
@@ -42,7 +43,5 @@ namespace Meadow.Devices
         void Initialize();
 
         void Reset();
-        void WatchdogEnable(TimeSpan timeout);
-        void WatchdogReset();
     }
 }

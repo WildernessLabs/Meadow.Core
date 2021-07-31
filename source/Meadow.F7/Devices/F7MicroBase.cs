@@ -13,7 +13,7 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public abstract class F7MicroBase : IF7MeadowDevice
+    public abstract class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
     {
         private SynchronizationContext? _context;
         protected Esp32Coprocessor? esp32;
@@ -83,11 +83,13 @@ namespace Meadow.Devices
             }
         }
 
+        // TODO: get rid of this
         public Task<bool> InitWiFiAdapter()
         {
             return InitCoprocessor();
         }
 
+        // TODO: get rid of this
         public Task<bool> InitBluetoothAdapter()
         {
             return InitCoprocessor();
