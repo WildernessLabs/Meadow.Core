@@ -162,6 +162,7 @@ namespace Meadow.Gateways
         /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
         Task<ConnectionResult> Disconnect(bool turnOffWiFiInterface);
 
+        // TODO: this should just return a list, and the implementor should make it async
         /// <summary>
         /// Get the list of access points.
         /// </summary>
