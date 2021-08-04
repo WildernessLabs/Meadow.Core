@@ -21,9 +21,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.8.*" />
- </ItemGroup>
- <ItemGroup>
    <Folder Include="Gateways\Bluetooth\Definitions\" />
  </ItemGroup>
  <ItemGroup>
