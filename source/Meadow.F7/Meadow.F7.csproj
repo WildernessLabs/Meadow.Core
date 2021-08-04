@@ -35,4 +35,7 @@
  <ItemGroup>
    <Folder Include="Devices\Esp32Coprocessor\EventData\" />
  </ItemGroup>
+ <ItemGroup>
+   <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
+ </ItemGroup>
 </Project>
