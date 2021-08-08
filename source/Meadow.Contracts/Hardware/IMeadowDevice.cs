@@ -32,14 +32,6 @@ namespace Meadow.Devices
         /// <param name="dateTime"></param>
         void SetClock(DateTime dateTime);
 
-        ///// <summary>
-        ///// Meadow Internal method for setting the device's primary (i.e. entry) SynchronizationContext
-        ///// </summary>
-        ///// <param name="context"></param>
-        //// TODO: this really should get moved to MeadowOS
-        //void SetSynchronizationContext(SynchronizationContext context);
-        //void BeginInvokeOnMainThread(Action action);
-
         void Initialize();
 
         void Reset();
