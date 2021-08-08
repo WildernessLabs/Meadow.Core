@@ -162,14 +162,14 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Helper method 
+        /// Write data to a register in the peripheral.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="data"></param>
-        /// <param name="order"></param>
-        protected void WriteRegister(byte address, Span<byte> data, ByteOrder order = ByteOrder.LittleEndian)
+        /// <param name="address">Address of the register to write to.</param>
+        /// <param name="writeBuffer">A buffer of byte values to be written.</param>
+        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
+        public void WriteRegister(byte address, Span<byte> writeBuffer, ByteOrder order = ByteOrder.LittleEndian)
         {
-            if (WriteBuffer.Length < data.Length + 1) {
+            if (WriteBuffer.Length < writeBuffer.Length + 1) {
                 throw new ArgumentException("Data to write is too large for the write buffer. " +
                     "Must be less than WriteBuffer.Length + 1 (to allow for address). " +
                     "Instantiate this class with a larger WriteBuffer, or send a smaller" +
@@ -183,19 +183,19 @@ namespace Meadow.Hardware
             // because `0` is the register address.
             switch (order) {
                 case ByteOrder.LittleEndian:
-                    for (int i = 0; i < data.Length; i++) {
-                        WriteBuffer.Span[i + 1] = data[i];
+                    for (int i = 0; i < writeBuffer.Length; i++) {
+                        WriteBuffer.Span[i + 1] = writeBuffer[i];
                     }
                     break;
                 case ByteOrder.BigEndian:
-                    for (int i = 0; i < data.Length; i++) {
+                    for (int i = 0; i < writeBuffer.Length; i++) {
                         // stuff them backwards
-                        WriteBuffer.Span[i + 1] = data[data.Length - (i + 1)];
+                        WriteBuffer.Span[i + 1] = writeBuffer[writeBuffer.Length - (i + 1)];
                     }
                     break;
             }
             // write it
-            this.Bus.Write(this.Address, WriteBuffer.Span[0..(data.Length + 1)]);
+            this.Bus.Write(this.Address, WriteBuffer.Span[0..(writeBuffer.Length + 1)]);
         }
 
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
@@ -311,6 +311,5 @@ namespace Meadow.Hardware
 
             this.Bus.WriteData(this.Address, temp);
         }
-
     }
 }

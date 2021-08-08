@@ -56,11 +56,19 @@ namespace Meadow.Hardware
         void Write(Span<byte> writeBuffer);
 
         /// <summary>
-        /// Write data a register in the peripheral.
+        /// Write data tp a register in the peripheral.
         /// </summary>
         /// <param name="address">Address of the register to write to.</param>
         /// <param name="value">Data to write into the register.</param>
         void WriteRegister(byte address, byte value);
+
+        /// <summary>
+        /// Write data to a register in the peripheral.
+        /// </summary>
+        /// <param name="address">Address of the register to write to.</param>
+        /// <param name="writeBuffer">A buffer of byte values to be written.</param>
+        /// <param name="order">Indicate if the data should be written as big or little endian.</param>
+        void WriteRegister(byte address, Span<byte> writeBuffer, ByteOrder order = ByteOrder.LittleEndian);
 
         /// <summary>
         /// Write an unsigned short to the peripheral.
