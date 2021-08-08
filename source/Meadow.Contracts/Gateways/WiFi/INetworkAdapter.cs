@@ -1,8 +1,8 @@
-//TODO: this should be Meadow.Gateways
-namespace Meadow.Gateway
-{
-    public interface INetworkAdapter
-    {
+//namespace Meadow.Gateways
+//{
+//    // For future use
+//    public interface INetworkAdapter
+//    {
         
-    }
-}
+//    }
+//}
