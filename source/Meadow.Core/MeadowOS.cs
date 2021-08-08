@@ -97,6 +97,12 @@ namespace Meadow
 
         //==== Synchronization context
 
+        // TODO: We should consider adding a second synch context for UX updates
+        // and make a method of `BeginInvokeOnUxThread()` so that the main thread
+        // can be reserved for hardware response and if we needed to so that
+        // queued operations on the UX thread such as renders wouldn't affect
+        // hardware response.
+
         internal static void SetSynchronizationContext(SynchronizationContext context)
         {
             synchronizationContext = context;
