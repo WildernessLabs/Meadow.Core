@@ -23,10 +23,5 @@ namespace Meadow.Hardware
                 string.Compare(p.Name, name, true) == 0 
                 || string.Compare($"{p.Key}", name, true) == 0);
         }
-
-        // TODO: if we do this, we can't type the instance version
-        // so we won't get good autocomplete for specific devices, e.g.:
-        // f7Micro.Groups.I2c1
-        //INamedPinGroups Groups { get; } 
     }
 }

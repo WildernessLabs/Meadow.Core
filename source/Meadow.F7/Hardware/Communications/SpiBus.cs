@@ -232,7 +232,6 @@ namespace Meadow.Hardware
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
-                // TODO: @Ctacke: doing this requires unsafe but gets rid of the GCHandle creation. worth?
                 fixed (byte* pWrite = writeBuffer)
                 fixed (byte* pRead = readBuffer) {
                     var command = new Nuttx.UpdSPIDataCommand() {
