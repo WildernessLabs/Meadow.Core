@@ -14,7 +14,7 @@ namespace Meadow.Units
     [ImmutableObject(false)]
     [StructLayout(LayoutKind.Sequential)]
     public struct AbsoluteHumidity :
-        IUnitType, IComparable, IFormattable, IConvertible,
+        IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>

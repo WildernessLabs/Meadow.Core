@@ -14,7 +14,7 @@ namespace Meadow.Units
     [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Acceleration3D :
-        IUnitType, IFormattable, IComparable,
+        IFormattable, IComparable,
         IEquatable<(double X, double Y, double Z)>,
         IComparable<(double, double, double)>
     {

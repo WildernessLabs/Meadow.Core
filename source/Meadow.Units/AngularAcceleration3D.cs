@@ -14,7 +14,7 @@ namespace Meadow.Units
     [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
     public struct AngularAcceleration3D :
-        IUnitType, IFormattable, IComparable,
+        IFormattable, IComparable,
         IEquatable<(double ValueX, double ValueY, double ValueZ)>,
         IComparable<(double, double, double)>
     {

@@ -14,7 +14,8 @@ namespace Meadow.Units
     [Serializable]
     [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pressure : IUnitType, IComparable, IFormattable, IConvertible,
+    public struct Pressure :
+        IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>

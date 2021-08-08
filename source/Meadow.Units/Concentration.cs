@@ -14,7 +14,7 @@ namespace Meadow.Units
     [ImmutableObject(true)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Concentration :
-        IUnitType, IComparable, IFormattable, IConvertible,
+        IComparable, IFormattable, IConvertible,
         IEquatable<double>, IComparable<double>
     {
         /// <summary>
