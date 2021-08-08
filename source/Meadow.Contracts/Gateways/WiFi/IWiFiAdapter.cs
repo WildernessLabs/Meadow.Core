@@ -3,6 +3,7 @@ using Meadow.Gateway.WiFi;
 using System.Collections.ObjectModel;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Meadow.Gateways
 {
@@ -162,15 +163,14 @@ namespace Meadow.Gateways
         /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
         Task<ConnectionResult> Disconnect(bool turnOffWiFiInterface);
 
-        // TODO: this should just return a list, and the implementor should make it async
         /// <summary>
         /// Get the list of access points.
         /// </summary>
         /// <remarks>
         /// The network must be started before this method can be called.
         /// </remarks>
-        /// <returns>ObservableCollection (possibly empty) of access points.</returns>
-        ObservableCollection<WifiNetwork> Scan();
+        /// <returns>An `IList` (possibly empty) of access points.</returns>
+        IList<WifiNetwork> Scan();
 
         /// <summary>
         /// Change the current WiFi antenna.

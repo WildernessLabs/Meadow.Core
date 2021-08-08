@@ -6,6 +6,7 @@ using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateways;
 using Meadow.Gateway.WiFi;
 using Meadow.Gateways.Exceptions;
+using System.Collections.Generic;
 
 namespace Meadow.Devices
 {
@@ -289,22 +290,16 @@ namespace Meadow.Devices
             Gateway = new IPAddress(addressBytes);
         }
 
-        // TODO: this really should probably not return the networks, but rather
-        // populate the collection that it used to do.
-        //
-        //  MS: Or should it?  The list of available networks is only valid at the point it is collected.
-        //      Having the list of networks in this class suggests that they are availalbe now and in say 2 hours time.
-        //      This might not be the case.
-        //  BC: Yeah, you're right. But it should return just an `IList<Network>` then. And be async.
+        // TODO: Mark, this should be async. But i think it requires the `SendCommand()` method to be async.
         /// <summary>
         /// Scan for networks.
         /// </summary>
         /// <remarks>
         /// The network must be started before this method can be called.
         /// </remarks>
-        public ObservableCollection<WifiNetwork> Scan()
+        public IList<WifiNetwork> Scan()
         {
-            var networks = new ObservableCollection<WifiNetwork>();
+            var networks = new List<WifiNetwork>();
             byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
             if (result == StatusCodes.CompletedOk)

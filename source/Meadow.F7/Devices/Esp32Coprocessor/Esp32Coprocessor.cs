@@ -143,6 +143,8 @@ namespace Meadow.Devices
             return (SendCommand((byte)Esp32Interfaces.BlueTooth, (uint)function, block, encodedRequest, encodedResult));
         }
 
+
+        // TODO: Mark, shouldn't this be an async call?
         /// <summary>
         /// Send a command and its payload to the ESP32.
         /// </summary>
