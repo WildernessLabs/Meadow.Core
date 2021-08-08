@@ -1,7 +1,6 @@
-﻿using Meadow.Hardware;
-using Meadow.Devices;
-using System;
+﻿using System;
 using System.Threading;
+using Meadow.Devices;
 
 namespace Meadow
 {
