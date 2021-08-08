@@ -35,7 +35,10 @@ namespace Meadow
         protected App()
         {
             _device = Activator.CreateInstance<D>();
-            _device.SetSynchronizationContext(_mainContext);
+            // TODO: move to Meadow.OS
+            MeadowOS.SetSynchronizationContext(_mainContext);
+            //_device.SetSynchronizationContext(_mainContext);
+
             _device.Initialize();
             MeadowOS.CurrentDevice = _device;
 

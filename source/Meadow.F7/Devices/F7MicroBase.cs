@@ -15,7 +15,6 @@ namespace Meadow.Devices
     /// </summary>
     public abstract class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
     {
-        private SynchronizationContext? _context;
         protected Esp32Coprocessor? esp32;
 
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
@@ -441,22 +440,6 @@ namespace Meadow.Devices
             };
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
-        }
-
-        // TODO: this should move to the MeadowOS class.
-        public void SetSynchronizationContext(SynchronizationContext context)
-        {
-            _context = context;
-        }
-
-        // TODO: this should move to the MeadowOS class.
-        public void BeginInvokeOnMainThread(Action action)
-        {
-            if (_context == null) {
-                action();
-            } else {
-                _context.Send(delegate { action(); }, null);
-            }
         }
 
         /// <summary>

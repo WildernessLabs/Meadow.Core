@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using Meadow.Devices;
 
 namespace Meadow
 {
     public static partial class MeadowOS
     {
+        private static SynchronizationContext? synchronizationContext;
+
         public static IMeadowDevice CurrentDevice { get; set; } = null!;
 
 
@@ -89,6 +92,26 @@ namespace Meadow
                 {
                     Console.WriteLine($"  Failed: {ex.Message}");
                 }
+            }
+        }
+
+        //==== Synchronization context
+
+        internal static void SetSynchronizationContext(SynchronizationContext context)
+        {
+            synchronizationContext = context;
+        }
+
+        /// <summary>
+        /// Runs the specified action on the main thread.
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
+        public static void BeginInvokeOnMainThread(Action action)
+        {
+            if (synchronizationContext == null) {
+                action();
+            } else {
+                synchronizationContext.Send(delegate { action(); }, null);
             }
         }
     }

@@ -11,7 +11,6 @@ namespace Meadow
     public class MeadowOnLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
-        private SynchronizationContext? _context;
         private SysFsGpioDriver _ioController;
 
         public TPinout Pins { get; }
@@ -82,22 +81,6 @@ namespace Meadow
             }
 
             throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");
-        }
-
-        // TODO: this should move to the MeadowOS class.
-        public void SetSynchronizationContext(SynchronizationContext context)
-        {
-            _context = context;
-        }
-
-        // TODO: this should move to the MeadowOS class.
-        public void BeginInvokeOnMainThread(Action action)
-        {
-            if (_context == null) {
-                action();
-            } else {
-                _context.Send(delegate { action(); }, null);
-            }
         }
 
         public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
