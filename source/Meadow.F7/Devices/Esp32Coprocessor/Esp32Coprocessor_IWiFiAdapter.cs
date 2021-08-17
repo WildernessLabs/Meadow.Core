@@ -503,15 +503,26 @@ namespace Meadow.Devices
         /// <returns></returns>
         public async Task<ConnectionResult> Disconnect(bool turnOffWiFiInterface)
         {
-            throw new NotImplementedException();
-
-            //var t = await Task.Run<ConnectionResult>(() => {
-            //    ConnectionResult connectionResult;
-            //    StatusCodes result = DisconnectFromAccessPoint(turnOffWiFiInterface);
-            //    connectionResult = new ConnectionResult(ConnectionStatus.Success);
-            //    return (connectionResult);
-            //});
-            //return (t);
+            var t = await Task.Run<ConnectionResult>(() =>
+            {
+                StatusCodes result = DisconnectFromAccessPoint(turnOffWiFiInterface);
+                ConnectionResult connectionResult;
+                switch (result)
+                {
+                    case StatusCodes.CompletedOk:
+                        ClearIpDetails();
+                        connectionResult = new ConnectionResult(ConnectionStatus.Success);
+                        break;
+                    case StatusCodes.Failure:
+                        connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
+                        break;
+                    default:
+                        connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
+                        break;
+                }
+                return (connectionResult);
+            });
+            return (t);
         }
 
         /// <summary>
@@ -524,8 +535,14 @@ namespace Meadow.Devices
         /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
         private StatusCodes DisconnectFromAccessPoint(bool turnOffWiFiInterface)
         {
-            throw new NotImplementedException();
-            //return (StatusCodes.CompletedOk);
+            DisconnectFromAccessPointRequest request = new DisconnectFromAccessPointRequest()
+            {
+                TurnOffWiFiInterface = (byte) ((turnOffWiFiInterface ? 1 : 0) & 0xff)
+            };
+            byte[] encodedRequest = Encoders.EncodeDisconnectFromAccessPointRequest(request);
+
+            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.DisconnectFromAccessPoint, true, encodedRequest, null);
+            return (result);
         }
 
         /// <summary>
