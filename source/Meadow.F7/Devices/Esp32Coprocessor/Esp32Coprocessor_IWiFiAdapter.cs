@@ -415,6 +415,9 @@ namespace Meadow.Devices
                     case StatusCodes.ConnectionFailed:
                         connectionResult = new ConnectionResult(ConnectionStatus.ConnectionRefused);
                         break;
+                    case StatusCodes.WiFiAlreadyStarted:
+                        connectionResult = new ConnectionResult(ConnectionStatus.AlreadyConnected);
+                        break;
                     case StatusCodes.UnmappedErrorCode:
                     default:
                         connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);

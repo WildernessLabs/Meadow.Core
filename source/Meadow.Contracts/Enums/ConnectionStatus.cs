@@ -51,5 +51,10 @@ namespace Meadow.Gateway.WiFi
         /// The network interface cannot be initialised.
         /// </summary>
         NetworkInterfaceCannotBeStarted = 8,
+
+        /// <summary>
+        /// The network interface is started and already connected to an access point.
+        /// </summary>
+        AlreadyConnected = 9,
     }
 }
