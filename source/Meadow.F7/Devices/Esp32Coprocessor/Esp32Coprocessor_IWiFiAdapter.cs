@@ -516,6 +516,9 @@ namespace Meadow.Devices
                     case StatusCodes.Failure:
                         connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
                         break;
+                    case StatusCodes.EspWiFiNotStarted:
+                        connectionResult = new ConnectionResult(ConnectionStatus.WiFiNotStarted);
+                        break;
                     default:
                         connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
                         break;

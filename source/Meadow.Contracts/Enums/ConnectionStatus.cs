@@ -56,5 +56,10 @@ namespace Meadow.Gateway.WiFi
         /// The network interface is started and already connected to an access point.
         /// </summary>
         AlreadyConnected = 9,
+
+        /// <summary>
+        /// WiFi interface not started.
+        /// </summary>
+        WiFiNotStarted = 10,
     }
 }
