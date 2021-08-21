@@ -669,7 +669,7 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
         {
-            EventArgs e = EventArgs.Empty;
+            WiFiDisconnectEventArgs e = new WiFiDisconnectEventArgs(statusCode);
             WiFiDisconnected?.Invoke(this, e);
         }
 
