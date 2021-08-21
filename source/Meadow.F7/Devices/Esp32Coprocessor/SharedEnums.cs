@@ -53,7 +53,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         HandshakeTimeout = 28,
         ConnectionFailed = 29,
         ApTsfReset = 30,
-        UnmappedErrorCode = 31
+        UnmappedErrorCode = 31,
+        UnknownConfigurationItem = 32
     };
 
     // <summary>
@@ -78,7 +79,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         SetConfigurationItem = 1,
         DeepSleep = 2,
         GetBatteryChargeLevel = 3,
-        ErrorEvent = 4
+        ErrorEvent = 4,
+        StartHeapTrace = 5,
+        StopHeapTrace = 6
     };
 
     // <summary>
@@ -89,33 +92,34 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         StartWiFiInterface = 0,
         StopWiFiInterface = 1,
         ConnectToAccessPoint = 2,
-        DisconnectFromAccessPoint = 3,
-        GetAccessPoints = 4,
-        SetAntenna = 5,
-        Socket = 6,
-        Connect = 7,
-        Write = 8,
-        SetSockOpt = 9,
-        Read = 10,
-        Close = 11,
-        SendTo = 12,
-        RecvFrom = 13,
-        Poll = 14,
-        InterruptPollResponse = 15,
-        Send = 16,
-        Bind = 17,
-        Listen = 18,
-        Accept = 19,
-        Ioctl = 20,
-        GetSockName = 21,
-        GetPeerName = 22,
-        FreeAddrInfo = 23,
-        GetAddrInfo = 24,
-        StartWiFiInterfaceEvent = 25,
-        StopWiFiInterfaceEvent = 26,
-        ConnectToAccessPointEvent = 27,
-        DisconnectFromAccessPointEvent = 28,
-        SetTimeOfDayEvent = 29
+        ConnectToDefaultAccessPoint = 3,
+        DisconnectFromAccessPoint = 4,
+        GetAccessPoints = 5,
+        SetAntenna = 6,
+        Socket = 7,
+        Connect = 8,
+        Write = 9,
+        SetSockOpt = 10,
+        Read = 11,
+        Close = 12,
+        SendTo = 13,
+        RecvFrom = 14,
+        Poll = 15,
+        InterruptPollResponse = 16,
+        Send = 17,
+        Bind = 18,
+        Listen = 19,
+        Accept = 20,
+        Ioctl = 21,
+        GetSockName = 22,
+        GetPeerName = 23,
+        FreeAddrInfo = 24,
+        GetAddrInfo = 25,
+        StartWiFiInterfaceEvent = 26,
+        StopWiFiInterfaceEvent = 27,
+        ConnectToAccessPointEvent = 28,
+        DisconnectFromAccessPointEvent = 29,
+        SetTimeOfDayEvent = 30
     };
 
     // <summary>
