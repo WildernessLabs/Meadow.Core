@@ -184,6 +184,47 @@ namespace Meadow.Gateways
         /// <param name="persist">Make the antenna change persistent.</param>
         void SetAntenna(AntennaType antenna, bool persist = true);
 
+        /// <summary>
+        /// Set the property that indicates if the coporcessor should connect to the default access
+        /// point when the system starts.
+        /// </summary>
+        /// <param name="automaticallyStartNetwork">True for the connection to be tried, false otehrwise.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork);
+
+        /// <summary>
+        /// Set the property that indicates if the system should automatically attempt to reconnect to an access
+        /// point should the system diconnect.
+        /// </summary>
+        /// <remarks>
+        /// This property will use the <seealso cref="MaximumRetryCount"/> property to determine how many times a reconnect should be attempted.
+        /// </remarks>
+        /// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        bool SetAutomaticallyReconnect(bool automaticallyReconnect);
+
+
+        /// <summary>
+        /// Set the name of the NTP server to use to get the current time.
+        /// </summary>
+        /// <param name="ntpServer">Server to use to retrieve the current time.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        bool SetNtpServer(string ntpServer);
+
+        /// <summary>
+        /// Should the system attempt to get the time from the configured NTP server.
+        /// </summary>
+        /// <param name="getTimeAtStartup">True to get the network time.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup);
+
+        /// <summary>
+        /// Set the maximum number of times the coprocessor should retry netowrk operations (on error) before returning an error.
+        /// </summary>
+        /// <param name="maximumRetryCount">Maximum number retries.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        bool SetMaximumRetryCount(uint maximumRetryCount);
+
         #endregion Methods
     }
 }

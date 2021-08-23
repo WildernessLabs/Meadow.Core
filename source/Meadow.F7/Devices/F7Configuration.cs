@@ -177,6 +177,62 @@ namespace Meadow.Devices
             }
 
             /// <summary>
+            /// Set the specified configuration item to the given array of bytes.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="buffer">Byte buffer to hold the data.</param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetByteArray(ConfigurationValues item, byte[] buffer)
+            {
+                (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
+
+                return (result);
+            }
+
+            /// <summary>
+            /// Set an unsigned integer configuration item.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="value"Value to be used.></param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetUInt32(ConfigurationValues item, UInt32 value)
+            {
+                byte[] buffer = BitConverter.GetBytes(value);
+
+                (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
+
+                return (result);
+            }
+
+            /// <summary>
+            /// Set a configuration to the specified byte.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="value"Value to be used.></param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetByte(ConfigurationValues item, byte value)
+            {
+                byte[] buffer = new byte[1];
+                buffer[0] = value;
+
+                (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
+
+                return (result);
+            }
+
+            /// <summary>
+            /// Set a boolean configuration item.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="value"Value to be used.></param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetBoolean(ConfigurationValues item, bool value)
+            {
+                byte b = (byte) ((value ? 1 : 0) & 0xff);
+                return (SetByte(item, b));
+            }
+
+            /// <summary>
             /// Get the current device name.
             /// </summary>
             /// <returns>Name of the device.</returns>
@@ -186,12 +242,13 @@ namespace Meadow.Devices
             }
 
             /// <summary>
-            /// Set the device name.
+            /// Set the name of the device as it will appear on the network.
             /// </summary>
-            /// <param name="deviceName">Name of the device.</param>
-            public static void SetDeviceName(string deviceName)
+            /// <param name="value">Name of the device.</param>
+            /// <returns>True if successful, false otherwise.</returns>
+            public static bool SetDeviceName(string value)
             {
-                SetString(ConfigurationValues.DeviceName, deviceName);
+                return (SetString(ConfigurationValues.DeviceName, value));
             }
 
             /// <summary>

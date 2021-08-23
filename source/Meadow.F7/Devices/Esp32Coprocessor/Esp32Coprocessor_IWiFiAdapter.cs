@@ -594,44 +594,66 @@ namespace Meadow.Devices
             }
         }
 
-        public void SetGetNetworkTimeAtStartup(bool getNetworkTimeAtStartup)
+        /// <summary>
+        /// Set the property that indicates if the coporcessor should connect to the default access
+        /// point when the system starts.
+        /// </summary>
+        /// <param name="automaticallyStartNetwork">True for the connection to be tried, false otehrwise.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork)
         {
-            throw new NotImplementedException($"Method {nameof(SetGetNetworkTimeAtStartup)} is not currently implemented.");
+            return (F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork));
         }
 
-        public void SetNtpServer(string ntpServer)
+        /// <summary>
+        /// Set the property that indicates if the system should automatically attempt to reconnect to an access
+        /// point should the system diconnect.
+        /// </summary>
+        /// <remarks>
+        /// This property will use the <seealso cref="MaximumRetryCount"/> property to determine how many times a reconnect should be attempted.
+        /// </remarks>
+        /// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetAutomaticallyReconnect(bool automaticallyReconnect)
         {
-            throw new NotImplementedException($"Method {nameof(SetNtpServer)} is not currently implemented.");
+            return (F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect));
         }
 
-        public void SetDeviceName(string deviceName)
+        /// <summary>
+        /// Set the name of the NTP server to use to get the current time.
+        /// </summary>
+        /// <param name="ntpServer">Server to use to retrieve the current time.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetNtpServer(string ntpServer)
         {
-            throw new NotImplementedException($"Method {nameof(SetDeviceName)} is not currently implemented.");
+            return (F7Micro.Configuration.SetString(F7Micro.Configuration.ConfigurationValues.NtpServer, ntpServer));
         }
 
-        public void SetMacAddress(byte[] macAddress)
+        /// <summary>
+        /// Should the system attempt to get the time from the configured NTP server.
+        /// </summary>
+        /// <param name="getTimeAtStartup">True to get the network time.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup)
         {
-            throw new NotImplementedException($"Method {nameof(SetMacAddress)} is not currently implemented.");
+            return (F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup));
         }
 
-        public void SetApMacAddress(byte[] apMacAddress)
+        /// <summary>
+        /// Set the maximum number of times the coprocessor should retry netowrk operations (on error) before returning an error.
+        /// </summary>
+        /// <remarks>
+        /// This property enforces a minimum value of 3.
+        /// </remarks>
+        /// <param name="maximumRetryCount">Maximum number retries.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetMaximumRetryCount(uint maximumRetryCount)
         {
-            throw new NotImplementedException($"Method {nameof(SetApMacAddress)} is not currently implemented.");
-        }
-
-        public void SetAutomaticallyStartNetwork(bool automaticallyStartNetwork)
-        {
-            throw new NotImplementedException($"Method {nameof(SetAutomaticallyStartNetwork)} is not currently implemented.");
-        }
-
-        public void SetAutomatiacallyReconnect(bool automaticallyReconnect)
-        {
-            throw new NotImplementedException($"Method {nameof(SetAutomatiacallyReconnect)} is not currently implemented.");
-        }
-
-        public void SetDefaultAccessPoint(string defaultAccessPoint)
-        {
-            throw new NotImplementedException($"Method {nameof(SetDefaultAccessPoint)} is not currently implemented.");
+            if (maximumRetryCount < 3)
+            {
+                maximumRetryCount = 3;
+            }
+            return (F7Micro.Configuration.SetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount));
         }
 
         #endregion Methods
