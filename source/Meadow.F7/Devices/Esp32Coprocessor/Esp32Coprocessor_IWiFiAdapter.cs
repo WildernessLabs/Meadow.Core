@@ -676,6 +676,7 @@ namespace Meadow.Devices
             string bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
             byte channel = connectEventData.Channel;
             NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
+
             WiFiConnectEventArgs ea = new WiFiConnectEventArgs(ip, subnet, gateway, ssid, bssid, channel, authenticationType, statusCode);
             WiFiConnected?.Invoke(this, ea);
         }
@@ -688,6 +689,10 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
         {
+            ClearIpDetails();
+            HasInternetAccess = false;
+            IsConnected = false;
+
             WiFiDisconnectEventArgs e = new WiFiDisconnectEventArgs(statusCode);
             WiFiDisconnected?.Invoke(this, e);
         }
