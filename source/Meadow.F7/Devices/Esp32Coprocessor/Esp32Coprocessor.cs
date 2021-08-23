@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using static Meadow.Core.Interop;
 using Meadow.Devices.Esp32.MessagePayloads;
+using Meadow.Devices;
 using System.Text;
 using Meadow.Core;
 using System.Threading;
@@ -77,10 +78,7 @@ namespace Meadow.Devices
             HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
             _antenna = AntennaType.NotKnown;
-            if (GetConfiguration() == StatusCodes.CompletedOk)
-            {
-                Status = ICoprocessor.CoprocessorState.Ready;
-            }
+            GetConfiguration();
 
             if (_eventHandlerThread == null)
             {
@@ -100,31 +98,6 @@ namespace Meadow.Devices
 
         #region Methods
 
-        //protected void SetProperty(ConfigurationItems item, UInt32 value)
-        //{
-        //    throw new NotImplementedException("SetProperty is not implemented.");
-        //}
-
-        //protected void SetProperty(ConfigurationItems item, byte value)
-        //{
-        //    UInt32 v = value;
-        //    SetProperty(item, v);
-        //}
-
-        //protected void SetProperty(ConfigurationItems item, bool value)
-        //{
-        //    UInt32 v = 0;
-        //    if (value)
-        //    {
-        //        v = 1;
-        //    }
-        //    SetProperty(item, v);
-        //}
-
-        //protected void SetProperty(ConfigurationItems item, string value)
-        //{
-        //}
-
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
         /// </summary>
@@ -138,6 +111,14 @@ namespace Meadow.Devices
             return(SendCommand(where, function, block, null, encodedResult));
         }
 
+        /// <summary>
+        /// Send a luetooth command and its payload to the ESP32.
+        /// </summary>
+        /// <param name="function">Command to be sent.</param>
+        /// <param name="block">Is this a blocking command?</param>
+        /// <param name="encodedRequest">Payload for the command to be executed by the ESP32.</param>
+        /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
+        /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
         protected StatusCodes SendBluetoothCommand(BluetoothFunction function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
         {
             return (SendCommand((byte)Esp32Interfaces.BlueTooth, (uint)function, block, encodedRequest, encodedResult));
@@ -165,8 +146,8 @@ namespace Meadow.Devices
                 {
                     Interface = destination,
                     Function = function,
-                    StatusCode = (UInt32)StatusCodes.CompletedOk,
-                    Block = (byte)(block ? 1 : 0),
+                    StatusCode = (UInt32) StatusCodes.CompletedOk,
+                    Block = (byte) (block ? 1 : 0),
                     PayloadLength = 0,
                     Payload = IntPtr.Zero,
                     ResultLength = 0,
@@ -332,38 +313,32 @@ namespace Meadow.Devices
         /// Get the configuration data structure from the ESP32.
         /// </summary>
         /// <returns>Result of getting the configuration from the ESP32.</returns>
-        protected StatusCodes GetConfiguration()
+        protected void GetConfiguration()
         {
-            StatusCodes result = StatusCodes.CompletedOk;
-            byte[] encodedResult = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
-            result = SendCommand((byte) Esp32Interfaces.System, (UInt32) SystemFunction.GetConfiguration, true, encodedResult);
-            if (result == StatusCodes.CompletedOk)
+            if (!string.IsNullOrEmpty(F7Micro.Configuration.GetCoprocessorFirmwareVersion()))
             {
-                SystemConfiguration config = Encoders.ExtractSystemConfiguration(encodedResult, 0);
-                switch ((AntennaTypes) config.Antenna)
-                {
-                    case AntennaTypes.External:
-                        _antenna = AntennaType.External;
-                        break;
-                    case AntennaTypes.OnBoard:
-                        _antenna = AntennaType.OnBoard;
-                        break;
-                    default:
-                        _antenna = AntennaType.NotKnown;
-                        break;
-                }
-                _automaticallyStartNetwork = (config.AutomaticallyStartNetwork ==1);
-                _automaticallyReconect = (config.AutomaticallyReconnect == 1);
-                _getNetworkTimeAtStartup = (config.GetTimeAtStartup == 1);
-                _ntpServer = config.NtpServer;
-                _apMacAddress = new byte[config.SoftApMacAddress.Length];
-                Array.Copy(config.SoftApMacAddress, _apMacAddress, config.SoftApMacAddress.Length);
-                _macAddress = new byte[config.BoardMacAddress.Length];
-                Array.Copy(config.BoardMacAddress, _macAddress, config.BoardMacAddress.Length);
-                _defaultAccessPoint = config.DefaultAccessPoint;
-                _deviceName = config.DeviceName;
+                _automaticallyStartNetwork = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork);
+                _automaticallyReconect = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect);
+                _getNetworkTimeAtStartup = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup);
+                _ntpServer = F7Micro.Configuration.GetString(F7Micro.Configuration.ConfigurationValues.NtpServer);
+                F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.SoftApMacAddress, _apMacAddress);
+                F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.MacAddress, _macAddress);
+                _defaultAccessPoint = F7Micro.Configuration.GetString(F7Micro.Configuration.ConfigurationValues.DefaultAccessPoint);
+                _maximumRetryCount = F7Micro.Configuration.GetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount);
+                Status = ICoprocessor.CoprocessorState.Ready;
             }
-            return (result);
+            //switch ((AntennaTypes) config.Antenna)
+            //{
+            //    case AntennaTypes.External:
+            //        _antenna = AntennaType.External;
+            //        break;
+            //    case AntennaTypes.OnBoard:
+            //        _antenna = AntennaType.OnBoard;
+            //        break;
+            //    default:
+            //        _antenna = AntennaType.NotKnown;
+            //        break;
+            //}
         }
 
         /// <summary>

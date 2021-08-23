@@ -121,22 +121,6 @@ namespace Meadow.Devices
         protected string _ntpServer = string.Empty;
 
         /// <summary>
-        /// Get the device name.
-        /// </summary>
-        /// <remarks>
-        /// This value should be changed through the meadow.cfg file.
-        /// </remarks>
-        public string DeviceName
-        {
-            get
-            {
-                CheckStatus();
-                return (_deviceName);
-            }
-        }
-        protected string _deviceName = string.Empty;
-
-        /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
         public byte[] MacAddress
@@ -148,7 +132,7 @@ namespace Meadow.Devices
             }
 
         }
-        protected byte[] _macAddress = new byte[0];
+        protected byte[] _macAddress = new byte[6];
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
@@ -161,7 +145,7 @@ namespace Meadow.Devices
                 return (_apMacAddress);
             }
         }
-        protected byte[] _apMacAddress = new byte[0];
+        protected byte[] _apMacAddress = new byte[6];
 
         /// <summary>
         /// Automatically start the network interface when the board reboots?
@@ -205,6 +189,19 @@ namespace Meadow.Devices
             }
         }
         protected string _defaultAccessPoint = string.Empty;
+
+        /// <summary>
+        /// The maximum number of times the ESP32 will retry an operation before returning an error.
+        /// </summary>
+        public uint MaximumRetryCount
+        {
+            get
+            {
+                CheckStatus();
+                return (_maximumRetryCount);
+            }
+        }
+        protected uint _maximumRetryCount;
 
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?

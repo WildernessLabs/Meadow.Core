@@ -42,11 +42,6 @@ namespace Meadow.Gateways
         string NtpServer { get; }
 
         /// <summary>
-        /// Name of the board on the network.
-        /// </summary>
-        string DeviceName { get; }
-
-        /// <summary>
         /// MAC address of the board when acting as a client.
         /// </summary>
         byte[] MacAddress { get; }
@@ -55,6 +50,11 @@ namespace Meadow.Gateways
         /// MAC address of the board when acting as a sft access point.
         /// </summary>
         byte[] ApMacAddress { get; }
+
+        /// <summary>
+        /// Maximum number of times the ESP32 will retry a netowrk operation before returning an error.
+        /// </summary>
+        uint MaximumRetryCount { get; }
 
         /// <summary>
         /// Current antenna in use.
