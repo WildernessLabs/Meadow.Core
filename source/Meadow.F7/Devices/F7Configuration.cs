@@ -171,7 +171,15 @@ namespace Meadow.Devices
             {
                 byte[] buffer = Encoding.ASCII.GetBytes(value);
 
-                (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
+                //
+                //  We put the terminating NULL at the end of the string in order to help the
+                //  underlying C code in the OS.
+                //
+                byte[] stringBuffer = new byte[buffer.Length + 1];
+                Array.Clear(stringBuffer, 0, stringBuffer.Length);
+                Array.Copy(buffer, stringBuffer, buffer.Length);
+
+                (bool result, int length) = GetSetValue(item, Direction.Set, stringBuffer);
 
                 return (result);
             }

@@ -448,9 +448,12 @@ namespace Meadow.Devices
         /// </summary>
         protected bool IsCoprocessorInitialized()
         {
-            if (esp32 == null) {
+            if (esp32 == null)
+            {
                 return false;
-            } else {
+            }
+            else
+            {
                 return true;
             }
         }
@@ -460,15 +463,21 @@ namespace Meadow.Devices
         /// <summary>
         /// Get the currently setlected WiFi antenna.
         /// </summary>
-        public AntennaType CurrentAntenna {
-            get {
-                if (WiFiAdapter != null) {
+        public AntennaType CurrentAntenna
+        {
+            get
+            {
+                if (WiFiAdapter != null)
+                {
                     return WiFiAdapter.Antenna;
-                } else {
+                }
+                else
+                {
                     throw new Exception("Coprocessor not initialized.");
                 }
             }
         }
+
         /// <summary>
         /// Change the current WiFi antenna.
         /// </summary>
@@ -481,13 +490,15 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            if (WiFiAdapter != null) {
+            if (WiFiAdapter != null)
+            {
                 WiFiAdapter.SetAntenna(antenna, persist);
-            } else {
+            }
+            else
+            {
                 throw new Exception("Coprocessor not initialized.");
             }
         }
-
 
         //TODO: need the Read()/StartUpdating()/StopUpdating() pattern here.
         /// <summary>
@@ -495,11 +506,28 @@ namespace Meadow.Devices
         /// </summary>
         public Voltage GetBatteryLevel()
         {
-            if (Coprocessor != null) {
+            if (Coprocessor != null)
+            {
                 return (new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts));
-            } else {
+            }
+            else
+            {
                 throw new Exception("Coprocessor not initialized.");
             }
+        }
+
+        /// <summary>
+        /// Set the name of the board as it will appear on the network (when connected to a network / access point).
+        /// </summary>
+        /// <param name="deviceName">Name to be used.</param>
+        /// <returns>True if the request was successful, false otherwise.</returns>
+        public bool SetDeviceNmae(string deviceName)
+        {
+            bool result = F7Micro.Configuration.SetDeviceName(deviceName);
+            //
+            //  May need to store this somewhere later to split the return.
+            //
+            return (result);
         }
 
         /// <summary>

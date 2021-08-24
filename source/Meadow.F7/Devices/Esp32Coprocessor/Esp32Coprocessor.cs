@@ -88,10 +88,6 @@ namespace Meadow.Devices
                 };
                 _eventHandlerThread.Start();
             }
-
-            IpAddress = System.Net.IPAddress.None;
-            SubnetMask = System.Net.IPAddress.None;
-            Gateway = System.Net.IPAddress.None;
         }
 
         #endregion Constructor(s)

@@ -602,7 +602,12 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork)
         {
-            return (F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork));
+            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork);
+            if (result)
+            {
+                _automaticallyStartNetwork = automaticallyStartNetwork;
+            }
+            return (result);
         }
 
         /// <summary>
@@ -616,7 +621,12 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetAutomaticallyReconnect(bool automaticallyReconnect)
         {
-            return (F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect));
+            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect);
+            if (result)
+            {
+                _automaticallyReconect = automaticallyReconnect;
+            }
+            return (result);
         }
 
         /// <summary>
@@ -626,7 +636,12 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetNtpServer(string ntpServer)
         {
-            return (F7Micro.Configuration.SetString(F7Micro.Configuration.ConfigurationValues.NtpServer, ntpServer));
+            bool result = F7Micro.Configuration.SetString(F7Micro.Configuration.ConfigurationValues.NtpServer, ntpServer);
+            if (result)
+            {
+                _ntpServer = ntpServer;
+            }
+            return (result);
         }
 
         /// <summary>
@@ -636,7 +651,12 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup)
         {
-            return (F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup));
+            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup);
+            if (result)
+            {
+                _getNetworkTimeAtStartup = getTimeAtStartup;
+            }
+            return (result);
         }
 
         /// <summary>
@@ -653,7 +673,13 @@ namespace Meadow.Devices
             {
                 maximumRetryCount = 3;
             }
-            return (F7Micro.Configuration.SetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount));
+
+            bool result = F7Micro.Configuration.SetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount);
+            if (result)
+            {
+                _maximumRetryCount = maximumRetryCount;
+            }
+            return (result);
         }
 
         #endregion Methods
