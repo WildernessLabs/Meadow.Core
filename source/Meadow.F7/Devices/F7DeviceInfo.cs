@@ -14,7 +14,7 @@ namespace Meadow.Devices
         public struct DeviceInformation
         {
           public string DeviceName;
-          public string Product;
+          public Configuration.HardwareVersion Product;
           public string Model;
           public string OsVersion;
           public string BuildDate;

@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Meadow.Core;
 using System.Text;
+using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Hardware;
 
 namespace Meadow.Devices
@@ -17,18 +18,23 @@ namespace Meadow.Devices
             /// Enumeration indicating the possible configuration items that can be read / written.
             /// </summary>
             /// <remarks>It is critical that this enum matches the enum in the NuttX file meadow-upd.h.</remarks>
-            private enum ConfigurationValues
+            public enum ConfigurationValues
             {
                 DeviceName = 0, Product, Model, OsVersion, BuildDate, ProcessorType, UniqueId, SerialNumber, CoprocessorType,
                 CoprocessorFirmwareVersion, MonoVersion,
                 AutomaticallyStartNetwork, AutomaticallyReconnect, MaximumNetworkRetryCount, GetTimeAtStartup,
-                NtpServer, MacAddress, SoftApMacAddress
+                NtpServer, MacAddress, SoftApMacAddress, DefaultAccessPoint
             };
 
             /// <summary>
             /// Indicate if a read or write operation is to be executed.
             /// </summary>
             private enum Direction { Get = 0, Set = 1 };
+
+            /// <summary>
+            /// Hardware version (product).
+            /// </summary>
+            public enum HardwareVersion { Unknown = 0, MeadowF7V1 = 1, MeadowF7V2 = 2 };
 
             /// <summary>
             /// Get or Set the specified value in the OS configuration.
@@ -77,6 +83,7 @@ namespace Meadow.Devices
                         bufferHandle.Free();
                     }
                 }
+
                 return (result, length);
             }
 
@@ -85,7 +92,7 @@ namespace Meadow.Devices
             /// </summary>
             /// <param name="value">Configuration item to read.</param>
             /// <returns>Configuration value if present, String.Empty if no item could be found.</returns>
-            private static string GetString(ConfigurationValues item)
+            public static string GetString(ConfigurationValues item)
             {
                 byte[] buffer = new byte[1024];
                 string str = String.Empty;
@@ -100,18 +107,142 @@ namespace Meadow.Devices
             }
 
             /// <summary>
+            /// Get an array of bytes from the board configuration
+            /// </summary>
+            /// <param name="item">Configuration item to read.</param>
+            /// <param name="buffer">Byte buffer to hold the data.</param>
+            public static void GetByteArray(ConfigurationValues item, byte[] buffer)
+            {
+                (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
+
+                return;
+            }
+
+            /// <summary>
+            /// Get an unsigned integer configuration item.
+            /// </summary>
+            /// <param name="value">Configuration item to read.</param>
+            /// <returns>Configuration value if present, 0 if it could not be found.</returns>
+            public static UInt32 GetUInt32(ConfigurationValues item)
+            {
+                byte[] buffer = new byte[4];
+                UInt32 ui = 0;
+
+                (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
+                if (result && (length == 4))
+                {
+                    ui = Encoders.ExtractUInt32(buffer, 0);
+                }
+
+                return (ui);
+            }
+
+            /// <summary>
+            /// Get a byte configuration item.
+            /// </summary>
+            /// <param name="value">Configuration item to read.</param>
+            /// <returns>Configuration value if present, 0 if the item count not be found..</returns>
+            public static byte GetByte(ConfigurationValues item)
+            {
+                byte[] buffer = new byte[1];
+                byte b = 0;
+
+                (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
+                if (result && (length == 1))
+                {
+                    b = buffer[0];
+                }
+
+                return (b);
+            }
+
+            /// <summary>
+            /// Get a boolean configuration item.
+            /// </summary>
+            /// <param name="value">Configuration item to read.</param>
+            /// <returns>Configuration value if present, false if the item could not be found.</returns>
+            public static bool GetBoolean(ConfigurationValues item)
+            {
+                return (GetByte(item) == 1 ? true : false);
+            }
+
+            /// <summary>
             /// Set the specified configuration item to the string value.
             /// </summary>
             /// <param name="item">Item to set.</param>
             /// <param name="value"Value to be used.></param>
             /// <returns>True if the configuration value was set, false if there is a problem.</returns>
-            private static bool SetString(ConfigurationValues item, string value)
+            public static bool SetString(ConfigurationValues item, string value)
             {
                 byte[] buffer = Encoding.ASCII.GetBytes(value);
+
+                //
+                //  We put the terminating NULL at the end of the string in order to help the
+                //  underlying C code in the OS.
+                //
+                byte[] stringBuffer = new byte[buffer.Length + 1];
+                Array.Clear(stringBuffer, 0, stringBuffer.Length);
+                Array.Copy(buffer, stringBuffer, buffer.Length);
+
+                (bool result, int length) = GetSetValue(item, Direction.Set, stringBuffer);
+
+                return (result);
+            }
+
+            /// <summary>
+            /// Set the specified configuration item to the given array of bytes.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="buffer">Byte buffer to hold the data.</param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetByteArray(ConfigurationValues item, byte[] buffer)
+            {
+                (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
+
+                return (result);
+            }
+
+            /// <summary>
+            /// Set an unsigned integer configuration item.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="value"Value to be used.></param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetUInt32(ConfigurationValues item, UInt32 value)
+            {
+                byte[] buffer = BitConverter.GetBytes(value);
 
                 (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
 
                 return (result);
+            }
+
+            /// <summary>
+            /// Set a configuration to the specified byte.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="value"Value to be used.></param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetByte(ConfigurationValues item, byte value)
+            {
+                byte[] buffer = new byte[1];
+                buffer[0] = value;
+
+                (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
+
+                return (result);
+            }
+
+            /// <summary>
+            /// Set a boolean configuration item.
+            /// </summary>
+            /// <param name="item">Item to set.</param>
+            /// <param name="value"Value to be used.></param>
+            /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+            public static bool SetBoolean(ConfigurationValues item, bool value)
+            {
+                byte b = (byte) ((value ? 1 : 0) & 0xff);
+                return (SetByte(item, b));
             }
 
             /// <summary>
@@ -124,21 +255,22 @@ namespace Meadow.Devices
             }
 
             /// <summary>
-            /// Set the device name.
+            /// Set the name of the device as it will appear on the network.
             /// </summary>
-            /// <param name="deviceName">Name of the device.</param>
-            public static void SetDeviceName(string deviceName)
+            /// <param name="value">Name of the device.</param>
+            /// <returns>True if successful, false otherwise.</returns>
+            public static bool SetDeviceName(string value)
             {
-                SetString(ConfigurationValues.DeviceName, deviceName);
+                return (SetString(ConfigurationValues.DeviceName, value));
             }
 
             /// <summary>
             /// Get the current product name.
             /// </summary>
             /// <returns>Product name.</returns>
-            public static string GetProduct()
+            public static HardwareVersion GetProduct()
             {
-                return (GetString(ConfigurationValues.Product));
+                return((HardwareVersion) GetUInt32(ConfigurationValues.Product));
             }
 
             /// <summary>

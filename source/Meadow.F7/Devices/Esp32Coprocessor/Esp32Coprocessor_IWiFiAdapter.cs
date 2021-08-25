@@ -121,22 +121,6 @@ namespace Meadow.Devices
         protected string _ntpServer = string.Empty;
 
         /// <summary>
-        /// Get the device name.
-        /// </summary>
-        /// <remarks>
-        /// This value should be changed through the meadow.cfg file.
-        /// </remarks>
-        public string DeviceName
-        {
-            get
-            {
-                CheckStatus();
-                return (_deviceName);
-            }
-        }
-        protected string _deviceName = string.Empty;
-
-        /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
         public byte[] MacAddress
@@ -148,7 +132,7 @@ namespace Meadow.Devices
             }
 
         }
-        protected byte[] _macAddress = new byte[0];
+        protected byte[] _macAddress = new byte[6];
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
@@ -161,7 +145,7 @@ namespace Meadow.Devices
                 return (_apMacAddress);
             }
         }
-        protected byte[] _apMacAddress = new byte[0];
+        protected byte[] _apMacAddress = new byte[6];
 
         /// <summary>
         /// Automatically start the network interface when the board reboots?
@@ -205,6 +189,19 @@ namespace Meadow.Devices
             }
         }
         protected string _defaultAccessPoint = string.Empty;
+
+        /// <summary>
+        /// The maximum number of times the ESP32 will retry an operation before returning an error.
+        /// </summary>
+        public uint MaximumRetryCount
+        {
+            get
+            {
+                CheckStatus();
+                return (_maximumRetryCount);
+            }
+        }
+        protected uint _maximumRetryCount;
 
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
@@ -597,44 +594,92 @@ namespace Meadow.Devices
             }
         }
 
-        public void SetGetNetworkTimeAtStartup(bool getNetworkTimeAtStartup)
+        /// <summary>
+        /// Set the property that indicates if the coporcessor should connect to the default access
+        /// point when the system starts.
+        /// </summary>
+        /// <param name="automaticallyStartNetwork">True for the connection to be tried, false otehrwise.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork)
         {
-            throw new NotImplementedException($"Method {nameof(SetGetNetworkTimeAtStartup)} is not currently implemented.");
+            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork);
+            if (result)
+            {
+                _automaticallyStartNetwork = automaticallyStartNetwork;
+            }
+            return (result);
         }
 
-        public void SetNtpServer(string ntpServer)
+        /// <summary>
+        /// Set the property that indicates if the system should automatically attempt to reconnect to an access
+        /// point should the system diconnect.
+        /// </summary>
+        /// <remarks>
+        /// This property will use the <seealso cref="MaximumRetryCount"/> property to determine how many times a reconnect should be attempted.
+        /// </remarks>
+        /// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetAutomaticallyReconnect(bool automaticallyReconnect)
         {
-            throw new NotImplementedException($"Method {nameof(SetNtpServer)} is not currently implemented.");
+            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect);
+            if (result)
+            {
+                _automaticallyReconect = automaticallyReconnect;
+            }
+            return (result);
         }
 
-        public void SetDeviceName(string deviceName)
+        /// <summary>
+        /// Set the name of the NTP server to use to get the current time.
+        /// </summary>
+        /// <param name="ntpServer">Server to use to retrieve the current time.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetNtpServer(string ntpServer)
         {
-            throw new NotImplementedException($"Method {nameof(SetDeviceName)} is not currently implemented.");
+            bool result = F7Micro.Configuration.SetString(F7Micro.Configuration.ConfigurationValues.NtpServer, ntpServer);
+            if (result)
+            {
+                _ntpServer = ntpServer;
+            }
+            return (result);
         }
 
-        public void SetMacAddress(byte[] macAddress)
+        /// <summary>
+        /// Should the system attempt to get the time from the configured NTP server.
+        /// </summary>
+        /// <param name="getTimeAtStartup">True to get the network time.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup)
         {
-            throw new NotImplementedException($"Method {nameof(SetMacAddress)} is not currently implemented.");
+            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup);
+            if (result)
+            {
+                _getNetworkTimeAtStartup = getTimeAtStartup;
+            }
+            return (result);
         }
 
-        public void SetApMacAddress(byte[] apMacAddress)
+        /// <summary>
+        /// Set the maximum number of times the coprocessor should retry netowrk operations (on error) before returning an error.
+        /// </summary>
+        /// <remarks>
+        /// This property enforces a minimum value of 3.
+        /// </remarks>
+        /// <param name="maximumRetryCount">Maximum number retries.</param>
+        /// <returns>True if the property was set, flase if there was a problem.</returns>
+        public bool SetMaximumRetryCount(uint maximumRetryCount)
         {
-            throw new NotImplementedException($"Method {nameof(SetApMacAddress)} is not currently implemented.");
-        }
+            if (maximumRetryCount < 3)
+            {
+                maximumRetryCount = 3;
+            }
 
-        public void SetAutomaticallyStartNetwork(bool automaticallyStartNetwork)
-        {
-            throw new NotImplementedException($"Method {nameof(SetAutomaticallyStartNetwork)} is not currently implemented.");
-        }
-
-        public void SetAutomatiacallyReconnect(bool automaticallyReconnect)
-        {
-            throw new NotImplementedException($"Method {nameof(SetAutomatiacallyReconnect)} is not currently implemented.");
-        }
-
-        public void SetDefaultAccessPoint(string defaultAccessPoint)
-        {
-            throw new NotImplementedException($"Method {nameof(SetDefaultAccessPoint)} is not currently implemented.");
+            bool result = F7Micro.Configuration.SetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount);
+            if (result)
+            {
+                _maximumRetryCount = maximumRetryCount;
+            }
+            return (result);
         }
 
         #endregion Methods
@@ -657,6 +702,7 @@ namespace Meadow.Devices
             string bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
             byte channel = connectEventData.Channel;
             NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
+
             WiFiConnectEventArgs ea = new WiFiConnectEventArgs(ip, subnet, gateway, ssid, bssid, channel, authenticationType, statusCode);
             WiFiConnected?.Invoke(this, ea);
         }
@@ -669,6 +715,10 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
         {
+            ClearIpDetails();
+            HasInternetAccess = false;
+            IsConnected = false;
+
             WiFiDisconnectEventArgs e = new WiFiDisconnectEventArgs(statusCode);
             WiFiDisconnected?.Invoke(this, e);
         }
