@@ -32,6 +32,11 @@ namespace Meadow.Devices
             private enum Direction { Get = 0, Set = 1 };
 
             /// <summary>
+            /// Hardware version (product).
+            /// </summary>
+            public enum HardwareVersion { Unknown = 0, MeadowF7V1 = 1, MeadowF7V2 = 2 };
+
+            /// <summary>
             /// Get or Set the specified value in the OS configuration.
             /// </summary>
             /// <param name="item">Item to retrieve.</param>
@@ -263,9 +268,9 @@ namespace Meadow.Devices
             /// Get the current product name.
             /// </summary>
             /// <returns>Product name.</returns>
-            public static string GetProduct()
+            public static HardwareVersion GetProduct()
             {
-                return (GetString(ConfigurationValues.Product));
+                return((HardwareVersion) GetUInt32(ConfigurationValues.Product));
             }
 
             /// <summary>
