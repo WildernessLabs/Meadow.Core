@@ -94,8 +94,17 @@ namespace Meadow.Units
         [Pure] public static bool operator >=(Angle left, Angle right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Angle operator +(Angle lvalue, Angle rvalue) => new Angle(lvalue.Value + rvalue.Value, UnitType.Degrees);
-        [Pure] public static Angle operator -(Angle lvalue, Angle rvalue) => new Angle(lvalue.Value - rvalue.Value, UnitType.Degrees);
+        [Pure] public static Angle operator +(Angle lvalue, Angle rvalue) => new Angle(StandardizeDegrees(lvalue.Value + rvalue.Value), UnitType.Degrees);
+        [Pure] public static Angle operator -(Angle lvalue, Angle rvalue) => new Angle(StandardizeDegrees(lvalue.Value - rvalue.Value), UnitType.Degrees);
+        [Pure] public static Angle operator *(Angle value, double operand) => new Angle(StandardizeDegrees(value.Value * operand), UnitType.Degrees);
+        [Pure] public static Angle operator /(Angle value, double operand) => new Angle(StandardizeDegrees(value.Value / operand), UnitType.Degrees);
+
+        private static double StandardizeDegrees(double value)
+        {
+            value = value % 360d;
+            if (value < 0) return value + 360d;
+            return value;
+        }
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

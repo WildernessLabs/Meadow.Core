@@ -100,6 +100,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Volume operator +(Volume lvalue, Volume rvalue) => new Volume(lvalue.Value + rvalue.Value);
         [Pure] public static Volume operator -(Volume lvalue, Volume rvalue) => new Volume(lvalue.Value - rvalue.Value);
+        [Pure] public static Volume operator *(Volume value, double operand) => new Volume(value.Value * operand);
+        [Pure] public static Volume operator /(Volume value, double operand) => new Volume(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

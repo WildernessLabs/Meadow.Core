@@ -119,6 +119,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Power operator +(Power lvalue, Power rvalue) => new Power(lvalue.Value + rvalue.Value);
         [Pure] public static Power operator -(Power lvalue, Power rvalue) => new Power(lvalue.Value - rvalue.Value);
+        [Pure] public static Power operator *(Power value, double operand) => new Power(value.Value * operand);
+        [Pure] public static Power operator /(Power value, double operand) => new Power(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

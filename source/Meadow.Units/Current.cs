@@ -104,6 +104,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Current operator +(Current lvalue, Current rvalue) => new Current(lvalue.Value + rvalue.Value);
         [Pure] public static Current operator -(Current lvalue, Current rvalue) => new Current(lvalue.Value - rvalue.Value);
+        [Pure] public static Current operator *(Current value, double operand) => new Current(value.Value * operand);
+        [Pure] public static Current operator /(Current value, double operand) => new Current(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

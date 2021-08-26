@@ -93,6 +93,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Concentration operator +(Concentration lvalue, Concentration rvalue) => new Concentration(lvalue.Value + rvalue.Value);
         [Pure] public static Concentration operator -(Concentration lvalue, Concentration rvalue) => new Concentration(lvalue.Value - rvalue.Value);
+        [Pure] public static Concentration operator *(Concentration value, double operand) => new Concentration(value.Value * operand);
+        [Pure] public static Concentration operator /(Concentration value, double operand) => new Concentration(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

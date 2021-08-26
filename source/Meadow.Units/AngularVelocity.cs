@@ -96,6 +96,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static AngularVelocity operator +(AngularVelocity lvalue, AngularVelocity rvalue) => new AngularVelocity(lvalue.Value + rvalue.Value);
         [Pure] public static AngularVelocity operator -(AngularVelocity lvalue, AngularVelocity rvalue) => new AngularVelocity(lvalue.Value - rvalue.Value);
+        [Pure] public static AngularVelocity operator *(AngularVelocity value, double operand) => new AngularVelocity(value.Value * operand);
+        [Pure] public static AngularVelocity operator /(AngularVelocity value, double operand) => new AngularVelocity(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

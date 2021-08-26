@@ -100,6 +100,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Torque operator +(Torque lvalue, Torque rvalue) => new Torque(lvalue.Value + rvalue.Value);
         [Pure] public static Torque operator -(Torque lvalue, Torque rvalue) => new Torque(lvalue.Value - rvalue.Value);
+        [Pure] public static Torque operator *(Torque value, double operand) => new Torque(value.Value * operand);
+        [Pure] public static Torque operator /(Torque value, double operand) => new Torque(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

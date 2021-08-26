@@ -82,6 +82,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static RelativeHumidity operator +(RelativeHumidity lvalue, RelativeHumidity rvalue) => new RelativeHumidity(lvalue.Percent + rvalue.Percent);
         [Pure] public static RelativeHumidity operator -(RelativeHumidity lvalue, RelativeHumidity rvalue) => new RelativeHumidity(lvalue.Percent - rvalue.Percent);
+        [Pure] public static RelativeHumidity operator *(RelativeHumidity value, double operand) => new RelativeHumidity(value.Percent * operand);
+        [Pure] public static RelativeHumidity operator /(RelativeHumidity value, double operand) => new RelativeHumidity(value.Percent / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

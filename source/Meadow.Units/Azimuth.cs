@@ -129,8 +129,17 @@ namespace Meadow.Units
         [Pure] public static bool operator >=(Azimuth left, Azimuth right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Azimuth operator +(Azimuth lvalue, Azimuth rvalue) => new Azimuth(lvalue.Value + rvalue.Value);
-        [Pure] public static Azimuth operator -(Azimuth lvalue, Azimuth rvalue) => new Azimuth(lvalue.Value - rvalue.Value);
+        [Pure] public static Azimuth operator +(Azimuth lvalue, Azimuth rvalue) => new Azimuth(StandardizeAngle(lvalue.Value + rvalue.Value));
+        [Pure] public static Azimuth operator -(Azimuth lvalue, Azimuth rvalue) => new Azimuth(StandardizeAngle(lvalue.Value - rvalue.Value));
+        [Pure] public static Azimuth operator *(Azimuth value, double operand) => new Azimuth(StandardizeAngle(value.Value * operand));
+        [Pure] public static Azimuth operator /(Azimuth value, double operand) => new Azimuth(StandardizeAngle(value.Value / operand));
+
+        private static double StandardizeAngle(double value)
+        {
+            value = value % 360d;
+            if (value < 0) return value + 360d;
+            return value;
+        }
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

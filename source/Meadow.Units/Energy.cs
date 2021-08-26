@@ -103,6 +103,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Energy operator +(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value + rvalue.Value);
         [Pure] public static Energy operator -(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value - rvalue.Value);
+        [Pure] public static Energy operator *(Energy value, double operand) => new Energy(value.Value * operand);
+        [Pure] public static Energy operator /(Energy value, double operand) => new Energy(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

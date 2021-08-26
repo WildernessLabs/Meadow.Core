@@ -90,6 +90,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Illuminance operator +(Illuminance lvalue, Illuminance rvalue) => new Illuminance(lvalue.Value + rvalue.Value);
         [Pure] public static Illuminance operator -(Illuminance lvalue, Illuminance rvalue) => new Illuminance(lvalue.Value - rvalue.Value);
+        [Pure] public static Illuminance operator *(Illuminance value, double operand) => new Illuminance(value.Value * operand);
+        [Pure] public static Illuminance operator /(Illuminance value, double operand) => new Illuminance(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

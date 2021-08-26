@@ -8,39 +8,39 @@ namespace Meadow.Units.Conversions
         public static Func<Azimuth16PointCardinalNames, double> Compass16CardinalsToDegrees = (value) => {
             switch (value) {
                 case Azimuth16PointCardinalNames.N:
-                    return 0f;
+                    return 0d;
                 case Azimuth16PointCardinalNames.NNE:
-                    return 22.5f;
+                    return 22.5d;
                 case Azimuth16PointCardinalNames.NE:
-                    return 45f;
+                    return 45d;
                 case Azimuth16PointCardinalNames.ENE:
-                    return 67.5f;
+                    return 67.5d;
                 case Azimuth16PointCardinalNames.E:
-                    return 90f;
+                    return 90d;
                 case Azimuth16PointCardinalNames.ESE:
-                    return 112.5f;
+                    return 112.5d;
                 case Azimuth16PointCardinalNames.SE:
-                    return 135f;
+                    return 135d;
                 case Azimuth16PointCardinalNames.SSE:
-                    return 157.5f;
+                    return 157.5d;
                 case Azimuth16PointCardinalNames.S:
-                    return 180f;
+                    return 180d;
                 case Azimuth16PointCardinalNames.SSW:
-                    return 202.5f;
+                    return 202.5d;
                 case Azimuth16PointCardinalNames.SW:
-                    return 225f;
+                    return 225d;
                 case Azimuth16PointCardinalNames.WSW:
-                    return 247.5f;
+                    return 247.5d;
                 case Azimuth16PointCardinalNames.W:
-                    return 270;
+                    return 270d;
                 case Azimuth16PointCardinalNames.WNW:
-                    return 292.5;
+                    return 292.5d;
                 case Azimuth16PointCardinalNames.NW:
-                    return 315f;
+                    return 315d;
                 case Azimuth16PointCardinalNames.NNW:
-                    return 337.5f;
+                    return 337.5d;
                 default:
-                    return 0;
+                    return 0d;
             }
         };
 

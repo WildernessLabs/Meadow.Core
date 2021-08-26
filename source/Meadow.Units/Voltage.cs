@@ -98,6 +98,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Voltage operator +(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Value + rvalue.Value);
         [Pure] public static Voltage operator -(Voltage lvalue, Voltage rvalue) => new Voltage(lvalue.Value - rvalue.Value);
+        [Pure] public static Voltage operator *(Voltage value, double operand) => new Voltage(value.Value * operand);
+        [Pure] public static Voltage operator /(Voltage value, double operand) => new Voltage(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

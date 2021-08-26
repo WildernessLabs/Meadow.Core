@@ -92,6 +92,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Frequency operator +(Frequency lvalue, Frequency rvalue) => new Frequency(lvalue.Value + rvalue.Value);
         [Pure] public static Frequency operator -(Frequency lvalue, Frequency rvalue) => new Frequency(lvalue.Value - rvalue.Value);
+        [Pure] public static Frequency operator *(Frequency value, double operand) => new Frequency(value.Value * operand);
+        [Pure] public static Frequency operator /(Frequency value, double operand) => new Frequency(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to

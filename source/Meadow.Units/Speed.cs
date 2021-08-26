@@ -110,6 +110,8 @@ namespace Meadow.Units
         // Math
         [Pure] public static Speed operator +(Speed lvalue, Speed rvalue) => new Speed(lvalue.Value + rvalue.Value);
         [Pure] public static Speed operator -(Speed lvalue, Speed rvalue) => new Speed(lvalue.Value - rvalue.Value);
+        [Pure] public static Speed operator *(Speed value, double operand) => new Speed(value.Value * operand);
+        [Pure] public static Speed operator /(Speed value, double operand) => new Speed(value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
