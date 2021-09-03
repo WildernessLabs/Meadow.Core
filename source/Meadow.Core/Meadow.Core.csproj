@@ -25,6 +25,5 @@
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\Meadow.Contracts\Meadow.Contracts.csproj" />
-   <ProjectReference Include="..\Meadow.Units\Meadow.Units.csproj" />
  </ItemGroup>
 </Project>
