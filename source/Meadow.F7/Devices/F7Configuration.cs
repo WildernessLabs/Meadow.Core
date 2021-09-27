@@ -23,7 +23,7 @@ namespace Meadow.Devices
                 DeviceName = 0, Product, Model, OsVersion, BuildDate, ProcessorType, UniqueId, SerialNumber, CoprocessorType,
                 CoprocessorFirmwareVersion, MonoVersion,
                 AutomaticallyStartNetwork, AutomaticallyReconnect, MaximumNetworkRetryCount, GetTimeAtStartup,
-                NtpServer, MacAddress, SoftApMacAddress, DefaultAccessPoint
+                MacAddress, SoftApMacAddress, DefaultAccessPoint
             };
 
             /// <summary>
