@@ -37,11 +37,6 @@ namespace Meadow.Gateways
         bool GetNetworkTimeAtStartup { get; }
 
         /// <summary>
-        /// Address of the NTP server.
-        /// </summary>
-        string NtpServer { get; }
-
-        /// <summary>
         /// MAC address of the board when acting as a client.
         /// </summary>
         byte[] MacAddress { get; }
@@ -202,14 +197,6 @@ namespace Meadow.Gateways
         /// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         bool SetAutomaticallyReconnect(bool automaticallyReconnect);
-
-
-        /// <summary>
-        /// Set the name of the NTP server to use to get the current time.
-        /// </summary>
-        /// <param name="ntpServer">Server to use to retrieve the current time.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        bool SetNtpServer(string ntpServer);
 
         /// <summary>
         /// Should the system attempt to get the time from the configured NTP server.

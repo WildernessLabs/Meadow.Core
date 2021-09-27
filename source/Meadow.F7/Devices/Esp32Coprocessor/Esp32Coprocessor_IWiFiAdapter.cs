@@ -108,19 +108,6 @@ namespace Meadow.Devices
         protected bool _getNetworkTimeAtStartup;
 
         /// <summary>
-        /// Name of the NTP server to use for time retrieval.
-        /// </summary>
-        public string NtpServer
-        {
-            get
-            {
-                CheckStatus();
-                return (_ntpServer);
-            }
-        }
-        protected string _ntpServer = string.Empty;
-
-        /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
         public byte[] MacAddress
@@ -625,21 +612,6 @@ namespace Meadow.Devices
             if (result)
             {
                 _automaticallyReconect = automaticallyReconnect;
-            }
-            return (result);
-        }
-
-        /// <summary>
-        /// Set the name of the NTP server to use to get the current time.
-        /// </summary>
-        /// <param name="ntpServer">Server to use to retrieve the current time.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        public bool SetNtpServer(string ntpServer)
-        {
-            bool result = F7Micro.Configuration.SetString(F7Micro.Configuration.ConfigurationValues.NtpServer, ntpServer);
-            if (result)
-            {
-                _ntpServer = ntpServer;
             }
             return (result);
         }

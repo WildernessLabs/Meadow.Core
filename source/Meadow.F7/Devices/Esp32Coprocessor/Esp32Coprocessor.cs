@@ -316,7 +316,6 @@ namespace Meadow.Devices
                 _automaticallyStartNetwork = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork);
                 _automaticallyReconect = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect);
                 _getNetworkTimeAtStartup = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup);
-                _ntpServer = F7Micro.Configuration.GetString(F7Micro.Configuration.ConfigurationValues.NtpServer);
                 F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.SoftApMacAddress, _apMacAddress);
                 F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.MacAddress, _macAddress);
                 _defaultAccessPoint = F7Micro.Configuration.GetString(F7Micro.Configuration.ConfigurationValues.DefaultAccessPoint);
