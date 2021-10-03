@@ -21,10 +21,6 @@ namespace Meadow.Devices
                   new AnalogCapabilities(true, DefaultA2DResolution),
                   new NetworkCapabilities(true, true))
         {
-            // TODO: it would be nice to block on this initialization, but
-            // because of the app architecture, this ctor runs asynchronously
-            // with app startup, so right now we're raising an event.
-            //this.InitEsp32CoProc();
             this.InitCoprocessor();
         }
     }
