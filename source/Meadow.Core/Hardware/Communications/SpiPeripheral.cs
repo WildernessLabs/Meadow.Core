@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Meadow.Hardware
 {
-    //TODO: BC: add internal buffer
     public class SpiPeripheral : ISpiPeripheral
     {
         public IDigitalOutputPort? ChipSelect { get; }
