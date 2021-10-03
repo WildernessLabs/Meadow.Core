@@ -82,13 +82,15 @@ namespace Meadow.Devices
             }
         }
 
-        // TODO: get rid of this
+        // TODO: get rid of this in b5.5
+        [Obsolete("Use `InitCoprocessor()` instead. Will be removed in the future.")]
         public Task<bool> InitWiFiAdapter()
         {
             return InitCoprocessor();
         }
 
-        // TODO: get rid of this
+        // TODO: get rid of this in b5.5
+        [Obsolete("Use `InitCoprocessor()` instead. Will be removed in the future.")]
         public Task<bool> InitBluetoothAdapter()
         {
             return InitCoprocessor();
