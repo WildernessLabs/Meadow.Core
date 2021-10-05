@@ -5,11 +5,40 @@ using Meadow.Devices;
 
 namespace Meadow
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static partial class MeadowOS
     {
+        //==== internals
         private static SynchronizationContext? synchronizationContext;
 
+        //==== properties
         public static IMeadowDevice CurrentDevice { get; set; } = null!;
+        public static bool Initialized { get; private set; }
+
+        static MeadowOS()
+        {
+
+        }
+
+        public static void Initialize()
+        {
+            Console.WriteLine("MeadowOS.Initialize()");
+
+            // if we're already init'd bail out
+            if (Initialized) { return; }
+
+            // used to capture the thread for `InvokeOnMainThread()`
+            synchronizationContext = new MeadowSynchronizationContext();
+            SynchronizationContext.SetSynchronizationContext(synchronizationContext);
+            SetSynchronizationContext(synchronizationContext);
+
+            // initialize file system folders and such
+            InitializeFileSystem();
+
+            Initialized = true;
+        }
 
 
         public static void Sleep(DateTime until)
@@ -95,6 +124,7 @@ namespace Meadow
             }
         }
 
+
         //==== Synchronization context
 
         // TODO: We should consider adding a second synch context for UX updates
@@ -120,5 +150,6 @@ namespace Meadow
                 synchronizationContext.Send(delegate { action(); }, null);
             }
         }
+
     }
 }
