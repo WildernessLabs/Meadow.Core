@@ -7,6 +7,7 @@ using Meadow.Gateways;
 using Meadow.Gateway.WiFi;
 using Meadow.Gateways.Exceptions;
 using System.Collections.Generic;
+using static Meadow.Devices.F7MicroBase;
 
 namespace Meadow.Devices
 {
@@ -589,7 +590,7 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork)
         {
-            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork);
+            bool result = Configuration.SetBoolean(Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork);
             if (result)
             {
                 _automaticallyStartNetwork = automaticallyStartNetwork;
@@ -608,7 +609,7 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetAutomaticallyReconnect(bool automaticallyReconnect)
         {
-            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect);
+            bool result = Configuration.SetBoolean(Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect);
             if (result)
             {
                 _automaticallyReconect = automaticallyReconnect;
@@ -623,7 +624,7 @@ namespace Meadow.Devices
         /// <returns>True if the property was set, flase if there was a problem.</returns>
         public bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup)
         {
-            bool result = F7Micro.Configuration.SetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup);
+            bool result = Configuration.SetBoolean(Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup);
             if (result)
             {
                 _getNetworkTimeAtStartup = getTimeAtStartup;
@@ -646,7 +647,7 @@ namespace Meadow.Devices
                 maximumRetryCount = 3;
             }
 
-            bool result = F7Micro.Configuration.SetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount);
+            bool result = Configuration.SetUInt32(Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount);
             if (result)
             {
                 _maximumRetryCount = maximumRetryCount;
