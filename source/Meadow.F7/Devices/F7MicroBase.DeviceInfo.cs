@@ -6,7 +6,7 @@ using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
-    public partial class F7Micro
+    public abstract partial class F7MicroBase
     {
         /// <summary>
         /// Describes the device information values

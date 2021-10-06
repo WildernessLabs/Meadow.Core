@@ -13,7 +13,7 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public abstract class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
+    public abstract partial class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
     {
         protected Esp32Coprocessor? esp32;
 

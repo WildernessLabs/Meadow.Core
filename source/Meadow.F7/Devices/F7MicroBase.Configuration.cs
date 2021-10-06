@@ -7,7 +7,7 @@ using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
-    public partial class F7Micro
+    public abstract partial class F7MicroBase
     {
         /// <summary>
         /// Class allowing access to the configuration of the F7 Micro.
