@@ -200,30 +200,35 @@ namespace Meadow.Hardware
             this.Bus.Write(this.ChipSelect, WriteBuffer.Span[0..(writeBuffer.Length + 1)], this.chipSelectMode);
         }
 
-        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer)
+        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer, DuplexType duplex = DuplexType.Half)
         {
-            // Todo: we should move this functionality deeper into the stack
-            // and have nuttx write the write buffer, then continue clocking out
-            // 0x00's until it's hit writeBuffer.Length + readBuffer.Lenght
-            // and ignore the input until it hits writeBuffer.Length, and then
-            // start writing directly into the readBuffer starting at 0.
-            // that will prevent all the allocations and copying we're doing
-            // here.
+            if (duplex == DuplexType.Half) {
 
-            // clock in and clock out data means that the buffers have to be as
-            // long as both tx and rx together
-            int length = writeBuffer.Length + readBuffer.Length;
-            Span<byte> txBuffer = stackalloc byte[length];
-            Span<byte> rxBuffer = stackalloc byte[length];
+                // Todo: we should move this functionality deeper into the stack
+                // and have nuttx write the write buffer, then continue clocking out
+                // 0x00's until it's hit writeBuffer.Length + readBuffer.Lenght
+                // and ignore the input until it hits writeBuffer.Length, and then
+                // start writing directly into the readBuffer starting at 0.
+                // that will prevent all the allocations and copying we're doing
+                // here.
 
-            // copy the write into tx
-            writeBuffer.CopyTo(txBuffer);
+                // clock in and clock out data means that the buffers have to be as
+                // long as both tx and rx together
+                int length = writeBuffer.Length + readBuffer.Length;
+                Span<byte> txBuffer = stackalloc byte[length];
+                Span<byte> rxBuffer = stackalloc byte[length];
 
-            // write/read the data
-            Bus.Exchange(ChipSelect, txBuffer, rxBuffer, this.chipSelectMode);
+                // copy the write into tx
+                writeBuffer.CopyTo(txBuffer);
 
-            // move the rx data into the read buffer, starting it at zero
-            rxBuffer[writeBuffer.Length..length].CopyTo(readBuffer);
+                // write/read the data
+                Bus.Exchange(ChipSelect, txBuffer, rxBuffer, this.chipSelectMode);
+
+                // move the rx data into the read buffer, starting it at zero
+                rxBuffer[writeBuffer.Length..length].CopyTo(readBuffer);
+            } else {
+                Bus.Exchange(ChipSelect, writeBuffer, readBuffer, this.chipSelectMode);
+            }
         }
 
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update

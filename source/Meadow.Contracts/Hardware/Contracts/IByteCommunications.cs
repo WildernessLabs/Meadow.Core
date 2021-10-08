@@ -109,8 +109,10 @@ namespace Meadow.Hardware
         /// Write data to followed by read data from the peripheral.
         /// </summary>
         /// <param name="writeBuffer">Data to write</param>
-        /// <param name="readBuffer">Buffer where read data will be written.  Number of bytes read is determined by buffer size</param>
-        void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer);
+        /// <param name="readBuffer">Buffer where read data will be written. Number of bytes read is determined by buffer size.</param>
+        /// <param name="duplex">Whether the communication will happen in a half-duplex or full-duplex fashion.</param>
+        void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer, DuplexType duplex = DuplexType.Half);
+        //void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer);
 
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
