@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Meadow.Devices
 {
-    public partial class F7Micro
+    public partial class F7MicroBase
     {
         internal static class FileSystem
         {

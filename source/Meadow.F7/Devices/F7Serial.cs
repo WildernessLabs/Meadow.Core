@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Meadow.Devices
 {
+    //TODO: should this be F7MicroBase.F7Serial?
     internal class F7Serial
     {
         private const string DriverFolder = "/dev";

@@ -37,6 +37,8 @@ namespace Meadow
             // initialize file system folders and such
             InitializeFileSystem();
 
+
+
             Initialized = true;
         }
 
