@@ -92,15 +92,6 @@ namespace Meadow.Devices
             return InitCoprocessor();
         }
 
-        public void SetClock(DateTime dateTime)
-        {
-            var ts = new Core.Interop.Nuttx.timespec {
-                tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
-            };
-
-            Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
-        }
-
         /// <summary>
         /// Check if the coprocessor is available / ready and throw an exception if it
         /// has not been setup.
@@ -116,6 +107,7 @@ namespace Meadow.Devices
                 return true;
             }
         }
+
 
         //==== antenna stuff
 
@@ -180,13 +172,19 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="deviceName">Name to be used.</param>
         /// <returns>True if the request was successful, false otherwise.</returns>
-        public bool SetDeviceNmae(string deviceName)
+        public bool SetDeviceName(string deviceName)
         {
             bool result = F7Micro.Configuration.SetDeviceName(deviceName);
             //
             //  May need to store this somewhere later to split the return.
             //
             return (result);
+        }
+
+        // TODO: remove in b5.5
+        [Obsolete("Use `SetDeviceName()`")]
+        public bool SetDeviceNmae(string deviceName) {
+            return this.SetDeviceName(deviceName);
         }
 
         /// <summary>
@@ -201,6 +199,15 @@ namespace Meadow.Devices
         public void Reset()
         {
             UPD.Ioctl(Nuttx.UpdIoctlFn.PowerReset);
+        }
+
+        public void SetClock(DateTime dateTime)
+        {
+            var ts = new Core.Interop.Nuttx.timespec {
+                tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
+            };
+
+            Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
 
     }
