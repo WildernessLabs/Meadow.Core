@@ -38,6 +38,11 @@ namespace Meadow.Devices
         /// </summary>
         public event EventHandler WiFiInterfaceStopped = delegate { };
 
+        /// <summary>
+        /// Raise the NTP time changed event.
+        /// </summary>
+        public event EventHandler NtpTimeChanged = delegate { };
+
         #endregion Events
 
 
@@ -257,6 +262,9 @@ namespace Meadow.Devices
                     break;
                 case WiFiFunction.StopWiFiInterfaceEvent:
                     RaiseWiFiInterfaceStopped(statusCode, payload);
+                    break;
+                case WiFiFunction.NtpUpdateEvent:
+                    RaiseNtpTimeChangedEvent();
                     break;
                 default:
                     throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
@@ -718,6 +726,15 @@ namespace Meadow.Devices
         {
             WiFiInterfaceStoppedEventArgs e = new WiFiInterfaceStoppedEventArgs(statusCode);
             WiFiInterfaceStopped?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Process the NtpTimeChanged event.
+        /// </summary>
+        protected void RaiseNtpTimeChangedEvent()
+        {
+            NtpTimeChangedEventArgs e = new NtpTimeChangedEventArgs();
+            NtpTimeChanged?.Invoke(this, e);
         }
 
         #endregion Event raising methods

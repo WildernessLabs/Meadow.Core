@@ -6,13 +6,8 @@ namespace Meadow.Gateway.WiFi
     /// <summary>
     /// Data relating to a stop WiFi interface request.
     /// </summary>
-    public class WiFiInterfaceStoppedEventArgs : EventArgs
+    public class NtpTimeChangedEventArgs : EventArgs
     {
-        /// <summary>
-        /// Status code of the stop WiFi interface request.
-        /// </summary>
-        public StatusCodes StatusCode { get; private set; }
-
         /// <summary>
         /// Date and time the event was generated.
         /// </summary>
@@ -22,9 +17,8 @@ namespace Meadow.Gateway.WiFi
         /// Construct a WiFiInterfaceStoppedEventArgs object.
         /// </summary>
         /// <param name="statusCode">Status code of the </param>
-        public WiFiInterfaceStoppedEventArgs(StatusCodes statusCode)
+        public NtpTimeChangedEventArgs()
         {
-            StatusCode = statusCode;
             When = DateTime.Now;
         }
     }
