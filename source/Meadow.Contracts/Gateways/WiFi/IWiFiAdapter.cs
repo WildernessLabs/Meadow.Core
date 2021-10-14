@@ -99,6 +99,11 @@ namespace Meadow.Gateways
         /// </summary>
         event EventHandler WiFiInterfaceStopped;
 
+        /// <summary>
+        /// User code to process the time changed event.
+        /// </summary>
+        event EventHandler NtpTimeChanged;
+
         #endregion Delegates and Events
 
         #region Methods

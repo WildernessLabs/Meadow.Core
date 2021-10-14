@@ -8,6 +8,7 @@ using Meadow.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Meadow.Gateways;
+using System.Net;
 
 namespace Meadow.Devices
 {
@@ -88,6 +89,10 @@ namespace Meadow.Devices
                 };
                 _eventHandlerThread.Start();
             }
+
+            IpAddress = new IPAddress(0x00000000);
+            SubnetMask = new IPAddress(0x00000000);
+            Gateway = new IPAddress(0x00000000);
         }
 
         #endregion Constructor(s)
