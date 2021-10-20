@@ -3,12 +3,6 @@ using System.Collections.Generic;
 
 namespace Meadow.Hardware
 {
-    public enum ChipSelectMode
-    {
-        ActiveLow,
-        ActiveHigh
-    }
-
     public interface ISpiBus
     {
         long[] SupportedSpeeds { get; }

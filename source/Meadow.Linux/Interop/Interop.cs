@@ -7,7 +7,6 @@ namespace Meadow
     [SuppressUnmanagedCodeSecurity]
     internal static partial class Interop
     {
-
         public const string LIBC = "libc";
 
         public const int TCSANOW = 0;
@@ -31,12 +30,6 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public unsafe static extern int read(int handle, byte* buf, int count);
-
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int ioctl(int fd, int request, byte data);
-
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int ioctl(int fd, int request, IntPtr pData);
 
         //int tcgetattr(int fildes, struct termios *termios_p);
         [DllImport(LIBC, SetLastError = true)]

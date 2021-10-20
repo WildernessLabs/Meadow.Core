@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Meadow
 {
-    public class MeadowOnLinux<TPinout> : IMeadowDevice, IApp
+    public class MeadowForLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
         private SysFsGpioDriver _ioController;
@@ -33,7 +33,7 @@ namespace Meadow
             }
         }
 
-        public MeadowOnLinux()
+        public MeadowForLinux()
         {
             Pins = new TPinout();
             Capabilities = new DeviceCapabilities(
@@ -112,6 +112,17 @@ namespace Meadow
             return new SysFsDigitalInputPort(_ioController, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode);
         }
 
+
+        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, long speedkHz = 375)
+        {
+            throw new NotImplementedException();
+        }
+
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount = 5, int sampleIntervalMs = 40, float voltageReference = 3.3F)
@@ -125,16 +136,6 @@ namespace Meadow
         }
 
         public IPwmPort CreatePwmPort(IPin pin, float frequency = 100, float dutyCycle = 0.5F, bool invert = false)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, long speedkHz = 375)
         {
             throw new NotImplementedException();
         }
