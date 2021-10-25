@@ -55,7 +55,7 @@ namespace Meadow.Devices
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
-        public Task<bool> InitCoprocessor()
+        protected bool InitCoprocessor()
         {
             lock (coprocInitLock) {
                 if (this.esp32 == null) {
@@ -68,13 +68,13 @@ namespace Meadow.Devices
                         Coprocessor = esp32;
                     } catch (Exception e) {
                         Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
-                        return Task.FromResult<bool>(false);
+                        return false;
                     } finally {
                             
                     }
-                    return Task.FromResult<bool>(true);
+                    return true;
                 } else { // already initialized, bail out
-                    return Task.FromResult<bool>(true);
+                    return true;
                 }
 
             }

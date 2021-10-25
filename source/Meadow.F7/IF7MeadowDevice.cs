@@ -15,8 +15,6 @@ namespace Meadow
         IWiFiAdapter? WiFiAdapter { get; }
         ICoprocessor? Coprocessor { get; }
 
-        Task<bool> InitCoprocessor();
-
         AntennaType CurrentAntenna { get; }
 
         void SetAntenna(AntennaType antenna, bool persist = true);
