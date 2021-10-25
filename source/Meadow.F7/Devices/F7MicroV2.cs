@@ -21,7 +21,6 @@ namespace Meadow.Devices
                   new AnalogCapabilities(true, DefaultA2DResolution),
                   new NetworkCapabilities(true, true))
         {
-            this.InitCoprocessor();
         }
     }
 }

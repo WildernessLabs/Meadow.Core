@@ -25,6 +25,8 @@ namespace Meadow.Devices
 
         public DeviceCapabilities Capabilities { get; }
 
+        protected object coprocInitLock = new object();
+
         /// <summary>
         /// Gets the pins.
         /// </summary>
@@ -45,7 +47,7 @@ namespace Meadow.Devices
         {
             IoController.Initialize();
 
-            
+            InitCoprocessor();
         }
 
         public IPin GetPin(string pinName)
@@ -55,59 +57,28 @@ namespace Meadow.Devices
 
         public Task<bool> InitCoprocessor()
         {
-            if (!IsCoprocessorInitialized()) {
-                return Task.Run<bool>(() => {
+            lock (coprocInitLock) {
+                if (this.esp32 == null) {
                     try {
-                        //TODO: looks like we're also instantiating this in the ctor
-                        // need to cleanup.
-                        //Console.WriteLine($"InitWiFiAdapter()");
-                        if (this.esp32 == null) {
-                            this.esp32 = new Esp32Coprocessor();
-                        }
+                        // instantiate the co proc and set the various adapters
+                        // to be it.
+                        this.esp32 = new Esp32Coprocessor();
                         BluetoothAdapter = esp32;
                         WiFiAdapter = esp32;
                         Coprocessor = esp32;
                     } catch (Exception e) {
                         Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
-                        return false;
+                        return Task.FromResult<bool>(false);
+                    } finally {
+                            
                     }
-                    return true;
-                });
-            } else {
-                return Task.FromResult<bool>(true);
+                    return Task.FromResult<bool>(true);
+                } else { // already initialized, bail out
+                    return Task.FromResult<bool>(true);
+                }
+
             }
         }
-
-        // TODO: get rid of this in b5.5
-        [Obsolete("Use `InitCoprocessor()` instead. Will be removed in the future.")]
-        public Task<bool> InitWiFiAdapter()
-        {
-            return InitCoprocessor();
-        }
-
-        // TODO: get rid of this in b5.5
-        [Obsolete("Use `InitCoprocessor()` instead. Will be removed in the future.")]
-        public Task<bool> InitBluetoothAdapter()
-        {
-            return InitCoprocessor();
-        }
-
-        /// <summary>
-        /// Check if the coprocessor is available / ready and throw an exception if it
-        /// has not been setup.
-        /// </summary>
-        protected bool IsCoprocessorInitialized()
-        {
-            if (esp32 == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
 
         //==== antenna stuff
 
