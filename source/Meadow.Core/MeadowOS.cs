@@ -24,8 +24,6 @@ namespace Meadow
 
         public static void Initialize()
         {
-            Console.WriteLine("MeadowOS.Initialize()");
-
             // if we're already init'd bail out
             if (Initialized) { return; }
 
@@ -36,8 +34,6 @@ namespace Meadow
 
             // initialize file system folders and such
             InitializeFileSystem();
-
-
 
             Initialized = true;
         }
