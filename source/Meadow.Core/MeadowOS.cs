@@ -12,9 +12,10 @@ namespace Meadow
     {
         //==== internals
         private static SynchronizationContext? synchronizationContext;
+        private static IPlatformOS platformOS => CurrentDevice.PlatformOS;
 
         //==== properties
-        public static IMeadowDevice CurrentDevice { get; set; } = null!;
+        public static IMeadowDevice CurrentDevice { get; private set; } = null!;
         public static bool Initialized { get; private set; }
 
         static MeadowOS()
@@ -22,10 +23,16 @@ namespace Meadow
 
         }
 
-        public static void Initialize()
+        public static void Initialize(IMeadowDevice device)
         {
             // if we're already init'd bail out
             if (Initialized) { return; }
+
+            // save the device
+            CurrentDevice = device;
+
+            // initialize the devices' platform OS
+            platformOS.Initialize();
 
             // used to capture the thread for `InvokeOnMainThread()`
             synchronizationContext = new MeadowSynchronizationContext();
@@ -33,6 +40,7 @@ namespace Meadow
             SetSynchronizationContext(synchronizationContext);
 
             // initialize file system folders and such
+            // TODO: move this to platformOS
             InitializeFileSystem();
 
             Initialized = true;
