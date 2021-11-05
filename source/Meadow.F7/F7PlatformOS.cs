@@ -12,15 +12,5 @@ namespace Meadow
         {
             
         }
-
-        public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
-        {
-            throw new NotImplementedException();
-        }
     }
 }

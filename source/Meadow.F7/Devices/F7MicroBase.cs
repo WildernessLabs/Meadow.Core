@@ -15,17 +15,17 @@ namespace Meadow.Devices
     /// </summary>
     public abstract partial class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
     {
-        protected Esp32Coprocessor? esp32;
+        //==== events
+        public event EventHandler WiFiAdapterInitialized = delegate { };
 
+        //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
         public IWiFiAdapter? WiFiAdapter { get; protected set; }
         public ICoprocessor? Coprocessor { get; protected set; }
 
-        public event EventHandler WiFiAdapterInitialized = delegate { };
-
         public DeviceCapabilities Capabilities { get; }
 
-        protected object coprocInitLock = new object();
+        public IPlatformOS PlatformOS { get; protected set; }
 
         /// <summary>
         /// Gets the pins.
@@ -33,14 +33,20 @@ namespace Meadow.Devices
         /// <value>The pins.</value>
         public IF7MicroPinout Pins { get; }
 
+        //==== internals
+        protected Esp32Coprocessor? esp32;
+        protected object coprocInitLock = new object();
         protected IMeadowIOController IoController { get; }
 
+        //==== constructors
         public F7MicroBase(IF7MicroPinout pins, IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
         {
             Pins = pins;
             IoController = ioController;
 
             Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
+
+            PlatformOS = new F7PlatformOS();
         }
 
         public void Initialize()
@@ -143,13 +149,14 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="deviceName">Name to be used.</param>
         /// <returns>True if the request was successful, false otherwise.</returns>
+        [Obsolete("Use [Device].DeviceInformation.DeviceName property instead.")]
         public bool SetDeviceName(string deviceName)
         {
-            bool result = F7Micro.Configuration.SetDeviceName(deviceName);
+            DeviceInformation.DeviceName = deviceName;
             //
             //  May need to store this somewhere later to split the return.
             //
-            return (result);
+            return (true);
         }
 
         // TODO: remove in b5.5

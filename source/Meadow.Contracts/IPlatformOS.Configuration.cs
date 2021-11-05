@@ -29,10 +29,14 @@ namespace Meadow
             DefaultAccessPoint
         };
 
-
         T GetConfigurationValue<T>(ConfigurationValues item) where T : struct;
 
         void SetConfigurationValue<T>(ConfigurationValues item, T value) where T : struct;
-        
+
+        // named properties
+        string OSVersion { get; }
+        string OSBuildDate { get; }
+        string MonoVersion { get; }
+
     }
 }

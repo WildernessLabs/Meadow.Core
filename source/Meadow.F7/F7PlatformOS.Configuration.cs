@@ -10,6 +10,40 @@ namespace Meadow
 {
     public partial class F7PlatformOS
     {
+
+        public T GetConfigurationValue<T>(ConfigurationValues item) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetConfigurationValue<T>(ConfigurationValues item, T value) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
+        //==== public config properties
+        /// <summary>
+        /// Get the OS version.
+        /// </summary>
+        /// <returns>OS version.</returns>
+        public string OSVersion => GetString(ConfigurationValues.OsVersion);
+
+        /// <summary>
+        /// Get the OS build date
+        /// </summary>
+        /// <returns>OS build date.</returns>
+        //TODO: parse as datetime
+        public string OSBuildDate => GetString(ConfigurationValues.BuildDate);
+
+        /// <summary>
+        /// Get the mono version on the device..
+        /// </summary>
+        /// <returns>Mono version.</returns>
+        public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
+
+
+        //==== Configuration internals
+
         /// <summary>
         /// Indicate if a read or write operation is to be executed.
         /// </summary>
@@ -18,7 +52,13 @@ namespace Meadow
         /// <summary>
         /// Hardware version (product).
         /// </summary>
-        public enum HardwareVersion { Unknown = 0, MeadowF7V1 = 1, MeadowF7V2 = 2 };
+        public enum HardwareModel
+        {
+            Unknown = 0,
+            MeadowF7v1 = 1,
+            MeadowF7v2 = 2,
+            MeadowF7v2_Core = 3,
+        };
 
         /// <summary>
         /// Get or Set the specified value in the OS configuration.
