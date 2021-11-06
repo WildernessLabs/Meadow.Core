@@ -198,6 +198,13 @@ namespace Meadow.Hardware
             this.Bus.Write(this.Address, WriteBuffer.Span[0..(writeBuffer.Length + 1)]);
         }
 
+        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer, DuplexType duplex = DuplexType.Half)
+        {
+            if (duplex == DuplexType.Full) { throw new ArgumentException("I2C doesn't support full-duplex communications. Only half-duplex is available because it only has a single data line."); }
+
+            Bus.Exchange(this.Address, writeBuffer, readBuffer);
+        }
+
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
         public byte[] ReadBytes(ushort numberOfBytes)
@@ -253,11 +260,6 @@ namespace Meadow.Hardware
         public byte[] WriteRead(byte[] write, ushort length)
         {
             return this.Bus.WriteReadData(this.Address, length, write);
-        }
-
-        public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer)
-        {
-            Bus.Exchange(this.Address, writeBuffer, readBuffer);
         }
 
         public void WriteRegisters(byte address, byte[] data)
