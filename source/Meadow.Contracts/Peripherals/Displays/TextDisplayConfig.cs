@@ -14,5 +14,10 @@
         /// Width of the display in columns (normally 16 or 20).
         /// </summary>
         public ushort Width;
+
+        /// <summary>
+        /// Font scale multiplier for pixel displays.
+        /// </summary>
+        public ushort FontScale = 1;
     }
 }

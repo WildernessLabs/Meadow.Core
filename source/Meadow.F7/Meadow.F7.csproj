@@ -22,15 +22,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.8.*" />
- </ItemGroup>
- <ItemGroup>
-   <Content Include="netstandard.dll">
-     <PackageCopyToOutput>true</PackageCopyToOutput>
-     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-   </Content>
- </ItemGroup>
- <ItemGroup>
    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
  </ItemGroup>
 </Project>
