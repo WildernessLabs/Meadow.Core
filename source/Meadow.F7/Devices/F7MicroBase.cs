@@ -33,6 +33,8 @@ namespace Meadow.Devices
         /// <value>The pins.</value>
         public IF7MicroPinout Pins { get; }
 
+        public IDeviceInformation Information { get; protected set; }
+
         //==== internals
         protected Esp32Coprocessor? esp32;
         protected object coprocInitLock = new object();
@@ -47,6 +49,8 @@ namespace Meadow.Devices
             Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
 
             PlatformOS = new F7PlatformOS();
+
+            Information = new F7DeviceInformation();
         }
 
         public void Initialize()
@@ -149,10 +153,11 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="deviceName">Name to be used.</param>
         /// <returns>True if the request was successful, false otherwise.</returns>
-        [Obsolete("Use [Device].DeviceInformation.DeviceName property instead.")]
+        // TODO: Delete in b6.1
+        [Obsolete("Use [Device].Information.DeviceName property instead.")]
         public bool SetDeviceName(string deviceName)
         {
-            DeviceInformation.DeviceName = deviceName;
+            Information.DeviceName = deviceName;
             //
             //  May need to store this somewhere later to split the return.
             //
