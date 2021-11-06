@@ -108,10 +108,14 @@ namespace Meadow.Devices
             get
             {
                 CheckStatus();
-                return (_getNetworkTimeAtStartup);
+                return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup));
+            }
+            set
+            {
+                CheckStatus();
+                F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup, value);
             }
         }
-        protected bool _getNetworkTimeAtStartup;
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
@@ -121,11 +125,12 @@ namespace Meadow.Devices
             get
             {
                 CheckStatus();
-                return (_macAddress);
+                byte[] mac = new byte[6];
+                F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
+                return mac;
             }
 
         }
-        protected byte[] _macAddress = new byte[6];
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
@@ -135,13 +140,14 @@ namespace Meadow.Devices
             get
             {
                 CheckStatus();
-                return (_apMacAddress);
+                byte[] mac = new byte[6];
+                F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
+                return mac;
             }
         }
-        protected byte[] _apMacAddress = new byte[6];
 
         /// <summary>
-        /// Automatically start the network interface when the board reboots?
+        /// Gets or sets whether to automatically start the network interface when the board reboots.
         /// </summary>
         /// <remarks>
         /// This will automatically connect to any preconfigured access points if they are available.
@@ -151,10 +157,13 @@ namespace Meadow.Devices
             get
             {
                 CheckStatus();
-                return (_automaticallyStartNetwork);
+                return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork));
+            }
+            set {
+                CheckStatus();
+                F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork, value);
             }
         }
-        protected bool _automaticallyStartNetwork;
 
         /// <summary>
         /// Automatically try to reconnect to an access point if there is a problem / disconnection?
@@ -164,10 +173,13 @@ namespace Meadow.Devices
             get
             {
                 CheckStatus();
-                return (_automaticallyReconect);
+                return F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
+            }
+            set {
+                CheckStatus();
+                F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect, value);
             }
         }
-        protected bool _automaticallyReconect;
 
         /// <summary>
         /// Default access point to try to connect to if the network interface is started and the board
@@ -178,23 +190,34 @@ namespace Meadow.Devices
             get
             {
                 CheckStatus();
-                return (_defaultAccessPoint);
+                return F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
             }
         }
-        protected string _defaultAccessPoint = string.Empty;
 
         /// <summary>
         /// The maximum number of times the ESP32 will retry an operation before returning an error.
         /// </summary>
+        /// <remarks>
+        /// This property enforces a minimum value of 3.
+        /// </remarks>
+
         public uint MaximumRetryCount
         {
             get
             {
                 CheckStatus();
-                return (_maximumRetryCount);
+                return (F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount));
+            }
+            set
+            {
+                CheckStatus();
+                uint retryCount = value;
+                if (retryCount < 3) {
+                    retryCount = 3;
+                }
+                F7PlatformOS.SetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount, retryCount);
             }
         }
-        protected uint _maximumRetryCount;
 
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
@@ -588,79 +611,6 @@ namespace Meadow.Devices
             {
                 throw new Exception("Failed to change the antenna in use.");
             }
-        }
-
-        /// <summary>
-        /// Set the property that indicates if the coporcessor should connect to the default access
-        /// point when the system starts.
-        /// </summary>
-        /// <param name="automaticallyStartNetwork">True for the connection to be tried, false otehrwise.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        public bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork)
-        {
-            bool result = Configuration.SetBoolean(Configuration.ConfigurationValues.AutomaticallyStartNetwork, automaticallyStartNetwork);
-            if (result)
-            {
-                _automaticallyStartNetwork = automaticallyStartNetwork;
-            }
-            return (result);
-        }
-
-        /// <summary>
-        /// Set the property that indicates if the system should automatically attempt to reconnect to an access
-        /// point should the system diconnect.
-        /// </summary>
-        /// <remarks>
-        /// This property will use the <seealso cref="MaximumRetryCount"/> property to determine how many times a reconnect should be attempted.
-        /// </remarks>
-        /// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        public bool SetAutomaticallyReconnect(bool automaticallyReconnect)
-        {
-            bool result = Configuration.SetBoolean(Configuration.ConfigurationValues.AutomaticallyReconnect, automaticallyReconnect);
-            if (result)
-            {
-                _automaticallyReconect = automaticallyReconnect;
-            }
-            return (result);
-        }
-
-        /// <summary>
-        /// Should the system attempt to get the time from the configured NTP server.
-        /// </summary>
-        /// <param name="getTimeAtStartup">True to get the network time.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        public bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup)
-        {
-            bool result = Configuration.SetBoolean(Configuration.ConfigurationValues.GetTimeAtStartup, getTimeAtStartup);
-            if (result)
-            {
-                _getNetworkTimeAtStartup = getTimeAtStartup;
-            }
-            return (result);
-        }
-
-        /// <summary>
-        /// Set the maximum number of times the coprocessor should retry netowrk operations (on error) before returning an error.
-        /// </summary>
-        /// <remarks>
-        /// This property enforces a minimum value of 3.
-        /// </remarks>
-        /// <param name="maximumRetryCount">Maximum number retries.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        public bool SetMaximumRetryCount(uint maximumRetryCount)
-        {
-            if (maximumRetryCount < 3)
-            {
-                maximumRetryCount = 3;
-            }
-
-            bool result = Configuration.SetUInt32(Configuration.ConfigurationValues.MaximumNetworkRetryCount, maximumRetryCount);
-            if (result)
-            {
-                _maximumRetryCount = maximumRetryCount;
-            }
-            return (result);
         }
 
         #endregion Methods

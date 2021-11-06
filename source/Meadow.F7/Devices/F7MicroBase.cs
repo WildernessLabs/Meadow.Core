@@ -159,12 +159,6 @@ namespace Meadow.Devices
             return (true);
         }
 
-        // TODO: remove in b5.5
-        [Obsolete("Use `SetDeviceName()`")]
-        public bool SetDeviceNmae(string deviceName) {
-            return this.SetDeviceName(deviceName);
-        }
-
         /// <summary>
         /// Gets the current processor temerpature
         /// </summary>

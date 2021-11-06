@@ -8,6 +8,8 @@ using static Meadow.IPlatformOS;
 
 namespace Meadow
 {
+    
+
     public partial class F7PlatformOS
     {
 
@@ -47,7 +49,7 @@ namespace Meadow
         /// <summary>
         /// Indicate if a read or write operation is to be executed.
         /// </summary>
-        private enum Direction { Get = 0, Set = 1 };
+        internal enum Direction { Get = 0, Set = 1 };
 
         /// <summary>
         /// Hardware version (product).
@@ -67,7 +69,7 @@ namespace Meadow
         /// <param name="direction">Indicate if a get or a set operation should be performed.</param>
         /// <param name="buffer">Byte buffer holding the value.</param>
         /// <returns>True if successful, false if there was a problem.</returns>
-        private static (bool Result, int Length) GetSetValue(ConfigurationValues item, Direction direction, byte[] buffer)
+        internal static (bool Result, int Length) GetSetValue(ConfigurationValues item, Direction direction, byte[] buffer)
         {
             bool result = true;
             int length = 0;
@@ -124,6 +126,8 @@ namespace Meadow
         /// </summary>
         /// <param name="item">Configuration item to read.</param>
         /// <param name="buffer">Byte buffer to hold the data.</param>
+        /// TODO: why the byte buffer? do we really need that kind of optimization here?
+        /// why not just return the array?
         public static void GetByteArray(ConfigurationValues item, byte[] buffer)
         {
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
@@ -206,6 +210,8 @@ namespace Meadow
         /// <param name="item">Item to set.</param>
         /// <param name="buffer">Byte buffer to hold the data.</param>
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
+        /// TODO: why the byte buffer? do we really need that kind of optimization here?
+        /// why not just return the array?
         public static bool SetByteArray(ConfigurationValues item, byte[] buffer)
         {
             (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
@@ -219,7 +225,7 @@ namespace Meadow
         /// <param name="item">Item to set.</param>
         /// <param name="value"Value to be used.></param>
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
-        public static bool SetUInt(ConfigurationValues item, UInt32 value)
+        public static bool SetUInt(ConfigurationValues item, uint value)
         {
             byte[] buffer = BitConverter.GetBytes(value);
 
