@@ -107,7 +107,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup));
             }
             set
@@ -124,7 +124,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 byte[] mac = new byte[6];
                 F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
                 return mac;
@@ -139,7 +139,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 byte[] mac = new byte[6];
                 F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
                 return mac;
@@ -156,7 +156,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork));
             }
             set {
@@ -172,7 +172,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 return F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
             }
             set {
@@ -189,7 +189,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 return F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
             }
         }
@@ -205,7 +205,7 @@ namespace Meadow.Devices
         {
             get
             {
-                CheckStatus();
+                //CheckStatus();
                 return (F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount));
             }
             set
