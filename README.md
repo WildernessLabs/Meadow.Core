@@ -2,11 +2,27 @@
 
 ## Summary
 
+[TBD]
+
 ## License
+
+Apache 2.0
+
+See [LICENSE File](/LICENSE)
 
 ## Supported Platforms and Distributions
 
+Currently tested platforms and distributions:
+
+| Hardware | Distro | M4L Version tested |
+| - | - |
+| Raspberry Pi 4 | Raspberry Pi OS | pre-release |
+| Jetson Nano | Ubuntu 20.04 | pre-release |
+
 ## Device Prerequisites
+
+- Your device must have .NET 5.0 installed.
+- You must have hardware drivers enabled (e.g. I2C on Raspberry Pi is disabled by default)
 
 ### Install .NET 5.0
 ```
@@ -21,20 +37,30 @@ Microsoft.NETCore.App 5.0.7 [/usr/share/dotnet/shared/Microsoft.NETCore.App]
 ## Deploying
 
 - Create the application as a .NET 5.0 App
-- Publish for `arm-linux` target
 - Copy over your application binaries and `App.runtimeconfig.json`.  Do *not* copy over App.deps.json
 
-```
-$ ls
-App.dll                 Meadow.Contracts.dll  Meadow.F7.dll          Meadow.Linux.dll
-App.runtimeconfig.json  Meadow.dll            Meadow.Foundation.dll  Meadow.Units.dll
-```
+Here's an example of all of the binaries for simple application using a BME280 and Meadow Foundation
 
-> Productivity Note:
-> Once you deploy all of the `publish` binaries, you can then copy over just the changed files incrementally from the build output folder (i.e. if you only change App.dll, only copy it)
-
+```
+$ ls -al
+total 472
+drwxr-xr-x  2 pi pi   4096 Nov  7 17:56 .
+drwxr-xr-x 16 pi pi   4096 Nov  7 17:55 ..
+-rw-r--r--  1 pi pi   7680 Nov  7 18:09 App.dll
+-rw-r--r--  1 pi pi    147 Nov  7 17:55 App.runtimeconfig.json
+-rw-r--r--  1 pi pi  17920 Nov  7 17:58 Bme280.dll
+-rw-r--r--  1 pi pi  69632 Nov  7 17:23 Meadow.Contracts.dll
+-rw-r--r--  1 pi pi 127488 Nov  7 17:23 Meadow.dll
+-rw-r--r--  1 pi pi 111104 Nov  7 17:23 Meadow.Foundation.dll
+-rw-r--r--  1 pi pi  38400 Nov  7 17:23 Meadow.Linux.dll
+-rw-r--r--  1 pi pi  83968 Nov  7 17:23 Meadow.Units.dll
+```
 
 ## Running
 
+Use `dotnet` to execute your application
 
+```
+$ dotnet App.exe
+```
  
