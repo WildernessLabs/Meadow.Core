@@ -2,25 +2,28 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace Meadow
 {
+    /// <summary>
+    /// Represents an instance of Meadow as a generic Linux process
+    /// </summary>
+    /// <typeparam name="TPinout"></typeparam>
     public class MeadowForLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
-        private SysFsGpioDriver _ioController;
+        private SysFsGpioDriver _ioController = null!;
 
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
+        public IPlatformOS PlatformOS { get; }
 
         public LinuxSerialPortNameDefinitions SerialPortNames
         {
             get
             {
-                if(typeof(TPinout) == typeof(JetsonNanoPinout))
+                if (typeof(TPinout) == typeof(JetsonNanoPinout))
                 {
                     return new JetsonNanoSerialPortNameDefinitions();
                 }
@@ -33,8 +36,12 @@ namespace Meadow
             }
         }
 
+        /// <summary>
+        /// Creates the Meadow on Linux infrastructure instance
+        /// </summary>
         public MeadowForLinux()
         {
+            PlatformOS = new LinuxPlatformOS();
             Pins = new TPinout();
             Capabilities = new DeviceCapabilities(
                 new AnalogCapabilities(false, null),

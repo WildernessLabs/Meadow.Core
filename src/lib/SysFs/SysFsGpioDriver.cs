@@ -41,6 +41,22 @@ namespace Meadow
 
         public void Export(int gpio)
         {
+            try
+            {
+                TryExport(gpio);
+            }
+            catch (DeviceBusyException)
+            {
+                // if the device is busy, it might be that our app tore down before and never Unexported.
+                // Try to unexport and retry
+                Unexport(gpio);
+                Thread.Sleep(500);
+                TryExport(gpio);
+            }
+        }
+
+        private void TryExport(int gpio)
+        {
             var path = $"{GpioFolder}/export";
 
             var handle = Interop.open(path, Interop.DriverFlags.O_WRONLY);

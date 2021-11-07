@@ -11,13 +11,7 @@ namespace DigitalIOSample
     {
         public MeadowApp()
         {
-            Initialize();
             Run();
-        }
-
-        void Initialize()
-        {
-            Console.WriteLine("Initialize hardware...");
         }
 
         void Run()
