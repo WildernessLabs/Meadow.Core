@@ -59,7 +59,7 @@ namespace Meadow
             return Pins.AllPins.First(p => string.Compare(p.Name, pinName) == 0);
         }
 
-        public II2cBus CreateI2cBus(int busNumber = 0)
+        public II2cBus CreateI2cBus(int busNumber = 1)
         {
             return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
         }
@@ -78,13 +78,23 @@ namespace Meadow
         {
             // TODO: implement this based on channel caps (this is Jetson specific right now)
 
-            if (clock == Pins["PIN05"] && data == Pins["PIN03"])
+            if (Pins is JetsonNanoPinout)
             {
-                return new I2CBus(1, frequency);
+                if (clock == Pins["PIN05"] && data == Pins["PIN03"])
+                {
+                    return new I2CBus(1, frequency);
+                }
+                else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
+                {
+                    return new I2CBus(0, frequency);
+                }
             }
-            else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
+            else if (Pins is RaspberryPiPinout)
             {
-                return new I2CBus(0, frequency);
+                if (clock == Pins["PIN05"] && data == Pins["PIN03"])
+                {
+                    return new I2CBus(1, frequency);
+                }
             }
 
             throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");

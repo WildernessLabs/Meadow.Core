@@ -60,6 +60,7 @@ namespace Meadow
 
             switch(busNumber)
             {
+                // TODO: we may need two info maps for platforms with multiple busses (e.g. jetson)
                 case 0:
                 case 1:
                     map = InfoMap0;
@@ -82,7 +83,7 @@ namespace Meadow
                 if (handle < 0)
                 {
                     // TODO: maybe try modprobe here?
-                    throw new Exception($"Unable to open driver {driver}");
+                    throw new Exception($"Unable to open driver {driver}.  Is it enabled on your platform?");
                 }
                 info = new I2CPeripheralInfo
                 {
@@ -114,9 +115,15 @@ namespace Meadow
                 var result = Interop.read(handle, pData, readBuffer.Length);
                 if (result < 0)
                 {
-                    var msg = $"ERROR: {Marshal.GetLastWin32Error()}";
-                    Console.WriteLine(msg);
-                    throw new NativeException(msg);
+                    var le = (LinuxErrorCode)Marshal.GetLastWin32Error();
+                    switch (le)
+                    {
+                        case LinuxErrorCode.IOError:
+                            throw new NativeException("I/O Error.  Check your wiring");
+                        default:
+                            var msg = $"READ ERROR: {le}";
+                            throw new NativeException(msg);
+                    }
                 }
             }
         }
@@ -129,9 +136,15 @@ namespace Meadow
                 var result = Interop.write(handle, pData, writeBuffer.Length);
                 if (result < 0)
                 {
-                    var msg = $"ERROR: {Marshal.GetLastWin32Error()}";
-                    Console.WriteLine(msg);
-                    throw new NativeException(msg);
+                    var le = (LinuxErrorCode)Marshal.GetLastWin32Error();
+                    switch (le)
+                    {
+                        case LinuxErrorCode.IOError:
+                            throw new NativeException("I/O Error.  Check your wiring");
+                        default:
+                            var msg = $"WRITE ERROR: {le}";
+                            throw new NativeException(msg);
+                    }
                 }
             }
         }
@@ -145,16 +158,28 @@ namespace Meadow
                 var result = Interop.write(handle, pWrite, writeBuffer.Length);
                 if (result < 0)
                 {
-                    var msg = $"WRITE ERROR: {Marshal.GetLastWin32Error()}";
-                    Console.WriteLine(msg);
-                    throw new NativeException(msg);
+                    var le = (LinuxErrorCode)Marshal.GetLastWin32Error();
+                    switch (le)
+                    {
+                        case LinuxErrorCode.IOError:
+                            throw new NativeException("I/O Error.  Check your wiring");
+                        default:
+                            var msg = $"WRITE ERROR: {le}";
+                            throw new NativeException(msg);
+                    }
                 }
                 result = Interop.read(handle, pRead, readBuffer.Length);
                 if (result < 0)
                 {
-                    var msg = $"READ ERROR: {Marshal.GetLastWin32Error()}";
-                    Console.WriteLine(msg);
-                    throw new NativeException(msg);
+                    var le = (LinuxErrorCode)Marshal.GetLastWin32Error();
+                    switch (le)
+                    {
+                        case LinuxErrorCode.IOError:
+                            throw new NativeException("I/O Error.  Check your wiring");
+                        default:
+                            var msg = $"READ ERROR: {le}";
+                            throw new NativeException(msg);
+                    }
                 }
             }
         }

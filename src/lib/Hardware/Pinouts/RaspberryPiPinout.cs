@@ -34,9 +34,31 @@ namespace Meadow
         public IPin GPIO20 => new SysFsPin("GPIO20", "PIN38", 20);
         public IPin GPIO21 => new SysFsPin("GPIO21", "PIN40", 21);
 
-        // alias for sanity
+        // aliases for sanity
+        public IPin Pin3 => GPIO2;
+        public IPin Pin5 => GPIO3;
+        public IPin Pin7 => GPIO4;
+        public IPin Pin11 => GPIO17;
+        public IPin Pin12 => GPIO18;
+        public IPin Pin13 => GPIO27;
+        public IPin Pin15 => GPIO22;
+        public IPin Pin16 => GPIO23;
+        public IPin Pin18 => GPIO24;
+        public IPin Pin19 => GPIO10;
+        public IPin Pin21 => GPIO9;
+        public IPin Pin22 => GPIO25;
+        public IPin Pin23 => GPIO11;
+        public IPin Pin24 => GPIO8;
+        public IPin Pin26 => GPIO7;
+        public IPin Pin29 => GPIO5;
+        public IPin Pin31 => GPIO6;
+        public IPin Pin32 => GPIO12;
+        public IPin Pin33 => GPIO13;
+        public IPin Pin35 => GPIO19;
+        public IPin Pin36 => GPIO16;
+        public IPin Pin37 => GPIO26;
+        public IPin Pin38 => GPIO20;
         public IPin Pin40 => GPIO21;
-        public IPin J8_40 => GPIO21;
 
         public IPin I2C1_SDA => GPIO2;
         public IPin I2C1_SCL => GPIO3;

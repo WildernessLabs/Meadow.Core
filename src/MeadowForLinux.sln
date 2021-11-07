@@ -26,6 +26,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.F7", "..\..\Meadow.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Units", "..\..\Meadow.Core\source\Meadow.Units\Meadow.Units.csproj", "{86B91EB5-7BFB-40C3-B1AF-ABDDEBE77D8A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bme280_Sample", "samples\Bme280_Sample\Bme280_Sample.csproj", "{2E31BEBB-BE38-4183-B913-200A07B7F89C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sensors.Atmospheric.Bme280", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Atmospheric.Bme280\Driver\Sensors.Atmospheric.BME280\Sensors.Atmospheric.Bme280.csproj", "{07669F3E-6CB6-4D66-89F3-8D80A2B70043}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +82,16 @@ Global
 		{86B91EB5-7BFB-40C3-B1AF-ABDDEBE77D8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86B91EB5-7BFB-40C3-B1AF-ABDDEBE77D8A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{86B91EB5-7BFB-40C3-B1AF-ABDDEBE77D8A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2E31BEBB-BE38-4183-B913-200A07B7F89C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E31BEBB-BE38-4183-B913-200A07B7F89C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E31BEBB-BE38-4183-B913-200A07B7F89C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E31BEBB-BE38-4183-B913-200A07B7F89C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +99,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C55FD85A-5786-41A5-AE47-EA3C736FDC4B} = {8436E98A-9974-43FE-ADF2-EC60505E767B}
 		{E0496FD0-7763-4668-9ABB-0D8DDA70F1CD} = {8436E98A-9974-43FE-ADF2-EC60505E767B}
+		{2E31BEBB-BE38-4183-B913-200A07B7F89C} = {8436E98A-9974-43FE-ADF2-EC60505E767B}
+		{07669F3E-6CB6-4D66-89F3-8D80A2B70043} = {8436E98A-9974-43FE-ADF2-EC60505E767B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6CC77371-5880-4AD7-8506-1FB909E18343}

@@ -8,16 +8,6 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    internal class DeviceBusyException : Exception
-    {
-    }
-
-    internal enum LinuxErrorCode
-    {
-        PermissionDenied = 13,
-        DeviceBusy = 16
-    }
-
     // error codes:
     // 13 = permission denied
     // 16 = device busy

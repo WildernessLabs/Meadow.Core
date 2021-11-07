@@ -1,9 +1,7 @@
 ﻿using Meadow;
-using Meadow.Devices;
-using Meadow.Hardware;
 using System.Threading;
 
-namespace PushButton_Sample
+namespace Bme280_Sample
 {
     class Program
     {
