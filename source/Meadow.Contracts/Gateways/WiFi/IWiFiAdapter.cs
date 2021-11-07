@@ -34,7 +34,7 @@ namespace Meadow.Gateways
         /// <summary>
         /// Get the network time when the WiFi adapter starts?
         /// </summary>
-        bool GetNetworkTimeAtStartup { get; }
+        bool GetNetworkTimeAtStartup { get; set; }
 
         /// <summary>
         /// MAC address of the board when acting as a client.
@@ -49,7 +49,7 @@ namespace Meadow.Gateways
         /// <summary>
         /// Maximum number of times the ESP32 will retry a netowrk operation before returning an error.
         /// </summary>
-        uint MaximumRetryCount { get; }
+        uint MaximumRetryCount { get; set; }
 
         /// <summary>
         /// Current antenna in use.
@@ -62,12 +62,12 @@ namespace Meadow.Gateways
         /// <remarks>
         /// This will automatically connect to any preconfigured access points if they are available.
         /// </remarks>
-        bool AutomaticallyStartNetwork { get; }
+        bool AutomaticallyStartNetwork { get; set; }
 
         /// <summary>
         /// Automatically try to reconnect to an access point if there is a problem / disconnection?
         /// </summary>
-        bool AutomaticallyReconnect { get; }
+        bool AutomaticallyReconnect { get; set; }
 
         /// <summary>
         /// Default access point to try to connect to if the network interface is started and the board
@@ -184,38 +184,38 @@ namespace Meadow.Gateways
         /// <param name="persist">Make the antenna change persistent.</param>
         void SetAntenna(AntennaType antenna, bool persist = true);
 
-        /// <summary>
-        /// Set the property that indicates if the coporcessor should connect to the default access
-        /// point when the system starts.
-        /// </summary>
-        /// <param name="automaticallyStartNetwork">True for the connection to be tried, false otehrwise.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork);
+        ///// <summary>
+        ///// Set the property that indicates if the coporcessor should connect to the default access
+        ///// point when the system starts.
+        ///// </summary>
+        ///// <param name="automaticallyStartNetwork">True for the connection to be tried, false otehrwise.</param>
+        ///// <returns>True if the property was set, flase if there was a problem.</returns>
+        //bool SetAutomaticallyStartNetowrk(bool automaticallyStartNetwork);
 
-        /// <summary>
-        /// Set the property that indicates if the system should automatically attempt to reconnect to an access
-        /// point should the system diconnect.
-        /// </summary>
-        /// <remarks>
-        /// This property will use the <seealso cref="MaximumRetryCount"/> property to determine how many times a reconnect should be attempted.
-        /// </remarks>
-        /// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        bool SetAutomaticallyReconnect(bool automaticallyReconnect);
+        ///// <summary>
+        ///// Set the property that indicates if the system should automatically attempt to reconnect to an access
+        ///// point should the system diconnect.
+        ///// </summary>
+        ///// <remarks>
+        ///// This property will use the <seealso cref="MaximumRetryCount"/> property to determine how many times a reconnect should be attempted.
+        ///// </remarks>
+        ///// <param name="automaticallyReconnect">Automatically reconnect to an access point?</param>
+        ///// <returns>True if the property was set, flase if there was a problem.</returns>
+        //bool SetAutomaticallyReconnect(bool automaticallyReconnect);
 
-        /// <summary>
-        /// Should the system attempt to get the time from the configured NTP server.
-        /// </summary>
-        /// <param name="getTimeAtStartup">True to get the network time.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup);
+        ///// <summary>
+        ///// Should the system attempt to get the time from the configured NTP server.
+        ///// </summary>
+        ///// <param name="getTimeAtStartup">True to get the network time.</param>
+        ///// <returns>True if the property was set, flase if there was a problem.</returns>
+        //bool SetGetNetworkTimeAtStartup(bool getTimeAtStartup);
 
-        /// <summary>
-        /// Set the maximum number of times the coprocessor should retry netowrk operations (on error) before returning an error.
-        /// </summary>
-        /// <param name="maximumRetryCount">Maximum number retries.</param>
-        /// <returns>True if the property was set, flase if there was a problem.</returns>
-        bool SetMaximumRetryCount(uint maximumRetryCount);
+        ///// <summary>
+        ///// Set the maximum number of times the coprocessor should retry netowrk operations (on error) before returning an error.
+        ///// </summary>
+        ///// <param name="maximumRetryCount">Maximum number retries.</param>
+        ///// <returns>True if the property was set, flase if there was a problem.</returns>
+        //bool SetMaximumRetryCount(uint maximumRetryCount);
 
         #endregion Methods
     }

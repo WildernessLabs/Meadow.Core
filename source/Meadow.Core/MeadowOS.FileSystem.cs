@@ -11,6 +11,7 @@ namespace Meadow
             /// <summary>
             /// Gets the root directory of the app file system partition.
             /// </summary>
+            // TODO: pull this from the device
             public static string UserFileSystemRoot => "/meadow0/";
 
             /// <summary>

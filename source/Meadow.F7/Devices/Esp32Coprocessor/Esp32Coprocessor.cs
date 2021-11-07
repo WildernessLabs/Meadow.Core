@@ -79,7 +79,7 @@ namespace Meadow.Devices
             HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
             _antenna = AntennaType.NotKnown;
-            GetConfiguration();
+            //GetConfiguration();
 
             if (_eventHandlerThread == null)
             {
@@ -310,36 +310,36 @@ namespace Meadow.Devices
             }
         }
 
-        /// <summary>
-        /// Get the configuration data structure from the ESP32.
-        /// </summary>
-        /// <returns>Result of getting the configuration from the ESP32.</returns>
-        protected void GetConfiguration()
-        {
-            if (!string.IsNullOrEmpty(F7Micro.Configuration.GetCoprocessorFirmwareVersion()))
-            {
-                _automaticallyStartNetwork = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork);
-                _automaticallyReconect = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect);
-                _getNetworkTimeAtStartup = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup);
-                F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.SoftApMacAddress, _apMacAddress);
-                F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.MacAddress, _macAddress);
-                _defaultAccessPoint = F7Micro.Configuration.GetString(F7Micro.Configuration.ConfigurationValues.DefaultAccessPoint);
-                _maximumRetryCount = F7Micro.Configuration.GetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount);
-                Status = ICoprocessor.CoprocessorState.Ready;
-            }
-            //switch ((AntennaTypes) config.Antenna)
-            //{
-            //    case AntennaTypes.External:
-            //        _antenna = AntennaType.External;
-            //        break;
-            //    case AntennaTypes.OnBoard:
-            //        _antenna = AntennaType.OnBoard;
-            //        break;
-            //    default:
-            //        _antenna = AntennaType.NotKnown;
-            //        break;
-            //}
-        }
+        ///// <summary>
+        ///// Get the configuration data structure from the ESP32.
+        ///// </summary>
+        ///// <returns>Result of getting the configuration from the ESP32.</returns>
+        //protected void GetConfiguration()
+        //{
+        //    if (!string.IsNullOrEmpty(F7MicroBase.DeviceInformation.CoprocessorOSVersion))
+        //    {
+        //        _automaticallyStartNetwork = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyStartNetwork);
+        //        _automaticallyReconect = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.AutomaticallyReconnect);
+        //        _getNetworkTimeAtStartup = F7Micro.Configuration.GetBoolean(F7Micro.Configuration.ConfigurationValues.GetTimeAtStartup);
+        //        F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.SoftApMacAddress, _apMacAddress);
+        //        F7Micro.Configuration.GetByteArray(F7Micro.Configuration.ConfigurationValues.MacAddress, _macAddress);
+        //        _defaultAccessPoint = F7Micro.Configuration.GetString(F7Micro.Configuration.ConfigurationValues.DefaultAccessPoint);
+        //        _maximumRetryCount = F7Micro.Configuration.GetUInt32(F7Micro.Configuration.ConfigurationValues.MaximumNetworkRetryCount);
+        //        Status = ICoprocessor.CoprocessorState.Ready;
+        //    }
+        //    //switch ((AntennaTypes) config.Antenna)
+        //    //{
+        //    //    case AntennaTypes.External:
+        //    //        _antenna = AntennaType.External;
+        //    //        break;
+        //    //    case AntennaTypes.OnBoard:
+        //    //        _antenna = AntennaType.OnBoard;
+        //    //        break;
+        //    //    default:
+        //    //        _antenna = AntennaType.NotKnown;
+        //    //        break;
+        //    //}
+        //}
 
         /// <summary>
         /// Reset the ESP32.

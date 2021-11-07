@@ -19,6 +19,8 @@ namespace Meadow.Devices
         IWatchdogController
         //IIOController<IPinDefinitions>
     {
+        IPlatformOS PlatformOS { get; }
+
         /// <summary>
         /// Gets the device capabilities.
         /// </summary>
@@ -28,6 +30,7 @@ namespace Meadow.Devices
         /// Sets the device time
         /// </summary>
         /// <param name="dateTime"></param>
+        // TODO: move this to PlatformOS, exposed via MeadowOS
         void SetClock(DateTime dateTime);
 
         void Initialize();

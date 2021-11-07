@@ -58,8 +58,6 @@ namespace Meadow
             // but because it's not instantiated, the exception handler won't exist.
             AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            // initialze MeadowOS
-            MeadowOS.Initialize();
         }
 
         /// <summary>
@@ -77,7 +75,9 @@ namespace Meadow
             _device = Activator.CreateInstance<D>();
 
             _device.Initialize();
-            MeadowOS.CurrentDevice = _device;
+
+            // initialze MeadowOS
+            MeadowOS.Initialize(_device);
 
             // singleton setting
             _current = this as A ?? throw new Exception($"Unable to convert to {typeof(A).Name}");

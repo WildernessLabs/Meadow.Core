@@ -15,17 +15,17 @@ namespace Meadow.Devices
     /// </summary>
     public abstract partial class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
     {
-        protected Esp32Coprocessor? esp32;
+        //==== events
+        public event EventHandler WiFiAdapterInitialized = delegate { };
 
+        //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
         public IWiFiAdapter? WiFiAdapter { get; protected set; }
         public ICoprocessor? Coprocessor { get; protected set; }
 
-        public event EventHandler WiFiAdapterInitialized = delegate { };
-
         public DeviceCapabilities Capabilities { get; }
 
-        protected object coprocInitLock = new object();
+        public IPlatformOS PlatformOS { get; protected set; }
 
         /// <summary>
         /// Gets the pins.
@@ -33,14 +33,24 @@ namespace Meadow.Devices
         /// <value>The pins.</value>
         public IF7MicroPinout Pins { get; }
 
+        public IDeviceInformation Information { get; protected set; }
+
+        //==== internals
+        protected Esp32Coprocessor? esp32;
+        protected object coprocInitLock = new object();
         protected IMeadowIOController IoController { get; }
 
+        //==== constructors
         public F7MicroBase(IF7MicroPinout pins, IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
         {
             Pins = pins;
             IoController = ioController;
 
             Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
+
+            PlatformOS = new F7PlatformOS();
+
+            Information = new F7DeviceInformation();
         }
 
         public void Initialize()
@@ -143,19 +153,15 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="deviceName">Name to be used.</param>
         /// <returns>True if the request was successful, false otherwise.</returns>
+        // TODO: Delete in b6.1
+        [Obsolete("Use [Device].Information.DeviceName property instead.")]
         public bool SetDeviceName(string deviceName)
         {
-            bool result = F7Micro.Configuration.SetDeviceName(deviceName);
+            Information.DeviceName = deviceName;
             //
             //  May need to store this somewhere later to split the return.
             //
-            return (result);
-        }
-
-        // TODO: remove in b5.5
-        [Obsolete("Use `SetDeviceName()`")]
-        public bool SetDeviceNmae(string deviceName) {
-            return this.SetDeviceName(deviceName);
+            return (true);
         }
 
         /// <summary>
