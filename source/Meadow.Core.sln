@@ -14,9 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Contracts", "Meadow.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7BCFC6D6-228E-4C93-8145-EAD121AA8587}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linux", "Meadow.Linux\Meadow.Linux.csproj", "{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Units.Tests", "Tests\Meadow.Units.Tests\Meadow.Units.Tests.csproj", "{B070E0F4-EC50-4A9F-A615-07079304AE12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Units.Tests", "Tests\Meadow.Units.Tests\Meadow.Units.Tests.csproj", "{B070E0F4-EC50-4A9F-A615-07079304AE12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,15 +61,6 @@ Global
 		{1DE72085-6E7C-4FFE-9EFD-7FB97EA4B18F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DE72085-6E7C-4FFE-9EFD-7FB97EA4B18F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1DE72085-6E7C-4FFE-9EFD-7FB97EA4B18F}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Core|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Core|Any CPU.Build.0 = Debug|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Core|Any CPU.Deploy.0 = Debug|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9CD0C0A-B663-4E59-85B5-CAFE4CE4E64A}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{B070E0F4-EC50-4A9F-A615-07079304AE12}.Core|Any CPU.ActiveCfg = Debug|Any CPU
 		{B070E0F4-EC50-4A9F-A615-07079304AE12}.Core|Any CPU.Build.0 = Debug|Any CPU
 		{B070E0F4-EC50-4A9F-A615-07079304AE12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
