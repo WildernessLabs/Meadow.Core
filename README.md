@@ -12,10 +12,10 @@ Wilderness Labs Meadow for Linux is a .NET Framework for running IoT application
 
 Currently tested platforms and distributions:
 
-| Hardware | Distro | M4L Version tested |
-| - | - |
-| Raspberry Pi 4 | Raspberry Pi OS | pre-release |
-| Jetson Nano | Ubuntu 20.04 | pre-release |
+| Hardware | Distro | Meadow.Core Version tested |
+| :---: | :---: | :---: |
+| Raspberry Pi 4 | Raspberry Pi OS | Beta 6 |
+| Jetson Nano | Ubuntu 20.04 | Beta 6 |
 
 ## License
 
@@ -68,3 +68,13 @@ Use `dotnet` to execute your application
 $ dotnet App.exe
 ```
  
+## Work in Progress
+
+M4L is currently an *Alpha* product with several core features that are not yet implemented.  Below is a list of bread features that are not yet working, but more details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
+
+- SPI Not Implemented
+- Analog input not implemented
+- PWMs not implemented
+- Bi-directional Ports not implemented
+- Watchdog not implemented
+- WiFi integration not implemented
