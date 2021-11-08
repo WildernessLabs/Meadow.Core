@@ -2,13 +2,11 @@
 
 ## Summary
 
-[TBD]
+Wilderness Labs Meadow for Linux is a .NET Framework for running IoT applications on Linux devices.  A Meadow for Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
 
-## License
+## Current State
 
-Apache 2.0
-
-See [LICENSE File](/LICENSE)
+![Build](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml/badge.svg)
 
 ## Supported Platforms and Distributions
 
@@ -18,6 +16,12 @@ Currently tested platforms and distributions:
 | - | - |
 | Raspberry Pi 4 | Raspberry Pi OS | pre-release |
 | Jetson Nano | Ubuntu 20.04 | pre-release |
+
+## License
+
+Apache 2.0
+
+See [LICENSE File](/LICENSE)
 
 ## Device Prerequisites
 
