@@ -10,7 +10,7 @@
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
    <Version>0.23.0</Version>
-   <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+   <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
    <Description>Linux .NET libraries for Wilderness Labs Meadow</Description>
