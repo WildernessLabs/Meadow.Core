@@ -10,7 +10,8 @@ namespace Meadow.Devices
         /// The current device name.
         /// </summary>
         /// <returns>Name of the device.</returns>
-        public string DeviceName {
+        public string DeviceName
+        {
             get => F7PlatformOS.GetString(ConfigurationValues.DeviceName);
             set => F7PlatformOS.SetString(ConfigurationValues.DeviceName, value);
         }
