@@ -107,7 +107,6 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup));
             }
             set
@@ -124,7 +123,6 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 byte[] mac = new byte[6];
                 F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
                 return mac;
@@ -139,7 +137,6 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 byte[] mac = new byte[6];
                 F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
                 return mac;
@@ -156,10 +153,10 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork));
             }
-            set {
+            set
+            {
                 CheckStatus();
                 F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork, value);
             }
@@ -172,10 +169,10 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 return F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
             }
-            set {
+            set
+            {
                 CheckStatus();
                 F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect, value);
             }
@@ -205,14 +202,14 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 return (F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount));
             }
             set
             {
                 CheckStatus();
                 uint retryCount = value;
-                if (retryCount < 3) {
+                if (retryCount < 3)
+                {
                     retryCount = 3;
                 }
                 F7PlatformOS.SetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount, retryCount);
@@ -340,8 +337,8 @@ namespace Meadow.Devices
                             }
                         }
                         var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown,
-                            new NetworkSecuritySettings((NetworkAuthenticationType)accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
-                            accessPoint.PrimaryChannel, (NetworkProtocol)accessPoint.Protocols, accessPoint.Rssi);
+                            new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
+                            accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
                         networks.Add(network);
                     }
                 }
@@ -406,7 +403,8 @@ namespace Meadow.Devices
         //TODO: we should probably be using some sort of password credential and secure storage see: https://docs.microsoft.com/en-us/uwp/api/windows.security.credentials.passwordcredential
         public async Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
         {
-            var t = await Task.Run<ConnectionResult>(() => {
+            var t = await Task.Run<ConnectionResult>(() =>
+            {
                 ConnectionResult connectionResult;
                 StatusCodes result = ConnectToAccessPoint(ssid, password, reconnection);
                 switch (result)
