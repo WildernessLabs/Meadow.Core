@@ -8,6 +8,7 @@ using Meadow.Gateway.WiFi;
 using Meadow.Gateways.Exceptions;
 using System.Collections.Generic;
 using static Meadow.Devices.F7MicroBase;
+using System.Threading;
 
 namespace Meadow.Devices
 {
@@ -64,6 +65,21 @@ namespace Meadow.Devices
         public const ushort MAXIMUM_SCAN_FREQUENCY = 60000;
 
         #endregion Constants
+
+        #region Member variables.
+
+        /// <summary>
+        /// Lock object to make sure the events and the methods do not try to access
+        /// properties simultaneously.
+        /// </summary>
+        private object _lock = new object();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private Semaphore _connectionSemaphore;
+
+        #endregion Member variables.
 
         #region Properties
 
@@ -186,10 +202,24 @@ namespace Meadow.Devices
         {
             get
             {
-                //CheckStatus();
                 return F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
             }
         }
+
+        /// <summary>
+        /// Access point the ESP32 is currently connected to.
+        /// </summary>
+        public string Ssid { get; private set; }
+
+        /// <summary>
+        /// BSSID of the access point the ESP32 is currently connected to.
+        /// </summary>
+        public string Bssid { get; private set; }
+
+        /// <summary>
+        /// WiFi channel the ESP32 and the access point are using for communication.
+        /// </summary>
+        public uint Channel { get; private set; } 
 
         /// <summary>
         /// The maximum number of times the ESP32 will retry an operation before returning an error.
@@ -294,13 +324,19 @@ namespace Meadow.Devices
         /// <summary>
         /// Clear the IP address, subnet mask and gateway details.
         /// </summary>
-        private void ClearIpDetails()
+        private void ClearNetworkDetails()
         {
-            byte[] addressBytes = new byte[4];
-            Array.Clear(addressBytes, 0, addressBytes.Length);
-            IpAddress = new IPAddress(addressBytes);
-            SubnetMask = new IPAddress(addressBytes);
-            Gateway = new IPAddress(addressBytes);
+            lock (_lock)
+            {
+                byte[] addressBytes = new byte[4];
+                Array.Clear(addressBytes, 0, addressBytes.Length);
+                IpAddress = new IPAddress(addressBytes);
+                SubnetMask = new IPAddress(addressBytes);
+                Gateway = new IPAddress(addressBytes);
+                Ssid = string.Empty;
+                Bssid = string.Empty;
+                Channel = 0;
+            }
         }
 
         // TODO: Mark, this should be async. But i think it requires the `SendCommand()` method to be async.
@@ -470,20 +506,27 @@ namespace Meadow.Devices
             byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
             byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
 
+            ClearNetworkDetails();
+            //
+            //  The connection semaphore is used to synchronise the connection event
+            //  and the return from this method.  This fixes the problem where the
+            //  event could sometimes be fired before this method had the chance to set
+            //  the various network properties.
+            //
+            _connectionSemaphore = new Semaphore(0, 1);
+
             // TODO: should be async and awaited
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+            _connectionSemaphore.WaitOne();
 
-            ClearIpDetails();
             IsConnected = false;
             ConnectEventData data;
             switch (result)
             {
                 case StatusCodes.CompletedOk:
-                    data = Encoders.ExtractConnectEventData(resultBuffer, 0);
-                    IpAddress = new IPAddress(data.IpAddress);
-                    SubnetMask = new IPAddress(data.SubnetMask);
-                    Gateway = new IPAddress(data.Gateway);
-                    IsConnected = true;
+                    //
+                    //  Nothing to do here as setting properties now dealt with by the constructor.
+                    //
                     break;
                 case StatusCodes.WiFiDisconnected:
                     data = Encoders.ExtractConnectEventData(resultBuffer, 0);
@@ -524,7 +567,7 @@ namespace Meadow.Devices
                 switch (result)
                 {
                     case StatusCodes.CompletedOk:
-                        ClearIpDetails();
+                        ClearNetworkDetails();
                         connectionResult = new ConnectionResult(ConnectionStatus.Success);
                         break;
                     case StatusCodes.Failure:
@@ -623,16 +666,24 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiConnected(StatusCodes statusCode, byte[] payload)
         {
+            byte channel = 0;
+
             ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
-            IPAddress ip = new IPAddress(connectEventData.IpAddress);
-            IPAddress subnet = new IPAddress(connectEventData.SubnetMask);
-            IPAddress gateway = new IPAddress(connectEventData.Gateway);
-            string ssid = connectEventData.Ssid;
-            string bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
-            byte channel = connectEventData.Channel;
+            lock (_lock)
+            {
+                IpAddress = new IPAddress(connectEventData.IpAddress);
+                SubnetMask = new IPAddress(connectEventData.SubnetMask);
+                Gateway = new IPAddress(connectEventData.Gateway);
+                Ssid = connectEventData.Ssid;
+                Bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
+                channel = connectEventData.Channel;
+                Channel = channel;
+                IsConnected = true;
+            }
+            _connectionSemaphore.Release();
             NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
 
-            WiFiConnectEventArgs ea = new WiFiConnectEventArgs(ip, subnet, gateway, ssid, bssid, channel, authenticationType, statusCode);
+            WiFiConnectEventArgs ea = new WiFiConnectEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, channel, authenticationType, statusCode);
             WiFiConnected?.Invoke(this, ea);
         }
 
@@ -644,7 +695,7 @@ namespace Meadow.Devices
         /// <param name="payload">Event data encoded in the payload.</param>
         protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
         {
-            ClearIpDetails();
+            ClearNetworkDetails();
             HasInternetAccess = false;
             IsConnected = false;
 
