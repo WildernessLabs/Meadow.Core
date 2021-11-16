@@ -1,5 +1,5 @@
 # this assumes you already built the app as Release configuration
-FROM wildernesslabs/m4l-pi:0.1 as meadow
+FROM wildernesslabs/m4l-pi as meadow
 
 COPY bin/Release/net5.0/App.dll /m4l/
 COPY bin/Release/net5.0/App.runtimeconfig.json /m4l/

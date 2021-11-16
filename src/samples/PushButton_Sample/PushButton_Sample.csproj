@@ -11,6 +11,6 @@
     <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow.Foundation" Version="0.30.0" />
+    <PackageReference Include="Meadow.Foundation" Version="0.*" />
   </ItemGroup>
 </Project>

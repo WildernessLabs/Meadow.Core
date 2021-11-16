@@ -11,6 +11,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow.Foundation.Sensors.Atmospheric.Bme280" Version="0.5.47" />
+    <PackageReference Include="Meadow.Foundation" Version="0.*" />
+    <PackageReference Include="Meadow.Foundation.Sensors.Atmospheric.Bme280" Version="0.*" />
   </ItemGroup>
 </Project>
