@@ -25,8 +25,8 @@ See [LICENSE File](/LICENSE)
 
 ## Device Prerequisites
 
-- Your device must have .NET 5.0 installed.
-- You must have hardware drivers enabled (e.g. I2C on Raspberry Pi is disabled by default)
+- Your device must have .NET 5.0 installed, unless you are running inside a container in which case the container image must have .NET 5.0 included. All [Wilderness Labs m4l Docker images](https://hub.docker.com/u/wildernesslabs) (samples and base) have the .NET 5.0 runtime included.
+- You must have hardware drivers enabled (e.g. I2C on Raspberry Pi is disabled by default and is enabled by running `raspi-config`)
 
 ### Install .NET 5.0
 ```
