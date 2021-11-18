@@ -15,6 +15,7 @@ Currently tested platforms and distributions:
 | Hardware | Distro | Meadow.Core Version tested |
 | :---: | :---: | :---: |
 | Raspberry Pi 4 | Raspberry Pi OS | Beta 6 |
+| Raspberry Pi Zero 2w | Raspberry Pi OS | Beta 6 |
 | Jetson Nano | Ubuntu 20.04 | Beta 6 |
 
 ## License
