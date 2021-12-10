@@ -1,8 +1,11 @@
-﻿namespace Meadow
+﻿using System.Runtime.InteropServices;
+
+namespace Meadow
 {
     public partial class SpiBus
     {
-        private class SpiTransferCommand
+        [StructLayout(LayoutKind.Auto, Pack = 1)]
+        private struct SpiTransferCommand
         {
             /*
             struct spi_ioc_transfer {
@@ -22,10 +25,11 @@
             public ulong TransmitBuffer { get; set; } // 64-bit pointer to byte array
             public ulong ReceiveBuffer { get; set; } // 64-bit pointer to byte array
             public int Length { get; set; }
-            public int SpeedHz { get; set; } = 500000;
-            public short DelayuSec { get; set; } = 0;
-            public byte BitsPerWord { get; set; } = 8;
+            public int SpeedHz { get; set; }
+            public short DelayuSec { get; set; }
+            public byte BitsPerWord { get; set; }
             public byte ChipSelectChange { get; set; }
+            public int Pad { get; set; }
         }
     }
 }

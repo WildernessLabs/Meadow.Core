@@ -16,6 +16,7 @@ namespace Meadow
         private const int JustificationIoctl = 2;
         private const int LengthIoctl = 3;
         private const int SpeedIoctl = 4;
+        private const int MAX_TX_BLOCK_SIZE_BYTES = 4096;
 
         [Flags]
         public enum SpiMode
@@ -58,7 +59,6 @@ namespace Meadow
         /// <param name="chipSelect">Must be 0 or 1</param>
         internal unsafe SpiBus(int chipSelect, SpiMode mode, Units.Frequency speed)
         {
-            var bitsPerWord = 8;
             var busNumber = 0;
 
             var driver = $"/dev/spidev{busNumber}.{chipSelect}";
@@ -69,48 +69,81 @@ namespace Meadow
                 throw new NativeException($"Unable to open driver {driver}. Check your user permissions", Marshal.GetLastWin32Error());
             }
 
-            var status = Interop.ioctl(DriverHandle, Interop._IOW('k', ModeIoctl, 8), (byte*)&mode);
-            if (status < 0)
-            {
-                throw new NativeException($"Could not set SPIMode (WR): {status}", Marshal.GetLastWin32Error());
-            }
-
-            status = Interop.ioctl(DriverHandle, Interop._IOR('k', ModeIoctl, 8), (byte*)&mode);
-            if (status < 0)
-            {
-                throw new NativeException($"Could not set SPIMode (RD): {status}", Marshal.GetLastWin32Error());
-            }
-
-            status = Interop.ioctl(DriverHandle, Interop._IOW('k', LengthIoctl, 8), (byte*)&bitsPerWord);
-            if (status < 0)
-            {
-                throw new NativeException($"Could not set SPI bits per word (WR): {status}", Marshal.GetLastWin32Error());
-            }
-
-            status = Interop.ioctl(DriverHandle, Interop._IOR('k', LengthIoctl, 8), (byte*)&bitsPerWord);
-            if (status < 0)
-            {
-                throw new NativeException($"Could not set SPI bits per word (RD): {status}", Marshal.GetLastWin32Error());
-            }
-
-            int speedHz = Convert.ToInt32(speed.Hertz);
-            status = Interop.ioctl(DriverHandle, Interop._IOW('k', LengthIoctl, 32), (byte*)&speedHz);
-            if (status < 0)
-            {
-                throw new NativeException($"Could not set SPI speed (WR): {status}", Marshal.GetLastWin32Error());
-            }
-
-            status = Interop.ioctl(DriverHandle, Interop._IOR('k', LengthIoctl, 32), (byte*)&speedHz);
-            if (status < 0)
-            {
-                throw new NativeException($"Could not set SPI speed (RD): {status}", Marshal.GetLastWin32Error());
-            }
+            Mode = mode;
+            BitsPerWord = 8;
+            SpeedHz = Convert.ToInt32(speed.Hertz);
 
             Configuration = new SpiClockConfiguration(speed)
             {
                 Phase = SpiClockConfiguration.ClockPhase.Zero,
                 Polarity = SpiClockConfiguration.ClockPolarity.Normal
             };
+        }
+
+        public unsafe int SpeedHz
+        {
+            set
+            {
+                var status = Interop.ioctl(DriverHandle, Interop._IOW('k', SpeedIoctl, 4), (byte*)&value);
+                if (status < 0)
+                {
+                    throw new NativeException($"Could not set SPI speed (WR): {status}", Marshal.GetLastWin32Error());
+                }
+            }
+            get
+            {
+                int speed = 0;
+                var status = Interop.ioctl(DriverHandle, Interop._IOR('k', SpeedIoctl, 4), (byte*)&speed);
+                if (status < 0)
+                {
+                    throw new NativeException($"Could not get SPI speed (RD): {status}", Marshal.GetLastWin32Error());
+                }
+                return speed;
+            }
+        }
+
+        public unsafe SpiMode Mode
+        {
+            set
+            {
+                var status = Interop.ioctl(DriverHandle, Interop._IOW('k', ModeIoctl, 1), (byte*)&value);
+                if (status < 0)
+                {
+                    throw new NativeException($"Could not set SPIMode (WR): {status}", Marshal.GetLastWin32Error());
+                }
+            }
+            get
+            {
+                byte value = 0;
+                var status = Interop.ioctl(DriverHandle, Interop._IOR('k', ModeIoctl, 1), (byte*)&value);
+                if (status < 0)
+                {
+                    throw new NativeException($"Could not get SPIMode (RD): {status}", Marshal.GetLastWin32Error());
+                }
+                return (SpiMode)value;
+            }
+        }
+
+        public unsafe byte BitsPerWord
+        {
+            set
+            {
+                var status = Interop.ioctl(DriverHandle, Interop._IOW('k', LengthIoctl, 1), &value);
+                if (status < 0)
+                {
+                    throw new NativeException($"Could not set SPI bits per word (WR): {status}", Marshal.GetLastWin32Error());
+                }
+            }
+            get
+            {
+                byte value = 0;
+                var status = Interop.ioctl(DriverHandle, Interop._IOR('k', LengthIoctl, 1), &value);
+                if (status < 0)
+                {
+                    throw new NativeException($"Could not get SPI bits per word (RD): {status}", Marshal.GetLastWin32Error());
+                }
+                return value;
+            }
         }
 
         public void Dispose()
@@ -134,12 +167,16 @@ namespace Meadow
             Exchange(chipSelect, writeBuffer, readBuffer, csMode);
         }
 
-        private void DecipherSPIError(int errorCode)
+        private void DecipherSPIError(int status, int errorCode)
         {
             switch (errorCode)
             {
+                case 22:
+                    throw new NativeException($"Communication error.  {errorCode} (Invalid Argument)");
+                case 90:
+                    throw new NativeException($"Communication error.  {errorCode} (Message too long)");
                 default:
-                    throw new NativeException($"Communication error.  Error code {(int)errorCode}");
+                    throw new NativeException($"Communication error.  Return {status}  Error code {errorCode}");
             }
         }
 
@@ -162,26 +199,34 @@ namespace Meadow
                 fixed (byte* pWrite = writeBuffer)
                 fixed (byte* pRead = readBuffer)
                 {
-                    var command = new SpiTransferCommand()
-                    {
-                        Length = readBuffer.Length,
-                        TransmitBuffer = (ulong)pWrite, // NOTE: these are always 64-bit for OS compatibility
-                        ReceiveBuffer = (ulong)pRead,
-                        DelayuSec = 0,
-                        BitsPerWord = 0,
-                        SpeedHz = 0,
-                        ChipSelectChange = 0
-                    };
+                    byte* p = pWrite;
 
-                    //                    Output.WriteLineIf(_showSpiDebug, "+Exchange");
-                    //                    Output.WriteLineIf(_showSpiDebug, $" Sending {writeBuffer.Length} bytes");
-                    var length = readBuffer.Length;
-                    var status = Interop.ioctl(DriverHandle, Interop._IOW('k', TransferIoctl, 1), (byte*)&length);
-                    if (status != 0)
+                    // each write can't be bigger than MAX_TX_BLOCK_SIZE_BYTES
+                    var offset = 0;
+                    while (offset < writeBuffer.Length)
                     {
-                        DecipherSPIError(Marshal.GetLastWin32Error());
+                        var length = (writeBuffer.Length - offset) > MAX_TX_BLOCK_SIZE_BYTES ? MAX_TX_BLOCK_SIZE_BYTES : (writeBuffer.Length - offset);
+
+                        var command = new SpiTransferCommand()
+                        {
+                            Length = length,
+                            TransmitBuffer = (ulong)p, // NOTE: these are always 64-bit for OS compatibility
+                            ReceiveBuffer = (ulong)pRead,
+                            DelayuSec = 0,
+                            BitsPerWord = 0,
+                            SpeedHz = 0,
+                            ChipSelectChange = 0
+                        };
+
+                        p += length;
+                        offset += length;
+
+                        var status = Interop.ioctl(DriverHandle, Interop._IOW('k', TransferIoctl, 32), (byte*)&command);
+                        if (status < 0)
+                        {
+                            DecipherSPIError(status, Marshal.GetLastWin32Error());
+                        }
                     }
-                    //                    Output.WriteLineIf(_showSpiDebug, $" Received {readBuffer.Length} bytes");
 
                     if (chipSelect != null)
                     {
