@@ -270,7 +270,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
         /// <param name="data">Data to write</param>
-        [Obsolete("Use Write", false)]
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data)
         {
             SendData(chipSelect, ChipSelectMode.ActiveLow, data.ToArray());
@@ -282,7 +282,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
         /// <param name="data">Data to write</param>
-        [Obsolete("Use Write", false)]
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, IEnumerable<byte> data)
         {
             SendData(chipSelect, csMode, data.ToArray());
@@ -293,7 +293,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
         /// <param name="data">Data to write</param>
-        [Obsolete("Use Write", false)]
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, params byte[] data)
         {
             SendData(chipSelect, ChipSelectMode.ActiveLow, data);
@@ -305,7 +305,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
         /// <param name="data">Data to write</param>
-        [Obsolete("Use Write", false)]
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -360,7 +360,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
         /// <param name="numberOfBytes">Number of bytes to read</param>
-        [Obsolete("Use Read", false)]
+        [Obsolete("Use Read", true)]
         public byte[] ReceiveData(IDigitalOutputPort chipSelect, int numberOfBytes)
         {
             return ReceiveData(chipSelect, ChipSelectMode.ActiveLow, numberOfBytes);
@@ -372,7 +372,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
         /// <param name="numberOfBytes">Number of bytes to read</param>
-        [Obsolete("Use Read", false)]
+        [Obsolete("Use Read", true)]
         public byte[] ReceiveData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, int numberOfBytes)
         {
             var rxBuffer = new byte[numberOfBytes];
@@ -435,7 +435,7 @@ namespace Meadow.Hardware
         /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
         /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
         /// </remarks>
-        [Obsolete("Use Exchange", false)]
+        [Obsolete("Use Exchange", true)]
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
         {
             ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
@@ -456,7 +456,7 @@ namespace Meadow.Hardware
         /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
         /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
         /// </remarks>
-        [Obsolete("Use Exchange", false)]
+        [Obsolete("Use Exchange", true)]
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer, int bytesToExchange)
         {
             if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");

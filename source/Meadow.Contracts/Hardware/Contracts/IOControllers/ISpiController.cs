@@ -9,7 +9,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
         /// </summary>
-        public const int DefaultSpiBusSpeed = 375;
+        public static Units.Frequency DefaultSpiBusSpeed = new Units.Frequency(375, Units.Frequency.UnitType.Kilohertz);
 
         /// <summary>
         /// Creates a SPI bus instance for the requested control pins and bus speed
