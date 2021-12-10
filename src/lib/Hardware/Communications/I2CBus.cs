@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Meadow
 {
-    public class I2CBus : II2cBus, IDisposable
+    public partial class I2CBus : II2cBus, IDisposable
     {
         private class SMBusIoctlData
         {
