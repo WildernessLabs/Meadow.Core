@@ -48,7 +48,7 @@ namespace Meadow
 
         public SpiClockConfiguration Configuration { get; private set; }
 
-        internal unsafe SpiBus(int chipSelect, SpiClockConfiguration.ClockPhase phase, SpiClockConfiguration.ClockPolarity polarity, Units.Frequency speed)
+        public unsafe SpiBus(int chipSelect, SpiClockConfiguration.ClockPhase phase, SpiClockConfiguration.ClockPolarity polarity, Units.Frequency speed)
             : this(chipSelect, (SpiMode)((int)phase | (int)polarity), speed)
         {
         }
@@ -57,7 +57,7 @@ namespace Meadow
         /// 
         /// </summary>
         /// <param name="chipSelect">Must be 0 or 1</param>
-        internal unsafe SpiBus(int chipSelect, SpiMode mode, Units.Frequency speed)
+        public unsafe SpiBus(int chipSelect, SpiMode mode, Units.Frequency speed)
         {
             var busNumber = 0;
 
