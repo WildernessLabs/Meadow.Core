@@ -16,6 +16,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
 {
     public struct SystemConfiguration
     {
+        public Byte ResetReason;
         public String SoftwareVersion;
         public Byte MaximumMessageQueueLength;
         public Byte AutomaticallyStartNetwork;
@@ -39,6 +40,14 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public UInt32 Item;
         public UInt32 ValueLength;
         public byte[] Value;
+    };
+
+    public struct ErrorEvent
+    {
+        public UInt32 ErrorCode;
+        public Byte Interface;
+        public UInt32 ErrorDataLength;
+        public byte[] ErrorData;
     };
 
     public struct WiFiCredentials
@@ -170,6 +179,22 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public Int32 SocketHandle;
         public Int32 Level;
         public Int32 OptionName;
+        public UInt32 OptionValueLength;
+        public byte[] OptionValue;
+        public Int32 OptionLen;
+    };
+
+    public struct GetSockOptRequest
+    {
+        public Int32 SocketHandle;
+        public Int32 Level;
+        public Int32 OptionName;
+    };
+
+    public struct GetSockOptResponse
+    {
+        public Int32 Result;
+        public Int32 ResponseErrno;
         public UInt32 OptionValueLength;
         public byte[] OptionValue;
         public Int32 OptionLen;

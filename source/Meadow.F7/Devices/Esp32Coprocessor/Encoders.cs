@@ -267,13 +267,15 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             length += (int) (systemConfiguration.DeviceName.Length + 1);
             length += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
             length += (int) (systemConfiguration.NtpServer.Length + 1);
-            length += 25;
+            length += 26;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
+            buffer[offset] = systemConfiguration.ResetReason;
+            offset += 1;
             EncodeString(systemConfiguration.SoftwareVersion, buffer, offset);
             offset += systemConfiguration.SoftwareVersion.Length + 1;
             buffer[offset] = systemConfiguration.MaximumMessageQueueLength;
@@ -317,6 +319,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             SystemConfiguration systemConfiguration = new MessagePayloads.SystemConfiguration();
 
+            systemConfiguration.ResetReason = buffer[offset];
+            offset += 1;
             systemConfiguration.SoftwareVersion = ExtractString(buffer, offset);
             offset += (int) (systemConfiguration.SoftwareVersion.Length + 1);
             systemConfiguration.MaximumMessageQueueLength = buffer[offset];
@@ -365,7 +369,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result += (int) systemConfiguration.DeviceName.Length;
             result += (int) systemConfiguration.DefaultAccessPoint.Length;
             result += (int) systemConfiguration.NtpServer.Length;
-            return(result + 41);
+            return(result + 42);
         }
 
         /// <summary>
@@ -431,6 +435,75 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += (int) configurationValue.ValueLength;
             return(result + 8);
+        }
+
+        /// <summary>
+        /// Encode a ErrorEvent object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="errorEvent">ErrorEvent object to be encoded.</param>
+        /// <returns>Byte array containing the encoded ErrorEvent object.</returns>
+        public static byte[] EncodeErrorEvent(MessagePayloads.ErrorEvent errorEvent)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (errorEvent.ErrorDataLength + 4);
+            length += 5;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(errorEvent.ErrorCode, buffer, offset);
+            offset += 4;
+            buffer[offset] = errorEvent.Interface;
+            offset += 1;
+            EncodeUInt32(errorEvent.ErrorDataLength, buffer, offset);
+            offset += 4;
+            if (errorEvent.ErrorDataLength > 0)
+            {
+                Array.Copy(errorEvent.ErrorData, 0, buffer, offset, errorEvent.ErrorDataLength);
+            }
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a ErrorEvent object from a byte array.
+        /// </summary>
+        /// <param name="errorEvent">Byte array containing the object to the extracted.</param>
+        /// <returns>ErrorEvent object.</returns>
+        public static MessagePayloads.ErrorEvent ExtractErrorEvent(byte[] buffer, int offset)
+        {
+            ErrorEvent errorEvent = new MessagePayloads.ErrorEvent();
+
+            errorEvent.ErrorCode = ExtractUInt32(buffer, offset);
+            offset += 4;
+            errorEvent.Interface = buffer[offset];
+            offset += 1;
+            errorEvent.ErrorDataLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (errorEvent.ErrorDataLength > 0)
+            {
+                errorEvent.ErrorData = new byte[errorEvent.ErrorDataLength];
+                Array.Copy(buffer, offset, errorEvent.ErrorData, 0, errorEvent.ErrorDataLength);
+            }
+            return(errorEvent);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the ErrorEvent object.
+        /// </summary>
+        /// <param name="errorEvent">ErrorEvent object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded ErrorEvent object.</returns>
+        public static int EncodedErrorEventBufferSize(MessagePayloads.ErrorEvent errorEvent)
+        {
+            int result = 0;
+            result += (int) errorEvent.ErrorDataLength;
+            return(result + 9);
         }
 
         /// <summary>
@@ -1519,6 +1592,134 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += (int) setSockOptRequest.OptionValueLength;
             return(result + 20);
+        }
+
+        /// <summary>
+        /// Encode a GetSockOptRequest object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getSockOptRequest">GetSockOptRequest object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetSockOptRequest object.</returns>
+        public static byte[] EncodeGetSockOptRequest(MessagePayloads.GetSockOptRequest getSockOptRequest)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += 12;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(getSockOptRequest.SocketHandle, buffer, offset);
+            offset += 4;
+            EncodeInt32(getSockOptRequest.Level, buffer, offset);
+            offset += 4;
+            EncodeInt32(getSockOptRequest.OptionName, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a GetSockOptRequest object from a byte array.
+        /// </summary>
+        /// <param name="getSockOptRequest">Byte array containing the object to the extracted.</param>
+        /// <returns>GetSockOptRequest object.</returns>
+        public static MessagePayloads.GetSockOptRequest ExtractGetSockOptRequest(byte[] buffer, int offset)
+        {
+            GetSockOptRequest getSockOptRequest = new MessagePayloads.GetSockOptRequest();
+
+            getSockOptRequest.SocketHandle = ExtractInt32(buffer, offset);
+            offset += 4;
+            getSockOptRequest.Level = ExtractInt32(buffer, offset);
+            offset += 4;
+            getSockOptRequest.OptionName = ExtractInt32(buffer, offset);
+            return(getSockOptRequest);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the GetSockOptRequest object.
+        /// </summary>
+        /// <param name="getSockOptRequest">GetSockOptRequest object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded GetSockOptRequest object.</returns>
+        public static int EncodedGetSockOptRequestBufferSize(MessagePayloads.GetSockOptRequest getSockOptRequest)
+        {
+            return(12);
+        }
+
+        /// <summary>
+        /// Encode a GetSockOptResponse object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="getSockOptResponse">GetSockOptResponse object to be encoded.</param>
+        /// <returns>Byte array containing the encoded GetSockOptResponse object.</returns>
+        public static byte[] EncodeGetSockOptResponse(MessagePayloads.GetSockOptResponse getSockOptResponse)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) (getSockOptResponse.OptionValueLength + 4);
+            length += 12;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeInt32(getSockOptResponse.Result, buffer, offset);
+            offset += 4;
+            EncodeInt32(getSockOptResponse.ResponseErrno, buffer, offset);
+            offset += 4;
+            EncodeUInt32(getSockOptResponse.OptionValueLength, buffer, offset);
+            offset += 4;
+            if (getSockOptResponse.OptionValueLength > 0)
+            {
+                Array.Copy(getSockOptResponse.OptionValue, 0, buffer, offset, getSockOptResponse.OptionValueLength);
+                offset += (int) (getSockOptResponse.OptionValueLength);
+            }
+            EncodeInt32(getSockOptResponse.OptionLen, buffer, offset);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a GetSockOptResponse object from a byte array.
+        /// </summary>
+        /// <param name="getSockOptResponse">Byte array containing the object to the extracted.</param>
+        /// <returns>GetSockOptResponse object.</returns>
+        public static MessagePayloads.GetSockOptResponse ExtractGetSockOptResponse(byte[] buffer, int offset)
+        {
+            GetSockOptResponse getSockOptResponse = new MessagePayloads.GetSockOptResponse();
+
+            getSockOptResponse.Result = ExtractInt32(buffer, offset);
+            offset += 4;
+            getSockOptResponse.ResponseErrno = ExtractInt32(buffer, offset);
+            offset += 4;
+            getSockOptResponse.OptionValueLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (getSockOptResponse.OptionValueLength > 0)
+            {
+                getSockOptResponse.OptionValue = new byte[getSockOptResponse.OptionValueLength];
+                Array.Copy(buffer, offset, getSockOptResponse.OptionValue, 0, getSockOptResponse.OptionValueLength);
+                offset += (int) getSockOptResponse.OptionValueLength;
+            }
+            getSockOptResponse.OptionLen = ExtractInt32(buffer, offset);
+            return(getSockOptResponse);
+        }
+
+        /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the GetSockOptResponse object.
+        /// </summary>
+        /// <param name="getSockOptResponse">GetSockOptResponse object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded GetSockOptResponse object.</returns>
+        public static int EncodedGetSockOptResponseBufferSize(MessagePayloads.GetSockOptResponse getSockOptResponse)
+        {
+            int result = 0;
+            result += (int) getSockOptResponse.OptionValueLength;
+            return(result + 16);
         }
 
         /// <summary>
