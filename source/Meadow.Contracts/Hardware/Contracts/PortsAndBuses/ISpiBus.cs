@@ -5,7 +5,10 @@ namespace Meadow.Hardware
 {
     public interface ISpiBus
     {
-        long[] SupportedSpeeds { get; }
+        /// <summary>
+        /// Gets an array of all of the speeds that the SPI bus supports.
+        /// </summary>
+        Units.Frequency[] SupportedSpeeds { get; }
 
         SpiClockConfiguration Configuration { get; }
 

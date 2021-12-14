@@ -518,20 +518,20 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Gets an array of all of the speeds (in kHz) that the SPI bus supports.
+        /// Gets an array of all of the speeds that the SPI bus supports.
         /// </summary>
-        public long[] SupportedSpeeds
+        public Units.Frequency[] SupportedSpeeds
         {
-            get => new long[]
+            get => new Units.Frequency[]
                 {
-                    375,
-                    750,
-                    1500,
-                    3000,
-                    6000,
-                    12000,
-                    24000,
-                    48000
+                    new Units.Frequency(375, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(750, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(1500, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(3000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(6000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(12000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(24000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(48000, Units.Frequency.UnitType.Kilohertz)
                 };
         }
 
