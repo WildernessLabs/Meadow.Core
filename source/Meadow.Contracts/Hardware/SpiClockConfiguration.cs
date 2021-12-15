@@ -6,7 +6,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class SpiClockConfiguration
     {
-        private long _speedKHz;
+        private Units.Frequency _speed;
         private int _bitsPerWord;
         private ClockPhase _phase;
         private ClockPolarity _polarity;
@@ -88,13 +88,13 @@ namespace Meadow.Hardware
         /// <remarks>
         /// The set of supported speeds is programmatically available from the bus in the <b>SupportedSpeeds</b> property.
         /// </remarks>
-        public long SpeedKHz 
+        public Units.Frequency Speed
         {
-            get => _speedKHz;
+            get => _speed;
             set
             {
-                if (value == SpeedKHz) return;
-                _speedKHz = value;
+                if (value == Speed) return;
+                _speed = value;
                 Changed?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -112,13 +112,26 @@ namespace Meadow.Hardware
             }
         }
 
+        public Mode SpiMode
+        {
+            get
+            {
+                if (Polarity == ClockPolarity.Normal)
+                {
+                    return (Phase == ClockPhase.Zero) ? Mode.Mode0 : Mode.Mode1;
+                }
+
+                return (Phase == ClockPhase.Zero) ? Mode.Mode2 : Mode.Mode3;
+            }
+        }
+
         /// <summary>
         /// Provided to allow setting speed value without raising a Changed event.  This method is used internally.
         /// </summary>
         /// <param name="speed"></param>
-        public void SetActualSpeedKHz(long speed)
+        public void SetActualSpeed(Units.Frequency speed)
         {
-            _speedKHz = speed;
+            _speed = speed;
         }
 
         internal SpiClockConfiguration()
@@ -128,17 +141,17 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates a SpiClockConfiguration instance
         /// </summary>
-        /// <param name="speedKHz">Bus clock speed, in kHz</param>
+        /// <param name="speed">Bus clock speed, in kHz</param>
         /// <param name="polarity">Bus clock polarity</param>
         /// <param name="phase">Bus clock phase</param>
         public SpiClockConfiguration(
-            long speedKHz,
+            Units.Frequency speed,
             ClockPolarity polarity = ClockPolarity.Normal,
             ClockPhase phase = ClockPhase.Zero
             
         )
         {
-            this.SpeedKHz = speedKHz;
+            this.Speed = speed;
             this.Polarity = polarity;
             this.Phase = phase;
             this.BitsPerWord = 8;
@@ -147,14 +160,14 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates a SpiClockConfiguration instance
         /// </summary>
-        /// <param name="speedKHz">Bus clock speed, in kHz</param>
+        /// <param name="speed">Bus clock speed, in kHz</param>
         /// <param name="mode">Bus Mode (phase and polarity)</param>
         public SpiClockConfiguration(
-            long speedKHz,
+            Units.Frequency speed,
             Mode mode
         )
         {
-            this.SpeedKHz = speedKHz;
+            this.Speed = speed;
             this.BitsPerWord = 8;
             switch (mode) {
                 case Mode.Mode0:

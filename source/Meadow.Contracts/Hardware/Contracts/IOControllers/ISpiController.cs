@@ -9,7 +9,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// The default SPI Bus speed, in kHz, used when speed parameters are not provided
         /// </summary>
-        public const int DefaultSpiBusSpeed = 375;
+        public static Units.Frequency DefaultSpiBusSpeed = new Units.Frequency(375, Units.Frequency.UnitType.Kilohertz);
 
         /// <summary>
         /// Creates a SPI bus instance for the requested control pins and bus speed
@@ -32,13 +32,13 @@ namespace Meadow.Hardware
         /// <param name="clock">The IPin instance to use as the bus clock</param>
         /// <param name="mosi">The IPin instance to use for data transmit (master out/slave in)</param>
         /// <param name="miso">The IPin instance to use for data receive (master in/slave out)</param>
-        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <param name="speed">The bus speed</param>
         /// <returns>An instance of an IISpiBus</returns>
         ISpiBus CreateSpiBus(
             IPin clock,
             IPin mosi,
             IPin miso,
-            long speedkHz = DefaultSpiBusSpeed
+            Units.Frequency speed
         );
 
     }

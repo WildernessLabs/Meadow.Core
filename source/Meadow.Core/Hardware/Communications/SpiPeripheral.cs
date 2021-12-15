@@ -238,6 +238,7 @@ namespace Meadow.Hardware
         /// Writes an array of bytes to the peripheral
         /// </summary>
         /// <param name="values">The data to write</param>
+        [Obsolete("Use Write", true)]
         public void WriteBytes(byte[] values)
         {
             Bus.SendData(ChipSelect, values);
@@ -249,6 +250,7 @@ namespace Meadow.Hardware
         /// <param name="address">The target write register address</param>
         /// <param name="values">Values to write</param>
         /// <param name="order">Endianness of the values to be written</param>
+        [Obsolete("Use Write", true)]
         public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = new List<byte>();
@@ -276,6 +278,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="address">The target write register address</param>
         /// <param name="values">Values to write</param>
+        [Obsolete("Use Write", true)]
         public void WriteRegisters(byte address, byte[] values)
         {
             var buffer = new byte[values.Length + 1];
@@ -291,6 +294,7 @@ namespace Meadow.Hardware
         /// <param name="length"></param>
         /// <returns></returns>
         /// <remarks>The data read happens <b>after</b> all outbound data has been clocked out (i.e. there is no overlap).  If you need overlap, use the Exchange method of the bus.</remarks>
+        [Obsolete("Use Exchange", true)]
         public byte[] WriteRead(byte[] write, ushort length)
         {
             // TODO: This is a terribly inefficient way to use a SPI bus
@@ -321,6 +325,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="numberOfBytes">The number of bytes to read</param>
         /// <returns>the data read</returns>
+        [Obsolete("Use Read", true)]
         public byte[] ReadBytes(ushort numberOfBytes)
         {
             return Bus.ReceiveData(ChipSelect, numberOfBytes);
@@ -332,6 +337,7 @@ namespace Meadow.Hardware
         /// <param name="address">Address of the read</param>
         /// <param name="length">Number of bytes to read</param>
         /// <returns>Data read from the device</returns>
+        [Obsolete("Use Read", true)]
         public byte[] ReadRegisters(byte address, ushort length)
         {
             var buffer = new byte[length];
@@ -347,6 +353,7 @@ namespace Meadow.Hardware
         /// <param name="number">The number of ushort values to read</param>
         /// <param name="order">Endianness of the values read</param>
         /// <returns>The values read</returns>
+        [Obsolete("Use Read", true)]
         public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
             var data = ReadRegisters(address, (ushort)(2 * number));
