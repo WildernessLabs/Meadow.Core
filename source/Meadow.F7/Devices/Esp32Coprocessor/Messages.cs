@@ -16,6 +16,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
 {
     public struct SystemConfiguration
     {
+        public Byte ResetReason;
         public String SoftwareVersion;
         public Byte MaximumMessageQueueLength;
         public Byte AutomaticallyStartNetwork;
@@ -32,7 +33,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public UInt32 StaticIpAddress;
         public UInt32 DnsServer;
         public UInt32 DefaultGateway;
-        public Byte ResetReason;
     };
 
     public struct ConfigurationValue
