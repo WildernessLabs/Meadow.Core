@@ -274,6 +274,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
+            buffer[offset] = systemConfiguration.ResetReason;
+            offset += 1;
             EncodeString(systemConfiguration.SoftwareVersion, buffer, offset);
             offset += systemConfiguration.SoftwareVersion.Length + 1;
             buffer[offset] = systemConfiguration.MaximumMessageQueueLength;
@@ -305,8 +307,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt32(systemConfiguration.DnsServer, buffer, offset);
             offset += 4;
             EncodeUInt32(systemConfiguration.DefaultGateway, buffer, offset);
-            offset += 4;
-            buffer[offset] = systemConfiguration.ResetReason;
             return(buffer);
         }
 
@@ -319,6 +319,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             SystemConfiguration systemConfiguration = new MessagePayloads.SystemConfiguration();
 
+            systemConfiguration.ResetReason = buffer[offset];
+            offset += 1;
             systemConfiguration.SoftwareVersion = ExtractString(buffer, offset);
             offset += (int) (systemConfiguration.SoftwareVersion.Length + 1);
             systemConfiguration.MaximumMessageQueueLength = buffer[offset];
@@ -352,8 +354,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             systemConfiguration.DnsServer = ExtractUInt32(buffer, offset);
             offset += 4;
             systemConfiguration.DefaultGateway = ExtractUInt32(buffer, offset);
-            offset += 4;
-            systemConfiguration.ResetReason = buffer[offset];
             return(systemConfiguration);
         }
 
