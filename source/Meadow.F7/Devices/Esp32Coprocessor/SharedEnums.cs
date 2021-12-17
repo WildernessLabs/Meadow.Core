@@ -94,42 +94,34 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         StopWiFiInterface = 1,
         ConnectToAccessPoint = 2,
         ConnectToDefaultAccessPoint = 3,
-        ClearDefaultAccessPoint = 4,
-        DisconnectFromAccessPoint = 5,
-        GetAccessPoints = 6,
-        SetAntenna = 7,
-        Socket = 8,
-        Connect = 9,
-        Write = 10,
-        SetSockOpt = 11,
-        GetSockOpt = 12,
-        Read = 13,
-        Close = 14,
-        SendTo = 15,
-        RecvFrom = 16,
-        Poll = 17,
-        InterruptPollResponse = 18,
-        Send = 19,
-        Bind = 20,
-        Listen = 21,
-        Accept = 22,
-        Ioctl = 23,
-        GetSockName = 24,
-        GetPeerName = 25,
-        FreeAddrInfo = 26,
-        GetAddrInfo = 27,
-        RecvMsg = 28,
-        Shutdown = 29,
-        SendMsg = 30,
-        Dup2 = 31,
-        AddRef = 32,
-        SockCaps = 33,
-        StartWiFiInterfaceEvent = 34,
-        StopWiFiInterfaceEvent = 35,
-        ConnectToAccessPointEvent = 36,
-        DisconnectFromAccessPointEvent = 37,
-        NtpUpdateEvent = 38,
-        ErrorEvent = 39
+        DisconnectFromAccessPoint = 4,
+        GetAccessPoints = 5,
+        SetAntenna = 6,
+        Socket = 7,
+        Connect = 8,
+        Write = 9,
+        SetSockOpt = 10,
+        Read = 11,
+        Close = 12,
+        SendTo = 13,
+        RecvFrom = 14,
+        Poll = 15,
+        InterruptPollResponse = 16,
+        Send = 17,
+        Bind = 18,
+        Listen = 19,
+        Accept = 20,
+        Ioctl = 21,
+        GetSockName = 22,
+        GetPeerName = 23,
+        FreeAddrInfo = 24,
+        GetAddrInfo = 25,
+        StartWiFiInterfaceEvent = 26,
+        StopWiFiInterfaceEvent = 27,
+        ConnectToAccessPointEvent = 28,
+        DisconnectFromAccessPointEvent = 29,
+        NtpUpdateEvent = 30,
+        ErrorEvent = 31
     };
 
     // <summary>
@@ -464,24 +456,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         NotRecoverable = 141,
         OwnerDead = 142,
         WouldBlock = 11
-    };
-
-    // <summary>
-    // ESP32 Error codes (errno).
-    // </summary>
-    public enum Esp32ResetCodes
-    {
-        Unknown = 0,
-        PowerOn = 1,
-        ExternalGpio = 2,
-        Software = 3,
-        Panic = 4,
-        InterruptWatchdog = 5,
-        TaskWatchdog = 6,
-        OtherWatchdog = 7,
-        DeepSleep = 8,
-        Brownout = 9,
-        SDIO = 10
     };
 
 }
