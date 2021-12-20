@@ -4,15 +4,53 @@ using System.Runtime.InteropServices;
 
 namespace Meadow
 {
-    internal class Gpiod
+    internal class Gpiod : IDisposable
     {
+        private class PinInfo
+        {
+            public int FileDescriptor { get; set; }
+            public int ReferenceCount { get; set; }
+        }
+
         public bool IsDisposed { get; private set; }
-        private int DriverHandle { get; set; }
+        private int DeviceHandle { get; set; }
 
         private const string DeviceName = "/dev/gpiochip0";
 
         public Gpiod()
         {
+            DeviceHandle = Interop.open(DeviceName, Interop.DriverFlags.O_RDONLY);
+            if (DeviceHandle < 0)
+            {
+                throw new NativeException($"Unable to open device '{DeviceName}'");
+            }
+
+            // get pin count, generate an array of Infos
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                if (DeviceHandle != 0)
+                {
+                    Interop.close(DeviceHandle);
+                    DeviceHandle = 0    ;
+                }
+
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         /*
@@ -47,152 +85,100 @@ namespace Meadow
 
         public unsafe void SetConfiguration(int gpio, LineConfiguration configuration)
         {
-            var hDev = Interop.open(DeviceName, Interop.DriverFlags.O_RDONLY);
-            if (hDev < 0)
-            {
-                throw new NativeException($"Unable to open device '{DeviceName}'");
-            }
+            // get a line handle
+            var request = new GpioHandleRequest();
+            request.LineOffsets[0] = gpio;
+            request.Lines = 1;
+            request.Flags = (int)configuration;
 
-            try
+            var result = IoctlGetLineHandle(DeviceHandle, request);
+            if (result == -1)
             {
-                // get a line handle
-                var request = new GpioHandleRequest();
-                request.LineOffsets[0] = gpio;
-                request.Lines = 1;
-                request.Flags = (int)configuration;
-
-                var result = IoctlGetLineHandle(hDev, request);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to get an IOCTL request handle");
-                }
-            }
-            finally
-            {
-                Interop.close(hDev);
+                throw new NativeException($"Unable to get an IOCTL request handle");
             }
         }
 
         public unsafe void SetValue(int gpio, bool value)
         {
-            var hDev = Interop.open(DeviceName, Interop.DriverFlags.O_RDONLY);
-            if (hDev < 0)
+            // get a line handle, configured as output
+            var request = new GpioHandleRequest();
+            request.LineOffsets[0] = gpio;
+            request.Lines = 1;
+            request.Flags = (int)LineConfiguration.Output;
+
+            var result = IoctlGetLineHandle(DeviceHandle, request);
+            if (result == -1)
             {
-                throw new NativeException($"Unable to open device '{DeviceName}'");
+                throw new NativeException($"Unable to get an IOCTL request handle");
             }
 
-            try
+            var state = new GpioHandleData();
+            state.Values[0] = (byte)(value ? 1 : 0);
+
+            result = IoctlSetLineValues(request.FileDescriptor, state);
+            Interop.close(request.FileDescriptor);
+            if (result == -1)
             {
-                // get a line handle, configured as output
-                var request = new GpioHandleRequest();
-                request.LineOffsets[0] = gpio;
-                request.Lines = 1;
-                request.Flags = (int)LineConfiguration.Output;
-
-                var result = IoctlGetLineHandle(hDev, request);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to get an IOCTL request handle");
-                }
-
-                var state = new GpioHandleData();
-                state.Values[0] = (byte)(value ? 1 : 0);
-
-                result = IoctlSetLineValues(request.FileDescriptor, state);
-                Interop.close(request.FileDescriptor);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to set IOCTL data");
-                }
-            }
-            finally
-            {
-                Interop.close(hDev);
+                throw new NativeException($"Unable to set IOCTL data");
             }
         }
 
         public unsafe bool GetValue(int gpio)
         {
-            var hDev = Interop.open(DeviceName, Interop.DriverFlags.O_RDONLY);
-            if (hDev < 0)
+            // get a line handle, configured as output
+            var request = new GpioHandleRequest();
+            request.LineOffsets[0] = gpio;
+            request.Lines = 1;
+            request.Flags = (int)LineConfiguration.Output;
+
+            var result = IoctlGetLineHandle(DeviceHandle, request);
+            if (result == -1)
             {
-                throw new NativeException($"Unable to open device '{DeviceName}'");
+                throw new NativeException($"Unable to get an IOCTL request handle");
             }
 
-            try
+            var state = new GpioHandleData();
+
+            result = IoctlSetLineValues(request.FileDescriptor, state);
+            Interop.close(request.FileDescriptor);
+            if (result == -1)
             {
-                // get a line handle, configured as output
-                var request = new GpioHandleRequest();
-                request.LineOffsets[0] = gpio;
-                request.Lines = 1;
-                request.Flags = (int)LineConfiguration.Output;
-
-                var result = IoctlGetLineHandle(hDev, request);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to get an IOCTL request handle");
-                }
-
-                var state = new GpioHandleData();
-
-                result = IoctlSetLineValues(request.FileDescriptor, state);
-                Interop.close(request.FileDescriptor);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to set IOCTL data");
-                }
-                return state.Values[0] != 0;
+                throw new NativeException($"Unable to set IOCTL data");
             }
-            finally
-            {
-                Interop.close(hDev);
-            }
+            return state.Values[0] != 0;
         }
 
         public unsafe void WaitForEdge(int gpio, GpioEdge edge)
         {
-            var hDev = Interop.open(DeviceName, Interop.DriverFlags.O_RDONLY);
-            if (hDev < 0)
+            var request = new GpioEventRequest
             {
-                throw new NativeException($"Unable to open device '{DeviceName}'");
+                LineOffset = gpio,
+                EventFlags = (int)edge
+            };
+
+            var result = IoctlGetLineEvent(DeviceHandle, request);
+            if (result == -1)
+            {
+                throw new NativeException($"Unable to get an IOCTL event handle");
+            }
+            var pfd = new Interop.pollfd
+            {
+                fd = request.FileDescriptor,
+                events = Interop.PollEvent.POLLIN
+            };
+
+            // TODO: we should probably *not* wait infinite (-1) here
+            result = Interop.poll(ref pfd, 1, -1);
+            if (result == -1)
+            {
+                throw new NativeException($"Unable to poll event handle");
+            }
+            if ((pfd.revents & Interop.PollEvent.POLLIN) != Interop.PollEvent.NONE)
+            {
+                // edge detected
             }
 
-            try
-            {
-                var request = new GpioEventRequest
-                {
-                    LineOffset = gpio,
-                    EventFlags = (int)edge
-                };
-
-                var result = IoctlGetLineEvent(hDev, request);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to get an IOCTL event handle");
-                }
-                var pfd = new Interop.pollfd
-                {
-                    fd = request.FileDescriptor,
-                    events = Interop.PollEvent.POLLIN
-                };
-
-                // TODO: we should probably *not* wait infinite (-1) here
-                result = Interop.poll(ref pfd, 1, -1);
-                if (result == -1)
-                {
-                    throw new NativeException($"Unable to poll event handle");
-                }
-                if ((pfd.revents & Interop.PollEvent.POLLIN) != Interop.PollEvent.NONE)
-                {
-                    // edge detected
-                }
-
-                Interop.close(request.FileDescriptor);
-            }
-            finally
-            {
-                Interop.close(hDev);
-            }
+            Interop.close(request.FileDescriptor);
         }
     }
 }
