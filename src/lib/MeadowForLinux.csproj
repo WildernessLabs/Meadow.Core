@@ -21,11 +21,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" Condition="'$(TargetFramework)'=='net472'" />
- </ItemGroup>
- <ItemGroup>
-   <ProjectReference Include="..\..\..\Meadow.Core\source\Meadow.Contracts\Meadow.Contracts.csproj" />
-   <ProjectReference Include="..\..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj" />
-   <ProjectReference Include="..\..\..\Meadow.Core\source\Meadow.Units\Meadow.Units.csproj" />
+   <PackageReference Include="Meadow" Version="0.*" />
  </ItemGroup>
 </Project>

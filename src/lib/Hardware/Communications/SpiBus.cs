@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -31,18 +32,18 @@ namespace Meadow
 
         private int DriverHandle { get; set; }
 
-        public long[] SupportedSpeeds
+        public Frequency[] SupportedSpeeds
         {
-            get => new long[]
+            get => new Frequency[]
                 {
-                    375,
-                    750,
-                    1500,
-                    3000,
-                    6000,
-                    12000,
-                    24000,
-                    48000
+                    new Frequency(375, Frequency.UnitType.Kilohertz),
+                    new Frequency(750, Frequency.UnitType.Kilohertz),
+                    new Frequency(1500, Frequency.UnitType.Kilohertz),
+                    new Frequency(3000, Frequency.UnitType.Kilohertz),
+                    new Frequency(6000, Frequency.UnitType.Kilohertz),
+                    new Frequency(12000, Frequency.UnitType.Kilohertz),
+                    new Frequency(24000, Frequency.UnitType.Kilohertz),
+                    new Frequency(48000, Frequency.UnitType.Kilohertz),
                 };
         }
 
