@@ -129,15 +129,19 @@ namespace Meadow
             return new SysFsDigitalInputPort(_ioController, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode);
         }
 
-
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
         {
-            throw new NotImplementedException();
+            return CreateSpiBus(clock, mosi, miso, config.SpiMode, config.Speed);
         }
 
-        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, long speedkHz = 375)
+        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, Units.Frequency speed)
         {
-            throw new NotImplementedException();
+            return CreateSpiBus(clock, mosi, miso, SpiClockConfiguration.Mode.Mode0, speed);
+        }
+
+        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
+        {
+            return new SpiBus(0, (SpiBus.SpiMode)mode, speed);
         }
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----

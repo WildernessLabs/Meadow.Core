@@ -21,9 +21,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="Meadow" Version="0.28.0" />
-   <PackageReference Include="Meadow.Contracts" Version="0.28.0" />
-   <PackageReference Include="Meadow.Units" Version="0.28.0" />
-   <PackageReference Include="WildernessLabs.Meadow.Assemblies" Version="0.7.0" Condition="'$(TargetFramework)'=='net472'" />
+   <PackageReference Include="Meadow" Version="0.*" />
  </ItemGroup>
 </Project>

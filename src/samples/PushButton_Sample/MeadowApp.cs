@@ -15,12 +15,12 @@ namespace PushButton_Sample
         {
             Console.WriteLine("Initializing...");
 
-            TestExternalResistorButtons();
+            ConfigureButtons();
 
             Console.WriteLine("PushButton(s) ready!!!");
         }
 
-        void TestExternalResistorButtons()
+        void ConfigureButtons()
         {
             _pushButtons = new List<PushButton>();
 
