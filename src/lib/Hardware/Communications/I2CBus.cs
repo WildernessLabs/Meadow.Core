@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Meadow
 {
-    public class I2CBus : II2cBus, IDisposable
+    public partial class I2CBus : II2cBus, IDisposable
     {
         private class SMBusIoctlData
         {
@@ -39,7 +39,7 @@ namespace Meadow
         // the I2C block driver is...interesting.  You open it multiple times, once per peripheral address per bus
         private Dictionary<byte, I2CPeripheralInfo> InfoMap0 { get; }
 
-        internal I2CBus(int busNumber, Frequency frequency)
+        public I2CBus(int busNumber, Frequency frequency)
         {
             BusNumber = busNumber;
 
