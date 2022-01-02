@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// </summary>
-    public interface ISerialPort
+    public interface ISerialPort : IDisposable
     {
         /// <summary>
         /// Gets or sets the serial baud rate.
@@ -47,16 +47,16 @@ namespace Meadow.Hardware
         int ReceiveBufferSize { get; }
 
         /// <summary>
-        /// The number of milliseconds before a time-out occurs when a read operation does not finish.
+        /// The time required for a a time-out to occur when a read operation does not finish.
         /// </summary>
-        /// <remarks>The time-out can be set to any value greater than zero, or set to InfiniteTimeout, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        int ReadTimeout { get; set; }
+        /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        TimeSpan ReadTimeout { get; set; }
 
         /// <summary>
-        /// The number of milliseconds before a time-out occurs when a read operation does not finish.
+        /// The time required for a a time-out to occur when a write operation does not finish.
         /// </summary>
-        /// <remarks>The time-out can be set to any value greater than zero, or set to InfiniteTimeout, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        int WriteTimeout { get; set; }
+        /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        TimeSpan WriteTimeout { get; set; }
 
         /// <summary>
         /// Gets or sets the standard number of stopbits per byte.

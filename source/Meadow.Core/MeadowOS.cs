@@ -65,7 +65,7 @@ namespace Meadow
         /// <summary>
         /// Resets the Meadow hardware immediately
         /// </summary>
-        [Obsolete("Use CurrentDevice.Reset", false)]
+        [Obsolete("Use CurrentDevice.Reset", true)]
         public static void Reset()
         {
             CurrentDevice.Reset();
@@ -78,12 +78,13 @@ namespace Meadow
         /// </summary>
         /// <param name="timeoutMs">Watchdog timeout period, in milliseconds.
         /// Maximum allowed timeout of 32,768ms</param>
-        [Obsolete("Use CurrentDevice.Reset", false)]
-        public static void WatchdogEnable(int timeoutMs)
+        [Obsolete("Use CurrentDevice.WatchdogEnable", true)]
+        public static void WatchdogReset(int timeoutMs)
         {
             CurrentDevice.WatchdogEnable(TimeSpan.FromMilliseconds(timeoutMs));
         }
 
+        [Obsolete("Use CurrentDevice.WatchdogReset", true)]
         public static void WatchdogReset()
         {
             CurrentDevice.WatchdogReset();
