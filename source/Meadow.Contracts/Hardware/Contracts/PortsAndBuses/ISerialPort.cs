@@ -47,13 +47,13 @@ namespace Meadow.Hardware
         int ReceiveBufferSize { get; }
 
         /// <summary>
-        /// The time required for a a time-out to occur when a read operation does not finish.
+        /// The time required for a time-out to occur when a read operation does not finish.
         /// </summary>
         /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
         TimeSpan ReadTimeout { get; set; }
 
         /// <summary>
-        /// The time required for a a time-out to occur when a write operation does not finish.
+        /// The time required for a time-out to occur when a write operation does not finish.
         /// </summary>
         /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
         TimeSpan WriteTimeout { get; set; }
