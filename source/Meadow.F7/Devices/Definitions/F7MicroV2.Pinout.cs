@@ -172,7 +172,7 @@ namespace Meadow.Devices
                 "D02", "PH10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH10", interruptGroup: 10),
-                    new PwmChannelInfo("TIM5_CH1", 8, 1)
+                    new PwmChannelInfo("TIM5_CH1", 5, 1)
                 }
             );
             // D03
@@ -270,7 +270,7 @@ namespace Meadow.Devices
                 "D09", "PC6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC6", interruptGroup: 6),
-                    new PwmChannelInfo("TIM3_CH1", 3, 1), // or TIM8_CH1
+                    new PwmChannelInfo("TIM8_CH1", 8, 1), // or TIM3_CH1 (see D05)
                 }
             );
             // D10
