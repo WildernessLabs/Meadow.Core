@@ -287,7 +287,7 @@ namespace Meadow.Devices
             public IPin D11 => new Pin(
                 "D11", "PC9",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC9"),
+                    new DigitalChannelInfo("PC9", interruptGroup: 9),
                     new PwmChannelInfo("TIM8_CH4", 8, 4)
                 }
             );
