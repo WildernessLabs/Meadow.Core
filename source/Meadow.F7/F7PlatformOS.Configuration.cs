@@ -106,7 +106,7 @@ namespace Meadow
         /// <summary>
         /// Get a string configuration item.
         /// </summary>
-        /// <param name="value">Configuration item to read.</param>
+        /// <param name="item">Configuration item to read.</param>
         /// <returns>Configuration value if present, String.Empty if no item could be found.</returns>
         public static string GetString(ConfigurationValues item)
         {
@@ -138,7 +138,7 @@ namespace Meadow
         /// <summary>
         /// Get an unsigned integer configuration item.
         /// </summary>
-        /// <param name="value">Configuration item to read.</param>
+        /// <param name="item">Configuration item to read.</param>
         /// <returns>Configuration value if present, 0 if it could not be found.</returns>
         public static uint GetUInt(ConfigurationValues item)
         {
@@ -156,7 +156,7 @@ namespace Meadow
         /// <summary>
         /// Get a byte configuration item.
         /// </summary>
-        /// <param name="value">Configuration item to read.</param>
+        /// <param name="item">Configuration item to read.</param>
         /// <returns>Configuration value if present, 0 if the item count not be found..</returns>
         public static byte GetByte(ConfigurationValues item)
         {
@@ -174,7 +174,7 @@ namespace Meadow
         /// <summary>
         /// Get a boolean configuration item.
         /// </summary>
-        /// <param name="value">Configuration item to read.</param>
+        /// <param name="item">Configuration item to read.</param>
         /// <returns>Configuration value if present, false if the item could not be found.</returns>
         public static bool GetBoolean(ConfigurationValues item)
         {

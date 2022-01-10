@@ -16,7 +16,6 @@ namespace Meadow.Gateway.WiFi
         /// <summary>
         /// Construct a WiFiInterfaceStoppedEventArgs object.
         /// </summary>
-        /// <param name="statusCode">Status code of the </param>
         public NtpTimeChangedEventArgs()
         {
             When = DateTime.Now;

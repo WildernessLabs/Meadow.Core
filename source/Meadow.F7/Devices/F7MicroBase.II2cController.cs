@@ -9,7 +9,6 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(int busNumber = 0)
         {
@@ -19,7 +18,6 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             I2cBusSpeed busSpeed,
@@ -32,7 +30,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <param name="frequency">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             int busNumber,
@@ -45,7 +43,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates an I2C bus instance for the requested pins and bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <param name="frequency">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin[] pins,
@@ -58,7 +56,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates an I2C bus instance for the requested pins and bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <param name="frequency">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
         public II2cBus CreateI2cBus(
             IPin clock,

@@ -65,7 +65,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         ///     Calculate the 32-bit CRC for the array of bytes.
         /// </summary>
-        /// <param name="data">Buffer of data.</param>
+        /// <param name="buffer">Buffer of data.</param>
         /// <returns>32-bit CRC for the array of bytes.</returns>
         private static UInt32 Crc32(byte[] buffer)
         {
@@ -311,7 +311,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SystemConfiguration object from a byte array.
         /// </summary>
-        /// <param name="systemConfiguration">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SystemConfiguration object.</returns>
         public static MessagePayloads.SystemConfiguration ExtractSystemConfiguration(byte[] buffer, int offset)
         {
@@ -403,7 +403,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ConfigurationValue object from a byte array.
         /// </summary>
-        /// <param name="configurationValue">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>ConfigurationValue object.</returns>
         public static MessagePayloads.ConfigurationValue ExtractConfigurationValue(byte[] buffer, int offset)
         {
@@ -463,7 +463,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a WiFiCredentials object from a byte array.
         /// </summary>
-        /// <param name="wiFiCredentials">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>WiFiCredentials object.</returns>
         public static MessagePayloads.WiFiCredentials ExtractWiFiCredentials(byte[] buffer, int offset)
         {
@@ -515,7 +515,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a DisconnectFromAccessPointRequest object from a byte array.
         /// </summary>
-        /// <param name="disconnectFromAccessPointRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>DisconnectFromAccessPointRequest object.</returns>
         public static MessagePayloads.DisconnectFromAccessPointRequest ExtractDisconnectFromAccessPointRequest(byte[] buffer, int offset)
         {
@@ -583,7 +583,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ConnectEventData object from a byte array.
         /// </summary>
-        /// <param name="connectEventData">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>ConnectEventData object.</returns>
         public static MessagePayloads.ConnectEventData ExtractConnectEventData(byte[] buffer, int offset)
         {
@@ -652,7 +652,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a DisconnectEventData object from a byte array.
         /// </summary>
-        /// <param name="disconnectEventData">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>DisconnectEventData object.</returns>
         public static MessagePayloads.DisconnectEventData ExtractDisconnectEventData(byte[] buffer, int offset)
         {
@@ -722,7 +722,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AccessPoint object from a byte array.
         /// </summary>
-        /// <param name="accessPoint">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>AccessPoint object.</returns>
         public static MessagePayloads.AccessPoint ExtractAccessPoint(byte[] buffer, int offset)
         {
@@ -793,7 +793,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AccessPointList object from a byte array.
         /// </summary>
-        /// <param name="accessPointList">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>AccessPointList object.</returns>
         public static MessagePayloads.AccessPointList ExtractAccessPointList(byte[] buffer, int offset)
         {
@@ -861,7 +861,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SockAddr object from a byte array.
         /// </summary>
-        /// <param name="sockAddr">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SockAddr object.</returns>
         public static MessagePayloads.SockAddr ExtractSockAddr(byte[] buffer, int offset)
         {
@@ -942,7 +942,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AddrInfo object from a byte array.
         /// </summary>
-        /// <param name="addrInfo">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>AddrInfo object.</returns>
         public static MessagePayloads.AddrInfo ExtractAddrInfo(byte[] buffer, int offset)
         {
@@ -1025,7 +1025,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetAddrInfoRequest object from a byte array.
         /// </summary>
-        /// <param name="getAddrInfoRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>GetAddrInfoRequest object.</returns>
         public static MessagePayloads.GetAddrInfoRequest ExtractGetAddrInfoRequest(byte[] buffer, int offset)
         {
@@ -1094,7 +1094,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetAddrInfoResponse object from a byte array.
         /// </summary>
-        /// <param name="getAddrInfoResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>GetAddrInfoResponse object.</returns>
         public static MessagePayloads.GetAddrInfoResponse ExtractGetAddrInfoResponse(byte[] buffer, int offset)
         {
@@ -1157,7 +1157,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SocketRequest object from a byte array.
         /// </summary>
-        /// <param name="socketRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SocketRequest object.</returns>
         public static MessagePayloads.SocketRequest ExtractSocketRequest(byte[] buffer, int offset)
         {
@@ -1210,7 +1210,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IntegerResponse object from a byte array.
         /// </summary>
-        /// <param name="integerResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>IntegerResponse object.</returns>
         public static MessagePayloads.IntegerResponse ExtractIntegerResponse(byte[] buffer, int offset)
         {
@@ -1259,7 +1259,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IntegerAndErrnoResponse object from a byte array.
         /// </summary>
-        /// <param name="integerAndErrnoResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>IntegerAndErrnoResponse object.</returns>
         public static MessagePayloads.IntegerAndErrnoResponse ExtractIntegerAndErrnoResponse(byte[] buffer, int offset)
         {
@@ -1316,7 +1316,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ConnectRequest object from a byte array.
         /// </summary>
-        /// <param name="connectRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>ConnectRequest object.</returns>
         public static MessagePayloads.ConnectRequest ExtractConnectRequest(byte[] buffer, int offset)
         {
@@ -1373,7 +1373,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a FreeAddrInfoRequest object from a byte array.
         /// </summary>
-        /// <param name="freeAddrInfoRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>FreeAddrInfoRequest object.</returns>
         public static MessagePayloads.FreeAddrInfoRequest ExtractFreeAddrInfoRequest(byte[] buffer, int offset)
         {
@@ -1422,7 +1422,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a TimeVal object from a byte array.
         /// </summary>
-        /// <param name="timeVal">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>TimeVal object.</returns>
         public static MessagePayloads.TimeVal ExtractTimeVal(byte[] buffer, int offset)
         {
@@ -1485,7 +1485,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SetSockOptRequest object from a byte array.
         /// </summary>
-        /// <param name="setSockOptRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SetSockOptRequest object.</returns>
         public static MessagePayloads.SetSockOptRequest ExtractSetSockOptRequest(byte[] buffer, int offset)
         {
@@ -1550,7 +1550,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a Linger object from a byte array.
         /// </summary>
-        /// <param name="linger">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>Linger object.</returns>
         public static MessagePayloads.Linger ExtractLinger(byte[] buffer, int offset)
         {
@@ -1609,7 +1609,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a WriteRequest object from a byte array.
         /// </summary>
-        /// <param name="writeRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>WriteRequest object.</returns>
         public static MessagePayloads.WriteRequest ExtractWriteRequest(byte[] buffer, int offset)
         {
@@ -1670,7 +1670,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ReadRequest object from a byte array.
         /// </summary>
-        /// <param name="readRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>ReadRequest object.</returns>
         public static MessagePayloads.ReadRequest ExtractReadRequest(byte[] buffer, int offset)
         {
@@ -1729,7 +1729,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ReadResponse object from a byte array.
         /// </summary>
-        /// <param name="readResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>ReadResponse object.</returns>
         public static MessagePayloads.ReadResponse ExtractReadResponse(byte[] buffer, int offset)
         {
@@ -1788,7 +1788,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a CloseRequest object from a byte array.
         /// </summary>
-        /// <param name="closeRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>CloseRequest object.</returns>
         public static MessagePayloads.CloseRequest ExtractCloseRequest(byte[] buffer, int offset)
         {
@@ -1835,7 +1835,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetBatteryChargeLevelResponse object from a byte array.
         /// </summary>
-        /// <param name="getBatteryChargeLevelResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>GetBatteryChargeLevelResponse object.</returns>
         public static MessagePayloads.GetBatteryChargeLevelResponse ExtractGetBatteryChargeLevelResponse(byte[] buffer, int offset)
         {
@@ -1894,7 +1894,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SendRequest object from a byte array.
         /// </summary>
-        /// <param name="sendRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SendRequest object.</returns>
         public static MessagePayloads.SendRequest ExtractSendRequest(byte[] buffer, int offset)
         {
@@ -1975,7 +1975,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SendToRequest object from a byte array.
         /// </summary>
-        /// <param name="sendToRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SendToRequest object.</returns>
         public static MessagePayloads.SendToRequest ExtractSendToRequest(byte[] buffer, int offset)
         {
@@ -2051,7 +2051,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a RecvFromRequest object from a byte array.
         /// </summary>
-        /// <param name="recvFromRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>RecvFromRequest object.</returns>
         public static MessagePayloads.RecvFromRequest ExtractRecvFromRequest(byte[] buffer, int offset)
         {
@@ -2124,7 +2124,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a RecvFromResponse object from a byte array.
         /// </summary>
-        /// <param name="recvFromResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>RecvFromResponse object.</returns>
         public static MessagePayloads.RecvFromResponse ExtractRecvFromResponse(byte[] buffer, int offset)
         {
@@ -2202,7 +2202,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a PollRequest object from a byte array.
         /// </summary>
-        /// <param name="pollRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>PollRequest object.</returns>
         public static MessagePayloads.PollRequest ExtractPollRequest(byte[] buffer, int offset)
         {
@@ -2261,7 +2261,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a PollResponse object from a byte array.
         /// </summary>
-        /// <param name="pollResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>PollResponse object.</returns>
         public static MessagePayloads.PollResponse ExtractPollResponse(byte[] buffer, int offset)
         {
@@ -2320,7 +2320,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a InterruptPollResponse object from a byte array.
         /// </summary>
-        /// <param name="interruptPollResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>InterruptPollResponse object.</returns>
         public static MessagePayloads.InterruptPollResponse ExtractInterruptPollResponse(byte[] buffer, int offset)
         {
@@ -2377,7 +2377,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ListenRequest object from a byte array.
         /// </summary>
-        /// <param name="listenRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>ListenRequest object.</returns>
         public static MessagePayloads.ListenRequest ExtractListenRequest(byte[] buffer, int offset)
         {
@@ -2434,7 +2434,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BindRequest object from a byte array.
         /// </summary>
-        /// <param name="bindRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>BindRequest object.</returns>
         public static MessagePayloads.BindRequest ExtractBindRequest(byte[] buffer, int offset)
         {
@@ -2491,7 +2491,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AcceptRequest object from a byte array.
         /// </summary>
-        /// <param name="acceptRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>AcceptRequest object.</returns>
         public static MessagePayloads.AcceptRequest ExtractAcceptRequest(byte[] buffer, int offset)
         {
@@ -2548,7 +2548,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AcceptResponse object from a byte array.
         /// </summary>
-        /// <param name="acceptResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>AcceptResponse object.</returns>
         public static MessagePayloads.AcceptResponse ExtractAcceptResponse(byte[] buffer, int offset)
         {
@@ -2607,7 +2607,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IoctlRequest object from a byte array.
         /// </summary>
-        /// <param name="ioctlRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>IoctlRequest object.</returns>
         public static MessagePayloads.IoctlRequest ExtractIoctlRequest(byte[] buffer, int offset)
         {
@@ -2666,7 +2666,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IoctlResponse object from a byte array.
         /// </summary>
-        /// <param name="ioctlResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>IoctlResponse object.</returns>
         public static MessagePayloads.IoctlResponse ExtractIoctlResponse(byte[] buffer, int offset)
         {
@@ -2727,7 +2727,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetSockPeerNameRequest object from a byte array.
         /// </summary>
-        /// <param name="getSockPeerNameRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>GetSockPeerNameRequest object.</returns>
         public static MessagePayloads.GetSockPeerNameRequest ExtractGetSockPeerNameRequest(byte[] buffer, int offset)
         {
@@ -2784,7 +2784,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetSockPeerNameResponse object from a byte array.
         /// </summary>
-        /// <param name="getSockPeerNameResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>GetSockPeerNameResponse object.</returns>
         public static MessagePayloads.GetSockPeerNameResponse ExtractGetSockPeerNameResponse(byte[] buffer, int offset)
         {
@@ -2849,7 +2849,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a EventData object from a byte array.
         /// </summary>
-        /// <param name="eventData">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>EventData object.</returns>
         public static MessagePayloads.EventData ExtractEventData(byte[] buffer, int offset)
         {
@@ -2910,7 +2910,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a EventDataPayload object from a byte array.
         /// </summary>
-        /// <param name="eventDataPayload">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>EventDataPayload object.</returns>
         public static MessagePayloads.EventDataPayload ExtractEventDataPayload(byte[] buffer, int offset)
         {
@@ -2969,7 +2969,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SetAntennaRequest object from a byte array.
         /// </summary>
-        /// <param name="setAntennaRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>SetAntennaRequest object.</returns>
         public static MessagePayloads.SetAntennaRequest ExtractSetAntennaRequest(byte[] buffer, int offset)
         {
@@ -3018,7 +3018,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTStackConfig object from a byte array.
         /// </summary>
-        /// <param name="bTStackConfig">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>BTStackConfig object.</returns>
         public static MessagePayloads.BTStackConfig ExtractBTStackConfig(byte[] buffer, int offset)
         {
@@ -3075,7 +3075,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTDataWriteRequest object from a byte array.
         /// </summary>
-        /// <param name="bTDataWriteRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>BTDataWriteRequest object.</returns>
         public static MessagePayloads.BTDataWriteRequest ExtractBTDataWriteRequest(byte[] buffer, int offset)
         {
@@ -3140,7 +3140,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTGetHandlesResponse object from a byte array.
         /// </summary>
-        /// <param name="bTGetHandlesResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>BTGetHandlesResponse object.</returns>
         public static MessagePayloads.BTGetHandlesResponse ExtractBTGetHandlesResponse(byte[] buffer, int offset)
         {
@@ -3205,7 +3205,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTServerDataSet object from a byte array.
         /// </summary>
-        /// <param name="bTServerDataSet">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the object to the extracted.</param>
         /// <returns>BTServerDataSet object.</returns>
         public static MessagePayloads.BTServerDataSet ExtractBTServerDataSet(byte[] buffer, int offset)
         {
