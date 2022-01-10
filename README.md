@@ -71,11 +71,4 @@ $ dotnet App.exe
  
 ## Work in Progress
 
-M4L is currently an *Alpha* product with several core features that are not yet implemented.  Below is a list of broad features that are not yet working, but more details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
-
-- SPI Not Implemented
-- Analog input not implemented
-- PWMs not implemented
-- Bi-directional Ports not implemented
-- Watchdog not implemented
-- WiFi integration not implemented
+M4L is currently an *Alpha* product with several core features that are not yet implemented.  Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
