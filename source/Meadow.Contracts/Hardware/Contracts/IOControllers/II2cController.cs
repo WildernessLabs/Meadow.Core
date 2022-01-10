@@ -22,7 +22,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates an I2C bus instance for the default pins and the requested bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz).</param>
+        /// <param name="frequency">The bus speed in (in Hz).</param>
         /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             int busNumber,
@@ -32,7 +32,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates an I2C bus instance for the requested pins and bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <param name="frequency">The bus speed in (in Hz)</param>
         /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin[] pins,
@@ -42,7 +42,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates an I2C bus instance for the requested pins and bus speed
         /// </summary>
-        /// <param name="frequencyHz">The bus speed in (in Hz)</param>
+        /// <param name="frequency">The bus speed in (in Hz)</param>
         /// <returns>An instance of an I2cBus</returns>
         II2cBus CreateI2cBus(
             IPin clock,

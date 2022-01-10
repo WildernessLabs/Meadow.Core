@@ -23,7 +23,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="x">The X Acceleration3d value.</param>
         /// <param name="y">The Y Acceleration3d value.</param>
-        /// <param name="y">The Z Acceleration3d value.</param>
+        /// <param name="z">The Z Acceleration3d value.</param>
         /// <param name="type"></param>
         public Acceleration3D(double x, double y, double z,
             Acceleration.UnitType type = Acceleration.UnitType.MetersPerSecondSquared)

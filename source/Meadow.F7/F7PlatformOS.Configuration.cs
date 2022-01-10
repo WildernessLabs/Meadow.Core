@@ -185,7 +185,7 @@ namespace Meadow
         /// Set the specified configuration item to the string value.
         /// </summary>
         /// <param name="item">Item to set.</param>
-        /// <param name="value"Value to be used.></param>
+        /// <param name="value">Value to be used.></param>
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
         public static bool SetString(ConfigurationValues item, string value)
         {
@@ -223,7 +223,7 @@ namespace Meadow
         /// Set an unsigned integer configuration item.
         /// </summary>
         /// <param name="item">Item to set.</param>
-        /// <param name="value"Value to be used.></param>
+        /// <param name="value">Value to be used.></param>
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
         public static bool SetUInt(ConfigurationValues item, uint value)
         {
@@ -238,7 +238,7 @@ namespace Meadow
         /// Set a configuration to the specified byte.
         /// </summary>
         /// <param name="item">Item to set.</param>
-        /// <param name="value"Value to be used.></param>
+        /// <param name="value">Value to be used.></param>
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
         public static bool SetByte(ConfigurationValues item, byte value)
         {
@@ -254,7 +254,7 @@ namespace Meadow
         /// Set a boolean configuration item.
         /// </summary>
         /// <param name="item">Item to set.</param>
-        /// <param name="value"Value to be used.></param>
+        /// <param name="value">Value to be used.></param>
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
         public static bool SetBoolean(ConfigurationValues item, bool value)
         {

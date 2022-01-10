@@ -26,7 +26,6 @@ namespace Meadow.Units
         /// Creates a new `Azimuth` object.
         /// </summary>
         /// <param name="value">The cardinal direction value.</param>
-        /// <param name="type">_Compass Decimal Degrees_ (`°`), by default.</param>
         public Azimuth(double value)
         {
             Value = value;
@@ -89,9 +88,9 @@ namespace Meadow.Units
         [Pure] public static Azimuth FromDecimalDegrees(double value) => new Azimuth(value);
 
         /// <summary>
-        /// Creates a new `Azimuth` object from a unit value in _Decimal Degrees_ (`°`).
+        /// Creates a new `Azimuth` object
         /// </summary>
-        /// <param name="value">The cardinal direction value.</param>
+        /// <param name="name">The 16 point cardinal direction.</param>
         /// <returns>A new cardinal direction object.</returns>
         [Pure] public static Azimuth FromCompass16PointCardinalName(Azimuth16PointCardinalNames name) => new Azimuth(name);
 

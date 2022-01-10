@@ -100,9 +100,9 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Write a single byte to the peripheral.
+        /// Write a span of bytes to the peripheral.
         /// </summary>
-        /// <param name="value">Value to be written (8-bits).</param>
+        /// <param name="data">Data to be written.</param>
         public void Write(Span<byte> data)
         {
             Bus.Write(this.ChipSelect, data, this.chipSelectMode);

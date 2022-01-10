@@ -27,9 +27,13 @@ namespace Meadow.Units
             Value = AngleConversions.Convert(value, type, UnitType.Degrees);
         }
 
+        /// <summary>
+        /// Creates a new `Angle` object from an existing angle object
+        /// </summary>
+        /// <param name="angle"></param>
         public Angle(Angle angle)
         {
-            this.Value = angle.Value;
+            Value = angle.Value;
         }
 
         /// <summary>

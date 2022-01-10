@@ -23,7 +23,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="x">The X MagneticField3d value.</param>
         /// <param name="y">The Y MagneticField3d value.</param>
-        /// <param name="valueZ">The Z MagneticField3d value.</param>
+        /// <param name="z">The Z MagneticField3d value.</param>
         /// <param name="type"></param>
         public MagneticField3D(double x, double y, double z, MU type = MU.Tesla)
         {

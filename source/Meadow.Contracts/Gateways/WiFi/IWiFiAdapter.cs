@@ -157,7 +157,7 @@ namespace Meadow.Gateways
         /// Disconnect from the the currently active access point.
         /// </summary>
         /// <remarks>
-        /// Setting turnOffWiFiInterface to true will call <cref="StopWiFiInterface" /> following
+        /// Setting turnOffWiFiInterface to true will call StopWiFiInterface following
         /// the disconnection from the current access point.
         /// </remarks>
         /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>

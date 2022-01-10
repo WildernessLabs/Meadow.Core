@@ -27,6 +27,10 @@ namespace Meadow.Units
             Value = AngularAccelerationConversions.Convert(value, type, UnitType.RevolutionsPerSecondSquared);
         }
 
+        /// <summary>
+        /// Creates a new `AngularAcceleration` object from an existing object
+        /// </summary>
+        /// <param name="acceleration"></param>
         public AngularAcceleration(AngularAcceleration acceleration)
         {
             Value = acceleration.Value;

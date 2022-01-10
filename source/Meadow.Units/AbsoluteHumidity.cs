@@ -18,7 +18,7 @@ namespace Meadow.Units
         IEquatable<double>, IComparable<double>
     {
         /// <summary>
-        /// Creates a new `AbsoluteHumidity` object.
+        /// Creates a new`AbsoluteHumidity object.
         /// </summary>
         /// <param name="value">The AbsoluteHumidity value.</param>
         /// <param name="type">kilometers meters per second by default.</param>
@@ -27,6 +27,10 @@ namespace Meadow.Units
             Value = AbsoluteHumidityConversions.Convert(value, type, UnitType.GramsPerCubicMeter);
         }
 
+        /// <summary>
+        /// Creates a new AbsoluteHumidity object.
+        /// </summary>
+        /// <param name="absoluteHumidity"></param>
         public AbsoluteHumidity(AbsoluteHumidity absoluteHumidity)
         {
             this.Value = absoluteHumidity.Value;
