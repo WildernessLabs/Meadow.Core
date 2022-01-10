@@ -77,7 +77,7 @@ namespace Meadow.Units
         /// <summary>
         /// Compare two 3DAngularVelocity objects
         /// </summary>
-        /// <param name="obj">object to compare</param>
+        /// <param name="other">object to compare</param>
         /// <returns>true if equal</returns>
         [Pure]
         public bool Equals(AngularVelocity3D other) =>
