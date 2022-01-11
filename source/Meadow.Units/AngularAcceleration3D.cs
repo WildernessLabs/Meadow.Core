@@ -61,16 +61,14 @@ namespace Meadow.Units
         /// </summary>
         public AngularAcceleration Z { get; set; }
 
-        [Pure]
-        public override bool Equals(object obj)
+        [Pure] public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((AngularAcceleration3D)obj);
         }
 
-        [Pure]
-        public bool Equals(AngularAcceleration3D other) =>
+        [Pure] public bool Equals(AngularAcceleration3D other) =>
             X == other.X &&
             Y == other.Y &&
             Z == other.Z;

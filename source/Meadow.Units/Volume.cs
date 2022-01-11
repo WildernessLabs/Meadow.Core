@@ -27,9 +27,13 @@ namespace Meadow.Units
             Value = VolumeConversions.Convert(value, type, UnitType.Liters);
         }
 
+        /// <summary>
+        /// Creates a new `Volume` object from an existing Volume object
+        /// </summary>
+        /// <param name="volume"></param>
         public Volume(Volume volume)
         {
-            this.Value = volume.Value;
+            Value = volume.Value;
         }
 
         /// <summary>
@@ -61,20 +65,32 @@ namespace Meadow.Units
         public double Milliliters => From(UnitType.Milliliters);
         public double CubicMeters => From(UnitType.CubicMeters);
 
-        [Pure]
-        public double From(UnitType convertTo)
+        /// <summary>
+        /// Get a double value for a specific unit
+        /// </summary>
+        /// <param name="convertTo">unit to covert to</param>
+        /// <returns>the converted value</returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return VolumeConversions.Convert(Value, UnitType.Liters, convertTo);
         }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another Volume object
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Volume)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -88,20 +104,100 @@ namespace Meadow.Units
         //[Pure] public static implicit operator Volume(decimal value) => new Volume((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another Volume object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Volume other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Volume left, Volume right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Volume left, Volume right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(Volume other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another Volume object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(Volume other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Volume left, Volume right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Volume left, Volume right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Volume left, Volume right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Volume left, Volume right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Volume operator +(Volume lvalue, Volume rvalue) => new Volume(lvalue.Value + rvalue.Value);
-        [Pure] public static Volume operator -(Volume lvalue, Volume rvalue) => new Volume(lvalue.Value - rvalue.Value);
-        [Pure] public static Volume operator *(Volume value, double operand) => new Volume(value.Value * operand);
-        [Pure] public static Volume operator /(Volume value, double operand) => new Volume(value.Value / operand);
+        /// <summary>
+        /// Addition operator to add two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Volume object with a value of left + right</returns>
+        [Pure] public static Volume operator +(Volume left, Volume right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two Volume objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Volume object with a value of left - right</returns>
+        [Pure] public static Volume operator -(Volume left, Volume right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Volume object with a value of value multiplied by the operand</returns>
+        [Pure] public static Volume operator *(Volume value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new Volume object with a value of value divided by the operand</returns>
+        [Pure] public static Volume operator /(Volume value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
@@ -126,9 +222,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another Volume object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other Volume cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 

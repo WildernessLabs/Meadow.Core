@@ -27,9 +27,13 @@ namespace Meadow.Units
             Value = SpeedConversions.Convert(value, type, UnitType.KilometersPerSecond);
         }
 
+        /// <summary>
+        /// Creates a new `Speed` object from an existing Speed object
+        /// </summary>
+        /// <param name="speed"></param>
         public Speed(Speed speed)
         {
-            this.Value = speed.Value;
+            Value = speed.Value;
         }
 
         /// <summary>
@@ -71,20 +75,32 @@ namespace Meadow.Units
         public double SpeedOfLight => From(UnitType.SpeedOfLight);
         public double Mach => From(UnitType.Mach);
 
-        [Pure]
-        public double From(UnitType convertTo)
+        /// <summary>
+        /// Get a double value for a specific unit
+        /// </summary>
+        /// <param name="convertTo">unit to covert to</param>
+        /// <returns>the converted value</returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return SpeedConversions.Convert(Value, UnitType.KilometersPerSecond, convertTo);
         }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another Speed object
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Speed)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -98,20 +114,100 @@ namespace Meadow.Units
         //[Pure] public static implicit operator Speed(decimal value) => new Speed((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another Speed object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Speed other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Speed left, Speed right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Speed left, Speed right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(Speed other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another Speed object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(Speed other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Speed left, Speed right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Speed left, Speed right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Speed left, Speed right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Speed left, Speed right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Speed operator +(Speed lvalue, Speed rvalue) => new Speed(lvalue.Value + rvalue.Value);
-        [Pure] public static Speed operator -(Speed lvalue, Speed rvalue) => new Speed(lvalue.Value - rvalue.Value);
-        [Pure] public static Speed operator *(Speed value, double operand) => new Speed(value.Value * operand);
-        [Pure] public static Speed operator /(Speed value, double operand) => new Speed(value.Value / operand);
+        /// <summary>
+        /// Addition operator to add two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Speed object with a value of left + right</returns>
+        [Pure] public static Speed operator +(Speed left, Speed right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two Speed objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Speed object with a value of left - right</returns>
+        [Pure] public static Speed operator -(Speed left, Speed right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Speed object with a value of value multiplied by the operand</returns>
+        [Pure] public static Speed operator *(Speed value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new Speed object with a value of value divided by the operand</returns>
+        [Pure] public static Speed operator /(Speed value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
@@ -136,9 +232,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another Speed object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other Speed cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 

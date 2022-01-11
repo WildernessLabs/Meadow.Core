@@ -27,6 +27,10 @@ namespace Meadow.Units
             Value = PowerConversions.Convert(value, type, UnitType.Watts);
         }
 
+        /// <summary>
+        /// Creates a new `Power` object from an existing Power object
+        /// </summary>
+        /// <param name="power"></param>
         public Power(Power power)
         {
             this.Value = power.Value;
@@ -79,21 +83,32 @@ namespace Meadow.Units
         public double FootPoundsPerHour => From(UnitType.FootPoundsPerHour);
         public double TonsRefridgeration => From(UnitType.TonsRefridgeration);
 
-
-        [Pure]
-        public double From(UnitType convertTo)
+        /// <summary>
+        /// Get a double value for a specific unit
+        /// </summary>
+        /// <param name="convertTo">unit to covert to</param>
+        /// <returns>the converted value</returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return PowerConversions.Convert(Value, UnitType.Watts, convertTo);
         }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another Power object
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Power)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -107,20 +122,100 @@ namespace Meadow.Units
         //[Pure] public static implicit operator Power(decimal value) => new Power((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another Power object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Power other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Power left, Power right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Power left, Power right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(Power other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another Power object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(Power other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Power left, Power right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Power left, Power right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Power left, Power right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Power left, Power right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Power operator +(Power lvalue, Power rvalue) => new Power(lvalue.Value + rvalue.Value);
-        [Pure] public static Power operator -(Power lvalue, Power rvalue) => new Power(lvalue.Value - rvalue.Value);
-        [Pure] public static Power operator *(Power value, double operand) => new Power(value.Value * operand);
-        [Pure] public static Power operator /(Power value, double operand) => new Power(value.Value / operand);
+        /// <summary>
+        /// Addition operator to add two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Power object with a value of left + right</returns>
+        [Pure] public static Power operator +(Power left, Power right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two Power objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Power object with a value of left - right</returns>
+        [Pure] public static Power operator -(Power left, Power right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Power object with a value of value multiplied by the operand</returns>
+        [Pure] public static Power operator *(Power value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new Power object with a value of value divided by the operand</returns>
+        [Pure] public static Power operator /(Power value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
@@ -145,9 +240,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another Power object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other Power cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 

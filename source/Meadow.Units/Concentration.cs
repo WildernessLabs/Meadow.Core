@@ -20,11 +20,10 @@ namespace Meadow.Units
         /// <summary>
         /// Creates a new `Concentration` object.
         /// </summary>
-        /// <param name="value">The Acceleration value.</param>
-        /// <param name="type">kilometers meters per second by default.</param>
+        /// <param name="value">The Concentration value.</param>
+        /// <param name="type">Parts Per Million by default.</param>
         public Concentration(double value, UnitType type = UnitType.PartsPerMillion)
         {
-            //always store reference value
             Value = ConcentrationConversions.Convert(value, type, UnitType.PartsPerMillion);
         }
 
@@ -43,7 +42,7 @@ namespace Meadow.Units
         private readonly double Value;
 
         /// <summary>
-        /// The type of units available to describe the temperature.
+        /// The type of units available to describe the concentration.
         /// </summary>
         public enum UnitType
         {
@@ -87,8 +86,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="convertTo">unit</param>
         /// <returns>value as a double</returns>
-        [Pure]
-        public double From(UnitType convertTo)
+        [Pure] public double From(UnitType convertTo)
         {
             return ConcentrationConversions.Convert(Value, UnitType.PartsPerMillion, convertTo);
         }
@@ -98,8 +96,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="obj"></param>
         /// <returns>true if equal</returns>
-        [Pure]
-        public override bool Equals(object obj)
+        [Pure] public override bool Equals(object obj)
         {
             if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
@@ -126,69 +123,97 @@ namespace Meadow.Units
         /// <summary>
         /// Compare to another Concentration objects
         /// </summary>
-        /// <param name="other">object to compare</param>
-        /// <returns>true if equals</returns>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Concentration other) => Value == other.Value;
+
         /// <summary>
-        /// Equals operator
+        /// Equals operator to compare two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
-        /// <returns>true if equals</returns>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Concentration left, Concentration right) => Equals(left.Value, right.Value);
+
         /// <summary>
-        /// Not equal operator used to compare two Concentration objects
+        /// Not equals operator to compare two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
         /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Concentration left, Concentration right) => !Equals(left.Value, right.Value);
+
         /// <summary>
-        /// Compare value to another Concentration object
+        /// Compare to another Concentration object
         /// </summary>
-        /// <param name="other">other Concentration object</param>
-        /// <returns>true if equlas</returns>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(Concentration other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
         /// <summary>
-        /// Less than operator used to compare two Concentration objects
+        /// Less than operator to compare two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
-        /// <returns>true if left value is less than right value</returns>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Concentration left, Concentration right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
         /// <summary>
-        /// Greater than operator
+        /// Greater than operator to compare two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
-        /// <returns>true if left value is greater than right value</returns>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Concentration left, Concentration right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
         /// <summary>
-        /// Less than or equal to operator used to compare two Concentration objects
+        /// Less than or equal operator to compare two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
-        /// <returns>true if left value is less than or equal to right value</returns>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Concentration left, Concentration right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
         /// <summary>
-        /// Greater than or equal to operator used to compare two Concentration objects
+        /// Greater than or equal operator to compare two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
-        /// <returns>true if left value is greater than or equal to right value</returns>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Concentration left, Concentration right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
         /// <summary>
-        /// Addition operator used to add two Concentration objects
+        /// Addition operator to add two Concentration objects
         /// </summary>
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
-        /// <returns>A new Concentration object with the combined value of left value and right value</returns>
-        [Pure] public static Concentration operator +(Concentration left, Concentration right) => new(left.Value + right.Value);
-        [Pure] public static Concentration operator -(Concentration left, Concentration right) => new(left.Value - right.Value);
-        [Pure] public static Concentration operator *(Concentration value, double operand) => new(value.Value * operand);
-        [Pure] public static Concentration operator /(Concentration value, double operand) => new(value.Value / operand);
+        /// <returns>A new Concentration object with a value of left + right</returns>
+        [Pure] public static Concentration operator +(Concentration left, Concentration right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two Concentration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Concentration object with a value of left - right</returns>
+        [Pure] public static Concentration operator -(Concentration left, Concentration right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Concentration object with a value of value multiplied by the operand</returns>
+        [Pure] public static Concentration operator *(Concentration value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new Concentration object with a value of value divided by the operand</returns>
+        [Pure] public static Concentration operator /(Concentration value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
@@ -213,9 +238,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another Concentration object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other Concentration cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 
@@ -336,7 +361,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 

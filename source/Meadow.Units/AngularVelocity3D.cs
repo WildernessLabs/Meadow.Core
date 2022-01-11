@@ -66,8 +66,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="obj">object to compare</param>
         /// <returns>true if equal</returns>
-        [Pure]
-        public override bool Equals(object obj)
+        [Pure] public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
@@ -79,8 +78,7 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="other">object to compare</param>
         /// <returns>true if equal</returns>
-        [Pure]
-        public bool Equals(AngularVelocity3D other) =>
+        [Pure] public bool Equals(AngularVelocity3D other) =>
             X == other.X &&
             Y == other.Y &&
             Z == other.Z;

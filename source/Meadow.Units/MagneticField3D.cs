@@ -50,16 +50,14 @@ namespace Meadow.Units
         public MagneticField Y { get; set; }
         public MagneticField Z { get; set; }
 
-        [Pure]
-        public override bool Equals(object obj)
+        [Pure] public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((MagneticField3D)obj);
         }
 
-        [Pure]
-        public bool Equals(MagneticField3D other) =>
+        [Pure] public bool Equals(MagneticField3D other) =>
             X == other.X &&
             Y == other.Y &&
             Z == other.Z;
