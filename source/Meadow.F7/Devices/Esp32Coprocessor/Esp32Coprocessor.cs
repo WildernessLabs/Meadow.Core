@@ -65,6 +65,14 @@ namespace Meadow.Devices
         /// </summary>
         public ICoprocessor.CoprocessorState Status { get; private set; }
 
+        /// <summary>
+        /// Reason for the last power cycle / reset of the coprocessor.
+        /// </summary>
+        public ICoprocessor.CoprocessorResetReason ResetReason
+        {
+            get => (ICoprocessor.CoprocessorResetReason) F7PlatformOS.GetByte(IPlatformOS.ConfigurationValues.ResetReason);
+        }
+
         #endregion Properties
 
         #region Constructor(s)
@@ -79,7 +87,6 @@ namespace Meadow.Devices
             HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
             _antenna = AntennaType.NotKnown;
-            //GetConfiguration();
 
             if (_eventHandlerThread == null)
             {

@@ -169,7 +169,7 @@ namespace Meadow
         /// Get a byte configuration item.
         /// </summary>
         /// <param name="item">Configuration item to read.</param>
-        /// <returns>Configuration value if present, 0 if the item count not be found..</returns>
+        /// <returns>Configuration value if present, 0 if the item count not be found.</returns>
         public static byte GetByte(ConfigurationValues item)
         {
             byte[] buffer = new byte[1];
@@ -274,9 +274,5 @@ namespace Meadow
             byte b = (byte) ((value ? 1 : 0) & 0xff);
             return (SetByte(item, b));
         }
-
-
-
-
     }
 }

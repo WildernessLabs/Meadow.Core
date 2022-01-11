@@ -477,7 +477,7 @@ namespace Meadow.Devices
             {
                 case StatusCodes.CompletedOk:
                     //
-                    //  Nothing to do here as setting properties now dealt with by the constructor.
+                    //  Nothing to do here as setting properties now dealt with by the connection event.
                     //
                     break;
                 case StatusCodes.WiFiDisconnected:
