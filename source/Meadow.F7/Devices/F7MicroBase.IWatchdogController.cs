@@ -10,7 +10,7 @@ namespace Meadow.Devices
         /// If Watchdog.Reset is not called before the timeout period, the Meadow
         /// will reset.
         /// </summary>
-        /// <param name="timeoutMs">Watchdog timeout period, in milliseconds.
+        /// <param name="timeout">Watchdog timeout period, in milliseconds.
         /// Maximum allowed timeout of 32,768ms</param>
         public void WatchdogEnable(TimeSpan timeout)
         {

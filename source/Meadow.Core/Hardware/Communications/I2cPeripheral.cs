@@ -51,7 +51,7 @@ namespace Meadow.Hardware
         /// Reads data from the peripheral starting at the specified address.
         /// </summary>
         /// <param name="address"></param>
-        /// <param name="buffer"></param>
+        /// <param name="readBuffer"></param>
         public void ReadRegister(byte address, Span<byte> readBuffer)
         {
             WriteBuffer.Span[0] = address;

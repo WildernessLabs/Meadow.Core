@@ -66,7 +66,10 @@ namespace Meadow.Hardware
             {
                 if(_clockConfig == null)
                 {
-                    Configuration = new SpiClockConfiguration(375, SpiClockConfiguration.Mode.Mode0);
+                    Configuration = new SpiClockConfiguration(
+                        new Units.Frequency(375, Units.Frequency.UnitType.Kilohertz),
+                        SpiClockConfiguration.Mode.Mode0);
+
                     return Configuration;
                 }
                 return _clockConfig;
@@ -96,9 +99,9 @@ namespace Meadow.Hardware
         private void HandleConfigChange()
         {
             // try setting the clock frequency.  Actual frequency comes back (based on clock divisor)
-            var actual = SetFrequency(Configuration.SpeedKHz * 1000);
+            var actual = SetFrequency(Configuration.Speed);
             // update the config with what we actually set so it's readable
-            Configuration.SetActualSpeedKHz(actual / 1000);
+            Configuration.SetActualSpeed(actual);
 
             int mode = 0;
 
@@ -267,6 +270,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
         /// <param name="data">Data to write</param>
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, IEnumerable<byte> data)
         {
             SendData(chipSelect, ChipSelectMode.ActiveLow, data.ToArray());
@@ -278,6 +282,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
         /// <param name="data">Data to write</param>
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, IEnumerable<byte> data)
         {
             SendData(chipSelect, csMode, data.ToArray());
@@ -288,6 +293,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
         /// <param name="data">Data to write</param>
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, params byte[] data)
         {
             SendData(chipSelect, ChipSelectMode.ActiveLow, data);
@@ -299,6 +305,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
         /// <param name="data">Data to write</param>
+        [Obsolete("Use Write", true)]
         public void SendData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, params byte[] data)
         {
             var gch = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -353,6 +360,7 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus (active-low)</param>
         /// <param name="numberOfBytes">Number of bytes to read</param>
+        [Obsolete("Use Read", true)]
         public byte[] ReceiveData(IDigitalOutputPort chipSelect, int numberOfBytes)
         {
             return ReceiveData(chipSelect, ChipSelectMode.ActiveLow, numberOfBytes);
@@ -364,6 +372,7 @@ namespace Meadow.Hardware
         /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
         /// <param name="csMode">Describes which level on the chip select activates the bus</param>
         /// <param name="numberOfBytes">Number of bytes to read</param>
+        [Obsolete("Use Read", true)]
         public byte[] ReceiveData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, int numberOfBytes)
         {
             var rxBuffer = new byte[numberOfBytes];
@@ -424,8 +433,9 @@ namespace Meadow.Hardware
         /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
         /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
         /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
-        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
+        /// <paramref name="receiveBuffer"/>Note: ExchangeData pins both buffers during execution. Cross-thread modifications to either of the buffers during execution will result in undefined behavior.
         /// </remarks>
+        [Obsolete("Use Exchange", true)]
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
         {
             ExchangeData(chipSelect, csMode, sendBuffer, receiveBuffer, sendBuffer.Length);
@@ -444,8 +454,9 @@ namespace Meadow.Hardware
         /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
         /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
         /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
-        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
+        /// <paramref name="receiveBuffer"/>Note: ExchangeData pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.
         /// </remarks>
+        [Obsolete("Use Exchange", true)]
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer, int bytesToExchange)
         {
             if (sendBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
@@ -507,20 +518,20 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Gets an array of all of the speeds (in kHz) that the SPI bus supports.
+        /// Gets an array of all of the speeds that the SPI bus supports.
         /// </summary>
-        public long[] SupportedSpeeds
+        public Units.Frequency[] SupportedSpeeds
         {
-            get => new long[]
+            get => new Units.Frequency[]
                 {
-                    375,
-                    750,
-                    1500,
-                    3000,
-                    6000,
-                    12000,
-                    24000,
-                    48000
+                    new Units.Frequency(375, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(750, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(1500, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(3000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(6000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(12000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(24000, Units.Frequency.UnitType.Kilohertz),
+                    new Units.Frequency(48000, Units.Frequency.UnitType.Kilohertz)
                 };
         }
 
@@ -563,7 +574,7 @@ namespace Meadow.Hardware
             Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
         }
 
-        private long SetFrequency(long desiredSpeed)
+        private Units.Frequency SetFrequency(Units.Frequency desiredSpeed)
         {
             // TODO: move this to the F7
             var speed = GetSupportedSpeed(desiredSpeed);
@@ -571,7 +582,7 @@ namespace Meadow.Hardware
             var command = new Nuttx.UpdSPISpeedCommand()
             {
                 BusNumber = BusNumber,
-                Frequency = speed
+                Frequency = Convert.ToInt64(speed.Hertz)
             };
 
             Output.WriteLineIf(_showSpiDebug, "+SetFrequency");
@@ -586,7 +597,7 @@ namespace Meadow.Hardware
             return speed;
         }
 
-        private long GetSupportedSpeed(long desiredSpeed)
+        private Units.Frequency GetSupportedSpeed(Units.Frequency desiredSpeed)
         {
             /*
              * Meadow's STM32 uses a clock divisor from the PCLK2 for speed.  
@@ -601,19 +612,21 @@ namespace Meadow.Hardware
             0.375
             */
 
+            var ds = Convert.ToInt64(desiredSpeed.Hertz);
+
             var clockSpeed = 96000000L;
             var divisor = 2;
             while (divisor <= 256)
             {
                 var test = clockSpeed / divisor;
-                if (desiredSpeed >= test)
+                if (ds >= test)
                 {
-                    return test;
+                    return new Units.Frequency(test, Units.Frequency.UnitType.Hertz);
                 }
                 divisor *= 2;
             }
             // return the slowest rate
-            return clockSpeed / 256;
+            return new Units.Frequency(clockSpeed / 256, Units.Frequency.UnitType.Hertz);
         }
 
         private uint SpeedToDivisor(long speed)

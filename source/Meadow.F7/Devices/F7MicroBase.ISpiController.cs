@@ -8,27 +8,40 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO
         /// </summary>
-        /// <param name="speedkHz">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
+        public ISpiBus CreateSpiBus()            
+        {
+            return CreateSpiBus(IMeadowDevice.DefaultSpiBusSpeed);
+        }
+
         public ISpiBus CreateSpiBus(
-            long speedkHz = IMeadowDevice.DefaultSpiBusSpeed
+            Units.Frequency speed
         )
         {
-            return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speedkHz);
+            return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speed);
         }
 
         /// <summary>
         /// Creates a SPI bus instance for the requested control pins and bus speed
         /// </summary>
         /// <param name="pins">IPin instances used for (in this order) CLK, COPI, CIPO</param>
-        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <param name="speed">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin[] pins,
-            long speedkHz = IMeadowDevice.DefaultSpiBusSpeed
+            Units.Frequency speed
         )
         {
-            return CreateSpiBus(pins[0], pins[1], pins[2], speedkHz);
+            return CreateSpiBus(pins[0], pins[1], pins[2], speed);
+        }
+
+        public ISpiBus CreateSpiBus(
+            IPin clock,
+            IPin copi,
+            IPin cipo
+        )
+        {
+            return CreateSpiBus(clock, copi, cipo, IMeadowDevice.DefaultSpiBusSpeed);
         }
 
         /// <summary>
@@ -37,18 +50,18 @@ namespace Meadow.Devices
         /// <param name="clock">The IPin instance to use as the bus clock</param>
         /// <param name="copi">The IPin instance to use for data transmit (controller out/peripheral in)</param>
         /// <param name="cipo">The IPin instance to use for data receive (controller in/peripheral out)</param>
-        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <param name="speed">The bus speed</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin copi,
             IPin cipo,
-            long speedkHz = IMeadowDevice.DefaultSpiBusSpeed
+            Units.Frequency speed
         )
         {
             var bus = SpiBus.From(clock, copi, cipo);
             bus.BusNumber = GetSpiBusNumberForPins(clock, copi, cipo);
-            bus.Configuration.SpeedKHz = speedkHz;
+            bus.Configuration.Speed = speed;
             return bus;
         }
 

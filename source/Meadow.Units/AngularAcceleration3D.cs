@@ -48,8 +48,17 @@ namespace Meadow.Units
             this.Z = new AngularAcceleration(angularAcceleration3D.Z);
         }
 
+        /// <summary>
+        /// X component of angular acceleration
+        /// </summary>
         public AngularAcceleration X { get; set; }
+        /// <summary>
+        /// Y component of angular acceleration
+        /// </summary>
         public AngularAcceleration Y { get; set; }
+        /// <summary>
+        /// Z component of angular acceleration
+        /// </summary>
         public AngularAcceleration Z { get; set; }
 
         [Pure]

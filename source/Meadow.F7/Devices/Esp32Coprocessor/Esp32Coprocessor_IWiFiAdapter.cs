@@ -106,14 +106,8 @@ namespace Meadow.Devices
         /// <summary>
         /// Current onboard antenna in use.
         /// </summary>
-        public AntennaType Antenna
-        {
-            get
-            {
-                CheckStatus();
-                return (_antenna);
-            }
-        }
+        public AntennaType Antenna => _antenna;
+      
         protected AntennaType _antenna;
 
         /// <summary>
@@ -121,15 +115,8 @@ namespace Meadow.Devices
         /// </summary>
         public bool GetNetworkTimeAtStartup
         {
-            get
-            {
-                return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup));
-            }
-            set
-            {
-                CheckStatus();
-                F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup, value);
-            }
+            get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup);
+            set => F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup, value);
         }
 
         /// <summary>
@@ -167,15 +154,8 @@ namespace Meadow.Devices
         /// </remarks>
         public bool AutomaticallyStartNetwork
         {
-            get
-            {
-                return (F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork));
-            }
-            set
-            {
-                CheckStatus();
-                F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork, value);
-            }
+            get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork);
+            set => F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork, value);
         }
 
         /// <summary>
@@ -183,28 +163,15 @@ namespace Meadow.Devices
         /// </summary>
         public bool AutomaticallyReconnect
         {
-            get
-            {
-                return F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
-            }
-            set
-            {
-                CheckStatus();
-                F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect, value);
-            }
+            get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
+            set => F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect, value);
         }
 
         /// <summary>
         /// Default access point to try to connect to if the network interface is started and the board
         /// is configured to automatically reconnect.
         /// </summary>
-        public string DefaultAcessPoint
-        {
-            get
-            {
-                return F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
-            }
-        }
+        public string DefaultAcessPoint => F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
 
         /// <summary>
         /// Access point the ESP32 is currently connected to.
@@ -230,13 +197,10 @@ namespace Meadow.Devices
 
         public uint MaximumRetryCount
         {
-            get
-            {
-                return (F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount));
-            }
+            get => F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount);
+            
             set
             {
-                CheckStatus();
                 uint retryCount = value;
                 if (retryCount < 3)
                 {
@@ -254,18 +218,6 @@ namespace Meadow.Devices
         #endregion Properties
 
         #region Methods
-
-        /// <summary>
-        /// Check to if the coprocessor is ready and throw an exception if it is not.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown if the coprocessor has not completed setup or if it is sleeping.</exception>
-        private void CheckStatus()
-        {
-            if (Status != ICoprocessor.CoprocessorState.Ready)
-            {
-                throw new InvalidOperationException("Coprocessor is not ready or is sleeping.");
-            }
-        }
 
         /// <summary>
         /// Delay (in milliseconds) between network scans.
@@ -589,7 +541,7 @@ namespace Meadow.Devices
         /// Disconnect from the the currently active access point.
         /// </summary>
         /// <remarks>
-        /// Setting turnOffWiFiInterface to true will call <cref="StopWiFiInterface" /> following
+        /// Setting turnOffWiFiInterface to true will call StopWiFiInterface following
         /// the disconnection from the current access point.
         /// </remarks>
         /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
@@ -622,7 +574,6 @@ namespace Meadow.Devices
                 throw new ArgumentException("Setting the antenna type NotKnown is not allowed.");
             }
 
-            CheckStatus();
             SetAntennaRequest request = new SetAntennaRequest();
             if (persist)
             {
@@ -645,7 +596,6 @@ namespace Meadow.Devices
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
             if (result == StatusCodes.CompletedOk)
             {
-                CheckStatus();
                 _antenna = antenna;
             }
             else

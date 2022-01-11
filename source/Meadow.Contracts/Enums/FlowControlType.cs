@@ -3,7 +3,7 @@ namespace Meadow.Hardware
 {
     /// <summary>
     /// Describes the type of flow control. See 
-    /// <a href='https://en.wikipedia.org/wiki/Flow_control_(data)">Flow Control</a>.
+    /// https://en.wikipedia.org/wiki/Flow_control_(data)
     /// </summary>
     public enum FlowControlType
     {

@@ -48,10 +48,24 @@ namespace Meadow.Units
             this.Z = new AngularVelocity(angularVelocity3D.Z);
         }
 
+        /// <summary>
+        /// X component of angular velocity
+        /// </summary>
         public AngularVelocity X { get; set; }
+        /// <summary>
+        /// Y component of angular velocity
+        /// </summary>
         public AngularVelocity Y { get; set; }
+        /// <summary>
+        /// Z component of angular velocity
+        /// </summary>
         public AngularVelocity Z { get; set; }
 
+        /// <summary>
+        /// Compare two 3DAngularVelocity objects
+        /// </summary>
+        /// <param name="obj">object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure]
         public override bool Equals(object obj)
         {
@@ -60,6 +74,11 @@ namespace Meadow.Units
             return obj.GetType() == GetType() && Equals((AngularVelocity3D)obj);
         }
 
+        /// <summary>
+        /// Compare two 3DAngularVelocity objects
+        /// </summary>
+        /// <param name="other">object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure]
         public bool Equals(AngularVelocity3D other) =>
             X == other.X &&
@@ -67,6 +86,10 @@ namespace Meadow.Units
             Z == other.Z;
 
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>hash as 32 bit integer</returns>
         [Pure] public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode()) / 3;
 
         [Pure] public static bool operator ==(AngularVelocity3D left, AngularVelocity3D right) => Equals(left, right);

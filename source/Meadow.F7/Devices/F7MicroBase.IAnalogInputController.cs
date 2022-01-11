@@ -16,13 +16,10 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pin">The analog input capable `IPin` on which to create the input port.</param>
         /// <param name="voltageReference">Reference voltage, in Volts, of the maximum input value. Default is `3.3V`.</param>
-        /// <param name="updateInterval">A `TimeSpan` that specifies how long to
-        /// wait between readings. This value influences how often `*Updated`
-        /// events are raised and `IObservable` consumers are notified. Default is `5` seconds.</param>
         /// <param name="sampleCount">Number of samples to take per reading. If > `1` then the port will
         /// take multiple readings and These are automatically averaged to
         /// reduce noise, a process known as _oversampling_. Default is `5` samples.</param>
-        /// <param name="sampleInterval">Duration in between samples when oversampling. Default is `40ms`.</param>
+        /// <param name="sampleIntervalMs">Duration in between samples when oversampling. Default is `40ms`.</param>
         /// <returns></returns>
         public IAnalogInputPort CreateAnalogInputPort(
             IPin pin,
