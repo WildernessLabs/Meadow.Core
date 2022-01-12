@@ -23,7 +23,7 @@ namespace Meadow.Units
         /// <param name="x">The X Acceleration3d value.</param>
         /// <param name="y">The Y Acceleration3d value.</param>
         /// <param name="z">The Z Acceleration3d value.</param>
-        /// <param name="type"></param>
+        /// <param name="type">Acceleration unit</param>
         public Acceleration3D(double x, double y, double z,
             Acceleration.UnitType type = Acceleration.UnitType.MetersPerSecondSquared)
         {
@@ -32,6 +32,12 @@ namespace Meadow.Units
             Z = new Acceleration(z, type);
         }
 
+        /// <summary>
+        /// Creates a new `Acceleration3d` object.
+        /// </summary>
+        /// <param name="x">The X Acceleration3d value.</param>
+        /// <param name="y">The Y Acceleration3d value.</param>
+        /// <param name="z">The Z Acceleration3d value.</param>
         public Acceleration3D(Acceleration x, Acceleration y, Acceleration z)
         {
             X = new Acceleration(x);
@@ -39,32 +45,57 @@ namespace Meadow.Units
             Z = new Acceleration(z);
         }
 
+        /// <summary>
+        /// Creates a new `Acceleration3d` object. 
+        /// </summary>
+        /// <param name="acceleration3D">Create a new object using the values from another object</param>
         public Acceleration3D(Acceleration3D acceleration3D)
         {
-            this.X = new Acceleration(acceleration3D.X);
-            this.Y = new Acceleration(acceleration3D.Y);
-            this.Z = new Acceleration(acceleration3D.Z);
+            X = new Acceleration(acceleration3D.X);
+            Y = new Acceleration(acceleration3D.Y);
+            Z = new Acceleration(acceleration3D.Z);
         }
 
+        /// <summary>
+        /// X component of accleration
+        /// </summary>
         public Acceleration X { get; set; }
+        /// <summary>
+        /// Y component of acceleration
+        /// </summary>
         public Acceleration Y { get; set; }
+        /// <summary>
+        /// Z component of acceleration
+        /// </summary>
         public Acceleration Z { get; set; }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another acceleration object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns>true if equals</returns>
+        [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Acceleration3D)obj);
         }
 
-        [Pure]
-        public bool Equals(Acceleration3D other) =>
+        /// <summary>
+        /// Compare to another acceleration object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>true if equals</returns>
+        [Pure] public bool Equals(Acceleration3D other) =>
             X == other.X &&
             Y == other.Y &&
             Z == other.Z;
 
 
+        /// <summary>
+        /// Get hash object
+        /// </summary>
+        /// <returns>hash as int32</returns>
         [Pure] public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode()) / 3;
 
         [Pure] public static bool operator ==(Acceleration3D left, Acceleration3D right) => Equals(left, right);

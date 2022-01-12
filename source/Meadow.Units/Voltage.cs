@@ -46,21 +46,63 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Volts
+            /// </summary>
             Volts,
+            /// <summary>
+            /// Millivolts
+            /// </summary>
             Millivolts,
+            /// <summary>
+            /// Microvolts
+            /// </summary>
             Microvolts,
+            /// <summary>
+            /// Kilovolts
+            /// </summary>
             Kilovolts,
+            /// <summary>
+            /// Megavolts
+            /// </summary>
             Megavolts,
+            /// <summary>
+            /// Gigavolts
+            /// </summary>
             Gigavolts,
+            /// <summary>
+            /// Statvolts
+            /// </summary>
             Statvolts
         }
 
+        /// <summary>
+        /// Get voltage in volts
+        /// </summary>
         public double Volts => From(UnitType.Volts);
+        /// <summary>
+        /// Get voltage in millivolts
+        /// </summary>
         public double Millivolts => From(UnitType.Millivolts);
+        /// <summary>
+        /// Get voltage in microvolts
+        /// </summary>
         public double Microvolts => From(UnitType.Microvolts);
+        /// <summary>
+        /// Get voltage in kilovolts
+        /// </summary>
         public double Kilovolts => From(UnitType.Kilovolts);
+        /// <summary>
+        /// Get voltage in megavolts
+        /// </summary>
         public double Megavolts => From(UnitType.Megavolts);
+        /// <summary>
+        /// Get voltage in gigavolts
+        /// </summary>
         public double Gigavolts => From(UnitType.Gigavolts);
+        /// <summary>
+        /// Get voltage in statvolts
+        /// </summary>
         public double Statvolts => From(UnitType.Statvolts);
 
         /// <summary>

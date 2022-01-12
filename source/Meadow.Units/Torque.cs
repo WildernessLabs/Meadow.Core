@@ -46,23 +46,71 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Newton meters
+            /// </summary>
             NewtonMeter,
+            /// <summary>
+            /// Foot pounds
+            /// </summary>
             FootPound,
+            /// <summary>
+            /// Kilogram meters
+            /// </summary>
             KilogramMeter,
+            /// <summary>
+            /// Kilogram centimeters
+            /// </summary>
             KilogramCentimeter,
+            /// <summary>
+            /// Gram centimeters
+            /// </summary>
             GramCentimeter,
+            /// <summary>
+            /// Inch pounds
+            /// </summary>
             InchPound,
+            /// <summary>
+            /// Inch ouces
+            /// </summary>
             InchOunce,
+            /// <summary>
+            /// Dyne centimeters
+            /// </summary>
             DyneCentimeter
         }
 
+        /// <summary>
+        /// Get torque in newton meters
+        /// </summary>
         public double NewtonMeter => From(UnitType.NewtonMeter);
+        /// <summary>
+        /// Get torque in foot pounds
+        /// </summary>
         public double FootPound => From(UnitType.FootPound);
+        /// <summary>
+        /// Get torque in kilogram meters
+        /// </summary>
         public double KilogramMeter => From(UnitType.KilogramMeter);
+        /// <summary>
+        /// Get torque in kilogram centimeters
+        /// </summary>
         public double KilogramCentimeter => From(UnitType.KilogramCentimeter);
+        /// <summary>
+        /// Get torque in gram centimeters
+        /// </summary>
         public double GramCentimeter => From(UnitType.GramCentimeter);
+        /// <summary>
+        /// Get torque in inch pounds
+        /// </summary>
         public double InchPound => From(UnitType.InchPound);
+        /// <summary>
+        /// Get torque in inch ounces
+        /// </summary>
         public double InchOunce => From(UnitType.InchOunce);
+        /// <summary>
+        /// Get torque in dyne centimers
+        /// </summary>
         public double DyneCentimeter => From(UnitType.DyneCentimeter);
 
         /// <summary>
@@ -82,7 +130,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Torque)obj);
         }

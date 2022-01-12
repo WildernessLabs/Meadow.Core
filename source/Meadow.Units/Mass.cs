@@ -33,7 +33,7 @@ namespace Meadow.Units
         /// <param name="mass"></param>
         public Mass(Mass mass)
         {
-            this.Value = mass.Value;
+            Value = mass.Value;
         }
 
         /// <summary>
@@ -46,25 +46,79 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Grams
+            /// </summary>
             Grams,
+            /// <summary>
+            /// Kilograms
+            /// </summary>
             Kilograms,
+            /// <summary>
+            /// Ounces
+            /// </summary>
             Ounces,
+            /// <summary>
+            /// Pounds
+            /// </summary>
             Pounds,
+            /// <summary>
+            /// Tons metric
+            /// </summary>
             TonsMetric,
+            /// <summary>
+            /// Tons US short
+            /// </summary>
             TonsUSShort,
+            /// <summary>
+            /// Tons UK long
+            /// </summary>
             TonsUKLong,
+            /// <summary>
+            /// Grains
+            /// </summary>
             Grains,
+            /// <summary>
+            /// Carats
+            /// </summary>
             Carats
         }
 
+        /// <summary>
+        /// Mass in grams
+        /// </summary>
         public double Grams => From(UnitType.Grams);
+        /// <summary>
+        /// Mass in kilograms
+        /// </summary>
         public double Kilograms => From(UnitType.Kilograms);
+        /// <summary>
+        /// Mass in ounces
+        /// </summary>
         public double Ounces => From(UnitType.Ounces);
+        /// <summary>
+        /// Mass in pounds
+        /// </summary>
         public double Pounds => From(UnitType.Pounds);
+        /// <summary>
+        /// Mass in tons metric
+        /// </summary>
         public double TonsMetric => From(UnitType.TonsMetric);
+        /// <summary>
+        /// Mass in tons US short
+        /// </summary>
         public double TonsUSShort => From(UnitType.TonsUSShort);
+        /// <summary>
+        /// Mass in tons UK long
+        /// </summary>
         public double TonsUKLong => From(UnitType.TonsUKLong);
+        /// <summary>
+        /// Mass in grains
+        /// </summary>
         public double Grains => From(UnitType.Grains);
+        /// <summary>
+        /// Mass in karats
+        /// </summary>
         public double Karats => From(UnitType.Carats);
 
         /// <summary>
@@ -84,7 +138,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Mass)obj);
         }
@@ -323,6 +377,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion type</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

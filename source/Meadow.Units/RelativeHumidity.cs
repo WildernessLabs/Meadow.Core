@@ -23,6 +23,7 @@ namespace Meadow.Units
         /// Creates a new `RelativeHumidity` object.
         /// </summary>
         /// <param name="value">The relative humidity value.</param>
+        /// <param name="type">Relative humidity unit.</param>
         public RelativeHumidity(double value, UnitType type = UnitType.Percent)
         {
             Percent = value;
@@ -298,6 +299,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">unit to convert</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Percent).ToType(conversionType, provider);

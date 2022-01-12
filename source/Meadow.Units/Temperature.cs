@@ -28,7 +28,8 @@ namespace Meadow.Units
         public Temperature(double value, UnitType type = UnitType.Celsius)
         {
             Value = 0;
-            switch (type) {
+            switch (type) 
+            {
                 case UnitType.Celsius:
                     Value = value;
                     break;
@@ -60,8 +61,17 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Celsius
+            /// </summary>
             Celsius,
+            /// <summary>
+            /// Fahrenheit
+            /// </summary>
             Fahrenheit,
+            /// <summary>
+            /// Kelvin
+            /// </summary>
             Kelvin,
         }
 

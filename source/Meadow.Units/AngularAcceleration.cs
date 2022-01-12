@@ -21,7 +21,7 @@ namespace Meadow.Units
         /// Creates a new `AngularAcceleration` object.
         /// </summary>
         /// <param name="value">The AngularAcceleration value.</param>
-        /// <param name="type">kilometers meters per second by default.</param>
+        /// <param name="type">units of angular acceleration</param>
         public AngularAcceleration(double value, UnitType type = UnitType.RevolutionsPerSecondSquared)
         {
             Value = AngularAccelerationConversions.Convert(value, type, UnitType.RevolutionsPerSecondSquared);
@@ -215,7 +215,7 @@ namespace Meadow.Units
         /// <summary>
         /// Compare to another AngularAcceleration object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other AngularAcceleration cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 

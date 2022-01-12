@@ -31,7 +31,7 @@ namespace Meadow.Units
         /// <summary>
         /// Creates a new `Pressure` object from an existing Pressure object
         /// </summary>
-        /// <param name="Pressure"></param>
+        /// <param name="pressure"></param>
         public Pressure(Pressure pressure)
         {
             Value = pressure.Value;
@@ -47,15 +47,35 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
-            Bar,            
+            /// <summary>
+            /// Bar
+            /// </summary>
+            Bar,   
+            /// <summary>
+            /// Pascal
+            /// </summary>
             Pascal,
+            /// <summary>
+            /// Psi
+            /// </summary>
             Psi,
+            /// <summary>
+            /// Standard atmopsheric pressure
+            /// </summary>
             StandardAtmosphere,
+            /// <summary>
+            /// Millibar
+            /// </summary>
             Millibar,
+            /// <summary>
+            /// Hectopascal
+            /// </summary>
             Hectopascal,
+            /// <summary>
+            /// Kilopascal
+            /// </summary>
             KiloPascal
         }
-
 
         /// <summary>
         /// Gets the pressure value expressed as a unit _Bar_ (`Bar`)
@@ -82,7 +102,11 @@ namespace Meadow.Units
         /// </summary>
         public double Hectopascal { get => From(UnitType.Hectopascal); }
 
-
+        /// <summary>
+        /// Get pressure value for a specific unit
+        /// </summary>
+        /// <param name="convertTo">the pressure unit</param>
+        /// <returns></returns>
         [Pure] public double From(UnitType convertTo)
         {
             return PressureConversions.Convert(Value, UnitType.Bar, convertTo);
@@ -95,7 +119,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Pressure)obj);
         }
@@ -334,6 +358,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion type</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

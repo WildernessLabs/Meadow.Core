@@ -34,7 +34,6 @@ namespace Meadow.Units
         public AbsoluteHumidity(AbsoluteHumidity absoluteHumidity)
         {
             Value = absoluteHumidity.Value;
-
         }
 
         /// <summary>

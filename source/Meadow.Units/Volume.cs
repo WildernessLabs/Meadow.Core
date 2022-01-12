@@ -46,23 +46,71 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// US Gallons
+            /// </summary>
             Gallons,
+            /// <summary>
+            /// Fluid ounces
+            /// </summary>
             Ounces,
+            /// <summary>
+            /// Cubic feet
+            /// </summary>
             CubicFeet,
+            /// <summary>
+            /// Cubic inches
+            /// </summary>
             CubicInches,
+            /// <summary>
+            /// Liters
+            /// </summary>
             Liters,
+            /// <summary>
+            /// Centiliters
+            /// </summary>
             Centiliters,
+            /// <summary>
+            /// Milliliters
+            /// </summary>
             Milliliters,
+            /// <summary>
+            /// Cubic meters
+            /// </summary>
             CubicMeters,
         }
 
+        /// <summary>
+        /// Get volume in US gallons
+        /// </summary>
         public double Gallons => From(UnitType.Gallons);
+        /// <summary>
+        /// Get volume in fluid ounces
+        /// </summary>
         public double Ounces => From(UnitType.Ounces);
+        /// <summary>
+        /// Get volume in cubic feet
+        /// </summary>
         public double CubicFeet => From(UnitType.CubicFeet);
+        /// <summary>
+        /// Get volume in cubic inches
+        /// </summary>
         public double CubicInches => From(UnitType.CubicInches);
+        /// <summary>
+        /// Get volume in liters
+        /// </summary>
         public double Liters => From(UnitType.Liters);
+        /// <summary>
+        /// Get volume in centiliters
+        /// </summary>
         public double Centiliters => From(UnitType.Centiliters);
+        /// <summary>
+        /// Get volume in milliliters
+        /// </summary>
         public double Milliliters => From(UnitType.Milliliters);
+        /// <summary>
+        /// Get volume in cubic meters
+        /// </summary>
         public double CubicMeters => From(UnitType.CubicMeters);
 
         /// <summary>
@@ -82,7 +130,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Volume)obj);
         }

@@ -46,33 +46,111 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Feet per minute
+            /// </summary>
             FeetPerMinute,
+            /// <summary>
+            /// Feet per second
+            /// </summary>
             FeetPerSecond,
+            /// <summary>
+            /// Kilometers per hour
+            /// </summary>
             KilometersPerHour,
+            /// <summary>
+            /// Kilometers per minute
+            /// </summary>
             KilometersPerMinute,
+            /// <summary>
+            /// Kilometers per second
+            /// </summary>
             KilometersPerSecond,
+            /// <summary>
+            /// Knots
+            /// </summary>
             Knots,
+            /// <summary>
+            /// Meters per minute
+            /// </summary>
             MetersPerMinute,
+            /// <summary>
+            /// Meters per second
+            /// </summary>
             MetersPerSecond,
+            /// <summary>
+            /// Miles per hour
+            /// </summary>
             MilesPerHour,
+            /// <summary>
+            /// Miles per minute
+            /// </summary>
             MilesPerMinute,
+            /// <summary>
+            /// Miles per second
+            /// </summary>
             MilesPerSecond,
+            /// <summary>
+            /// Speed of light
+            /// </summary>
             SpeedOfLight,
+            /// <summary>
+            /// Mach 
+            /// </summary>
             Mach,
         }
 
+        /// <summary>
+        /// Get speed in feet per second
+        /// </summary>
         public double FeetPerSecond => From(UnitType.FeetPerSecond);
+        /// <summary>
+        /// Get speed in feet per minute
+        /// </summary>
         public double FeetPerMinute => From(UnitType.FeetPerMinute);
+        /// <summary>
+        /// Get speed in kilometers per hour
+        /// </summary>
         public double KilometersPerHour => From(UnitType.KilometersPerHour);
+        /// <summary>
+        /// Get speed in kilometers per minute
+        /// </summary>
         public double KilometersPerMinute => From(UnitType.KilometersPerMinute);
+        /// <summary>
+        /// Get speed in kilometers per second
+        /// </summary>
         public double KilometersPerSecond => From(UnitType.KilometersPerSecond);
+        /// <summary>
+        /// Get speed in knots
+        /// </summary>
         public double Knots => From(UnitType.Knots);
+        /// <summary>
+        /// Get speed in meters per minute
+        /// </summary>
         public double MetersPerMinute => From(UnitType.MetersPerMinute);
+        /// <summary>
+        /// Get speed in meters per second
+        /// </summary>
         public double MetersPerSecond => From(UnitType.MetersPerSecond);
+        /// <summary>
+        /// Get speed in miles per hour
+        /// </summary>
         public double MilesPerHour => From(UnitType.MilesPerHour);
+        /// <summary>
+        /// Get speed in miles per minute 
+        /// </summary>
         public double MilesPerMinute => From(UnitType.MilesPerMinute);
+        /// <summary>
+        /// Get speed in miles per second
+        /// </summary>
         public double MilesPerSecond => From(UnitType.MilesPerSecond);
+        /// <summary>
+        /// Get speed as a multiple of the speed of light - 299792458m/s
+        /// </summary>
         public double SpeedOfLight => From(UnitType.SpeedOfLight);
+        /// <summary>
+        /// Get speed as a multiple of mach
+        /// </summary>
         public double Mach => From(UnitType.Mach);
 
         /// <summary>
@@ -331,6 +409,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion unit type</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

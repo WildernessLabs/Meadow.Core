@@ -46,41 +46,143 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Gigawatts
+            /// </summary>
             Gigawatts,
+            /// <summary>
+            /// Megawatts
+            /// </summary>
             Megawatts,
+            /// <summary>
+            /// Kilowatts
+            /// </summary>
             Kilowatts,
+            /// <summary>
+            /// Watts
+            /// </summary>
             Watts,
+            /// <summary>
+            /// Milliwatts
+            /// </summary>
             Milliwatts,
+            /// <summary>
+            /// Horsepower - metric
+            /// </summary>
             HorsePowerMetric,
+            /// <summary>
+            /// Horsepower - IT
+            /// </summary>
             HorsePowerIT,
+            /// <summary>
+            /// Calories per second
+            /// </summary>
             CaloriesPerSecond,
+            /// <summary>
+            /// Calories per minute
+            /// </summary>
             CaloriesPerMinute,
+            /// <summary>
+            /// Calories per hour
+            /// </summary>
             CaloriesPerHour,
+            /// <summary>
+            /// BTUs per second
+            /// </summary>
             BTUsPerSecond,
+            /// <summary>
+            /// BTUs per minute
+            /// </summary>
             BTUsPerMinute,
+            /// <summary>
+            /// BTUs per hour
+            /// </summary>
             BTUsPerHour,
+            /// <summary>
+            /// Footpounds per second
+            /// </summary>
             FootPoundsPerSecond,
+            /// <summary>
+            /// Footpounds per minute
+            /// </summary>
             FootPoundsPerMinute,
+            /// <summary>
+            /// Footpounds per hour
+            /// </summary>
             FootPoundsPerHour,
+            /// <summary>
+            /// Tons refridgeration
+            /// </summary>
             TonsRefridgeration
         }
 
+        /// <summary>
+        /// Power in gigawatts
+        /// </summary>
         public double Gigawatts => From(UnitType.Gigawatts);
+        /// <summary>
+        /// Power in megawatts
+        /// </summary>
         public double Megawatts => From(UnitType.Megawatts);
+        /// <summary>
+        /// Power in kilowatts
+        /// </summary>
         public double Kilowatts => From(UnitType.Kilowatts);
+        /// <summary>
+        /// Power in watts
+        /// </summary>
         public double Watts => From(UnitType.Watts);
+        /// <summary>
+        /// Power in milliwatts
+        /// </summary>
         public double Milliwatts => From(UnitType.Milliwatts);
+        /// <summary>
+        /// Power in horsepower metric
+        /// </summary>
         public double HorsePowerMetric => From(UnitType.HorsePowerMetric);
+        /// <summary>
+        /// Power in horsepower IT
+        /// </summary>
         public double HorsePowerIT => From(UnitType.HorsePowerIT);
+        /// <summary>
+        /// Power in calories per second
+        /// </summary>
         public double CaloriesPerSecond => From(UnitType.CaloriesPerSecond);
+        /// <summary>
+        /// Power in calories per minute
+        /// </summary>
         public double CaloriesPerMinute => From(UnitType.CaloriesPerMinute);
+        /// <summary>
+        /// Power in calories per hour
+        /// </summary>
         public double CaloriesPerHour => From(UnitType.CaloriesPerHour);
+        /// <summary>
+        /// Power in BTUs per second
+        /// </summary>
         public double BTUsPerSecond => From(UnitType.BTUsPerSecond);
+        /// <summary>
+        /// Power in BTUs per minute
+        /// </summary>
         public double BTUsPerMinute => From(UnitType.BTUsPerMinute);
+        /// <summary>
+        /// Power in BTUs per hour
+        /// </summary>
         public double BTUsPerHour => From(UnitType.BTUsPerHour);
+        /// <summary>
+        /// Power in footpounds per second
+        /// </summary>
         public double FootPoundsPerSecond => From(UnitType.FootPoundsPerSecond);
+        /// <summary>
+        /// Power in footpounds per minute
+        /// </summary>
         public double FootPoundsPerMinute => From(UnitType.FootPoundsPerMinute);
+        /// <summary>
+        /// Power in footpounds per hour
+        /// </summary>
         public double FootPoundsPerHour => From(UnitType.FootPoundsPerHour);
+        /// <summary>
+        /// Power in tons refridgeration
+        /// </summary>
         public double TonsRefridgeration => From(UnitType.TonsRefridgeration);
 
         /// <summary>
@@ -100,7 +202,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Power)obj);
         }
@@ -339,6 +441,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion type</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
