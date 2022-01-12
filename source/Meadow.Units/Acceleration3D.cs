@@ -35,9 +35,9 @@ namespace Meadow.Units
         /// <summary>
         /// Creates a new `Acceleration3d` object.
         /// </summary>
-        /// <param name="x">The X Acceleration3d value.</param>
-        /// <param name="y">The Y Acceleration3d value.</param>
-        /// <param name="z">The Z Acceleration3d value.</param>
+        /// <param name="x">The X Acceleration value.</param>
+        /// <param name="y">The Y Acceleration value.</param>
+        /// <param name="z">The Z Acceleration value.</param>
         public Acceleration3D(Acceleration x, Acceleration y, Acceleration z)
         {
             X = new Acceleration(x);
@@ -46,9 +46,9 @@ namespace Meadow.Units
         }
 
         /// <summary>
-        /// Creates a new `Acceleration3d` object. 
+        /// Creates a new `Acceleration3d` object from an existing object. 
         /// </summary>
-        /// <param name="acceleration3D">Create a new object using the values from another object</param>
+        /// <param name="acceleration3D">Source object</param>
         public Acceleration3D(Acceleration3D acceleration3D)
         {
             X = new Acceleration(acceleration3D.X);
@@ -84,14 +84,15 @@ namespace Meadow.Units
         /// <summary>
         /// Get hash object
         /// </summary>
-        /// <returns>hash as int32</returns>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode() + Z.GetHashCode()) / 3;
 
+        // Comparison
         /// <summary>
-        /// Compare to another acceleration object
+        /// Compare to another Acceleration object
         /// </summary>
         /// <param name="other"></param>
-        /// <returns>true if equals</returns>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Acceleration3D other) =>
             X == other.X &&
             Y == other.Y &&
@@ -152,11 +153,11 @@ namespace Meadow.Units
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
         /// <returns>A new Acceleration3D object with a value of left + right</returns>
-        [Pure] public static Acceleration3D operator +(Acceleration3D lvalue, Acceleration3D rvalue)
+        [Pure] public static Acceleration3D operator +(Acceleration3D left, Acceleration3D right)
         {
-            var x = lvalue.X + rvalue.X;
-            var y = lvalue.Y + rvalue.Y;
-            var z = lvalue.Z + rvalue.Z;
+            var x = left.X + right.X;
+            var y = left.Y + right.Y;
+            var z = left.Z + right.Z;
 
             return new Acceleration3D(x, y, z);
         }
@@ -177,24 +178,31 @@ namespace Meadow.Units
             return new Acceleration3D(x, y, z);
         }
 
-
         /// <summary>
-        /// Covert to string
+        /// Get a string represention of the object
         /// </summary>
+        /// <returns>A string representing the object</returns>
         [Pure] public override string ToString() => $"{X}, {Y}, {Z}";
 
         /// <summary>
-        /// Covert to string
+        /// Get a string represention of the object
         /// </summary>
-        /// <param name="provider">format provider</param>
-        /// <returns>string representation of the object</returns>
+        /// <param name="format">format</param>
+        /// <param name="formatProvider">format provider</param>
+        /// <returns>A string representing the object</returns>
         [Pure] public string ToString(string format, IFormatProvider formatProvider) => $"{X.ToString(format, formatProvider)}, {Y.ToString(format, formatProvider)}, {Z.ToString(format, formatProvider)}";
 
+        // IComparable
+        /// <summary>
+        /// Compare to another Acceleration3D object
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public int CompareTo(object obj)
         {
             throw new NotImplementedException();
         }
-
 
         /// <summary>
         /// Compare the default value to three double 
@@ -207,7 +215,6 @@ namespace Meadow.Units
                 Y.Equals(other.Y) &&
                 Z.Equals(other.Z);
         }
-
 
         /// <summary>
         /// Compare the default value to a double 

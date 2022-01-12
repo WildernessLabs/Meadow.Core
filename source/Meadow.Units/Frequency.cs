@@ -46,15 +46,39 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Gigahertz
+            /// </summary>
             Gigahertz,
+            /// <summary>
+            /// Megahertz
+            /// </summary>
             Megahertz,
+            /// <summary>
+            /// Kilohertz
+            /// </summary>
             Kilohertz,
+            /// <summary>
+            /// Hertz
+            /// </summary>
             Hertz,
         }
 
+        /// <summary>
+        /// Get frequency value as gigahertz
+        /// </summary>
         public double Gigahertz => From(UnitType.Gigahertz);
+        /// <summary>
+        /// Get frequency value as megahertz
+        /// </summary>
         public double Megahertz => From(UnitType.Megahertz);
+        /// <summary>
+        /// Get frequency value as kilohertz
+        /// </summary>
         public double Kilohertz => From(UnitType.Kilohertz);
+        /// <summary>
+        /// Get frequency value as hertz
+        /// </summary>
         public double Hertz => From(UnitType.Hertz);
 
         /// <summary>
@@ -74,7 +98,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Frequency)obj);
         }
@@ -196,7 +220,7 @@ namespace Meadow.Units
         /// negative polarity
         /// </summary>
         /// <returns></returns>
-        [Pure] public Frequency Abs() { return new Frequency(Math.Abs(this.Value)); }
+        [Pure] public Frequency Abs() =>  new (Math.Abs(Value)); 
 
         /// <summary>
         /// Get a string represention of the object
@@ -313,6 +337,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to convert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

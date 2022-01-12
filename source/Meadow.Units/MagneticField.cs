@@ -30,7 +30,7 @@ namespace Meadow.Units
         /// <summary>
         /// Creates a new `MagneticField` object from an existing MagneticField object
         /// </summary>
-        /// <param name="MagneticField"></param>
+        /// <param name="magneticField"></param>
         public MagneticField(MagneticField magneticField)
         {
             Value = magneticField.Value;
@@ -46,23 +46,71 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// MegaTelsa
+            /// </summary>
             MegaTesla,
+            /// <summary>
+            /// KiloTesla
+            /// </summary>
 			KiloTesla,
+            /// <summary>
+            /// Tesla
+            /// </summary>
 			Tesla,
+            /// <summary>
+            /// MilliTesla
+            /// </summary>
 			MilliTesla,
+            /// <summary>
+            /// MicroTesla
+            /// </summary>
 			MicroTesla,
+            /// <summary>
+            /// NanoTesla
+            /// </summary>
 			NanoTesla,
+            /// <summary>
+            /// PicoTesla
+            /// </summary>
 			PicoTesla,
+            /// <summary>
+            /// Gauss
+            /// </summary>
 			Gauss
         }
 
+        /// <summary>
+        /// Get the magnetic field value as MegaTesla
+        /// </summary>
         public double MegaTesla => From(UnitType.MegaTesla);
+        /// <summary>
+        /// Get the magnetic field value as KiloTesla
+        /// </summary>
         public double KiloTesla => From(UnitType.KiloTesla);
+        /// <summary>
+        /// Get the magnetic field value as Tesla
+        /// </summary>
         public double Tesla => From(UnitType.Tesla);
+        /// <summary>
+        /// Get the magnetic field value as MilliTesla
+        /// </summary>
         public double MilliTesla => From(UnitType.MilliTesla);
+        /// <summary>
+        /// Get the magnetic field value as MicroTesla
+        /// </summary>
         public double MicroTesla => From(UnitType.MicroTesla);
+        /// <summary>
+        /// Get the magnetic field value as NanoTesla
+        /// </summary>
         public double NanoTesla => From(UnitType.NanoTesla);
+        /// <summary>
+        /// Get the magnetic field value as PicoTesla
+        /// </summary>
         public double PicoTesla => From(UnitType.PicoTesla);
+        /// <summary>
+        /// Get the magnetic field value as Gauss
+        /// </summary>
         public double Gauss => From(UnitType.Gauss);
 
         /// <summary>
@@ -82,7 +130,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((MagneticField)obj);
         }
@@ -321,6 +369,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to convert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

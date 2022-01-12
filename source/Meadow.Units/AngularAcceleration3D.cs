@@ -36,9 +36,9 @@ namespace Meadow.Units
         /// <summary>
         /// Creates a new `AngularAcceleration3d` object.
         /// </summary>
-        /// <param name="valueX">The X AngularAcceleration3d value.</param>
-        /// <param name="valueY">The Y AngularAcceleration3d value.</param>
-        /// <param name="valueZ">The Z AngularAcceleration3d value.</param>
+        /// <param name="x">The X AngularAcceleration value.</param>
+        /// <param name="y">The Y AngularAcceleration value.</param>
+        /// <param name="z">The Z AngularAcceleration value.</param>
         public AngularAcceleration3D(AngularAcceleration x, AngularAcceleration y, AngularAcceleration z)
         {
             X = new AngularAcceleration(x);
@@ -47,9 +47,9 @@ namespace Meadow.Units
         }
 
         /// <summary>
-        /// Creates a new `AngularAcceleration3D` object from an existing object
+        /// Creates a new `AngularAcceleration3D` object from an existing object.
         /// </summary>
-        /// <param name="angularAcceleration3D">AngularAcceleration3Dobject to compare to</param>
+        /// <param name="angularAcceleration3D">Source object</param>
         public AngularAcceleration3D(AngularAcceleration3D angularAcceleration3D)
         {
             this.X = new AngularAcceleration(angularAcceleration3D.X);
@@ -70,6 +70,11 @@ namespace Meadow.Units
         /// </summary>
         public AngularAcceleration Z { get; set; }
 
+        /// <summary>
+        /// Compare to another AngularAcceleration3D object
+        /// </summary>
+        /// <param name="obj">object to compare to</param>
+        /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
             if (obj is null) { return false; }
@@ -94,7 +99,6 @@ namespace Meadow.Units
             Y == other.Y &&
             Z == other.Z;
 
-
         /// <summary>
         /// Equals operator to compare two AngularAcceleration3D objects
         /// </summary>
@@ -110,8 +114,7 @@ namespace Meadow.Units
         /// <param name="right">right value</param>
         /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(AngularAcceleration3D left, AngularAcceleration3D right) => !Equals(left, right);
-        //ToDo [Pure] public int CompareTo(AngularAcceleration3d other) => Equals(this, other) ? 0 : AccelerationX.CompareTo(other.AccelerationX);
-
+  
         /// <summary>
         /// Less than operator to compare two AngularAcceleration3D objects
         /// </summary>
@@ -151,15 +154,14 @@ namespace Meadow.Units
         /// <param name="left">left value</param>
         /// <param name="right">right value</param>
         /// <returns>A new AngularAcceleration3D object with a value of left + right</returns>
-        [Pure] public static AngularAcceleration3D operator +(AngularAcceleration3D lvalue, AngularAcceleration3D rvalue)
+        [Pure] public static AngularAcceleration3D operator +(AngularAcceleration3D left, AngularAcceleration3D right)
         {
-            var x = lvalue.X + rvalue.X;
-            var y = lvalue.Y + rvalue.Y;
-            var z = lvalue.Z + rvalue.Z;
+            var x = left.X + right.X;
+            var y = left.Y + right.Y;
+            var z = left.Z + right.Z;
 
             return new AngularAcceleration3D(x, y, z);
         }
-
 
         /// <summary>
         /// Subtraction operator to subtract two AngularAcceleration3D objects
@@ -195,7 +197,8 @@ namespace Meadow.Units
         /// Compare to another AngularAcceleration3D object
         /// </summary>
         /// <param name="obj">The other AngularAcceleration3D cast to object</param>
-        /// <returns>0 if equal</returns>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public int CompareTo(object obj)
         {
             throw new NotImplementedException();

@@ -33,7 +33,7 @@ namespace Meadow.Units
         /// <param name="energy"></param>
         public Energy(Energy energy)
         {
-            this.Value = energy.Value;
+            Value = energy.Value;
         }
 
         /// <summary>
@@ -46,25 +46,79 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// BTU
+            /// </summary>
             BTU,
+            /// <summary>
+            /// Calories
+            /// </summary>
             Calories,
+            /// <summary>
+            /// Joules
+            /// </summary>
             Joules,
+            /// <summary>
+            /// Kilocalories
+            /// </summary>
             Kilocalories,
+            /// <summary>
+            /// Kilojoules
+            /// </summary>
             Kilojoules,
+            /// <summary>
+            /// Kilowatt hours
+            /// </summary>
             KilowattHours,
+            /// <summary>
+            /// Therms
+            /// </summary>
             Therms,
+            /// <summary>
+            /// Watt hours
+            /// </summary>
             WattHours,
+            /// <summary>
+            /// Watt seconds
+            /// </summary>
             WattSeconds
         }
 
+        /// <summary>
+        /// Get energy value as BTUs
+        /// </summary>
         public double BTU => From(UnitType.BTU);
+        /// <summary>
+        /// Get energy value as calories
+        /// </summary>
         public double Calories => From(UnitType.Calories);
+        /// <summary>
+        /// Get energy value as joules
+        /// </summary>
         public double Joules => From(UnitType.Joules);
+        /// <summary>
+        /// Get energy value as kilocalories
+        /// </summary>
         public double Kilocalories => From(UnitType.Kilocalories);
+        /// <summary>
+        /// Get energy value kilojoules
+        /// </summary>
         public double Kilojoules => From(UnitType.Kilojoules);
+        /// <summary>
+        /// Get energy value as kilowatt hours
+        /// </summary>
         public double KilowattHours => From(UnitType.KilowattHours);
+        /// <summary>
+        /// Get engery value as Therms
+        /// </summary>
         public double Therms => From(UnitType.Therms);
+        /// <summary>
+        /// Get energy value as watt hours
+        /// </summary>
         public double WattHours => From(UnitType.WattHours);
+        /// <summary>
+        /// Get energy value as watt seconds
+        /// </summary>
         public double WattSecond => From(UnitType.WattSeconds);
 		
         /// <summary>
@@ -206,7 +260,7 @@ namespace Meadow.Units
         /// negative polarity
         /// </summary>
         /// <returns></returns>
-        [Pure] public Energy Abs() { return new Energy(Math.Abs(this.Value)); }
+        [Pure] public Energy Abs() => new (Math.Abs(Value)); 
 
         /// <summary>
         /// Get a string represention of the object
@@ -323,6 +377,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to covert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

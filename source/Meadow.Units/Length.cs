@@ -30,7 +30,7 @@ namespace Meadow.Units
         /// <summary>
         /// Creates a new `Length` object from an existing Length object
         /// </summary>
-        /// <param name="Length"></param>
+        /// <param name="length"></param>
         public Length(Length length)
         {
             this.Value = length.Value;
@@ -46,31 +46,103 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Kilometers
+            /// </summary>
             Kilometers,
+            /// <summary>
+            /// Meters
+            /// </summary>
             Meters,
+            /// <summary>
+            /// Centimeters
+            /// </summary>
             Centimeters,
+            /// <summary>
+            /// Decimeters
+            /// </summary>
             Decimeters,
+            /// <summary>
+            /// Millimeters
+            /// </summary>
             Millimeters,
+            /// <summary>
+            /// Microns
+            /// </summary>
             Microns,
+            /// <summary>
+            /// Nanometers
+            /// </summary>
             Nanometers,
+            /// <summary>
+            /// Miles
+            /// </summary>
             Miles,
+            /// <summary>
+            /// Nautical miles
+            /// </summary>
             NauticalMiles,
+            /// <summary>
+            /// Yards
+            /// </summary>
             Yards,
+            /// <summary>
+            /// Feet
+            /// </summary>
             Feet,
+            /// <summary>
+            /// Inches
+            /// </summary>
             Inches,
         }
 
+        /// <summary>
+        /// Get length value as Kilometers
+        /// </summary>
         public double Kilometers => From(UnitType.Kilometers);
+        /// <summary>
+        /// Get length value as Meters
+        /// </summary>
         public double Meters => From(UnitType.Meters);
+        /// <summary>
+        /// Get length value as Centimeters
+        /// </summary>
         public double Centimeters => From(UnitType.Centimeters);
+        /// <summary>
+        /// Get length value as Decimeters
+        /// </summary>
         public double Decimeters => From(UnitType.Decimeters);
+        /// <summary>
+        /// Get length value as Millimeters
+        /// </summary>
         public double Millimeters => From(UnitType.Millimeters);
+        /// <summary>
+        /// Get length value as Microns
+        /// </summary>
         public double Microns => From(UnitType.Microns);
-        public double Nanometer => From(UnitType.Nanometers);
+        /// <summary>
+        /// Get length value as Nanometers
+        /// </summary>
+        public double Nanometers => From(UnitType.Nanometers);
+        /// <summary>
+        /// Get length value as Miles
+        /// </summary>
         public double Miles => From(UnitType.Miles);
+        /// <summary>
+        /// Get length value as NauticalMiles
+        /// </summary>
         public double NauticalMiles => From(UnitType.NauticalMiles);
+        /// <summary>
+        /// Get length value as Yards
+        /// </summary>
         public double Yards => From(UnitType.Yards);
+        /// <summary>
+        /// Get length value as Feet
+        /// </summary>
         public double Feet => From(UnitType.Feet);
+        /// <summary>
+        /// Get length value as Inches
+        /// </summary>
         public double Inches => From(UnitType.Inches);
 
         /// <summary>
@@ -329,6 +401,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to covert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);

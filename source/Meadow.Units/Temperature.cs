@@ -93,6 +93,11 @@ namespace Meadow.Units
         /// </summary>
         public double Kelvin { get => TempConversions.CToK(Value); }
 
+        /// <summary>
+        /// Get temperature value for a given unit
+        /// </summary>
+        /// <param name="convertTo">unit to convert to</param>
+        /// <returns></returns>
         [Pure] public double From(UnitType convertTo)
         {
             return TempConversions.Convert(Value, UnitType.Celsius, convertTo);
@@ -344,6 +349,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to convert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
