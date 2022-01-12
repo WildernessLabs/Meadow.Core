@@ -46,19 +46,60 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Revolutions
+            /// </summary>
             Revolutions,
+            /// <summary>
+            /// Degrees
+            /// </summary>
             Degrees,
+            /// <summary>
+            /// Radians
+            /// </summary>
             Radians,
+            /// <summary>
+            /// Gradians
+            /// </summary>
             Gradians,
+            /// <summary>
+            /// Minutes
+            /// </summary>
             Minutes,
+            /// <summary>
+            /// Seconds
+            /// </summary>
             Seconds
         }
 
+        /// <summary>
+        /// Get angle in revolutions
+        /// </summary>
         public double Revolutions => From(UnitType.Revolutions);
+
+        /// <summary>
+        /// Get angle in degrees
+        /// </summary>
         public double Degrees => From(UnitType.Degrees);
+
+        /// <summary>
+        /// Get angle in radians
+        /// </summary>
         public double Radians => From(UnitType.Radians);
+
+        /// <summary>
+        /// Get angle in gradians
+        /// </summary>
         public double Gradians => From(UnitType.Gradians);
+
+        /// <summary>
+        /// Get angle in minutes
+        /// </summary>
         public double Minutes => From(UnitType.Minutes);
+
+        /// <summary>
+        /// Get angle in seconds
+        /// </summary>
         public double Seconds => From(UnitType.Seconds);
 
         /// <summary>

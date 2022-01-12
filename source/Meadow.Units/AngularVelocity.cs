@@ -33,7 +33,7 @@ namespace Meadow.Units
         /// <param name="angularVelocity"></param>
 	    public AngularVelocity(AngularVelocity angularVelocity)
         {
-            this.Value = angularVelocity.Value;
+            Value = angularVelocity.Value;
         }
 
         /// <summary>
@@ -46,21 +46,67 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Revolutions per second
+            /// </summary>
             RevolutionsPerSecond,
+            /// <summary>
+            /// Revolutions per minute
+            /// </summary>
 			RevolutionsPerMinute,
+            /// <summary>
+            /// Radians per second
+            /// </summary>
 			RadiansPerSecond,
+            /// <summary>
+            /// Radians per minute
+            /// </summary>
 			RadiansPerMinute,
+            /// <summary>
+            /// Degrees per second
+            /// </summary>
 			DegreesPerSecond,
+            /// <summary>
+            /// Degrees per minute
+            /// </summary>
 			DegreesPerMinute
         }
 
+        /// <summary>
+        /// Get angular velocity in revolutions per second
+        /// </summary>
         public double RevolutionsPerSecond => From(UnitType.RevolutionsPerSecond);
+
+        /// <summary>
+        /// Get angular velocity in revolutions per minute
+        /// </summary>
 		public double RevolutionsPerMinute => From(UnitType.RevolutionsPerMinute);
+
+        /// <summary>
+        /// Get angular velocity in radians per second
+        /// </summary>
         public double RadiansPerSecond => From(UnitType.RadiansPerSecond);
+
+        /// <summary>
+        /// Get angular velocity in radians per minute
+        /// </summary>
         public double RadiansPerMinute => From(UnitType.RadiansPerMinute);
+
+        /// <summary>
+        /// Get angular velocity in degrees per second
+        /// </summary>
         public double DegreesPerSecond => From(UnitType.DegreesPerSecond);
+
+        /// <summary>
+        /// Get angular velocity in degrees per minute
+        /// </summary>
         public double DegreesPerMinute => From(UnitType.DegreesPerMinute);
 
+        /// <summary>
+        /// Get angular velocity for specific unit
+        /// </summary>
+        /// <param name="convertTo">the unit to covert to</param>
+        /// <returns>the angular velocity</returns>
         [Pure] public double From(UnitType convertTo)
         {
             return AngularVelocityConversions.Convert(Value, UnitType.RevolutionsPerSecond, convertTo);
@@ -73,7 +119,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((AngularVelocity)obj);
         }

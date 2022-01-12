@@ -162,6 +162,7 @@ namespace Meadow.Units
         /// <param name="right">right value</param>
         /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Acceleration left, Acceleration right) => !Equals(left.Value, right.Value);
+
         /// <summary>
         /// Compare to another Acceleration object
         /// </summary>
@@ -381,7 +382,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 

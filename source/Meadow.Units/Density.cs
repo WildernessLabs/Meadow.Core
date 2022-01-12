@@ -46,25 +46,79 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Grams per centimeters cubed
+            /// </summary>
             GramsPerCentimetersCubed,
+            /// <summary>
+            /// Grams per meters cubed
+            /// </summary>
             GramsPerMetersCubed,
+            /// <summary>
+            /// Grams per liter
+            /// </summary>
             GramsPerLiter,
+            /// <summary>
+            /// Kilograms per meters cubed
+            /// </summary>
             KilogramsPerMetersCubed,
+            /// <summary>
+            /// Ounces per inches cubed
+            /// </summary>
             OuncesPerInchesCubed,
+            /// <summary>
+            /// Ounces per feet cubed
+            /// </summary>
             OuncesPerFeetCubed,
+            /// <summary>
+            /// Pounds per inches cubed
+            /// </summary>
             PoundsPerInchesCubed,
+            /// <summary>
+            /// Pounds per feet cubed
+            /// </summary>
             PoundsPerFeetCubed,
+            /// <summary>
+            /// Density of water
+            /// </summary>
             Water
         }
 
+        /// <summary>
+        /// Get the density in grams per centimeters cubed
+        /// </summary>
         public double GramsPerCentimetersCubed => From(UnitType.GramsPerCentimetersCubed);
+        /// <summary>
+        /// Get the density in grams per meters cubed
+        /// </summary>
         public double GramsPerMetersCubed => From(UnitType.GramsPerMetersCubed);
+        /// <summary>
+        /// Get the density in grams per liter cubed
+        /// </summary>
         public double GramsPerLiter => From(UnitType.GramsPerLiter);
+        /// <summary>
+        /// Get the density in kilograms per meters cubed
+        /// </summary>
         public double KilogramsPerMetersCubed => From(UnitType.KilogramsPerMetersCubed);
+        /// <summary>
+        /// Get the density in ounces per inches cubed
+        /// </summary>
         public double OuncesPerInchesCubed => From(UnitType.OuncesPerInchesCubed);
+        /// <summary>
+        /// Get the density in ounces per feet cubed
+        /// </summary>
         public double OuncesPerFeetCubed => From(UnitType.OuncesPerFeetCubed);
+        /// <summary>
+        /// Get the density in pounds per inches cubed
+        /// </summary>
         public double PoundsPerInchesCubed => From(UnitType.PoundsPerInchesCubed);
+        /// <summary>
+        /// Get the density in pounds per feet cubed
+        /// </summary>
         public double PoundsPerFeetCubed => From(UnitType.PoundsPerFeetCubed);
+        /// <summary>
+        /// Get the density relative to water
+        /// </summary>
         public double Water => From(UnitType.Water);
 		
         /// <summary>

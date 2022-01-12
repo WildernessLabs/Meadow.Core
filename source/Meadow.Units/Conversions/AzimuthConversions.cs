@@ -4,6 +4,9 @@ namespace Meadow.Units.Conversions
 {
     public static class AzimuthConversions
     {
+        /// <summary>
+        /// Compass 16 Cardinals to degrees
+        /// </summary>
         // To Base (`CompassDegrees`)
         public static Func<Azimuth16PointCardinalNames, double> Compass16CardinalsToDegrees = (value) => {
             switch (value) {

@@ -46,21 +46,72 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Revolutions per second squared
+            /// </summary>
             RevolutionsPerSecondSquared,
+
+            /// <summary>
+            /// Revolutions per minute squared
+            /// </summary>
             RevolutionsPerMinuteSquared,
+
+            /// <summary>
+            /// Radians per second squared
+            /// </summary>
             RadiansPerSecondSquared,
+
+            /// <summary>
+            /// Radians per minutes squared
+            /// </summary>
             RadiansPerMinuteSquared,
+
+            /// <summary>
+            /// Degrees per second squared
+            /// </summary>
             DegreesPerSecondSquared,
+
+            /// <summary>
+            /// Degrees per minute squared
+            /// </summary>
             DegreesPerMinuteSquared
         }
 
+        /// <summary>
+        /// Get angular acceleration in revolutions per second squared
+        /// </summary>
         public double RevolutionsPerSecondSquared => From(UnitType.RevolutionsPerSecondSquared);
+
+        /// <summary>
+        /// Get angular acceleration in revolutions per minutes squared
+        /// </summary>
         public double RevolutionsPerMinuteSquared => From(UnitType.RevolutionsPerMinuteSquared);
+
+        /// <summary>
+        /// Get angular acceleration in radians per second squared
+        /// </summary>
         public double RadiansPerSecondSquared => From(UnitType.RadiansPerSecondSquared);
+
+        /// <summary>
+        /// Get angular acceleration in radians per minute squared
+        /// </summary>
         public double RadiansPerMinuteSquared => From(UnitType.RadiansPerMinuteSquared);
+
+        /// <summary>
+        /// Get angular acceleration in degrees per second squared
+        /// </summary>
         public double DegreesPerSecondSquared => From(UnitType.DegreesPerSecondSquared);
+
+        /// <summary>
+        /// Get angular acceleration in degrees per minute squared
+        /// </summary>
         public double DegreesPerMinuteSquared => From(UnitType.DegreesPerMinuteSquared);
 
+        /// <summary>
+        /// Get angular acceleration for a specific unit
+        /// </summary>
+        /// <param name="convertTo"></param>
+        /// <returns>angular acceleration value</returns>
         [Pure] public double From(UnitType convertTo)
         {
             return AngularAccelerationConversions.Convert(Value, UnitType.RevolutionsPerSecondSquared, convertTo);

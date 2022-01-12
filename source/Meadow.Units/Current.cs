@@ -46,21 +46,67 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Amperes
+            /// </summary>
             Amps,
+            /// <summary>
+            /// Milliamperes
+            /// </summary>
             Milliamps,
+            /// <summary>
+            /// Microamperes
+            /// </summary>
             Microamps,
+            /// <summary>
+            /// Kiloamperes
+            /// </summary>
             Kiloamps,
+            /// <summary>
+            /// Megaamperes
+            /// </summary>
             Megaamps,
+            /// <summary>
+            /// Gigaamperes
+            /// </summary>
             Gigaamps,
-           }
+        }
 
+        /// <summary>
+        /// Get current in amps
+        /// </summary>
         public double Amps => From(UnitType.Amps);
+
+        /// <summary>
+        /// Get current in milliamps
+        /// </summary>
         public double Milliamps => From(UnitType.Milliamps);
+
+        /// <summary>
+        /// Get current in microamps
+        /// </summary>
         public double Microamps => From(UnitType.Microamps);
+
+        /// <summary>
+        /// Get current in kiloamps
+        /// </summary>
         public double Kiloamps => From(UnitType.Kiloamps);
+
+        /// <summary>
+        /// Get current in megaamps
+        /// </summary>
         public double Megaamps => From(UnitType.Megaamps);
+
+        /// <summary>
+        /// Get current in gagaamps
+        /// </summary>
         public double Gigaamps => From(UnitType.Gigaamps);
  
+        /// <summary>
+        /// Convert to a specific unit
+        /// </summary>
+        /// <param name="convertTo">the unit to convert to</param>
+        /// <returns></returns>
         [Pure] public double From(UnitType convertTo)
         {
             return CurrentConversions.Convert(Value, Current.UnitType.Amps, convertTo);
@@ -312,6 +358,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion unit type</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
