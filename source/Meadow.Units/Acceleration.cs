@@ -33,7 +33,7 @@ namespace Meadow.Units
         /// <param name="acceleration"></param>
 		public Acceleration(Acceleration acceleration)
         {
-            this.Value = acceleration.Value;
+            Value = acceleration.Value;
         }
 
         /// <summary>
@@ -80,14 +80,33 @@ namespace Meadow.Units
             InchesPerSecondSquared,
         }
 
+        /// <summary>
+        /// Get acceleration in meters per second squared
+        /// </summary>
         public double MetersPerSecondSquared => From(UnitType.MetersPerSecondSquared);
+        /// <summary>
+        /// Get acceleration in centimeters per second squared
+        /// </summary>
         public double CentimetersPerSecondSquared => From(UnitType.CentimetersPerSecondSquared);
+        /// <summary>
+        /// Get acceleration in g
+        /// </summary>
         public double Gravity => From(UnitType.Gravity);
+        /// <summary>
+        /// Get acceleration in feet per second squared
+        /// </summary>
         public double FeetPerSecondSquared => From(UnitType.FeetPerSecondSquared);
+        /// <summary>
+        /// Get acceleration in inches per second squared
+        /// </summary>
         public double InchesPerSecondSquared => From(UnitType.InchesPerSecondSquared);
 
-        [Pure]
-        public double From(UnitType convertTo)
+        /// <summary>
+        /// Get acceleration value for a given unit
+        /// </summary>
+        /// <param name="convertTo">acceleration unit to convert to</param>
+        /// <returns></returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return AccelerationConversions.Convert(Value, UnitType.MetersPerSecondSquared, convertTo);
         }
@@ -99,7 +118,7 @@ namespace Meadow.Units
         /// <returns>true if equal</returns>
         [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Acceleration)obj);
         }
@@ -143,6 +162,7 @@ namespace Meadow.Units
         /// <param name="right">right value</param>
         /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Acceleration left, Acceleration right) => !Equals(left.Value, right.Value);
+
         /// <summary>
         /// Compare to another Acceleration object
         /// </summary>
@@ -337,6 +357,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion type</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
@@ -361,7 +382,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 

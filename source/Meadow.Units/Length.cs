@@ -27,6 +27,10 @@ namespace Meadow.Units
             Value = LengthConversions.Convert(value, type, UnitType.Meters);
         }
 
+        /// <summary>
+        /// Creates a new `Length` object from an existing Length object
+        /// </summary>
+        /// <param name="length"></param>
         public Length(Length length)
         {
             this.Value = length.Value;
@@ -42,48 +46,131 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Kilometers
+            /// </summary>
             Kilometers,
+            /// <summary>
+            /// Meters
+            /// </summary>
             Meters,
+            /// <summary>
+            /// Centimeters
+            /// </summary>
             Centimeters,
+            /// <summary>
+            /// Decimeters
+            /// </summary>
             Decimeters,
+            /// <summary>
+            /// Millimeters
+            /// </summary>
             Millimeters,
+            /// <summary>
+            /// Microns
+            /// </summary>
             Microns,
+            /// <summary>
+            /// Nanometers
+            /// </summary>
             Nanometers,
+            /// <summary>
+            /// Miles
+            /// </summary>
             Miles,
+            /// <summary>
+            /// Nautical miles
+            /// </summary>
             NauticalMiles,
+            /// <summary>
+            /// Yards
+            /// </summary>
             Yards,
+            /// <summary>
+            /// Feet
+            /// </summary>
             Feet,
+            /// <summary>
+            /// Inches
+            /// </summary>
             Inches,
         }
 
-        //==== Typed "To" methods
+        /// <summary>
+        /// Get length value as Kilometers
+        /// </summary>
         public double Kilometers => From(UnitType.Kilometers);
+        /// <summary>
+        /// Get length value as Meters
+        /// </summary>
         public double Meters => From(UnitType.Meters);
+        /// <summary>
+        /// Get length value as Centimeters
+        /// </summary>
         public double Centimeters => From(UnitType.Centimeters);
+        /// <summary>
+        /// Get length value as Decimeters
+        /// </summary>
         public double Decimeters => From(UnitType.Decimeters);
+        /// <summary>
+        /// Get length value as Millimeters
+        /// </summary>
         public double Millimeters => From(UnitType.Millimeters);
+        /// <summary>
+        /// Get length value as Microns
+        /// </summary>
         public double Microns => From(UnitType.Microns);
-        public double Nanometer => From(UnitType.Nanometers);
+        /// <summary>
+        /// Get length value as Nanometers
+        /// </summary>
+        public double Nanometers => From(UnitType.Nanometers);
+        /// <summary>
+        /// Get length value as Miles
+        /// </summary>
         public double Miles => From(UnitType.Miles);
+        /// <summary>
+        /// Get length value as NauticalMiles
+        /// </summary>
         public double NauticalMiles => From(UnitType.NauticalMiles);
+        /// <summary>
+        /// Get length value as Yards
+        /// </summary>
         public double Yards => From(UnitType.Yards);
+        /// <summary>
+        /// Get length value as Feet
+        /// </summary>
         public double Feet => From(UnitType.Feet);
+        /// <summary>
+        /// Get length value as Inches
+        /// </summary>
         public double Inches => From(UnitType.Inches);
 
-        [Pure]
-        public double From(UnitType convertTo)
+        /// <summary>
+        /// Get a double value for a specific unit
+        /// </summary>
+        /// <param name="convertTo">unit to covert to</param>
+        /// <returns>the converted value</returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return LengthConversions.Convert(Value, UnitType.Meters, convertTo);
         }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another Length object
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Length)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -97,20 +184,100 @@ namespace Meadow.Units
         //[Pure] public static implicit operator Length(decimal value) => new Length((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another Length object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Length other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Length left, Length right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Length left, Length right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(Length other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another Length object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(Length other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Length left, Length right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Length operator +(Length lvalue, Length rvalue) => new Length(lvalue.Value + rvalue.Value);
-        [Pure] public static Length operator -(Length lvalue, Length rvalue) => new Length(lvalue.Value - rvalue.Value);
-        [Pure] public static Length operator *(Length value, double operand) => new Length(value.Value * operand);
-        [Pure] public static Length operator /(Length value, double operand) => new Length(value.Value / operand);
+        /// <summary>
+        /// Addition operator to add two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Length object with a value of left + right</returns>
+        [Pure] public static Length operator +(Length left, Length right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two Length objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Length object with a value of left - right</returns>
+        [Pure] public static Length operator -(Length left, Length right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Length object with a value of value multiplied by the operand</returns>
+        [Pure] public static Length operator *(Length value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new Length object with a value of value divided by the operand</returns>
+        [Pure] public static Length operator /(Length value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
@@ -135,9 +302,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another Length object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other Length cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 
@@ -234,6 +401,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to covert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
@@ -258,7 +426,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 

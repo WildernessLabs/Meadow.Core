@@ -31,14 +31,22 @@ namespace Meadow.Units
             Value = value;
         }
 
+        /// <summary>
+        /// Creates a new `Azimuth` object.
+        /// </summary>
+        /// <param name="cardinalPoint">The cardinal direction.</param>
         public Azimuth(Azimuth16PointCardinalNames cardinalPoint)
         {
             Value = AzimuthConversions.Compass16CardinalsToDegrees(cardinalPoint);
         }
 
+        /// <summary>
+        /// Creates a new `Azimuth` object.
+        /// </summary>
+        /// <param name="azimuth">source object</param>
         public Azimuth(Azimuth azimuth)
         {
-            this.Value = azimuth.Value;
+            Value = azimuth.Value;
         }
 
         /// <summary>
@@ -51,7 +59,13 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Degrees (decimal)
+            /// </summary>
             DecimalDegrees,
+            /// <summary>
+            /// Cardinal compass point names (English)
+            /// </summary>
             Compass16CardinalPointNames
         }
 
@@ -61,11 +75,7 @@ namespace Meadow.Units
         /// <summary>
         /// Gets the cardinal direction value expressed as a unit _Decimal Degrees_ (`°`)
         /// </summary>
-        public double DecimalDegrees {
-            get {
-                return Value;
-            }
-        }
+        public double DecimalDegrees => Value;
 
         /// <summary>
         /// Gets the cardinal direction value expressed as a unit a 16 division cardinal point
@@ -85,26 +95,31 @@ namespace Meadow.Units
         /// </summary>
         /// <param name="value">The cardinal direction value.</param>
         /// <returns>A new cardinal direction object.</returns>
-        [Pure] public static Azimuth FromDecimalDegrees(double value) => new Azimuth(value);
+        [Pure] public static Azimuth FromDecimalDegrees(double value) => new (value);
 
         /// <summary>
         /// Creates a new `Azimuth` object
         /// </summary>
         /// <param name="name">The 16 point cardinal direction.</param>
         /// <returns>A new cardinal direction object.</returns>
-        [Pure] public static Azimuth FromCompass16PointCardinalName(Azimuth16PointCardinalNames name) => new Azimuth(name);
+        [Pure] public static Azimuth FromCompass16PointCardinalName(Azimuth16PointCardinalNames name) => new (name);
 
-        //=============================
-        // Boilerplate interface stuff.
-
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another Azimuth object.
+        /// </summary>
+        /// <param name="obj">object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Azimuth)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -118,24 +133,96 @@ namespace Meadow.Units
         //[Pure] public static implicit operator Azimuth(decimal value) => new Azimuth((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another Azimuth object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Azimuth other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Azimuth left, Azimuth right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Azimuth left, Azimuth right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(Azimuth other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another Azimuth object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(Azimuth other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Azimuth left, Azimuth right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Azimuth left, Azimuth right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Azimuth left, Azimuth right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Azimuth left, Azimuth right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Azimuth operator +(Azimuth lvalue, Azimuth rvalue) => new Azimuth(StandardizeAngle(lvalue.Value + rvalue.Value));
-        [Pure] public static Azimuth operator -(Azimuth lvalue, Azimuth rvalue) => new Azimuth(StandardizeAngle(lvalue.Value - rvalue.Value));
-        [Pure] public static Azimuth operator *(Azimuth value, double operand) => new Azimuth(StandardizeAngle(value.Value * operand));
-        [Pure] public static Azimuth operator /(Azimuth value, double operand) => new Azimuth(StandardizeAngle(value.Value / operand));
+        /// <summary>
+        /// Addition operator to add two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Azimuth object with a value of left + right</returns>
+        [Pure] public static Azimuth operator +(Azimuth left, Azimuth right) => new (left.Value + right.Value);
 
-        private static double StandardizeAngle(double value)
+        /// <summary>
+        /// Subtraction operator to subtract two Azimuth objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Azimuth object with a value of left - right</returns>
+        [Pure] public static Azimuth operator -(Azimuth left, Azimuth right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Azimuth object with a value of value multiplied by the operand</returns>
+		[Pure] public static Azimuth operator *(Azimuth value, double operand) => new (value.Value * operand);
+		
+        private static double StandardizeAzimuth(double value)
         {
-            value = value % 360d;
+            value %= 360d;
             if (value < 0) return value + 360d;
             return value;
         }
@@ -145,7 +232,7 @@ namespace Meadow.Units
         /// negative polarity
         /// </summary>
         /// <returns></returns>
-        [Pure] public Azimuth Abs() { return new Azimuth(Math.Abs(this.Value)); }
+        [Pure] public Azimuth Abs() { return new Azimuth(Math.Abs(Value)); }
 
         /// <summary>
         /// Get a string represention of the object
@@ -262,6 +349,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to convert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
@@ -286,7 +374,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 

@@ -27,9 +27,13 @@ namespace Meadow.Units
             Value = EnergyConversions.Convert(value, type, UnitType.Joules);
         }
 
+        /// <summary>
+        /// Creates a new `Energy` object from an existing Energy object
+        /// </summary>
+        /// <param name="energy"></param>
         public Energy(Energy energy)
         {
-            this.Value = energy.Value;
+            Value = energy.Value;
         }
 
         /// <summary>
@@ -42,42 +46,107 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// BTU
+            /// </summary>
             BTU,
+            /// <summary>
+            /// Calories
+            /// </summary>
             Calories,
+            /// <summary>
+            /// Joules
+            /// </summary>
             Joules,
+            /// <summary>
+            /// Kilocalories
+            /// </summary>
             Kilocalories,
+            /// <summary>
+            /// Kilojoules
+            /// </summary>
             Kilojoules,
+            /// <summary>
+            /// Kilowatt hours
+            /// </summary>
             KilowattHours,
+            /// <summary>
+            /// Therms
+            /// </summary>
             Therms,
+            /// <summary>
+            /// Watt hours
+            /// </summary>
             WattHours,
+            /// <summary>
+            /// Watt seconds
+            /// </summary>
             WattSeconds
         }
 
+        /// <summary>
+        /// Get energy value as BTUs
+        /// </summary>
         public double BTU => From(UnitType.BTU);
+        /// <summary>
+        /// Get energy value as calories
+        /// </summary>
         public double Calories => From(UnitType.Calories);
+        /// <summary>
+        /// Get energy value as joules
+        /// </summary>
         public double Joules => From(UnitType.Joules);
+        /// <summary>
+        /// Get energy value as kilocalories
+        /// </summary>
         public double Kilocalories => From(UnitType.Kilocalories);
+        /// <summary>
+        /// Get energy value kilojoules
+        /// </summary>
         public double Kilojoules => From(UnitType.Kilojoules);
+        /// <summary>
+        /// Get energy value as kilowatt hours
+        /// </summary>
         public double KilowattHours => From(UnitType.KilowattHours);
+        /// <summary>
+        /// Get engery value as Therms
+        /// </summary>
         public double Therms => From(UnitType.Therms);
+        /// <summary>
+        /// Get energy value as watt hours
+        /// </summary>
         public double WattHours => From(UnitType.WattHours);
+        /// <summary>
+        /// Get energy value as watt seconds
+        /// </summary>
         public double WattSecond => From(UnitType.WattSeconds);
-
-
-        [Pure]
-        public double From(UnitType convertTo)
+		
+        /// <summary>
+        /// Get a double value for a specific unit
+        /// </summary>
+        /// <param name="convertTo">unit to covert to</param>
+        /// <returns>the converted value</returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return EnergyConversions.Convert(Value, UnitType.Joules, convertTo);
         }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another Energy object
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((Energy)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -91,27 +160,107 @@ namespace Meadow.Units
         //[Pure] public static implicit operator Energy(decimal value) => new Energy((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another Energy object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(Energy other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(Energy left, Energy right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(Energy left, Energy right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(Energy other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another Energy object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(Energy other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(Energy left, Energy right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static Energy operator +(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value + rvalue.Value);
-        [Pure] public static Energy operator -(Energy lvalue, Energy rvalue) => new Energy(lvalue.Value - rvalue.Value);
-        [Pure] public static Energy operator *(Energy value, double operand) => new Energy(value.Value * operand);
-        [Pure] public static Energy operator /(Energy value, double operand) => new Energy(value.Value / operand);
+        /// <summary>
+        /// Addition operator to add two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Energy object with a value of left + right</returns>
+        [Pure] public static Energy operator +(Energy left, Energy right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two Energy objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new Energy object with a value of left - right</returns>
+        [Pure] public static Energy operator -(Energy left, Energy right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new Energy object with a value of value multiplied by the operand</returns>
+        [Pure] public static Energy operator *(Energy value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new Energy object with a value of value divided by the operand</returns>
+        [Pure] public static Energy operator /(Energy value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
         /// negative polarity
         /// </summary>
         /// <returns></returns>
-        [Pure] public Energy Abs() { return new Energy(Math.Abs(this.Value)); }
+        [Pure] public Energy Abs() => new (Math.Abs(Value)); 
 
         /// <summary>
         /// Get a string represention of the object
@@ -129,9 +278,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another Energy object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other Energy cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 
@@ -228,6 +377,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">type to covert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
@@ -252,7 +402,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 

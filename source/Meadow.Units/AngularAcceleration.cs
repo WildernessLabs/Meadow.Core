@@ -21,7 +21,7 @@ namespace Meadow.Units
         /// Creates a new `AngularAcceleration` object.
         /// </summary>
         /// <param name="value">The AngularAcceleration value.</param>
-        /// <param name="type">kilometers meters per second by default.</param>
+        /// <param name="type">units of angular acceleration</param>
         public AngularAcceleration(double value, UnitType type = UnitType.RevolutionsPerSecondSquared)
         {
             Value = AngularAccelerationConversions.Convert(value, type, UnitType.RevolutionsPerSecondSquared);
@@ -46,35 +46,93 @@ namespace Meadow.Units
         /// </summary>
         public enum UnitType
         {
+            /// <summary>
+            /// Revolutions per second squared
+            /// </summary>
             RevolutionsPerSecondSquared,
+
+            /// <summary>
+            /// Revolutions per minute squared
+            /// </summary>
             RevolutionsPerMinuteSquared,
+
+            /// <summary>
+            /// Radians per second squared
+            /// </summary>
             RadiansPerSecondSquared,
+
+            /// <summary>
+            /// Radians per minutes squared
+            /// </summary>
             RadiansPerMinuteSquared,
+
+            /// <summary>
+            /// Degrees per second squared
+            /// </summary>
             DegreesPerSecondSquared,
+
+            /// <summary>
+            /// Degrees per minute squared
+            /// </summary>
             DegreesPerMinuteSquared
         }
 
+        /// <summary>
+        /// Get angular acceleration in revolutions per second squared
+        /// </summary>
         public double RevolutionsPerSecondSquared => From(UnitType.RevolutionsPerSecondSquared);
+
+        /// <summary>
+        /// Get angular acceleration in revolutions per minutes squared
+        /// </summary>
         public double RevolutionsPerMinuteSquared => From(UnitType.RevolutionsPerMinuteSquared);
+
+        /// <summary>
+        /// Get angular acceleration in radians per second squared
+        /// </summary>
         public double RadiansPerSecondSquared => From(UnitType.RadiansPerSecondSquared);
+
+        /// <summary>
+        /// Get angular acceleration in radians per minute squared
+        /// </summary>
         public double RadiansPerMinuteSquared => From(UnitType.RadiansPerMinuteSquared);
+
+        /// <summary>
+        /// Get angular acceleration in degrees per second squared
+        /// </summary>
         public double DegreesPerSecondSquared => From(UnitType.DegreesPerSecondSquared);
+
+        /// <summary>
+        /// Get angular acceleration in degrees per minute squared
+        /// </summary>
         public double DegreesPerMinuteSquared => From(UnitType.DegreesPerMinuteSquared);
 
-        [Pure]
-        public double From(UnitType convertTo)
+        /// <summary>
+        /// Get angular acceleration for a specific unit
+        /// </summary>
+        /// <param name="convertTo"></param>
+        /// <returns>angular acceleration value</returns>
+        [Pure] public double From(UnitType convertTo)
         {
             return AngularAccelerationConversions.Convert(Value, UnitType.RevolutionsPerSecondSquared, convertTo);
         }
 
-        [Pure]
-        public override bool Equals(object obj)
+        /// <summary>
+        /// Compare to another AngularAcceleration object
+        /// </summary>
+        /// <param name="obj">The object to compare</param>
+        /// <returns>true if equal</returns>
+        [Pure] public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) { return false; }
+            if (obj is null) { return false; }
             if (Equals(this, obj)) { return true; }
             return obj.GetType() == GetType() && Equals((AngularAcceleration)obj);
         }
 
+        /// <summary>
+        /// Get hash of object
+        /// </summary>
+        /// <returns>int32 hash value</returns>
         [Pure] public override int GetHashCode() => Value.GetHashCode();
 
         // implicit conversions
@@ -88,20 +146,100 @@ namespace Meadow.Units
         //[Pure] public static implicit operator AngularAcceleration(decimal value) => new AngularAcceleration((double)value);
 
         // Comparison
+        /// <summary>
+        /// Compare to another AngularAcceleration object
+        /// </summary>
+        /// <param name="other">The object to compare</param>
+        /// <returns>true if equal</returns>
         [Pure] public bool Equals(AngularAcceleration other) => Value == other.Value;
+
+        /// <summary>
+        /// Equals operator to compare two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if equal</returns>
         [Pure] public static bool operator ==(AngularAcceleration left, AngularAcceleration right) => Equals(left.Value, right.Value);
+
+        /// <summary>
+        /// Not equals operator to compare two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if not equal</returns>
         [Pure] public static bool operator !=(AngularAcceleration left, AngularAcceleration right) => !Equals(left.Value, right.Value);
-        [Pure] public int CompareTo(AngularAcceleration other) => Equals(this.Value, other.Value) ? 0 : this.Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Compare to another AngularAcceleration object
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>0 if equal</returns>
+        [Pure] public int CompareTo(AngularAcceleration other) => Equals(Value, other.Value) ? 0 : Value.CompareTo(other.Value);
+
+        /// <summary>
+        /// Less than operator to compare two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than right</returns>
         [Pure] public static bool operator <(AngularAcceleration left, AngularAcceleration right) => Comparer<double>.Default.Compare(left.Value, right.Value) < 0;
+
+        /// <summary>
+        /// Greater than operator to compare two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than right</returns>
         [Pure] public static bool operator >(AngularAcceleration left, AngularAcceleration right) => Comparer<double>.Default.Compare(left.Value, right.Value) > 0;
+
+        /// <summary>
+        /// Less than or equal operator to compare two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is less than or equal to right</returns>
         [Pure] public static bool operator <=(AngularAcceleration left, AngularAcceleration right) => Comparer<double>.Default.Compare(left.Value, right.Value) <= 0;
+
+        /// <summary>
+        /// Greater than or equal operator to compare two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>true if left is greater than or equal to right</returns>
         [Pure] public static bool operator >=(AngularAcceleration left, AngularAcceleration right) => Comparer<double>.Default.Compare(left.Value, right.Value) >= 0;
 
         // Math
-        [Pure] public static AngularAcceleration operator +(AngularAcceleration lvalue, AngularAcceleration rvalue) => new AngularAcceleration(lvalue.Value + rvalue.Value);
-        [Pure] public static AngularAcceleration operator -(AngularAcceleration lvalue, AngularAcceleration rvalue) => new AngularAcceleration(lvalue.Value - rvalue.Value);
-        [Pure] public static AngularAcceleration operator *(AngularAcceleration value, double operand) => new AngularAcceleration(value.Value * operand);
-        [Pure] public static AngularAcceleration operator /(AngularAcceleration value, double operand) => new AngularAcceleration(value.Value / operand);
+        /// <summary>
+        /// Addition operator to add two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new AngularAcceleration object with a value of left + right</returns>
+        [Pure] public static AngularAcceleration operator +(AngularAcceleration left, AngularAcceleration right) => new (left.Value + right.Value);
+
+        /// <summary>
+        /// Subtraction operator to subtract two AngularAcceleration objects
+        /// </summary>
+        /// <param name="left">left value</param>
+        /// <param name="right">right value</param>
+        /// <returns>A new AngularAcceleration object with a value of left - right</returns>
+        [Pure] public static AngularAcceleration operator -(AngularAcceleration left, AngularAcceleration right) => new (left.Value - right.Value);
+
+        /// <summary>
+        /// Multipication operator to multiply by a double
+        /// </summary>
+        /// <param name="value">object to multiply</param>
+        /// <param name="operand">operand to multiply object</param>
+        /// <returns>A new AngularAcceleration object with a value of value multiplied by the operand</returns>
+        [Pure] public static AngularAcceleration operator *(AngularAcceleration value, double operand) => new (value.Value * operand);
+
+        /// <summary>
+        /// Division operator to divide by a double
+        /// </summary>
+        /// <param name="value">object to be divided</param>
+        /// <param name="operand">operand to divide object</param>
+        /// <returns>A new AngularAcceleration object with a value of value divided by the operand</returns>
+        [Pure] public static AngularAcceleration operator /(AngularAcceleration value, double operand) => new (value.Value / operand);
 
         /// <summary>
         /// Returns the absolute length, that is, the length without regards to
@@ -126,9 +264,9 @@ namespace Meadow.Units
 
         // IComparable
         /// <summary>
-        /// Compare to another AbsoluteHumidity object
+        /// Compare to another AngularAcceleration object
         /// </summary>
-        /// <param name="obj">The other AbsoluteHumity cast to object</param>
+        /// <param name="obj">The other AngularAcceleration cast to object</param>
         /// <returns>0 if equal</returns>
         [Pure] public int CompareTo(object obj) => Value.CompareTo(obj);
 
@@ -225,6 +363,7 @@ namespace Meadow.Units
         /// <summary>
         /// Covert to type
         /// </summary>
+        /// <param name="conversionType">conversion type to convert to</param>
         /// <param name="provider">format provider</param>
         /// <returns>type representation of the object</returns>
         [Pure] public object ToType(Type conversionType, IFormatProvider provider) => ((IConvertible)Value).ToType(conversionType, provider);
@@ -249,7 +388,6 @@ namespace Meadow.Units
         /// <param name="provider">format provider</param>
         /// <returns>uint64 representation of the object</returns>
         [Pure] public ulong ToUInt64(IFormatProvider provider) => ((IConvertible)Value).ToUInt64(provider);
-
 
         /// <summary>
         /// Compare the default value to a double 
