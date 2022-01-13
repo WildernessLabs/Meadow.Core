@@ -103,6 +103,7 @@ namespace Meadow.Hardware
         /// <param name="ioController">The Meadow IO Controller</param>
         /// <param name="clock">Clock (SCL) pin</param>
         /// <param name="data">Data (SDA) pin</param>
+        /// <param name="busSpeed">I2C bus speed</param>
         /// <param name="transactionTimeout">Bus transaction timeout</param>
         /// <returns>An I2CBus instance</returns>
         public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)

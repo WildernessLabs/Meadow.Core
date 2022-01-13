@@ -8,7 +8,6 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO
         /// </summary>
-        /// <param name="speedkHz">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus()            
         {
@@ -26,7 +25,7 @@ namespace Meadow.Devices
         /// Creates a SPI bus instance for the requested control pins and bus speed
         /// </summary>
         /// <param name="pins">IPin instances used for (in this order) CLK, COPI, CIPO</param>
-        /// <param name="speedkHz">The bus speed (in kHz)</param>
+        /// <param name="speed">The bus speed (in kHz)</param>
         /// <returns>An instance of an IISpiBus</returns>
         public ISpiBus CreateSpiBus(
             IPin[] pins,

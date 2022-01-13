@@ -6,7 +6,7 @@ namespace Meadow
         /// <summary>
         /// Enumeration indicating the possible configuration items that can be read / written.
         /// </summary>
-        /// <remarks>It is critical that this enum matches the enum in the NuttX file meadow-upd.h.</remarks>
+        /// <remarks>It is critical that this enum matches the enum in the NuttX file hcom_nx_config_manager.h.</remarks>
         public enum ConfigurationValues
         {
             DeviceName = 0,
@@ -26,7 +26,8 @@ namespace Meadow
             GetTimeAtStartup,
             MacAddress,
             SoftApMacAddress,
-            DefaultAccessPoint
+            DefaultAccessPoint,
+            ResetReason
         };
 
         T GetConfigurationValue<T>(ConfigurationValues item) where T : struct;

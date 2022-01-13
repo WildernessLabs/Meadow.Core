@@ -433,7 +433,7 @@ namespace Meadow.Hardware
         /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
         /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
         /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
-        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
+        /// <paramref name="receiveBuffer"/>Note: ExchangeData pins both buffers during execution. Cross-thread modifications to either of the buffers during execution will result in undefined behavior.
         /// </remarks>
         [Obsolete("Use Exchange", true)]
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer)
@@ -454,7 +454,7 @@ namespace Meadow.Hardware
         /// Due to the nature of a data exchange on a SPI bus, equal numbers of bytes must always be transmitted and received.  Both the sendBuffer and receiveBuffer must be of equal length and must be non-null.
         /// The <b>sendBuffer</b> data will start transmitting on the first clock cycle of the exchange.  If you want the output data to start transmitting on a later clock cycle, you must left-pad <b>dataToWrite</b> with a zero for each clock cycle to skip (it is not actually skipped, but a zero will be transmitted on those cycles).
         /// If you want to read more data that you are writing, you must right-pad the input parameter with enough empty bytes (zeros) to account for the desired return data.
-        /// <paramref name="receiveBuffer"/>Note: <i>ExchangeData</i> pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.</b>
+        /// <paramref name="receiveBuffer"/>Note: ExchangeData pins both buffers during execution.  Cross-thread modifications to either of the buffers during execution will result in undefined behavior.
         /// </remarks>
         [Obsolete("Use Exchange", true)]
         public void ExchangeData(IDigitalOutputPort chipSelect, ChipSelectMode csMode, byte[] sendBuffer, byte[] receiveBuffer, int bytesToExchange)

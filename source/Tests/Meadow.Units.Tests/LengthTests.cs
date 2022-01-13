@@ -26,7 +26,7 @@ namespace Meadow.Units.Tests
             Assert.True(t.Decimeters == 100);
             Assert.True(t.Millimeters == 10000);
             Assert.True(t.Microns == 10000000);
-            Assert.True(t.Nanometer == 10000000000);
+            Assert.True(t.Nanometers == 10000000000);
             Assert.True(t.Miles.Equals4DigitPrecision(0.00621371));
             Assert.True(t.NauticalMiles.Equals4DigitPrecision(0.00539957));
             Assert.True(t.Yards.Equals4DigitPrecision(10.9361));

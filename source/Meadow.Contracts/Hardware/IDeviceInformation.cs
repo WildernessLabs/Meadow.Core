@@ -18,7 +18,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// The hardware version.
         /// </summary>
-        string HardwareRevision { get; }
+        F7HardwareRevision HardwareRevision { get; }
 
         /// <summary>
         /// Get the processor type.

@@ -75,6 +75,21 @@ namespace Meadow.Gateways
         /// </summary>
         string DefaultAcessPoint { get; }
 
+        /// <summary>
+        /// Access point the ESP32 is currently connected to.
+        /// </summary>
+        string Ssid { get; }
+
+        /// <summary>
+        /// BSSID of the access point the ESP32 is currently connected to.
+        /// </summary>
+        string Bssid { get; }
+
+        /// <summary>
+        /// WiFi channel the ESP32 and the access point are using for communication.
+        /// </summary>
+        uint Channel { get; }
+
         #endregion Properties
 
         #region Delegates and Events
@@ -157,7 +172,7 @@ namespace Meadow.Gateways
         /// Disconnect from the the currently active access point.
         /// </summary>
         /// <remarks>
-        /// Setting turnOffWiFiInterface to true will call <cref="StopWiFiInterface" /> following
+        /// Setting turnOffWiFiInterface to true will call StopWiFiInterface following
         /// the disconnection from the current access point.
         /// </remarks>
         /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
