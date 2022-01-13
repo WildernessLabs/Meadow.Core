@@ -18,10 +18,8 @@ namespace Meadow.Hardware
         protected bool _showSerialDebug = false;
         private CircularBuffer<byte>? _readBuffer;
         protected Thread? _readThread;
-        protected int _readTimeout;
         protected int _baudRate;
         protected object _accessLock = new object();
-        private int _writeTimeout;
 
         protected abstract void SetHardwarePortSettings(IntPtr handle);
         protected abstract IntPtr OpenHardwarePort(string portName);
@@ -68,6 +66,7 @@ namespace Meadow.Hardware
             DataBits = dataBits;    
             StopBits = stopBits;
             ReadTimeout = TimeSpan.FromMilliseconds(-1);
+            WriteTimeout = TimeSpan.FromMilliseconds(-1);
             ReceiveBufferSize = readBufferSize;
         }
 
@@ -105,28 +104,14 @@ namespace Meadow.Hardware
         /// <summary>
         /// The time required for a time-out to occur when a read operation does not finish.
         /// </summary>
-        /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        public TimeSpan ReadTimeout
-        {
-            get => TimeSpan.FromMilliseconds(_readTimeout);
-            set
-            {
-                _readTimeout = value.TotalMilliseconds > 0 ? (int)value.TotalMilliseconds : -1;
-            }
-        }
+        /// <remarks>The time-out can be set to any value greater than or equal to zero, or set to &lt; 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        public TimeSpan ReadTimeout { get; set; }
 
         /// <summary>
         /// The time required for a time-out to occur when a write operation does not finish.
         /// </summary>
-        /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        public TimeSpan WriteTimeout
-        {
-            get => TimeSpan.FromMilliseconds(_writeTimeout);
-            set
-            {
-                _writeTimeout = value.TotalMilliseconds > 0 ? (int)value.TotalMilliseconds : -1;
-            }
-        }
+        /// <remarks>The time-out can be set to any value greater than or equal to zero, or set to &lt; 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        public TimeSpan WriteTimeout { get; set; }
 
         /// <summary>
         /// Gets the number of bytes of data in the receive buffer.
