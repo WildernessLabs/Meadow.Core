@@ -67,7 +67,7 @@ namespace Meadow.Hardware
             Parity = Parity;
             DataBits = dataBits;    
             StopBits = stopBits;
-            ReadTimeout = Timeout.Infinite;
+            ReadTimeout = TimeSpan.FromMilliseconds(-1);
             ReceiveBufferSize = readBufferSize;
         }
 
@@ -101,33 +101,30 @@ namespace Meadow.Hardware
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
         public StopBits StopBits { get; }
+
         /// <summary>
-        /// The number of milliseconds before a time-out occurs when a read operation does not finish.
+        /// The time required for a time-out to occur when a read operation does not finish.
         /// </summary>
-        /// <remarks>The time-out can be set to any value greater than zero, or set to InfiniteTimeout, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        public int ReadTimeout
+        /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        public TimeSpan ReadTimeout
         {
-            get => _readTimeout;
+            get => TimeSpan.FromMilliseconds(_readTimeout);
             set
             {
-                if (value == 0 || value < -1)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _readTimeout = value;
+                _readTimeout = value.TotalMilliseconds > 0 ? (int)value.TotalMilliseconds : -1;
             }
         }
 
-        public int WriteTimeout
+        /// <summary>
+        /// The time required for a time-out to occur when a write operation does not finish.
+        /// </summary>
+        /// <remarks>The time-out can be set to any value greater than zero, or set to &lt;= 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        public TimeSpan WriteTimeout
         {
-            get => _writeTimeout;
+            get => TimeSpan.FromMilliseconds(_writeTimeout);
             set
             {
-                if (value == 0 || value < -1)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _writeTimeout = value;
+                _writeTimeout = value.TotalMilliseconds > 0 ? (int)value.TotalMilliseconds : -1;
             }
         }
 
@@ -315,12 +312,12 @@ namespace Meadow.Hardware
 
                 Timer? writeTimeoutTimer = null;
 
-                if(WriteTimeout > 0)
+                if(WriteTimeout.TotalMilliseconds > 0)
                 {
                     writeTimeoutTimer = new Timer((o) =>
                     {
                         throw new TimeoutException("Write timeout");
-                    }, null, WriteTimeout, Timeout.Infinite);
+                    }, null, (int)WriteTimeout.TotalMilliseconds, Timeout.Infinite);
                 }
 
                 // we can only write 255 bytes at a time, so we loop 
