@@ -18,10 +18,8 @@ namespace Meadow.Hardware
         protected bool _showSerialDebug = false;
         private CircularBuffer<byte>? _readBuffer;
         protected Thread? _readThread;
-        protected int _readTimeout;
         protected int _baudRate;
         protected object _accessLock = new object();
-        private int _writeTimeout;
 
         protected abstract void SetHardwarePortSettings(IntPtr handle);
         protected abstract IntPtr OpenHardwarePort(string portName);
@@ -67,7 +65,8 @@ namespace Meadow.Hardware
             Parity = Parity;
             DataBits = dataBits;    
             StopBits = stopBits;
-            ReadTimeout = Timeout.Infinite;
+            ReadTimeout = TimeSpan.FromMilliseconds(-1);
+            WriteTimeout = TimeSpan.FromMilliseconds(-1);
             ReceiveBufferSize = readBufferSize;
         }
 
@@ -101,35 +100,18 @@ namespace Meadow.Hardware
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
         public StopBits StopBits { get; }
-        /// <summary>
-        /// The number of milliseconds before a time-out occurs when a read operation does not finish.
-        /// </summary>
-        /// <remarks>The time-out can be set to any value greater than zero, or set to InfiniteTimeout, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
-        public int ReadTimeout
-        {
-            get => _readTimeout;
-            set
-            {
-                if (value == 0 || value < -1)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _readTimeout = value;
-            }
-        }
 
-        public int WriteTimeout
-        {
-            get => _writeTimeout;
-            set
-            {
-                if (value == 0 || value < -1)
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-                _writeTimeout = value;
-            }
-        }
+        /// <summary>
+        /// The time required for a time-out to occur when a read operation does not finish.
+        /// </summary>
+        /// <remarks>The time-out can be set to any value greater than or equal to zero, or set to &lt; 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        public TimeSpan ReadTimeout { get; set; }
+
+        /// <summary>
+        /// The time required for a time-out to occur when a write operation does not finish.
+        /// </summary>
+        /// <remarks>The time-out can be set to any value greater than or equal to zero, or set to &lt; 0, in which case no time-out occurs. InfiniteTimeout is the default.</remarks>
+        public TimeSpan WriteTimeout { get; set; }
 
         /// <summary>
         /// Gets the number of bytes of data in the receive buffer.
@@ -315,12 +297,12 @@ namespace Meadow.Hardware
 
                 Timer? writeTimeoutTimer = null;
 
-                if(WriteTimeout > 0)
+                if(WriteTimeout.TotalMilliseconds > 0)
                 {
                     writeTimeoutTimer = new Timer((o) =>
                     {
                         throw new TimeoutException("Write timeout");
-                    }, null, WriteTimeout, Timeout.Infinite);
+                    }, null, (int)WriteTimeout.TotalMilliseconds, Timeout.Infinite);
                 }
 
                 // we can only write 255 bytes at a time, so we loop 

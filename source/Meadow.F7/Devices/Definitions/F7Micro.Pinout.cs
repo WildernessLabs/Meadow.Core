@@ -6,6 +6,8 @@ namespace Meadow.Devices
 {
     public partial class F7Micro
     {
+        private const int ADCPrecisionBits = 12;
+
         public partial class Pinout : IF7MicroPinout
         {
             public IList<IPin> AllPins => new List<IPin> {
@@ -61,7 +63,7 @@ namespace Meadow.Devices
                 "A00", "PA4",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA4", interruptGroup: 4),
-                    new AnalogChannelInfo("ADC1_IN4", 12)
+                    new AnalogChannelInfo("ADC1_IN4", ADCPrecisionBits, true, false)
                 }
             );
             // A01
@@ -71,7 +73,7 @@ namespace Meadow.Devices
                 "A01", "PA5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA5", interruptGroup: 5),
-                    new AnalogChannelInfo("ADC1_IN5", 12)
+                    new AnalogChannelInfo("ADC1_IN5", ADCPrecisionBits, true, false)
                 }
             );
             // A02
@@ -81,7 +83,7 @@ namespace Meadow.Devices
                 "A02", "PA3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA3", interruptGroup: 3),
-                    new AnalogChannelInfo("ADC1_IN3", 12)
+                    new AnalogChannelInfo("ADC1_IN3", ADCPrecisionBits, true, false)
                 }
             );
             // A03
@@ -91,7 +93,7 @@ namespace Meadow.Devices
                 "A03", "PA7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA7", interruptGroup: 7),
-                    new AnalogChannelInfo("ADC1_IN7", 12)
+                    new AnalogChannelInfo("ADC1_IN7", ADCPrecisionBits, true, false)
                 }
             );
             // A04
@@ -101,7 +103,7 @@ namespace Meadow.Devices
                 "A04", "PC0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC0", interruptGroup: 0),
-                    new AnalogChannelInfo("ADC1_IN10", 12)
+                    new AnalogChannelInfo("ADC1_IN10", ADCPrecisionBits, true, false)
                 }
             );
             // A05
@@ -111,7 +113,7 @@ namespace Meadow.Devices
                 "A05", "PC1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC1", interruptGroup: 1),
-                    new AnalogChannelInfo("ADC1_IN11", 12)
+                    new AnalogChannelInfo("ADC1_IN11", ADCPrecisionBits, true, false)
                 }
             );
             // SCK
@@ -211,7 +213,7 @@ namespace Meadow.Devices
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB0", interruptGroup: 0),
                     new PwmChannelInfo("TIM3_CH3", 3, 3),
-                    new AnalogChannelInfo("ADC1_IN8", 12) // or ADC2_IN8?
+                    new AnalogChannelInfo("ADC1_IN8", ADCPrecisionBits, true, false) // or ADC2_IN8?
                 }
             );
             // D07
@@ -242,7 +244,7 @@ namespace Meadow.Devices
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB1", interruptGroup: 1),
                     new PwmChannelInfo("TIM3_CH4", 3, 4),
-                    new AnalogChannelInfo("ADC1_IN9", 12) // or ADC2_IN9
+                    new AnalogChannelInfo("ADC1_IN9", ADCPrecisionBits, true, false) // or ADC2_IN9
                 }
             );
             // D10
