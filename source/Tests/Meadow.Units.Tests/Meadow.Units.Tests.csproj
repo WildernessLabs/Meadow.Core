@@ -14,6 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Meadow.Units\Meadow.Units.csproj" />
+    <ProjectReference Include="..\..\..\..\Meadow.Units\Source\Meadow.Units\Meadow.Units.csproj" />
   </ItemGroup>
 </Project>
