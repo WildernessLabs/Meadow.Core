@@ -207,11 +207,13 @@ namespace Meadow.Hardware
 
         //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
 
+        [Obsolete("Use Read", true)]
         public byte[] ReadBytes(ushort numberOfBytes)
         {
             return Bus.ReadData(this.Address, numberOfBytes);
         }
 
+        [Obsolete("Use Read", true)]
         public byte[] ReadRegisters(byte address, ushort length)
         {
             if (length > ReadBuffer.Length) {
@@ -224,6 +226,7 @@ namespace Meadow.Hardware
             return ReadBuffer.Slice(0, length).ToArray();
         }
 
+        [Obsolete("Use Read", true)]
         public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
         {
             //TODO to @CTACKE from BC; i'm not sure what this method does. i'm also concerned
@@ -250,6 +253,7 @@ namespace Meadow.Hardware
             return result;
         }
 
+        [Obsolete("Use Write", true)]
         public void WriteBytes(byte[] values)
         {
             this.Bus.WriteData(this.Address, values);
@@ -262,6 +266,7 @@ namespace Meadow.Hardware
             return this.Bus.WriteReadData(this.Address, length, write);
         }
 
+        [Obsolete("Use WriteRegister", true)]
         public void WriteRegisters(byte address, byte[] data)
         {
             var temp = new List<byte>();
@@ -271,6 +276,7 @@ namespace Meadow.Hardware
             this.Bus.WriteData(this.Address, temp);
         }
 
+        [Obsolete("Use WriteRegister", true)]
         public void WriteRegisterUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
         {
             var temp = new List<byte>();
@@ -291,6 +297,7 @@ namespace Meadow.Hardware
             this.Bus.WriteData(this.Address, temp);
         }
 
+        [Obsolete("Use WriteRegister", true)]
         public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
         {
             var temp = new List<byte>();
