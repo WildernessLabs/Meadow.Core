@@ -12,7 +12,7 @@ namespace Meadow.Hardware
     /// </summary>
     public abstract class AnalogInputPortBase : AnalogPortBase, IAnalogInputPort
     {
-        //public bool IsSampling { get; protected set; } = false;
+        protected object BufferSyncRoot { get; } = new object();
 
         /// <summary>
         /// Raised when the value of the reading changes.
@@ -58,8 +58,13 @@ namespace Meadow.Hardware
         /// </summary>
         /// <value>The average buffer value.</value>
         public Voltage Voltage {
-            get { //heh. may be a faster way to do this. 
-                return new Voltage((VoltageSampleBuffer.Select(x => x.Volts).Sum() / VoltageSampleBuffer.Count()), Voltage.UnitType.Volts);
+            get 
+            {
+                //heh. may be a faster way to do this. 
+                lock (BufferSyncRoot)
+                {
+                    return new Voltage((VoltageSampleBuffer.Select(x => x.Volts).Sum() / VoltageSampleBuffer.Count()), Voltage.UnitType.Volts);
+                }
             }
         }
 

@@ -178,9 +178,13 @@ namespace Meadow.Hardware
                             // TODO: this probably isn't thread safe, might need
                             // to create a buffer access lock.
                             // ZOMG functional folks would laugh at us.
-                            base.VoltageSampleBuffer.Clear();
-                            for(int i = 0; i < sampleBuffer.Length; i++) {
-                                base.VoltageSampleBuffer.Add(sampleBuffer[i]);
+                            lock (BufferSyncRoot)
+                            {
+                                base.VoltageSampleBuffer.Clear();
+                                for (int i = 0; i < sampleBuffer.Length; i++)
+                                {
+                                    base.VoltageSampleBuffer.Add(sampleBuffer[i]);
+                                }
                             }
 
                             var newVoltage = Voltage;
