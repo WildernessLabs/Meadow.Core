@@ -45,6 +45,9 @@ namespace Meadow.Hardware
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
         static readonly object _analogSyncRoot = new object();
 
+        public static readonly TimeSpan DefaultSampleInterval = TimeSpan.FromMilliseconds(40);
+        public static readonly Voltage DefaultReferenceVoltage = new Voltage(3.3, Voltage.UnitType.Volts);
+
         protected IMeadowIOController IOController { get; }
 
         // internal thread lock
@@ -62,9 +65,9 @@ namespace Meadow.Hardware
 
         protected AnalogInputPort(
                     IPin pin, IMeadowIOController ioController, IAnalogChannelInfo channel,
-                    int sampleCount, int sampleIntervalMs,
-                    float referenceVoltage)
-            : base(pin, channel, sampleCount, sampleIntervalMs, referenceVoltage)
+                    int sampleCount, TimeSpan sampleInterval,
+                    Voltage referenceVoltage)
+            : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
         {
             // save all the settings
             this.IOController = ioController;
@@ -82,9 +85,17 @@ namespace Meadow.Hardware
         public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
-            int sampleCount = 5,
-            int sampleIntervalMs = 40,
-            float referenceVoltage = 3.3f)
+            int sampleCount = 5)
+        {
+            return From(pin, ioController, sampleCount, DefaultSampleInterval, DefaultReferenceVoltage);
+        }
+
+        public static AnalogInputPort From(
+            IPin pin,
+            IMeadowIOController ioController,
+            int sampleCount,
+            TimeSpan sampleInterval,
+            Voltage referenceVoltage)
         {
             var channel = pin.SupportedChannels.OfType<IAnalogChannelInfo>().FirstOrDefault();
             if (channel != null) {
@@ -93,7 +104,7 @@ namespace Meadow.Hardware
 
                 return new AnalogInputPort(
                     pin, ioController, channel,
-                    sampleCount, sampleIntervalMs,
+                    sampleCount, sampleInterval,
                     referenceVoltage);
             } else {
                 var supported = pin.SupportedChannels.Select(c => c.Name);
@@ -117,7 +128,7 @@ namespace Meadow.Hardware
         /// <param name="updateInterval">A `TimeSpan` to wait
         /// between sets of sample readings. This value determines how often
         /// `Changed` events are raised and `IObservable` consumers are notified.</param>
-        public override void StartUpdating(TimeSpan? updateInterval)
+        public override void StartUpdating(TimeSpan? updateInterval = null)
         {
             // thread safety
             lock (_lock) {

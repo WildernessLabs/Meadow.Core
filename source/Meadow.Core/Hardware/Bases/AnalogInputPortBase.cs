@@ -46,7 +46,9 @@ namespace Meadow.Hardware
         /// </summary>
         public TimeSpan SampleInterval { get; protected set; }
 
-
+        /// <summary>
+        /// The reference voltage being used for the ADC comparison
+        /// </summary>
         public Voltage ReferenceVoltage { get; protected set; }
 
         /// <summary>
@@ -66,20 +68,34 @@ namespace Meadow.Hardware
 
         protected AnalogInputPortBase(
             IPin pin, IAnalogChannelInfo channel,
-            int sampleCount, int sampleIntervalMs,
-            float referenceVoltage)
+            int sampleCount, TimeSpan sampleInterval,
+            Voltage referenceVoltage)
             : base (pin, channel)
         {
             Pin = pin;
             SampleCount = sampleCount;
-            SampleInterval = TimeSpan.FromMilliseconds(sampleIntervalMs);
-            ReferenceVoltage = new Voltage(referenceVoltage, Voltage.UnitType.Volts);
+            SampleInterval = sampleInterval;
+            ReferenceVoltage = referenceVoltage;
         }
 
+        /// <summary>
+        /// Convenience method to get the current voltage. For frequent reads, use
+        /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
+        /// </summary>
         public abstract Task<Voltage> Read();
 
+        /// <summary>
+        /// Starts continuously sampling the analog port.
+        ///
+        /// This method also starts raising `Changed` events and IObservable
+        /// subscribers getting notified. Use the `readIntervalDuration` parameter
+        /// to specify how often events and notifications are raised/sent.
+        /// </summary>
         public abstract void StartUpdating(TimeSpan? updateInterval);
 
+        /// <summary>
+        /// Stops sampling the analog port.
+        /// </summary>
         public abstract void StopUpdating();
 
 
