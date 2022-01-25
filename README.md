@@ -17,6 +17,7 @@ Currently tested platforms and distributions:
 | Raspberry Pi 4 | Raspberry Pi OS | Beta 6 |
 | Raspberry Pi Zero 2w | Raspberry Pi OS | Beta 6 |
 | Jetson Nano | Ubuntu 20.04 | Beta 6 |
+| Jetson Xavier AGX | Ubuntu 18.04 | Beta 6 |
 
 ## License
 
