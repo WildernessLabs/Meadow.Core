@@ -471,7 +471,6 @@ namespace Meadow.Devices
             StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
             _connectionSemaphore.WaitOne();
 
-            IsConnected = false;
             ConnectEventData data;
             switch (result)
             {
@@ -629,6 +628,7 @@ namespace Meadow.Devices
                 channel = connectEventData.Channel;
                 Channel = channel;
                 IsConnected = true;
+                HasInternetAccess = true;
             }
             _connectionSemaphore.Release();
             NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
