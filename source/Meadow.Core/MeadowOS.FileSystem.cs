@@ -1,6 +1,7 @@
 ﻿using System.IO;
 namespace Meadow
 {
+
     public static partial class MeadowOS
     {
         /// <summary>
@@ -11,8 +12,20 @@ namespace Meadow
             /// <summary>
             /// Gets the root directory of the app file system partition.
             /// </summary>
-            // TODO: pull this from the device
-            public static string UserFileSystemRoot => "/meadow0/";
+            public static string UserFileSystemRoot
+            {
+                get
+                {
+                    if (RuntimeInformation.IsPlatform(MeadowPlatform.MeadowForLinux))
+                    {
+                        return System.AppDomain.CurrentDomain.BaseDirectory;
+                    }
+                    else
+                    {
+                        return "/meadow0/";
+                    }
+                }
+            }
 
             /// <summary>
             /// Gets the `/Data` directory. Use this directory to store files that

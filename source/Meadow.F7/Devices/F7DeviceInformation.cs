@@ -10,7 +10,8 @@ namespace Meadow.Devices
         /// The current device name.
         /// </summary>
         /// <returns>Name of the device.</returns>
-        public string DeviceName {
+        public string DeviceName
+        {
             get => F7PlatformOS.GetString(ConfigurationValues.DeviceName);
             set => F7PlatformOS.SetString(ConfigurationValues.DeviceName, value);
         }
@@ -20,10 +21,15 @@ namespace Meadow.Devices
         /// </summary>
         /// <returns>Model name.</returns>
         public string Model => F7PlatformOS.GetString(ConfigurationValues.Model);
-        //public HardwareModel Model { get; }
 
-        // TODO: this should be a string, e.g. `2.c`, not a uint.
-        public string HardwareRevision => F7PlatformOS.GetUInt(ConfigurationValues.Product).ToString();
+        /// <summary>
+        /// Get the hardware revision.
+        /// </summary>
+        /// <remarks>
+        /// For some devices this will return the generic hardware revision (say F7MicroV1) for
+        /// others a specific model may be returned.
+        /// </remarks>
+        public F7HardwareRevision HardwareRevision => (F7HardwareRevision) F7PlatformOS.GetUInt(ConfigurationValues.Product);
 
         /// <summary>
         /// Get the processor type.

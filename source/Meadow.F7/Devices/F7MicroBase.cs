@@ -187,5 +187,9 @@ namespace Meadow.Devices
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
 
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount = 5, int sampleIntervalMs = 40, float voltageReference = 3.3F)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
