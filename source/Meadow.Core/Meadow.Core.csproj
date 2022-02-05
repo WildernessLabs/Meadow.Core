@@ -15,6 +15,7 @@
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
    <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
+   <Configurations>Debug;Release;ProjectRefs</Configurations>
  </PropertyGroup>
  <PropertyGroup>
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -24,7 +25,18 @@
  <ItemGroup>
    <Folder Include="Gateways\Bluetooth\Definitions\" />
  </ItemGroup>
- <ItemGroup>
-   <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
- </ItemGroup>
+  <Choose>
+    <When Condition="'$(Configuration)' == 'ProjectRefs'">
+      <ItemGroup>
+        <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
+        <ProjectReference Include="..\..\..\Meadow.Units\Source\Meadow.Units\Meadow.Units.csproj" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <PackageReference Include="Meadow.Contracts" Version="0.*" />
+        <PackageReference Include="Meadow.Units" Version="0.*" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 </Project>
