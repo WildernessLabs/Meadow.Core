@@ -46,10 +46,10 @@ jobs:
     - name: Restore dependencies
       run: msbuild main/source/Meadow.Core.sln /t:Restore
 
-    - name: Build VS4M Extension
+    - name: Build Meadow.Core
       run: msbuild main/source/Meadow.Core.sln /t:Build /p:Configuration=Release
 
-    - name: Upload mpack Artifacts
+    - name: Upload nuget Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: Meadow.nuget.zip
