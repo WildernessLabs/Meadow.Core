@@ -1,0 +1,56 @@
+name: Meadow.Core
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+
+    runs-on: macos-11
+    
+    steps:
+    - name: Checkout current repo
+      uses: actions/checkout@v2
+      with:
+        path: main
+    
+    - name: Checkout Meadow.Contracts side-by-side
+      uses: actions/checkout@v2
+      with:
+        repository: WildernessLabs/Meadow.Contracts
+        path: Meadow.Contracts
+
+    - name: Checkout Meadow.Units side-by-side
+      uses: actions/checkout@v2
+      with:
+        repository: WildernessLabs/Meadow.Units
+        path: Meadow.Units
+
+    - name: Set default Xamarin SDK versions
+      run: |
+        $VM_ASSETS/select-xamarin-sdk-v2.sh --mono=6.12 --mac=8.2
+    
+    - name: Setup .NET Core SDK 5.0.x and 6.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          5.0.x
+          6.0.x
+    
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore dependencies
+      run: msbuild main/source/Meadow.Core.sln /t:Restore
+
+    - name: Build VS4M Extension
+      run: msbuild main/source/Meadow.Core.sln /t:Build /p:Configuration=Release
+
+    - name: Upload mpack Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Meadow.nuget.zip
+        path: 'main/source/Meadow.Core/bin/Release/*.nupkg'
