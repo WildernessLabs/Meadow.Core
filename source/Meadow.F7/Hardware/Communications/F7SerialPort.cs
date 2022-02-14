@@ -77,7 +77,7 @@ namespace Meadow.Hardware
 
         protected override IntPtr OpenHardwarePort(string portName)
         {
-            var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput | Nuttx.DriverFlags.NonBlocking);
+            var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput);
             if (handle.ToInt32() < 0)
             {
                 throw new NativeException(UPD.GetLastError().ToString());
