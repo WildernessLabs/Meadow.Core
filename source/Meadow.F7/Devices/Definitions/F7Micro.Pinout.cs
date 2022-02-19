@@ -19,6 +19,7 @@ namespace Meadow.Devices
                 OnboardLedRed, OnboardLedGreen, OnboardLedBlue,
                 // ESP stuff TODO: Consider removing these from the `AllPins` list.
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
+                I2C_SCL, I2C_SDA,
             };
 
             //==== LED
