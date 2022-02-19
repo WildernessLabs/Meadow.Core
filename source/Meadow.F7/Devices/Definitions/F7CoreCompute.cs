@@ -18,34 +18,34 @@ namespace Meadow.Devices
             public IList<IPin> AllPins => new List<IPin>
             {
                 A00, A01, A02, A03, A04, A05, 
-                SCK, COPI, CIPO, 
+                SCK3, COPI3, CIPO3, SCK5, COPI5, CIPO5,
                 D00, D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART5_RX, ESP_UART5_TX,
-                LED1, I2C_SCL, I2C_SDA
+                LED1, I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA
             };
 
             // ==== SPI ====
-            public IPin SCK => new Pin(
-                "SCK", "PC10",
+            public IPin SCK3 => new Pin(
+                "SCK3", "PC10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC10", interruptGroup: 10),
-                    new SpiChannelInfo("PC10", SpiLineType.Clock)
+                    new SpiChannelInfo("SPI3_SCK", SpiLineType.Clock)
                 }
             );
 
-            public IPin CIPO => new Pin(
-                "CIPO", "PC11",
+            public IPin CIPO3 => new Pin(
+                "CIPO3", "PC11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC11", interruptGroup: 11),
-                    new SpiChannelInfo("PC11", SpiLineType.MISO)
+                    new SpiChannelInfo("SPI3_CIPO", SpiLineType.MISO)
                 }
             );
 
-            public IPin COPI => new Pin(
-                "COPI", "PB5",
+            public IPin COPI3 => new Pin(
+                "COPI3", "PB5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB5", interruptGroup: 5),
-                    new SpiChannelInfo("PB5", SpiLineType.MOSI)
+                    new SpiChannelInfo("SPI3_COPI", SpiLineType.MOSI)
                 }
             );
 
@@ -133,7 +133,8 @@ namespace Meadow.Devices
             public IPin D03 => new Pin(
                 "D03", "PB8",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB8", interruptGroup: 8)
+                    new DigitalChannelInfo("PB8", interruptGroup: 8),
+                    new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
                 }
             );
 
@@ -141,7 +142,7 @@ namespace Meadow.Devices
                 "D04", "PB9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9", interruptGroup: 9),
-                    new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
+                    new CanChannelInfo("CAN1_TX", SerialDirectionType.Transmit)
                 }
             );
 
@@ -163,7 +164,7 @@ namespace Meadow.Devices
                 "D07", "PB7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7", interruptGroup: 7),
-                    new I2cChannelInfo("I2C_SDA", I2cChannelFunctionType.Data)
+                    new I2cChannelInfo("I2C1_SDA", I2cChannelFunctionType.Data)
                 }
             );
 
@@ -171,7 +172,7 @@ namespace Meadow.Devices
                 "D08", "PB6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB6", interruptGroup: 6),
-                    new I2cChannelInfo("I2C_SCL", I2cChannelFunctionType.Clock)
+                    new I2cChannelInfo("I2C1_SCL", I2cChannelFunctionType.Clock)
                 }
             );
 
@@ -224,6 +225,46 @@ namespace Meadow.Devices
                 "D15", "PG12",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG12", interruptGroup: 12)
+                }
+            );
+
+            public IPin I2C3_SDA => new Pin(
+                "I2C3_SDA", "PH7",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PH7", interruptGroup: 7),
+                    new I2cChannelInfo("I2C3_SDA", I2cChannelFunctionType.Data)
+                }
+            );
+
+            public IPin I2C3_SCL => new Pin(
+                "I2C3_SCL", "PH8",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PH8", interruptGroup: 8),
+                    new I2cChannelInfo("I2C3_SCL", I2cChannelFunctionType.Data)
+                }
+            );
+
+            public IPin SCK5 => new Pin(
+                "SCK5", "PH6",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PH6", interruptGroup: 6),
+                    new SpiChannelInfo("SPI5_SCK", SpiLineType.Clock)
+                }
+            );
+
+            public IPin CIPO5 => new Pin(
+                "CIPO5", "PF8",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PF8", interruptGroup: 8),
+                    new SpiChannelInfo("SPI5_CIPO", SpiLineType.MISO)
+                }
+            );
+
+            public IPin COPI5 => new Pin(
+                "COPI5", "PF9",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PF9", interruptGroup: 9),
+                    new SpiChannelInfo("SPI5_COPI", SpiLineType.MOSI)
                 }
             );
 
@@ -288,9 +329,10 @@ namespace Meadow.Devices
                 }
             );
 
+
             // ==== ALIASES ====
-            public IPin I2C_SDA => D07;
-            public IPin I2C_SCL => D08;
+            public IPin I2C1_SDA => D07;
+            public IPin I2C1_SCL => D08;
         }
     }
 }
