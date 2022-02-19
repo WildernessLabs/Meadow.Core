@@ -191,7 +191,7 @@ namespace Meadow.Devices
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9", interruptGroup: 9),
                     new PwmChannelInfo("TIM4_CH4", 4, 4),
-                    new CanChannelInfo("CAN1_RX", SerialDirectionType.Receive)
+                    new CanChannelInfo("CAN1_TX", SerialDirectionType.Transmit)
                 }
             );
 
