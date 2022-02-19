@@ -10,8 +10,6 @@ namespace Meadow.Devices
 
         public partial class Pinout : IF7MicroPinout
         {
-            //public F7NamedPinGroups Groups { get; protected set; }
-
             public IList<IPin> AllPins => new List<IPin> {
                 // left header
                 A00, A01, A02, A03, A04, A05, SCK, COPI, CIPO, D00, D01, D02, D03, D04,
@@ -21,6 +19,7 @@ namespace Meadow.Devices
                 OnboardLedRed, OnboardLedGreen, OnboardLedBlue,
                 // ESP stuff TODO: Consider removing these from the `AllPins` list.
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
+                I2C_SCL, I2C_SDA
             };
 
             //==== LED
@@ -338,7 +337,7 @@ namespace Meadow.Devices
             public IPin D15 => new Pin(
                 "D15", "PG12",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB12", interruptGroup: 12),
+                    new DigitalChannelInfo("PG12", interruptGroup: 12),
                     //new PwmChannelInfo("TIM12_CH1", 12, 1),
                 }
             );
