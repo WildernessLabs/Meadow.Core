@@ -64,7 +64,40 @@ namespace Meadow.Devices
             Frequency frequency
         )
         {
-            return I2cBus.From(this.IoController, clock, data, frequency);
+            var bus = I2cBus.From(this.IoController, clock, data, frequency);
+            bus.BusNumber = GetI2CBusNumberForPins(clock, data);
+        }
+
+        protected int GetI2CBusNumberForPins(IPin clock, IPin data)
+        {
+            if (RuntimeInformation.IsPlatform(MeadowPlatform.F7CoreCompute))
+            {
+                if (clock.Name == (Pins as F7CoreCompute.Pinout)?.I2C3_SCL.Name)
+                {
+                    return 3;
+                }
+                if (clock.Name == (Pins as F7CoreCompute.Pinout)?.I2C1_SCL.Name)
+                {
+                    return 1;
+                }
+            }
+            else if (RuntimeInformation.IsPlatform(MeadowPlatform.F7v1))
+            {
+                if (clock.Name == (Pins as F7Micro.Pinout)?.I2C_SCL.Name)
+                {
+                    return 1;
+                }
+            }
+            else if (RuntimeInformation.IsPlatform(MeadowPlatform.F7v2))
+            {
+                if (clock.Name == (Pins as F7MicroV2.Pinout)?.I2C_SCL.Name)
+                {
+                    return 1;
+                }
+            }
+
+            // this is an unsupported bus, but will get caught elsewhere
+            return -1;
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Meadow.Hardware
         private Frequency _frequency;
 
         private IMeadowIOController IOController { get; }
+        internal int BusNumber { get; set; } = 1;
 
         public void Dispose()
         {
@@ -81,6 +82,8 @@ namespace Meadow.Hardware
         {
             IOController = ioController;
             Frequency = frequency;
+
+            B
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
             _showI2cDebug = false;

@@ -209,7 +209,7 @@ namespace Meadow.Core
                 public int TxBufferLength;
                 public IntPtr RxBuffer;
                 public int RxBufferLength;
-
+                public int BusNumber;
             }
 
             public struct UpdSPIDataCommand
