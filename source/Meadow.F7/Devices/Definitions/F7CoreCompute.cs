@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
+using System.Collections.Generic;
 
 namespace Meadow.Devices
 {
@@ -13,14 +13,14 @@ namespace Meadow.Devices
             public SerialPortName Com4 { get; } = new SerialPortName("COM4", "ttyS1");
         }
 
-        public partial class Pinout : IPinDefinitions // IF7MicroPinout
+        public partial class Pinout : IF7CoreComputePinout
         {
             public IList<IPin> AllPins => new List<IPin>
             {
                 A00, A01, A02, A03, A04, A05, 
                 SCK3, COPI3, CIPO3, SCK5, COPI5, CIPO5,
                 D00, D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
-                ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART5_RX, ESP_UART5_TX,
+                ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
                 LED1, I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA
             };
 
@@ -315,14 +315,14 @@ namespace Meadow.Devices
                 }
             );
 
-            public IPin ESP_UART5_RX => new Pin(
+            public IPin ESP_UART_RX => new Pin(
                 "ESP_UART5_RX", "PD2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD2", interruptGroup: 2),
                 }
             );
 
-            public IPin ESP_UART5_TX => new Pin(
+            public IPin ESP_UART_TX => new Pin(
                 "ESP_UART5_TX", "PC12",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC12", interruptGroup: 12),
@@ -333,6 +333,9 @@ namespace Meadow.Devices
             // ==== ALIASES ====
             public IPin I2C1_SDA => D07;
             public IPin I2C1_SCL => D08;
+            public IPin SCK => SCK3;
+            public IPin COPI => COPI3;
+            public IPin CIPO => CIPO3;
         }
     }
 }

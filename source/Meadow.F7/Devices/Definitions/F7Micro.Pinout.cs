@@ -4,11 +4,11 @@ using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
-    public partial class F7Micro
+    public partial class F7FeatherV1
     {
         private const int ADCPrecisionBits = 12;
 
-        public partial class Pinout : IF7MicroPinout
+        public partial class Pinout : IF7FeatherPinout
         {
             public IList<IPin> AllPins => new List<IPin> {
                 // left header

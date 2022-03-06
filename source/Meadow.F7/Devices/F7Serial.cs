@@ -13,7 +13,7 @@ namespace Meadow.Devices
 
         public static string[] GetAvailablePorts()
         {
-            var allDevices = F7Micro.FileSystem.EnumDirectory(DriverFolder);
+            var allDevices = F7FeatherV1.FileSystem.EnumDirectory(DriverFolder);
             var list = new List<string>();
             foreach (var s in allDevices)
             {

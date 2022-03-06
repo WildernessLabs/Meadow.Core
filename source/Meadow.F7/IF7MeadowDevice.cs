@@ -1,15 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using Meadow.Devices;
+﻿using Meadow.Devices;
 using Meadow.Gateways;
-using Meadow.Hardware;
 using Meadow.Units;
 
 namespace Meadow
 {
-    public interface IF7MeadowDevice :
-        IMeadowDevice,
-        IIOController<IF7MicroPinout>
+    public interface IF7MeadowDevice : IMeadowDevice
     {
         IBluetoothAdapter? BluetoothAdapter { get; }
         IWiFiAdapter? WiFiAdapter { get; }

@@ -5,6 +5,9 @@ namespace Meadow.Devices
 {
     public abstract partial class F7MicroBase
     {
+        protected abstract int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo);
+        public abstract ISpiBus CreateSpiBus(Units.Frequency speed);
+
         /// <summary>
         /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO
         /// </summary>
@@ -12,13 +15,6 @@ namespace Meadow.Devices
         public ISpiBus CreateSpiBus()            
         {
             return CreateSpiBus(IMeadowDevice.DefaultSpiBusSpeed);
-        }
-
-        public ISpiBus CreateSpiBus(
-            Units.Frequency speed
-        )
-        {
-            return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speed);
         }
 
         /// <summary>
@@ -84,22 +80,6 @@ namespace Meadow.Devices
             bus.BusNumber = GetSpiBusNumberForPins(clock, copi, cipo);
             bus.Configuration = config;
             return bus;
-        }
-
-        protected int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo)
-        {
-            // we're only looking at clock pin.  
-            // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
-            // HACK NOTE: can't compare directly here, so we're comparing the name.
-            // might be able to cast and compare?
-            if (clock.Name == (Pins as IF7MicroPinout)?.ESP_CLK.Name) {
-                return 2;
-            } else if (clock.Name == (Pins as IF7MicroPinout)?.SCK.Name) {
-                return 3;
-            }
-
-            // this is an unsupported bus, but will get caught elsewhere
-            return -1;
         }
     }
 }

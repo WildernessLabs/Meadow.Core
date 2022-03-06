@@ -3,7 +3,7 @@ using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
-    public partial class F7MicroV2
+    public partial class F7FeatherV2
     {
         public class SerialPortNameDefinitions
         {
