@@ -66,6 +66,8 @@ namespace Meadow.Devices
         {
             var bus = I2cBus.From(this.IoController, clock, data, frequency);
             bus.BusNumber = GetI2CBusNumberForPins(clock, data);
+            Console.WriteLine($"I2C Bus number:{bus.BusNumber}");
+            return bus;
         }
 
         protected int GetI2CBusNumberForPins(IPin clock, IPin data)
