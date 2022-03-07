@@ -22,5 +22,6 @@
  </PropertyGroup>
  <ItemGroup>
    <PackageReference Include="Meadow" Version="0.*" />
+   <PackageReference Include="Meadow.Logging" Version="0.*" />
  </ItemGroup>
 </Project>

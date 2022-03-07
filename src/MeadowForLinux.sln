@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.1.31911.260
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeadowForLinux", "lib\MeadowForLinux.csproj", "{D4E5C593-FFB2-427F-82E3-6D9F655243E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linux", "lib\Meadow.Linux.csproj", "{D4E5C593-FFB2-427F-82E3-6D9F655243E7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalIOSample", "samples\DigitalIOSample\DigitalIOSample.csproj", "{C55FD85A-5786-41A5-AE47-EA3C736FDC4B}"
 EndProject
