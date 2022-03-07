@@ -76,7 +76,7 @@ namespace Meadow
 
         public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
         {
-            // TODO: implement this based on channel caps (this is Jetson specific right now)
+            // TODO: implement this based on channel caps (this is platform specific right now)
 
             if (Pins is JetsonNanoPinout)
             {
@@ -87,6 +87,13 @@ namespace Meadow
                 else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
                 {
                     return new I2CBus(0, frequency);
+                }
+            }
+            if (Pins is JetsonXavierAGXPinout)
+            {
+                if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
+                {
+                    return new I2CBus(8, frequency);
                 }
             }
             else if (Pins is RaspberryPiPinout)
@@ -146,7 +153,12 @@ namespace Meadow
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
-        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount = 5, int sampleIntervalMs = 40, float voltageReference = 3.3F)
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, float voltageReference = 3.3F)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
         {
             throw new NotImplementedException();
         }
