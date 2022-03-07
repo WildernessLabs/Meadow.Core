@@ -1,5 +1,6 @@
 ﻿using Meadow.Hardware;
 using Meadow.Units;
+using System;
 using System.Linq;
 
 namespace Meadow.Devices
@@ -27,10 +28,10 @@ namespace Meadow.Devices
         /// <returns>An instance of an I2cBus</returns>
         public override II2cBus CreateI2cBus(
             I2cBusSpeed busSpeed,
-            int busNumber = 0
+            int busNumber = 1
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
+            return CreateI2cBus(busNumber, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
         }
 
         /// <summary>
@@ -43,7 +44,11 @@ namespace Meadow.Devices
             Frequency frequency
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequency);
+            if (busNumber == 3)
+            {
+                return CreateI2cBus(Pins.I2C3_SCL, Pins.I2C3_SDA, frequency);
+            }
+            return CreateI2cBus(Pins.I2C1_SCL, Pins.I2C1_SDA, frequency);
         }
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)

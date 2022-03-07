@@ -240,7 +240,7 @@ namespace Meadow.Devices
                 "I2C3_SCL", "PH8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH8", interruptGroup: 8),
-                    new I2cChannelInfo("I2C3_SCL", I2cChannelFunctionType.Data)
+                    new I2cChannelInfo("I2C3_SCL", I2cChannelFunctionType.Clock)
                 }
             );
 

@@ -1,4 +1,6 @@
-﻿namespace Meadow.Devices
+﻿using System;
+
+namespace Meadow.Devices
 {
     public partial class F7CoreCompute : F7CoreComputeBase
     {
@@ -10,6 +12,7 @@
                   new AnalogCapabilities(true, DefaultA2DResolution),
                   new NetworkCapabilities(true, false))
         {
+            // TODO: verify the platform hardware
         }
     }
 }
