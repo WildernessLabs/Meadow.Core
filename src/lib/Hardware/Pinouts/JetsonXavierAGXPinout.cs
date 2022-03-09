@@ -47,6 +47,8 @@ namespace Meadow
         public IPin SPI1_SCLK => new SysFsPin("SPI1_SCLK", "PIN23", 491);
         public IPin SPI1_CS0 => new SysFsPin("SPI1_CS0", "PIN24", 494);
         public IPin SPI1_CS1 => new SysFsPin("SPI1_CS1", "PIN26", 495);
+        public IPin I2C_GP2_DAT => new Pin("I2C_GP2_DAT", "PIN27");
+        public IPin I2C_GP2_CLK => new Pin("I2C_GP2_CLK", "PIN28");
         public IPin CAN0_DIN => new SysFsPin("CAN0_DIN", "PIN29", 251);
         public IPin CAN0_DOUT => new SysFsPin("CAN0_DOUT", "PIN31", 250);
         public IPin GPIO9_CAN1_GPIO0_DMIC_CLK => new SysFsPin("GPIO9_CAN1_GPIO0_DMIC_CLK", "PIN32", 257);

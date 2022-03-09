@@ -27,6 +27,10 @@ namespace Meadow
                 {
                     return new JetsonNanoSerialPortNameDefinitions();
                 }
+                if (typeof(TPinout) == typeof(JetsonXavierAGXPinout))
+                {
+                    return new JetsonXavierAGXSerialPortNameDefinitions();
+                }
                 else if (typeof(TPinout) == typeof(RaspberryPiPinout))
                 {
                     return new RaspberryPiSerialPortNameDefinitions();
@@ -91,7 +95,11 @@ namespace Meadow
             }
             if (Pins is JetsonXavierAGXPinout)
             {
-                if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
+                if (clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
+                {
+                    return new I2CBus(1, frequency);
+                }
+                else if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
                 {
                     return new I2CBus(8, frequency);
                 }

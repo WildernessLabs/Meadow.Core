@@ -1,13 +1,13 @@
 # Wilderness Labs Meadow.Linux
 
-## Summary
-
-Wilderness Labs Meadow.Linux is a .NET Framework for running IoT applications on Linux devices.  A Meadow.Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
-
 ## Repo Status
 
 [![Build](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml)  
 [![NuGet Package Creation](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/package.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/package.yml)
+
+## Summary
+
+Wilderness Labs Meadow.Linux is a .NET Framework for running IoT applications on Linux devices.  A Meadow.Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
 
 ## Supported Platforms and Distributions
 
