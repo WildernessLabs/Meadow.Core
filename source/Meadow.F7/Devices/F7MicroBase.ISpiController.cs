@@ -6,7 +6,7 @@ namespace Meadow.Devices
     public abstract partial class F7MicroBase
     {
         protected abstract int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo);
-        public abstract ISpiBus CreateSpiBus(Units.Frequency speed);
+        public abstract ISpiBus CreateSpiBus(Units.Frequency speed, int busNumber = 3);
 
         /// <summary>
         /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO

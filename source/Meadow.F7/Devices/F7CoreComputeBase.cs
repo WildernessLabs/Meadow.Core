@@ -73,10 +73,21 @@ namespace Meadow.Devices
         public IF7CoreComputePinout Pins { get; }
 
         public override ISpiBus CreateSpiBus(
-            Units.Frequency speed
+            Units.Frequency speed,
+            int busNumber = 3
         )
         {
-            return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speed);
+            switch (busNumber)
+            {
+                case 2:
+                    return CreateSpiBus(Pins.ESP_CLK, Pins.ESP_COPI, Pins.ESP_CIPO, speed);
+                case 3:
+                    return CreateSpiBus(Pins.SPI3_SCK, Pins.SPI3_COPI, Pins.SPI3_CIPO, speed);
+                case 5:
+                    return CreateSpiBus(Pins.SPI5_SCK, Pins.SPI5_COPI, Pins.SPI5_CIPO, speed);
+            }
+
+            throw new Exception("Unsupported SPI bus number");
         }
 
         protected override int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo)
@@ -89,9 +100,13 @@ namespace Meadow.Devices
             {
                 return 2;
             }
-            else if (clock.Name == (Pins as IF7FeatherPinout)?.SCK.Name)
+            else if (clock.Name == (Pins as F7CoreCompute.Pinout)?.SPI3_SCK.Name)
             {
                 return 3;
+            }
+            else if (clock.Name == (Pins as F7CoreCompute.Pinout)?.SPI5_SCK.Name)
+            {
+                return 5;
             }
 
             // this is an unsupported bus, but will get caught elsewhere

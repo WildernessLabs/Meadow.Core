@@ -17,35 +17,59 @@ namespace Meadow.Devices
         {
             public IList<IPin> AllPins => new List<IPin>
             {
-                A00, A01, A02, A03, A04, A05, 
-                SCK3, COPI3, CIPO3, SCK5, COPI5, CIPO5,
+                A00, A01, A02, A03, A04, A05,
+                SPI3_SCK, SPI3_CIPO, SPI3_COPI, SPI5_SCK, SPI5_CIPO, SPI5_COPI,
                 D00, D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
-                LED1, I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA
+                LED1, I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA, 
             };
 
             // ==== SPI ====
-            public IPin SCK3 => new Pin(
-                "SCK3", "PC10",
+            public IPin SPI3_SCK => new Pin(
+                "SPI3_SCK", "PC10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC10", interruptGroup: 10),
                     new SpiChannelInfo("SPI3_SCK", SpiLineType.Clock)
                 }
             );
 
-            public IPin CIPO3 => new Pin(
-                "CIPO3", "PC11",
+            public IPin SPI3_CIPO => new Pin(
+                "SPI3_CIPO", "PC11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC11", interruptGroup: 11),
                     new SpiChannelInfo("SPI3_CIPO", SpiLineType.MISO)
                 }
             );
 
-            public IPin COPI3 => new Pin(
-                "COPI3", "PB5",
+            public IPin SPI3_COPI => new Pin(
+                "SPI3_COPI", "PB5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB5", interruptGroup: 5),
                     new SpiChannelInfo("SPI3_COPI", SpiLineType.MOSI)
+                }
+            );
+
+            public IPin SPI5_SCK => new Pin(
+                "SPI5_SCK", "PH6",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PH6", interruptGroup: 6),
+                    new SpiChannelInfo("SPI5_SCK", SpiLineType.Clock)
+                }
+            );
+
+            public IPin SPI5_CIPO => new Pin(
+                "SPI5_CIPO", "PF8",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PF8", interruptGroup: 8),
+                    new SpiChannelInfo("SPI5_CIPO", SpiLineType.MISO)
+                }
+            );
+
+            public IPin SPI5_COPI => new Pin(
+                "SPI5_COPI", "PF9",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PF9", interruptGroup: 9),
+                    new SpiChannelInfo("SPI5_COPI", SpiLineType.MOSI)
                 }
             );
 
@@ -244,29 +268,6 @@ namespace Meadow.Devices
                 }
             );
 
-            public IPin SCK5 => new Pin(
-                "SCK5", "PH6",
-                new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH6", interruptGroup: 6),
-                    new SpiChannelInfo("SPI5_SCK", SpiLineType.Clock)
-                }
-            );
-
-            public IPin CIPO5 => new Pin(
-                "CIPO5", "PF8",
-                new List<IChannelInfo> {
-                    new DigitalChannelInfo("PF8", interruptGroup: 8),
-                    new SpiChannelInfo("SPI5_CIPO", SpiLineType.MISO)
-                }
-            );
-
-            public IPin COPI5 => new Pin(
-                "COPI5", "PF9",
-                new List<IChannelInfo> {
-                    new DigitalChannelInfo("PF9", interruptGroup: 9),
-                    new SpiChannelInfo("SPI5_COPI", SpiLineType.MOSI)
-                }
-            );
 
             // ==== ESP32 ====
             public IPin ESP_COPI => new Pin(
@@ -333,9 +334,9 @@ namespace Meadow.Devices
             // ==== ALIASES ====
             public IPin I2C1_SDA => D07;
             public IPin I2C1_SCL => D08;
-            public IPin SCK => SCK3;
-            public IPin COPI => COPI3;
-            public IPin CIPO => CIPO3;
+            public IPin SCK => SPI3_SCK;
+            public IPin COPI => SPI3_COPI;
+            public IPin CIPO => SPI3_CIPO;
         }
     }
 }

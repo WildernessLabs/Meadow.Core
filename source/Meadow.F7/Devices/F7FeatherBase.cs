@@ -91,7 +91,8 @@ namespace Meadow.Devices
         }
 
         public override ISpiBus CreateSpiBus(
-            Units.Frequency speed
+            Units.Frequency speed,
+            int busNumber = 3
         )
         {
             return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speed);
