@@ -20,6 +20,7 @@ namespace Meadow.Devices
                 A00, A01, A02, A03, A04, A05,
                 SPI3_SCK, SPI3_CIPO, SPI3_COPI, SPI5_SCK, SPI5_CIPO, SPI5_COPI,
                 D00, D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
+                D17, D18, D19,
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
                 LED1, I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA, 
             };
@@ -77,7 +78,7 @@ namespace Meadow.Devices
             public IPin LED1 => new Pin(
                 "BLINKY", "PA0",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA0", inverseLogic: true, interruptGroup: 0) // TODO: check to see if this is still inverted
+                    new DigitalChannelInfo("PA0", interruptGroup: 0)
                 }
             );
 
@@ -252,6 +253,26 @@ namespace Meadow.Devices
                 }
             );
 
+            public IPin D17 => new Pin(
+                "D17", "PD5",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PD5", interruptGroup: 5)
+                }
+            );
+
+            public IPin D18 => new Pin(
+                "D18", "PA10",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PA10", interruptGroup: 10)
+                }
+            );
+
+            public IPin D19 => new Pin(
+                "D19", "PC8",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PC8", interruptGroup: 8)
+                }
+            );
             public IPin I2C3_SDA => new Pin(
                 "I2C3_SDA", "PH7",
                 new List<IChannelInfo> {
