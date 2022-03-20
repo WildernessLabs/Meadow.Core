@@ -18,7 +18,7 @@ namespace Meadow.Devices
         public F7FeatherV1()
             : base(
                   new Pinout(),
-                  new F7GPIOManager(),
+                  new F7FeatherGpioManager(),
                   new AnalogCapabilities(true, DefaultA2DResolution),
                   new NetworkCapabilities(true, false))
         {

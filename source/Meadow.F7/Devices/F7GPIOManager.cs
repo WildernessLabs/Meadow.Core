@@ -48,7 +48,7 @@ namespace Meadow.Devices
         }
 
 
-        public void Initialize()
+        public virtual void Initialize()
         {
             if ((DebugFeatures & DebugFeature.Interrupts) != 0)
             {
@@ -56,11 +56,6 @@ namespace Meadow.Devices
             }
 
             Output.WriteLineIf((DebugFeatures & DebugFeature.PinInitilize) != 0, "Initializing GPIOs...");
-
-            // LEDs are inverse logic - initialize to high/off
-            ConfigureOutput(STM32.GpioPort.PortA, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
-            ConfigureOutput(STM32.GpioPort.PortA, 1, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
-            ConfigureOutput(STM32.GpioPort.PortA, 2, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
 
             // these are the "unallocated" pins on the meadow
             Output.WriteIf((DebugFeatures & DebugFeature.PinInitilize) != 0, ".");

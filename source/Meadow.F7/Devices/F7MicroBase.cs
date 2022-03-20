@@ -139,22 +139,6 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Set the name of the board as it will appear on the network (when connected to a network / access point).
-        /// </summary>
-        /// <param name="deviceName">Name to be used.</param>
-        /// <returns>True if the request was successful, false otherwise.</returns>
-        // TODO: Delete in b6.1
-        [Obsolete("Use [Device].Information.DeviceName property instead.", true)]
-        public bool SetDeviceName(string deviceName)
-        {
-            Information.DeviceName = deviceName;
-            //
-            //  May need to store this somewhere later to split the return.
-            //
-            return (true);
-        }
-
-        /// <summary>
         /// Gets the current processor temerpature
         /// </summary>
         /// <returns></returns>

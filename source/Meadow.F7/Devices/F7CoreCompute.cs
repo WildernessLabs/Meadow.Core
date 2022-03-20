@@ -1,4 +1,5 @@
 ﻿using System;
+using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
@@ -8,7 +9,7 @@ namespace Meadow.Devices
 
         public F7CoreCompute()
             : base(new Pinout(),
-                  new F7GPIOManager(),
+                  new F7CoreComputeGpioManager(),
                   new AnalogCapabilities(true, DefaultA2DResolution),
                   new NetworkCapabilities(true, false))
         {
