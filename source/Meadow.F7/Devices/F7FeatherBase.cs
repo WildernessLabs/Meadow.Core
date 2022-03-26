@@ -6,6 +6,14 @@ namespace Meadow.Devices
 {
     public abstract partial class F7FeatherBase : F7MicroBase, IF7FeatherMeadowDevice
     {
+        public class SerialPortNameDefinitions
+        {
+            public SerialPortName Com1 { get; } = new SerialPortName("COM1", "ttyS0");
+            public SerialPortName Com4 { get; } = new SerialPortName("COM4", "ttyS1");
+            // TODO: what is the unix name for this port?
+            //public SerialPortName Com7 { get; } = new SerialPortName("COM7", "ttyS?");
+        }
+
         protected F7FeatherBase(
             IF7FeatherPinout pins, 
             IMeadowIOController ioController, 
