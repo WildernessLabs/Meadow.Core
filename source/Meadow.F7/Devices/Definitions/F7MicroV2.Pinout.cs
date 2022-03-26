@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Meadow.Hardware;
 
@@ -417,6 +418,9 @@ namespace Meadow.Devices
             {
                 //Groups = new F7NamedPinGroups(this); //TODO: This causes a NullReferenceException
             }
+
+            public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }

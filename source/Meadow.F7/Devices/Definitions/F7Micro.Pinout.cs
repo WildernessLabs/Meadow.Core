@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Meadow.Hardware;
 
@@ -374,6 +375,9 @@ namespace Meadow.Devices
             public Pinout()
             {
             }
+
+            public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }
