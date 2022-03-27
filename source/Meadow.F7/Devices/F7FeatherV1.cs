@@ -13,8 +13,6 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7FeatherV1 : F7FeatherBase
     {
-        public F7SerialPortNameDefinitions SerialPortNames => new F7SerialPortNameDefinitions();
-
         public F7FeatherV1()
             : base(
                   new Pinout(),

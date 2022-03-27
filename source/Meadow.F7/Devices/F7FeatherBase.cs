@@ -14,6 +14,8 @@ namespace Meadow.Devices
             //public SerialPortName Com7 { get; } = new SerialPortName("COM7", "ttyS?");
         }
 
+        public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
+
         protected F7FeatherBase(
             IF7FeatherPinout pins, 
             IMeadowIOController ioController, 
