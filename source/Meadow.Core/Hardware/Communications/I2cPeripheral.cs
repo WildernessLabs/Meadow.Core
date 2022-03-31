@@ -32,8 +32,6 @@ namespace Meadow.Hardware
             ReadBuffer = new byte[readBufferSize];
         }
 
-        //==== NEW HOTNESS
-
         /// <summary>
         /// Reads data from the peripheral.
         /// </summary>
@@ -203,122 +201,6 @@ namespace Meadow.Hardware
             if (duplex == DuplexType.Full) { throw new ArgumentException("I2C doesn't support full-duplex communications. Only half-duplex is available because it only has a single data line."); }
 
             Bus.Exchange(this.Address, writeBuffer, readBuffer);
-        }
-
-        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
-
-        [Obsolete("Use Read", true)]
-        public byte[] ReadBytes(ushort numberOfBytes)
-        {
-            return Bus.ReadData(this.Address, numberOfBytes);
-        }
-
-        [Obsolete("Use Read", true)]
-        public byte[] ReadRegisters(byte address, ushort length)
-        {
-            if (length > ReadBuffer.Length) {
-                throw new ArgumentException("Read length exceeds RxBuffer size. " +
-                    "Please construct with a larger buffer to use this read length.");
-            }
-
-            this.WriteBuffer.Span[0] = address;
-            Bus.Exchange(this.Address, WriteBuffer.Span[0..1], ReadBuffer.Span[0..length]);
-            return ReadBuffer.Slice(0, length).ToArray();
-        }
-
-        [Obsolete("Use Read", true)]
-        public ushort[] ReadUShorts(byte address, ushort number, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            //TODO to @CTACKE from BC; i'm not sure what this method does. i'm also concerned
-            // about the allocation of `number * 2` being larger than the buffer.
-            // please convert
-
-            // write the register address, then read
-            Span<byte> tx = stackalloc byte[1];
-            tx[0] = address;
-            Span<byte> rx = stackalloc byte[number * 2];
-
-            Bus.Exchange(this.Address, tx, rx);
-
-            var result = new ushort[number];
-            for (int i = 0; i < number; i++)
-            {
-                if (order == ByteOrder.LittleEndian)
-                {
-                    result[i] = (ushort)(rx[i * 2] | (rx[i * 2 + 1] << 8));
-                }
-                result[i] = (ushort)((rx[i * 2] << 8) | rx[i * 2 + 1]);
-            }
-
-            return result;
-        }
-
-        [Obsolete("Use Write", true)]
-        public void WriteBytes(byte[] values)
-        {
-            this.Bus.WriteData(this.Address, values);
-        }
-
-
-        [Obsolete("This overload of WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
-        public byte[] WriteRead(byte[] write, ushort length)
-        {
-            return this.Bus.WriteReadData(this.Address, length, write);
-        }
-
-        [Obsolete("Use WriteRegister", true)]
-        public void WriteRegisters(byte address, byte[] data)
-        {
-            var temp = new List<byte>();
-            temp.Add(address);
-            temp.AddRange(data);
-
-            this.Bus.WriteData(this.Address, temp);
-        }
-
-        [Obsolete("Use WriteRegister", true)]
-        public void WriteRegisterUShort(byte address, ushort value, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var temp = new List<byte>();
-            temp.Add(address);
-
-            var b = BitConverter.GetBytes(value);
-
-            if (order == ByteOrder.LittleEndian)
-            {
-                temp.AddRange(b);
-            }
-            else
-            {
-                temp.Add(b[1]);
-                temp.Add(b[0]);
-            }
-
-            this.Bus.WriteData(this.Address, temp);
-        }
-
-        [Obsolete("Use WriteRegister", true)]
-        public void WriteUShorts(byte address, ushort[] values, ByteOrder order = ByteOrder.LittleEndian)
-        {
-            var temp = new List<byte>();
-            temp.Add(address);
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                var b = BitConverter.GetBytes(values[i]);
-
-                if (order == ByteOrder.LittleEndian)
-                {
-                    temp.AddRange(b);
-                }
-                else
-                {
-                    temp.Add(b[1]);
-                    temp.Add(b[0]);
-                }
-            }
-
-            this.Bus.WriteData(this.Address, temp);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Meadow.Hardware
         private Frequency _frequency;
 
         private IMeadowIOController IOController { get; }
+        internal int BusNumber { get; set; } = 1;
 
         public void Dispose()
         {
@@ -81,6 +82,7 @@ namespace Meadow.Hardware
         {
             IOController = ioController;
             Frequency = frequency;
+
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
             _showI2cDebug = false;
@@ -160,7 +162,8 @@ namespace Meadow.Hardware
                         TxBufferLength = 0,
                         TxBuffer = IntPtr.Zero,
                         RxBufferLength = readBuffer.Length,
-                        RxBuffer = (IntPtr)pData
+                        RxBuffer = (IntPtr)pData,
+                        BusNumber = this.BusNumber
                     };
 
                     Output.WriteIf(_showI2cDebug, " +SendData");
@@ -195,7 +198,8 @@ namespace Meadow.Hardware
                         TxBufferLength = data.Length,
                         TxBuffer = (IntPtr)pData,
                         RxBufferLength = 0,
-                        RxBuffer = IntPtr.Zero
+                        RxBuffer = IntPtr.Zero,
+                        BusNumber = this.BusNumber
                     };
 
                     Output.WriteIf(_showI2cDebug, " +Write");
@@ -230,6 +234,7 @@ namespace Meadow.Hardware
                         TxBuffer = (IntPtr)pWrite,
                         RxBufferLength = readBuffer.Length,
                         RxBuffer = (IntPtr)pRead,
+                        BusNumber = this.BusNumber
                     };
 
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
@@ -239,176 +244,6 @@ namespace Meadow.Hardware
                     }
                 }
             } finally {
-                _busSemaphore.Release();
-            }
-        }
-
-        //==== OLD AND BUSTED //TODO: Delete after M.Foundation update
-
-        /// <summary>
-        /// Writes data to a specified I2C bus address and reads data back from the same address
-        /// </summary>
-        /// <param name="peripheralAddress">Peripheral address</param>
-        /// <param name="numberOfBytesToRead">Bytes to read after writing</param>
-        /// <param name="dataToWrite">Data to write</param>
-        /// <returns>Data received from peripheral</returns>
-        [Obsolete("This overload if WriteReadData is obsolete for performance reasons and will be removed in a future release.  Migrate to another overload.", false)]
-        public byte[] WriteReadData(byte peripheralAddress, int numberOfBytesToRead, params byte[] dataToWrite)
-        {
-            var rxBuffer = new byte[numberOfBytesToRead];
-            var rxGch = GCHandle.Alloc(rxBuffer, GCHandleType.Pinned);
-            var txGch = GCHandle.Alloc(dataToWrite, GCHandleType.Pinned);
-
-            _busSemaphore.Wait();
-
-            try
-            {
-                var command = new Nuttx.UpdI2CCommand()
-                {
-                    Address = peripheralAddress,
-                    Frequency = (int)this.Frequency.Hertz,
-                    TxBufferLength = dataToWrite.Length,
-                    TxBuffer = txGch.AddrOfPinnedObject(),
-                    RxBufferLength = rxBuffer.Length,
-                    RxBuffer = rxGch.AddrOfPinnedObject(),
-                };
-
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-
-                if (result != 0)
-                {
-                    DecipherI2CError(UPD.GetLastError());
-                }
-
-                return rxBuffer;
-            }
-            finally
-            {
-                _busSemaphore.Release();
-
-                if (rxGch.IsAllocated)
-                {
-                    rxGch.Free();
-                }
-                if (txGch.IsAllocated)
-                {
-                    txGch.Free();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Reads the specified number of bytes from a peripheral
-        /// </summary>
-        /// <param name="peripheralAddress">The I2C Address to read</param>
-        /// <param name="numberOfBytes">The number of bytes/octets to read</param>
-        /// <returns></returns>
-        [Obsolete("Use `Read` with `Span<byte>`.")]
-        public unsafe byte[] ReadData(byte peripheralAddress, int numberOfBytes)
-        {
-            _busSemaphore.Wait();
-            Span<byte> rxBuffer = stackalloc byte[numberOfBytes];
-
-            try
-            {
-                fixed (byte* pData = &rxBuffer.GetPinnableReference())
-                {
-                    var command = new Nuttx.UpdI2CCommand()
-                    {
-                        Address = peripheralAddress,
-                        Frequency = (int)this.Frequency.Hertz,
-                        TxBufferLength = 0,
-                        TxBuffer = IntPtr.Zero,
-                        RxBufferLength = rxBuffer.Length,
-                        RxBuffer = (IntPtr)pData
-                    };
-
-                    Output.WriteIf(_showI2cDebug, " +SendData");
-                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-                    if (result != 0)
-                    {
-                        DecipherI2CError(UPD.GetLastError());
-                    }
-
-                    return rxBuffer.ToArray();
-                }
-            }
-            finally
-            {
-                _busSemaphore.Release();
-            }
-        }
-
-        /// <summary>
-        /// Writes a number of bytes to the device.
-        /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
-        /// <param name="data">Data to be written.</param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        [Obsolete("Use `Write` with `Span<byte>`.")]
-        public void WriteData(byte peripheralAddress, params byte[] data)
-        {
-            SendData(peripheralAddress, data);
-        }
-
-        [Obsolete("Use `Write` with `Span<byte>`.")]
-        public void WriteData(byte peripheralAddress, byte[] data, int length)
-        {
-            SendData(peripheralAddress, data, length);
-        }
-
-        /// <summary>
-        /// Writes a number of bytes to the device.
-        /// </summary>
-        /// <remarks>
-        /// The number of bytes to be written will be determined by the length of the byte array.
-        /// </remarks>
-        /// <param name="data">Data to be written.</param>
-        [Obsolete("Use `Write` with `Span<byte>`.")]
-        public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
-        {
-            SendData(peripheralAddress, data.ToArray());
-        }
-
-        [Obsolete("Use `Write` with `Span<byte>`.")]
-        private unsafe void SendData(byte address, Span<byte> data)
-        {
-            SendData(address, data, data.Length);
-        }
-
-        [Obsolete("Use `Write` with `Span<byte>`.")]
-        private unsafe void SendData(byte address, Span<byte> data, int count)
-        {
-            _busSemaphore.Wait();
-
-            try
-            {
-                fixed (byte* pData = data)
-                {
-                    var command = new Nuttx.UpdI2CCommand()
-                    {
-                        Address = address,
-                        Frequency = (int)this.Frequency.Hertz,
-                        TxBufferLength = count,
-                        TxBuffer = (IntPtr)pData,
-                        RxBufferLength = 0,
-                        RxBuffer = IntPtr.Zero
-                    };
-
-                    Output.WriteIf(_showI2cDebug, " +SendData");
-                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-                    if (result != 0)
-                    {
-                        DecipherI2CError(UPD.GetLastError());
-                    }
-                }
-            }
-            finally
-            {
                 _busSemaphore.Release();
             }
         }

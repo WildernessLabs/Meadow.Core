@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Meadow.Gateways;
@@ -27,13 +26,10 @@ namespace Meadow.Devices
 
         public IPlatformOS PlatformOS { get; protected set; }
 
-        /// <summary>
-        /// Gets the pins.
-        /// </summary>
-        /// <value>The pins.</value>
-        public IF7MicroPinout Pins { get; }
-
         public IDeviceInformation Information { get; protected set; }
+
+        public abstract IPin GetPin(string pinName);
+        public abstract IPwmPort CreatePwmPort(IPin pin, float frequency = IPwmOutputController.DefaultPwmFrequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
         //==== internals
         protected Esp32Coprocessor? esp32;
@@ -41,9 +37,8 @@ namespace Meadow.Devices
         protected IMeadowIOController IoController { get; }
 
         //==== constructors
-        public F7MicroBase(IF7MicroPinout pins, IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
+        public F7MicroBase(IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
         {
-            Pins = pins;
             IoController = ioController;
 
             Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
@@ -58,11 +53,6 @@ namespace Meadow.Devices
             IoController.Initialize();
 
             InitCoprocessor();
-        }
-
-        public IPin GetPin(string pinName)
-        {
-            return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
         }
 
         protected bool InitCoprocessor()
@@ -146,22 +136,6 @@ namespace Meadow.Devices
             {
                 throw new Exception("Coprocessor not initialized.");
             }
-        }
-
-        /// <summary>
-        /// Set the name of the board as it will appear on the network (when connected to a network / access point).
-        /// </summary>
-        /// <param name="deviceName">Name to be used.</param>
-        /// <returns>True if the request was successful, false otherwise.</returns>
-        // TODO: Delete in b6.1
-        [Obsolete("Use [Device].Information.DeviceName property instead.")]
-        public bool SetDeviceName(string deviceName)
-        {
-            Information.DeviceName = deviceName;
-            //
-            //  May need to store this somewhere later to split the return.
-            //
-            return (true);
         }
 
         /// <summary>

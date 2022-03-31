@@ -62,7 +62,7 @@ namespace Meadow.Hardware
         /// <returns></returns>
         public static string[] GetPortNames()
         {
-            var allDevices = F7Micro.FileSystem.EnumDirectory(DriverFolder);
+            var allDevices = F7FeatherBase.FileSystem.EnumDirectory(DriverFolder);
             var list = new List<string>();
             foreach (var s in allDevices)
             {

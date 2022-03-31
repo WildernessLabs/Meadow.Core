@@ -10,7 +10,7 @@ namespace Meadow.Devices
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
         /// <returns>An instance of an I2cBus</returns>
-        public II2cBus CreateI2cBus(int busNumber = 0)
+        public II2cBus CreateI2cBus(int busNumber = 1)
         {
             return CreateI2cBus(busNumber, IMeadowDevice.DefaultI2cBusSpeed);
         }
@@ -19,26 +19,22 @@ namespace Meadow.Devices
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
         /// <returns>An instance of an I2cBus</returns>
-        public II2cBus CreateI2cBus(
+        public abstract II2cBus CreateI2cBus(
             I2cBusSpeed busSpeed,
             int busNumber = 0
-        )
-        {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
-        }
+        );
 
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
         /// <param name="frequency">The bus speed in (in Hz) defaulting to 100k</param>
         /// <returns>An instance of an I2cBus</returns>
-        public II2cBus CreateI2cBus(
+        public abstract II2cBus CreateI2cBus(
             int busNumber,
             Frequency frequency
-        )
-        {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequency);
-        }
+        );
+
+        protected abstract int GetI2CBusNumberForPins(IPin clock, IPin data);
 
         /// <summary>
         /// Creates an I2C bus instance for the requested pins and bus speed
@@ -64,7 +60,9 @@ namespace Meadow.Devices
             Frequency frequency
         )
         {
-            return I2cBus.From(this.IoController, clock, data, frequency);
+            var bus = I2cBus.From(this.IoController, clock, data, frequency);
+            bus.BusNumber = GetI2CBusNumberForPins(clock, data);
+            return bus;
         }
     }
 }
