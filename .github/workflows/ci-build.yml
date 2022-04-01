@@ -1,6 +1,7 @@
 name: .NET Core CI Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main, develop ]
   pull_request:
@@ -9,7 +10,7 @@ on:
 jobs:
   build:
 
-    runs-on: runs-on: windows-latest
+    runs-on: windows-latest
     
     steps:
     - name: Checkout Meadow.Core
