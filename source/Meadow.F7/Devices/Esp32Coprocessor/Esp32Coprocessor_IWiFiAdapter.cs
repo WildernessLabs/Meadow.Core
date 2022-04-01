@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Net;
-using System.Threading.Tasks;
-using Meadow.Devices.Esp32.MessagePayloads;
-using Meadow.Gateways;
+﻿using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateway.WiFi;
+using Meadow.Gateways;
 using Meadow.Gateways.Exceptions;
+using System;
 using System.Collections.Generic;
-using static Meadow.Devices.F7MicroBase;
+using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices
 {
@@ -107,7 +105,7 @@ namespace Meadow.Devices
         /// Current onboard antenna in use.
         /// </summary>
         public AntennaType Antenna => _antenna;
-      
+
         protected AntennaType _antenna;
 
         /// <summary>
@@ -186,7 +184,7 @@ namespace Meadow.Devices
         /// <summary>
         /// WiFi channel the ESP32 and the access point are using for communication.
         /// </summary>
-        public uint Channel { get; private set; } 
+        public uint Channel { get; private set; }
 
         /// <summary>
         /// The maximum number of times the ESP32 will retry an operation before returning an error.
@@ -198,7 +196,7 @@ namespace Meadow.Devices
         public uint MaximumRetryCount
         {
             get => F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.MaximumNetworkRetryCount);
-            
+
             set
             {
                 uint retryCount = value;
@@ -298,44 +296,92 @@ namespace Meadow.Devices
         /// <remarks>
         /// The network must be started before this method can be called.
         /// </remarks>
-        public IList<WifiNetwork> Scan()
+        public async Task<IList<WifiNetwork>> Scan(TimeSpan timeout)
+        {
+            var src = new CancellationTokenSource();
+            return await Scan(timeout, src.Token);
+        }
+
+        public async Task<IList<WifiNetwork>> Scan(CancellationToken token)
+        {
+            return await Scan(TimeSpan.Zero, token);
+        }
+
+        private async Task<IList<WifiNetwork>> Scan(TimeSpan timeout, CancellationToken token)
         {
             var networks = new List<WifiNetwork>();
-            byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.GetAccessPoints, true, resultBuffer);
-            if (result == StatusCodes.CompletedOk)
-            {
-                var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
-                var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
+            var resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            var tasks = new List<Task>();
 
-                if (accessPointList.NumberOfAccessPoints > 0)
-                {
-                    int accessPointOffset = 0;
-                    for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
-                    {
-                        var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
-                        accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
-                        string bssid = "";
-                        for (int index = 0; index < accessPoint.Bssid.Length; index++)
-                        {
-                            bssid += accessPoint.Bssid[index].ToString("x2");
-                            if (index != accessPoint.Bssid.Length - 1)
-                            {
-                                bssid += ":";
-                            }
-                        }
-                        var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown,
-                            new NetworkSecuritySettings((NetworkAuthenticationType) accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
-                            accessPoint.PrimaryChannel, (NetworkProtocol) accessPoint.Protocols, accessPoint.Rssi);
-                        networks.Add(network);
-                    }
-                }
-            }
-            else
+            var scanTask = Task.Run(() =>
+              {
+                  token.ThrowIfCancellationRequested();
+
+                  try
+                  {
+                      // note: this is synchronous, so all we can really do is wait for completion in the background and throw away the result
+                      var result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.GetAccessPoints, true, resultBuffer);
+
+                      token.ThrowIfCancellationRequested();
+
+                      if (result == StatusCodes.CompletedOk)
+                      {
+                          var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
+                          var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
+
+                          if (accessPointList.NumberOfAccessPoints > 0)
+                          {
+                              int accessPointOffset = 0;
+                              for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+                              {
+                                  var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
+                                  accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
+                                  string bssid = "";
+                                  for (int index = 0; index < accessPoint.Bssid.Length; index++)
+                                  {
+                                      bssid += accessPoint.Bssid[index].ToString("x2");
+                                      if (index != accessPoint.Bssid.Length - 1)
+                                      {
+                                          bssid += ":";
+                                      }
+                                  }
+                                  var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown,
+                                      new NetworkSecuritySettings((NetworkAuthenticationType)accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
+                                      accessPoint.PrimaryChannel, (NetworkProtocol)accessPoint.Protocols, accessPoint.Rssi);
+                                  networks.Add(network);
+                              }
+                          }
+                      }
+                      else
+                      {
+                          Console.WriteLine($"Error getting access points: {result}");
+                      }
+                      return (networks);
+                  }
+                  catch (Exception ex)
+                  {
+                      Console.WriteLine($"Error getting access points: {ex.Message}");
+
+                      token.ThrowIfCancellationRequested();
+                      throw ex;
+                  }
+              }, token);
+
+            tasks.Add(scanTask);
+
+            if (timeout.TotalMilliseconds > 0)
             {
-                Console.WriteLine($"Error getting access points: {result}");
+                tasks.Add(Task.Delay(timeout));
             }
-            return (networks);
+
+            var index = Task.WaitAny(tasks.ToArray());
+            Console.WriteLine($"TASK {index} COMPLETED");
+            if (index == 1)
+            {
+                throw new TimeoutException();
+            }
+
+            return scanTask.Result;
         }
 
         /// <summary>
@@ -362,7 +408,7 @@ namespace Meadow.Devices
         /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
         public bool StartWiFiInterface()
         {
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartWiFiInterface, true, null);
+            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StartWiFiInterface, true, null);
             return (result == StatusCodes.CompletedOk);
         }
 
@@ -377,7 +423,7 @@ namespace Meadow.Devices
         /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
         public bool StopWiFiInterface()
         {
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StopWiFiInterface, true, null);
+            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StopWiFiInterface, true, null);
             return (result == StatusCodes.CompletedOk);
         }
 
@@ -468,7 +514,7 @@ namespace Meadow.Devices
             _connectionSemaphore = new Semaphore(0, 1);
 
             // TODO: should be async and awaited
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
             _connectionSemaphore.WaitOne();
 
             ConnectEventData data;
@@ -481,7 +527,7 @@ namespace Meadow.Devices
                     break;
                 case StatusCodes.WiFiDisconnected:
                     data = Encoders.ExtractConnectEventData(resultBuffer, 0);
-                    switch ((WiFiReasons) data.Reason)
+                    switch ((WiFiReasons)data.Reason)
                     {
                         case WiFiReasons.AuthenticationFailed:
                             result = StatusCodes.AuthenticationFailed;
@@ -548,11 +594,11 @@ namespace Meadow.Devices
         {
             DisconnectFromAccessPointRequest request = new DisconnectFromAccessPointRequest()
             {
-                TurnOffWiFiInterface = (byte) ((turnOffWiFiInterface ? 1 : 0) & 0xff)
+                TurnOffWiFiInterface = (byte)((turnOffWiFiInterface ? 1 : 0) & 0xff)
             };
             byte[] encodedRequest = Encoders.EncodeDisconnectFromAccessPointRequest(request);
 
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.DisconnectFromAccessPoint, true, encodedRequest, null);
+            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.DisconnectFromAccessPoint, true, encodedRequest, null);
             return (result);
         }
 
@@ -584,15 +630,15 @@ namespace Meadow.Devices
             }
             if (antenna == AntennaType.OnBoard)
             {
-                request.Antenna = (byte) AntennaTypes.OnBoard;
+                request.Antenna = (byte)AntennaTypes.OnBoard;
             }
             else
             {
-                request.Antenna = (byte) AntennaTypes.External;
+                request.Antenna = (byte)AntennaTypes.External;
             }
             byte[] encodedPayload = Encoders.EncodeSetAntennaRequest(request);
             byte[] encodedResult = new byte[4000];
-            StatusCodes result = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
+            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
             if (result == StatusCodes.CompletedOk)
             {
                 _antenna = antenna;
@@ -631,7 +677,7 @@ namespace Meadow.Devices
                 HasInternetAccess = true;
             }
             _connectionSemaphore.Release();
-            NetworkAuthenticationType authenticationType = (NetworkAuthenticationType) connectEventData.AuthenticationMode;
+            NetworkAuthenticationType authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
 
             WiFiConnectEventArgs ea = new WiFiConnectEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, channel, authenticationType, statusCode);
             WiFiConnected?.Invoke(this, ea);
