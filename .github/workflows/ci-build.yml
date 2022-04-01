@@ -1,0 +1,37 @@
+name: .NET Core CI Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+
+    runs-on: runs-on: windows-latest
+    
+    steps:
+    - name: Checkout Meadow.Core
+      uses: actions/checkout@v3
+    
+    - name: Checkout Meadow.Contracts
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Contracts
+        path: Meadow.Contracts
+
+    - name: Checkout Meadow.Units
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Units
+        path: Meadow.Units
+    
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version:
+          6.0.x
+    
+    - name: Build Meadow.Core
+      run: dotnet build -c Release main/source/Meadow.Core.sln
