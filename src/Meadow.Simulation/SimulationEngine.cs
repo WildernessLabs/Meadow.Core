@@ -1,20 +1,21 @@
 ﻿using Meadow.Hardware;
+using Meadow.Logging;
 using Meadow.Units;
 using System;
 using System.Collections.Generic;
 
 namespace Meadow.Simulation
 {
-    internal class SimulationEngine<TPinDefinitions> : SimulationEnvironment, IMeadowIOController
+    internal class SimulationEngine<TPinDefinitions> : SimulationEnvironment, IMeadowIOController, IPlatformOS
         where TPinDefinitions : IPinDefinitions
     {
         private ISimulatedDevice<TPinDefinitions> _device;
+        private WebSocketServer _wsServer;
 
-        public SimulationEngine(ISimulatedDevice<TPinDefinitions> device)
+        public SimulationEngine(ISimulatedDevice<TPinDefinitions> device, Logger logger)
         {
             _device = device;
-          
-            Initialize();
+            _wsServer = new WebSocketServer(logger);
         }
 
         private Dictionary<IPin, bool> _discreteStates = new Dictionary<IPin, bool>();
@@ -22,9 +23,15 @@ namespace Meadow.Simulation
 
         public IDeviceChannelManager DeviceChannelManager => throw new NotImplementedException();
 
+        public string OSVersion => throw new NotImplementedException();
+
+        public string OSBuildDate => throw new NotImplementedException();
+
+        public string MonoVersion => throw new NotImplementedException();
+
         public event InterruptHandler Interrupt;
 
-        private void Initialize()
+        public void Initialize()
         {
             foreach (var pin in _device.Pins)
             {
@@ -40,6 +47,8 @@ namespace Meadow.Simulation
                     _analogStates.Add(pin, 0d);
                 }
             }
+
+            _wsServer.Start();
         }
 
         void IMeadowIOController.Initialize()
@@ -127,6 +136,16 @@ namespace Meadow.Simulation
         }
 
         public Temperature GetTemperature()
+        {
+            throw new NotImplementedException();
+        }
+
+        public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
         {
             throw new NotImplementedException();
         }

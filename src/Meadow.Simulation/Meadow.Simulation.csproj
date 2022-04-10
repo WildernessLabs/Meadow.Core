@@ -6,7 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" Version="0.5.0" />
+    <PackageReference Include="Meadow.Logging" Version="0.24.0" />
+    <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="REST\" />
   </ItemGroup>
 
 </Project>

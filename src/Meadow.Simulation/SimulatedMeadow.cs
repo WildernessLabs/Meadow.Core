@@ -1,35 +1,35 @@
 ﻿using Meadow.Hardware;
+using Meadow.Logging;
 using Meadow.Units;
 using System;
 using System.Collections;
 using System.Linq;
 
 namespace Meadow.Simulation
-{     
+{
     public partial class SimulatedMeadow<TPinDefinitions> : ISimulatedDevice<TPinDefinitions>
         where TPinDefinitions : IPinDefinitions, new()
     {
         private SimulationEngine<TPinDefinitions> _simulationEngine;
+        private WebSocketServer _wsServer;
+
+        public Logger Logger { get; }
 
         public SimulatedMeadow()
         {
-            Pins = new TPinDefinitions();
-            _simulationEngine = new SimulationEngine<TPinDefinitions>(this);
-            Information = new SimulationInformation();
+            Logger = new Logger(new ConsoleLogProvider());
+            Logger.Loglevel = Loglevel.Info;
 
-            LaunchUI();
+            Pins = new TPinDefinitions();
+            _simulationEngine = new SimulationEngine<TPinDefinitions>(this, Logger);
+            Information = new SimulationInformation();
         }
 
         public TPinDefinitions Pins { get; }
         public IDeviceInformation Information { get; }
 
-        public IPlatformOS PlatformOS => throw new NotImplementedException();
+        public IPlatformOS PlatformOS => _simulationEngine;
         public DeviceCapabilities Capabilities => throw new NotImplementedException();
-
-        private void LaunchUI()
-        {
-            
-        }
 
         public void DrivePinVoltage(IPin pin, Voltage voltage)
         {
