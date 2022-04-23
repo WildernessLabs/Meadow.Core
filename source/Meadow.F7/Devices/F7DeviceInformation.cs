@@ -25,7 +25,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Get the hardware revision.
         /// </summary>
-        public MeadowPlatform HardwareRevision => (MeadowPlatform) F7PlatformOS.GetUInt(ConfigurationValues.Product);
+        public MeadowPlatform Platform => (MeadowPlatform) F7PlatformOS.GetUInt(ConfigurationValues.Product);
 
         /// <summary>
         /// Get the processor type.
