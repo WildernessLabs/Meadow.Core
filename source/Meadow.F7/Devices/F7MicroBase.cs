@@ -5,6 +5,7 @@ using Meadow.Gateways;
 using Meadow.Hardware;
 using Meadow.Units;
 using static Meadow.Core.Interop;
+using static Meadow.Core.Interop.Nuttx;
 
 namespace Meadow.Devices
 {
@@ -16,6 +17,9 @@ namespace Meadow.Devices
     {
         //==== events
         public event EventHandler WiFiAdapterInitialized = delegate { };
+        public event PowerTransitionHandler BeforeReset = delegate { };
+        public event PowerTransitionHandler BeforeSleep = delegate { };
+        public event PowerTransitionHandler AfterWake = delegate { };
 
         //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
@@ -149,6 +153,8 @@ namespace Meadow.Devices
 
         public void Reset()
         {
+            BeforeReset?.Invoke();
+
             UPD.Ioctl(Nuttx.UpdIoctlFn.PowerReset);
         }
 
@@ -159,6 +165,25 @@ namespace Meadow.Devices
             };
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
+        }
+
+        public void Sleep(int seconds = Timeout.Infinite)
+        {            
+            var cmd = new UpdSleepCommand
+            {
+                 SecondsToSleep = seconds                
+            };
+
+            BeforeSleep?.Invoke();
+
+            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep, cmd);
+
+            // Stop execution while the device actually does it's thing
+            Thread.Sleep(100);
+
+            // TODO: see how long this actually takes
+
+            AfterWake?.Invoke();
         }
     }
 }

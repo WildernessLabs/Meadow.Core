@@ -167,13 +167,17 @@ namespace Meadow.Core
                 UpdEsp32EventDataPayload = 62,
 
                 PowerReset = 71,
-                PowerSleep1 = 72,
-                PowerSleep2 = 73,
+                PowerSleep = 72,
                 PowerWDSet = 74,
                 PowerWDPet = 75,
 
                 GetDeviceInfo = 81,
                 GetSetConfigurationValue = 82,
+            }
+
+            public struct UpdSleepCommand
+            {
+                public int SecondsToSleep;
             }
 
             public struct UpdRegisterValue
