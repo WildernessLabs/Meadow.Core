@@ -45,24 +45,21 @@ namespace Meadow.Devices
         #endregion Events
 
 
-        #region Constants
+        /// <summary>
+        /// Default delay between WiFi network scans <see cref="ScanPeriod"/>.
+        /// </summary>
+        public static TimeSpan DefaultScanPeriod = TimeSpan.FromSeconds(5);
 
         /// <summary>
-        /// Default delay (in milliseconds) between WiFi network scans <see cref="ScanFrequency"/>.
+        /// Minimum delay that can be used for the <see cref="ScanPeriod"/>.
         /// </summary>
-        public const ushort DEFAULT_SCAN_FREQUENCY = 5000;
+        public static TimeSpan MinimumScanPeriod = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// Minimum delay (in milliseconds) that can be used for the <see cref="ScanFrequency"/>.
+        /// Maximum delay that can be used for the <see cref="ScanPeriod"/>.
         /// </summary>
-        public const ushort MINIMUM_SCAN_FREQUENCY = 1000;
+        public static TimeSpan MaximumScanPeriod = TimeSpan.FromSeconds(60);
 
-        /// <summary>
-        /// Maximum delay (in milliseconds) that can be used for the <see cref="ScanFrequency"/>.
-        /// </summary>
-        public const ushort MAXIMUM_SCAN_FREQUENCY = 60000;
-
-        #endregion Constants
 
         #region Member variables.
 
@@ -221,25 +218,25 @@ namespace Meadow.Devices
         /// Delay (in milliseconds) between network scans.
         /// </summary>
         /// <remarks>
-        /// This will default to the <see cref="DEFAULT_SCAN_FREQUENCY"/> value.
+        /// This will default to the <see cref="DefaultScanPeriod"/> value.
         ///
-        /// The ScanFrequency should be between <see cref="MINIMUM_SCAN_FREQUENCY"/> and
-        /// <see cref="MAXIMUM_SCAN_FREQUENCY"/> (inclusive).
+        /// The ScanFrequency should be between <see cref="MinimumScanPeriod"/> and
+        /// <see cref="MaximumScanPeriod"/> (inclusive).
         /// </remarks>
-        /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if value is less than <see cref="MINIMUM_SCAN_FREQUENCY"/> or greater than <see cref="MAXIMUM_SCAN_FREQUENCY"/>.</exception>
-        private ushort _scanFrequency = DEFAULT_SCAN_FREQUENCY;
-        public ushort ScanFrequency
+        /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if value is less than <see cref="MinimumScanPeriod"/> or greater than <see cref="MaximumScanPeriod"/>.</exception>
+        public TimeSpan ScanPeriod
         {
-            get { return (_scanFrequency); }
+            get { return (_scanPeriod); }
             set
             {
-                if ((value < MINIMUM_SCAN_FREQUENCY) || (value > MAXIMUM_SCAN_FREQUENCY))
+                if ((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
                 {
-                    throw new ArgumentOutOfRangeException($"{nameof(ScanFrequency)} should be between {MINIMUM_SCAN_FREQUENCY} and {MAXIMUM_SCAN_FREQUENCY} (inclusive).");
+                    throw new ArgumentOutOfRangeException($"{nameof(ScanPeriod)} should be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
                 }
-                _scanFrequency = value;
+                _scanPeriod = value;
             }
         }
+        private TimeSpan _scanPeriod = DefaultScanPeriod;
 
         /// <summary>
         /// Use the event data to work out which event to invoke and create any event args that will be consumed.
@@ -413,10 +410,13 @@ namespace Meadow.Devices
         /// connection to the access point was made.
         /// </remarks>
         /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
-        public bool StartWiFiInterface()
+        public async Task<bool> StartWiFiInterface()
         {
-            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StartWiFiInterface, true, null);
-            return (result == StatusCodes.CompletedOk);
+            return await Task.Run(() =>
+            {
+                StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StartWiFiInterface, true, null);
+                return (result == StatusCodes.CompletedOk);
+            });
         }
 
         /// <summary>
@@ -428,51 +428,13 @@ namespace Meadow.Devices
         /// Errors could occur if the adapter was not started.
         /// </remarks>
         /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
-        public bool StopWiFiInterface()
+        public async Task<bool> StopWiFiInterface()
         {
-            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StopWiFiInterface, true, null);
-            return (result == StatusCodes.CompletedOk);
-        }
-
-        /// <summary>
-        /// Connect to a WiFi network.
-        /// </summary>
-        /// <param name="ssid">SSID of the network to connect to</param>
-        /// <param name="password">Password for the WiFi access point.</param>
-        /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
-        /// <returns>The connection result</returns>
-        public async Task<ConnectionResult> Connect(string ssid, string password, ReconnectionType reconnection = ReconnectionType.Automatic)
-        {
-            var src = new CancellationTokenSource();
-            return await Connect(ssid, password, TimeSpan.Zero, src.Token, reconnection);
-        }
-
-        /// <summary>
-        /// Connect to a WiFi network.
-        /// </summary>
-        /// <param name="ssid">SSID of the network to connect to</param>
-        /// <param name="password">Password for the WiFi access point.</param>
-        /// <param name="token">Cancellation token for the connection attempt</param>
-        /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
-        /// <returns>The connection result</returns>
-        public async Task<ConnectionResult> Connect(string ssid, string password, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
-        {
-            var src = new CancellationTokenSource();
-            return await Connect(ssid, password, TimeSpan.Zero, token, reconnection);
-        }
-
-        /// <summary>
-        /// Connect to a WiFi network.
-        /// </summary>
-        /// <param name="ssid">SSID of the network to connect to</param>
-        /// <param name="password">Password for the WiFi access point.</param>
-        /// <param name="timeout">Timeout period for the connection attempt</param>
-        /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
-        /// <returns>The connection result</returns>
-        public async Task<ConnectionResult> Connect(string ssid, string password, TimeSpan timeout, ReconnectionType reconnection = ReconnectionType.Automatic)
-        {
-            var src = new CancellationTokenSource();
-            return await Connect(ssid, password, timeout, src.Token, reconnection);
+            return await Task.Run(() =>
+            {
+                StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StopWiFiInterface, true, null);
+                return (result == StatusCodes.CompletedOk);
+            });
         }
 
         /// <summary>
