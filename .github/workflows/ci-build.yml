@@ -23,12 +23,14 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.Contracts
         path: Meadow.Contracts
+        ref: develop
 
     - name: Checkout Meadow.Units
       uses: actions/checkout@v3
       with:
         repository: WildernessLabs/Meadow.Units
         path: Meadow.Units
+        ref: develop
     
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
