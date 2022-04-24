@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Meadow.Hardware;
+using System.IO;
 namespace Meadow
 {
     public static class RuntimeInformation
@@ -13,7 +14,7 @@ namespace Meadow
                 if (Directory.Exists("/meadow0"))
                 {
                     // we're an F7
-                    _platform = MeadowPlatform.F7v1;
+                    _platform = MeadowPlatform.F7FeatherV1;
                 }
                 else
                 {

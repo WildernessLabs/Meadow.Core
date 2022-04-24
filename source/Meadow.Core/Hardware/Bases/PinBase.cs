@@ -28,7 +28,7 @@ namespace Meadow.Hardware
         }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        private PinBase()
+        protected PinBase()
         {
             // make default non-callable
         }
@@ -44,6 +44,27 @@ namespace Meadow.Hardware
         }
         public void ReleaseChannel() { 
         
+        }
+
+        public virtual bool Equals(IPin other)
+        {
+            if (other == null) return false;
+
+            return this.Key.Equals(other.Key);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is IPin { } p)
+            {
+                return p.Equals(this);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Key.GetHashCode();
         }
     }
 }

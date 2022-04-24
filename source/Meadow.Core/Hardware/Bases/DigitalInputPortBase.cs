@@ -33,6 +33,7 @@ namespace Meadow.Hardware
             )
             : base(pin, channel)
         {
+            // TODO: check interrupt mode (i.e. if != none, make sure channel info agrees)
             this.InterruptMode = interruptMode;
         }
 
