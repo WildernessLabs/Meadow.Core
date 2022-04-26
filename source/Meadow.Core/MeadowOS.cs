@@ -1,49 +1,119 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using Meadow.Devices;
-
-namespace Meadow
+﻿namespace Meadow
 {
+    using System;
+    using System.IO;
+    using System.Threading;
+    using System.Reflection;
+    using Meadow.Devices;
+    using System.Threading.Tasks;
+
+    using static System.Console;
+
     /// <summary>
-    /// 
+    /// The entry point of the .NET part of Meadow OS.
     /// </summary>
     public static partial class MeadowOS
     {
         //==== internals
         private static SynchronizationContext? synchronizationContext;
-        private static IPlatformOS platformOS => CurrentDevice.PlatformOS;
 
         //==== properties
-        public static IMeadowDevice CurrentDevice { get; private set; } = null!;
-        public static bool Initialized { get; private set; }
+        internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
-        static MeadowOS()
+        static IApp app;
+
+        static bool appSetup = false;
+        static bool appRan = false;
+        static bool appShutdown = false;
+
+        internal static CancellationTokenSource AppAbort = new();
+
+        public async static Task Main (string[] args)
         {
+            Initialize();
+            try {
+                await app.Initialize();
+                appSetup = true;
+            }
+            catch (Exception e) {
+                // exception on bring-up; not good
+                SystemFailure(e, "App initialization failed");
+            }
 
+            while (!appRan)
+            {
+                try {
+                    await app.Run();
+                    appRan = true;
+                }
+                catch (Exception e)
+                {
+                    bool recovered;
+                    app.OnError (e, out recovered);
+                    if (recovered)
+                        app.Recovery(e);
+                    else
+                    {
+                        AppAbort.Cancel();
+                        throw SystemFailure(e);
+                    }
+                }
+            }
+
+            try {
+                AppAbort.CancelAfter(millisecondsDelay: 60);
+                app.Shutdown(out appShutdown);
+            }
+            catch (Exception e)
+            {
+                // we can't recover while shutting down
+                throw SystemFailure(e, "App shutdown error");
+            }
+            finally {
+                await (app as IAsyncDisposable).DisposeAsync();
+            }
+            Shutdown();
         }
 
-        public static void Initialize(IMeadowDevice device)
+        private static void Initialize()
         {
-            // if we're already init'd bail out
-            if (Initialized) { return; }
+            Write($"Initializing... ");
+            //capture unhandled exceptions
+            AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            // save the device
-            CurrentDevice = device;
+            // Load 'App.dll'
+            var loaded_app = Assembly.LoadFrom("/meadow0/App.exe");
+            var app_type = loaded_app.GetType("MeadowApp.MeadowApp");
+            if (app_type is null)
+                throw new Exception ("App not found. Looking for 'MeadowApp.MeadowApp' type");
 
-            // initialize the devices' platform OS
-            platformOS.Initialize();
-
-            // used to capture the thread for `InvokeOnMainThread()`
-            synchronizationContext = new MeadowSynchronizationContext();
-            SynchronizationContext.SetSynchronizationContext(synchronizationContext);
-            SetSynchronizationContext(synchronizationContext);
+            // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
+            var device_type = app_type.BaseType.GetGenericArguments()[0];
+            CurrentDevice = Activator.CreateInstance(device_type) as IMeadowDevice;
+            CurrentDevice.Initialize();
+            CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
             // initialize file system folders and such
             // TODO: move this to platformOS
             InitializeFileSystem();
 
-            Initialized = true;
+            // Create the app object, bound immediately to the <IMeadowDevice>
+            app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
+
+            CurrentDevice.BeforeSleep += () => { app.BeforeSleep(); };
+            CurrentDevice.AfterWake += () => { app.AfterSleep(); };
+            CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
+
+            WriteLine($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+        }
+
+        private static void Shutdown()
+        {
+            app = null;
+            // Do a best-attempt at freeing memory and resources
+            GC.Collect(GC.MaxGeneration);
+            WriteLine("Done.");
+            Thread.Sleep(-1);
         }
 
 
@@ -96,15 +166,11 @@ namespace Meadow
         /// </summary>
         internal static void InitializeFileSystem()
         {
-            Console.WriteLine("Initializing file system...");
-
             CreateFolderIfNeeded(FileSystem.CacheDirectory);
             CreateFolderIfNeeded(FileSystem.DataDirectory);
             CreateFolderIfNeeded(FileSystem.DocumentsDirectory);
             EmptyDirectory(FileSystem.TempDirectory);
             CreateFolderIfNeeded(FileSystem.TempDirectory);
-
-            Console.WriteLine("File system initialized.");
         }
 
         private static void EmptyDirectory(string path)
@@ -119,43 +185,36 @@ namespace Meadow
         private static void CreateFolderIfNeeded(string path)
         {
             if (!Directory.Exists(path)) {
-                Console.WriteLine($"Directory doesn't exist, creating '{path}'");
                 try
                 {
                     Directory.CreateDirectory(path);
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine($"  Failed: {ex.Message}");
+                    WriteLine($"Failed: {ex.Message}");
                 }
             }
         }
 
-
-        //==== Synchronization context
-
-        // TODO: We should consider adding a second synch context for UX updates
-        // and make a method of `BeginInvokeOnUxThread()` so that the main thread
-        // can be reserved for hardware response and if we needed to so that
-        // queued operations on the UX thread such as renders wouldn't affect
-        // hardware response.
-
-        internal static void SetSynchronizationContext(SynchronizationContext context)
+        private static Exception SystemFailure (Exception e, string? message = null)
         {
-            synchronizationContext = context;
+            if (app is null)
+                Write("OS startup failure:");
+            else
+                Write("App failure:");
+
+            WriteLine(message);
+            WriteLine($"{e.GetType()}: {e.Message}");
+            WriteLine(e.StackTrace);
+            WriteLine("App failure. Meadow will restart in 5 seconds.");
+            Thread.Sleep(5000);
+            CurrentDevice.Reset();
+            throw e; // no return from this function
         }
 
-        /// <summary>
-        /// Runs the specified action on the main thread.
-        /// </summary>
-        /// <param name="action">The action to execute.</param>
-        public static void BeginInvokeOnMainThread(Action action)
+        private static void StaticOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            if (synchronizationContext == null) {
-                action();
-            } else {
-                synchronizationContext.Send(delegate { action(); }, null);
-            }
+            SystemFailure(e.ExceptionObject as Exception, "Unhandled exception");
         }
 
     }
