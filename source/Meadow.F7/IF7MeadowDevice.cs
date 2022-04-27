@@ -13,8 +13,5 @@ namespace Meadow
         AntennaType CurrentAntenna { get; }
 
         void SetAntenna(AntennaType antenna, bool persist = true);
-
-        // TODO: put on a different interface
-        Temperature GetProcessorTemperature();
     }
 }
