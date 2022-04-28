@@ -157,6 +157,19 @@ namespace Meadow.Devices
             return result;
         }
 
+        public static int Ioctl(Nuttx.UpdIoctlFn request, Nuttx.UpdSleepCommand command)
+        {
+            var result = Nuttx.ioctl(DriverHandle, request, ref command);
+            if (result != 0)
+            {
+                var err = GetLastError();
+                Console.WriteLine($"ioctl {request} failed {err}");
+                return (int)err;
+            }
+            return result;
+        }
+        
+
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdGpioInterruptConfiguration interruptConfig)
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref interruptConfig);

@@ -76,6 +76,10 @@ namespace Meadow
 
             _device.Initialize();
 
+            _device.BeforeSleep += () => { WillSleep(); };
+            _device.AfterWake += () => { OnWake(); };
+            _device.BeforeReset += () => { WillReset(); };
+
             // initialze MeadowOS
             MeadowOS.Initialize(_device);
 
