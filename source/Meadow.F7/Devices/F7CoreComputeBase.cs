@@ -53,11 +53,11 @@ namespace Meadow.Devices
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
         {
-            if (clock.Name == (Pins as F7CoreCompute.Pinout)?.I2C3_SCL.Name)
+            if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.I2C3_SCL.Name)
             {
                 return 3;
             }
-            if (clock.Name == (Pins as F7CoreCompute.Pinout)?.I2C1_SCL.Name)
+            if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.I2C1_SCL.Name)
             {
                 return 1;
             }
@@ -100,11 +100,11 @@ namespace Meadow.Devices
             {
                 return 2;
             }
-            else if (clock.Name == (Pins as F7CoreCompute.Pinout)?.SPI3_SCK.Name)
+            else if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.SPI3_SCK.Name)
             {
                 return 3;
             }
-            else if (clock.Name == (Pins as F7CoreCompute.Pinout)?.SPI5_SCK.Name)
+            else if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.SPI5_SCK.Name)
             {
                 return 5;
             }

@@ -13,7 +13,7 @@ namespace Meadow.Devices
     /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
     /// capabilities and provides access to the various device-specific features.
     /// </summary>
-    public abstract partial class F7MicroBase : IF7MeadowDevice, IBatteryChargeController
+    public abstract partial class F7MicroBase : IF7MeadowDevice
     {
         //==== events
         public event EventHandler WiFiAdapterInitialized = delegate { };
@@ -126,27 +126,28 @@ namespace Meadow.Devices
             }
         }
 
-        //TODO: need the Read()/StartUpdating()/StopUpdating() pattern here.
         /// <summary>
-        /// Gets the current battery charge level in voltage.
+        /// Gets the current Battery information
         /// </summary>
-        public Voltage GetBatteryLevel()
+        /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
+        public virtual BatteryInfo GetBatteryInfo()
         {
             if (Coprocessor != null)
             {
-                return (new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts));
+                return new BatteryInfo
+                {
+                    Voltage = new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts)
+                };
             }
-            else
-            {
-                throw new Exception("Coprocessor not initialized.");
-            }
+
+            throw new Exception("Coprocessor not initialized.");
         }
 
         /// <summary>
-        /// Gets the current processor temerpature
+        /// Gets the current processor temperature
         /// </summary>
         /// <returns></returns>
-        public Temperature GetProcessorTemperature()
+        public virtual Temperature GetProcessorTemperature()
         {
             return IoController.GetTemperature();
         }
