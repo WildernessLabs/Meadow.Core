@@ -83,7 +83,7 @@ namespace Meadow
             return Interop.ioctl(fileDescriptor, Interop._IOWR(0xb4, 0x09, Marshal.SizeOf(data)), (byte*)&data);
         }
 
-        public unsafe void SetConfiguration(int gpio, LineConfiguration configuration)
+        public unsafe GpioHandleRequest SetConfiguration(int gpio, LineConfiguration configuration)
         {
             // get a line handle
             var request = new GpioHandleRequest();
@@ -96,9 +96,24 @@ namespace Meadow
             {
                 throw new NativeException($"Unable to get an IOCTL request handle");
             }
+
+            return request;
         }
 
-        public unsafe void SetValue(int gpio, bool value)
+        public unsafe void SetValue(GpioHandleRequest request, bool value)
+        {
+            var state = new GpioHandleData();
+            state.Values[0] = (byte)(value ? 1 : 0);
+
+            var result = IoctlSetLineValues(request.FileDescriptor, state);
+
+            if (result == -1)
+            {
+                throw new NativeException($"Unable to set IOCTL data");
+            }
+        }
+
+        private unsafe void SetValue2(int gpio, bool value)
         {
             // get a line handle, configured as output
             var request = new GpioHandleRequest();

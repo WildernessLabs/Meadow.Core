@@ -6,7 +6,9 @@ namespace Meadow
     public class RaspberryPiPinout : IPinDefinitions
     {
         public IList<IPin> AllPins => new List<IPin> {
-            GPIO2, GPIO3, GPIO4, GPIO10, GPIO11, GPIO12, GPIO13, GPIO16, GPIO17, GPIO18, GPIO19, GPIO20, GPIO21, GPIO22, GPIO23, GPIO24, GPIO25, GPIO26, GPIO27
+            GPIO2, GPIO3, GPIO4, GPIO10, GPIO11, GPIO12, GPIO13, GPIO16, 
+            GPIO17, GPIO18, GPIO19, GPIO20, GPIO21, GPIO22, GPIO23, GPIO24, 
+            GPIO25, GPIO26, GPIO27
         };
 
         public IPin GPIO2 => new SysFsPin("GPIO2", "PIN03", 2);
@@ -32,7 +34,8 @@ namespace Meadow
         public IPin GPIO16 => new SysFsPin("GPIO16", "PIN36", 16);
         public IPin GPIO26 => new SysFsPin("GPIO26", "PIN37", 26);
         public IPin GPIO20 => new SysFsPin("GPIO20", "PIN38", 20);
-        public IPin GPIO21 => new SysFsPin("GPIO21", "PIN40", 21);
+
+        public IPin GPIO21 => new GpiodPin("GPIO21", "PIN40", 21);
 
         // aliases for sanity
         public IPin Pin3 => GPIO2;
