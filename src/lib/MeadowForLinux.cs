@@ -14,7 +14,6 @@ namespace Meadow
         where TPinout : IPinDefinitions, new()
     {
         private SysFsGpioDriver _ioController = null!;
-        private Gpiod _gpiod = null!;
 
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
@@ -27,6 +26,10 @@ namespace Meadow
                 if (typeof(TPinout) == typeof(JetsonNanoPinout))
                 {
                     return new JetsonNanoSerialPortNameDefinitions();
+                }
+                if (typeof(TPinout) == typeof(JetsonXavierAGXPinout))
+                {
+                    return new JetsonXavierAGXSerialPortNameDefinitions();
                 }
                 else if (typeof(TPinout) == typeof(RaspberryPiPinout))
                 {
@@ -53,7 +56,6 @@ namespace Meadow
         public void Initialize()
         {
             _ioController = new SysFsGpioDriver();
-            _gpiod = new Gpiod();
         }
 
         public IPin GetPin(string pinName)
@@ -78,7 +80,7 @@ namespace Meadow
 
         public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
         {
-            // TODO: implement this based on channel caps (this is Jetson specific right now)
+            // TODO: implement this based on channel caps (this is platform specific right now)
 
             if (Pins is JetsonNanoPinout)
             {
@@ -89,6 +91,17 @@ namespace Meadow
                 else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
                 {
                     return new I2CBus(0, frequency);
+                }
+            }
+            if (Pins is JetsonXavierAGXPinout)
+            {
+                if (clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
+                {
+                    return new I2CBus(1, frequency);
+                }
+                else if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
+                {
+                    return new I2CBus(8, frequency);
                 }
             }
             else if (Pins is RaspberryPiPinout)
@@ -122,8 +135,7 @@ namespace Meadow
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
             // TODO: move to the GPIO character driver to support things like resistor mode
-            return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
-            //return new SysFsDigitalOutputPort(_ioController, pin, initialState);
+            return new SysFsDigitalOutputPort(_ioController, pin, initialState);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
@@ -149,7 +161,12 @@ namespace Meadow
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
-        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleIntervalMs, Voltage voltageReference)
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, float voltageReference = 3.3F)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
         {
             throw new NotImplementedException();
         }

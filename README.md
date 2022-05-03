@@ -1,12 +1,13 @@
-# Meadow For Linux
+# Wilderness Labs Meadow.Linux
+
+## Repo Status
+
+[![Build](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml)  
+[![NuGet Package Creation](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/package.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/package.yml)
 
 ## Summary
 
-Wilderness Labs Meadow for Linux is a .NET Framework for running IoT applications on Linux devices.  A Meadow for Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
-
-## Current State
-
-![Build](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml/badge.svg)
+Wilderness Labs Meadow.Linux is a .NET Framework for running IoT applications on Linux devices.  A Meadow.Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
 
 ## Supported Platforms and Distributions
 
@@ -14,9 +15,10 @@ Currently tested platforms and distributions:
 
 | Hardware | Distro | Meadow.Core Version tested |
 | :---: | :---: | :---: |
-| Raspberry Pi 4 | Raspberry Pi OS | Beta 6 |
-| Raspberry Pi Zero 2w | Raspberry Pi OS | Beta 6 |
-| Jetson Nano | Ubuntu 20.04 | Beta 6 |
+| Raspberry Pi 4 | Raspberry Pi OS | Beta 6.2 |
+| Raspberry Pi Zero 2w | Raspberry Pi OS | Beta 6.2 |
+| Jetson Nano | Ubuntu 20.04 | Beta 6.2 |
+| Jetson Xavier AGX | Ubuntu 18.04 | Beta 6.2 |
 
 ## License
 
@@ -26,22 +28,23 @@ See [LICENSE File](/LICENSE)
 
 ## Device Prerequisites
 
-- Your device must have .NET 5.0 installed, unless you are running inside a container in which case the container image must have .NET 5.0 included. All [Wilderness Labs m4l Docker images](https://hub.docker.com/u/wildernesslabs) (samples and base) have the .NET 5.0 runtime included.
+- Your device must have .NET 5.0 or .NET 6.0 installed, unless you are running inside a container in which case the container image must have .NET included. All [Wilderness Labs m4l Docker images](https://hub.docker.com/u/wildernesslabs) (samples and base) have the .NET runtime included.
 - You must have hardware drivers enabled (e.g. I2C on Raspberry Pi is disabled by default and is enabled by running `raspi-config`)
 
-### Install .NET 5.0
+### Install .NET 5.0 or .NET 6.0
+
+Follow the instructions based on your distro:
+
+https://docs.microsoft.com/en-us/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website
+
 ```
-$ curl -SL -o dotnet.tar.gz https://download.visualstudio.microsoft.com/download/pr/09a24e9f-0096-454a-b761-70cdf9504775/eafe9578bbedd15c9319b7580d5a20d9/dotnet-runtime-5.0.7-linux-arm.tar.gz
-$ sudo mkdir -p /usr/share/dotnet
-$ sudo tar -zxf dotnet.tar.gz -C /usr/share/dotnet
-$ sudo ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
-$ $ dotnet --list-runtimes
-Microsoft.NETCore.App 5.0.7 [/usr/share/dotnet/shared/Microsoft.NETCore.App]
+$ dotnet --list-runtimes
+Microsoft.NETCore.App 6.0.1 [/opt/dotnet/shared/Microsoft.NETCore.App]
 ```
 
 ## Deploying
 
-- Create the application as a .NET 5.0 App
+- Create the application as a .NET 6.0 App
 - Copy over your application binaries and `App.runtimeconfig.json`.  Do *not* copy over App.deps.json
 
 Here's an example of all of the binaries for simple application using a BME280 and Meadow Foundation

@@ -1,6 +1,5 @@
 ﻿using Meadow;
 using Meadow.Foundation;
-using Meadow.Foundation.Displays;
 using Meadow.Foundation.Displays.TftSpi;
 using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
@@ -31,7 +30,7 @@ namespace PushButton_Sample
         private IGraphicsDisplay ConfigureDisplay()
         {
             var config = new SpiClockConfiguration(
-                new Meadow.Units.Frequency(48, Meadow.Units.Frequency.UnitType.Megahertz), 
+                new Meadow.Units.Frequency(48, Meadow.Units.Frequency.UnitType.Megahertz),
                 SpiClockConfiguration.Mode.Mode3);
 
             try
