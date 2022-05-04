@@ -72,7 +72,7 @@ namespace Meadow.Devices
         /// <summary>
         /// 
         /// </summary>
-        private Semaphore _connectionSemaphore;
+        private readonly Semaphore _connectionSemaphore = new Semaphore(0, 1);
 
         #endregion Member variables.
 
@@ -246,33 +246,33 @@ namespace Meadow.Devices
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
         protected void InvokeEvent(WiFiFunction eventId, StatusCodes statusCode, byte[] payload)
         {
-            try
+            switch (eventId)
             {
-                switch (eventId)
-                {
-                    case WiFiFunction.ConnectToAccessPointEvent:
+                case WiFiFunction.ConnectToAccessPointEvent:
+                    try
+                    {
                         RaiseWiFiConnected(statusCode, payload);
-                        break;
-                    case WiFiFunction.DisconnectFromAccessPointEvent:
-                        RaiseWiFiDisconnected(statusCode, payload);
-                        break;
-                    case WiFiFunction.StartWiFiInterfaceEvent:
-                        RaiseWiFiInterfaceStarted(statusCode, payload);
-                        break;
-                    case WiFiFunction.StopWiFiInterfaceEvent:
-                        RaiseWiFiInterfaceStopped(statusCode, payload);
-                        break;
-                    case WiFiFunction.NtpUpdateEvent:
-                        RaiseNtpTimeChangedEvent();
-                        break;
-                    default:
-                        throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
-                }
-            }
-            finally
-            {
-                // always release the connection semaphore, whether we connected successfully or failed
-                _connectionSemaphore.Release();
+                    }
+                    finally
+                    {
+                        // always release the connection semaphore, whether we connected successfully or failed
+                        _connectionSemaphore.Release();
+                    }
+                    break;
+                case WiFiFunction.DisconnectFromAccessPointEvent:
+                    RaiseWiFiDisconnected(statusCode, payload);
+                    break;
+                case WiFiFunction.StartWiFiInterfaceEvent:
+                    RaiseWiFiInterfaceStarted(statusCode, payload);
+                    break;
+                case WiFiFunction.StopWiFiInterfaceEvent:
+                    RaiseWiFiInterfaceStopped(statusCode, payload);
+                    break;
+                case WiFiFunction.NtpUpdateEvent:
+                    RaiseNtpTimeChangedEvent();
+                    break;
+                default:
+                    throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
             }
         }
 
@@ -523,8 +523,6 @@ namespace Meadow.Devices
                 //  event could sometimes be fired before this method had the chance to set
                 //  the various network properties.
                 //
-                _connectionSemaphore = new Semaphore(0, 1);
-
                 try
                 {
                     // TODO: should be async and awaited
