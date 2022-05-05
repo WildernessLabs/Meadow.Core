@@ -5,12 +5,10 @@ namespace Meadow
 {
     public class GpiodDigitalInputPort : DigitalInputPortBase
     {
-        private int Gpio { get; set; } = -1;
         private Gpiod Driver { get; }
+        private LineInfo Line { get; }
 
-        private GpioHandleRequest _request;
-
-        public override bool State => Driver.GetValue(_request);
+        public override bool State => Line.GetValue();
 
         internal GpiodDigitalInputPort(
             Gpiod driver,
@@ -36,7 +34,8 @@ namespace Meadow
 
             if (pin is GpiodPin { } gp)
             {
-                Gpio = gp.Gpio;
+                Line = Driver.Request(gp);
+                Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_INPUT);
             }
             else
             {

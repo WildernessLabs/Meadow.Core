@@ -1,20 +1,17 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Meadow
 {
-    internal class LineInfo
-    {
-    }
-
     internal class ChipInfo : IDisposable
     {
-        private IntPtr Handle { get; set; }
+        public IntPtr Handle { get; private set; }
         private Gpiod.Interop.gpiod_chip? Chip { get; }
         public string Name { get; } = string.Empty;
         public string Label { get; } = string.Empty;
 
-        public int Lines { get; } = 0;
+        public LineCollection Lines { get; }
 
         public bool IsInvalid => Handle.ToInt64() <= 0;
 
@@ -30,9 +27,11 @@ namespace Meadow
             if (!IsInvalid)
             {
                 Chip = Marshal.PtrToStructure<Gpiod.Interop.gpiod_chip>(Handle);
-                Name = new string(Chip.Value.name);
-                Label = new string(Chip.Value.label);
-                Lines = (int)Chip.Value.num_lines;
+                Name = new string(Chip.Value.name).Trim('\0');
+                Label = new string(Chip.Value.label).Trim('\0');
+
+                // Init as an array of nulls.  We'll populate as they are accessed
+                Lines = new LineCollection(this, (int)Chip.Value.num_lines);
             }
         }
 

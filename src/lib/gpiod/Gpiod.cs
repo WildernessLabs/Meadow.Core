@@ -17,14 +17,14 @@ namespace Meadow
 
         public bool IsDisposed { get; private set; }
 
-        private List<ChipInfo> Chips { get; set; }
+        private ChipCollection Chips { get; set; }
         private Logger Logger { get; }
 
         private string[] DeviceNames = new string[] { "gpiochip0", "gpiochip1" };
 
         public unsafe Gpiod(Logger logger)
         {
-            Chips = new List<ChipInfo>();
+            Chips = new ChipCollection();
             Logger = logger;
 
             // TODO: query for list of chips
@@ -36,6 +36,11 @@ namespace Meadow
                     Chips.Add(info);
 
                     Logger.Debug(info.ToString());
+
+                    foreach (var line in info.Lines)
+                    {
+                        Logger.Debug(line.ToString());
+                    }
                 }
             }
         }
@@ -64,12 +69,20 @@ namespace Meadow
             GC.SuppressFinalize(this);
         }
 
+        public LineInfo Request(GpiodPin pin)
+        {
+            var line = Chips[pin.Chip].Lines[pin.Offset];
 
-        public unsafe void SetValue(GpioHandleRequest request, bool value)
+            // TODO: check availability, check for other reservations
+
+            return line;
+        }
+
+        public unsafe void SetValue(bool value)
         {
         }
 
-        public unsafe bool GetValue(GpioHandleRequest request)
+        public unsafe bool GetValue()
         {
             return false;
         }

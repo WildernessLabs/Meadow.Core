@@ -9,10 +9,10 @@ namespace Meadow
         public bool InitialState { get; private set; }
         public IPin Pin { get; private set; }
         private bool LastState { get; set; }
-        private int Gpio { get; set; } = -1;
-        private Gpiod Driver { get; }
 
-        private GpioHandleRequest _request;
+        private Gpiod Driver { get; }
+        private LineInfo Line { get; }
+
 
         public IDigitalChannelInfo Channel => throw new NotImplementedException(); // TODO
 
@@ -24,7 +24,8 @@ namespace Meadow
 
             if (pin is GpiodPin { } gp)
             {
-                Gpio = gp.Gpio;
+                Line = Driver.Request(gp);
+                Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_OUTPUT);
             }
             else
             {
@@ -38,7 +39,7 @@ namespace Meadow
             get => LastState;
             set
             {
-                Driver.SetValue(_request, value);
+                Line.SetValue(value);
 
                 LastState = value;
             }
@@ -46,7 +47,6 @@ namespace Meadow
 
         public void Dispose()
         {
-            Interop.close(_request.FileDescriptor);
         }
     }
 }
