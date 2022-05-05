@@ -3,6 +3,7 @@ using System;
 
 namespace Meadow
 {
+
     public class GpiodDigitalOutputPort : IDigitalOutputPort
     {
         public bool InitialState { get; private set; }
@@ -27,10 +28,8 @@ namespace Meadow
             }
             else
             {
-                throw new NativeException($"Pin {pin.Name} does not support SYS FS GPIO operations");
+                throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
             }
-
-            _request = driver.SetConfiguration(Gpio, LineConfiguration.Output);
 
         }
 

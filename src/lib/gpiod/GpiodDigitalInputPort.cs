@@ -1,18 +1,19 @@
 ﻿using Meadow.Hardware;
 using System;
-using System.Threading;
 
 namespace Meadow
 {
-    public class SysFsDigitalInputPort : DigitalInputPortBase, IDigitalInputPort
+    public class GpiodDigitalInputPort : DigitalInputPortBase
     {
         private int Gpio { get; set; } = -1;
-        private SysFsGpioDriver Driver { get; }
+        private Gpiod Driver { get; }
 
-        public override bool State => Driver.GetValue(Gpio);
+        private GpioHandleRequest _request;
 
-        internal SysFsDigitalInputPort(
-            SysFsGpioDriver driver,
+        public override bool State => Driver.GetValue(_request);
+
+        internal GpiodDigitalInputPort(
+            Gpiod driver,
             IPin pin,
             SysFsDigitalChannelInfo channel,
             InterruptMode interruptMode = InterruptMode.None,
@@ -32,44 +33,23 @@ namespace Meadow
 
             Driver = driver;
             Pin = pin;
-            if (pin is SysFsPin { } sp)
+
+            if (pin is GpiodPin { } gp)
             {
-                Gpio = sp.Gpio;
+                Gpio = gp.Gpio;
             }
             else
             {
-                throw new NativeException($"Pin {pin.Name} does not support SYS FS GPIO operations");
+                throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
             }
 
-            Driver.Export(Gpio);
-            Thread.Sleep(100); // this seems to be required to prevent an error 13
-            Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
-            switch (interruptMode)
-            {
-                case InterruptMode.None:
-                    // nothing to do
-                    break;
-                default:
-                    Driver.HookInterrupt(Gpio, interruptMode, InterruptCallback);
-                    break;
-            }
 
             InterruptMode = interruptMode;
         }
 
-        private void InterruptCallback()
-        {
-            // TODO: implement old/new
-            RaiseChangedAndNotify(new DigitalPortResult());
-        }
-
         public override void Dispose()
         {
-            if (Gpio >= 0)
-            {
-                Driver.UnhookInterrupt(Gpio);
-                Driver.Unexport(Gpio);
-            }
+            
         }
 
         public override ResistorMode Resistor

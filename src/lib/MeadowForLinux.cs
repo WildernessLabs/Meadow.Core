@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Logging;
 using Meadow.Units;
 using System;
 using System.Linq;
@@ -14,10 +15,12 @@ namespace Meadow
         where TPinout : IPinDefinitions, new()
     {
         private SysFsGpioDriver _ioController = null!;
+        private Gpiod _gpiod;
 
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
+        protected Logger Logger { get; private set; }
 
         public LinuxSerialPortNameDefinitions SerialPortNames
         {
@@ -55,7 +58,27 @@ namespace Meadow
 
         public void Initialize()
         {
+            Initialize(null);
+        }
+
+        public void Initialize(Logger? logger = null)
+        {
+            if (logger == null)
+            {
+                Logger = new Logger
+                {
+                    Loglevel = Loglevel.Debug
+                };
+                Logger.AddProvider(new ConsoleLogProvider());
+            }
+            else
+            {
+                Logger = logger;
+            }
+            
+
             _ioController = new SysFsGpioDriver();
+            _gpiod = new Gpiod(Logger);
         }
 
         public IPin GetPin(string pinName)
@@ -134,14 +157,12 @@ namespace Meadow
 
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
-            // TODO: move to the GPIO character driver to support things like resistor mode
-            return new SysFsDigitalOutputPort(_ioController, pin, initialState);
+            return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
         {
-            // TODO: move to the GPIO character driver to support things like resistor mode
-            return new SysFsDigitalInputPort(_ioController, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode);
+            return new GpiodDigitalInputPort(_gpiod, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode);
         }
 
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)

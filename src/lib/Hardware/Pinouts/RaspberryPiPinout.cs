@@ -33,8 +33,8 @@ namespace Meadow
         public IPin GPIO19 => new SysFsPin("GPIO19", "PIN35", 19);
         public IPin GPIO16 => new SysFsPin("GPIO16", "PIN36", 16);
         public IPin GPIO26 => new SysFsPin("GPIO26", "PIN37", 26);
-        public IPin GPIO20 => new SysFsPin("GPIO20", "PIN38", 20);
 
+        public IPin GPIO20 => new GpiodPin("GPIO20", "PIN38", 20);
         public IPin GPIO21 => new GpiodPin("GPIO21", "PIN40", 21);
 
         // aliases for sanity
