@@ -12,6 +12,16 @@ namespace DigitalIOSample
         public MeadowApp()
         {
             RunLoopback();
+            //CheckResistor();
+        }
+
+        void CheckResistor()
+        {
+            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
+            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
+
+            Console.WriteLine($"20 is {input20.State}");
+            Console.WriteLine($"21 is {input21.State}");
         }
 
         void RunPulse()
@@ -35,7 +45,7 @@ namespace DigitalIOSample
             var output = Device.CreateDigitalOutputPort(Device.Pins.GPIO21);
             var state = false;
 
-            var input = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.EdgeBoth, Meadow.Hardware.ResistorMode.Disabled);
+            var input = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.EdgeRising, Meadow.Hardware.ResistorMode.InternalPullUp);
 
             while (true)
             {

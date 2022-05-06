@@ -5,6 +5,8 @@ namespace Meadow
 {
     internal partial class Gpiod
     {
+        // https://github.com/brgl/libgpiod/blob/master/include/gpiod.h
+
         internal static class Interop
         {
             /*
@@ -78,6 +80,7 @@ namespace Meadow
             [Flags]
             public enum line_request_flags
             {
+                None = 0,
                 GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = 1 << 0,
                 /**< The line is an open-drain port. */
                 GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE = 1 << 1,
@@ -156,6 +159,14 @@ namespace Meadow
                 public char[] label;
             }
 
+            internal enum gpiod_event_type
+            {
+                GPIOD_LINE_EVENT_RISING_EDGE = 1,
+                /**< Rising edge event. */
+                GPIOD_LINE_EVENT_FALLING_EDGE,
+                /**< Falling edge event. */
+            }
+
             internal struct gpiod_line_request_config
             {
                 public string consumer;
@@ -164,6 +175,14 @@ namespace Meadow
                 /**< Request type. */
                 public int flags;
                 /**< Other configuration flags. */
+            };
+
+            internal struct gpiod_line_event
+            {
+                public timespec ts;
+                /**< Best estimate of time of event occurrence. */
+                public gpiod_event_type event_type;
+                /**< Type of the event that occurred. */
             };
 
             private const string LIB_GPIOD = "libgpiod.so.2";
@@ -211,6 +230,17 @@ namespace Meadow
             public static extern int gpiod_line_request_input(IntPtr line, string consumer);
 
             /**
+             * @brief Reserve a single line, set the direction to input.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @param flags Additional request flags.
+             * @return 0 if the line was properly reserved, -1 on failure.
+             */
+            // int gpiod_line_request_input_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_input_flags(IntPtr line, string consumer, line_request_flags flags);
+
+            /**
              * @brief Reserve a single line, set the direction to output.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.
@@ -243,10 +273,146 @@ namespace Meadow
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_set_value(IntPtr line, int value);
 
+            /**
+             * @brief Release a previously reserved line.
+             * @param line GPIO line object.
+             */
             // void gpiod_line_release(struct gpiod_line *line) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern void gpiod_line_release(IntPtr line);
+
             // bool gpiod_line_is_requested(struct gpiod_line *line) GPIOD_API;
             // bool gpiod_line_is_free(struct gpiod_line *line) GPIOD_API;
+
+            /**
+             * @brief Update the configuration of a single GPIO line.
+             * @param line GPIO line object.
+             * @param direction Updated direction which may be one of
+             *                  GPIOD_LINE_REQUEST_DIRECTION_AS_IS,
+             *                  GPIOD_LINE_REQUEST_DIRECTION_INPUT, or
+             *                  GPIOD_LINE_REQUEST_DIRECTION_OUTPUT.
+             * @param flags Replacement flags.
+             * @param value The new output value for the line when direction is
+             *              GPIOD_LINE_REQUEST_DIRECTION_OUTPUT.
+             * @return 0 is the operation succeeds. In case of an error this routine
+             *         returns -1 and sets the last error number.
+             */
             // int gpiod_line_set_config(struct gpiod_line *line, int direction, int flags, int value) GPIOD_API;
+
+            /**
+             * @brief Set the direction of a single GPIO line to output.
+             * @param line GPIO line object.
+             * @param value The logical value output on the line.
+             * @return 0 is the operation succeeds. In case of an error this routine
+             *         returns -1 and sets the last error number.
+             */
+            //int gpiod_line_set_direction_output(struct gpiod_line *line, int value) GPIOD_API;
+
+            /**
+             * @brief Set the direction of a single GPIO line to input.
+             * @param line GPIO line object.
+             * @return 0 is the operation succeeds. In case of an error this routine
+             *         returns -1 and sets the last error number.
+             */
+            //int gpiod_line_set_direction_input(struct gpiod_line *line) GPIOD_API;
+
+            /**
+             * @brief Update the configuration flags of a single GPIO line.
+             * @param line GPIO line object.
+             * @param flags Replacement flags.
+             * @return 0 is the operation succeeds. In case of an error this routine
+             *         returns -1 and sets the last error number.
+             */
+            // int gpiod_line_set_flags(struct gpiod_line *line, int flags) GPIOD_API;
+
+            internal struct timespec
+            {
+                public ulong tv_sec;      //   seconds 
+                public ulong tv_nsec;       // nanoseconds 
+            };
+
+            /**
+             * @brief Wait for an event on a single line.
+             * @param line GPIO line object.
+             * @param timeout Wait time limit.
+             * @return 0 if wait timed out, -1 if an error occurred, 1 if an event
+             *         occurred.
+             */
+            //int gpiod_line_event_wait(struct gpiod_line *line, const struct timespec *timeout) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_event_wait(IntPtr line, ref timespec timeout);
+
+
+            /**
+             * @brief Request rising edge event notifications on a single line.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @return 0 if the operation succeeds, -1 on failure.
+             */
+            //int gpiod_line_request_rising_edge_events(struct gpiod_line *line, const char* consumer) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_rising_edge_events(IntPtr line, string consumer);
+
+            /**
+             * @brief Request rising edge event notifications on a single line.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @param flags Additional request flags.
+             * @return 0 if the operation succeeds, -1 on failure.
+             */
+            // int gpiod_line_request_rising_edge_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, string consumer, line_request_flags flags);
+
+            /**
+             * @brief Request falling edge event notifications on a single line.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @return 0 if the operation succeeds, -1 on failure.
+             */
+            //int gpiod_line_request_falling_edge_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_falling_edge_events(IntPtr line, string consumer);
+
+            /**
+             * @brief Request all event type notifications on a single line.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @return 0 if the operation succeeds, -1 on failure.
+             */
+            //int gpiod_line_request_both_edges_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_both_edges_events(IntPtr line, string consumer);
+
+            /**
+             * @brief Request falling edge event notifications on a single line.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @param flags Additional request flags.
+             * @return 0 if the operation succeeds, -1 on failure.
+             */
+            // int gpiod_line_request_falling_edge_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
+
+            /**
+             * @brief Request all event type notifications on a single line.
+             * @param line GPIO line object.
+             * @param consumer Name of the consumer.
+             * @param flags Additional request flags.
+             * @return 0 if the operation succeeds, -1 on failure.
+             */
+            //int gpiod_line_request_both_edges_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;       
+
+            /**
+             * @brief Read next pending event from the GPIO line.
+             * @param line GPIO line object.
+             * @param event Buffer to which the event data will be copied.
+             * @return 0 if the event was read correctly, -1 on error.
+             * @note This function will block if no event was queued for this line.
+             */
+            //int gpiod_line_event_read(struct gpiod_line *line, struct gpiod_line_event *event) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_event_read(IntPtr line, ref gpiod_line_event evnt);
+            
         }
     }
 }

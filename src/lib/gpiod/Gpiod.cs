@@ -69,22 +69,13 @@ namespace Meadow
             GC.SuppressFinalize(this);
         }
 
-        public LineInfo Request(GpiodPin pin)
+        public LineInfo GetLine(GpiodPin pin)
         {
             var line = Chips[pin.Chip].Lines[pin.Offset];
 
             // TODO: check availability, check for other reservations
 
             return line;
-        }
-
-        public unsafe void SetValue(bool value)
-        {
-        }
-
-        public unsafe bool GetValue()
-        {
-            return false;
         }
     }
 }

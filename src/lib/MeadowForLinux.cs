@@ -162,7 +162,7 @@ namespace Meadow
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
         {
-            return new GpiodDigitalInputPort(_gpiod, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode);
+            return new GpiodDigitalInputPort(_gpiod, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode, resistorMode);
         }
 
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)

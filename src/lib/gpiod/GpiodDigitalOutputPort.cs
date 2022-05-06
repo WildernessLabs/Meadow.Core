@@ -24,7 +24,7 @@ namespace Meadow
 
             if (pin is GpiodPin { } gp)
             {
-                Line = Driver.Request(gp);
+                Line = Driver.GetLine(gp);
                 Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_OUTPUT);
             }
             else
@@ -47,6 +47,7 @@ namespace Meadow
 
         public void Dispose()
         {
+            Line.Release();
         }
     }
 }

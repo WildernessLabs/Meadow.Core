@@ -1,6 +1,8 @@
 ﻿using Meadow.Hardware;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using static Meadow.Gpiod.Interop;
 
 namespace Meadow
@@ -16,6 +18,10 @@ namespace Meadow
         public line_active_state ActiveState { get; private set; }
 
         public bool IsInvalid => Handle.ToInt64() <= 0;
+
+        private bool _istIsRunning = false;
+        private bool _istShouldStop = false;
+        public event EventHandler InterruptOccurred = delegate { };
 
         public LineInfo(ChipInfo chip, int offset)
         {
@@ -64,6 +70,90 @@ namespace Meadow
             {
                 throw new NativeException("Failed to request line", Marshal.GetLastWin32Error());
             }
+        }
+
+        public void RequestInput(line_request_flags flags)
+        {
+            // TODO: check for free?
+            var result = gpiod_line_request_input_flags(Handle, MeadowConsumer, flags);
+
+            if (result == -1)
+            {
+                throw new NativeException("Failed to request line", Marshal.GetLastWin32Error());
+            }
+        }
+
+        public void SpawnIST(InterruptMode mode, line_request_flags flags)
+        {
+            if (_istIsRunning) return;
+
+            _istShouldStop = false;
+
+            switch (mode)
+            {
+                case InterruptMode.EdgeRising:
+                    gpiod_line_request_rising_edge_events_flags(Handle, MeadowConsumer, flags);
+                    break;
+                case InterruptMode.EdgeFalling:
+                    gpiod_line_request_falling_edge_events(Handle, MeadowConsumer);
+                    break;
+                case InterruptMode.EdgeBoth:
+                    gpiod_line_request_both_edges_events(Handle, MeadowConsumer);
+                    break;
+                default:
+                    return;
+            }
+
+            Task.Run(() => IST());
+        }
+
+        private void IST()
+        {
+            _istIsRunning = true;
+            timespec timeout = new timespec { tv_sec = 1 }; // 1-second timeout
+            gpiod_line_event evnt = new gpiod_line_event();
+
+            while (!_istShouldStop)
+            {
+                var result = gpiod_line_event_wait(Handle, ref timeout);
+
+                switch (result)
+                {
+                    case 0: // timeout
+                        // nop, just wait again
+                        break;
+                    case 1: // event
+                        Console.WriteLine($"INTERRUPT");
+                        /*
+                        result = gpiod_line_event_read(Handle, ref evnt);
+
+                        if (result == 0)
+                        {
+                            Console.WriteLine($"INTERRUPT {evnt.event_type}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"READ INTERRUPT ERR {Marshal.GetLastWin32Error()}");
+                        }
+                        Thread.Sleep(500);
+                        */
+                        InterruptOccurred?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case -1: // error
+                    default: //undefined
+                        throw new NativeException("Waiting for interrupt event failed", Marshal.GetLastWin32Error());
+                        break;
+                }
+
+            }
+
+            _istIsRunning = false;
+        }
+
+        public void Release()
+        {
+            _istShouldStop = true;
+            gpiod_line_release(Handle);
         }
 
         public void SetValue(bool state)
