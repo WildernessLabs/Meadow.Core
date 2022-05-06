@@ -1,12 +1,13 @@
 ﻿using Meadow.Hardware;
 using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.Gpiod.Interop;
 
 namespace Meadow
 {
+    internal delegate void LineEventHandler(LineInfo lineInfo, gpiod_line_event evt);
+    
     internal class LineInfo
     {
         private IntPtr Handle { get; set; }
@@ -21,7 +22,7 @@ namespace Meadow
 
         private bool _istIsRunning = false;
         private bool _istShouldStop = false;
-        public event EventHandler InterruptOccurred = delegate { };
+        public event LineEventHandler InterruptOccurred = delegate { };
 
         public LineInfo(ChipInfo chip, int offset)
         {
@@ -83,28 +84,37 @@ namespace Meadow
             }
         }
 
-        public void SpawnIST(InterruptMode mode, line_request_flags flags)
+        public void RequestInterrupts(InterruptMode mode, line_request_flags flags)
         {
             if (_istIsRunning) return;
 
             _istShouldStop = false;
 
+            int result;
+
             switch (mode)
             {
                 case InterruptMode.EdgeRising:
-                    gpiod_line_request_rising_edge_events_flags(Handle, MeadowConsumer, flags);
+                    result = gpiod_line_request_rising_edge_events_flags(Handle, MeadowConsumer, flags);
                     break;
                 case InterruptMode.EdgeFalling:
-                    gpiod_line_request_falling_edge_events(Handle, MeadowConsumer);
+                    result = gpiod_line_request_falling_edge_events(Handle, MeadowConsumer);
                     break;
                 case InterruptMode.EdgeBoth:
-                    gpiod_line_request_both_edges_events(Handle, MeadowConsumer);
+                    result = gpiod_line_request_both_edges_events(Handle, MeadowConsumer);
                     break;
                 default:
                     return;
             }
 
-            Task.Run(() => IST());
+            if (result == -1)
+            {
+                throw new NativeException($"Failed to request interrupts: {Marshal.GetLastWin32Error()}", Marshal.GetLastWin32Error());
+            }
+            else
+            {
+                Task.Run(() => IST());
+            }
         }
 
         private void IST()
@@ -123,26 +133,20 @@ namespace Meadow
                         // nop, just wait again
                         break;
                     case 1: // event
-                        Console.WriteLine($"INTERRUPT");
-                        /*
                         result = gpiod_line_event_read(Handle, ref evnt);
 
                         if (result == 0)
                         {
-                            Console.WriteLine($"INTERRUPT {evnt.event_type}");
+                            InterruptOccurred?.Invoke(this, evnt);
                         }
                         else
                         {
-                            Console.WriteLine($"READ INTERRUPT ERR {Marshal.GetLastWin32Error()}");
+                            throw new NativeException("Failed to read interrupt data", Marshal.GetLastWin32Error());
                         }
-                        Thread.Sleep(500);
-                        */
-                        InterruptOccurred?.Invoke(this, EventArgs.Empty);
                         break;
                     case -1: // error
                     default: //undefined
                         throw new NativeException("Waiting for interrupt event failed", Marshal.GetLastWin32Error());
-                        break;
                 }
 
             }

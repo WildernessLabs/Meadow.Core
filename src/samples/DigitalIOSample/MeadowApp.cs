@@ -46,6 +46,10 @@ namespace DigitalIOSample
             var state = false;
 
             var input = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.EdgeRising, Meadow.Hardware.ResistorMode.InternalPullUp);
+            input.Changed += (s, e) =>
+            {
+                Console.WriteLine($"Interrupt: {e.New.State}");
+            };
 
             while (true)
             {

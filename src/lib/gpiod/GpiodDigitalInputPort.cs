@@ -48,30 +48,33 @@ namespace Meadow
                         break;
                 }
 
-                Console.WriteLine($"Flags: {flags}");
-                Line.RequestInput(flags);
+                InterruptMode = interruptMode;
+
+                switch (InterruptMode)
+                {
+                    case InterruptMode.EdgeRising:
+                    case InterruptMode.EdgeFalling:
+                    case InterruptMode.EdgeBoth:
+                        Line.InterruptOccurred += OnInterruptOccurred;
+                        Line.RequestInterrupts(InterruptMode, flags);
+                        break;
+                    default:
+                        Line.RequestInput(flags);
+                        break;
+                }
+
             }
             else
             {
                 throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
             }
-
-            InterruptMode = interruptMode;
-
-            switch(InterruptMode)
-            {
-                case InterruptMode.EdgeRising:
-                case InterruptMode.EdgeFalling:
-                case InterruptMode.EdgeBoth:
-                    Line.SpawnIST(InterruptMode, flags);
-                    Line.InterruptOccurred += OnInterruptOccurred;
-                    break;
-            }
         }
 
-        private void OnInterruptOccurred(object sender, EventArgs e)
+        private void OnInterruptOccurred(LineInfo sender, gpiod_line_event e)
         {
-            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(State, DateTime.UtcNow) });
+            var state = e.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE ? true : false;
+
+            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
         }
 
         public override void Dispose()
