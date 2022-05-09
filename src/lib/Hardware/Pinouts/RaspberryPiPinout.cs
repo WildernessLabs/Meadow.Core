@@ -11,29 +11,28 @@ namespace Meadow
             GPIO25, GPIO26, GPIO27
         };
 
-        public IPin GPIO2 => new SysFsPin("GPIO2", "PIN03", 2);
-        public IPin GPIO3 => new SysFsPin("GPIO3", "PIN05", 3);
-        public IPin GPIO4 => new SysFsPin("GPIO4", "PIN07", 4);
-        public IPin GPIO17 => new SysFsPin("GPIO17", "PIN11", 17);
-        public IPin GPIO18 => new SysFsPin("GPIO18", "PIN12", 18);
-        public IPin GPIO27 => new SysFsPin("GPIO27", "PIN13", 27);
-        public IPin GPIO22 => new SysFsPin("GPIO22", "PIN15", 22);
-        public IPin GPIO23 => new SysFsPin("GPIO23", "PIN16", 23);
-        public IPin GPIO24 => new SysFsPin("GPIO24", "PIN18", 24);
-        public IPin GPIO10 => new SysFsPin("GPIO10", "PIN19", 10);
-        public IPin GPIO9 => new SysFsPin("GPIO9", "PIN21", 9);
-        public IPin GPIO25 => new SysFsPin("GPIO25", "PIN22", 25);
-        public IPin GPIO11 => new SysFsPin("GPIO11", "PIN23", 11);
-        public IPin GPIO8 => new SysFsPin("GPIO8", "PIN24", 8);
-        public IPin GPIO7 => new SysFsPin("GPIO7", "PIN26", 7);
-        public IPin GPIO5 => new SysFsPin("GPIO5", "PIN29", 5);
-        public IPin GPIO6 => new SysFsPin("GPIO6", "PIN31", 6);
-        public IPin GPIO12 => new SysFsPin("GPIO12", "PIN32", 12);
-        public IPin GPIO13 => new SysFsPin("GPIO13", "PIN33", 13);
-        public IPin GPIO19 => new SysFsPin("GPIO19", "PIN35", 19);
-        public IPin GPIO16 => new SysFsPin("GPIO16", "PIN36", 16);
-        public IPin GPIO26 => new SysFsPin("GPIO26", "PIN37", 26);
-
+        public IPin GPIO2 => new GpiodPin("GPIO2", "PIN03", "gpiochip0", 2);
+        public IPin GPIO3 => new GpiodPin("GPIO3", "PIN05", "gpiochip0", 3);
+        public IPin GPIO4 => new GpiodPin("GPIO4", "PIN07", "gpiochip0", 4);
+        public IPin GPIO17 => new GpiodPin("GPIO17", "PIN11", "gpiochip0", 17);
+        public IPin GPIO18 => new GpiodPin("GPIO18", "PIN12", "gpiochip0", 18);
+        public IPin GPIO27 => new GpiodPin("GPIO27", "PIN13", "gpiochip0", 27);
+        public IPin GPIO22 => new GpiodPin("GPIO22", "PIN15", "gpiochip0", 22);
+        public IPin GPIO23 => new GpiodPin("GPIO23", "PIN16", "gpiochip0", 23);
+        public IPin GPIO24 => new GpiodPin("GPIO24", "PIN18", "gpiochip0", 24);
+        public IPin GPIO10 => new GpiodPin("GPIO10", "PIN19", "gpiochip0", 10);
+        public IPin GPIO9 => new GpiodPin("GPIO9", "PIN21", "gpiochip0", 9);
+        public IPin GPIO25 => new GpiodPin("GPIO25", "PIN22", "gpiochip0", 25);
+        public IPin GPIO11 => new GpiodPin("GPIO11", "PIN23", "gpiochip0", 11);
+        public IPin GPIO8 => new GpiodPin("GPIO8", "PIN24", "gpiochip0", 8);
+        public IPin GPIO7 => new GpiodPin("GPIO7", "PIN26", "gpiochip0", 7);
+        public IPin GPIO5 => new GpiodPin("GPIO5", "PIN29", "gpiochip0", 5);
+        public IPin GPIO6 => new GpiodPin("GPIO6", "PIN31", "gpiochip0", 6);
+        public IPin GPIO12 => new GpiodPin("GPIO12", "PIN32", "gpiochip0", 12);
+        public IPin GPIO13 => new GpiodPin("GPIO13", "PIN33", "gpiochip0", 13);
+        public IPin GPIO19 => new GpiodPin("GPIO19", "PIN35", "gpiochip0", 19);
+        public IPin GPIO16 => new GpiodPin("GPIO16", "PIN36", "gpiochip0", 16);
+        public IPin GPIO26 => new GpiodPin("GPIO26", "PIN37", "gpiochip0", 26);
         public IPin GPIO20 => new GpiodPin("GPIO20", "PIN38", "gpiochip0", 20);
         public IPin GPIO21 => new GpiodPin("GPIO21", "PIN40", "gpiochip0", 21);
 
