@@ -89,17 +89,6 @@ namespace Meadow.Devices
             return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequency);
         }
 
-        protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
-        {
-            if (clock.Name == (Pins as F7FeatherV1.Pinout)?.I2C_SCL.Name)
-            {
-                return 1;
-            }
-
-            // this is an unsupported bus, but will get caught elsewhere
-            return -1;
-        }
-
         public override ISpiBus CreateSpiBus(
             Units.Frequency speed,
             int busNumber = 3

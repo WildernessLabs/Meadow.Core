@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Hardware;
+using System;
 
 namespace Meadow.Devices
 {
@@ -27,6 +28,17 @@ namespace Meadow.Devices
                 Console.WriteLine(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
+        }
+
+        protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
+        {
+            if (clock.Name == (Pins as F7FeatherV2.Pinout)?.I2C_SCL.Name)
+            {
+                return 1;
+            }
+
+            // this is an unsupported bus, but will get caught elsewhere
+            return -1;
         }
     }
 }
