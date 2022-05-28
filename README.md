@@ -26,10 +26,13 @@ Apache 2.0
 
 See [LICENSE File](/LICENSE)
 
-## Device Prerequisites
+## Assumptions
 
-- Your device must have .NET 5.0 or .NET 6.0 installed, unless you are running inside a container in which case the container image must have .NET included. All [Wilderness Labs m4l Docker images](https://hub.docker.com/u/wildernesslabs) (samples and base) have the .NET runtime included.
-- You must have hardware drivers enabled (e.g. I2C on Raspberry Pi is disabled by default and is enabled by running `raspi-config`)
+For this documentation, we assume you are developing your application code on a machine *separate* from your target hardware.  You can certainly develop and compile your application directly on your target hardware, but the possible variations and permutations make documenting the process more difficult. If you are new to .NET development on IoT devices, we recommend starting with a separate development machine first.
+
+## Prepare Your Target Hardware
+
+`Meadow.Linux` runs applications using the .NET 6.0 Core Runtime, so you must install it on the target.
 
 ### Install .NET 5.0 or .NET 6.0
 
@@ -42,12 +45,46 @@ $ dotnet --list-runtimes
 Microsoft.NETCore.App 6.0.1 [/opt/dotnet/shared/Microsoft.NETCore.App]
 ```
 
+### Enable Hardware Access
+
+Different platforms will have different rules for enabling application access to hardware devices such as GPIO, SPI and I2C. Consult your platform documentation for specifics, but as an example Raspberry Pi OS requires that you run `raspi-config` to enable the peripherals you want, and *additionally* add your user to specific groups for the peripherals.  If you get permissions errors while first running your application, this is the place to start looking.
+
+## Develop your Application
+
+- Create a .NET 6 Core Application Project
+- Add NuGet references to Meadow.Linux and any other requirements (e.g Meadow.Foundation and peripheral drivers)
+- Develop/Compile 
+
 ## Deploying
 
-- Create the application as a .NET 6.0 App
+When you are ready to run your application you will need to copy it, and all dependencies, to the target device.
+
+The simplest, most reliable way to collect all of those binaries is by using `dotnet publish`.
+
+For example, the `Bme280_Sample` in this repo can be published to a local folder like this:
+
+```
+C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample>dotnet publish -c Release -o publish
+Microsoft (R) Build Engine version 17.2.0+41abc5629 for .NET
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Meadow.Linux -> C:\repos\wilderness\Meadow.Linux\src\lib\bin\Release\netstandard2.1\Meadow.Linux.dll
+  Bme280_Sample -> C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample\bin\Release\net6.0\App.dll
+  Bme280_Sample -> C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample\publish\
+``` 
+
+The output folder contains all of the files and assemblies you need to copy to your target hardware.
+
+Now use a tool such as SCP to copy all of these files to a folder on you target hardware.
+
+[add example command / winscp sceen cap]
+
+[todo: this is a note from my previous work, check if App.deps is a problem]
 - Copy over your application binaries and `App.runtimeconfig.json`.  Do *not* copy over App.deps.json
 
-Here's an example of all of the binaries for simple application using a BME280 and Meadow Foundation
+Here's an example of all of the binaries for the Bme280_Sample aaplication after deployment to a target Raspberry Pi:
 
 ```
 $ ls -al
@@ -66,12 +103,12 @@ drwxr-xr-x 16 pi pi   4096 Nov  7 17:55 ..
 
 ## Running
 
-Use `dotnet` to execute your application
+Use `dotnet` *on the target hardware* to execute your application
 
 ```
-$ dotnet App.exe
+$ dotnet App.dll
 ```
  
 ## Work in Progress
 
-M4L is currently an *Alpha* product with several core features that are not yet implemented.  Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
+`Meadow.Linux` is currently an *Beta* product with several core features that are not yet implemented.  Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.

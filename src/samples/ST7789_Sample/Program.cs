@@ -12,7 +12,8 @@ namespace PushButton_Sample
         public static void Main(string[] args)
         {
             app = new MeadowApp();
-
+            MeadowOS.FileSystem.UserFileSystemRoot
+            System.IO.File.ReadAllBytes()
             Thread.Sleep(Timeout.Infinite);
         }
     }

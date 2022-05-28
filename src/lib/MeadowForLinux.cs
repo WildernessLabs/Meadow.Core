@@ -14,8 +14,8 @@ namespace Meadow
     public class MeadowForLinux<TPinout> : IMeadowDevice, IApp
         where TPinout : IPinDefinitions, new()
     {
-        private SysFsGpioDriver _ioController = null!;
-        private Gpiod _gpiod;
+        private SysFsGpioDriver _sysfs = null!;
+        private Gpiod _gpiod = null!;
 
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
@@ -75,9 +75,9 @@ namespace Meadow
             {
                 Logger = logger;
             }
-            
 
-            _ioController = new SysFsGpioDriver();
+
+            _sysfs = new SysFsGpioDriver();
             _gpiod = new Gpiod(Logger);
         }
 
