@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Meadow
 {
-    public class SysFsDigitalInputPort :DigitalInputPortBase, IDigitalInputPort
+    public class SysFsDigitalInputPort : DigitalInputPortBase, IDigitalInputPort
     {
         private int Gpio { get; set; } = -1;
         private SysFsGpioDriver Driver { get; }
@@ -12,20 +12,20 @@ namespace Meadow
         public override bool State => Driver.GetValue(Gpio);
 
         internal SysFsDigitalInputPort(
-            SysFsGpioDriver driver, 
+            SysFsGpioDriver driver,
             IPin pin,
             SysFsDigitalChannelInfo channel,
-            InterruptMode interruptMode = InterruptMode.None, 
-            ResistorMode resistorMode = ResistorMode.Disabled, 
-            double debounceDuration = 0, 
+            InterruptMode interruptMode = InterruptMode.None,
+            ResistorMode resistorMode = ResistorMode.Disabled,
+            double debounceDuration = 0,
             double glitchDuration = 0)
             : base(pin, channel, interruptMode)
         {
-            if(resistorMode != ResistorMode.Disabled)
+            if (resistorMode != ResistorMode.Disabled)
             {
                 throw new NotSupportedException("Resistor Mode not supported on this platform");
             }
-            if(debounceDuration > 0 || glitchDuration > 0)
+            if (debounceDuration > 0 || glitchDuration > 0)
             {
                 throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
             }
@@ -44,7 +44,7 @@ namespace Meadow
             Driver.Export(Gpio);
             Thread.Sleep(100); // this seems to be required to prevent an error 13
             Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
-            switch(interruptMode)
+            switch (interruptMode)
             {
                 case InterruptMode.None:
                     // nothing to do
@@ -72,14 +72,14 @@ namespace Meadow
             }
         }
 
-        public override ResistorMode Resistor 
-        { 
-            get => ResistorMode.Disabled; 
-            set => throw new NotSupportedException("Resistor Mode not supported on this platform"); 
+        public override ResistorMode Resistor
+        {
+            get => ResistorMode.Disabled;
+            set => throw new NotSupportedException("Resistor Mode not supported on this platform");
         }
 
         public override double DebounceDuration
-        { 
+        {
             get => 0;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
