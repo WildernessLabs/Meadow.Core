@@ -2,7 +2,6 @@
 using Meadow.Logging;
 using Meadow.Units;
 using System;
-using System.Collections.Generic;
 
 namespace Meadow.Simulation
 {
@@ -16,10 +15,11 @@ namespace Meadow.Simulation
         {
             _device = device;
             _wsServer = new WebSocketServer(logger);
+            _wsServer.MessageReceived += OnWebSocketMessageReceived;
         }
 
-        private Dictionary<IPin, bool> _discreteStates = new Dictionary<IPin, bool>();
-        private Dictionary<IPin, double> _analogStates = new Dictionary<IPin, double>();
+//        private Dictionary<IPin, bool> _discreteStates = new Dictionary<IPin, bool>();
+//        private Dictionary<IPin, double> _analogStates = new Dictionary<IPin, double>();
 
         public IDeviceChannelManager DeviceChannelManager => throw new NotImplementedException();
 
@@ -33,6 +33,7 @@ namespace Meadow.Simulation
 
         public void Initialize()
         {
+            /*
             foreach (var pin in _device.Pins)
             {
                 // discretes
@@ -47,13 +48,35 @@ namespace Meadow.Simulation
                     _analogStates.Add(pin, 0d);
                 }
             }
+            */
 
             _wsServer.Start();
+
+            PublishState();
         }
 
         private void PublishState()
         {
+            var state = new SimulationState();
 
+            foreach (SimulatedPin pin in _device.Pins)
+            {
+                state.PinStates.Add(pin.Name, pin.Voltage.Volts);
+            }
+
+            var j = System.Text.Json.JsonSerializer.Serialize(state);
+            _wsServer.SendMessage(j);
+        }
+
+        private void OnWebSocketMessageReceived(WebSocketServer source, string message)
+        {
+            switch (message)
+            {
+                case "get_state":
+                    // publish full state
+                    PublishState();
+                    break;
+            }
         }
 
         void IMeadowIOController.Initialize()

@@ -10,11 +10,15 @@ using System.Threading.Tasks;
 
 namespace Meadow.Simulation
 {
+    internal delegate void MessageHandler(WebSocketServer source, string message);
+
     internal class WebSocketServer
     {
         private Logger _logger;
         private TcpListener _listener;
-        private IAsyncResult _client;
+        private List<TcpClient> _clients = new List<TcpClient>();
+
+        public event MessageHandler MessageReceived = delegate { };
 
         public WebSocketServer(Logger logger, int port = 8081)
         {
@@ -29,8 +33,6 @@ namespace Meadow.Simulation
             var result = _listener.BeginAcceptTcpClient(AcceptProc, _listener);
         }
 
-        private List<TcpClient> _clients = new List<TcpClient>();
-
         private void AcceptProc(IAsyncResult result)
         {
             _logger.Info("Client Connected");
@@ -38,16 +40,69 @@ namespace Meadow.Simulation
             if (result.AsyncState is TcpListener { } listener)
             {
                 var client = listener.EndAcceptTcpClient(result);
-                if(NegotiateClientConnection(client))
+                if (NegotiateClientConnection(client))
                 {
                     lock (_clients)
                     {
                         _clients.Add(client);
                     }
+
+                    Task.Run(() => MessageReceiverProc(client));
                 }
 
                 // allow multiple clients
                 listener.BeginAcceptTcpClient(AcceptProc, listener);
+            }
+        }
+
+        private void MessageReceiverProc(TcpClient client)
+        {
+            var stream = client.GetStream();
+
+            while (client.Connected)
+            {
+                if (stream.DataAvailable)
+                {
+                    byte[] bytes = new byte[client.Available];
+                    stream.Read(bytes, 0, client.Available);
+
+                    var msgFromClient = (bytes[1] & 0b10000000) != 0;
+                    if (!msgFromClient)
+                    {
+                        // should never happen - all client messages should have that bit set
+                        continue;
+                    }
+
+                    ulong offset = 2;
+                    ulong msglen = (ulong)bytes[1] & 0b01111111;
+
+                    if (msglen == 126)
+                    {
+                        // endian swap
+                        msglen = BitConverter.ToUInt16(new byte[] { bytes[3], bytes[2] }, 0);
+                        offset = 4;
+                    }
+                    else if (msglen == 127)
+                    {
+                        throw new Exception("length > 64k not supported");
+                    }
+
+                    if (msglen > 0)
+                    {
+                        byte[] decoded = new byte[msglen];
+                        byte[] masks = new byte[4] { bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3] };
+                        offset += 4;
+
+                        for (ulong i = 0; i < msglen; ++i)
+                        {
+                            decoded[i] = (byte)(bytes[offset + i] ^ masks[i % 4]);
+                        }
+
+                        var message = Encoding.UTF8.GetString(decoded);
+                        _logger.Info($"WS message received: {message}");
+                        MessageReceived.Invoke(this, message);
+                    }
+                }
             }
         }
 
@@ -56,11 +111,11 @@ namespace Meadow.Simulation
             var data = Encoding.UTF8.GetBytes(message);
             var frameData = new List<byte>();
             frameData.Add(0x81); // utf text
-            if(data.Length < 126)
+            if (data.Length < 126)
             {
                 frameData.Add((byte)data.Length);
             }
-            else if(data.Length < ushort.MaxValue)
+            else if (data.Length < ushort.MaxValue)
             {
                 frameData.Add((byte)data.Length);
                 frameData.AddRange(BitConverter.GetBytes((ushort)data.Length));
@@ -98,8 +153,8 @@ namespace Meadow.Simulation
             {
                 if (stream.DataAvailable)
                 {
-                                        var read = stream.Read(buffer, 0, buffer.Length);
-                                        _logger.Info($"Received {read} bytes");
+                    var read = stream.Read(buffer, 0, buffer.Length);
+                    _logger.Info($"WS Received {read} bytes");
 
                     var request = Encoding.UTF8.GetString(buffer, 0, read);
 
