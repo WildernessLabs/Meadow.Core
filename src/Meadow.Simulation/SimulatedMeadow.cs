@@ -168,5 +168,20 @@ namespace Meadow.Simulation
         {
             throw new NotImplementedException();
         }
+
+        public void Sleep(int seconds = -1)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BatteryInfo GetBatteryInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Temperature GetProcessorTemperature()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
