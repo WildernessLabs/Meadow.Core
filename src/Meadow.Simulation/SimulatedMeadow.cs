@@ -11,7 +11,6 @@ namespace Meadow.Simulation
         where TPinDefinitions : IPinDefinitions, new()
     {
         private SimulationEngine<TPinDefinitions> _simulationEngine;
-        private WebSocketServer _wsServer;
 
         public Logger Logger { get; }
 
@@ -84,6 +83,12 @@ namespace Meadow.Simulation
             var dco = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dco != null)
             {
+                var p = pin as SimulatedPin;
+                p.VoltageChanged += (s, e) =>
+                    {
+                        _simulationEngine.SetPinVoltage(pin, p.Voltage);
+                    };
+
                 return new SimulatedDigitalOutputPort(pin, dco, false, OutputType.PushPull);
             }
 

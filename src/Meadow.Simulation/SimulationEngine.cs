@@ -51,13 +51,19 @@ namespace Meadow.Simulation
             _wsServer.Start();
         }
 
+        private void PublishState()
+        {
+
+        }
+
         void IMeadowIOController.Initialize()
         {
         }
 
         public void SetDiscrete(IPin pin, bool state)
         {
-            SetPinVoltage(pin, state ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage);
+            var voltage = state ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage;
+            SetPinVoltage(pin, voltage);
         }
 
         public bool GetDiscrete(IPin pin)
@@ -74,6 +80,8 @@ namespace Meadow.Simulation
                 var rising = voltage > sp.Voltage;
 
                 sp.Voltage = voltage;
+
+                _wsServer.SendMessage($"{pin.Name}={voltage.Volts}V");
 
                 Interrupt?.Invoke(pin, rising);
             }

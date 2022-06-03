@@ -26,7 +26,6 @@ namespace Meadow.Simulation
         public void Start()
         {
             _listener.Start();
-            Task.Run(StatePublicationProc);
             var result = _listener.BeginAcceptTcpClient(AcceptProc, _listener);
         }
 
@@ -49,16 +48,6 @@ namespace Meadow.Simulation
 
                 // allow multiple clients
                 listener.BeginAcceptTcpClient(AcceptProc, listener);
-            }
-        }
-
-        private void StatePublicationProc()
-        {
-            while(true)
-            {
-                SendMessage("Hello\r\n");
-
-                Thread.Sleep(2000);
             }
         }
 
