@@ -2,6 +2,8 @@
 using Meadow.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Meadow
@@ -28,7 +30,9 @@ namespace Meadow
             Logger = logger;
 
             // TODO: query for list of chips
-            foreach (var n in DeviceNames)
+            var names = Directory.GetFiles("/dev", "gpiochip*");
+
+            foreach (var n in names)
             {
                 var info = ChipInfo.FromIntPtr(Interop.gpiod_chip_open_by_name(n));
                 if (!info.IsInvalid)
@@ -41,6 +45,12 @@ namespace Meadow
                     {
                         Logger.Debug(line.ToString());
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"ERR: {Marshal.GetLastWin32Error()}");
+
+                    Logger.Error($"Unable to get info for chip {n}");
                 }
             }
         }
@@ -71,6 +81,11 @@ namespace Meadow
 
         public LineInfo GetLine(GpiodPin pin)
         {
+            if (!Chips.Contains(pin.Chip))
+            {
+                throw new NativeException($"Unknown GPIO chip {pin.Chip}");
+            }
+
             var line = Chips[pin.Chip].Lines[pin.Offset];
 
             // TODO: check availability, check for other reservations

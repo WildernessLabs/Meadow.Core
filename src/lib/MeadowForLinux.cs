@@ -1,6 +1,7 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Logging;
+using Meadow.Pinouts;
 using Meadow.Units;
 using System;
 using System.Linq;
@@ -26,15 +27,15 @@ namespace Meadow
         {
             get
             {
-                if (typeof(TPinout) == typeof(JetsonNanoPinout))
+                if (typeof(TPinout) == typeof(JetsonNano))
                 {
                     return new JetsonNanoSerialPortNameDefinitions();
                 }
-                if (typeof(TPinout) == typeof(JetsonXavierAGXPinout))
+                if (typeof(TPinout) == typeof(JetsonXavierAGX))
                 {
                     return new JetsonXavierAGXSerialPortNameDefinitions();
                 }
-                else if (typeof(TPinout) == typeof(RaspberryPiPinout))
+                else if (typeof(TPinout) == typeof(RaspberryPi))
                 {
                     return new RaspberryPiSerialPortNameDefinitions();
                 }
@@ -105,7 +106,7 @@ namespace Meadow
         {
             // TODO: implement this based on channel caps (this is platform specific right now)
 
-            if (Pins is JetsonNanoPinout)
+            if (Pins is JetsonNano)
             {
                 if (clock == Pins["PIN05"] && data == Pins["PIN03"])
                 {
@@ -116,7 +117,7 @@ namespace Meadow
                     return new I2CBus(0, frequency);
                 }
             }
-            if (Pins is JetsonXavierAGXPinout)
+            if (Pins is JetsonXavierAGX)
             {
                 if (clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
                 {
@@ -127,12 +128,16 @@ namespace Meadow
                     return new I2CBus(8, frequency);
                 }
             }
-            else if (Pins is RaspberryPiPinout)
+            else if (Pins is RaspberryPi)
             {
                 if (clock == Pins["PIN05"] && data == Pins["PIN03"])
                 {
                     return new I2CBus(1, frequency);
                 }
+            }
+            else if (Pins is SnickerdoodleBlack)
+            {
+                return new KrtklI2CBus(frequency);
             }
 
             throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");

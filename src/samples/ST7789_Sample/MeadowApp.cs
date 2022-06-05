@@ -3,12 +3,13 @@ using Meadow.Foundation;
 using Meadow.Foundation.Displays.TftSpi;
 using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
+using Meadow.Pinouts;
 using System;
 using System.Threading;
 
 namespace PushButton_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPiPinout>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
     {
         private St7789 _display;
         private MicroGraphics _graphics;

@@ -1,13 +1,14 @@
 ﻿using Meadow;
 using Meadow.Foundation.Sensors.Buttons;
 using Meadow.Hardware;
+using Meadow.Pinouts;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
 namespace PushButton_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPiPinout>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
     {
         private List<PushButton> _pushButtons;
 

@@ -1,9 +1,9 @@
 ﻿using Meadow.Hardware;
 using System.Collections.Generic;
 
-namespace Meadow
+namespace Meadow.Pinouts
 {
-    public class JetsonXavierAGXPinout : IPinDefinitions
+    public class JetsonXavierAGX : IPinDefinitions
     {
         public IList<IPin> AllPins => new List<IPin> {
             I2C_GP5_DAT,

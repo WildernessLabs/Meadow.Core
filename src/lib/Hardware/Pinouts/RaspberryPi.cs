@@ -1,14 +1,15 @@
 ﻿using Meadow.Hardware;
 using System.Collections.Generic;
 
-namespace Meadow
+namespace Meadow.Pinouts
 {
-    public class RaspberryPiPinout : IPinDefinitions
+    public class RaspberryPi : IPinDefinitions
     {
-        public IList<IPin> AllPins => new List<IPin> {
-            GPIO2, GPIO3, GPIO4, GPIO10, GPIO11, GPIO12, GPIO13, GPIO16, 
-            GPIO17, GPIO18, GPIO19, GPIO20, GPIO21, GPIO22, GPIO23, GPIO24, 
-            GPIO25, GPIO26, GPIO27
+        public IList<IPin> AllPins => new List<IPin> 
+        {
+            GPIO2, GPIO3, GPIO4, GPIO17, GPIO18, GPIO27, GPIO22, GPIO23,
+            GPIO24, GPIO10, GPIO9, GPIO25, GPIO11, GPIO8, GPIO7, GPIO5,
+            GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21
         };
 
         public IPin GPIO2 => new GpiodPin("GPIO2", "PIN03", "gpiochip0", 2);

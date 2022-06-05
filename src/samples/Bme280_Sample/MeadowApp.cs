@@ -1,11 +1,12 @@
 ﻿using Meadow;
 using Meadow.Foundation.Sensors.Atmospheric;
+using Meadow.Pinouts;
 using System;
 using System.Threading.Tasks;
 
 namespace Bme280_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPiPinout>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
     {
         private Bme280 _bme;
 

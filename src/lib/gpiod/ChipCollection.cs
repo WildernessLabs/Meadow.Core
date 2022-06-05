@@ -13,6 +13,11 @@ namespace Meadow
             get => _chips[index];
         }
 
+        public bool Contains(string name)
+        {
+            return _chips.Any(c => c.Name == name);
+        }
+
         public void Add(ChipInfo chip)
         {
             _chips.Add(chip);

@@ -1,9 +1,9 @@
 ﻿using Meadow.Hardware;
 using System.Collections.Generic;
 
-namespace Meadow
+namespace Meadow.Pinouts
 {
-    public class JetsonNanoPinout : IPinDefinitions
+    public class JetsonNano : IPinDefinitions
     {
         public IList<IPin> AllPins => new List<IPin> {
             I2C_2_SDA, I2C_2_SCL, 
