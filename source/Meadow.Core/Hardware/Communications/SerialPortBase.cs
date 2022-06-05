@@ -20,6 +20,9 @@ namespace Meadow.Hardware
         protected Thread? _readThread;
         protected int _baudRate;
         protected object _accessLock = new object();
+        private Parity _parity;
+        private int _dataBits;
+        private StopBits _stopBits;
 
         protected abstract void SetHardwarePortSettings(IntPtr handle);
         protected abstract IntPtr OpenHardwarePort(string portName);
@@ -88,18 +91,53 @@ namespace Meadow.Hardware
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
         public bool IsOpen { get => _driverHandle != IntPtr.Zero; }
+
         /// <summary>
         /// Gets or sets the parity-checking protocol.
         /// </summary>
-        public Parity Parity { get; }
+        public Parity Parity
+        {
+            get => _parity;
+            set
+            {
+                if (value == Parity) return;
+                if (IsOpen) throw new IOException($"You cannot change Parity on an Open port");
+
+                _parity = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the standard length of data bits per byte.
         /// </summary>
-        public int DataBits { get; }
+        public int DataBits 
+        {
+            get => _dataBits;
+            set
+            {
+                if (value == DataBits) return;
+                if (value < 5 || value > 8) throw new ArgumentOutOfRangeException();
+                if (IsOpen) throw new IOException($"You cannot change DataBits on an Open port");
+
+                _dataBits = value;
+            }
+
+        }
+
         /// <summary>
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
-        public StopBits StopBits { get; }
+        public StopBits StopBits 
+        {
+            get => _stopBits;
+            set
+            {
+                if (value == StopBits) return;
+                if (IsOpen) throw new IOException($"You cannot change StopBits on an Open port");
+
+                _stopBits = value;
+            }
+        }
 
         /// <summary>
         /// The time required for a time-out to occur when a read operation does not finish.

@@ -37,15 +37,15 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets or sets the parity-checking protocol.
         /// </summary>
-        public Parity Parity { get => _classicSerialPort.Parity; }
+        public Parity Parity { get => _classicSerialPort.Parity; set => _classicSerialPort.Parity = value; }
         /// <summary>
         /// Gets or sets the standard length of data bits per byte.
         /// </summary>
-        public int DataBits { get => _classicSerialPort.DataBits; }
+        public int DataBits { get => _classicSerialPort.DataBits; set => _classicSerialPort.DataBits = value; }
         /// <summary>
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
-        public StopBits StopBits { get => _classicSerialPort.StopBits; }
+        public StopBits StopBits { get => _classicSerialPort.StopBits; set => _classicSerialPort.StopBits = value; }
         /// <summary>
         /// The buffer size, in bytes.
         /// </summary>
