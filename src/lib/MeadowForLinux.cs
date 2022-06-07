@@ -18,6 +18,10 @@ namespace Meadow
         private SysFsGpioDriver _sysfs = null!;
         private Gpiod _gpiod = null!;
 
+        public event PowerTransitionHandler BeforeReset;
+        public event PowerTransitionHandler BeforeSleep;
+        public event PowerTransitionHandler AfterWake;
+
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
@@ -43,6 +47,8 @@ namespace Meadow
                 throw new PlatformNotSupportedException();
             }
         }
+
+        public IDeviceInformation Information => throw new NotImplementedException();
 
         /// <summary>
         /// Creates the Meadow on Linux infrastructure instance
@@ -238,6 +244,21 @@ namespace Meadow
         }
 
         public void WillReset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Sleep(int seconds = -1)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BatteryInfo GetBatteryInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Temperature GetProcessorTemperature()
         {
             throw new NotImplementedException();
         }

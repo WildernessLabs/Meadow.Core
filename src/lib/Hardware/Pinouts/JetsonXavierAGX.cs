@@ -1,10 +1,14 @@
 ﻿using Meadow.Hardware;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Meadow.Pinouts
 {
     public class JetsonXavierAGX : IPinDefinitions
     {
+        public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
         public IList<IPin> AllPins => new List<IPin> {
             I2C_GP5_DAT,
             I2C_GP5_CLK,

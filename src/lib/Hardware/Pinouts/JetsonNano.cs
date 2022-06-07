@@ -1,10 +1,14 @@
 ﻿using Meadow.Hardware;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Meadow.Pinouts
 {
     public class JetsonNano : IPinDefinitions
     {
+        public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
         public IList<IPin> AllPins => new List<IPin> {
             I2C_2_SDA, I2C_2_SCL, 
             UART_2_TX, UART_2_RX,

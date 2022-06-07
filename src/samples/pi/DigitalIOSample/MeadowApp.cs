@@ -1,33 +1,32 @@
 ﻿using Meadow;
-using Meadow.Devices;
-using Meadow.Foundation;
-using Meadow.Foundation.Leds;
+using Meadow.Pinouts;
 using System;
 using System.Threading;
 
 namespace DigitalIOSample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPiPinout>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<SnickerdoodleBlack>, MeadowApp>
     {
         public MeadowApp()
         {
-            RunLoopback();
+            RunPulse();
+            //RunLoopback();
             //CheckResistor();
         }
 
         void CheckResistor()
         {
-            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
-            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
+//            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
+//            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
 
-            Console.WriteLine($"20 is {input20.State}");
-            Console.WriteLine($"21 is {input21.State}");
+//            Console.WriteLine($"20 is {input20.State}");
+//            Console.WriteLine($"21 is {input21.State}");
         }
 
         void RunPulse()
         {
             // this is pin 40 on a Pi4, so last outer pin (easy to clip with a scope)
-            var output = Device.CreateDigitalOutputPort(Device.Pins.GPIO21);
+            var output = Device.CreateDigitalOutputPort(Device.Pins.GPIO1);
             var state = false;
 
             while (true)
@@ -41,6 +40,7 @@ namespace DigitalIOSample
 
         void RunLoopback()
         {
+            /*
             // this is pin 40 on a Pi4, so last outer pin (easy to clip with a scope)
             var output = Device.CreateDigitalOutputPort(Device.Pins.GPIO21);
             var state = false;
@@ -59,6 +59,7 @@ namespace DigitalIOSample
                 state = !state;
                 Thread.Sleep(1000);
             }
+            */
         }
     }
 }

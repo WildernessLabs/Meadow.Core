@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Logging;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -6,6 +7,7 @@ namespace Meadow
 {
     internal class ChipInfo : IDisposable
     {
+        private Logger Logger { get; }
         public IntPtr Handle { get; private set; }
         private Gpiod.Interop.gpiod_chip? Chip { get; }
         public string Name { get; } = string.Empty;
@@ -15,23 +17,33 @@ namespace Meadow
 
         public bool IsInvalid => Handle.ToInt64() <= 0;
 
-        public static ChipInfo FromIntPtr(IntPtr p)
+        public static ChipInfo FromIntPtr(Logger logger, IntPtr p)
         {
-            return new ChipInfo(p);
+            return new ChipInfo(logger, p);
         }
 
-        private ChipInfo(IntPtr p)
+        private ChipInfo(Logger logger, IntPtr p)
         {
+            Logger = logger;
+
             Handle = p;
+
+            Logger.Debug($"Chip ptr: {p.ToString()}");
 
             if (!IsInvalid)
             {
+                Logger.Debug($"Chip ptr VALID");
+
                 Chip = Marshal.PtrToStructure<Gpiod.Interop.gpiod_chip>(Handle);
-                Name = new string(Chip.Value.name).Trim('\0');
-                Label = new string(Chip.Value.label).Trim('\0');
+                Name = Chip.Value.name;
+                Label = Chip.Value.label;
 
                 // Init as an array of nulls.  We'll populate as they are accessed
                 Lines = new LineCollection(this, (int)Chip.Value.num_lines);
+            }
+            else
+            {
+                Logger.Error($"errno={Marshal.GetLastWin32Error()}");
             }
         }
 
@@ -47,7 +59,7 @@ namespace Meadow
         {
             // same format as gpiodetect
             // gpiochip0 [pinctrl-bcm2711] (58 lines)
-            return $"{Name} [{Label}] ({Lines} lines)";
+            return $"{Name} [{Label}] ({Lines.Count} lines)";
         }
     }
 }

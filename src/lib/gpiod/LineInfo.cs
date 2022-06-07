@@ -38,9 +38,8 @@ namespace Meadow
         private void UpdatePropsFromHandle()
         {
             Line = Marshal.PtrToStructure<gpiod_line>(Handle);
-            Line = Marshal.PtrToStructure<gpiod_line>(Handle);
-            Name = new string(Line.Value.name).Trim('\0');
-            Consumer = new string(Line.Value.consumer).Trim('\0');
+            Name = Line.Value.name;
+            Consumer = Line.Value.consumer;
             Direction = Line.Value.direction;
             ActiveState = Line.Value.active_state;
         }
@@ -191,7 +190,7 @@ namespace Meadow
             var d = Direction == line_direction.GPIOD_LINE_DIRECTION_INPUT ? " input" : "output";
             var s = ActiveState == line_active_state.GPIOD_LINE_ACTIVE_STATE_LOW ? "active-low" : "active-high";
 
-            return $"line {Offset:00}: {n,16}{c,16}  {d}  {s}";
+            return $"line {Offset:00}: {n,24}{c,24}  {d}  {s}";
         }
     }
 }

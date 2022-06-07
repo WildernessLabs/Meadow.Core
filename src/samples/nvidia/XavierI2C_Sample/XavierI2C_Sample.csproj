@@ -6,14 +6,14 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\MeadowForLinux.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Meadow.Foundation" Version="0.*" />
     <PackageReference Include="Meadow.Foundation.Sensors.Atmospheric.Ccs811" Version="0.*" />
     <PackageReference Include="Meadow.Foundation.Sensors.Atmospheric.Si70xx" Version="0.*" />
     <PackageReference Include="Meadow.Foundation.Sensors.Motion.Adxl3xx" Version="0.*" />
     <PackageReference Include="Meadow.Foundation.Sensors.Motion.Bno055" Version="0.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\lib\Meadow.Linux.csproj" />
   </ItemGroup>
 
 </Project>

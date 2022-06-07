@@ -22,19 +22,48 @@ namespace Meadow
         private ChipCollection Chips { get; set; }
         private Logger Logger { get; }
 
-        private string[] DeviceNames = new string[] { "gpiochip0", "gpiochip1" };
-
         public unsafe Gpiod(Logger logger)
         {
             Chips = new ChipCollection();
             Logger = logger;
 
-            // TODO: query for list of chips
+            var iter = Interop.gpiod_chip_iter_new();
+
+            try
+            {
+                IntPtr p;
+
+                do
+                {
+                    p = Interop.gpiod_chip_iter_next_noclose(iter);
+
+                    var info = ChipInfo.FromIntPtr(logger, p);
+                    if (!info.IsInvalid)
+                    {
+                        Chips.Add(info);
+
+                        Logger.Debug(info.ToString());
+
+                        foreach (var line in info.Lines)
+                        {
+                            Logger.Debug(line.ToString());
+                        }
+                    }
+                } while(p != IntPtr.Zero);
+            }
+            finally
+            {
+                Interop.gpiod_chip_iter_free(iter);
+            }
+
+            /*
             var names = Directory.GetFiles("/dev", "gpiochip*");
 
             foreach (var n in names)
             {
-                var info = ChipInfo.FromIntPtr(Interop.gpiod_chip_open_by_name(n));
+                Logger.Debug($"opening {n}");
+
+                var info = ChipInfo.FromIntPtr(logger, Interop.gpiod_chip_open_by_name(n));
                 if (!info.IsInvalid)
                 {
                     Chips.Add(info);
@@ -53,6 +82,7 @@ namespace Meadow
                     Logger.Error($"Unable to get info for chip {n}");
                 }
             }
+            */
         }
 
         protected virtual void Dispose(bool disposing)

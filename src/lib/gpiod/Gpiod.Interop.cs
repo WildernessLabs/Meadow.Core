@@ -111,7 +111,7 @@ namespace Meadow
                 /**< The active state of a GPIO is active-low. */
             };
 
-            [StructLayout(LayoutKind.Sequential)]
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             internal unsafe struct gpiod_line
             {
                 public uint offset;
@@ -138,14 +138,14 @@ namespace Meadow
                 public IntPtr chip; // gpiod_chip *chip;
                 public IntPtr fd_handle; // line_fd_handle *fd_handle;
 
-                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-                public char[] name;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                public string name;
 
-                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-                public char[] consumer;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                public string consumer;
             }
 
-            [StructLayout(LayoutKind.Sequential)]
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             internal struct gpiod_chip
             {
                 public IntPtr lines; // gpiod_line **lines;
@@ -153,10 +153,10 @@ namespace Meadow
 
                 public int fd;
 
-                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-                public char[] name;
-                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-                public char[] label;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                public string name;
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                public string label;
             }
 
             internal enum gpiod_event_type
@@ -188,8 +188,12 @@ namespace Meadow
             private const string LIB_GPIOD = "libgpiod.so.2";
 
             // struct gpiod_chip *gpiod_chip_open_by_name(const char *name)
-            [DllImport(LIB_GPIOD, SetLastError = true)]
+            [DllImport(LIB_GPIOD, SetLastError = true, CharSet=CharSet.Ansi)]
             public static extern IntPtr gpiod_chip_open_by_name([MarshalAs(UnmanagedType.LPStr)] string name);
+
+            // struct gpiod_chip *gpiod_chip_open_by_number(unsigned int num) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern IntPtr gpiod_chip_open_by_number(uint num);
 
             // void gpiod_chip_close(struct gpiod_chip *chip)
             [DllImport(LIB_GPIOD, SetLastError = true)]
@@ -227,7 +231,7 @@ namespace Meadow
              */
             //int gpiod_line_request_input(struct gpiod_line *line, const char *consumer) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_input(IntPtr line, string consumer);
+            public static extern int gpiod_line_request_input(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
             /**
              * @brief Reserve a single line, set the direction to input.
@@ -238,7 +242,7 @@ namespace Meadow
              */
             // int gpiod_line_request_input_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_input_flags(IntPtr line, string consumer, line_request_flags flags);
+            public static extern int gpiod_line_request_input_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
 
             /**
              * @brief Reserve a single line, set the direction to output.
@@ -249,7 +253,7 @@ namespace Meadow
              */
             //int gpiod_line_request_output(struct gpiod_line *line, const char *consumer, int default_val) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_output(IntPtr line, string consumer);
+            public static extern int gpiod_line_request_output(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
 
             /**
@@ -351,7 +355,7 @@ namespace Meadow
              */
             //int gpiod_line_request_rising_edge_events(struct gpiod_line *line, const char* consumer) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_rising_edge_events(IntPtr line, string consumer);
+            public static extern int gpiod_line_request_rising_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
             /**
              * @brief Request rising edge event notifications on a single line.
@@ -362,7 +366,7 @@ namespace Meadow
              */
             // int gpiod_line_request_rising_edge_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, string consumer, line_request_flags flags);
+            public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)]  string consumer, line_request_flags flags);
 
             /**
              * @brief Request falling edge event notifications on a single line.
@@ -372,7 +376,7 @@ namespace Meadow
              */
             //int gpiod_line_request_falling_edge_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_falling_edge_events(IntPtr line, string consumer);
+            public static extern int gpiod_line_request_falling_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
             /**
              * @brief Request all event type notifications on a single line.
@@ -382,7 +386,7 @@ namespace Meadow
              */
             //int gpiod_line_request_both_edges_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_both_edges_events(IntPtr line, string consumer);
+            public static extern int gpiod_line_request_both_edges_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
             /**
              * @brief Request falling edge event notifications on a single line.
@@ -412,7 +416,22 @@ namespace Meadow
             //int gpiod_line_event_read(struct gpiod_line *line, struct gpiod_line_event *event) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_event_read(IntPtr line, ref gpiod_line_event evnt);
-            
+
+            // struct gpiod_chip_iter *gpiod_chip_iter_new(void) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern IntPtr gpiod_chip_iter_new();
+
+            // void gpiod_chip_iter_free(struct gpiod_chip_iter *iter) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern void gpiod_chip_iter_free(IntPtr iter);
+
+            // struct gpiod_chip *gpiod_chip_iter_next(struct gpiod_chip_iter *iter) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern IntPtr gpiod_chip_iter_next(IntPtr iter);
+
+            // struct gpiod_chip *gpiod_chip_iter_next_noclose(struct gpiod_chip_iter *iter) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern IntPtr gpiod_chip_iter_next_noclose(IntPtr iter);
         }
     }
 }

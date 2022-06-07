@@ -5,15 +5,12 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="0.*" />
     <PackageReference Include="Meadow.Foundation" Version="0.*" />
-    <PackageReference Include="Meadow.Foundation.Displays.TftSpi" Version="0.*" />
-    <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.*" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\Meadow.Linux.csproj" />
+    <ProjectReference Include="..\..\..\lib\Meadow.Linux.csproj" />
   </ItemGroup>
 </Project>

@@ -1,12 +1,12 @@
 ﻿using Meadow;
-using Meadow.Devices;
 using Meadow.Foundation.ICs.ADC;
+using Meadow.Pinouts;
 using System;
 using System.Threading.Tasks;
 
 namespace Ads1015_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPiPinout>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
     {
         private Ads1x15 _adc;
 
@@ -22,7 +22,7 @@ namespace Ads1015_Sample
             Console.WriteLine("Initialize hardware...");
             _adc = new Ads1015(
                 Device.CreateI2cBus(1, new Meadow.Units.Frequency(1, Meadow.Units.Frequency.UnitType.Megahertz)),
-                Ads1x15.Address.Default,
+                Ads1x15.Addresses.Default,
                 Ads1x15.MeasureMode.Continuous,
                 Ads1x15.ChannelSetting.A0SingleEnded,
                 Ads1015.SampleRateSetting.Sps3300);

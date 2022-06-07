@@ -1,12 +1,13 @@
 ﻿using Meadow;
 using Meadow.Foundation.Sensors.Atmospheric;
 using Meadow.Foundation.Sensors.Motion;
+using Meadow.Pinouts;
 using System;
 using System.Threading;
 
 namespace XavierI2C_Sample
 {
-    class MeadowApp : App<MeadowForLinux<JetsonXavierAGXPinout>, MeadowApp>
+    class MeadowApp : App<MeadowForLinux<JetsonXavierAGX>, MeadowApp>
     {
         private Bno055 _bno055;
         private Ccs811 _ccs811;

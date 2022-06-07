@@ -11,6 +11,6 @@
     <PackageReference Include="Meadow.Foundation" Version="0.*" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\Meadow.Linux.csproj" />
+    <ProjectReference Include="..\..\..\lib\Meadow.Linux.csproj" />
   </ItemGroup>
 </Project>
