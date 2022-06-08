@@ -20,7 +20,7 @@ namespace Meadow.Hardware
         public event EventHandler<IChangeResult<Voltage>> Updated = delegate { };
 
         /// <summary>
-        /// Gets the sample buffer. Make sure to call StartSampling() before 
+        /// Gets the sample buffer. Make sure to call StartUpdating() before 
         /// use.
         /// </summary>
         /// <value>The sample buffer.</value>
@@ -53,7 +53,7 @@ namespace Meadow.Hardware
 
         /// <summary>
         /// Gets the average value of the values in the buffer. Use in conjunction
-        /// with StartSampling() for long-running analog sampling. For occasional
+        /// with StartUpdating() for long-running analog sampling. For occasional
         /// sampling, use Read().
         /// </summary>
         /// <value>The average buffer value.</value>
@@ -85,7 +85,7 @@ namespace Meadow.Hardware
 
         /// <summary>
         /// Convenience method to get the current voltage. For frequent reads, use
-        /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
+        /// StartUpdating() and StopUpdating() in conjunction with the SampleBuffer.
         /// </summary>
         public abstract Task<Voltage> Read();
 

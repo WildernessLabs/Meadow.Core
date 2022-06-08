@@ -56,7 +56,7 @@ namespace Meadow.Hardware
 
         /// <summary>
         /// Gets a value indicating whether the analog input port is currently
-        /// sampling the ADC. Call StartSampling() to spin up the sampling process.
+        /// sampling the ADC. Call StartUpdating() to spin up the sampling process.
         /// </summary>
         /// <value><c>true</c> if sampling; otherwise, <c>false</c>.</value>
         public bool IsSampling { get; protected set; } = false;
@@ -230,7 +230,7 @@ namespace Meadow.Hardware
 
         /// <summary>
         /// Convenience method to get the voltage value. For frequent reads, use
-        /// StartSampling() and StopSampling() in conjunction with the SampleBuffer.
+        /// StartUpdating() and StopUpdating() in conjunction with the SampleBuffer.
         /// </summary>
         /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
         public async override Task<Voltage> Read()
