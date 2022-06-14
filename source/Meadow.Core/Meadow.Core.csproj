@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Meadow.Sdk/1.1.0">
  <PropertyGroup>
    <TargetFramework>netstandard2.1</TargetFramework>
-   <OutputType>Library</OutputType>
+   <OutputType>Exe</OutputType>
    <AssemblyName>Meadow</AssemblyName>   
    <Company>Wilderness Labs, Inc</Company>
    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
