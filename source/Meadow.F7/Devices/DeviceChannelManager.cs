@@ -116,7 +116,7 @@ namespace Meadow.Hardware
                 {
                     foreach(var p in _pinsToReasssertForPwm)
                     {
-                        ioController.ReassertConfig(p.Key);
+                        ioController.ReassertConfig(p.Key, false); 
                     }
                 }
                 _pinsToReasssertForPwm = null;

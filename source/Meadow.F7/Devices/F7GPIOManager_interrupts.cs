@@ -22,7 +22,8 @@ namespace Meadow.Devices
 
         public void WireInterrupt(IPin pin, InterruptMode interruptMode,
                      Meadow.Hardware.ResistorMode resistorMode,
-                     double debounceDuration, double glitchDuration)
+                     double debounceDuration, double glitchDuration,
+                     bool validateInterruptGroup = true)
         {
             STM32.ResistorMode stm32Resistor;
 
@@ -40,12 +41,13 @@ namespace Meadow.Devices
             }
 
             var designator = GetPortAndPin(pin);
-            WireInterrupt(designator.port, designator.pin, interruptMode, stm32Resistor, debounceDuration, glitchDuration);
+            WireInterrupt(designator.port, designator.pin, interruptMode, stm32Resistor, debounceDuration, glitchDuration, validateInterruptGroup);
         }
 
         private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
                     STM32.ResistorMode resistorMode,
-                    double debounceDuration, double glitchDuration)
+                    double debounceDuration, double glitchDuration,
+                    bool validateInterruptGroup = true)
         {
             Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" + Wire Interrupt {interruptMode}");
 
@@ -55,16 +57,21 @@ namespace Meadow.Devices
                 {
                     Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin}");
 
-                    // interrupt group is effectively the pin number
-                    if (_interruptGroupsInUse.Contains(pin))
+                    // interrupt group is effectively the F7 pin number (not the Meadow pin number)
+                    if (validateInterruptGroup && _interruptGroupsInUse.Contains(pin))
                     {
                         Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} in use");
+
                         throw new InterruptGroupInUseException(pin);
                     }
                     else
                     {
                         Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} not in use");
-                        _interruptGroupsInUse.Add(pin);
+
+                        if(_interruptGroupsInUse.Contains(pin) == false)
+                        {
+                            _interruptGroupsInUse.Add(pin);
+                        }
                     }
                 }
 
@@ -91,6 +98,9 @@ namespace Meadow.Devices
 
                     _ist.Start();
                 }
+
+                //Not sure why but Ioctl fails without this after reasserting interrupt groups
+                Thread.Sleep(10);
 
                 Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
                     $"Calling ioctl from WireInterrupt() enable Input: {port}{pin}, ResistorMode:0x{cfg.ResistorMode:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
