@@ -14,7 +14,6 @@
             where D : class, IMeadowDevice
     {
         protected App() {
-            Console.WriteLine("+App");
             Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
             Abort = MeadowOS.AppAbort.Token;
         }

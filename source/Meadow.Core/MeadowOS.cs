@@ -9,6 +9,7 @@
 
     using static System.Console;
     using System.Linq;
+    using Meadow.Logging;
 
     /// <summary>
     /// The entry point of the .NET part of Meadow OS.
@@ -31,10 +32,16 @@
 
         public async static Task Main(string[] args)
         {
+            Resolver.Services.Create<Logger>();
+            Resolver.Log.AddProvider(new ConsoleLogProvider());
+
+            // TODO: pull from file/config
+            Resolver.Log.Loglevel = LogLevel.Verbose;
+
             Initialize();
             try
             {
-                WriteLine("Initializing App");
+                Resolver.Log.Verbose("Initializing App");
                 await App.Initialize();
                 appSetup = true;
             }
@@ -48,12 +55,14 @@
             {
                 try
                 {
-                    WriteLine("Running App");
+                    Resolver.Log.Verbose("Running App");
                     await App.Run();
                     appRan = true;
                 }
                 catch (Exception e)
                 {
+                    Resolver.Log.Error($"App Error: {e.Message}");
+                    
                     bool recovered;
                     App.OnError(e, out recovered);
                     if (recovered)
@@ -70,6 +79,8 @@
 
             try
             {
+                Resolver.Log.Verbose($"App shutting down");
+
                 AppAbort.CancelAfter(millisecondsDelay: 60);
                 App.Shutdown(out appShutdown);
             }
@@ -90,7 +101,7 @@
      
         private static Type FindAppType()
         {
-            WriteLine($"Looking for app assembly...");
+            Resolver.Log.Verbose($"Looking for app assembly...");
 
             // support app.exe or app.dll
             var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
@@ -106,7 +117,7 @@
                     var path = Path.Combine(root, name);
                     if (File.Exists(path))
                     {
-                        WriteLine($"Found '{path}'");
+                        Resolver.Log.Verbose($"Found '{path}'");
                         return Assembly.LoadFrom(path);
                     }
                 }
@@ -114,9 +125,8 @@
                 return null;
             }
 
-            WriteLine($"Looking for IApp...");
+            Resolver.Log.Verbose($"Looking for IApp...");
             var types = assembly.GetTypes();
-            WriteLine($"Checking {types.Length} types...");
             var app_type = types.FirstOrDefault(t => typeof(IApp).IsAssignableFrom(t));
 
             if (app_type is null)
@@ -128,7 +138,7 @@
 
         private static void Initialize()
         {
-            Write($"Initializing... ");
+            Resolver.Log.Verbose($"Initializing OS... ");
 
             try
             {
@@ -166,7 +176,7 @@
                 CurrentDevice.AfterWake += () => { app.AfterSleep(); };
                 CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
 
-                WriteLine($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+                Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
             catch (Exception e)
             {
@@ -178,7 +188,7 @@
         {
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
-            WriteLine("Done.");
+            Resolver.Log.Debug("Shutdown");
             Thread.Sleep(-1);
         }
 
@@ -238,17 +248,17 @@
         {
             if (App is null)
             {
-                Write("OS startup failure:");
+                Resolver.Log.Error("OS startup failure:");
             }
             else
             {
-                Write("App failure:");
+                Resolver.Log.Error("App failure:");
             }
 
-            WriteLine(message);
-            WriteLine($"{e.GetType()}: {e.Message}");
-            WriteLine(e.StackTrace);
-            WriteLine("App failure. Meadow will restart in 5 seconds.");
+            Resolver.Log.Error(message);
+            Resolver.Log.Debug($"{e.GetType()}: {e.Message}");
+            Resolver.Log.Debug(e.StackTrace);
+            Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
             Thread.Sleep(5000);
             CurrentDevice.Reset();
             throw e; // no return from this function
