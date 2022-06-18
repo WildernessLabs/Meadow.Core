@@ -13,10 +13,14 @@
     public abstract class App<D> : IApp, IAsyncDisposable
             where D : class, IMeadowDevice
     {
-        protected App() { 
+        protected App() {
+            Console.WriteLine("+App");
             Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
             Abort = MeadowOS.AppAbort.Token;
         }
+
+        public abstract Task Run();
+        public virtual Task Initialize() {  return Task.CompletedTask; }
 
         /// <summary>
         /// The root Device interface

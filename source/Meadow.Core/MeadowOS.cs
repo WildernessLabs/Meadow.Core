@@ -8,6 +8,7 @@
     using System.Threading.Tasks;
 
     using static System.Console;
+    using System.Linq;
 
     /// <summary>
     /// The entry point of the .NET part of Meadow OS.
@@ -20,7 +21,7 @@
         //==== properties
         internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
-        static IApp app;
+        private static IApp App { get; set; }
 
         static bool appSetup = false;
         static bool appRan = false;
@@ -28,30 +29,37 @@
 
         internal static CancellationTokenSource AppAbort = new();
 
-        public async static Task Main (string[] args)
+        public async static Task Main(string[] args)
         {
             Initialize();
-            try {
-                await app.Initialize();
+            try
+            {
+                WriteLine("Initializing App");
+                await App.Initialize();
                 appSetup = true;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 // exception on bring-up; not good
                 SystemFailure(e, "App initialization failed");
             }
 
             while (!appRan)
             {
-                try {
-                    await app.Run();
+                try
+                {
+                    WriteLine("Running App");
+                    await App.Run();
                     appRan = true;
                 }
                 catch (Exception e)
                 {
                     bool recovered;
-                    app.OnError (e, out recovered);
+                    App.OnError(e, out recovered);
                     if (recovered)
-                        app.Recovery(e);
+                    {
+                        App.Recovery(e);
+                    }
                     else
                     {
                         AppAbort.Cancel();
@@ -60,56 +68,114 @@
                 }
             }
 
-            try {
+            try
+            {
                 AppAbort.CancelAfter(millisecondsDelay: 60);
-                app.Shutdown(out appShutdown);
+                App.Shutdown(out appShutdown);
             }
             catch (Exception e)
             {
                 // we can't recover while shutting down
                 throw SystemFailure(e, "App shutdown error");
             }
-            finally {
-                await (app as IAsyncDisposable).DisposeAsync();
+            finally
+            {
+                if (App is IAsyncDisposable { } da)
+                {
+                    await da.DisposeAsync();
+                }                
             }
             Shutdown();
+        }
+     
+        private static Type FindAppType()
+        {
+            WriteLine($"Looking for app assembly...");
+
+            // support app.exe or app.dll
+            var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
+
+            if(assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
+
+            Assembly? FindByPath(string[] namesToCheck)
+            {
+                var root = AppDomain.CurrentDomain.BaseDirectory;
+
+                foreach (var name in namesToCheck)
+                {
+                    var path = Path.Combine(root, name);
+                    if (File.Exists(path))
+                    {
+                        WriteLine($"Found '{path}'");
+                        return Assembly.LoadFrom(path);
+                    }
+                }
+
+                return null;
+            }
+
+            WriteLine($"Looking for IApp...");
+            var types = assembly.GetTypes();
+            WriteLine($"Checking {types.Length} types...");
+            var app_type = types.FirstOrDefault(t => typeof(IApp).IsAssignableFrom(t));
+
+            if (app_type is null)
+            {
+                throw new Exception("App not found. Looking for 'MeadowApp.MeadowApp' type");
+            }
+            return app_type;
         }
 
         private static void Initialize()
         {
             Write($"Initializing... ");
-            //capture unhandled exceptions
-            AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            // Load 'App.dll'
-            var loaded_app = Assembly.LoadFrom("/meadow0/App.exe");
-            var app_type = loaded_app.GetType("MeadowApp.MeadowApp");
-            if (app_type is null)
-                throw new Exception ("App not found. Looking for 'MeadowApp.MeadowApp' type");
+            try
+            {
+                //capture unhandled exceptions
+                AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
-            var device_type = app_type.BaseType.GetGenericArguments()[0];
-            CurrentDevice = Activator.CreateInstance(device_type) as IMeadowDevice;
-            CurrentDevice.Initialize();
-            CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
-            // initialize file system folders and such
-            // TODO: move this to platformOS
-            InitializeFileSystem();
+                // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
+                var app_type = FindAppType();
 
-            // Create the app object, bound immediately to the <IMeadowDevice>
-            app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
+                var device_type = app_type.BaseType.GetGenericArguments()[0];
+                var device = Activator.CreateInstance(device_type) as IMeadowDevice;
+                if(device == null)
+                {
+                    throw new Exception($"Failed to create instance of '{device_type.Name}'");
+                }
+                CurrentDevice = device;
+                CurrentDevice.Initialize();
+                CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
-            CurrentDevice.BeforeSleep += () => { app.BeforeSleep(); };
-            CurrentDevice.AfterWake += () => { app.AfterSleep(); };
-            CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
+                // initialize file system folders and such
+                // TODO: move this to platformOS
+                InitializeFileSystem();
 
-            WriteLine($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+                // Create the app object, bound immediately to the <IMeadowDevice>
+                var app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
+                if(app == null)
+                {
+                    throw new Exception($"Failed to create instance of '{app_type.Name}'");
+                }
+
+                App = app;
+
+                CurrentDevice.BeforeSleep += () => { app.BeforeSleep(); };
+                CurrentDevice.AfterWake += () => { app.AfterSleep(); };
+                CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
+
+                WriteLine($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private static void Shutdown()
         {
-            app = null;
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             WriteLine("Done.");
@@ -130,34 +196,6 @@
         public static void Sleep(WakeUpOptions wakeUp)
         {
             throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Resets the Meadow hardware immediately
-        /// </summary>
-        [Obsolete("Use CurrentDevice.Reset", true)]
-        public static void Reset()
-        {
-            CurrentDevice.Reset();
-        }
-
-        /// <summary>
-        /// Enables a watchdog timer with the specified timeout in milliseconds.
-        /// If Watchdog.Reset is not called before the timeout period, the Meadow
-        /// will reset.
-        /// </summary>
-        /// <param name="timeoutMs">Watchdog timeout period, in milliseconds.
-        /// Maximum allowed timeout of 32,768ms</param>
-        [Obsolete("Use CurrentDevice.WatchdogEnable", true)]
-        public static void WatchdogReset(int timeoutMs)
-        {
-            CurrentDevice.WatchdogEnable(TimeSpan.FromMilliseconds(timeoutMs));
-        }
-
-        [Obsolete("Use CurrentDevice.WatchdogReset", true)]
-        public static void WatchdogReset()
-        {
-            CurrentDevice.WatchdogReset();
         }
 
         /// <summary>
@@ -198,10 +236,14 @@
 
         private static Exception SystemFailure (Exception e, string? message = null)
         {
-            if (app is null)
+            if (App is null)
+            {
                 Write("OS startup failure:");
+            }
             else
+            {
                 Write("App failure:");
+            }
 
             WriteLine(message);
             WriteLine($"{e.GetType()}: {e.Message}");
