@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Linq;
 using static Meadow.Core.Interop;
@@ -13,7 +14,7 @@ namespace Meadow.Hardware
     public class PwmPort : PwmPortBase
     {
         private bool _isRunning = false;
-        private float _frequency;
+        private Frequency _frequency;
         private float _dutyCycle;
         private bool _inverted;
 
@@ -29,7 +30,7 @@ namespace Meadow.Hardware
             IPwmChannelInfo channel,
             bool inverted = false,
             bool isOnboard = false)
-            : base(pin, channel)
+            : base(pin, channel, new Frequency(100f, Units.Frequency.UnitType.Hertz))
         {
             this.IsOnboard = isOnboard;
             this.IOController = ioController;
@@ -40,7 +41,7 @@ namespace Meadow.Hardware
         internal static PwmPort From(
             IPin pin,
             IMeadowIOController ioController,
-            float frequency = 100f,
+            Frequency frequency,
             float dutyCycle = 0.5f,
             bool inverted = false,
             bool isOnboard = false)
@@ -91,13 +92,14 @@ namespace Meadow.Hardware
         /// <summary>
         /// The frequency, in Hz (cycles per second) of the PWM square wave.
         /// </summary>
-        public override float Frequency
+        public override Frequency Frequency
         {
             get => _frequency;
             set
             {
                 // clamp
-                if (value < 0) { value = 0; }
+                if (value.Hertz < 0) { value = new Frequency(0); }
+
                 // TODO: add upper bound.
 
                 // shortcut
@@ -160,16 +162,16 @@ namespace Meadow.Hardware
         /// </summary>
         public override float Period
         {
-            get => 1.0f / Frequency * (float)TimeScale;
+            get => 1.0f / (float)Frequency.Hertz * (float)TimeScale;
             set
             {
-                Frequency = 1.0f * (float)TimeScale / value;
+                Frequency = new Frequency(1.0f * (float)TimeScale / value);
             }
         }
 
         private void UpdateChannel()
         {
-            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency, Inverted ? (1.0f - DutyCycle) : DutyCycle);
+            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency.Hertz, Inverted ? (1.0f - DutyCycle) : DutyCycle);
         }
 
 
