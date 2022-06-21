@@ -28,7 +28,7 @@ namespace Meadow.Devices
 
         public override IPwmPort CreatePwmPort(
             IPin pin,
-            float frequency = IPwmOutputController.DefaultPwmFrequency,
+            Frequency frequency,
             float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle,
             bool inverted = false)
         {
