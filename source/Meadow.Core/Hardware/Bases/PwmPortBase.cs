@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 namespace Meadow.Hardware
 {
     public abstract class PwmPortBase : DigitalPortBase, IPwmPort
@@ -11,7 +12,7 @@ namespace Meadow.Hardware
         protected PwmPortBase(
             IPin pin,
             IPwmChannelInfo channelInfo,
-            float frequency = 100,
+            Frequency frequency,
             float dutyCycle = 0,
             bool inverted = false
             ) : base (pin, channelInfo)
@@ -28,7 +29,7 @@ namespace Meadow.Hardware
 
         public abstract bool Inverted { get; set; }
         public abstract float DutyCycle { get; set; }
-        public abstract float Frequency { get; set; }
+        public abstract Frequency Frequency { get; set; }
         public abstract float Duration { get; set; }
         public abstract float Period { get; set; }
         public abstract bool State { get; }

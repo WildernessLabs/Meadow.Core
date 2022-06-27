@@ -33,7 +33,7 @@ namespace Meadow.Devices
         public IDeviceInformation Information { get; protected set; }
 
         public abstract IPin GetPin(string pinName);
-        public abstract IPwmPort CreatePwmPort(IPin pin, float frequency = IPwmOutputController.DefaultPwmFrequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
+        public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
         //==== internals
         protected Esp32Coprocessor? esp32;

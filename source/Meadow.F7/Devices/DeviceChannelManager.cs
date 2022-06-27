@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Meadow.Hardware
         /// </summary>
         private IDictionary<IPin, ChannelConfig> _channelStates;
         private readonly object _channelLock = new object();
-        private IDictionary<uint, float> _pwmTimerFrequencies;
+        private IDictionary<uint, double> _pwmTimerFrequencies;
         private List<uint> _pwmTimersInitialized = new List<uint>();
         private KeyValuePair<IPin, ChannelConfig>[]? _pinsToReasssertForPwm = null;
 
@@ -22,7 +23,7 @@ namespace Meadow.Hardware
         internal DeviceChannelManager()
         {
             _channelStates = new Dictionary<IPin, ChannelConfig>();
-            _pwmTimerFrequencies = new Dictionary<uint, float>();
+            _pwmTimerFrequencies = new Dictionary<uint, double>();
         }
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace Meadow.Hardware
             }
         }
 
-        public Tuple<bool, string> ReservePwm(IPin pin, IPwmChannelInfo channelInfo, float frequency)
+        public Tuple<bool, string> ReservePwm(IPin pin, IPwmChannelInfo channelInfo, Frequency frequency)
         {
             lock (_channelLock)
             {
@@ -146,7 +147,7 @@ namespace Meadow.Hardware
                 // PWMs on a single timer must have the same frequency (but can have different duty cycles)
                 if (_pwmTimerFrequencies.ContainsKey(channelInfo.Timer))
                 {
-                    var currentFrequency = _pwmTimerFrequencies[channelInfo.Timer];
+                    var currentFrequency = new Frequency(_pwmTimerFrequencies[channelInfo.Timer], Frequency.UnitType.Hertz);
                     if (currentFrequency != frequency)
                     {
                         return new Tuple<bool, string>(false, $"PWM Timer frequency cannot be different between separate channels. PWM Timer {channelInfo.Timer} is already set to {currentFrequency} Hz");
@@ -154,7 +155,7 @@ namespace Meadow.Hardware
                 }
                 else
                 {
-                    _pwmTimerFrequencies.Add(channelInfo.Timer, frequency);
+                    _pwmTimerFrequencies.Add(channelInfo.Timer, frequency.Hertz);
                 }
 
                 // due to nuttx - any PWM created on a timer will initialize all channels on that timer to alternate function - killing any existing IO
