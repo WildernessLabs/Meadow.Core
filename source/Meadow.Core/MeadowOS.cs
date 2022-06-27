@@ -1,15 +1,13 @@
 ﻿namespace Meadow
 {
+    using Meadow.Devices;
+    using Meadow.Logging;
     using System;
     using System.IO;
-    using System.Threading;
     using System.Reflection;
-    using Meadow.Devices;
+    using System.Threading;
     using System.Threading.Tasks;
-
     using static System.Console;
-    using System.Linq;
-    using Meadow.Logging;
 
     /// <summary>
     /// The entry point of the .NET part of Meadow OS.
@@ -36,7 +34,7 @@
             Resolver.Log.AddProvider(new ConsoleLogProvider());
 
             // TODO: pull from file/config
-            Resolver.Log.Loglevel = LogLevel.Verbose;
+            Resolver.Log.Loglevel = LogLevel.Debug;
 
             Initialize();
             try
@@ -62,7 +60,7 @@
                 catch (Exception e)
                 {
                     Resolver.Log.Error($"App Error: {e.Message}");
-                    
+
                     bool recovered;
                     App.OnError(e, out recovered);
                     if (recovered)
@@ -94,11 +92,11 @@
                 if (App is IAsyncDisposable { } da)
                 {
                     await da.DisposeAsync();
-                }                
+                }
             }
             Shutdown();
         }
-     
+
         private static Type FindAppType()
         {
             Resolver.Log.Verbose($"Looking for app assembly...");
@@ -106,7 +104,7 @@
             // support app.exe or app.dll
             var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
 
-            if(assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
+            if (assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
 
             Assembly? FindByPath(string[] namesToCheck)
             {
@@ -126,8 +124,16 @@
             }
 
             Resolver.Log.Verbose($"Looking for IApp...");
-            var types = assembly.GetTypes();
-            var app_type = types.FirstOrDefault(t => typeof(IApp).IsAssignableFrom(t));
+            var searchType = typeof(IApp);
+            Type? app_type = null;
+            foreach (var type in assembly.GetTypes())
+            {
+                if (searchType.IsAssignableFrom(type))
+                {
+                    app_type = type;
+                    break;
+                }
+            }
 
             if (app_type is null)
             {
@@ -151,7 +157,7 @@
 
                 var device_type = app_type.BaseType.GetGenericArguments()[0];
                 var device = Activator.CreateInstance(device_type) as IMeadowDevice;
-                if(device == null)
+                if (device == null)
                 {
                     throw new Exception($"Failed to create instance of '{device_type.Name}'");
                 }
@@ -165,7 +171,7 @@
 
                 // Create the app object, bound immediately to the <IMeadowDevice>
                 var app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
-                if(app == null)
+                if (app == null)
                 {
                     throw new Exception($"Failed to create instance of '{app_type.Name}'");
                 }
@@ -223,8 +229,10 @@
 
         private static void EmptyDirectory(string path)
         {
-            if (Directory.Exists(path)) {
-                foreach (var file in Directory.GetFiles(path)) {
+            if (Directory.Exists(path))
+            {
+                foreach (var file in Directory.GetFiles(path))
+                {
                     File.Delete(file);
                 }
             }
@@ -232,19 +240,20 @@
 
         private static void CreateFolderIfNeeded(string path)
         {
-            if (!Directory.Exists(path)) {
+            if (!Directory.Exists(path))
+            {
                 try
                 {
                     Directory.CreateDirectory(path);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WriteLine($"Failed: {ex.Message}");
                 }
             }
         }
 
-        private static Exception SystemFailure (Exception e, string? message = null)
+        private static Exception SystemFailure(Exception e, string? message = null)
         {
             if (App is null)
             {
