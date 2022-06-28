@@ -25,7 +25,11 @@
    <Folder Include="Gateways\Bluetooth\Definitions\" />
  </ItemGroup>
  <ItemGroup>
+   <PackageReference Include="Meadow.Logging" Version="0.24.0" />
+ </ItemGroup>
+ <ItemGroup>
    <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
+   <ProjectReference Include="..\..\..\Meadow.Logging\lib\Meadow.Logging.csproj" />
    <ProjectReference Include="..\..\..\Meadow.Units\Source\Meadow.Units\Meadow.Units.csproj" />
  </ItemGroup>
 </Project>

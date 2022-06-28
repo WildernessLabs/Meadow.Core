@@ -1,12 +1,12 @@
 ﻿namespace Meadow
 {
+    using Meadow.Devices;
+    using Meadow.Logging;
     using System;
     using System.IO;
-    using System.Threading;
     using System.Reflection;
-    using Meadow.Devices;
+    using System.Threading;
     using System.Threading.Tasks;
-
     using static System.Console;
 
     /// <summary>
@@ -20,7 +20,7 @@
         //==== properties
         internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
-        static IApp app;
+        private static IApp App { get; set; }
 
         static bool appSetup = false;
         static bool appRan = false;
@@ -28,30 +28,45 @@
 
         internal static CancellationTokenSource AppAbort = new();
 
-        public async static Task Main (string[] args)
+        public async static Task Main(string[] args)
         {
+            Resolver.Services.Create<Logger>();
+            Resolver.Log.AddProvider(new ConsoleLogProvider());
+
+            // TODO: pull from file/config
+            Resolver.Log.Loglevel = LogLevel.Debug;
+
             Initialize();
-            try {
-                await app.Initialize();
+            try
+            {
+                Resolver.Log.Verbose("Initializing App");
+                await App.Initialize();
                 appSetup = true;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 // exception on bring-up; not good
                 SystemFailure(e, "App initialization failed");
             }
 
             while (!appRan)
             {
-                try {
-                    await app.Run();
+                try
+                {
+                    Resolver.Log.Verbose("Running App");
+                    await App.Run();
                     appRan = true;
                 }
                 catch (Exception e)
                 {
+                    Resolver.Log.Error($"App Error: {e.Message}");
+
                     bool recovered;
-                    app.OnError (e, out recovered);
+                    App.OnError(e, out recovered);
                     if (recovered)
-                        app.Recovery(e);
+                    {
+                        App.Recovery(e);
+                    }
                     else
                     {
                         AppAbort.Cancel();
@@ -60,59 +75,126 @@
                 }
             }
 
-            try {
+            try
+            {
+                Resolver.Log.Verbose($"App shutting down");
+
                 AppAbort.CancelAfter(millisecondsDelay: 60);
-                app.Shutdown(out appShutdown);
+                App.Shutdown(out appShutdown);
             }
             catch (Exception e)
             {
                 // we can't recover while shutting down
                 throw SystemFailure(e, "App shutdown error");
             }
-            finally {
-                await (app as IAsyncDisposable).DisposeAsync();
+            finally
+            {
+                if (App is IAsyncDisposable { } da)
+                {
+                    await da.DisposeAsync();
+                }
             }
             Shutdown();
         }
 
+        private static Type FindAppType()
+        {
+            Resolver.Log.Verbose($"Looking for app assembly...");
+
+            // support app.exe or app.dll
+            var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
+
+            if (assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
+
+            Assembly? FindByPath(string[] namesToCheck)
+            {
+                var root = AppDomain.CurrentDomain.BaseDirectory;
+
+                foreach (var name in namesToCheck)
+                {
+                    var path = Path.Combine(root, name);
+                    if (File.Exists(path))
+                    {
+                        Resolver.Log.Verbose($"Found '{path}'");
+                        return Assembly.LoadFrom(path);
+                    }
+                }
+
+                return null;
+            }
+
+            Resolver.Log.Verbose($"Looking for IApp...");
+            var searchType = typeof(IApp);
+            Type? app_type = null;
+            foreach (var type in assembly.GetTypes())
+            {
+                if (searchType.IsAssignableFrom(type))
+                {
+                    app_type = type;
+                    break;
+                }
+            }
+
+            if (app_type is null)
+            {
+                throw new Exception("App not found. Looking for 'MeadowApp.MeadowApp' type");
+            }
+            return app_type;
+        }
+
         private static void Initialize()
         {
-            Write($"Initializing... ");
-            //capture unhandled exceptions
-            AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
+            Resolver.Log.Verbose($"Initializing OS... ");
 
-            // Load 'App.dll'
-            var loaded_app = Assembly.LoadFrom("/meadow0/App.exe");
-            var app_type = loaded_app.GetType("MeadowApp.MeadowApp");
-            if (app_type is null)
-                throw new Exception ("App not found. Looking for 'MeadowApp.MeadowApp' type");
+            try
+            {
+                //capture unhandled exceptions
+                AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
-            var device_type = app_type.BaseType.GetGenericArguments()[0];
-            CurrentDevice = Activator.CreateInstance(device_type) as IMeadowDevice;
-            CurrentDevice.Initialize();
-            CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
-            // initialize file system folders and such
-            // TODO: move this to platformOS
-            InitializeFileSystem();
+                // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
+                var app_type = FindAppType();
 
-            // Create the app object, bound immediately to the <IMeadowDevice>
-            app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
+                var device_type = app_type.BaseType.GetGenericArguments()[0];
+                var device = Activator.CreateInstance(device_type) as IMeadowDevice;
+                if (device == null)
+                {
+                    throw new Exception($"Failed to create instance of '{device_type.Name}'");
+                }
+                CurrentDevice = device;
+                CurrentDevice.Initialize();
+                CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
-            CurrentDevice.BeforeSleep += () => { app.BeforeSleep(); };
-            CurrentDevice.AfterWake += () => { app.AfterSleep(); };
-            CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
+                // initialize file system folders and such
+                // TODO: move this to platformOS
+                InitializeFileSystem();
 
-            WriteLine($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+                // Create the app object, bound immediately to the <IMeadowDevice>
+                var app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
+                if (app == null)
+                {
+                    throw new Exception($"Failed to create instance of '{app_type.Name}'");
+                }
+
+                App = app;
+
+                CurrentDevice.BeforeSleep += () => { app.BeforeSleep(); };
+                CurrentDevice.AfterWake += () => { app.AfterSleep(); };
+                CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
+
+                Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private static void Shutdown()
         {
-            app = null;
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
-            WriteLine("Done.");
+            Resolver.Log.Debug("Shutdown");
             Thread.Sleep(-1);
         }
 
@@ -133,34 +215,6 @@
         }
 
         /// <summary>
-        /// Resets the Meadow hardware immediately
-        /// </summary>
-        [Obsolete("Use CurrentDevice.Reset", true)]
-        public static void Reset()
-        {
-            CurrentDevice.Reset();
-        }
-
-        /// <summary>
-        /// Enables a watchdog timer with the specified timeout in milliseconds.
-        /// If Watchdog.Reset is not called before the timeout period, the Meadow
-        /// will reset.
-        /// </summary>
-        /// <param name="timeoutMs">Watchdog timeout period, in milliseconds.
-        /// Maximum allowed timeout of 32,768ms</param>
-        [Obsolete("Use CurrentDevice.WatchdogEnable", true)]
-        public static void WatchdogReset(int timeoutMs)
-        {
-            CurrentDevice.WatchdogEnable(TimeSpan.FromMilliseconds(timeoutMs));
-        }
-
-        [Obsolete("Use CurrentDevice.WatchdogReset", true)]
-        public static void WatchdogReset()
-        {
-            CurrentDevice.WatchdogReset();
-        }
-
-        /// <summary>
         /// Creates the named OS directories if they don't exist, and makes sure
         /// the `/Temp` directory is emptied out.
         /// </summary>
@@ -175,8 +229,10 @@
 
         private static void EmptyDirectory(string path)
         {
-            if (Directory.Exists(path)) {
-                foreach (var file in Directory.GetFiles(path)) {
+            if (Directory.Exists(path))
+            {
+                foreach (var file in Directory.GetFiles(path))
+                {
                     File.Delete(file);
                 }
             }
@@ -184,29 +240,34 @@
 
         private static void CreateFolderIfNeeded(string path)
         {
-            if (!Directory.Exists(path)) {
+            if (!Directory.Exists(path))
+            {
                 try
                 {
                     Directory.CreateDirectory(path);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     WriteLine($"Failed: {ex.Message}");
                 }
             }
         }
 
-        private static Exception SystemFailure (Exception e, string? message = null)
+        private static Exception SystemFailure(Exception e, string? message = null)
         {
-            if (app is null)
-                Write("OS startup failure:");
+            if (App is null)
+            {
+                Resolver.Log.Error("OS startup failure:");
+            }
             else
-                Write("App failure:");
+            {
+                Resolver.Log.Error("App failure:");
+            }
 
-            WriteLine(message);
-            WriteLine($"{e.GetType()}: {e.Message}");
-            WriteLine(e.StackTrace);
-            WriteLine("App failure. Meadow will restart in 5 seconds.");
+            Resolver.Log.Error(message);
+            Resolver.Log.Debug($"{e.GetType()}: {e.Message}");
+            Resolver.Log.Debug(e.StackTrace);
+            Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
             Thread.Sleep(5000);
             CurrentDevice.Reset();
             throw e; // no return from this function
