@@ -23,15 +23,6 @@
         public virtual Task Run()
         {
             return Task.Delay(-1, cts.Token);
-
-            /*
-            var task = Task.Run(() =>
-            {
-                Thread.Sleep(Timeout.Infinite);
-            });
-
-            return task; 
-            */
         }
 
         public virtual Task Initialize() {  return Task.CompletedTask; }
