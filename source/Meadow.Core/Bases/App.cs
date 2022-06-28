@@ -18,7 +18,7 @@
             Abort = MeadowOS.AppAbort.Token;
         }
 
-        public virtual Task Start()
+        public virtual Task Run()
         {
             var task = Task.Run(() =>
             {

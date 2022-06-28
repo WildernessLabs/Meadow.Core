@@ -54,7 +54,7 @@
                 try
                 {
                     Resolver.Log.Verbose("Running App");
-                    await App.Start();
+                    await App.Run();
                     appRunning = true;
                 }
                 catch (Exception e)
@@ -177,8 +177,8 @@
 
                 App = app;
 
-                CurrentDevice.BeforeSleep += () => { app.Resume(); };
-                CurrentDevice.AfterWake += () => { app.Sleep(); };
+                CurrentDevice.BeforeSleep += () => { app.Sleep(); };
+                CurrentDevice.AfterWake += () => { app.Resume(); };
                 CurrentDevice.BeforeReset += () => { app.Reset(); };
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
