@@ -18,8 +18,33 @@
             Abort = MeadowOS.AppAbort.Token;
         }
 
-        public abstract Task Run();
+        public virtual Task Start()
+        {
+            var task = Task.Run(() =>
+            {
+                Thread.Sleep(Timeout.Infinite);
+            });
+
+            return task; 
+        }
+
         public virtual Task Initialize() {  return Task.CompletedTask; }
+
+        public virtual void Shutdown(out bool complete, Exception? e = null) { complete = true; }
+
+        public virtual void OnError(Exception e, out bool recovered) { recovered = false; }
+
+        public virtual void Resume() { }
+
+        public virtual void Sleep() { }
+
+        public virtual void Recovery(Exception e) { }
+
+        public virtual void Update(Version newVersion, out bool approveUpdate) { approveUpdate = true; }
+
+        public virtual void UpdateComplete(Version oldVersion, out bool rollbackUpdate) { rollbackUpdate = false; }
+
+        public virtual void Reset() { }
 
         /// <summary>
         /// The root Device interface
