@@ -18,19 +18,31 @@
             Abort = MeadowOS.AppAbort.Token;
         }
 
+        object loc;
+
         public virtual Task Run()
         {
+            Monitor.Wait(loc);
+
+            return Task.CompletedTask;
+
+            /*
             var task = Task.Run(() =>
             {
                 Thread.Sleep(Timeout.Infinite);
             });
 
             return task; 
+            */
         }
 
         public virtual Task Initialize() {  return Task.CompletedTask; }
 
-        public virtual void Shutdown(out bool complete, Exception? e = null) { complete = true; }
+        public virtual void Shutdown(out bool complete, Exception? e = null) 
+        { 
+            Monitor.Pulse(loc);
+            complete = true; 
+        }
 
         public virtual void OnError(Exception e, out bool recovered) { recovered = false; }
 
