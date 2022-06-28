@@ -13,18 +13,16 @@
     public abstract class App<D> : IApp, IAsyncDisposable
             where D : class, IMeadowDevice
     {
+        readonly CancellationTokenSource cts = new CancellationTokenSource();
+
         protected App() {
             Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
             Abort = MeadowOS.AppAbort.Token;
         }
 
-        object loc;
-
         public virtual Task Run()
         {
-            Monitor.Wait(loc);
-
-            return Task.CompletedTask;
+            return Task.Delay(-1, cts.Token);
 
             /*
             var task = Task.Run(() =>
@@ -40,7 +38,7 @@
 
         public virtual void Shutdown(out bool complete, Exception? e = null) 
         { 
-            Monitor.Pulse(loc);
+            cts.Cancel();
             complete = true; 
         }
 
