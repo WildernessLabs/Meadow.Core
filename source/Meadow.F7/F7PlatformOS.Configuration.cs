@@ -31,18 +31,35 @@ namespace Meadow
         public string OSVersion => GetString(ConfigurationValues.OsVersion);
 
         /// <summary>
-        /// Get the OS build date
+        /// Get the OS build date.
         /// </summary>
         /// <returns>OS build date.</returns>
         //TODO: parse as datetime
         public string OSBuildDate => GetString(ConfigurationValues.BuildDate);
 
         /// <summary>
-        /// Get the mono version on the device..
+        /// Get the mono version on the device.
         /// </summary>
         /// <returns>Mono version.</returns>
         public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
 
+        /// <summary>
+        /// Should the system reboot if an unhandled exception is encounted in the user application?
+        /// </summary>
+        public bool RebootOnUnhandledException => GetBoolean(ConfigurationValues.RebootOnUnhandledException);
+
+        /// <summary>
+        /// Number of seconds the initialization method in the user application is allowed to run before
+        /// it is assumed to have crashed.
+        /// </summary>
+        /// <remarks>A value of 0 indicates an infinite period.</remarks>
+        public uint InitializationTimeout => GetUInt(ConfigurationValues.InitializationTimeout);
+
+        /// <summary>
+        /// Is an SD card present?
+        /// </summary>
+        /// <remarks>Only really relevant to the CCM at the moment.</remarks>
+        public bool SdCardPresent => GetBoolean(ConfigurationValues.SdCardPresent);
 
         //==== Configuration internals
 

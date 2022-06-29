@@ -111,7 +111,6 @@ namespace Meadow.Devices
         public bool GetNetworkTimeAtStartup
         {
             get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup);
-            set => F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup, value);
         }
 
         /// <summary>
@@ -150,7 +149,6 @@ namespace Meadow.Devices
         public bool AutomaticallyStartNetwork
         {
             get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork);
-            set => F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork, value);
         }
 
         /// <summary>
@@ -159,7 +157,6 @@ namespace Meadow.Devices
         public bool AutomaticallyReconnect
         {
             get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
-            set => F7PlatformOS.SetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect, value);
         }
 
         /// <summary>
