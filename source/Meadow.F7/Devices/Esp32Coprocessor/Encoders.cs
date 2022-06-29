@@ -266,8 +266,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             length += (int) 6;
             length += (int) (systemConfiguration.DeviceName.Length + 1);
             length += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
-            length += (int) (systemConfiguration.NtpServer.Length + 1);
-            length += 26;
+            length += 7;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
@@ -277,10 +276,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeString(systemConfiguration.SoftwareVersion, buffer, offset);
             offset += systemConfiguration.SoftwareVersion.Length + 1;
             buffer[offset] = systemConfiguration.MaximumMessageQueueLength;
-            offset += 1;
-            buffer[offset] = systemConfiguration.AutomaticallyStartNetwork;
-            offset += 1;
-            buffer[offset] = systemConfiguration.AutomaticallyReconnect;
             offset += 1;
             EncodeInt32(systemConfiguration.MaximumRetryCount, buffer, offset);
             offset += 4;
@@ -294,18 +289,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += systemConfiguration.DeviceName.Length + 1;
             EncodeString(systemConfiguration.DefaultAccessPoint, buffer, offset);
             offset += systemConfiguration.DefaultAccessPoint.Length + 1;
-            EncodeString(systemConfiguration.NtpServer, buffer, offset);
-            offset += systemConfiguration.NtpServer.Length + 1;
-            EncodeInt32(systemConfiguration.GetTimeAtStartup, buffer, offset);
-            offset += 4;
-            buffer[offset] = systemConfiguration.UseDhcp;
-            offset += 1;
-            EncodeUInt32(systemConfiguration.StaticIpAddress, buffer, offset);
-            offset += 4;
-            EncodeUInt32(systemConfiguration.DnsServer, buffer, offset);
-            offset += 4;
-            EncodeUInt32(systemConfiguration.DefaultGateway, buffer, offset);
-            offset += 4;
             buffer[offset] = systemConfiguration.ResetReason;
             return(buffer);
         }
@@ -313,7 +296,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SystemConfiguration object from a byte array.
         /// </summary>
-        /// <param name="systemConfiguration">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SystemConfiguration object.</returns>
         public static MessagePayloads.SystemConfiguration ExtractSystemConfiguration(byte[] buffer, int offset)
         {
@@ -322,10 +306,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             systemConfiguration.SoftwareVersion = ExtractString(buffer, offset);
             offset += (int) (systemConfiguration.SoftwareVersion.Length + 1);
             systemConfiguration.MaximumMessageQueueLength = buffer[offset];
-            offset += 1;
-            systemConfiguration.AutomaticallyStartNetwork = buffer[offset];
-            offset += 1;
-            systemConfiguration.AutomaticallyReconnect = buffer[offset];
             offset += 1;
             systemConfiguration.MaximumRetryCount = ExtractInt32(buffer, offset);
             offset += 4;
@@ -341,25 +321,13 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += (int) (systemConfiguration.DeviceName.Length + 1);
             systemConfiguration.DefaultAccessPoint = ExtractString(buffer, offset);
             offset += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
-            systemConfiguration.NtpServer = ExtractString(buffer, offset);
-            offset += (int) (systemConfiguration.NtpServer.Length + 1);
-            systemConfiguration.GetTimeAtStartup = ExtractInt32(buffer, offset);
-            offset += 4;
-            systemConfiguration.UseDhcp = buffer[offset];
-            offset += 1;
-            systemConfiguration.StaticIpAddress = ExtractUInt32(buffer, offset);
-            offset += 4;
-            systemConfiguration.DnsServer = ExtractUInt32(buffer, offset);
-            offset += 4;
-            systemConfiguration.DefaultGateway = ExtractUInt32(buffer, offset);
-            offset += 4;
             systemConfiguration.ResetReason = buffer[offset];
             return(systemConfiguration);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SystemConfiguration object.
-        /// </summary>
+         /// </summary>
         /// <param name="systemConfiguration">SystemConfiguration object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SystemConfiguration object.</returns>
         public static int EncodedSystemConfigurationBufferSize(MessagePayloads.SystemConfiguration systemConfiguration)
@@ -368,8 +336,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result += (int) systemConfiguration.SoftwareVersion.Length;
             result += (int) systemConfiguration.DeviceName.Length;
             result += (int) systemConfiguration.DefaultAccessPoint.Length;
-            result += (int) systemConfiguration.NtpServer.Length;
-            return(result + 42);
+            return(result + 22);
         }
 
         /// <summary>
@@ -407,7 +374,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ConfigurationValue object from a byte array.
         /// </summary>
-        /// <param name="configurationValue">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ConfigurationValue object.</returns>
         public static MessagePayloads.ConfigurationValue ExtractConfigurationValue(byte[] buffer, int offset)
         {
@@ -425,9 +393,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(configurationValue);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ConfigurationValue object.
-        /// </summary>
+         /// </summary>
         /// <param name="configurationValue">ConfigurationValue object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ConfigurationValue object.</returns>
         public static int EncodedConfigurationValueBufferSize(MessagePayloads.ConfigurationValue configurationValue)
@@ -474,7 +442,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ErrorEvent object from a byte array.
         /// </summary>
-        /// <param name="errorEvent">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ErrorEvent object.</returns>
         public static MessagePayloads.ErrorEvent ExtractErrorEvent(byte[] buffer, int offset)
         {
@@ -494,9 +463,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(errorEvent);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ErrorEvent object.
-        /// </summary>
+         /// </summary>
         /// <param name="errorEvent">ErrorEvent object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ErrorEvent object.</returns>
         public static int EncodedErrorEventBufferSize(MessagePayloads.ErrorEvent errorEvent)
@@ -536,7 +505,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a WiFiCredentials object from a byte array.
         /// </summary>
-        /// <param name="wiFiCredentials">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>WiFiCredentials object.</returns>
         public static MessagePayloads.WiFiCredentials ExtractWiFiCredentials(byte[] buffer, int offset)
         {
@@ -548,9 +518,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(wiFiCredentials);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the WiFiCredentials object.
-        /// </summary>
+         /// </summary>
         /// <param name="wiFiCredentials">WiFiCredentials object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded WiFiCredentials object.</returns>
         public static int EncodedWiFiCredentialsBufferSize(MessagePayloads.WiFiCredentials wiFiCredentials)
@@ -588,7 +558,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a DisconnectFromAccessPointRequest object from a byte array.
         /// </summary>
-        /// <param name="disconnectFromAccessPointRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>DisconnectFromAccessPointRequest object.</returns>
         public static MessagePayloads.DisconnectFromAccessPointRequest ExtractDisconnectFromAccessPointRequest(byte[] buffer, int offset)
         {
@@ -598,9 +569,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(disconnectFromAccessPointRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the DisconnectFromAccessPointRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="disconnectFromAccessPointRequest">DisconnectFromAccessPointRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded DisconnectFromAccessPointRequest object.</returns>
         public static int EncodedDisconnectFromAccessPointRequestBufferSize(MessagePayloads.DisconnectFromAccessPointRequest disconnectFromAccessPointRequest)
@@ -656,7 +627,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ConnectEventData object from a byte array.
         /// </summary>
-        /// <param name="connectEventData">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ConnectEventData object.</returns>
         public static MessagePayloads.ConnectEventData ExtractConnectEventData(byte[] buffer, int offset)
         {
@@ -684,9 +656,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(connectEventData);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ConnectEventData object.
-        /// </summary>
+         /// </summary>
         /// <param name="connectEventData">ConnectEventData object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ConnectEventData object.</returns>
         public static int EncodedConnectEventDataBufferSize(MessagePayloads.ConnectEventData connectEventData)
@@ -725,7 +697,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a DisconnectEventData object from a byte array.
         /// </summary>
-        /// <param name="disconnectEventData">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>DisconnectEventData object.</returns>
         public static MessagePayloads.DisconnectEventData ExtractDisconnectEventData(byte[] buffer, int offset)
         {
@@ -739,9 +712,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(disconnectEventData);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the DisconnectEventData object.
-        /// </summary>
+         /// </summary>
         /// <param name="disconnectEventData">DisconnectEventData object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded DisconnectEventData object.</returns>
         public static int EncodedDisconnectEventDataBufferSize(MessagePayloads.DisconnectEventData disconnectEventData)
@@ -795,7 +768,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AccessPoint object from a byte array.
         /// </summary>
-        /// <param name="accessPoint">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>AccessPoint object.</returns>
         public static MessagePayloads.AccessPoint ExtractAccessPoint(byte[] buffer, int offset)
         {
@@ -821,9 +795,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(accessPoint);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the AccessPoint object.
-        /// </summary>
+         /// </summary>
         /// <param name="accessPoint">AccessPoint object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded AccessPoint object.</returns>
         public static int EncodedAccessPointBufferSize(MessagePayloads.AccessPoint accessPoint)
@@ -866,7 +840,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AccessPointList object from a byte array.
         /// </summary>
-        /// <param name="accessPointList">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>AccessPointList object.</returns>
         public static MessagePayloads.AccessPointList ExtractAccessPointList(byte[] buffer, int offset)
         {
@@ -884,9 +859,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(accessPointList);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the AccessPointList object.
-        /// </summary>
+         /// </summary>
         /// <param name="accessPointList">AccessPointList object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded AccessPointList object.</returns>
         public static int EncodedAccessPointListBufferSize(MessagePayloads.AccessPointList accessPointList)
@@ -934,7 +909,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SockAddr object from a byte array.
         /// </summary>
-        /// <param name="sockAddr">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SockAddr object.</returns>
         public static MessagePayloads.SockAddr ExtractSockAddr(byte[] buffer, int offset)
         {
@@ -955,9 +931,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(sockAddr);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SockAddr object.
-        /// </summary>
+         /// </summary>
         /// <param name="sockAddr">SockAddr object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SockAddr object.</returns>
         public static int EncodedSockAddrBufferSize(MessagePayloads.SockAddr sockAddr)
@@ -1015,7 +991,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AddrInfo object from a byte array.
         /// </summary>
-        /// <param name="addrInfo">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>AddrInfo object.</returns>
         public static MessagePayloads.AddrInfo ExtractAddrInfo(byte[] buffer, int offset)
         {
@@ -1047,9 +1024,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(addrInfo);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the AddrInfo object.
-        /// </summary>
+         /// </summary>
         /// <param name="addrInfo">AddrInfo object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded AddrInfo object.</returns>
         public static int EncodedAddrInfoBufferSize(MessagePayloads.AddrInfo addrInfo)
@@ -1098,7 +1075,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetAddrInfoRequest object from a byte array.
         /// </summary>
-        /// <param name="getAddrInfoRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetAddrInfoRequest object.</returns>
         public static MessagePayloads.GetAddrInfoRequest ExtractGetAddrInfoRequest(byte[] buffer, int offset)
         {
@@ -1118,9 +1096,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getAddrInfoRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetAddrInfoRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="getAddrInfoRequest">GetAddrInfoRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetAddrInfoRequest object.</returns>
         public static int EncodedGetAddrInfoRequestBufferSize(MessagePayloads.GetAddrInfoRequest getAddrInfoRequest)
@@ -1167,7 +1145,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetAddrInfoResponse object from a byte array.
         /// </summary>
-        /// <param name="getAddrInfoResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetAddrInfoResponse object.</returns>
         public static MessagePayloads.GetAddrInfoResponse ExtractGetAddrInfoResponse(byte[] buffer, int offset)
         {
@@ -1185,9 +1164,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getAddrInfoResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetAddrInfoResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="getAddrInfoResponse">GetAddrInfoResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetAddrInfoResponse object.</returns>
         public static int EncodedGetAddrInfoResponseBufferSize(MessagePayloads.GetAddrInfoResponse getAddrInfoResponse)
@@ -1230,7 +1209,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SocketRequest object from a byte array.
         /// </summary>
-        /// <param name="socketRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SocketRequest object.</returns>
         public static MessagePayloads.SocketRequest ExtractSocketRequest(byte[] buffer, int offset)
         {
@@ -1246,9 +1226,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(socketRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SocketRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="socketRequest">SocketRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SocketRequest object.</returns>
         public static int EncodedSocketRequestBufferSize(MessagePayloads.SocketRequest socketRequest)
@@ -1283,7 +1263,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IntegerResponse object from a byte array.
         /// </summary>
-        /// <param name="integerResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>IntegerResponse object.</returns>
         public static MessagePayloads.IntegerResponse ExtractIntegerResponse(byte[] buffer, int offset)
         {
@@ -1293,9 +1274,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(integerResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the IntegerResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="integerResponse">IntegerResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded IntegerResponse object.</returns>
         public static int EncodedIntegerResponseBufferSize(MessagePayloads.IntegerResponse integerResponse)
@@ -1332,7 +1313,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IntegerAndErrnoResponse object from a byte array.
         /// </summary>
-        /// <param name="integerAndErrnoResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>IntegerAndErrnoResponse object.</returns>
         public static MessagePayloads.IntegerAndErrnoResponse ExtractIntegerAndErrnoResponse(byte[] buffer, int offset)
         {
@@ -1344,9 +1326,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(integerAndErrnoResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the IntegerAndErrnoResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="integerAndErrnoResponse">IntegerAndErrnoResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded IntegerAndErrnoResponse object.</returns>
         public static int EncodedIntegerAndErrnoResponseBufferSize(MessagePayloads.IntegerAndErrnoResponse integerAndErrnoResponse)
@@ -1389,7 +1371,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ConnectRequest object from a byte array.
         /// </summary>
-        /// <param name="connectRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ConnectRequest object.</returns>
         public static MessagePayloads.ConnectRequest ExtractConnectRequest(byte[] buffer, int offset)
         {
@@ -1407,9 +1390,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(connectRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ConnectRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="connectRequest">ConnectRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ConnectRequest object.</returns>
         public static int EncodedConnectRequestBufferSize(MessagePayloads.ConnectRequest connectRequest)
@@ -1446,7 +1429,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a FreeAddrInfoRequest object from a byte array.
         /// </summary>
-        /// <param name="freeAddrInfoRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>FreeAddrInfoRequest object.</returns>
         public static MessagePayloads.FreeAddrInfoRequest ExtractFreeAddrInfoRequest(byte[] buffer, int offset)
         {
@@ -1456,9 +1440,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(freeAddrInfoRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the FreeAddrInfoRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="freeAddrInfoRequest">FreeAddrInfoRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded FreeAddrInfoRequest object.</returns>
         public static int EncodedFreeAddrInfoRequestBufferSize(MessagePayloads.FreeAddrInfoRequest freeAddrInfoRequest)
@@ -1495,7 +1479,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a TimeVal object from a byte array.
         /// </summary>
-        /// <param name="timeVal">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>TimeVal object.</returns>
         public static MessagePayloads.TimeVal ExtractTimeVal(byte[] buffer, int offset)
         {
@@ -1507,9 +1492,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(timeVal);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the TimeVal object.
-        /// </summary>
+         /// </summary>
         /// <param name="timeVal">TimeVal object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded TimeVal object.</returns>
         public static int EncodedTimeValBufferSize(MessagePayloads.TimeVal timeVal)
@@ -1558,7 +1543,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SetSockOptRequest object from a byte array.
         /// </summary>
-        /// <param name="setSockOptRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SetSockOptRequest object.</returns>
         public static MessagePayloads.SetSockOptRequest ExtractSetSockOptRequest(byte[] buffer, int offset)
         {
@@ -1582,9 +1568,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(setSockOptRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SetSockOptRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="setSockOptRequest">SetSockOptRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SetSockOptRequest object.</returns>
         public static int EncodedSetSockOptRequestBufferSize(MessagePayloads.SetSockOptRequest setSockOptRequest)
@@ -1625,7 +1611,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetSockOptRequest object from a byte array.
         /// </summary>
-        /// <param name="getSockOptRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetSockOptRequest object.</returns>
         public static MessagePayloads.GetSockOptRequest ExtractGetSockOptRequest(byte[] buffer, int offset)
         {
@@ -1639,9 +1626,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getSockOptRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetSockOptRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="getSockOptRequest">GetSockOptRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetSockOptRequest object.</returns>
         public static int EncodedGetSockOptRequestBufferSize(MessagePayloads.GetSockOptRequest getSockOptRequest)
@@ -1688,7 +1675,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetSockOptResponse object from a byte array.
         /// </summary>
-        /// <param name="getSockOptResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetSockOptResponse object.</returns>
         public static MessagePayloads.GetSockOptResponse ExtractGetSockOptResponse(byte[] buffer, int offset)
         {
@@ -1710,9 +1698,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getSockOptResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetSockOptResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="getSockOptResponse">GetSockOptResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetSockOptResponse object.</returns>
         public static int EncodedGetSockOptResponseBufferSize(MessagePayloads.GetSockOptResponse getSockOptResponse)
@@ -1751,7 +1739,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a Linger object from a byte array.
         /// </summary>
-        /// <param name="linger">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>Linger object.</returns>
         public static MessagePayloads.Linger ExtractLinger(byte[] buffer, int offset)
         {
@@ -1763,9 +1752,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(linger);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the Linger object.
-        /// </summary>
+         /// </summary>
         /// <param name="linger">Linger object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded Linger object.</returns>
         public static int EncodedLingerBufferSize(MessagePayloads.Linger linger)
@@ -1810,7 +1799,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a WriteRequest object from a byte array.
         /// </summary>
-        /// <param name="writeRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>WriteRequest object.</returns>
         public static MessagePayloads.WriteRequest ExtractWriteRequest(byte[] buffer, int offset)
         {
@@ -1830,9 +1820,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(writeRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the WriteRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="writeRequest">WriteRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded WriteRequest object.</returns>
         public static int EncodedWriteRequestBufferSize(MessagePayloads.WriteRequest writeRequest)
@@ -1871,7 +1861,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ReadRequest object from a byte array.
         /// </summary>
-        /// <param name="readRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ReadRequest object.</returns>
         public static MessagePayloads.ReadRequest ExtractReadRequest(byte[] buffer, int offset)
         {
@@ -1883,9 +1874,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(readRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ReadRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="readRequest">ReadRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ReadRequest object.</returns>
         public static int EncodedReadRequestBufferSize(MessagePayloads.ReadRequest readRequest)
@@ -1930,7 +1921,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ReadResponse object from a byte array.
         /// </summary>
-        /// <param name="readResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ReadResponse object.</returns>
         public static MessagePayloads.ReadResponse ExtractReadResponse(byte[] buffer, int offset)
         {
@@ -1950,9 +1942,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(readResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ReadResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="readResponse">ReadResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ReadResponse object.</returns>
         public static int EncodedReadResponseBufferSize(MessagePayloads.ReadResponse readResponse)
@@ -1989,7 +1981,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a CloseRequest object from a byte array.
         /// </summary>
-        /// <param name="closeRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>CloseRequest object.</returns>
         public static MessagePayloads.CloseRequest ExtractCloseRequest(byte[] buffer, int offset)
         {
@@ -1999,9 +1992,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(closeRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the CloseRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="closeRequest">CloseRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded CloseRequest object.</returns>
         public static int EncodedCloseRequestBufferSize(MessagePayloads.CloseRequest closeRequest)
@@ -2036,7 +2029,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetBatteryChargeLevelResponse object from a byte array.
         /// </summary>
-        /// <param name="getBatteryChargeLevelResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetBatteryChargeLevelResponse object.</returns>
         public static MessagePayloads.GetBatteryChargeLevelResponse ExtractGetBatteryChargeLevelResponse(byte[] buffer, int offset)
         {
@@ -2046,9 +2040,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getBatteryChargeLevelResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetBatteryChargeLevelResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="getBatteryChargeLevelResponse">GetBatteryChargeLevelResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetBatteryChargeLevelResponse object.</returns>
         public static int EncodedGetBatteryChargeLevelResponseBufferSize(MessagePayloads.GetBatteryChargeLevelResponse getBatteryChargeLevelResponse)
@@ -2095,7 +2089,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SendRequest object from a byte array.
         /// </summary>
-        /// <param name="sendRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SendRequest object.</returns>
         public static MessagePayloads.SendRequest ExtractSendRequest(byte[] buffer, int offset)
         {
@@ -2117,9 +2112,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(sendRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SendRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="sendRequest">SendRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SendRequest object.</returns>
         public static int EncodedSendRequestBufferSize(MessagePayloads.SendRequest sendRequest)
@@ -2176,7 +2171,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SendToRequest object from a byte array.
         /// </summary>
-        /// <param name="sendToRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SendToRequest object.</returns>
         public static MessagePayloads.SendToRequest ExtractSendToRequest(byte[] buffer, int offset)
         {
@@ -2206,9 +2202,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(sendToRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SendToRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="sendToRequest">SendToRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SendToRequest object.</returns>
         public static int EncodedSendToRequestBufferSize(MessagePayloads.SendToRequest sendToRequest)
@@ -2252,7 +2248,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a RecvFromRequest object from a byte array.
         /// </summary>
-        /// <param name="recvFromRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>RecvFromRequest object.</returns>
         public static MessagePayloads.RecvFromRequest ExtractRecvFromRequest(byte[] buffer, int offset)
         {
@@ -2268,9 +2265,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(recvFromRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the RecvFromRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="recvFromRequest">RecvFromRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded RecvFromRequest object.</returns>
         public static int EncodedRecvFromRequestBufferSize(MessagePayloads.RecvFromRequest recvFromRequest)
@@ -2325,7 +2322,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a RecvFromResponse object from a byte array.
         /// </summary>
-        /// <param name="recvFromResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>RecvFromResponse object.</returns>
         public static MessagePayloads.RecvFromResponse ExtractRecvFromResponse(byte[] buffer, int offset)
         {
@@ -2355,9 +2353,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(recvFromResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the RecvFromResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="recvFromResponse">RecvFromResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded RecvFromResponse object.</returns>
         public static int EncodedRecvFromResponseBufferSize(MessagePayloads.RecvFromResponse recvFromResponse)
@@ -2403,7 +2401,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a PollRequest object from a byte array.
         /// </summary>
-        /// <param name="pollRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>PollRequest object.</returns>
         public static MessagePayloads.PollRequest ExtractPollRequest(byte[] buffer, int offset)
         {
@@ -2421,9 +2420,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(pollRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the PollRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="pollRequest">PollRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded PollRequest object.</returns>
         public static int EncodedPollRequestBufferSize(MessagePayloads.PollRequest pollRequest)
@@ -2462,7 +2461,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a PollResponse object from a byte array.
         /// </summary>
-        /// <param name="pollResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>PollResponse object.</returns>
         public static MessagePayloads.PollResponse ExtractPollResponse(byte[] buffer, int offset)
         {
@@ -2476,9 +2476,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(pollResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the PollResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="pollResponse">PollResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded PollResponse object.</returns>
         public static int EncodedPollResponseBufferSize(MessagePayloads.PollResponse pollResponse)
@@ -2521,7 +2521,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a InterruptPollResponse object from a byte array.
         /// </summary>
-        /// <param name="interruptPollResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>InterruptPollResponse object.</returns>
         public static MessagePayloads.InterruptPollResponse ExtractInterruptPollResponse(byte[] buffer, int offset)
         {
@@ -2539,9 +2540,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(interruptPollResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the InterruptPollResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="interruptPollResponse">InterruptPollResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded InterruptPollResponse object.</returns>
         public static int EncodedInterruptPollResponseBufferSize(MessagePayloads.InterruptPollResponse interruptPollResponse)
@@ -2578,7 +2579,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a ListenRequest object from a byte array.
         /// </summary>
-        /// <param name="listenRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>ListenRequest object.</returns>
         public static MessagePayloads.ListenRequest ExtractListenRequest(byte[] buffer, int offset)
         {
@@ -2590,9 +2592,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(listenRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the ListenRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="listenRequest">ListenRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded ListenRequest object.</returns>
         public static int EncodedListenRequestBufferSize(MessagePayloads.ListenRequest listenRequest)
@@ -2635,7 +2637,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BindRequest object from a byte array.
         /// </summary>
-        /// <param name="bindRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>BindRequest object.</returns>
         public static MessagePayloads.BindRequest ExtractBindRequest(byte[] buffer, int offset)
         {
@@ -2653,9 +2656,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(bindRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the BindRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="bindRequest">BindRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded BindRequest object.</returns>
         public static int EncodedBindRequestBufferSize(MessagePayloads.BindRequest bindRequest)
@@ -2692,7 +2695,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AcceptRequest object from a byte array.
         /// </summary>
-        /// <param name="acceptRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>AcceptRequest object.</returns>
         public static MessagePayloads.AcceptRequest ExtractAcceptRequest(byte[] buffer, int offset)
         {
@@ -2702,9 +2706,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(acceptRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the AcceptRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="acceptRequest">AcceptRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded AcceptRequest object.</returns>
         public static int EncodedAcceptRequestBufferSize(MessagePayloads.AcceptRequest acceptRequest)
@@ -2749,7 +2753,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a AcceptResponse object from a byte array.
         /// </summary>
-        /// <param name="acceptResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>AcceptResponse object.</returns>
         public static MessagePayloads.AcceptResponse ExtractAcceptResponse(byte[] buffer, int offset)
         {
@@ -2769,9 +2774,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(acceptResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the AcceptResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="acceptResponse">AcceptResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded AcceptResponse object.</returns>
         public static int EncodedAcceptResponseBufferSize(MessagePayloads.AcceptResponse acceptResponse)
@@ -2808,7 +2813,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IoctlRequest object from a byte array.
         /// </summary>
-        /// <param name="ioctlRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>IoctlRequest object.</returns>
         public static MessagePayloads.IoctlRequest ExtractIoctlRequest(byte[] buffer, int offset)
         {
@@ -2818,9 +2824,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(ioctlRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the IoctlRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="ioctlRequest">IoctlRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded IoctlRequest object.</returns>
         public static int EncodedIoctlRequestBufferSize(MessagePayloads.IoctlRequest ioctlRequest)
@@ -2867,7 +2873,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a IoctlResponse object from a byte array.
         /// </summary>
-        /// <param name="ioctlResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>IoctlResponse object.</returns>
         public static MessagePayloads.IoctlResponse ExtractIoctlResponse(byte[] buffer, int offset)
         {
@@ -2889,9 +2896,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(ioctlResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the IoctlResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="ioctlResponse">IoctlResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded IoctlResponse object.</returns>
         public static int EncodedIoctlResponseBufferSize(MessagePayloads.IoctlResponse ioctlResponse)
@@ -2928,7 +2935,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetSockPeerNameRequest object from a byte array.
         /// </summary>
-        /// <param name="getSockPeerNameRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetSockPeerNameRequest object.</returns>
         public static MessagePayloads.GetSockPeerNameRequest ExtractGetSockPeerNameRequest(byte[] buffer, int offset)
         {
@@ -2938,9 +2946,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getSockPeerNameRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetSockPeerNameRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="getSockPeerNameRequest">GetSockPeerNameRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetSockPeerNameRequest object.</returns>
         public static int EncodedGetSockPeerNameRequestBufferSize(MessagePayloads.GetSockPeerNameRequest getSockPeerNameRequest)
@@ -2985,7 +2993,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a GetSockPeerNameResponse object from a byte array.
         /// </summary>
-        /// <param name="getSockPeerNameResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>GetSockPeerNameResponse object.</returns>
         public static MessagePayloads.GetSockPeerNameResponse ExtractGetSockPeerNameResponse(byte[] buffer, int offset)
         {
@@ -3005,9 +3014,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(getSockPeerNameResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the GetSockPeerNameResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="getSockPeerNameResponse">GetSockPeerNameResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded GetSockPeerNameResponse object.</returns>
         public static int EncodedGetSockPeerNameResponseBufferSize(MessagePayloads.GetSockPeerNameResponse getSockPeerNameResponse)
@@ -3050,7 +3059,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a EventData object from a byte array.
         /// </summary>
-        /// <param name="eventData">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>EventData object.</returns>
         public static MessagePayloads.EventData ExtractEventData(byte[] buffer, int offset)
         {
@@ -3066,9 +3076,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(eventData);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the EventData object.
-        /// </summary>
+         /// </summary>
         /// <param name="eventData">EventData object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded EventData object.</returns>
         public static int EncodedEventDataBufferSize(MessagePayloads.EventData eventData)
@@ -3111,7 +3121,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a EventDataPayload object from a byte array.
         /// </summary>
-        /// <param name="eventDataPayload">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>EventDataPayload object.</returns>
         public static MessagePayloads.EventDataPayload ExtractEventDataPayload(byte[] buffer, int offset)
         {
@@ -3129,9 +3140,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(eventDataPayload);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the EventDataPayload object.
-        /// </summary>
+         /// </summary>
         /// <param name="eventDataPayload">EventDataPayload object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded EventDataPayload object.</returns>
         public static int EncodedEventDataPayloadBufferSize(MessagePayloads.EventDataPayload eventDataPayload)
@@ -3170,7 +3181,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a SetAntennaRequest object from a byte array.
         /// </summary>
-        /// <param name="setAntennaRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>SetAntennaRequest object.</returns>
         public static MessagePayloads.SetAntennaRequest ExtractSetAntennaRequest(byte[] buffer, int offset)
         {
@@ -3182,9 +3194,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(setAntennaRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the SetAntennaRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="setAntennaRequest">SetAntennaRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded SetAntennaRequest object.</returns>
         public static int EncodedSetAntennaRequestBufferSize(MessagePayloads.SetAntennaRequest setAntennaRequest)
@@ -3219,7 +3231,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTStackConfig object from a byte array.
         /// </summary>
-        /// <param name="bTStackConfig">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>BTStackConfig object.</returns>
         public static MessagePayloads.BTStackConfig ExtractBTStackConfig(byte[] buffer, int offset)
         {
@@ -3229,9 +3242,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(bTStackConfig);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the BTStackConfig object.
-        /// </summary>
+         /// </summary>
         /// <param name="bTStackConfig">BTStackConfig object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded BTStackConfig object.</returns>
         public static int EncodedBTStackConfigBufferSize(MessagePayloads.BTStackConfig bTStackConfig)
@@ -3276,7 +3289,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTDataWriteRequest object from a byte array.
         /// </summary>
-        /// <param name="bTDataWriteRequest">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>BTDataWriteRequest object.</returns>
         public static MessagePayloads.BTDataWriteRequest ExtractBTDataWriteRequest(byte[] buffer, int offset)
         {
@@ -3294,9 +3308,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(bTDataWriteRequest);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the BTDataWriteRequest object.
-        /// </summary>
+         /// </summary>
         /// <param name="bTDataWriteRequest">BTDataWriteRequest object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded BTDataWriteRequest object.</returns>
         public static int EncodedBTDataWriteRequestBufferSize(MessagePayloads.BTDataWriteRequest bTDataWriteRequest)
@@ -3341,7 +3355,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTGetHandlesResponse object from a byte array.
         /// </summary>
-        /// <param name="bTGetHandlesResponse">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>BTGetHandlesResponse object.</returns>
         public static MessagePayloads.BTGetHandlesResponse ExtractBTGetHandlesResponse(byte[] buffer, int offset)
         {
@@ -3359,9 +3374,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(bTGetHandlesResponse);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the BTGetHandlesResponse object.
-        /// </summary>
+         /// </summary>
         /// <param name="bTGetHandlesResponse">BTGetHandlesResponse object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded BTGetHandlesResponse object.</returns>
         public static int EncodedBTGetHandlesResponseBufferSize(MessagePayloads.BTGetHandlesResponse bTGetHandlesResponse)
@@ -3406,7 +3421,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Extract a BTServerDataSet object from a byte array.
         /// </summary>
-        /// <param name="bTServerDataSet">Byte array containing the object to the extracted.</param>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
         /// <returns>BTServerDataSet object.</returns>
         public static MessagePayloads.BTServerDataSet ExtractBTServerDataSet(byte[] buffer, int offset)
         {
@@ -3424,9 +3440,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return(bTServerDataSet);
         }
 
-        /// <summary>
+         /// <summary>
         /// Calculate the amount of memory required to hold the given instance of the BTServerDataSet object.
-        /// </summary>
+         /// </summary>
         /// <param name="bTServerDataSet">BTServerDataSet object to be encoded.</param>
         /// <returns>Number of bytes required to hold the encoded BTServerDataSet object.</returns>
         public static int EncodedBTServerDataSetBufferSize(MessagePayloads.BTServerDataSet bTServerDataSet)
