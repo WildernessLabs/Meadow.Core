@@ -72,13 +72,17 @@
                         throw SystemFailure(e);
                     }
                 }
+                finally
+                {
+                    await Task.Delay(-1, AppAbort.Token);
+                }
             }
 
             try
             {
                 Resolver.Log.Verbose($"App shutting down");
 
-                AppAbort.CancelAfter(millisecondsDelay: 60);
+                AppAbort.CancelAfter(millisecondsDelay: 6000);
                 App.Shutdown(out appShutdown);
             }
             catch (Exception e)
