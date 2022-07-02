@@ -30,16 +30,10 @@
 
         public async static Task Main(string[] args)
         {
-            Resolver.Services.Create<Logger>();
-            Resolver.Log.AddProvider(new ConsoleLogProvider());
-
-            // TODO: pull from file/config
-            Resolver.Log.Loglevel = LogLevel.Debug;
-
             Initialize();
             try
             {
-                Resolver.Log.Verbose("Initializing App");
+                Resolver.Log.Trace("Initializing App");
                 await App.Initialize();
                 appSetup = true;
             }
@@ -53,7 +47,7 @@
             {
                 try
                 {
-                    Resolver.Log.Verbose("Running App");
+                    Resolver.Log.Trace("Running App");
                     await App.Run();
                     appRan = true;
                 }
@@ -77,7 +71,7 @@
 
             try
             {
-                Resolver.Log.Verbose($"App shutting down");
+                Resolver.Log.Trace($"App shutting down");
 
                 AppAbort.CancelAfter(millisecondsDelay: 60);
                 App.Shutdown(out appShutdown);
@@ -97,9 +91,32 @@
             Shutdown();
         }
 
+        private static LifecycleSettings LifecycleSettings { get; set; }
+
+        private static void LoadSettings()
+        {
+            {
+                try
+                {
+                    LifecycleSettings = new LifecycleSettings();
+
+                    var s = new LoggingSettings();
+                    if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
+                    {
+                        Resolver.Log.Loglevel = level;
+                        Resolver.Log.Trace($"Setting log level to: {level}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteLine(ex.Message);
+                }
+            }
+        }
+
         private static Type FindAppType()
         {
-            Resolver.Log.Verbose($"Looking for app assembly...");
+            Resolver.Log.Trace($"Looking for app assembly...");
 
             // support app.exe or app.dll
             var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
@@ -115,7 +132,7 @@
                     var path = Path.Combine(root, name);
                     if (File.Exists(path))
                     {
-                        Resolver.Log.Verbose($"Found '{path}'");
+                        Resolver.Log.Trace($"Found '{path}'");
                         return Assembly.LoadFrom(path);
                     }
                 }
@@ -123,7 +140,7 @@
                 return null;
             }
 
-            Resolver.Log.Verbose($"Looking for IApp...");
+            Resolver.Log.Trace($"Looking for IApp...");
             var searchType = typeof(IApp);
             Type? app_type = null;
             foreach (var type in assembly.GetTypes())
@@ -144,13 +161,25 @@
 
         private static void Initialize()
         {
-            Resolver.Log.Verbose($"Initializing OS... ");
+            try
+            {
+                Resolver.Services.Create<Logger>();
+                Resolver.Log.AddProvider(new ConsoleLogProvider());
+
+                Resolver.Log.Trace($"Initializing OS... ");
+            }
+            catch (Exception ex)
+            {
+                // must use Console because the logger failed
+                Console.WriteLine($"Failed to create Logger: {ex.Message}");
+            }
 
             try
             {
                 //capture unhandled exceptions
                 AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
+                LoadSettings();
 
                 // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
                 var app_type = FindAppType();
