@@ -27,7 +27,7 @@ namespace Meadow.Devices
 
         private List<GpioConfig> _currentConfigs = new List<GpioConfig>();
 
-        public void ReassertConfig(IPin pin)
+        public void ReassertConfig(IPin pin, bool validateInterruptGroup = true)
         {
             var designator = GetPortAndPin(pin);
             lock (_currentConfigs)
@@ -35,7 +35,7 @@ namespace Meadow.Devices
                 var cfg = _currentConfigs.FirstOrDefault(c => c.Port == designator.port && c.Pin == designator.pin);
                 if (cfg != null)
                 {
-                    ConfigureGpio(designator.port, designator.pin, cfg.Mode, cfg.Resistor, cfg.Speed, cfg.Type, cfg.InitialState, cfg.InterruptMode);
+                    ConfigureGpio(designator.port, designator.pin, cfg.Mode, cfg.Resistor, cfg.Speed, cfg.Type, cfg.InitialState, cfg.InterruptMode, validateInterruptGroup: validateInterruptGroup);
                 }
             }
         }
