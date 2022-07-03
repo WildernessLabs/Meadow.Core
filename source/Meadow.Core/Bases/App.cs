@@ -18,9 +18,9 @@
             Abort = MeadowOS.AppAbort.Token;
         }
 
-        public virtual Task Run() { }
+        public virtual Task Run() { return Task.CompletedTask; }
 
-        public virtual Task Initialize() {  return Task.CompletedTask; }
+        public virtual Task Initialize() { return Task.CompletedTask; }
 
         public virtual void Shutdown(out bool complete, Exception? e = null) { complete = true; }
 
