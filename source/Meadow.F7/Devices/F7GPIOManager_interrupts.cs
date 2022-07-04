@@ -1,12 +1,10 @@
-﻿using System;
+﻿using Meadow.Core;
+using Meadow.Hardware;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Meadow.Core;
-using Meadow.Hardware;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.STM32;
 
@@ -20,10 +18,11 @@ namespace Meadow.Devices
         private Thread? _ist;
         private List<int> _interruptGroupsInUse = new();
 
-        public void WireInterrupt(IPin pin, InterruptMode interruptMode,
-                     Meadow.Hardware.ResistorMode resistorMode,
-                     double debounceDuration, double glitchDuration,
-                     bool validateInterruptGroup = true)
+        public void WireInterrupt(IPin pin,
+            InterruptMode interruptMode,
+            Hardware.ResistorMode resistorMode,
+            double debounceDuration, double glitchDuration,
+            bool validateInterruptGroup = true)
         {
             STM32.ResistorMode stm32Resistor;
 
@@ -68,7 +67,7 @@ namespace Meadow.Devices
                     {
                         Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} not in use");
 
-                        if(_interruptGroupsInUse.Contains(pin) == false)
+                        if (_interruptGroupsInUse.Contains(pin) == false)
                         {
                             _interruptGroupsInUse.Add(pin);
                         }
@@ -153,7 +152,7 @@ namespace Meadow.Devices
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
             Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
                 $"IST Started reading queue {queue.ToInt32():X}");
-            
+
             // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
             // the debounced state of the GPIO
             var rx_buffer = new byte[2];
@@ -199,7 +198,7 @@ namespace Meadow.Devices
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"IST: {ex.Message}");
                     Thread.Sleep(5000);

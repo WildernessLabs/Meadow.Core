@@ -293,12 +293,15 @@
                 Resolver.Log.Error("App failure:");
             }
 
-            Resolver.Log.Error(message);
+            Resolver.Log.Error(message ?? "System Failure");
             Resolver.Log.Debug($"{e.GetType()}: {e.Message}");
             Resolver.Log.Debug(e.StackTrace);
-            Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
-            Thread.Sleep(5000);
-            CurrentDevice.Reset();
+            if (LifecycleSettings.ResetOnAppFailure)
+            {
+                Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
+                Thread.Sleep(5000);
+                CurrentDevice.Reset();
+            }
             throw e; // no return from this function
         }
 
