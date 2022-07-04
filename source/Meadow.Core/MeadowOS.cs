@@ -21,21 +21,20 @@
         internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
         private static IApp App { get; set; }
+        private static LifecycleSettings LifecycleSettings { get; set; }
 
-        static bool appSetup = false;
         static bool appRunning = false;
         static bool appShutdown = false;
 
         internal static CancellationTokenSource AppAbort = new();
 
-        public async static Task Main(string[] args)
+        public async static Task Main(string[] _)
         {
             Initialize();
             try
             {
                 Resolver.Log.Trace("Initializing App");
                 await App.Initialize();
-                appSetup = true;
             }
             catch (Exception e)
             {
@@ -68,7 +67,7 @@
                 }
                 finally
                 {
-                    await Task.Delay(-1, AppAbort.Token);
+                    await Task.Delay(Timeout.Infinite, AppAbort.Token);
                 }
             }
 
@@ -76,7 +75,7 @@
             {
                 Resolver.Log.Trace($"App shutting down");
 
-                AppAbort.CancelAfter(millisecondsDelay: 6000);
+                AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
                 App.Shutdown(out appShutdown);
             }
             catch (Exception e)
@@ -93,8 +92,6 @@
             }
             Shutdown();
         }
-
-        private static LifecycleSettings LifecycleSettings { get; set; }
 
         private static void LoadSettings()
         {
@@ -227,7 +224,6 @@
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             Resolver.Log.Debug("Shutdown");
-            Thread.Sleep(-1);
         }
 
 
