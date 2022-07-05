@@ -23,7 +23,7 @@
         private static IApp App { get; set; }
 
         static bool appSetup = false;
-        static bool appRan = false;
+        static bool appRunning = false;
         static bool appShutdown = false;
 
         internal static CancellationTokenSource AppAbort = new();
@@ -49,20 +49,19 @@
                 SystemFailure(e, "App initialization failed");
             }
 
-            while (!appRan)
+            while (!appRunning)
             {
                 try
                 {
                     Resolver.Log.Verbose("Running App");
                     await App.Run();
-                    appRan = true;
+                    appRunning = true;
                 }
                 catch (Exception e)
                 {
                     Resolver.Log.Error($"App Error: {e.Message}");
 
-                    bool recovered;
-                    App.OnError(e, out recovered);
+                    App.OnError(e, out bool recovered);
                     if (recovered)
                     {
                         App.Recovery(e);
@@ -73,13 +72,17 @@
                         throw SystemFailure(e);
                     }
                 }
+                finally
+                {
+                    await Task.Delay(-1, AppAbort.Token);
+                }
             }
 
             try
             {
                 Resolver.Log.Verbose($"App shutting down");
 
-                AppAbort.CancelAfter(millisecondsDelay: 60);
+                AppAbort.CancelAfter(millisecondsDelay: 6000);
                 App.Shutdown(out appShutdown);
             }
             catch (Exception e)
@@ -125,21 +128,21 @@
 
             Resolver.Log.Verbose($"Looking for IApp...");
             var searchType = typeof(IApp);
-            Type? app_type = null;
+            Type? appType = null;
             foreach (var type in assembly.GetTypes())
             {
                 if (searchType.IsAssignableFrom(type))
                 {
-                    app_type = type;
+                    appType = type;
                     break;
                 }
             }
 
-            if (app_type is null)
+            if (appType is null)
             {
                 throw new Exception("App not found. Looking for 'MeadowApp.MeadowApp' type");
             }
-            return app_type;
+            return appType;
         }
 
         private static void Initialize()
@@ -153,14 +156,15 @@
 
 
                 // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
-                var app_type = FindAppType();
+                var appType = FindAppType();
 
-                var device_type = app_type.BaseType.GetGenericArguments()[0];
-                var device = Activator.CreateInstance(device_type) as IMeadowDevice;
-                if (device == null)
+                var deviceType = appType.BaseType.GetGenericArguments()[0];
+
+                if (Activator.CreateInstance(deviceType) is not IMeadowDevice device)
                 {
-                    throw new Exception($"Failed to create instance of '{device_type.Name}'");
+                    throw new Exception($"Failed to create instance of '{deviceType.Name}'");
                 }
+
                 CurrentDevice = device;
                 CurrentDevice.Initialize();
                 CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
@@ -170,17 +174,16 @@
                 InitializeFileSystem();
 
                 // Create the app object, bound immediately to the <IMeadowDevice>
-                var app = Activator.CreateInstance(app_type, nonPublic: true) as IApp;
-                if (app == null)
+                if (Activator.CreateInstance(appType, nonPublic: true) is not IApp app)
                 {
-                    throw new Exception($"Failed to create instance of '{app_type.Name}'");
+                    throw new Exception($"Failed to create instance of '{appType.Name}'");
                 }
 
                 App = app;
 
-                CurrentDevice.BeforeSleep += () => { app.BeforeSleep(); };
-                CurrentDevice.AfterWake += () => { app.AfterSleep(); };
-                CurrentDevice.BeforeReset += () => { app.BeforeReset(); };
+                CurrentDevice.BeforeSleep += () => { app.Sleep(); };
+                CurrentDevice.AfterWake += () => { app.Resume(); };
+                CurrentDevice.BeforeReset += () => { app.Reset(); };
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
