@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Meadow.Core;
+﻿using Meadow.Core;
 using Meadow.Hardware;
+using System;
+using System.Collections.Generic;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -237,7 +234,7 @@ namespace Meadow.Devices
         {
             // translate output type from Meadow to STM32
             STM32.OutputType stm32OutputType;
-            if(initialOutputType == OutputType.PushPull)
+            if (initialOutputType == OutputType.PushPull)
                 stm32OutputType = STM32.OutputType.PushPull;
             else
                 stm32OutputType = STM32.OutputType.OpenDrain;
@@ -320,8 +317,6 @@ namespace Meadow.Devices
             double debounceDuration = 0, double glitchDuration = 0,
             bool validateInterruptGroup = true)
         {
-            Console.WriteLine("CConfigureGpio");
-
             var designator = GetPortAndPin(pin);
 
             return ConfigureGpio(designator.port, designator.pin, mode, resistor, speed, type, initialState, interruptMode, 0, debounceDuration, glitchDuration, validateInterruptGroup);
@@ -439,7 +434,7 @@ namespace Meadow.Devices
             }
 
             ////// ====== INTERRUPTS ======
-            if(mode == STM32.GpioMode.Input)
+            if (mode == STM32.GpioMode.Input)
             {
                 WireInterrupt(port, pin, interruptMode, resistor, debounceDuration, glitchDuration, validateInterruptGroup);
             }

@@ -21,27 +21,20 @@
         internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
         private static IApp App { get; set; }
+        private static LifecycleSettings LifecycleSettings { get; set; }
 
-        static bool appSetup = false;
         static bool appRunning = false;
         static bool appShutdown = false;
 
         internal static CancellationTokenSource AppAbort = new();
 
-        public async static Task Main(string[] args)
+        public async static Task Main(string[] _)
         {
-            Resolver.Services.Create<Logger>();
-            Resolver.Log.AddProvider(new ConsoleLogProvider());
-
-            // TODO: pull from file/config
-            Resolver.Log.Loglevel = LogLevel.Debug;
-
             Initialize();
             try
             {
-                Resolver.Log.Verbose("Initializing App");
+                Resolver.Log.Trace("Initializing App");
                 await App.Initialize();
-                appSetup = true;
             }
             catch (Exception e)
             {
@@ -53,7 +46,7 @@
             {
                 try
                 {
-                    Resolver.Log.Verbose("Running App");
+                    Resolver.Log.Trace("Running App");
                     await App.Run();
                     appRunning = true;
                 }
@@ -64,7 +57,7 @@
                     App.OnError(e, out bool recovered);
                     if (recovered)
                     {
-                        App.Recovery(e);
+                        App.OnRecovery(e);
                     }
                     else
                     {
@@ -74,16 +67,16 @@
                 }
                 finally
                 {
-                    await Task.Delay(-1, AppAbort.Token);
+                    await Task.Delay(Timeout.Infinite, AppAbort.Token);
                 }
             }
 
             try
             {
-                Resolver.Log.Verbose($"App shutting down");
+                Resolver.Log.Trace($"App shutting down");
 
-                AppAbort.CancelAfter(millisecondsDelay: 6000);
-                App.Shutdown(out appShutdown);
+                AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
+                App.OnShutdown(out appShutdown);
             }
             catch (Exception e)
             {
@@ -100,9 +93,30 @@
             Shutdown();
         }
 
+        private static void LoadSettings()
+        {
+            {
+                try
+                {
+                    LifecycleSettings = new LifecycleSettings();
+
+                    var s = new LoggingSettings();
+                    if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
+                    {
+                        Resolver.Log.Loglevel = level;
+                        Resolver.Log.Trace($"Setting log level to: {level}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteLine(ex.Message);
+                }
+            }
+        }
+
         private static Type FindAppType()
         {
-            Resolver.Log.Verbose($"Looking for app assembly...");
+            Resolver.Log.Trace($"Looking for app assembly...");
 
             // support app.exe or app.dll
             var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
@@ -118,7 +132,7 @@
                     var path = Path.Combine(root, name);
                     if (File.Exists(path))
                     {
-                        Resolver.Log.Verbose($"Found '{path}'");
+                        Resolver.Log.Trace($"Found '{path}'");
                         return Assembly.LoadFrom(path);
                     }
                 }
@@ -126,7 +140,7 @@
                 return null;
             }
 
-            Resolver.Log.Verbose($"Looking for IApp...");
+            Resolver.Log.Trace($"Looking for IApp...");
             var searchType = typeof(IApp);
             Type? appType = null;
             foreach (var type in assembly.GetTypes())
@@ -147,13 +161,25 @@
 
         private static void Initialize()
         {
-            Resolver.Log.Verbose($"Initializing OS... ");
+            try
+            {
+                Resolver.Services.Create<Logger>();
+                Resolver.Log.AddProvider(new ConsoleLogProvider());
+
+                Resolver.Log.Trace($"Initializing OS... ");
+            }
+            catch (Exception ex)
+            {
+                // must use Console because the logger failed
+                Console.WriteLine($"Failed to create Logger: {ex.Message}");
+            }
 
             try
             {
                 //capture unhandled exceptions
                 AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
+                LoadSettings();
 
                 // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
                 var appType = FindAppType();
@@ -181,9 +207,9 @@
 
                 App = app;
 
-                CurrentDevice.BeforeSleep += () => { app.Sleep(); };
-                CurrentDevice.AfterWake += () => { app.Resume(); };
-                CurrentDevice.BeforeReset += () => { app.Reset(); };
+                CurrentDevice.BeforeSleep += () => { app.OnSleep(); };
+                CurrentDevice.AfterWake += () => { app.OnResume(); };
+                CurrentDevice.BeforeReset += () => { app.OnReset(); };
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
@@ -198,7 +224,6 @@
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             Resolver.Log.Debug("Shutdown");
-            Thread.Sleep(-1);
         }
 
 
@@ -267,12 +292,15 @@
                 Resolver.Log.Error("App failure:");
             }
 
-            Resolver.Log.Error(message);
+            Resolver.Log.Error(message ?? "System Failure");
             Resolver.Log.Debug($"{e.GetType()}: {e.Message}");
             Resolver.Log.Debug(e.StackTrace);
-            Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
-            Thread.Sleep(5000);
-            CurrentDevice.Reset();
+            if (LifecycleSettings.ResetOnAppFailure)
+            {
+                Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
+                Thread.Sleep(5000);
+                CurrentDevice.Reset();
+            }
             throw e; // no return from this function
         }
 
