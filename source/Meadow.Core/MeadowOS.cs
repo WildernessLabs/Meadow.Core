@@ -57,7 +57,7 @@
                     App.OnError(e, out bool recovered);
                     if (recovered)
                     {
-                        App.Recovery(e);
+                        App.OnRecovery(e);
                     }
                     else
                     {
@@ -76,7 +76,7 @@
                 Resolver.Log.Trace($"App shutting down");
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
-                App.Shutdown(out appShutdown);
+                App.OnShutdown(out appShutdown);
             }
             catch (Exception e)
             {
@@ -207,9 +207,9 @@
 
                 App = app;
 
-                CurrentDevice.BeforeSleep += () => { app.Sleep(); };
-                CurrentDevice.AfterWake += () => { app.Resume(); };
-                CurrentDevice.BeforeReset += () => { app.Reset(); };
+                CurrentDevice.BeforeSleep += () => { app.OnSleep(); };
+                CurrentDevice.AfterWake += () => { app.OnResume(); };
+                CurrentDevice.BeforeReset += () => { app.OnReset(); };
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
