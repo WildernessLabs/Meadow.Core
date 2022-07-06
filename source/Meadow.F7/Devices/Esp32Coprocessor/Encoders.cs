@@ -14,6 +14,9 @@ using System;
 
 namespace Meadow.Devices.Esp32.MessagePayloads
 {
+    /// <summary>
+    /// Encapsulate the various message encoder and extract methods.
+    /// </summary>
     public static class Encoders
     {
         /// <summary>
@@ -65,7 +68,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         ///     Calculate the 32-bit CRC for the array of bytes.
         /// </summary>
-        /// <param name="data">Buffer of data.</param>
+        /// <param name="buffer">Buffer of data.</param>
         /// <returns>32-bit CRC for the array of bytes.</returns>
         private static UInt32 Crc32(byte[] buffer)
         {
