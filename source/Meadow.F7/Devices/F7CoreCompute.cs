@@ -1,6 +1,4 @@
 ﻿using Meadow.Hardware;
-using System;
-using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
@@ -17,7 +15,7 @@ namespace Meadow.Devices
             if (this.Information.Platform != Hardware.MeadowPlatform.F7CoreComputeV1)
             {
                 var message = $"Application is defined as F7CoreComputeV1, but running hardware is {this.Information.Platform}";
-                Console.WriteLine(message);
+                Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
         }

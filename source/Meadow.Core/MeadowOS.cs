@@ -133,7 +133,14 @@
                     if (File.Exists(path))
                     {
                         Resolver.Log.Trace($"Found '{path}'");
-                        return Assembly.LoadFrom(path);
+                        try
+                        {
+                            return Assembly.LoadFrom(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            Resolver.Log.Warn($"Unable to load assembly '{name}': { ex.Message}");
+                        }
                     }
                 }
 
@@ -145,7 +152,7 @@
             Type? appType = null;
             foreach (var type in assembly.GetTypes())
             {
-                if (searchType.IsAssignableFrom(type))
+                if (searchType.IsAssignableFrom(type) && !type.IsAbstract)
                 {
                     appType = type;
                     break;
@@ -183,6 +190,8 @@
 
                 // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
                 var appType = FindAppType();
+
+                Resolver.Log.Trace($"App is type {appType.Name}");
 
                 var deviceType = appType.BaseType.GetGenericArguments()[0];
 
