@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Meadow
 {
@@ -9,6 +11,8 @@ namespace Meadow
         public virtual string OSBuildDate { get; private set; }
 
         public virtual string MonoVersion => ".NET 5.0"; // TODO"
+
+        internal static CancellationTokenSource AppAbort = new();
 
         public void Initialize()
         {
@@ -44,6 +48,17 @@ namespace Meadow
                 // TODO:
             }
         }
+
+        public virtual Temperature GetCpuTemperature()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        public bool RebootOnUnhandledException => throw new NotImplementedException();
+
+        public uint InitializationTimeout => throw new NotImplementedException();
+
+        public bool SdCardPresent => throw new NotImplementedException();
 
         public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
         {

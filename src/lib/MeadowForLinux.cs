@@ -1,6 +1,5 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
-using Meadow.Logging;
 using Meadow.Pinouts;
 using Meadow.Units;
 using System;
@@ -8,11 +7,16 @@ using System.Linq;
 
 namespace Meadow
 {
+    public class LinuxApp<T> : App<T>
+        where T : class, IMeadowDevice, new()
+    {
+    }
+
     /// <summary>
     /// Represents an instance of Meadow as a generic Linux process
     /// </summary>
     /// <typeparam name="TPinout"></typeparam>
-    public class MeadowForLinux<TPinout> : IMeadowDevice, IApp
+    public class MeadowForLinux<TPinout> : IMeadowDevice
         where TPinout : IPinDefinitions, new()
     {
         private SysFsGpioDriver _sysfs = null!;
@@ -25,7 +29,6 @@ namespace Meadow
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
-        protected Logger Logger { get; private set; }
 
         public LinuxSerialPortNameDefinitions SerialPortNames
         {
@@ -35,7 +38,7 @@ namespace Meadow
                 {
                     return new JetsonNanoSerialPortNameDefinitions();
                 }
-                if (typeof(TPinout) == typeof(JetsonXavierAGX))
+                else if (typeof(TPinout) == typeof(JetsonXavierAGX))
                 {
                     return new JetsonXavierAGXSerialPortNameDefinitions();
                 }
@@ -55,7 +58,15 @@ namespace Meadow
         /// </summary>
         public MeadowForLinux()
         {
-            PlatformOS = new LinuxPlatformOS();
+            if (typeof(TPinout) == typeof(JetsonNano) || typeof(TPinout) == typeof(JetsonXavierAGX))
+            {
+                PlatformOS = new JetsonPlatformOS();
+            }
+            else
+            {
+                PlatformOS = new LinuxPlatformOS();
+            }
+
             Pins = new TPinout();
             Capabilities = new DeviceCapabilities(
                 new AnalogCapabilities(false, null),
@@ -65,27 +76,16 @@ namespace Meadow
 
         public void Initialize()
         {
-            Initialize(null);
-        }
-
-        public void Initialize(Logger? logger = null)
-        {
-            if (logger == null)
-            {
-                Logger = new Logger
-                {
-                    Loglevel = Loglevel.Debug
-                };
-                Logger.AddProvider(new ConsoleLogProvider());
-            }
-            else
-            {
-                Logger = logger;
-            }
-
-
             _sysfs = new SysFsGpioDriver();
-            _gpiod = new Gpiod(Logger);
+
+            try
+            {
+                _gpiod = new Gpiod(Resolver.Log);
+            }
+            catch
+            {
+                Resolver.Log.Warn("Platform does not support gpiod");
+            }
         }
 
         public IPin GetPin(string pinName)
@@ -208,12 +208,12 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        public IPwmPort CreatePwmPort(IPin pin, float frequency = 100, float dutyCycle = 0.5F, bool invert = false)
+        public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
         {
             throw new NotImplementedException();
         }
 
-        public void Reset()
+        public void OnReset()
         {
             throw new NotImplementedException();
         }
@@ -233,22 +233,7 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        public void WillSleep()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void OnWake()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WillReset()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Sleep(int seconds = -1)
+        public void OnSleep()
         {
             throw new NotImplementedException();
         }
@@ -259,6 +244,46 @@ namespace Meadow
         }
 
         public Temperature GetProcessorTemperature()
+        {
+            return PlatformOS.GetCpuTemperature();
+        }
+
+        public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Sleep(int seconds = -1)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnShutdown(out bool complete, Exception? e = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnError(Exception e, out bool recovered)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnResume()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnRecovery(Exception e)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnUpdate(Version newVersion, out bool approveUpdate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
         {
             throw new NotImplementedException();
         }
