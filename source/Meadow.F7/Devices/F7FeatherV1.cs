@@ -24,7 +24,7 @@ namespace Meadow.Devices
             if (this.Information.Platform != Hardware.MeadowPlatform.F7FeatherV1)
             {
                 var message = $"Application is defined as F7FeatherV1, but running hardware is {this.Information.Platform}";
-                Console.WriteLine(message);
+                Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
         }
