@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meadow.Units;
+using System;
 
 namespace Meadow
 {
@@ -8,9 +9,14 @@ namespace Meadow
         {
         }
 
+        public Temperature GetCpuTemperature()
+        {
+            throw new NotSupportedException();
+        }
+
         public void Initialize()
         {
-            
+
         }
     }
 }
