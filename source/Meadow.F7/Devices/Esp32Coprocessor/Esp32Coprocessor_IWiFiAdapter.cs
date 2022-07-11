@@ -103,6 +103,9 @@ namespace Meadow.Devices
         /// </summary>
         public AntennaType Antenna => _antenna;
 
+        /// <summary>
+        /// Private copy of the currently selected antenna.
+        /// </summary>
         protected AntennaType _antenna;
 
         /// <summary>
@@ -304,11 +307,22 @@ namespace Meadow.Devices
             return await Scan(timeout, src.Token);
         }
 
+        /// <summary>
+        /// Scan for WiFiNetworks (access points).
+        /// </summary>
+        /// <param name="token">Cancellation token for the connection attempt</param>
+        /// <returns>List of WiFiNetwork objects.</returns>
         public async Task<IList<WifiNetwork>> Scan(CancellationToken token)
         {
             return await Scan(TimeSpan.Zero, token);
         }
 
+        /// <summary>
+        /// Scan for WiFiNetworks (access points).
+        /// </summary>
+        /// <param name="timeout">Length of time to run the scan for before the scan is declared a failure.</param>
+        /// <param name="token">Cancellation token for the connection attempt</param>
+        /// <returns>List of WiFiNetwork objects.</returns>
         private async Task<IList<WifiNetwork>> Scan(TimeSpan timeout, CancellationToken token)
         {
             var networks = new List<WifiNetwork>();
@@ -487,6 +501,8 @@ namespace Meadow.Devices
         /// <param name="ssid">Name of the network to connect to.</param>
         /// <param name="password">Password for the network.</param>
         /// <param name="reconnection">Should the adapter reconnect automatically?</param>
+        /// <param name="token">Cancellation token for the connection attempt</param>
+        /// <param name="timeout">Amount of time to wait for a connection before a failure is declared.</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
         private async Task<StatusCodes> ConnectToAccessPoint(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection)
