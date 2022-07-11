@@ -20,7 +20,7 @@
             {
             }
 
-            public string Default => this.GetConfiguredValue() ?? "Info";
+            public string Default => this.GetConfiguredValue() ?? Logging.LogLevel.Information.ToString();
         }
     }
 }
