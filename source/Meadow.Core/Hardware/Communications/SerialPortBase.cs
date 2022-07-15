@@ -66,7 +66,7 @@ namespace Meadow.Hardware
             PortName = portName.SystemName;
             BaudRate = baudRate;
             Parity = Parity;
-            DataBits = dataBits;    
+            DataBits = dataBits;
             StopBits = stopBits;
             ReadTimeout = TimeSpan.FromMilliseconds(-1);
             WriteTimeout = TimeSpan.FromMilliseconds(-1);
@@ -110,7 +110,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets or sets the standard length of data bits per byte.
         /// </summary>
-        public int DataBits 
+        public int DataBits
         {
             get => _dataBits;
             set
@@ -127,7 +127,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
-        public StopBits StopBits 
+        public StopBits StopBits
         {
             get => _stopBits;
             set
@@ -270,7 +270,7 @@ namespace Meadow.Hardware
             if (IsOpen) throw new InvalidOperationException("Port is already open");
 
             _driverHandle = OpenHardwarePort(PortName);
-            
+
             SetHardwarePortSettings(_driverHandle);
 
             _readThread = new Thread(ReadThreadProc)
@@ -289,7 +289,7 @@ namespace Meadow.Hardware
             if (!IsOpen) return;
 
             CloseHardwarePort(_driverHandle);
-            
+
             _driverHandle = IntPtr.Zero;
         }
 
@@ -335,7 +335,7 @@ namespace Meadow.Hardware
 
                 Timer? writeTimeoutTimer = null;
 
-                if(WriteTimeout.TotalMilliseconds > 0)
+                if (WriteTimeout.TotalMilliseconds > 0)
                 {
                     writeTimeoutTimer = new Timer((o) =>
                     {
@@ -374,7 +374,7 @@ namespace Meadow.Hardware
                 }
                 finally
                 {
-                    if(writeTimeoutTimer != null)
+                    if (writeTimeoutTimer != null)
                     {
                         writeTimeoutTimer.Change(Timeout.Infinite, Timeout.Infinite);
                         writeTimeoutTimer.Dispose();
@@ -417,8 +417,8 @@ namespace Meadow.Hardware
                                 }
                                 catch (Exception ex)
                                 {
-                                        // if the event handler throws, we don't want this to die
-                                        Output.WriteLine($"Serial event handler threw: {ex.Message}");
+                                    // if the event handler throws, we don't want this to die
+                                    Output.WriteLine($"Serial event handler threw: {ex.Message}");
                                 }
                             });
                         }
@@ -614,8 +614,6 @@ namespace Meadow.Hardware
             if (count > (buffer.Length - index)) { throw new ArgumentException("Count is larger than available buffer size"); }
             if (index < 0) { throw new ArgumentException("Invalid offset"); }
             if (count == 0) { return 0; }
-
-            if (count > _readBuffer.Count) { throw new ArgumentException("Count cannot be larger than the available data."); }
 
             // read what we have into the buffer and return
             return _readBuffer.MoveItemsTo(buffer, index, count);

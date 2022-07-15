@@ -106,6 +106,10 @@
                         Resolver.Log.Loglevel = level;
                         Resolver.Log.Trace($"Setting log level to: {level}");
                     }
+                    else
+                    {
+                        Resolver.Log.Info($"Log level: {level}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -301,12 +305,12 @@
                 Resolver.Log.Error("App failure:");
             }
 
-            Resolver.Log.Error(message ?? "System Failure");
-            Resolver.Log.Debug($"{e.GetType()}: {e.Message}");
+            Resolver.Log.Error(message ?? " System Failure");
+            Resolver.Log.Error($" {e.GetType()}: {e.Message}");
             Resolver.Log.Debug(e.StackTrace);
             if (LifecycleSettings.ResetOnAppFailure)
             {
-                Resolver.Log.Info("App failure. Meadow will restart in 5 seconds.");
+                Resolver.Log.Info("CRASH: Meadow will restart in 5 seconds.");
                 Thread.Sleep(5000);
                 CurrentDevice.Reset();
             }

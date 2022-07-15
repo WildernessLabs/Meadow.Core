@@ -1,5 +1,5 @@
-﻿using System;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
+using System;
 
 namespace Meadow.Devices
 {
@@ -10,10 +10,21 @@ namespace Meadow.Devices
             bool initialState = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input,
-            double debounceDuration = 0.0,    // 0 - 1000 msec in .1 increments
-            double glitchDuration = 0.0,      // 0 - 1000 msec in .1 increments
-            OutputType outputType = OutputType.PushPull
+            PortDirectionType initialDirection = PortDirectionType.Input
+            )
+        {
+            return CreateBiDirectionalPort(pin, initialState, interruptMode, resistorMode, initialDirection, TimeSpan.Zero, TimeSpan.Zero, OutputType.PushPull);
+        }
+
+        public IBiDirectionalPort CreateBiDirectionalPort(
+            IPin pin,
+            bool initialState,
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            PortDirectionType initialDirection,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration,
+            OutputType outputType
             )
         {
             // Convert durations to unsigned int with 100 usec resolution
