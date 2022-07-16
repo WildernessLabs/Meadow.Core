@@ -21,7 +21,7 @@ namespace Meadow.Devices
         public void WireInterrupt(IPin pin,
             InterruptMode interruptMode,
             Hardware.ResistorMode resistorMode,
-            double debounceDuration, double glitchDuration,
+            TimeSpan debounceDuration, TimeSpan glitchDuration,
             bool validateInterruptGroup = true)
         {
             STM32.ResistorMode stm32Resistor;
@@ -45,7 +45,7 @@ namespace Meadow.Devices
 
         private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
                     STM32.ResistorMode resistorMode,
-                    double debounceDuration, double glitchDuration,
+                    TimeSpan debounceDuration, TimeSpan glitchDuration,
                     bool validateInterruptGroup = true)
         {
             Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" + Wire Interrupt {interruptMode}");
@@ -84,8 +84,8 @@ namespace Meadow.Devices
                     ResistorMode = (uint)resistorMode,
 
                     // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
-                    DebounceDuration = (uint)(debounceDuration * 10),
-                    GlitchDuration = (uint)(glitchDuration * 10)
+                    DebounceDuration = (uint)(debounceDuration.TotalMilliseconds * 10),
+                    GlitchDuration = (uint)(glitchDuration.TotalMilliseconds * 10)
                 };
 
                 if (_ist == null)

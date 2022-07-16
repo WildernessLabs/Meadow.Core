@@ -246,8 +246,8 @@ namespace Meadow.Devices
             IPin pin,
             ResistorMode resistorMode,
             InterruptMode interruptMode,
-            double debounceDuration = 0.0,
-            double glitchDuration = 0.0
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration
             )
         {
             // translate resistor mode from Meadow to STM32 register bits
@@ -273,7 +273,7 @@ namespace Meadow.Devices
         }
 
         private bool ConfigureInput(IPin pin, STM32.ResistorMode resistor, InterruptMode interruptMode,
-            double debounceDuration, double glitchDuration)
+            TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
             lock (_interruptPins)
             {
@@ -288,12 +288,12 @@ namespace Meadow.Devices
                 }
             }
             return ConfigureGpio(pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull,
-                    false, interruptMode, debounceDuration, glitchDuration);
+                    false, interruptMode, debounceDuration, glitchDuration, true);
         }
 
         private bool ConfigureOutput(IPin pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
-            return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None);
+            return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None, TimeSpan.Zero, TimeSpan.Zero, true);
         }
 
         internal bool ConfigureOutput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
@@ -314,8 +314,8 @@ namespace Meadow.Devices
 
         private bool ConfigureGpio(IPin pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
             STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
-            double debounceDuration = 0, double glitchDuration = 0,
-            bool validateInterruptGroup = true)
+            TimeSpan debounceDuration, TimeSpan glitchDuration,
+            bool validateInterruptGroup)
         {
             var designator = GetPortAndPin(pin);
 
@@ -323,9 +323,16 @@ namespace Meadow.Devices
         }
 
         private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
-         STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
-         int alternateFunctionNumber = 0, double debounceDuration = 0, double glitchDuration = 0,
-         bool validateInterruptGroup = true)
+             STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
+             int alternateFunctionNumber = 0)
+        {
+            return ConfigureGpio(port, pin, mode, resistor, speed, type, initialState, interruptMode, alternateFunctionNumber, TimeSpan.Zero, TimeSpan.Zero, true);
+        }
+
+        private bool ConfigureGpio(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor,
+             STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode,
+             int alternateFunctionNumber, TimeSpan debounceDuration, TimeSpan glitchDuration,
+             bool validateInterruptGroup)
         {
             int setting = 0;
             uint base_addr = 0;

@@ -1,11 +1,7 @@
-﻿using System;
+﻿using Meadow.Hardware;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using Meadow.Core;
-using Meadow.Hardware;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -35,7 +31,7 @@ namespace Meadow.Devices
                 var cfg = _currentConfigs.FirstOrDefault(c => c.Port == designator.port && c.Pin == designator.pin);
                 if (cfg != null)
                 {
-                    ConfigureGpio(designator.port, designator.pin, cfg.Mode, cfg.Resistor, cfg.Speed, cfg.Type, cfg.InitialState, cfg.InterruptMode, validateInterruptGroup: validateInterruptGroup);
+                    ConfigureGpio(designator.port, designator.pin, cfg.Mode, cfg.Resistor, cfg.Speed, cfg.Type, cfg.InitialState, cfg.InterruptMode, 0, TimeSpan.Zero, TimeSpan.Zero, true);
                 }
             }
         }

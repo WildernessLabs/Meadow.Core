@@ -736,7 +736,7 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Process the Disconnected event extracing any event data from the
+        /// Process the Disconnected event extracting any event data from the
         /// payload and create an EventArg object if necessary
         /// </summary>
         /// <param name="statusCode">Status code for the WiFi disconnection request.</param>

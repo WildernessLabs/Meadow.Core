@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Meadow.Hardware
@@ -10,8 +9,8 @@ namespace Meadow.Hardware
     public class DigitalInputPort : DigitalInputPortBase
     {
         private ResistorMode _resistorMode;
-        private double _debounceDuration;
-        private double _glitchDuration;
+        private TimeSpan _debounceDuration;
+        private TimeSpan _glitchDuration;
 
         protected IMeadowIOController IOController { get; set; }
 
@@ -21,10 +20,10 @@ namespace Meadow.Hardware
             IPin pin,
             IMeadowIOController ioController,
             IDigitalChannelInfo channel,
-            InterruptMode interruptMode = InterruptMode.None,
-            ResistorMode resistorMode = ResistorMode.Disabled,
-            double debounceDuration = 0.0,
-            double glitchDuration = 0.0
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration
             ) : base(pin, channel, interruptMode)
         {
             // DEVELOPER NOTE:
@@ -32,7 +31,7 @@ namespace Meadow.Hardware
             // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
 
             if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
-            {                
+            {
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
             }
 
@@ -58,12 +57,16 @@ namespace Meadow.Hardware
         public static DigitalInputPort From(
             IPin pin,
             IMeadowIOController ioController,
-            InterruptMode interruptMode = InterruptMode.None,
-            ResistorMode resistorMode = ResistorMode.Disabled,
-            double debounceDuration = 0.0,
-            double glitchDuration = 0.0
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration
             )
         {
+            // convert to microseconds
+            var debounce = debounceDuration.TotalMilliseconds * 10;
+            var glitch = glitchDuration.TotalMilliseconds * 10;
+
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             //TODO: may need other checks here.
             if (chan == null)
@@ -74,16 +77,16 @@ namespace Meadow.Hardware
             {
                 throw new Exception("Unable to create input; channel is not capable of interrupts");
             }
-            if(debounceDuration < 0.0 || debounceDuration > 1000.0)
+            if (debounce < 0.0 || debounce > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
-            if(glitchDuration < 0.0 || glitchDuration > 1000.0)
+            if (glitch < 0.0 || glitch > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(glitchDuration), "Unable to create an input port, because glitchDuration is out of range (0.1-1000.0)");
             }
 
-            var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode, 
+            var port = new DigitalInputPort(pin, ioController, chan, interruptMode, resistorMode,
                             debounceDuration, glitchDuration);
             return port;
         }
@@ -103,7 +106,7 @@ namespace Meadow.Hardware
 
         void OnInterrupt(IPin pin, bool state)
         {
-            if(pin == this.Pin)
+            if (pin == this.Pin)
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = DateTime.Now;
@@ -159,41 +162,41 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Gets or Sets the interrupt debounce duration (in milliseconds)
+        /// Gets or Sets the interrupt debounce duration
         /// </summary>
-        public override double DebounceDuration
+        public override TimeSpan DebounceDuration
         {
             get => _debounceDuration;
             set
             {
-                if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
+                if (value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
                 if (value == _debounceDuration) return;
 
                 _debounceDuration = value;
 
                 // Update in F7
                 // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
-                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, 0, 0);
+                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, TimeSpan.Zero, TimeSpan.Zero);
                 this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
             }
         }
 
         /// <summary>
-        /// Gets or Sets the interrupt glitch filter duration (in milliseconds)
+        /// Gets or Sets the interrupt glitch filter duration
         /// </summary>
-        public override double GlitchDuration
+        public override TimeSpan GlitchDuration
         {
             get => _glitchDuration;
             set
             {
-                if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
+                if (value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
                 if (value == _glitchDuration) return;
 
                 _glitchDuration = value;
 
                 // Update in F7
                 // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
-                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, 0, 0);
+                this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, TimeSpan.Zero, TimeSpan.Zero);
                 this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
             }
         }

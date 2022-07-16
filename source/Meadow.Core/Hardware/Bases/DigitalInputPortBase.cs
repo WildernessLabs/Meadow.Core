@@ -21,8 +21,8 @@ namespace Meadow.Hardware
 
         public abstract bool State { get; }
         public abstract ResistorMode Resistor { get; set; }
-        public abstract double DebounceDuration { get; set; }
-        public abstract double GlitchDuration { get; set; }
+        public abstract TimeSpan DebounceDuration { get; set; }
+        public abstract TimeSpan GlitchDuration { get; set; }
 
         protected List<IObserver<IChangeResult<DigitalState>>> _observers { get; set; } = new List<IObserver<IChangeResult<DigitalState>>>();
 
