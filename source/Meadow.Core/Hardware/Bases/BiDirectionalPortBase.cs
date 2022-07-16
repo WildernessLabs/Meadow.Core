@@ -23,8 +23,6 @@ namespace Meadow.Hardware
         public abstract bool State { get; set; }
         public abstract PortDirectionType Direction { get; set; }
 
-        protected abstract void Dispose(bool disposing);
-
         protected TimeSpan _debounceDuration;
         protected TimeSpan _glitchDuration;
 

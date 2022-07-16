@@ -1,6 +1,4 @@
-﻿using Meadow.Devices;
-
-namespace Meadow.Hardware
+﻿namespace Meadow.Hardware
 {
     /// <summary>
     /// Provides a base implementation for digital output ports.
@@ -15,7 +13,7 @@ namespace Meadow.Hardware
 
         public abstract bool State { get; set; }
 
-        protected DigitalOutputPortBase(IPin pin, IDigitalChannelInfo channel, bool initialState, OutputType initialOutputType) 
+        protected DigitalOutputPortBase(IPin pin, IDigitalChannelInfo channel, bool initialState, OutputType initialOutputType)
             : base(pin, channel)
         {
             this.InitialState = initialState;
