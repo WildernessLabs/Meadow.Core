@@ -13,7 +13,6 @@ namespace Meadow.Hardware
 
         // internals
         protected bool _currentState;
-        protected bool _isDisposed;
 
         public bool InitialState { get; }
         public OutputType InitialOutputType { get; }
@@ -67,16 +66,9 @@ namespace Meadow.Hardware
             InitialOutputType = initialOutputType;
         }
 
-        public override void Dispose()
-        {
-            Dispose(true);
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
-        }
-
         protected void RaiseChangedAndNotify(DigitalPortResult changeResult)
         {
-            if (_isDisposed) return;
+            if (disposed) return;
 
             Changed?.Invoke(this, changeResult);
             // TODO: implement Subscribe patter (see DigitalInputPortBase)

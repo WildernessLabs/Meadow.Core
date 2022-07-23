@@ -201,18 +201,10 @@ namespace Meadow.Hardware
             _isRunning = false;
         }
 
-        protected void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             Stop();
             UPD.PWM.Shutdown(PwmChannelInfo.Timer);
-        }
-
-        /// <summary>
-        /// Disposes the resources associated with the PwmPort
-        /// </summary>
-        public override void Dispose()
-        {
-            Dispose(true);
         }
     }
 }

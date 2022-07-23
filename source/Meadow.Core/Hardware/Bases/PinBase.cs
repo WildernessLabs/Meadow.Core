@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
+
     /// <summary>
     /// Provides base implementation for IO pins.
     /// </summary>
@@ -39,11 +38,13 @@ namespace Meadow.Hardware
             return this.Name;
         }
 
-        public void ReserveChannel<C>() { 
-        
+        public void ReserveChannel<C>()
+        {
+
         }
-        public void ReleaseChannel() { 
-        
+        public void ReleaseChannel()
+        {
+
         }
 
         public virtual bool Equals(IPin other)
