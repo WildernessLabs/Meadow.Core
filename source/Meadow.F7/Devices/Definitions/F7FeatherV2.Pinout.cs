@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
-using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
@@ -124,7 +123,7 @@ namespace Meadow.Devices
             public IPin SCK => new Pin(
                 "SCK", "PC10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC10", interruptGroup: 10),
+                    new DigitalChannelInfo("PC10", interruptCapable: false),
                     new SpiChannelInfo("PC10", SpiLineType.Clock)
                 }
             );
@@ -173,7 +172,7 @@ namespace Meadow.Devices
             public IPin D02 => new Pin(
                 "D02", "PH10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH10", interruptGroup: 10),
+                    new DigitalChannelInfo("PH10", interruptCapable: false),
                     new PwmChannelInfo("TIM5_CH1", 5, 1)
                 }
             );
@@ -383,7 +382,7 @@ namespace Meadow.Devices
             public IPin ESP_BOOT => new Pin(
                 "ESP_BOOT", "PI10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI10", interruptGroup: 10),
+                    new DigitalChannelInfo("PI10", interruptCapable: false),
                 }
             );
             // ESP_RST
