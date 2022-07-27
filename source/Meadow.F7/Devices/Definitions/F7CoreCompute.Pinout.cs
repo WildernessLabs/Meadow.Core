@@ -23,14 +23,14 @@ namespace Meadow.Devices
                 D00, D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
                 D17, D18, D19, D20,
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
-                I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA, 
+                I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA,
             };
 
             // ==== SPI ====
             public IPin SPI3_SCK => new Pin(
                 "SPI3_SCK", "PC10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC10", interruptGroup: 10),
+                    new DigitalChannelInfo("PC10", interruptCapable: false),
                     new SpiChannelInfo("SPI3_SCK", SpiLineType.Clock)
                 }
             );
@@ -146,7 +146,7 @@ namespace Meadow.Devices
             public IPin D02 => new Pin(
                 "D02", "PH10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH10", interruptGroup: 10),
+                    new DigitalChannelInfo("PH10", interruptCapable: false),
                     new PwmChannelInfo("TIM5_CH1", 5, 1)
                 }
             );
@@ -178,7 +178,7 @@ namespace Meadow.Devices
             public IPin D06 => new Pin(
                 "D06", "PB13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB13", interruptGroup: 13) 
+                    new DigitalChannelInfo("PB13", interruptGroup: 13)
                 }
             );
 
@@ -245,7 +245,7 @@ namespace Meadow.Devices
             public IPin D14 => new Pin(
                 "D14", "PB12",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB12", interruptGroup: 12) 
+                    new DigitalChannelInfo("PB12", interruptGroup: 12)
                 }
             );
 
@@ -267,7 +267,7 @@ namespace Meadow.Devices
             public IPin D18 => new Pin(
                 "D18", "PA10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PA10", interruptGroup: 10)
+                    new DigitalChannelInfo("PA10", interruptCapable: false)
                 }
             );
 
@@ -340,7 +340,7 @@ namespace Meadow.Devices
             public IPin ESP_BOOT => new Pin(
                 "ESP_BOOT", "PI10",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI10", interruptGroup: 10),
+                    new DigitalChannelInfo("PI10", interruptCapable: false),
                 }
             );
 

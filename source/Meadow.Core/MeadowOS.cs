@@ -7,7 +7,6 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using static System.Console;
 
     /// <summary>
     /// The entry point of the .NET part of Meadow OS.
@@ -113,7 +112,7 @@
                 }
                 catch (Exception ex)
                 {
-                    WriteLine(ex.Message);
+                    Resolver.Log.Error(ex.Message);
                 }
             }
         }
@@ -289,7 +288,7 @@
                 }
                 catch (Exception ex)
                 {
-                    WriteLine($"Failed: {ex.Message}");
+                    Resolver.Log.Error($"Failed: {ex.Message}");
                 }
             }
         }
