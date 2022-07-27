@@ -70,8 +70,8 @@ namespace Meadow
         private void SetConfigRoot()
         {
             var b = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-            b.AddYamlFile("appsettings.yaml", true);
-            b.AddJsonFile("appsettings.json", true);
+            b.AddYamlFile("app.settings.yaml", true);
+            b.AddJsonFile("app.settings.json", true);
             this.ConfigurationRoot = b.Build();
         }
 
