@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Meadow.Hardware
+﻿namespace Meadow.Hardware
 {
     /// <summary>
     /// DigitalPortBase provides a base implementation for much of the 
@@ -17,14 +15,6 @@ namespace Meadow.Hardware
         {
             this.InverseLogic = channel.InverseLogic;
             this.Channel = channel;
-        }
-
-        protected virtual void Dispose(bool disposing) { }
-
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

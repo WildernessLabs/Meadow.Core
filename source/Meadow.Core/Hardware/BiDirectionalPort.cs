@@ -150,12 +150,6 @@ namespace Meadow.Hardware
             Dispose(false);
         }
 
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected override void Dispose(bool disposing)
         {
             // TODO: we should consider moving this logic to the finalizer

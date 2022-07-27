@@ -15,6 +15,13 @@ namespace Meadow.Hardware
             this.Channel = channel ?? throw new ArgumentNullException(nameof(channel));
         }
 
-        public abstract void Dispose();
+        protected virtual void Dispose(bool disposing) { }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            disposed = true;
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Meadow.Units;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Meadow.Units;
 //using System.Collections.Generic;
 //using System.Threading.Tasks;
 
@@ -74,10 +73,13 @@ namespace Meadow.Hardware
 
             // attempt to reserve
             var success = IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
-            if (success.Item1) {
+            if (success.Item1)
+            {
                 // make sure the pin is configured as an analog input
                 ioController.ConfigureAnalogInput(pin);
-            } else {
+            }
+            else
+            {
                 throw new PortInUseException();
             }
         }
@@ -98,15 +100,18 @@ namespace Meadow.Hardware
             Voltage referenceVoltage)
         {
             var channel = pin.SupportedChannels.OfType<IAnalogChannelInfo>().FirstOrDefault();
-            if (channel != null) {
+            if (channel != null)
+            {
                 //TODO: need other checks here.
-                if(sampleCount < 1) { throw new ArgumentException("sampleCount must be greater than zero."); }
+                if (sampleCount < 1) { throw new ArgumentException("sampleCount must be greater than zero."); }
 
                 return new AnalogInputPort(
                     pin, ioController, channel,
                     sampleCount, sampleInterval,
                     referenceVoltage);
-            } else {
+            }
+            else
+            {
                 var supported = pin.SupportedChannels.Select(c => c.Name);
                 var msg = $"Pin {pin.Name} does not support an analog input channel. It supports: {string.Join(",", supported)}";
                 throw new Exception(msg);
@@ -131,7 +136,8 @@ namespace Meadow.Hardware
         public override void StartUpdating(TimeSpan? updateInterval = null)
         {
             // thread safety
-            lock (_lock) {
+            lock (_lock)
+            {
                 if (IsSampling) return;
 
                 // state muh-cheen
@@ -143,21 +149,25 @@ namespace Meadow.Hardware
                 SamplingTokenSource = new CancellationTokenSource();
                 CancellationToken ct = SamplingTokenSource.Token;
 
-                Task.Factory.StartNew(async () => {
+                Task.Factory.StartNew(async () =>
+                {
                     int currentSampleCount = 0;
                     Voltage[] sampleBuffer = new Voltage[SampleCount];
                     // loop until we're supposed to stop
-                    while (true) {
+                    while (true)
+                    {
 
                         // cleanup
-                        if (ct.IsCancellationRequested) {
+                        if (ct.IsCancellationRequested)
+                        {
                             // do task clean up here
                             observers.ForEach(x => x.OnCompleted());
                             break;
                         }
 
                         // read into the buffer
-                        lock (_analogSyncRoot) {
+                        lock (_analogSyncRoot)
+                        {
                             var rawValue = this.IOController.GetAnalogValue(this.Pin);
                             // convert the raw valute into an actual voltage.
                             sampleBuffer[currentSampleCount] = new Voltage(((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts);
@@ -167,13 +177,15 @@ namespace Meadow.Hardware
                         currentSampleCount++;
 
                         // if we still have more samples to take
-                        if (currentSampleCount < SampleCount) {
+                        if (currentSampleCount < SampleCount)
+                        {
                             // go to sleep for a while
                             await Task.Delay(SampleInterval);
                         }
                         // if we've filled our temp sample buffer, dump it into
                         // the class one
-                        else {
+                        else
+                        {
                             // dump our buffer into the base buffer
                             // TODO: this probably isn't thread safe, might need
                             // to create a buffer access lock.
@@ -205,6 +217,8 @@ namespace Meadow.Hardware
                             await Task.Delay(UpdateInterval);
                         }
                     }
+
+                    IsSampling = false;
                 }, SamplingTokenSource.Token);
             }
         }
@@ -219,11 +233,11 @@ namespace Meadow.Hardware
             {
                 if (!IsSampling) return;
 
-                if (SamplingTokenSource != null) {
+                if (SamplingTokenSource != null)
+                {
                     SamplingTokenSource.Cancel();
                 }
 
-                // state muh-cheen
                 IsSampling = false;
             }
         }
@@ -232,14 +246,16 @@ namespace Meadow.Hardware
         /// Convenience method to get the voltage value. For frequent reads, use
         /// StartUpdating() and StopUpdating() in conjunction with the SampleBuffer.
         /// </summary>
-        /// <returns>The raw value between 0 and x. TODO: @Ctacke 0 and what? Int.Max?</returns>
+        /// <returns>Read Voltage</returns>
         public async override Task<Voltage> Read()
         {
             // TODO: should this be class level Memory<double>?
             double[] sampleBuffer = new double[SampleCount];
-            for (int i = 0; i < SampleCount; i++) {
+            for (int i = 0; i < SampleCount; i++)
+            {
                 // read into the buffer
-                lock (_analogSyncRoot) {
+                lock (_analogSyncRoot)
+                {
                     var rawValue = this.IOController.GetAnalogValue(this.Pin);
                     // convert the raw valute into an actual voltage.
                     sampleBuffer[i] = ((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts;
@@ -249,11 +265,6 @@ namespace Meadow.Hardware
 
             // return the average of the samples
             return new Voltage((float)(sampleBuffer.Select(x => (float)x).Sum() / SampleCount), Units.Voltage.UnitType.Volts);
-        }
-
-        public override void Dispose()
-        {
-            
         }
     }
 }
