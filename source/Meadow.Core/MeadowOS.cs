@@ -97,8 +97,6 @@
             {
                 try
                 {
-                    LifecycleSettings = new LifecycleSettings();
-
                     var s = new LoggingSettings();
                     if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
                     {
@@ -109,6 +107,13 @@
                     {
                         Resolver.Log.Info($"Log level: {level}");
                     }
+
+                    Resolver.Log.Trace("LifecycleSettings:");
+
+                    LifecycleSettings = new LifecycleSettings();
+
+                    Resolver.Log.Trace($"  ResetOnAppFailure: {LifecycleSettings.ResetOnAppFailure}");
+                    Resolver.Log.Trace($"  AppFailureRestartDelaySeconds: {LifecycleSettings.AppFailureRestartDelaySeconds}");
                 }
                 catch (Exception ex)
                 {
@@ -309,8 +314,14 @@
             Resolver.Log.Debug(e.StackTrace);
             if (LifecycleSettings.ResetOnAppFailure)
             {
-                Resolver.Log.Info("CRASH: Meadow will restart in 5 seconds.");
-                Thread.Sleep(5000);
+                int restart = 5;
+                if (LifecycleSettings.AppFailureRestartDelaySeconds >= 0)
+                {
+                    restart = LifecycleSettings.AppFailureRestartDelaySeconds;
+                }
+
+                Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
+                Thread.Sleep(restart * 1000);
                 CurrentDevice.Reset();
             }
             throw e; // no return from this function
