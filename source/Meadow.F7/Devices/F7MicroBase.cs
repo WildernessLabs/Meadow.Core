@@ -1,9 +1,8 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Meadow.Gateways;
+﻿using Meadow.Gateways;
 using Meadow.Hardware;
 using Meadow.Units;
+using System;
+using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
 
@@ -185,6 +184,19 @@ namespace Meadow.Devices
             // TODO: see how long this actually takes
 
             AfterWake?.Invoke();
+        }
+
+        /// <summary>
+        /// Creates a new `Counter` instance to count the given transitions on the given pin
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="edge"></param>
+        /// <returns></returns>
+        public ICounter CreateCounter(
+            IPin pin,
+            InterruptMode edge)
+        {
+            return new Counter(this, pin, edge);
         }
     }
 }
