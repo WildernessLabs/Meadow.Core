@@ -112,8 +112,8 @@
 
                     LifecycleSettings = new LifecycleSettings();
 
-                    Resolver.Log.Trace($"  ResetOnAppFailure: {LifecycleSettings.ResetOnAppFailure}");
-                    Resolver.Log.Trace($"  AppFailureRestartDelaySeconds: {LifecycleSettings.AppFailureRestartDelaySeconds}");
+                    Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
+                    Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
                 }
                 catch (Exception ex)
                 {
@@ -312,7 +312,7 @@
             Resolver.Log.Error(message ?? " System Failure");
             Resolver.Log.Error($" {e.GetType()}: {e.Message}");
             Resolver.Log.Debug(e.StackTrace);
-            if (LifecycleSettings.ResetOnAppFailure)
+            if (LifecycleSettings.RestartOnAppFailure)
             {
                 int restart = 5;
                 if (LifecycleSettings.AppFailureRestartDelaySeconds >= 0)
