@@ -112,7 +112,7 @@
 
                     LifecycleSettings = new LifecycleSettings();
 
-                    Resolver.Log.Trace($"  ResetOnAppFailure: {LifecycleSettings.ResetOnAppFailure}");
+                    Resolver.Log.Trace($"  {nameof(RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
                     Resolver.Log.Trace($"  AppFailureRestartDelaySeconds: {LifecycleSettings.AppFailureRestartDelaySeconds}");
                 }
                 catch (Exception ex)
