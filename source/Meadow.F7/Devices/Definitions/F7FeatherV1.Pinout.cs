@@ -161,7 +161,7 @@ namespace Meadow.Devices
             public IPin D01 => new Pin(
                 "D01", "PH13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH13", interruptGroup: 13),
+                    new DigitalChannelInfo("PH13", interruptCapable: false),
                     new UartChannelInfo("UART4_TX", SerialDirectionType.Transmit)
                 }
             );
@@ -362,7 +362,7 @@ namespace Meadow.Devices
             public /*internal*/ IPin ESP_UART_TX => new Pin(
                 "ESP_UART_TX", "PB13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB13", interruptGroup: 13),
+                    new DigitalChannelInfo("PB13", interruptCapable: false),
                 }
             );
 

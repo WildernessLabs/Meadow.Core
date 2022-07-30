@@ -317,7 +317,7 @@ namespace Meadow.Devices
             public IPin D14 => new Pin(
                 "D14", "PB12",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB12", interruptGroup: 12),
+                    new DigitalChannelInfo("PB12", interruptCapable: false),
                     //new PwmChannelInfo("TIM12_CH2", 12, 2),
                 }
             );
@@ -337,7 +337,7 @@ namespace Meadow.Devices
             public IPin D15 => new Pin(
                 "D15", "PG12",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PG12", interruptGroup: 12),
+                    new DigitalChannelInfo("PG12", interruptCapable: false),
                     //new PwmChannelInfo("TIM12_CH1", 12, 1),
                 }
             );
@@ -358,7 +358,7 @@ namespace Meadow.Devices
             public IPin ESP_CIPO => new Pin(
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PI2", interruptGroup: 12),
+                    new DigitalChannelInfo("PI2", interruptCapable: false),
                     new SpiChannelInfo("PI2", SpiLineType.MISO)
                 }
             );
@@ -404,7 +404,7 @@ namespace Meadow.Devices
             public IPin ESP_UART_TX => new Pin(
                 "ESP_UART_TX", "PC12",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PC12", interruptGroup: 12),
+                    new DigitalChannelInfo("PC12", interruptCapable: false),
                 }
             );
 
