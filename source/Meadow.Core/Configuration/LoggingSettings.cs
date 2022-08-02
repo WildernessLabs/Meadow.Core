@@ -1,15 +1,15 @@
 ﻿namespace Meadow
 {
-    internal class LoggingSettings : ConfigurableObject
+    internal class LoggingSettings : ConfigurableObject, ILoggingSettings
     {
         public LoggingSettings() : base()
         {
             LogLevel = new LogLevelSettings(this, null);
         }
 
-        public LogLevelSettings LogLevel { get; set; }
+        public ILogLevelSettings LogLevel { get; set; }
 
-        public class LogLevelSettings : ConfigurableObject
+        public class LogLevelSettings : ConfigurableObject, ILogLevelSettings
         {
             public LogLevelSettings()
             {
