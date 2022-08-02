@@ -67,12 +67,31 @@ namespace Meadow
             }
         }
 
+        public const string DefaultJsonFileName = "app.config.json";
+        public const string DefaultYamlFileName = "app.config.yaml";
+
         private void SetConfigRoot()
         {
             var b = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-            b.AddYamlFile("app.config.yaml", true);
-            b.AddJsonFile("app.config.json", true);
-            this.ConfigurationRoot = b.Build();
+            b.AddYamlFile(DefaultYamlFileName, true);
+            b.AddJsonFile(DefaultJsonFileName, true);
+
+            try
+            {
+                this.ConfigurationRoot = b.Build();
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("json"))
+                {
+                    throw new Exception($"Error loading {DefaultJsonFileName}");
+                }
+                else if (ex.Message.Contains("yaml"))
+                {
+                    throw new Exception($"Error loading {DefaultYamlFileName}");
+                }
+                else throw;
+            }
         }
 
         public float GetConfiguredFloat([CallerMemberName] string? name = null, float defaultValue = 0f)

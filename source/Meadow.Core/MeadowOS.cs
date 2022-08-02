@@ -20,7 +20,7 @@
         internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
         private static IApp App { get; set; }
-        private static LifecycleSettings LifecycleSettings { get; set; }
+        private static ILifecycleSettings LifecycleSettings { get; set; }
 
         static bool appRunning = false;
         static bool appShutdown = false;
@@ -94,33 +94,48 @@
 
         private static void LoadSettings()
         {
+            ILoggingSettings s;
+
+            try
             {
-                try
-                {
-                    var s = new LoggingSettings();
-                    if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
-                    {
-                        Resolver.Log.Loglevel = level;
-                        Resolver.Log.Trace($"Setting log level to: {level}");
-                    }
-                    else
-                    {
-                        Resolver.Log.Info($"Log level: {level}");
-                    }
-
-                    Resolver.Log.Trace("LifecycleSettings:");
-
-                    LifecycleSettings = new LifecycleSettings();
-
-                    Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
-                    Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
-                }
-                catch (Exception ex)
-                {
-                    Resolver.Log.Error(ex.Message);
-                }
+                s = new LoggingSettings();
             }
+            catch (Exception ex)
+            {
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default App Config");
+
+                s = AppSettings.DefaultLoggingSettings;
+
+            }
+
+            if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
+            {
+                Resolver.Log.Loglevel = level;
+                Resolver.Log.Trace($"Setting log level to: {level}");
+            }
+            else
+            {
+                Resolver.Log.Info($"Log level: {level}");
+            }
+
+            Resolver.Log.Trace("LifecycleSettings:");
+
+            try
+            {
+                LifecycleSettings = new LifecycleSettings();
+            }
+            catch (Exception ex)
+            {
+                LifecycleSettings = AppSettings.DefaultLifecycleSettings;
+
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default App Config");
+            }
+            Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
+            Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
         }
+
 
         private static Type FindAppType()
         {
