@@ -1,13 +1,12 @@
 ﻿using Meadow.Devices;
 using Meadow.Gateways;
-using Meadow.Units;
 
 namespace Meadow
 {
     public interface IF7MeadowDevice : IMeadowDevice
     {
         IBluetoothAdapter? BluetoothAdapter { get; }
-        IWiFiAdapter? WiFiAdapter { get; }
+        //        IWiFiAdapter? WiFiAdapter { get; }
         ICoprocessor? Coprocessor { get; }
 
         AntennaType CurrentAntenna { get; }

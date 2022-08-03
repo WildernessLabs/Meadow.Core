@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Linq;
 using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
@@ -14,6 +15,9 @@ namespace Meadow.Devices
     /// </summary>
     public abstract partial class F7MicroBase : IF7MeadowDevice
     {
+        public event NetworkConnectionHandler NetworkConnected = delegate { };
+        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+
         //==== events
         public event EventHandler WiFiAdapterInitialized = delegate { };
         public event PowerTransitionHandler BeforeReset = delegate { };
@@ -22,7 +26,7 @@ namespace Meadow.Devices
 
         //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
-        public IWiFiAdapter? WiFiAdapter { get; protected set; }
+        //        public IWiFiAdapter? WiFiAdapter { get; protected set; }
         public ICoprocessor? Coprocessor { get; protected set; }
 
         public DeviceCapabilities Capabilities { get; }
@@ -31,10 +35,13 @@ namespace Meadow.Devices
 
         public IDeviceInformation Information { get; protected set; }
 
+        public INetworkAdapterCollection NetworkAdapters => networkAdapters;
+
         public abstract IPin GetPin(string pinName);
         public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
         //==== internals
+        protected NetworkAdapterCollection networkAdapters;
         protected Esp32Coprocessor? esp32;
         protected object coprocInitLock = new object();
         protected IMeadowIOController IoController { get; }
@@ -49,6 +56,10 @@ namespace Meadow.Devices
             PlatformOS = new F7PlatformOS();
 
             Information = new F7DeviceInformation();
+
+            networkAdapters = new NetworkAdapterCollection();
+            networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
+            networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
         }
 
         public void Initialize()
@@ -60,23 +71,35 @@ namespace Meadow.Devices
 
         protected bool InitCoprocessor()
         {
-            lock (coprocInitLock) {
-                if (this.esp32 == null) {
-                    try {
+            lock (coprocInitLock)
+            {
+                if (this.esp32 == null)
+                {
+                    try
+                    {
                         // instantiate the co proc and set the various adapters
                         // to be it.
                         this.esp32 = new Esp32Coprocessor();
                         BluetoothAdapter = esp32;
-                        WiFiAdapter = esp32;
+                        //                        WiFiAdapter = esp32;
                         Coprocessor = esp32;
-                    } catch (Exception e) {
+
+                        networkAdapters.Add(esp32);
+
+                    }
+                    catch (Exception e)
+                    {
                         Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
-                    } finally {
-                            
+                    }
+                    finally
+                    {
+
                     }
                     return true;
-                } else { // already initialized, bail out
+                }
+                else
+                { // already initialized, bail out
                     return true;
                 }
 
@@ -92,9 +115,12 @@ namespace Meadow.Devices
         {
             get
             {
-                if (WiFiAdapter != null)
+                // TODO: this feels awkward - should all of this antenna be in the adapter?
+                var wifi = NetworkAdapters.FirstOrDefault(a => a is IWirelessNetworkAdapter) as IWiFiAdapter;
+
+                if (wifi != null)
                 {
-                    return WiFiAdapter.Antenna;
+                    return wifi.Antenna;
                 }
                 else
                 {
@@ -115,9 +141,12 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            if (WiFiAdapter != null)
+            // TODO: this feels awkward - should all of this antenna be in the adapter?
+            var wifi = NetworkAdapters.FirstOrDefault(a => a is IWirelessNetworkAdapter) as IWiFiAdapter;
+
+            if (wifi != null)
             {
-                WiFiAdapter.SetAntenna(antenna, persist);
+                wifi.SetAntenna(antenna, persist);
             }
             else
             {
@@ -160,7 +189,8 @@ namespace Meadow.Devices
 
         public void SetClock(DateTime dateTime)
         {
-            var ts = new Core.Interop.Nuttx.timespec {
+            var ts = new Core.Interop.Nuttx.timespec
+            {
                 tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
             };
 
@@ -168,10 +198,10 @@ namespace Meadow.Devices
         }
 
         public void Sleep(int seconds = Timeout.Infinite)
-        {            
+        {
             var cmd = new UpdSleepCommand
             {
-                 SecondsToSleep = seconds                
+                SecondsToSleep = seconds
             };
 
             BeforeSleep?.Invoke();

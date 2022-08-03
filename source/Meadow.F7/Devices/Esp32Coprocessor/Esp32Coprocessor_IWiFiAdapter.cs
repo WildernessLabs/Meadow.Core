@@ -2,9 +2,11 @@
 using Meadow.Gateway.WiFi;
 using Meadow.Gateways;
 using Meadow.Gateways.Exceptions;
+using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,12 +22,12 @@ namespace Meadow.Devices
         /// <summary>
         /// Raised when the device connects to WiFi.
         /// </summary>
-        public event EventHandler WiFiConnected = delegate { };
+        public event NetworkConnectionHandler NetworkConnected = delegate { };
 
         /// <summary>
         /// Raised when the device disconnects from WiFi.
         /// </summary>
-        public event EventHandler WiFiDisconnected = delegate { };
+        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
 
         /// <summary>
         /// Raised when the WiFi interface starts.
@@ -119,29 +121,38 @@ namespace Meadow.Devices
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
-        public byte[] MacAddress
+        public PhysicalAddress MacAddress
         {
             get
             {
-                byte[] mac = new byte[6];
-                F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
-                return mac;
+                if (_mac == null)
+                {
+                    byte[] mac = new byte[6];
+                    F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
+                    _mac = new PhysicalAddress(mac);
+                }
+                return _mac;
             }
-
         }
+        private PhysicalAddress _mac;
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as an access point.
         /// </summary>
-        public byte[] ApMacAddress
+        public PhysicalAddress ApMacAddress
         {
             get
             {
-                byte[] mac = new byte[6];
-                F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
-                return mac;
+                if (_apMac == null)
+                {
+                    byte[] mac = new byte[6];
+                    F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
+                    _apMac = new PhysicalAddress(mac);
+                }
+                return _apMac;
             }
         }
+        private PhysicalAddress _apMac;
 
         /// <summary>
         /// Gets or sets whether to automatically start the network interface when the board reboots.
@@ -731,8 +742,8 @@ namespace Meadow.Devices
 
             NetworkAuthenticationType authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
 
-            WiFiConnectEventArgs ea = new WiFiConnectEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, channel, authenticationType, statusCode);
-            WiFiConnected?.Invoke(this, ea);
+            var ea = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, channel, authenticationType);
+            NetworkConnected?.Invoke(this, ea);
         }
 
         /// <summary>
@@ -747,8 +758,8 @@ namespace Meadow.Devices
             HasInternetAccess = false;
             IsConnected = false;
 
-            WiFiDisconnectEventArgs e = new WiFiDisconnectEventArgs(statusCode);
-            WiFiDisconnected?.Invoke(this, e);
+            var e = new WiFiDisconnectEventArgs(statusCode);
+            NetworkDisconnected?.Invoke(this);
         }
 
         /// <summary>
