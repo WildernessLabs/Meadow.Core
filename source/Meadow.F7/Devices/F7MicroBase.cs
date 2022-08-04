@@ -37,6 +37,10 @@ namespace Meadow.Devices
 
         public INetworkAdapterCollection NetworkAdapters => networkAdapters;
 
+        public IWiFiAdapter? GetPrimaryWiFiAdapter() => NetworkAdapters.OfType<IWiFiAdapter>().First();
+
+        public IWiredNetworkAdapter? GetPrimaryWiredNetworkAdapter() => NetworkAdapters.OfType<IWiredNetworkAdapter>().First();
+
         public abstract IPin GetPin(string pinName);
         public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
