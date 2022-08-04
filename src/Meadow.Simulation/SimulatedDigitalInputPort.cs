@@ -8,7 +8,7 @@ namespace Meadow.Simulation
     {
         private SimulatedPin _pin;
 
-        public SimulatedDigitalInputPort(IPin pin, IDigitalChannelInfo channel, InterruptMode interruptMode = InterruptMode.None) 
+        public SimulatedDigitalInputPort(IPin pin, IDigitalChannelInfo channel, InterruptMode interruptMode = InterruptMode.None)
             : base(pin, channel, interruptMode)
         {
             _pin = pin as SimulatedPin;
@@ -30,12 +30,7 @@ namespace Meadow.Simulation
         public override bool State { get => _pin.Voltage >= SimulationEnvironment.ActiveVoltage; }
 
         public override ResistorMode Resistor { get; set; }
-        public override double DebounceDuration { get; set; }
-        public override double GlitchDuration { get; set; }
-
-
-        public override void Dispose()
-        {
-        }
+        public override TimeSpan DebounceDuration { get; set; }
+        public override TimeSpan GlitchDuration { get; set; }
     }
 }

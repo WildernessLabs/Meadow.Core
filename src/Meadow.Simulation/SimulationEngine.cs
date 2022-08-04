@@ -13,7 +13,7 @@ namespace Meadow.Simulation
         public SimulationEngine(ISimulatedDevice<TPinDefinitions> device)
         {
             _device = device;
-          
+
             Initialize();
         }
 
@@ -96,12 +96,7 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public void ConfigureInput(IPin pin, ResistorMode resistorMode, InterruptMode interruptMode, double debounceDuration, double glitchDuration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void WireInterrupt(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, double debounceDuration, double glitchDuration)
+        public void ConfigureInput(IPin pin, ResistorMode resistorMode, InterruptMode interruptMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
             throw new NotImplementedException();
         }
@@ -121,12 +116,17 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public void ReassertConfig(IPin pin)
+        public Temperature GetTemperature()
         {
             throw new NotImplementedException();
         }
 
-        public Temperature GetTemperature()
+        public void WireInterrupt(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration, bool validateInterruptGroup = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReassertConfig(IPin pin, bool validateInterruptGroup = true)
         {
             throw new NotImplementedException();
         }

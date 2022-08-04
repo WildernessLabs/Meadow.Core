@@ -9,14 +9,10 @@ namespace Meadow.Simulation
     {
         private SimulatedPin _pin;
 
-        public SimulatedAnalogInputPort(IPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage) 
+        public SimulatedAnalogInputPort(IPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage)
             : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
         {
             _pin = pin as SimulatedPin;
-        }
-
-        public override void Dispose()
-        {
         }
 
         public override Task<Voltage> Read()

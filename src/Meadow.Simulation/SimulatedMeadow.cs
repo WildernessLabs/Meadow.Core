@@ -1,15 +1,21 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices;
+using Meadow.Hardware;
 using Meadow.Units;
 using System;
-using System.Collections;
 using System.Linq;
 
 namespace Meadow.Simulation
-{     
+{
     public partial class SimulatedMeadow<TPinDefinitions> : ISimulatedDevice<TPinDefinitions>
         where TPinDefinitions : IPinDefinitions, new()
     {
         private SimulationEngine<TPinDefinitions> _simulationEngine;
+
+        public event PowerTransitionHandler BeforeReset;
+        public event PowerTransitionHandler BeforeSleep;
+        public event PowerTransitionHandler AfterWake;
+        public event NetworkConnectionHandler NetworkConnected;
+        public event NetworkDisconnectionHandler NetworkDisconnected;
 
         public SimulatedMeadow()
         {
@@ -26,9 +32,11 @@ namespace Meadow.Simulation
         public IPlatformOS PlatformOS => throw new NotImplementedException();
         public DeviceCapabilities Capabilities => throw new NotImplementedException();
 
+        public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
+
         private void LaunchUI()
         {
-            
+
         }
 
         public void DrivePinVoltage(IPin pin, Voltage voltage)
@@ -57,18 +65,18 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
-        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, double debounceDuration = 0, double glitchDuration = 0, OutputType output = OutputType.PushPull)
+        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
             var dc = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dc != null)
             {
-                return new SimulatedBiDirectionalPort(pin, dc, initialState, interruptMode, resistorMode, initialDirection);
+                return new SimulatedBiDirectionalPort(pin, dc, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration);
             }
 
             throw new NotSupportedException();
         }
 
-        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
             var dci = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dci != null)
@@ -165,6 +173,31 @@ namespace Meadow.Simulation
         }
 
         public void WatchdogReset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Sleep(int seconds = -1)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BatteryInfo GetBatteryInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Temperature GetProcessorTemperature()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICounter CreateCounter(IPin pin, InterruptMode edge)
         {
             throw new NotImplementedException();
         }
