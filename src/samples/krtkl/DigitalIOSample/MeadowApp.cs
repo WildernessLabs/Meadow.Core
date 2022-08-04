@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace DigitalIOSample
 {
-    public class MeadowApp : App<MeadowForLinux<SnickerdoodleBlack>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<SnickerdoodleBlack>>
     {
         public MeadowApp()
         {
@@ -16,16 +16,16 @@ namespace DigitalIOSample
 
         void CheckResistor()
         {
-//            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
-//            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
+            //            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
+            //            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
 
-//            Console.WriteLine($"20 is {input20.State}");
-//            Console.WriteLine($"21 is {input21.State}");
+            //            Console.WriteLine($"20 is {input20.State}");
+            //            Console.WriteLine($"21 is {input21.State}");
         }
 
         void RunPulse()
         {
-//            var output0 = Device.CreateDigitalOutputPort(Device.Pins.GPIO0);
+            //            var output0 = Device.CreateDigitalOutputPort(Device.Pins.GPIO0);
             var output1 = Device.CreateDigitalOutputPort(Device.Pins.GPIO1);
             var output2 = Device.CreateDigitalOutputPort(Device.Pins.GPIO2);
             var output3 = Device.CreateDigitalOutputPort(Device.Pins.GPIO3);
@@ -34,13 +34,13 @@ namespace DigitalIOSample
             var output6 = Device.CreateDigitalOutputPort(Device.Pins.GPIO6);
             var output7 = Device.CreateDigitalOutputPort(Device.Pins.GPIO7);
             var output8 = Device.CreateDigitalOutputPort(Device.Pins.GPIO8);
-//            var output9 = Device.CreateDigitalOutputPort(Device.Pins.GPIO9);
+            //            var output9 = Device.CreateDigitalOutputPort(Device.Pins.GPIO9);
             var state = false;
 
             while (true)
             {
                 Console.Write(".");
-//                output0.State = state;
+                //                output0.State = state;
                 output1.State = state;
                 output2.State = state;
                 output3.State = state;
@@ -49,7 +49,7 @@ namespace DigitalIOSample
                 output6.State = state;
                 output7.State = state;
                 output8.State = state;
-//                output9.State = state;
+                //                output9.State = state;
 
                 state = !state;
                 Thread.Sleep(1000);
