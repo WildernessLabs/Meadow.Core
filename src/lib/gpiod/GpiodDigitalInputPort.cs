@@ -1,6 +1,5 @@
 ﻿using Meadow.Hardware;
 using System;
-using System.Threading.Tasks;
 using static Meadow.Gpiod.Interop;
 
 namespace Meadow
@@ -16,13 +15,13 @@ namespace Meadow
             Gpiod driver,
             IPin pin,
             SysFsDigitalChannelInfo channel,
-            InterruptMode interruptMode = InterruptMode.None,
-            ResistorMode resistorMode = ResistorMode.Disabled,
-            double debounceDuration = 0,
-            double glitchDuration = 0)
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration)
             : base(pin, channel, interruptMode)
         {
-            if (debounceDuration > 0 || glitchDuration > 0)
+            if (debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
             {
                 throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
             }
@@ -77,9 +76,10 @@ namespace Meadow
             this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
             Line.Release();
+            base.Dispose(disposing);
         }
 
         public override ResistorMode Resistor
@@ -88,15 +88,15 @@ namespace Meadow
             set => throw new NotSupportedException("Resistor Mode not supported on this platform");
         }
 
-        public override double DebounceDuration
+        public override TimeSpan DebounceDuration
         {
-            get => 0;
+            get => TimeSpan.Zero;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
 
-        public override double GlitchDuration
+        public override TimeSpan GlitchDuration
         {
-            get => 0;
+            get => TimeSpan.Zero;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
     }

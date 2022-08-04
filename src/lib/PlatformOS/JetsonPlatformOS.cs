@@ -38,11 +38,8 @@ namespace Meadow
 
             if (_nameToPathLookup.ContainsKey(name))
             {
-                Console.WriteLine("reading...");
                 var raw = File.ReadAllText(_nameToPathLookup[name]).Trim();
-                Console.WriteLine($"raw:{raw}");
                 var c = double.Parse(raw);
-                Console.WriteLine($"parsed: {c}");
                 return new Temperature(c / 1000d, Temperature.UnitType.Celsius);
             }
             else

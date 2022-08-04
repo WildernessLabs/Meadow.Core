@@ -45,9 +45,9 @@ namespace PushButton_Sample
                 _display = new St7789(
                     device: Device,
                     spiBus: spiBus,
-                    chipSelectPin: Device.Pins.GPIO25,
-                    dcPin: Device.Pins.GPIO27,
-                    resetPin: Device.Pins.GPIO22,
+                    chipSelectPin: Device.Pins.GPIO25, // A03
+                    dcPin: Device.Pins.GPIO27, // A04
+                    resetPin: Device.Pins.GPIO22, // A05
                     width: 240,
                     height: 240,
                     displayColorMode: ColorType.Format16bppRgb565);

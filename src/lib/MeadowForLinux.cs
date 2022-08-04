@@ -25,6 +25,8 @@ namespace Meadow
         public event PowerTransitionHandler BeforeReset;
         public event PowerTransitionHandler BeforeSleep;
         public event PowerTransitionHandler AfterWake;
+        public event NetworkConnectionHandler NetworkConnected;
+        public event NetworkDisconnectionHandler NetworkDisconnected;
 
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
@@ -52,6 +54,8 @@ namespace Meadow
         }
 
         public IDeviceInformation Information => throw new NotImplementedException();
+
+        public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
 
         /// <summary>
         /// Creates the Meadow on Linux infrastructure instance
@@ -171,9 +175,14 @@ namespace Meadow
             return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
         }
 
-        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, double debounceDuration = 0, double glitchDuration = 0)
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled)
         {
-            return new GpiodDigitalInputPort(_gpiod, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode, resistorMode);
+            return CreateDigitalInputPort(pin, interruptMode, resistorMode);
+        }
+
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
+        {
+            return new GpiodDigitalInputPort(_gpiod, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
 
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
@@ -284,6 +293,16 @@ namespace Meadow
         }
 
         public void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICounter CreateCounter(IPin pin, InterruptMode edge)
         {
             throw new NotImplementedException();
         }
