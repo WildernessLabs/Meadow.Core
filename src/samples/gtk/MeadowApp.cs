@@ -27,17 +27,21 @@ namespace Meadow
 
         private void DrawStuff(object? o)
         {
-            // display primitives
-            _display.Fill(RandomColor());
-            _display.Fill(100, 100, _display.Width - 200, _display.Height - 200, RandomColor());
-            var linecolor = RandomColor();
-
             if (_useGraphics)
             {
-                _graphics.DrawLine(0, _display.Height / 3, _display.Width, _display.Height / 3, linecolor);
+                // use MicroGraphics
+                _graphics.Clear(RandomColor());
+                _graphics.DrawRectangle(100, 100, _display.Width - 200, _display.Height - 200, RandomColor(), true);
+                _graphics.DrawLine(0, _display.Height / 3, _display.Width, _display.Height / 3, RandomColor());
             }
             else
             {
+                // use only display primitives
+                _display.Fill(RandomColor());
+                _display.Fill(100, 100, _display.Width - 200, _display.Height - 200, RandomColor());
+
+                var linecolor = RandomColor();
+
                 for (int x = 0; x < _display.Width; x++)
                 {
                     _display.DrawPixel(x, _display.Height / 2, linecolor);
