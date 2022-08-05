@@ -13,13 +13,22 @@
     public abstract class App<D> : IApp, IAsyncDisposable
             where D : class, IMeadowDevice
     {
+        private ExecutionContext executionContext;
+
         protected App()
         {
+            executionContext = Thread.CurrentThread.ExecutionContext;
+
             Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
             Abort = MeadowOS.AppAbort.Token;
 
             Resolver.Services.Add<IMeadowDevice>(Device);
             Resolver.Services.Add<IApp>(this);
+        }
+
+        public void InvokeOnMainThread(Action<object> action, object? state = null)
+        {
+            ExecutionContext.Run(executionContext, new ContextCallback(action), state);
         }
 
         public virtual Task Run() { return Task.CompletedTask; }
