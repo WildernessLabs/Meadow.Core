@@ -1,4 +1,5 @@
 ﻿using Meadow.Foundation;
+using Meadow.Foundation.Graphics;
 using Meadow.Graphics;
 using System;
 using System.Threading;
@@ -8,8 +9,9 @@ namespace Meadow
 {
     public class MeadowApp : App<Simulation.SimulatedMeadow<Simulation.SimulatedPinout>>
     {
+        private MicroGraphics _graphics;
         private Display _display;
-        private ExecutionContext? _ctx;
+        private bool _useGraphics = true;
 
         public MeadowApp()
         {
@@ -18,18 +20,28 @@ namespace Meadow
         public override async Task Run()
         {
             _display = new Meadow.Graphics.Display();
+            _graphics = new MicroGraphics(_display);
             _ = Task.Run(() => Updater());
             _display.Run();
         }
 
         private void DrawStuff(object? o)
         {
+            // display primitives
             _display.Fill(RandomColor());
             _display.Fill(100, 100, _display.Width - 200, _display.Height - 200, RandomColor());
             var linecolor = RandomColor();
-            for (int x = 0; x < _display.Width; x++)
+
+            if (_useGraphics)
             {
-                _display.DrawPixel(x, _display.Height / 2, linecolor);
+                _graphics.DrawLine(0, _display.Height / 3, _display.Width, _display.Height / 3, linecolor);
+            }
+            else
+            {
+                for (int x = 0; x < _display.Width; x++)
+                {
+                    _display.DrawPixel(x, _display.Height / 2, linecolor);
+                }
             }
             _display.Show();
         }

@@ -47,13 +47,10 @@ namespace Meadow.Graphics
         }
 
         public IPixelBuffer PixelBuffer => _pixelBuffer;
-        public ColorType ColorMode => ColorType.Format16bppRgb565;
+        public ColorType ColorMode => _pixelBuffer.ColorMode;
 
         public int Width => _window.Window.Width;
         public int Height => _window.Window.Height;
-
-
-
 
         public void Show()
         {

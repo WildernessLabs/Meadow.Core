@@ -23,25 +23,6 @@ namespace Meadow.Graphics
             _surface = new ImageSurface(Format.Rgb24, width, height);
         }
 
-        public void Foo()
-        {
-            using (var cr = new Context(_surface))
-            {
-                var width = _surface.Width;
-                var height = _surface.Height;
-
-                // fill an area
-                cr.Rectangle(0, 0, width, height);
-                cr.SetSourceRGB(0, 1, 0);
-                cr.Fill();
-
-                // draw a pixel (can't yet find a better way)
-                cr.SetSourceRGB(1, 0, 0);
-                cr.Rectangle(400, 300, 1, 1);
-                cr.Fill();
-            }
-        }
-
         public void Clear()
         {
             Fill(Foundation.Color.Black);
