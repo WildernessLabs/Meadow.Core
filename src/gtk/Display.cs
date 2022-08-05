@@ -5,8 +5,9 @@ using System;
 
 namespace Meadow.Graphics
 {
-    public class Display : Window, IGraphicsDisplay
+    public class Display : IGraphicsDisplay
     {
+        private Window _window;
         private SurfaceBuffer888 _pixelBuffer;
 
         static Display()
@@ -20,13 +21,14 @@ namespace Meadow.Graphics
         }
 
         public Display(int width, int height)
-            : base(WindowType.Popup)
         {
+            _window = new Window(WindowType.Popup);
             _pixelBuffer = new SurfaceBuffer888(width, height);
-            WindowPosition = WindowPosition.Center;
-            DefaultSize = new Gdk.Size(width, height);
+            _window.WindowPosition = WindowPosition.Center;
+            _window.DefaultSize = new Gdk.Size(width, height);
 
-            ShowAll();
+            _window.ShowAll();
+            _window.Drawn += OnWindowDrawn;
         }
 
         public void Run()
@@ -34,34 +36,33 @@ namespace Meadow.Graphics
             Application.Run();
         }
 
-        protected override bool OnDrawn(Cairo.Context cr)
+        private void OnWindowDrawn(object o, DrawnArgs args)
         {
-            cr.SetSource(_pixelBuffer.Surface);
-            cr.Paint();
+            args.Cr.SetSource(_pixelBuffer.Surface);
+            args.Cr.Paint();
 
-            if (cr.GetTarget() is IDisposable d) d.Dispose();
-            if (cr is IDisposable cd) cd.Dispose();
-
-            return true;
+            if (args.Cr.GetTarget() is IDisposable d) d.Dispose();
+            if (args.Cr is IDisposable cd) cd.Dispose();
+            args.RetVal = true;
         }
 
         public IPixelBuffer PixelBuffer => _pixelBuffer;
         public ColorType ColorMode => ColorType.Format16bppRgb565;
 
-        public int Width => base.Window.Width;
-        public int Height => base.Window.Height;
+        public int Width => _window.Window.Width;
+        public int Height => _window.Window.Height;
 
 
 
 
-        void IGraphicsDisplay.Show()
+        public void Show()
         {
-            this.Show();
+            _window.QueueDraw();
         }
 
-        void IGraphicsDisplay.Show(int left, int top, int right, int bottom)
+        public void Show(int left, int top, int right, int bottom)
         {
-            base.QueueDrawArea(left, top, right - left, bottom - top);
+            _window.QueueDrawArea(left, top, right - left, bottom - top);
         }
 
         public void Clear(bool updateDisplay = false)

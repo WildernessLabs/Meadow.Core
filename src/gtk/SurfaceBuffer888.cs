@@ -56,7 +56,7 @@ namespace Meadow.Graphics
         {
             using (var cr = new Context(_surface))
             {
-                cr.SetSourceRGB(color.R, color.G, color.B);
+                cr.SetSourceRGB(color.R / 255d, color.G / 255d, color.B / 255d);
                 cr.Rectangle(originX, originY, width, height);
                 cr.Fill();
             }
@@ -67,7 +67,7 @@ namespace Meadow.Graphics
             using (var cr = new Context(_surface))
             {
                 // draw a pixel (can't yet find a better way)
-                cr.SetSourceRGB(color.R, color.G, color.B);
+                cr.SetSourceRGB(color.R / 255d, color.G / 255d, color.B / 255d);
                 cr.Rectangle(x, y, 1, 1);
                 cr.Fill();
             }
