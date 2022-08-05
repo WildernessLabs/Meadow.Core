@@ -18,6 +18,7 @@ namespace Meadow
             {
                 display.DrawPixel(x, display.Height / 2, Color.Green);
             }
+
             display.Run();
         }
     }

@@ -75,7 +75,14 @@ namespace Meadow.Graphics
 
         public Foundation.Color GetPixel(int x, int y)
         {
-            throw new NotImplementedException();
+            var index = ((y * Width) + x) * 3;
+
+            //split into R,G,B & invert
+            byte r = Buffer[index];
+            byte g = Buffer[index + 1];
+            byte b = Buffer[index + 2];
+
+            return new Foundation.Color(r, g, b);
         }
 
         public void InvertPixel(int x, int y)
@@ -85,7 +92,13 @@ namespace Meadow.Graphics
 
         public void WriteBuffer(int originX, int originY, IPixelBuffer buffer)
         {
-            throw new NotImplementedException();
+            for (var x = 0; x < buffer.Width; x++)
+            {
+                for (var y = 0; y < buffer.Height; y++)
+                {
+                    SetPixel(originX + x, originY + y, buffer.GetPixel(x, y));
+                }
+            }
         }
     }
 }

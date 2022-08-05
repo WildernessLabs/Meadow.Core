@@ -86,17 +86,17 @@ namespace Meadow.Graphics
 
         public void DrawPixel(int x, int y, bool colored)
         {
-            throw new NotImplementedException();
+            DrawPixel(x, y, colored ? Foundation.Color.White : Foundation.Color.Black);
         }
 
         public void InvertPixel(int x, int y)
         {
-            throw new NotImplementedException();
+            _pixelBuffer.InvertPixel(x, y);
         }
 
         public void WriteBuffer(int x, int y, IPixelBuffer displayBuffer)
         {
-            throw new NotImplementedException();
+            _pixelBuffer.WriteBuffer(x, y, displayBuffer);
         }
     }
 }
