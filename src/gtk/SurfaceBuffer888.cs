@@ -40,6 +40,8 @@ namespace Meadow.Graphics
                 cr.SetSourceRGB(color.R / 255d, color.G / 255d, color.B / 255d);
                 cr.Rectangle(originX, originY, width, height);
                 cr.Fill();
+
+                cr.GetTarget().Dispose();
             }
         }
 
@@ -51,6 +53,8 @@ namespace Meadow.Graphics
                 cr.SetSourceRGB(color.R / 255d, color.G / 255d, color.B / 255d);
                 cr.Rectangle(x, y, 1, 1);
                 cr.Fill();
+
+                cr.GetTarget().Dispose();
             }
         }
 

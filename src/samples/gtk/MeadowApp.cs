@@ -33,6 +33,7 @@ namespace Meadow
                 _graphics.Clear(RandomColor());
                 _graphics.DrawRectangle(100, 100, _display.Width - 200, _display.Height - 200, RandomColor(), true);
                 _graphics.DrawLine(0, _display.Height / 3, _display.Width, _display.Height / 3, RandomColor());
+                _graphics.Show();
             }
             else
             {
@@ -46,8 +47,8 @@ namespace Meadow
                 {
                     _display.DrawPixel(x, _display.Height / 2, linecolor);
                 }
+                _display.Show();
             }
-            _display.Show();
         }
 
         public void Updater()

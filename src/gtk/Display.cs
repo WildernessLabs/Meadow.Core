@@ -16,17 +16,21 @@ namespace Meadow.Graphics
         }
 
         public Display()
-            : this(800, 600) // TODO: query screen size
         {
+            Initialize(800, 600); // TODO: query screen size
         }
 
         public Display(int width, int height)
+        {
+            Initialize(width, height);
+        }
+
+        private void Initialize(int width, int height)
         {
             _window = new Window(WindowType.Popup);
             _pixelBuffer = new SurfaceBuffer888(width, height);
             _window.WindowPosition = WindowPosition.Center;
             _window.DefaultSize = new Gdk.Size(width, height);
-
             _window.ShowAll();
             _window.Drawn += OnWindowDrawn;
         }

@@ -10,7 +10,7 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <Compile Remove="CubeApp.cs" />
+   <Compile Remove="MeadowApp.cs" />
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
