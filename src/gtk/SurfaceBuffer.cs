@@ -5,22 +5,35 @@ using System;
 
 namespace Meadow.Graphics
 {
-    public class SurfaceBuffer888 : IPixelBuffer
+    public class SurfaceBuffer : IPixelBuffer
     {
         private ImageSurface _surface;
+        private ColorType _colorMode;
 
         public Surface Surface => _surface;
 
         public int Width => _surface.Width;
         public int Height => _surface.Height;
-        public ColorType ColorMode => ColorType.Format24bppRgb888;
+        public ColorType ColorMode => _colorMode;
         public int BitDepth => 24;
         public int ByteCount => _surface.Data.Length;
         public byte[] Buffer => _surface.Data;
 
-        public SurfaceBuffer888(int width, int height)
+        public SurfaceBuffer(ColorType mode, int width, int height)
         {
-            _surface = new ImageSurface(Format.Rgb24, width, height);
+            _colorMode = mode;
+            switch (mode)
+            {
+                case ColorType.Format24bppRgb888:
+                    _surface = new ImageSurface(Format.Rgb24, width, height);
+                    break;
+                case ColorType.Format16bppRgb565:
+                    _surface = new ImageSurface(Format.Rgb16565, width, height);
+                    break;
+                default:
+                    throw new Exception($"Mode {mode} not supported");
+            }
+
         }
 
         public void Clear()

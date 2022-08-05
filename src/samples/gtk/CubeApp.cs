@@ -2,7 +2,6 @@
 using Meadow.Foundation.Graphics;
 using Meadow.Graphics;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow
@@ -110,7 +109,7 @@ namespace Meadow
 
                     graphics.Show();
 
-                    Thread.Sleep(10);
+                    //                    Thread.Sleep(20);
                 });
             }
         }

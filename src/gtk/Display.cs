@@ -8,27 +8,27 @@ namespace Meadow.Graphics
     public class Display : IGraphicsDisplay
     {
         private Window _window;
-        private SurfaceBuffer888 _pixelBuffer;
+        private SurfaceBuffer _pixelBuffer;
 
         static Display()
         {
             Application.Init();
         }
 
-        public Display()
+        public Display(ColorType mode = ColorType.Format24bppRgb888)
         {
-            Initialize(800, 600); // TODO: query screen size
+            Initialize(800, 600, mode); // TODO: query screen size and caps
         }
 
-        public Display(int width, int height)
+        public Display(int width, int height, ColorType mode = ColorType.Format24bppRgb888)
         {
-            Initialize(width, height);
+            Initialize(width, height, mode);
         }
 
-        private void Initialize(int width, int height)
+        private void Initialize(int width, int height, ColorType mode)
         {
             _window = new Window(WindowType.Popup);
-            _pixelBuffer = new SurfaceBuffer888(width, height);
+            _pixelBuffer = new SurfaceBuffer(mode, width, height);
             _window.WindowPosition = WindowPosition.Center;
             _window.DefaultSize = new Gdk.Size(width, height);
             _window.ShowAll();
