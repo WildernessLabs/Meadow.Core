@@ -1,5 +1,6 @@
-﻿using Meadow.Devices;
+using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Logging;
 using Meadow.Units;
 using System;
 using System.Linq;
@@ -18,14 +19,17 @@ namespace Meadow.Simulation
         public event NetworkConnectionHandler NetworkConnected;
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
+        public Logger Logger { get; }
+
         public SimulatedMeadow()
         {
+            Logger = new Logger(new ConsoleLogProvider());
+            Logger.Loglevel = LogLevel.Information;
+
             Pins = new TPinDefinitions();
             _platformOS = new SimulatedPlatformOS();
-            _simulationEngine = new SimulationEngine<TPinDefinitions>(this);
+            _simulationEngine = new SimulationEngine<TPinDefinitions>(this, Logger);
             Information = new SimulationInformation();
-
-            LaunchUI();
         }
 
         public TPinDefinitions Pins { get; }
@@ -94,6 +98,12 @@ namespace Meadow.Simulation
             var dco = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dco != null)
             {
+                var p = pin as SimulatedPin;
+                p.VoltageChanged += (s, e) =>
+                    {
+                        _simulationEngine.SetPinVoltage(pin, p.Voltage);
+                    };
+
                 return new SimulatedDigitalOutputPort(pin, dco, false, OutputType.PushPull);
             }
 

@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "refs", "refs", "{9F59823F-2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj", "{925D5ECA-9D96-4EA3-AA74-9386C01C0078}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulatedApp", "SimulatedApp\SimulatedApp.csproj", "{F239AA5C-F804-49EA-B35D-D00964CEE0B7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{925D5ECA-9D96-4EA3-AA74-9386C01C0078}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{925D5ECA-9D96-4EA3-AA74-9386C01C0078}.Release|Any CPU.Build.0 = Release|Any CPU
 		{925D5ECA-9D96-4EA3-AA74-9386C01C0078}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{F239AA5C-F804-49EA-B35D-D00964CEE0B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F239AA5C-F804-49EA-B35D-D00964CEE0B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F239AA5C-F804-49EA-B35D-D00964CEE0B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F239AA5C-F804-49EA-B35D-D00964CEE0B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

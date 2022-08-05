@@ -1,7 +1,7 @@
 ﻿using Meadow.Hardware;
+using Meadow.Logging;
 using Meadow.Units;
 using System;
-using System.Collections.Generic;
 
 namespace Meadow.Simulation
 {
@@ -9,23 +9,34 @@ namespace Meadow.Simulation
         where TPinDefinitions : IPinDefinitions
     {
         private ISimulatedDevice<TPinDefinitions> _device;
+        private WebSocketServer _wsServer;
 
-        public SimulationEngine(ISimulatedDevice<TPinDefinitions> device)
+        public SimulationEngine(ISimulatedDevice<TPinDefinitions> device, Logger logger)
         {
             _device = device;
+
+            _wsServer = new WebSocketServer(logger);
+            _wsServer.MessageReceived += OnWebSocketMessageReceived;
 
             Initialize();
         }
 
-        private Dictionary<IPin, bool> _discreteStates = new Dictionary<IPin, bool>();
-        private Dictionary<IPin, double> _analogStates = new Dictionary<IPin, double>();
+        //        private Dictionary<IPin, bool> _discreteStates = new Dictionary<IPin, bool>();
+        //        private Dictionary<IPin, double> _analogStates = new Dictionary<IPin, double>();
 
         public IDeviceChannelManager DeviceChannelManager => throw new NotImplementedException();
 
+        public string OSVersion => throw new NotImplementedException();
+
+        public string OSBuildDate => throw new NotImplementedException();
+
+        public string MonoVersion => throw new NotImplementedException();
+
         public event InterruptHandler Interrupt;
 
-        private void Initialize()
+        public void Initialize()
         {
+            /*
             foreach (var pin in _device.Pins)
             {
                 // discretes
@@ -40,6 +51,35 @@ namespace Meadow.Simulation
                     _analogStates.Add(pin, 0d);
                 }
             }
+            */
+
+            _wsServer.Start();
+
+            PublishState();
+        }
+
+        private void PublishState()
+        {
+            var state = new SimulationState();
+
+            foreach (SimulatedPin pin in _device.Pins)
+            {
+                state.PinStates.Add(pin.Name, pin.Voltage.Volts);
+            }
+
+            var j = System.Text.Json.JsonSerializer.Serialize(state);
+            _wsServer.SendMessage(j);
+        }
+
+        private void OnWebSocketMessageReceived(WebSocketServer source, string message)
+        {
+            switch (message)
+            {
+                case "get_state":
+                    // publish full state
+                    PublishState();
+                    break;
+            }
         }
 
         void IMeadowIOController.Initialize()
@@ -48,7 +88,8 @@ namespace Meadow.Simulation
 
         public void SetDiscrete(IPin pin, bool state)
         {
-            SetPinVoltage(pin, state ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage);
+            var voltage = state ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage;
+            SetPinVoltage(pin, voltage);
         }
 
         public bool GetDiscrete(IPin pin)
@@ -65,6 +106,8 @@ namespace Meadow.Simulation
                 var rising = voltage > sp.Voltage;
 
                 sp.Voltage = voltage;
+
+                _wsServer.SendMessage($"{pin.Name}={voltage.Volts}V");
 
                 Interrupt?.Invoke(pin, rising);
             }
@@ -127,6 +170,16 @@ namespace Meadow.Simulation
         }
 
         public void ReassertConfig(IPin pin, bool validateInterruptGroup = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
         {
             throw new NotImplementedException();
         }
