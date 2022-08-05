@@ -10,6 +10,7 @@ namespace Meadow.Simulation
         where TPinDefinitions : IPinDefinitions, new()
     {
         private SimulationEngine<TPinDefinitions> _simulationEngine;
+        private IPlatformOS _platformOS;
 
         public event PowerTransitionHandler BeforeReset;
         public event PowerTransitionHandler BeforeSleep;
@@ -20,6 +21,7 @@ namespace Meadow.Simulation
         public SimulatedMeadow()
         {
             Pins = new TPinDefinitions();
+            _platformOS = new SimulatedPlatformOS();
             _simulationEngine = new SimulationEngine<TPinDefinitions>(this);
             Information = new SimulationInformation();
 
@@ -29,7 +31,7 @@ namespace Meadow.Simulation
         public TPinDefinitions Pins { get; }
         public IDeviceInformation Information { get; }
 
-        public IPlatformOS PlatformOS => throw new NotImplementedException();
+        public IPlatformOS PlatformOS => _platformOS;
         public DeviceCapabilities Capabilities => throw new NotImplementedException();
 
         public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
