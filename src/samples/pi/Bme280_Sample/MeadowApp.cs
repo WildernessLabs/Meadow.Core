@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bme280_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>>
     {
         private Bme280 _bme;
 

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace XavierI2C_Sample
 {
-    class MeadowApp : App<MeadowForLinux<JetsonXavierAGX>, MeadowApp>
+    class MeadowApp : App<MeadowForLinux<JetsonXavierAGX>>
     {
         private Bno055 _bno055;
         private Ccs811 _ccs811;

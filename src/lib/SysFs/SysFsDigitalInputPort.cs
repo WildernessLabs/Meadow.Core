@@ -63,13 +63,15 @@ namespace Meadow
             RaiseChangedAndNotify(new DigitalPortResult());
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
             if (Gpio >= 0)
             {
                 Driver.UnhookInterrupt(Gpio);
                 Driver.Unexport(Gpio);
             }
+
+            base.Dispose(disposing);
         }
 
         public override ResistorMode Resistor
@@ -78,15 +80,15 @@ namespace Meadow
             set => throw new NotSupportedException("Resistor Mode not supported on this platform");
         }
 
-        public override double DebounceDuration
+        public override TimeSpan DebounceDuration
         {
-            get => 0;
+            get => TimeSpan.Zero;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
 
-        public override double GlitchDuration
+        public override TimeSpan GlitchDuration
         {
-            get => 0;
+            get => TimeSpan.Zero;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
     }

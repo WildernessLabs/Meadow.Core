@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace DigitalIOSample
 {
-    public class MeadowApp : App<MeadowForLinux<SnickerdoodleBlack>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<SnickerdoodleBlack>>
     {
         public MeadowApp()
         {
@@ -16,11 +16,11 @@ namespace DigitalIOSample
 
         void CheckResistor()
         {
-//            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
-//            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
+            //            var input20 = Device.CreateDigitalInputPort(Device.Pins.GPIO20, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullUp);
+            //            var input21 = Device.CreateDigitalInputPort(Device.Pins.GPIO21, Meadow.Hardware.InterruptMode.None, Meadow.Hardware.ResistorMode.InternalPullDown);
 
-//            Console.WriteLine($"20 is {input20.State}");
-//            Console.WriteLine($"21 is {input21.State}");
+            //            Console.WriteLine($"20 is {input20.State}");
+            //            Console.WriteLine($"21 is {input21.State}");
         }
 
         void RunPulse()
