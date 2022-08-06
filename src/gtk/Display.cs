@@ -4,6 +4,7 @@ using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.Buffers;
 using System;
 using System.Buffers.Binary;
+using System.Threading;
 
 namespace Meadow.Graphics
 {
@@ -13,6 +14,14 @@ namespace Meadow.Graphics
         private IPixelBuffer _pixelBuffer;
         private Cairo.Format _format;
         private int _stride;
+        private Action<byte[]>? _bufferConverter = null;
+
+        private EventWaitHandle ShowComplete { get; } = new EventWaitHandle(true, EventResetMode.ManualReset);
+        public IPixelBuffer PixelBuffer => _pixelBuffer;
+        public ColorType ColorMode => _pixelBuffer.ColorMode;
+
+        public int Width => _window.Window.Width;
+        public int Height => _window.Window.Height;
 
         static Display()
         {
@@ -33,7 +42,7 @@ namespace Meadow.Graphics
         {
             _window = new Window(WindowType.Popup);
 
-            switch (mode)
+            switch(mode)
             {
                 case ColorType.Format24bppRgb888:
                     _pixelBuffer = new BufferRgb888(width, height);
@@ -42,6 +51,7 @@ namespace Meadow.Graphics
                 case ColorType.Format16bppRgb565:
                     _pixelBuffer = new BufferRgb565(width, height);
                     _format = Cairo.Format.Rgb16565;
+                    _bufferConverter = ConvertRGBBufferToBGRBuffer24;
                     break;
                 case ColorType.Format32bppRgba8888:
                     _pixelBuffer = new BufferRgb8888(width, height);
@@ -65,28 +75,24 @@ namespace Meadow.Graphics
 
         private void OnWindowDrawn(object o, DrawnArgs args)
         {
-            ConvertRGBBufferToBGRBuffer(_pixelBuffer.Buffer);
+            _bufferConverter?.Invoke(_pixelBuffer.Buffer);
 
-            using (var surface = new ImageSurface(_pixelBuffer.Buffer, _format, Width, Height, _stride))
+            using(var surface = new ImageSurface(_pixelBuffer.Buffer, _format, Width, Height, _stride))
             {
                 args.Cr.SetSource(surface);
                 args.Cr.Paint();
 
-                if (args.Cr.GetTarget() is IDisposable d) d.Dispose();
-                if (args.Cr is IDisposable cd) cd.Dispose();
+                if(args.Cr.GetTarget() is IDisposable d) d.Dispose();
+                if(args.Cr is IDisposable cd) cd.Dispose();
                 args.RetVal = true;
             }
+            ShowComplete.Set();
         }
-
-        public IPixelBuffer PixelBuffer => _pixelBuffer;
-        public ColorType ColorMode => _pixelBuffer.ColorMode;
-
-        public int Width => _window.Window.Width;
-        public int Height => _window.Window.Height;
 
         public void Show()
         {
             _window.QueueDraw();
+            ShowComplete.Reset();
         }
 
         public void Show(int left, int top, int right, int bottom)
@@ -96,36 +102,43 @@ namespace Meadow.Graphics
 
         public void Clear(bool updateDisplay = false)
         {
+            ShowComplete.WaitOne();
             _pixelBuffer.Clear();
         }
 
         public void Fill(Foundation.Color fillColor, bool updateDisplay = false)
         {
+            ShowComplete.WaitOne();
             _pixelBuffer.Fill(fillColor);
         }
 
         public void Fill(int x, int y, int width, int height, Foundation.Color fillColor)
         {
+            ShowComplete.WaitOne();
             _pixelBuffer.Fill(x, y, width, height, fillColor);
         }
 
         public void DrawPixel(int x, int y, Foundation.Color color)
         {
+            ShowComplete.WaitOne();
             _pixelBuffer.SetPixel(x, y, color);
         }
 
         public void DrawPixel(int x, int y, bool colored)
         {
+            ShowComplete.WaitOne();
             DrawPixel(x, y, colored ? Foundation.Color.White : Foundation.Color.Black);
         }
 
         public void InvertPixel(int x, int y)
         {
+            ShowComplete.WaitOne();
             _pixelBuffer.InvertPixel(x, y);
         }
 
         public void WriteBuffer(int x, int y, IPixelBuffer displayBuffer)
         {
+            ShowComplete.WaitOne();
             _pixelBuffer.WriteBuffer(x, y, displayBuffer);
         }
 
@@ -142,11 +155,13 @@ namespace Meadow.Graphics
             return stride;
         }
 
-
-
-        private void ConvertRGBBufferToBGRBuffer(byte[] buffer)
+        /// <summary>
+        /// 24-bit RGB to BGR converter
+        /// </summary>
+        /// <param name="buffer"></param>
+        private void ConvertRGBBufferToBGRBuffer24(byte[] buffer)
         {
-            for (int i = 0; i < buffer.Length; i += 2)
+            for(int i = 0; i < buffer.Length; i += 2)
             {
                 // convert two bytes into a short
                 ushort pixel = (ushort)(buffer[i] << 8 | buffer[i + 1]);
