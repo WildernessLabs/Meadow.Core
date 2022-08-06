@@ -37,21 +37,19 @@ namespace Meadow.Graphics
                 case ColorType.Format24bppRgb888:
                     _pixelBuffer = new BufferRgb888(width, height);
                     _format = Cairo.Format.Rgb24;
-                    _stride = width * 3;
                     break;
                 case ColorType.Format16bppRgb565:
                     _pixelBuffer = new BufferRgb565(width, height);
                     _format = Cairo.Format.Rgb16565;
-                    _stride = width * 2;
                     break;
                 case ColorType.Format32bppRgba8888:
                     _pixelBuffer = new BufferRgb8888(width, height);
                     _format = Cairo.Format.Argb32;
-                    _stride = width * 4;
                     break;
                 default:
                     throw new Exception($"Mode {mode} not supported");
             }
+            _stride = GetStrideForBitDepth(width, _pixelBuffer.BitDepth);
 
             _window.WindowPosition = WindowPosition.Center;
             _window.DefaultSize = new Gdk.Size(width, height);
@@ -129,8 +127,20 @@ namespace Meadow.Graphics
         }
 
         private void ConvertRGBBufferToBGRBuffer(byte[] buffer)
+
+        // This attempts to copy the cairo method for getting stride length
+        // as defined here:
+        // https://github.com/freedesktop/cairo/blob/a934fa66dba2b880723f4e5c3fdea92cbe0207e7/src/cairoint.h#L1553
+        // #define CAIRO_STRIDE_FOR_WIDTH_BPP(w,bpp) \
+        // ((((bpp)*(w)+7)/8 + CAIRO_STRIDE_ALIGNMENT-1) & -CAIRO_STRIDE_ALIGNMENT)
+        private int GetStrideForBitDepth(int width, int bpp)
         {
             byte temp;
+            var cairo_stride_alignment = sizeof(UInt32);
+            var stride = ((((bpp) * (width) + 7) / 8 + cairo_stride_alignment - 1) & -cairo_stride_alignment);
+            return stride;
+        }
+
 
             for (int i = 0; i < buffer.Length; i += 3)
             {
