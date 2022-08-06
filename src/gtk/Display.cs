@@ -1,4 +1,5 @@
-﻿using Gtk;
+﻿using Cairo;
+using Gtk;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.Buffers;
 using System;
@@ -8,7 +9,9 @@ namespace Meadow.Graphics
     public class Display : IGraphicsDisplay
     {
         private Window _window;
-        private SurfaceBuffer _pixelBuffer;
+        private IPixelBuffer _pixelBuffer;
+        private Cairo.Format _format;
+        private int _stride;
 
         static Display()
         {
@@ -28,7 +31,28 @@ namespace Meadow.Graphics
         private void Initialize(int width, int height, ColorType mode)
         {
             _window = new Window(WindowType.Popup);
-            _pixelBuffer = new SurfaceBuffer(mode, width, height);
+
+            switch (mode)
+            {
+                case ColorType.Format24bppRgb888:
+                    _pixelBuffer = new BufferRgb888(width, height);
+                    _format = Cairo.Format.Rgb24;
+                    _stride = width * 3;
+                    break;
+                case ColorType.Format16bppRgb565:
+                    _pixelBuffer = new BufferRgb565(width, height);
+                    _format = Cairo.Format.Rgb16565;
+                    _stride = width * 2;
+                    break;
+                case ColorType.Format32bppRgba8888:
+                    _pixelBuffer = new BufferRgb8888(width, height);
+                    _format = Cairo.Format.Argb32;
+                    _stride = width * 4;
+                    break;
+                default:
+                    throw new Exception($"Mode {mode} not supported");
+            }
+
             _window.WindowPosition = WindowPosition.Center;
             _window.DefaultSize = new Gdk.Size(width, height);
             _window.ShowAll();
@@ -42,12 +66,15 @@ namespace Meadow.Graphics
 
         private void OnWindowDrawn(object o, DrawnArgs args)
         {
-            args.Cr.SetSource(_pixelBuffer.Surface);
-            args.Cr.Paint();
+            using (var surface = new ImageSurface(_pixelBuffer.Buffer, _format, Width, Height, _stride))
+            {
+                args.Cr.SetSource(surface);
+                args.Cr.Paint();
 
-            if (args.Cr.GetTarget() is IDisposable d) d.Dispose();
-            if (args.Cr is IDisposable cd) cd.Dispose();
-            args.RetVal = true;
+                if (args.Cr.GetTarget() is IDisposable d) d.Dispose();
+                if (args.Cr is IDisposable cd) cd.Dispose();
+                args.RetVal = true;
+            }
         }
 
         public IPixelBuffer PixelBuffer => _pixelBuffer;
@@ -99,6 +126,20 @@ namespace Meadow.Graphics
         public void WriteBuffer(int x, int y, IPixelBuffer displayBuffer)
         {
             _pixelBuffer.WriteBuffer(x, y, displayBuffer);
+        }
+
+        private void ConvertRGBBufferToBGRBuffer(byte[] buffer)
+        {
+            byte temp;
+
+            for (int i = 0; i < buffer.Length; i += 3)
+            {
+                // pull red
+                temp = buffer[i + 1];
+                // push blue to red
+                buffer[i + 1] = buffer[i + 2];
+                buffer[i + 2] = temp;
+            }
         }
     }
 }
