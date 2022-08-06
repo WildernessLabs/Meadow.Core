@@ -3,6 +3,7 @@ using Gtk;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.Buffers;
 using System;
+using System.Buffers.Binary;
 
 namespace Meadow.Graphics
 {
@@ -64,6 +65,8 @@ namespace Meadow.Graphics
 
         private void OnWindowDrawn(object o, DrawnArgs args)
         {
+            ConvertRGBBufferToBGRBuffer(_pixelBuffer.Buffer);
+
             using (var surface = new ImageSurface(_pixelBuffer.Buffer, _format, Width, Height, _stride))
             {
                 args.Cr.SetSource(surface);
@@ -126,7 +129,6 @@ namespace Meadow.Graphics
             _pixelBuffer.WriteBuffer(x, y, displayBuffer);
         }
 
-        private void ConvertRGBBufferToBGRBuffer(byte[] buffer)
 
         // This attempts to copy the cairo method for getting stride length
         // as defined here:
@@ -135,20 +137,26 @@ namespace Meadow.Graphics
         // ((((bpp)*(w)+7)/8 + CAIRO_STRIDE_ALIGNMENT-1) & -CAIRO_STRIDE_ALIGNMENT)
         private int GetStrideForBitDepth(int width, int bpp)
         {
-            byte temp;
             var cairo_stride_alignment = sizeof(UInt32);
             var stride = ((((bpp) * (width) + 7) / 8 + cairo_stride_alignment - 1) & -cairo_stride_alignment);
             return stride;
         }
 
 
-            for (int i = 0; i < buffer.Length; i += 3)
+
+        private void ConvertRGBBufferToBGRBuffer(byte[] buffer)
+        {
+            for (int i = 0; i < buffer.Length; i += 2)
             {
-                // pull red
-                temp = buffer[i + 1];
-                // push blue to red
-                buffer[i + 1] = buffer[i + 2];
-                buffer[i + 2] = temp;
+                // convert two bytes into a short
+                ushort pixel = (ushort)(buffer[i] << 8 | buffer[i + 1]);
+
+                // reverse the endianness because that's what cairo expects
+                BinaryPrimitives.ReverseEndianness(pixel);
+
+                // separate back into two bytes
+                buffer[i] = (byte)pixel;
+                buffer[i + 1] = (byte)(pixel >> 8);
             }
         }
     }
