@@ -1,6 +1,5 @@
 ﻿using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateway.WiFi;
-using Meadow.Gateways;
 using Meadow.Gateways.Exceptions;
 using Meadow.Hardware;
 using System;
@@ -15,7 +14,7 @@ namespace Meadow.Devices
     /// <summary>
 	/// This file holds the WiFi specific methods, properties etc for the IWiFiAdapter interface.
 	/// </summary>
-    public partial class Esp32Coprocessor : IWiFiAdapter
+    public partial class Esp32Coprocessor : IWiFiNetworkAdapter
     {
         #region Events
 
@@ -103,20 +102,12 @@ namespace Meadow.Devices
         /// <summary>
         /// Current onboard antenna in use.
         /// </summary>
-        public AntennaType Antenna => _antenna;
+        public AntennaType CurrentAntenna => _antenna;
 
         /// <summary>
         /// Private copy of the currently selected antenna.
         /// </summary>
         protected AntennaType _antenna;
-
-        /// <summary>
-        /// Should the system automatically get the time when the board is connected to an access point?
-        /// </summary>
-        public bool GetNetworkTimeAtStartup
-        {
-            get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup);
-        }
 
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
@@ -125,7 +116,7 @@ namespace Meadow.Devices
         {
             get
             {
-                if (_mac == null)
+                if(_mac == null)
                 {
                     byte[] mac = new byte[6];
                     F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
@@ -143,7 +134,7 @@ namespace Meadow.Devices
         {
             get
             {
-                if (_apMac == null)
+                if(_apMac == null)
                 {
                     byte[] mac = new byte[6];
                     F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
@@ -160,7 +151,7 @@ namespace Meadow.Devices
         /// <remarks>
         /// This will automatically connect to any preconfigured access points if they are available.
         /// </remarks>
-        public bool AutomaticallyStartNetwork
+        public bool AutoConnect
         {
             get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyStartNetwork);
         }
@@ -168,7 +159,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Automatically try to reconnect to an access point if there is a problem / disconnection?
         /// </summary>
-        public bool AutomaticallyReconnect
+        public bool AutoReconnect
         {
             get => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.AutomaticallyReconnect);
         }
@@ -177,7 +168,7 @@ namespace Meadow.Devices
         /// Default access point to try to connect to if the network interface is started and the board
         /// is configured to automatically reconnect.
         /// </summary>
-        public string DefaultAcessPoint => F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
+        public string DefaultSsid => F7PlatformOS.GetString(IPlatformOS.ConfigurationValues.DefaultAccessPoint);
 
         /// <summary>
         /// Access point the ESP32 is currently connected to.
@@ -187,12 +178,12 @@ namespace Meadow.Devices
         /// <summary>
         /// BSSID of the access point the ESP32 is currently connected to.
         /// </summary>
-        public string Bssid { get; private set; }
+        public PhysicalAddress Bssid { get; private set; }
 
         /// <summary>
         /// WiFi channel the ESP32 and the access point are using for communication.
         /// </summary>
-        public uint Channel { get; private set; }
+        public int Channel { get; private set; }
 
         /// <summary>
         /// The maximum number of times the ESP32 will retry an operation before returning an error.
@@ -208,7 +199,7 @@ namespace Meadow.Devices
             set
             {
                 uint retryCount = value;
-                if (retryCount < 3)
+                if(retryCount < 3)
                 {
                     retryCount = 3;
                 }
@@ -240,7 +231,7 @@ namespace Meadow.Devices
             get { return (_scanPeriod); }
             set
             {
-                if ((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
+                if((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
                 {
                     throw new ArgumentOutOfRangeException($"{nameof(ScanPeriod)} should be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
                 }
@@ -257,7 +248,7 @@ namespace Meadow.Devices
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
         protected void InvokeEvent(WiFiFunction eventId, StatusCodes statusCode, byte[] payload)
         {
-            switch (eventId)
+            switch(eventId)
             {
                 case WiFiFunction.ConnectToAccessPointEvent:
                     try
@@ -292,7 +283,7 @@ namespace Meadow.Devices
         /// </summary>
         private void ClearNetworkDetails()
         {
-            lock (_lock)
+            lock(_lock)
             {
                 byte[] addressBytes = new byte[4];
                 Array.Clear(addressBytes, 0, addressBytes.Length);
@@ -300,7 +291,7 @@ namespace Meadow.Devices
                 SubnetMask = new IPAddress(addressBytes);
                 Gateway = new IPAddress(addressBytes);
                 Ssid = string.Empty;
-                Bssid = string.Empty;
+                Bssid = PhysicalAddress.None;
                 Channel = 0;
             }
         }
@@ -351,27 +342,19 @@ namespace Meadow.Devices
 
                       token.ThrowIfCancellationRequested();
 
-                      if (result == StatusCodes.CompletedOk)
+                      if(result == StatusCodes.CompletedOk)
                       {
                           var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
                           var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
 
-                          if (accessPointList.NumberOfAccessPoints > 0)
+                          if(accessPointList.NumberOfAccessPoints > 0)
                           {
                               int accessPointOffset = 0;
-                              for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+                              for(int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
                               {
                                   var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
                                   accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
-                                  string bssid = "";
-                                  for (int index = 0; index < accessPoint.Bssid.Length; index++)
-                                  {
-                                      bssid += accessPoint.Bssid[index].ToString("x2");
-                                      if (index != accessPoint.Bssid.Length - 1)
-                                      {
-                                          bssid += ":";
-                                      }
-                                  }
+                                  var bssid = new PhysicalAddress(accessPoint.Bssid);
                                   var network = new WifiNetwork(accessPoint.Ssid, bssid, NetworkType.Infrastructure, PhyType.Unknown,
                                       new NetworkSecuritySettings((NetworkAuthenticationType)accessPoint.AuthenticationMode, NetworkEncryptionType.Unknown),
                                       accessPoint.PrimaryChannel, (NetworkProtocol)accessPoint.Protocols, accessPoint.Rssi);
@@ -385,7 +368,7 @@ namespace Meadow.Devices
                       }
                       return (networks);
                   }
-                  catch (Exception ex)
+                  catch(Exception ex)
                   {
                       Console.WriteLine($"Error getting access points: {ex.Message}");
 
@@ -396,13 +379,13 @@ namespace Meadow.Devices
 
             tasks.Add(scanTask);
 
-            if (timeout.TotalMilliseconds > 0)
+            if(timeout.TotalMilliseconds > 0)
             {
                 tasks.Add(Task.Delay(timeout));
             }
 
             var index = Task.WaitAny(tasks.ToArray());
-            if (index == 1)
+            if(index == 1)
             {
                 throw new TimeoutException();
             }
@@ -472,7 +455,7 @@ namespace Meadow.Devices
         {
             ConnectionResult connectionResult;
             StatusCodes result = await ConnectToAccessPoint(ssid, password, timeout, token, reconnection);
-            switch (result)
+            switch(result)
             {
                 case StatusCodes.CompletedOk:
                     connectionResult = new ConnectionResult(ConnectionStatus.Success);
@@ -518,11 +501,11 @@ namespace Meadow.Devices
         /// <returns>true if the connection was successfully made.</returns>
         private async Task<StatusCodes> ConnectToAccessPoint(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection)
         {
-            if (string.IsNullOrEmpty(ssid))
+            if(string.IsNullOrEmpty(ssid))
             {
                 throw new ArgumentNullException("Invalid SSID.");
             }
-            if (password == null)
+            if(password == null)
             {
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
@@ -557,7 +540,7 @@ namespace Meadow.Devices
                     _connectionSemaphore.WaitOne();
 
                     ConnectEventData data;
-                    switch (result)
+                    switch(result)
                     {
                         case StatusCodes.CompletedOk:
                             //
@@ -566,7 +549,7 @@ namespace Meadow.Devices
                             break;
                         case StatusCodes.WiFiDisconnected:
                             data = Encoders.ExtractConnectEventData(resultBuffer, 0);
-                            switch ((WiFiReasons)data.Reason)
+                            switch((WiFiReasons)data.Reason)
                             {
                                 case WiFiReasons.AuthenticationFailed:
                                     result = StatusCodes.AuthenticationFailed;
@@ -588,7 +571,7 @@ namespace Meadow.Devices
                     }
                     return (result);
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     Console.WriteLine($"Error connecting to access point: {ex.Message}");
 
@@ -599,13 +582,13 @@ namespace Meadow.Devices
 
             tasks.Add(connectTask);
 
-            if (timeout.TotalMilliseconds > 0)
+            if(timeout.TotalMilliseconds > 0)
             {
                 tasks.Add(Task.Delay(timeout));
             }
 
             var index = Task.WaitAny(tasks.ToArray());
-            if (index == 1)
+            if(index == 1)
             {
                 throw new TimeoutException();
             }
@@ -624,7 +607,7 @@ namespace Meadow.Devices
             {
                 StatusCodes result = DisconnectFromAccessPoint(turnOffWiFiInterface);
                 ConnectionResult connectionResult;
-                switch (result)
+                switch(result)
                 {
                     case StatusCodes.CompletedOk:
                         ClearNetworkDetails();
@@ -677,13 +660,13 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            if (antenna == AntennaType.NotKnown)
+            if(antenna == AntennaType.NotKnown)
             {
                 throw new ArgumentException("Setting the antenna type NotKnown is not allowed.");
             }
 
             SetAntennaRequest request = new SetAntennaRequest();
-            if (persist)
+            if(persist)
             {
                 request.Persist = 1;
             }
@@ -691,7 +674,7 @@ namespace Meadow.Devices
             {
                 request.Persist = 0;
             }
-            if (antenna == AntennaType.OnBoard)
+            if(antenna == AntennaType.OnBoard)
             {
                 request.Antenna = (byte)AntennaTypes.OnBoard;
             }
@@ -702,7 +685,7 @@ namespace Meadow.Devices
             byte[] encodedPayload = Encoders.EncodeSetAntennaRequest(request);
             byte[] encodedResult = new byte[4000];
             StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
-            if (result == StatusCodes.CompletedOk)
+            if(result == StatusCodes.CompletedOk)
             {
                 _antenna = antenna;
             }
@@ -727,13 +710,13 @@ namespace Meadow.Devices
             byte channel = 0;
 
             ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
-            lock (_lock)
+            lock(_lock)
             {
                 IpAddress = new IPAddress(connectEventData.IpAddress);
                 SubnetMask = new IPAddress(connectEventData.SubnetMask);
                 Gateway = new IPAddress(connectEventData.Gateway);
                 Ssid = connectEventData.Ssid;
-                Bssid = BitConverter.ToString(connectEventData.Bssid).Replace("-", ":");
+                Bssid = new PhysicalAddress(connectEventData.Bssid);
                 channel = connectEventData.Channel;
                 Channel = channel;
                 IsConnected = true;
@@ -792,6 +775,7 @@ namespace Meadow.Devices
         protected void RaiseNtpTimeChangedEvent()
         {
             NtpTimeChangedEventArgs e = new NtpTimeChangedEventArgs();
+
             NtpTimeChanged?.Invoke(this, e);
         }
 

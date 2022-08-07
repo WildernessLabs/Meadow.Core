@@ -2,7 +2,6 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
-using System.Linq;
 using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
@@ -32,14 +31,11 @@ namespace Meadow.Devices
         public DeviceCapabilities Capabilities { get; }
 
         public IPlatformOS PlatformOS { get; protected set; }
+        public INtpClient NtpClient { get; }
 
         public IDeviceInformation Information { get; protected set; }
 
         public INetworkAdapterCollection NetworkAdapters => networkAdapters;
-
-        public IWiFiAdapter? GetPrimaryWiFiAdapter() => NetworkAdapters.OfType<IWiFiAdapter>().First();
-
-        public IWiredNetworkAdapter? GetPrimaryWiredNetworkAdapter() => NetworkAdapters.OfType<IWiredNetworkAdapter>().First();
 
         public abstract IPin GetPin(string pinName);
         public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
@@ -64,6 +60,8 @@ namespace Meadow.Devices
             networkAdapters = new NetworkAdapterCollection();
             networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
             networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
+
+            NtpClient = new NtpClient();
         }
 
         public void Initialize()
@@ -75,9 +73,9 @@ namespace Meadow.Devices
 
         protected bool InitCoprocessor()
         {
-            lock (coprocInitLock)
+            lock(coprocInitLock)
             {
-                if (this.esp32 == null)
+                if(this.esp32 == null)
                 {
                     try
                     {
@@ -90,8 +88,12 @@ namespace Meadow.Devices
 
                         networkAdapters.Add(esp32);
 
+                        esp32.NtpTimeChanged += (s, e) =>
+                        {
+                            // forward to the NtpClient
+                        };
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
                         Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
@@ -110,61 +112,13 @@ namespace Meadow.Devices
             }
         }
 
-        //==== antenna stuff
-
-        /// <summary>
-        /// Get the currently setlected WiFi antenna.
-        /// </summary>
-        public AntennaType CurrentAntenna
-        {
-            get
-            {
-                // TODO: this feels awkward - should all of this antenna be in the adapter?
-                var wifi = NetworkAdapters.FirstOrDefault(a => a is IWirelessNetworkAdapter) as IWiFiAdapter;
-
-                if (wifi != null)
-                {
-                    return wifi.Antenna;
-                }
-                else
-                {
-                    throw new Exception("Coprocessor not initialized.");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Change the current WiFi antenna.
-        /// </summary>
-        /// <remarks>
-        /// Allows the application to change the current antenna used by the WiFi adapter.  This
-        /// can be made to persist between reboots / power cycles by setting the persist option
-        /// to true.
-        /// </remarks>
-        /// <param name="antenna">New antenna to use.</param>
-        /// <param name="persist">Make the antenna change persistent.</param>
-        public void SetAntenna(AntennaType antenna, bool persist = true)
-        {
-            // TODO: this feels awkward - should all of this antenna be in the adapter?
-            var wifi = NetworkAdapters.FirstOrDefault(a => a is IWirelessNetworkAdapter) as IWiFiAdapter;
-
-            if (wifi != null)
-            {
-                wifi.SetAntenna(antenna, persist);
-            }
-            else
-            {
-                throw new Exception("Coprocessor not initialized.");
-            }
-        }
-
         /// <summary>
         /// Gets the current Battery information
         /// </summary>
         /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
         public virtual BatteryInfo GetBatteryInfo()
         {
-            if (Coprocessor != null)
+            if(Coprocessor != null)
             {
                 return new BatteryInfo
                 {
