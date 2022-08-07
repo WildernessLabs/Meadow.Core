@@ -3,6 +3,7 @@ using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateways;
 using Meadow.Hardware;
 using System;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -79,6 +80,14 @@ namespace Meadow.Devices
         /// </summary>
         internal Esp32Coprocessor()
         {
+            IpAddress = IPAddress.None;
+            SubnetMask = IPAddress.None;
+            Gateway = IPAddress.None;
+
+            _mac = System.Net.NetworkInformation.PhysicalAddress.None;
+            Bssid = System.Net.NetworkInformation.PhysicalAddress.None;
+            _apMac = System.Net.NetworkInformation.PhysicalAddress.None;
+
             IsConnected = false;
             ClearNetworkDetails();
             HasInternetAccess = false;

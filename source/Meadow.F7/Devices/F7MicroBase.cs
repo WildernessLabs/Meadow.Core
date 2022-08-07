@@ -31,7 +31,6 @@ namespace Meadow.Devices
         public DeviceCapabilities Capabilities { get; }
 
         public IPlatformOS PlatformOS { get; protected set; }
-        public INtpClient NtpClient { get; }
 
         public IDeviceInformation Information { get; protected set; }
 
@@ -60,8 +59,6 @@ namespace Meadow.Devices
             networkAdapters = new NetworkAdapterCollection();
             networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
             networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
-
-            NtpClient = new NtpClient();
         }
 
         public void Initialize()

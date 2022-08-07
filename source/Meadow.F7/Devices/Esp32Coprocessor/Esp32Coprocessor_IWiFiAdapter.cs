@@ -173,7 +173,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Access point the ESP32 is currently connected to.
         /// </summary>
-        public string Ssid { get; private set; }
+        public string? Ssid { get; private set; }
 
         /// <summary>
         /// BSSID of the access point the ESP32 is currently connected to.
@@ -325,7 +325,7 @@ namespace Meadow.Devices
         /// <param name="timeout">Length of time to run the scan for before the scan is declared a failure.</param>
         /// <param name="token">Cancellation token for the connection attempt</param>
         /// <returns>List of WiFiNetwork objects.</returns>
-        private async Task<IList<WifiNetwork>> Scan(TimeSpan timeout, CancellationToken token)
+        private Task<IList<WifiNetwork>> Scan(TimeSpan timeout, CancellationToken token)
         {
             var networks = new List<WifiNetwork>();
             var resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
@@ -390,7 +390,7 @@ namespace Meadow.Devices
                 throw new TimeoutException();
             }
 
-            return scanTask.Result;
+            return Task.FromResult(scanTask.Result as IList<WifiNetwork>);
         }
 
         /// <summary>
@@ -499,7 +499,7 @@ namespace Meadow.Devices
         /// <param name="timeout">Amount of time to wait for a connection before a failure is declared.</param>
         /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
         /// <returns>true if the connection was successfully made.</returns>
-        private async Task<StatusCodes> ConnectToAccessPoint(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection)
+        private Task<StatusCodes> ConnectToAccessPoint(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection)
         {
             if(string.IsNullOrEmpty(ssid))
             {
@@ -593,7 +593,7 @@ namespace Meadow.Devices
                 throw new TimeoutException();
             }
 
-            return connectTask.Result;
+            return Task.FromResult(connectTask.Result);
         }
 
         /// <summary>
