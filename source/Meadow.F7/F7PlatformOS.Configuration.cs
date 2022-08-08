@@ -1,15 +1,13 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
-using Meadow.Core;
+﻿using Meadow.Core;
 using Meadow.Devices;
 using Meadow.Devices.Esp32.MessagePayloads;
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
 using static Meadow.IPlatformOS;
 
 namespace Meadow
 {
-
-
     public partial class F7PlatformOS
     {
 
@@ -97,14 +95,14 @@ namespace Meadow
                 bufferHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
                 var request = new Interop.Nuttx.UpdConfigurationValue()
                 {
-                    Item = (int) item,
-                    Direction = (byte) direction,
+                    Item = (int)item,
+                    Direction = (byte)direction,
                     ValueBufferSize = buffer.Length,
                     ValueBuffer = bufferHandle.AddrOfPinnedObject(),
                     ReturnDataLength = 0
                 };
                 int updResult = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetSetConfigurationValue, ref request);
-                if (updResult == 0)
+                if(updResult == 0)
                 {
                     length = request.ReturnDataLength;
                 }
@@ -114,14 +112,14 @@ namespace Meadow
                     result = false;
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Console.WriteLine($"Configuration ioctl failed: {ex.Message}");
                 result = false;
             }
             finally
             {
-                if (bufferHandle.IsAllocated)
+                if(bufferHandle.IsAllocated)
                 {
                     bufferHandle.Free();
                 }
@@ -141,7 +139,7 @@ namespace Meadow
             string str = String.Empty;
 
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-            if (result && (length > 0))
+            if(result && (length > 0))
             {
                 str = Encoding.ASCII.GetString(buffer, 0, length);
             }
@@ -174,7 +172,7 @@ namespace Meadow
             uint ui = 0;
 
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-            if (result && (length == 4))
+            if(result && (length == 4))
             {
                 ui = Encoders.ExtractUInt32(buffer, 0);
             }
@@ -193,7 +191,7 @@ namespace Meadow
             byte b = 0;
 
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-            if (result && (length == 1))
+            if(result && (length == 1))
             {
                 b = buffer[0];
             }
@@ -288,7 +286,7 @@ namespace Meadow
         /// <returns>True if the configuration value was set, false if there is a problem.</returns>
         public static bool SetBoolean(ConfigurationValues item, bool value)
         {
-            byte b = (byte) ((value ? 1 : 0) & 0xff);
+            byte b = (byte)((value ? 1 : 0) & 0xff);
             return (SetByte(item, b));
         }
     }

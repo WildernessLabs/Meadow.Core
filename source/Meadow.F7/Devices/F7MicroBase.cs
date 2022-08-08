@@ -14,6 +14,9 @@ namespace Meadow.Devices
     /// </summary>
     public abstract partial class F7MicroBase : IF7MeadowDevice
     {
+        public event NetworkConnectionHandler NetworkConnected = delegate { };
+        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+
         //==== events
         public event EventHandler WiFiAdapterInitialized = delegate { };
         public event PowerTransitionHandler BeforeReset = delegate { };
@@ -22,7 +25,7 @@ namespace Meadow.Devices
 
         //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
-        public IWiFiAdapter? WiFiAdapter { get; protected set; }
+        //        public IWiFiAdapter? WiFiAdapter { get; protected set; }
         public ICoprocessor? Coprocessor { get; protected set; }
 
         public DeviceCapabilities Capabilities { get; }
@@ -31,10 +34,13 @@ namespace Meadow.Devices
 
         public IDeviceInformation Information { get; protected set; }
 
+        public INetworkAdapterCollection NetworkAdapters => networkAdapters;
+
         public abstract IPin GetPin(string pinName);
         public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
         //==== internals
+        protected NetworkAdapterCollection networkAdapters;
         protected Esp32Coprocessor? esp32;
         protected object coprocInitLock = new object();
         protected IMeadowIOController IoController { get; }
@@ -49,6 +55,10 @@ namespace Meadow.Devices
             PlatformOS = new F7PlatformOS();
 
             Information = new F7DeviceInformation();
+
+            networkAdapters = new NetworkAdapterCollection();
+            networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
+            networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
         }
 
         public void Initialize()
@@ -60,68 +70,42 @@ namespace Meadow.Devices
 
         protected bool InitCoprocessor()
         {
-            lock (coprocInitLock) {
-                if (this.esp32 == null) {
-                    try {
+            lock(coprocInitLock)
+            {
+                if(this.esp32 == null)
+                {
+                    try
+                    {
                         // instantiate the co proc and set the various adapters
                         // to be it.
                         this.esp32 = new Esp32Coprocessor();
                         BluetoothAdapter = esp32;
-                        WiFiAdapter = esp32;
+                        //                        WiFiAdapter = esp32;
                         Coprocessor = esp32;
-                    } catch (Exception e) {
+
+                        networkAdapters.Add(esp32);
+
+                        esp32.NtpTimeChanged += (s, e) =>
+                        {
+                            // forward to the NtpClient
+                        };
+                    }
+                    catch(Exception e)
+                    {
                         Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
-                    } finally {
-                            
+                    }
+                    finally
+                    {
+
                     }
                     return true;
-                } else { // already initialized, bail out
+                }
+                else
+                { // already initialized, bail out
                     return true;
                 }
 
-            }
-        }
-
-        //==== antenna stuff
-
-        /// <summary>
-        /// Get the currently setlected WiFi antenna.
-        /// </summary>
-        public AntennaType CurrentAntenna
-        {
-            get
-            {
-                if (WiFiAdapter != null)
-                {
-                    return WiFiAdapter.Antenna;
-                }
-                else
-                {
-                    throw new Exception("Coprocessor not initialized.");
-                }
-            }
-        }
-
-        /// <summary>
-        /// Change the current WiFi antenna.
-        /// </summary>
-        /// <remarks>
-        /// Allows the application to change the current antenna used by the WiFi adapter.  This
-        /// can be made to persist between reboots / power cycles by setting the persist option
-        /// to true.
-        /// </remarks>
-        /// <param name="antenna">New antenna to use.</param>
-        /// <param name="persist">Make the antenna change persistent.</param>
-        public void SetAntenna(AntennaType antenna, bool persist = true)
-        {
-            if (WiFiAdapter != null)
-            {
-                WiFiAdapter.SetAntenna(antenna, persist);
-            }
-            else
-            {
-                throw new Exception("Coprocessor not initialized.");
             }
         }
 
@@ -131,7 +115,7 @@ namespace Meadow.Devices
         /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
         public virtual BatteryInfo GetBatteryInfo()
         {
-            if (Coprocessor != null)
+            if(Coprocessor != null)
             {
                 return new BatteryInfo
                 {
@@ -160,7 +144,8 @@ namespace Meadow.Devices
 
         public void SetClock(DateTime dateTime)
         {
-            var ts = new Core.Interop.Nuttx.timespec {
+            var ts = new Core.Interop.Nuttx.timespec
+            {
                 tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
             };
 
@@ -168,10 +153,10 @@ namespace Meadow.Devices
         }
 
         public void Sleep(int seconds = Timeout.Infinite)
-        {            
+        {
             var cmd = new UpdSleepCommand
             {
-                 SecondsToSleep = seconds                
+                SecondsToSleep = seconds
             };
 
             BeforeSleep?.Invoke();
