@@ -25,10 +25,22 @@ namespace Meadow
 
         protected override IntPtr OpenHardwarePort(string portName)
         {
-            var driverName = $"/dev/{portName}";
+            string driverName;
+
+            if(portName.StartsWith("/"))
+            {
+                driverName = portName;
+            }
+            else
+            {
+                driverName = $"/dev/{portName}";
+            }
+
+            Resolver.Log.Trace($"Opening linux serial port {driverName}");
+
             var handle = Interop.open(driverName, Interop.DriverFlags.O_RDWR | Interop.DriverFlags.O_NOCTTY);
 
-            if (handle < 0)
+            if(handle < 0)
             {
                 var err = Marshal.GetLastWin32Error();
                 switch(err)
@@ -37,7 +49,7 @@ namespace Meadow
                         throw new NativeException($"Unable to open port '{driverName}'. Permission Denied ({err})");
                     default:
                         throw new NativeException($"Unable to open port '{driverName}'. Native error {err}");
-                }                
+                }
             }
 
             return new IntPtr(handle);
@@ -47,7 +59,7 @@ namespace Meadow
         {
             var result = Interop.read(handle.ToInt32(), readBuffer, count);
 
-            if (result < 0)
+            if(result < 0)
             {
                 // will we potentially get E_TRY_AGAIN? (11)
                 throw new NativeException($"Unable to read from port. Native error {Marshal.GetLastWin32Error()}");
@@ -59,7 +71,7 @@ namespace Meadow
         protected override void SetHardwarePortSettings(IntPtr handle)
         {
             // get the current settings
-            var settings = new Interop.termios(); 
+            var settings = new Interop.termios();
             Interop.tcgetattr(handle.ToInt32(), ref settings);
 
 
@@ -70,7 +82,7 @@ namespace Meadow
             settings.c_cflag &= ~(Interop.ControlFlags.CSIZE | Interop.ControlFlags.PARENB | Interop.ControlFlags.CRTSCTS);
 
             // now set the user-requested settings
-            switch (DataBits)
+            switch(DataBits)
             {
                 case 5:
                     settings.c_cflag |= Interop.ControlFlags.CS5;
@@ -88,7 +100,7 @@ namespace Meadow
 
             settings.c_cflag |= Interop.ControlFlags.CREAD | Interop.ControlFlags.CLOCAL;
 
-            switch (Parity)
+            switch(Parity)
             {
                 case Parity.Odd:
                     settings.c_cflag |= (Interop.ControlFlags.PARENB | Interop.ControlFlags.PARODD);
@@ -98,7 +110,7 @@ namespace Meadow
                     break;
             }
 
-            switch (StopBits)
+            switch(StopBits)
             {
                 case StopBits.Two:
                     settings.c_cflag |= Interop.ControlFlags.CSTOPB;
@@ -117,9 +129,9 @@ namespace Meadow
 
             var result = Interop.tcsetattr(handle.ToInt32(), Interop.TCSANOW, ref settings);
 
-            if (result != 0)
+            if(result != 0)
             {
-//                throw new NativeException(UPD.GetLastError().ToString());
+                //                throw new NativeException(UPD.GetLastError().ToString());
             }
         }
 
@@ -127,7 +139,7 @@ namespace Meadow
         {
             var result = Interop.write(handle.ToInt32(), writeBuffer, count);
 
-            if (result < 0)
+            if(result < 0)
             {
                 throw new NativeException($"Unable to write to port. Native error {Marshal.GetLastWin32Error()}");
             }

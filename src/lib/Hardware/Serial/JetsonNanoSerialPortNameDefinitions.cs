@@ -4,18 +4,21 @@ namespace Meadow
 {
     public class JetsonXavierAGXSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
     {
+        // TODO: verify this
+        public SerialPortName Serial0 => new SerialPortName("UART2", "/dev/ttyTHS1");
+
         public JetsonXavierAGXSerialPortNameDefinitions()
         {
-            // TODO: verify this
-            UART2 = new SerialPortName("UART2", "ttyTHS1");
         }
     }
 
     public class JetsonNanoSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
     {
+        // TODO: verify this
+        public SerialPortName Serial0 => new SerialPortName("UART2", "/dev/ttyTHS1");
+
         public JetsonNanoSerialPortNameDefinitions()
         {
-            UART2 = new SerialPortName("UART2", "ttyTHS1");
         }
     }
 }
