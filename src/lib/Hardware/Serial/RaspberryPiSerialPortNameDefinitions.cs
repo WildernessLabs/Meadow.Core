@@ -1,10 +1,14 @@
-﻿namespace Meadow
+﻿using Meadow.Hardware;
+
+namespace Meadow
 {
     public class RaspberryPiSerialPortNameDefinitions : LinuxSerialPortNameDefinitions
     {
         public RaspberryPiSerialPortNameDefinitions()
         {
-            // TODO:
+            UART1 = new SerialPortName("UART1", "/dev/ttyAMA0");
         }
+
+
     }
 }

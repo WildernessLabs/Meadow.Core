@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Ads1015_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>>
     {
         private Ads1x15 _adc;
 
@@ -38,7 +38,7 @@ namespace Ads1015_Sample
             var start = Environment.TickCount;
             long sum = 0;
 
-            for (var i = 0; i < totalSamples; i++)
+            for(var i = 0; i < totalSamples; i++)
             {
                 sum += await _adc.ReadRaw();
             }
@@ -53,14 +53,14 @@ namespace Ads1015_Sample
         {
             var i = 0;
 
-            while (true)
+            while(true)
             {
                 try
                 {
                     var value = await _adc.Read();
                     Console.WriteLine($"ADC Reading {++i}: {value.Volts}V");
                 }
-                catch (Exception ex)
+                catch(Exception ex)
                 {
                     Console.WriteLine(ex.ToString());
                 }

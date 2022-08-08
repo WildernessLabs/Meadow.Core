@@ -19,9 +19,13 @@ namespace Meadow
             Driver = driver;
             Pin = pin;
             InitialState = initialState;
-            if (pin is SysFsPin { } sp)
+            if(pin is SysFsPin { } sp)
             {
                 Gpio = sp.Gpio;
+            }
+            else if(pin is LinuxFlexiPin { } l)
+            {
+                Gpio = l.SysFsGpio;
             }
             else
             {
@@ -32,7 +36,7 @@ namespace Meadow
             {
                 Initialize();
             }
-            catch (DeviceBusyException)
+            catch(DeviceBusyException)
             {
                 //if the device is busy, it might be that our app tore down before and never Unexported.  Try to unexport and retry
                 Driver.Unexport(Gpio);
@@ -55,7 +59,7 @@ namespace Meadow
             State = InitialState;
         }
 
-        public bool State 
+        public bool State
         {
             get => LastState;
             set
@@ -67,7 +71,7 @@ namespace Meadow
 
         public void Dispose()
         {
-            if (Gpio >= 0)
+            if(Gpio >= 0)
             {
                 Driver.Unexport(Gpio);
             }

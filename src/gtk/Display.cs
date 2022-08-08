@@ -98,6 +98,7 @@ namespace Meadow.Graphics
         public void Show(int left, int top, int right, int bottom)
         {
             _window.QueueDrawArea(left, top, right - left, bottom - top);
+            ShowComplete.Reset();
         }
 
         public void Clear(bool updateDisplay = false)

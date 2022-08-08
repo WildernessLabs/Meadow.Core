@@ -9,7 +9,7 @@ namespace Meadow.Pinouts
         public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public IList<IPin> AllPins => new List<IPin> 
+        public IList<IPin> AllPins => new List<IPin>
         {
             GPIO2, GPIO3, GPIO4, GPIO17, GPIO18, GPIO27, GPIO22, GPIO23,
             GPIO24, GPIO10, GPIO9, GPIO25, GPIO11, GPIO8, GPIO7, GPIO5,
@@ -23,8 +23,11 @@ namespace Meadow.Pinouts
         public IPin GPIO18 => new GpiodPin("GPIO18", "PIN12", "gpiochip0", 18);
         public IPin GPIO27 => new GpiodPin("GPIO27", "PIN13", "gpiochip0", 27);
         public IPin GPIO22 => new GpiodPin("GPIO22", "PIN15", "gpiochip0", 22);
-        public IPin GPIO23 => new GpiodPin("GPIO23", "PIN16", "gpiochip0", 23);
-        public IPin GPIO24 => new GpiodPin("GPIO24", "PIN18", "gpiochip0", 24);
+
+        // Pi may or may not support GPIOD - depends on OS
+        public IPin GPIO23 => new LinuxFlexiPin("GPIO23", "PIN16", 23, "gpiochip0", 23);
+        public IPin GPIO24 => new LinuxFlexiPin("GPIO24", "PIN18", 24, "gpiochip0", 24);
+
         public IPin GPIO10 => new GpiodPin("GPIO10", "PIN19", "gpiochip0", 10);
         public IPin GPIO9 => new GpiodPin("GPIO9", "PIN21", "gpiochip0", 9);
         public IPin GPIO25 => new GpiodPin("GPIO25", "PIN22", "gpiochip0", 25);

@@ -15,26 +15,30 @@ namespace Meadow
             SysFsGpioDriver driver,
             IPin pin,
             SysFsDigitalChannelInfo channel,
-            InterruptMode interruptMode = InterruptMode.None,
-            ResistorMode resistorMode = ResistorMode.Disabled,
-            double debounceDuration = 0,
-            double glitchDuration = 0)
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration)
             : base(pin, channel, interruptMode)
         {
-            if (resistorMode != ResistorMode.Disabled)
+            if(resistorMode != ResistorMode.Disabled)
             {
                 throw new NotSupportedException("Resistor Mode not supported on this platform");
             }
-            if (debounceDuration > 0 || glitchDuration > 0)
+            if(debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
             {
                 throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
             }
 
             Driver = driver;
             Pin = pin;
-            if (pin is SysFsPin { } sp)
+            if(pin is SysFsPin { } sp)
             {
                 Gpio = sp.Gpio;
+            }
+            else if(pin is LinuxFlexiPin { } l)
+            {
+                Gpio = l.SysFsGpio;
             }
             else
             {
@@ -44,7 +48,7 @@ namespace Meadow
             Driver.Export(Gpio);
             Thread.Sleep(100); // this seems to be required to prevent an error 13
             Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
-            switch (interruptMode)
+            switch(interruptMode)
             {
                 case InterruptMode.None:
                     // nothing to do
@@ -65,7 +69,7 @@ namespace Meadow
 
         protected override void Dispose(bool disposing)
         {
-            if (Gpio >= 0)
+            if(Gpio >= 0)
             {
                 Driver.UnhookInterrupt(Gpio);
                 Driver.Unexport(Gpio);

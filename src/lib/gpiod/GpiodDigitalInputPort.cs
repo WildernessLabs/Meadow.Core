@@ -14,14 +14,14 @@ namespace Meadow
         internal GpiodDigitalInputPort(
             Gpiod driver,
             IPin pin,
-            SysFsDigitalChannelInfo channel,
+            GpiodDigitalChannelInfo channel,
             InterruptMode interruptMode,
             ResistorMode resistorMode,
             TimeSpan debounceDuration,
             TimeSpan glitchDuration)
             : base(pin, channel, interruptMode)
         {
-            if (debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
+            if(debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
             {
                 throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
             }
@@ -31,10 +31,10 @@ namespace Meadow
 
             line_request_flags flags = line_request_flags.None;
 
-            if (pin is GpiodPin { } gp)
+            if(pin is GpiodPin { } gp)
             {
                 Line = Driver.GetLine(gp);
-                switch (resistorMode)
+                switch(resistorMode)
                 {
                     case ResistorMode.InternalPullUp:
                         flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
@@ -49,7 +49,7 @@ namespace Meadow
 
                 InterruptMode = interruptMode;
 
-                switch (InterruptMode)
+                switch(InterruptMode)
                 {
                     case InterruptMode.EdgeRising:
                     case InterruptMode.EdgeFalling:

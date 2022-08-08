@@ -5,17 +5,30 @@ using System.Threading;
 
 namespace Meadow
 {
+    public class LinuxNtpClient : INtpClient
+    {
+        public bool Enabled => false;
+
+        public TimeSpan PollPeriod { get; set; }
+
+        public event TimeChangedEventHandler TimeChanged;
+    }
+
     public class LinuxPlatformOS : IPlatformOS
     {
         public virtual string OSVersion { get; private set; }
         public virtual string OSBuildDate { get; private set; }
 
-        public virtual string MonoVersion => ".NET 5.0"; // TODO"
+        public virtual string MonoVersion => ".NET 6.0"; // TODO"
 
         internal static CancellationTokenSource AppAbort = new();
 
+        public INtpClient NtpClient { get; private set; }
+
         public void Initialize()
         {
+            NtpClient = new LinuxNtpClient();
+
             try
             {
                 var psi = new ProcessStartInfo("/bin/bash", "-c \"lsb_release -d\"")
@@ -27,9 +40,9 @@ namespace Meadow
                 var proc = Process.Start(psi);
                 OSVersion = proc.StandardOutput.ReadToEnd().Trim();
             }
-            catch
+            catch(Exception ex)
             {
-                // TODO:
+                Resolver.Log.Debug($"Unable to parse lsb_release: {ex.Message}");
             }
 
             try
@@ -43,9 +56,9 @@ namespace Meadow
                 var proc = Process.Start(psi);
                 OSBuildDate = proc.StandardOutput.ReadToEnd().Trim();
             }
-            catch
+            catch(Exception ex)
             {
-                // TODO:
+                Resolver.Log.Debug($"Unable to parse uname: {ex.Message}");
             }
         }
 
@@ -54,7 +67,7 @@ namespace Meadow
             throw new PlatformNotSupportedException();
         }
 
-        public bool RebootOnUnhandledException => throw new NotImplementedException();
+        public bool RebootOnUnhandledException => false;
 
         public uint InitializationTimeout => throw new NotImplementedException();
 
