@@ -35,7 +35,7 @@
 
         public virtual Task Initialize() { return Task.CompletedTask; }
 
-        public virtual void OnShutdown(out bool complete, Exception? e = null) { complete = true; }
+        public virtual void OnShutdown() { }
 
         public virtual void OnError(Exception e, out bool recovered) { recovered = false; }
 

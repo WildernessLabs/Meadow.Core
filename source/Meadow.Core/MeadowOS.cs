@@ -23,7 +23,6 @@
         private static ILifecycleSettings LifecycleSettings { get; set; }
 
         static bool appRunning = false;
-        static bool appShutdown = false;
 
         internal static CancellationTokenSource AppAbort = new();
 
@@ -75,7 +74,7 @@
                 Resolver.Log.Trace($"App shutting down");
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
-                App.OnShutdown(out appShutdown);
+                App.OnShutdown();
             }
             catch (Exception e)
             {
