@@ -30,7 +30,7 @@ namespace Meadow.Hardware
             // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
             // Glitch filtering ignores the first state transition and waits a period of time and then looks at state to make sure the result is stable
 
-            if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
+            if(interruptMode != InterruptMode.None && (!channel.InterruptCapable))
             {
                 throw new Exception("Unable to create port; channel is not capable of interrupts");
             }
@@ -43,7 +43,7 @@ namespace Meadow.Hardware
 
             // attempt to reserve
             var success = this.IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
-            if (success.Item1)
+            if(success.Item1)
             {
                 // make sure the pin is configured as a digital input with the proper state
                 ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
@@ -69,19 +69,19 @@ namespace Meadow.Hardware
 
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             //TODO: may need other checks here.
-            if (chan == null)
+            if(chan == null)
             {
                 throw new Exception("Unable to create an input port on the pin, because it doesn't have a digital channel");
             }
-            if (interruptMode != InterruptMode.None && (!chan.InterruptCapable))
+            if(interruptMode != InterruptMode.None && (!chan.InterruptCapable))
             {
                 throw new Exception("Unable to create input; channel is not capable of interrupts");
             }
-            if (debounce < 0.0 || debounce > 1000.0)
+            if(debounce < 0.0 || debounce > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
-            if (glitch < 0.0 || glitch > 1000.0)
+            if(glitch < 0.0 || glitch > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(glitchDuration), "Unable to create an input port, because glitchDuration is out of range (0.1-1000.0)");
             }
@@ -106,7 +106,7 @@ namespace Meadow.Hardware
 
         void OnInterrupt(IPin pin, bool state)
         {
-            if (pin == this.Pin)
+            if(pin == this.Pin)
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = DateTime.Now;
@@ -119,15 +119,15 @@ namespace Meadow.Hardware
             }
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             // TODO: we should consider moving this logic to the finalizer
             // but the problem with that is that we don't know when it'll be called
             // but if we do it in here, we may need to check the _disposed field
             // elsewhere
-            if (!disposed)
+            if(!disposed)
             {
-                if (disposing)
+                if(disposing)
                 {
                     this.IOController.Interrupt -= OnInterrupt;
                     this.IOController.DeviceChannelManager.ReleasePin(Pin);
@@ -163,8 +163,8 @@ namespace Meadow.Hardware
             get => _debounceDuration;
             set
             {
-                if (value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
-                if (value == _debounceDuration) return;
+                if(value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
+                if(value == _debounceDuration) return;
 
                 _debounceDuration = value;
 
@@ -183,8 +183,8 @@ namespace Meadow.Hardware
             get => _glitchDuration;
             set
             {
-                if (value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
-                if (value == _glitchDuration) return;
+                if(value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
+                if(value == _glitchDuration) return;
 
                 _glitchDuration = value;
 
