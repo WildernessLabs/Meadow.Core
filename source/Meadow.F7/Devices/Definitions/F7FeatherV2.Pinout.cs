@@ -238,7 +238,7 @@ namespace Meadow.Devices
                 "D06", "PB13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB13", interruptGroup: 13),
-                    //new PwmChannelInfo("TIM1_CH1", 1, 1),
+                    new PwmChannelInfo("TIM1_CH1", 1, 1),
                     //new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
                 }
             );
