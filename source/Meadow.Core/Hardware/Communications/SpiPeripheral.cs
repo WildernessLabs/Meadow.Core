@@ -2,10 +2,25 @@
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents an SPI peripheral object
+    /// This encapsulates and synchronizes the SPI bus and chip select ports
+    /// </summary>
     public class SpiPeripheral : ISpiPeripheral
     {
+        /// <summary>
+        /// The SPI chip select port
+        /// </summary>
         public IDigitalOutputPort? ChipSelect { get; }
+
+        /// <summary>
+        /// The chip select mode (active high or active low)
+        /// </summary>
         ChipSelectMode chipSelectMode;
+
+        /// <summary>
+        /// the ISpiBus object
+        /// </summary>
         public ISpiBus Bus { get; }
 
         /// <summary>
@@ -19,6 +34,14 @@ namespace Meadow.Hardware
         /// </summary>
         protected Memory<byte> ReadBuffer { get; }
 
+        /// <summary>
+        /// Creates a new SpiPeripheral instance
+        /// </summary>
+        /// <param name="bus">The spi bus connected to the peripheral</param>
+        /// <param name="chipSelect">The chip select port</param>
+        /// <param name="readBufferSize">The size of the read buffer in bytes</param>
+        /// <param name="writeBufferSize">The size of the write buffer in bytes</param>
+        /// <param name="csMode">The chip select mode, active high or active low</param>
         public SpiPeripheral(
             ISpiBus bus,
             IDigitalOutputPort? chipSelect,
@@ -48,12 +71,12 @@ namespace Meadow.Hardware
         /// <summary>
         /// Reads data from the peripheral starting at the specified address.
         /// </summary>
-        /// <param name="address"></param>
-        /// <param name="readBuffer"></param>
+        /// <param name="address">The register address</param>
+        /// <param name="readBuffer">The buffer to hold the data</param>
         public void ReadRegister(byte address, Span<byte> readBuffer)
         {
             WriteBuffer.Span[0] = address;
-            Bus.Exchange(this.ChipSelect, WriteBuffer.Span[0..1], readBuffer, this.chipSelectMode);
+            Bus.Exchange(this.ChipSelect, WriteBuffer.Span[0..readBuffer.Length], readBuffer, this.chipSelectMode);
         }
 
         /// <summary>
@@ -202,11 +225,16 @@ namespace Meadow.Hardware
             this.Bus.Write(this.ChipSelect, WriteBuffer.Span[0..(writeBuffer.Length + 1)], this.chipSelectMode);
         }
 
+        /// <summary>
+        /// Exchange data over the SPI bus
+        /// </summary>
+        /// <param name="writeBuffer">The buffer holding the data to write</param>
+        /// <param name="readBuffer">The buffer to receieve data</param>
+        /// <param name="duplex">The duplex mode - half or full</param>
         public void Exchange(Span<byte> writeBuffer, Span<byte> readBuffer, DuplexType duplex = DuplexType.Half)
         {
             if (duplex == DuplexType.Half)
             {
-
                 // Todo: we should move this functionality deeper into the stack
                 // and have nuttx write the write buffer, then continue clocking out
                 // 0x00's until it's hit writeBuffer.Length + readBuffer.Lenght
