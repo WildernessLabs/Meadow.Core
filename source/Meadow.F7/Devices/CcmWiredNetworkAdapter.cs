@@ -89,8 +89,11 @@ namespace Meadow.Devices
                                 Resolver.Log.Info($"Mac: {MacAddress}");
 
                                 // TODO: check for wired (v. wifi)
-                                nativeInterface = intf;
-                                return;
+                                if(intf.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                                {
+                                    nativeInterface = intf;
+                                    return;
+                                }
                             }
                         }
                         else
