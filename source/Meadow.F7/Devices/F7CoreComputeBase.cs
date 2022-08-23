@@ -15,6 +15,7 @@ namespace Meadow.Devices
             : base(ioController, analogCapabilities, networkCapabilities)
         {
             Pins = pins;
+            this.networkAdapters.Add(new CcmWiredNetworkAdapter());
         }
 
         public override IPin GetPin(string pinName)
@@ -44,7 +45,7 @@ namespace Meadow.Devices
             Frequency frequency
         )
         {
-            if (busNumber == 3)
+            if(busNumber == 3)
             {
                 return CreateI2cBus(Pins.I2C3_SCL, Pins.I2C3_SDA, frequency);
             }
@@ -53,11 +54,11 @@ namespace Meadow.Devices
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
         {
-            if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.I2C3_SCL.Name)
+            if(clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C3_SCL.Name)
             {
                 return 3;
             }
-            if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.I2C1_SCL.Name)
+            if(clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL.Name)
             {
                 return 1;
             }
@@ -77,7 +78,7 @@ namespace Meadow.Devices
             int busNumber = 3
         )
         {
-            switch (busNumber)
+            switch(busNumber)
             {
                 case 2:
                     return CreateSpiBus(Pins.ESP_CLK, Pins.ESP_COPI, Pins.ESP_CIPO, speed);
@@ -96,15 +97,15 @@ namespace Meadow.Devices
             // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
             // HACK NOTE: can't compare directly here, so we're comparing the name.
             // might be able to cast and compare?
-            if (clock.Name == (Pins as IF7FeatherPinout)?.ESP_CLK.Name)
+            if(clock.Name == (Pins as IF7FeatherPinout)?.ESP_CLK.Name)
             {
                 return 2;
             }
-            else if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.SPI3_SCK.Name)
+            else if(clock.Name == (Pins as F7CoreComputeV2.Pinout)?.SPI3_SCK.Name)
             {
                 return 3;
             }
-            else if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.SPI5_SCK.Name)
+            else if(clock.Name == (Pins as F7CoreComputeV2.Pinout)?.SPI5_SCK.Name)
             {
                 return 5;
             }
