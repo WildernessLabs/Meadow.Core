@@ -70,9 +70,9 @@ namespace Meadow.Devices
 
         protected bool InitCoprocessor()
         {
-            lock(coprocInitLock)
+            lock (coprocInitLock)
             {
-                if(this.esp32 == null)
+                if (this.esp32 == null)
                 {
                     try
                     {
@@ -90,7 +90,7 @@ namespace Meadow.Devices
                             // forward to the NtpClient
                         };
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
@@ -115,7 +115,7 @@ namespace Meadow.Devices
         /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
         public virtual BatteryInfo GetBatteryInfo()
         {
-            if(Coprocessor != null)
+            if (Coprocessor != null)
             {
                 return new BatteryInfo
                 {
@@ -152,8 +152,19 @@ namespace Meadow.Devices
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
         }
 
-        public void Sleep(int seconds = Timeout.Infinite)
+        public void Sleep(TimeSpan duration)
         {
+            var seconds = (int)duration.TotalSeconds;
+
+            if (seconds <= 0)
+            {
+                throw new ArgumentOutOfRangeException("duration must be > 0 seconds");
+            }
+            if (seconds > 0xffff)
+            {
+                throw new ArgumentOutOfRangeException("duration must be < 0xffff seconds");
+            }
+
             var cmd = new UpdSleepCommand
             {
                 SecondsToSleep = seconds
