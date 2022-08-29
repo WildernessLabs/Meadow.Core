@@ -2,6 +2,7 @@ name: .NET Core CI Build
 
 on:
   workflow_dispatch:
+  repository_dispatch:
   push:
     branches: [ main, develop ]
   pull_request:
