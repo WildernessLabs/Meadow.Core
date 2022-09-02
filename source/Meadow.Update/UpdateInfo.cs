@@ -1,8 +1,21 @@
-﻿public class UpdateInfo
+﻿using System.Text.Json.Serialization;
+
+internal class UpdateMessage : UpdateInfo
 {
-    public string ID { get; internal set; }
+    public string MpakID
+    {
+        get => ID;
+        set => ID = value;
+    }
+    public string MpakDownloadUrl { get; set; }
+    public string[] TargetDevices { get; set; }
+}
+
+public class UpdateInfo
+{
+    public DateTime PublishedOn { get; internal set; }
+    public string ID { get; protected set; }
     public UpdateType UpdateType { get; internal set; }
-    public DateTime PublicationDate { get; internal set; }
     public string Version { get; internal set; }
     public long DownloadSize { get; internal set; }
     public string? Summary { get; internal set; }

@@ -18,21 +18,21 @@ public interface IUpdateService
     UpdateState State { get; }
     void RetrieveUpdate(UpdateInfo updateInfo);
     void ApplyUpdate(UpdateInfo updateInfo);
+    void ClearUpdates();
 }
 
 public class UpdateService : IUpdateService
 {
-    public event UpdateEventHandler OnUpdateAvailable;
-    public event UpdateEventHandler OnUpdateRetrieved;
-    public event UpdateEventHandler OnUpdateSuccess;
-    public event UpdateEventHandler OnUpdateFailure;
+    public event UpdateEventHandler OnUpdateAvailable = delegate { };
+    public event UpdateEventHandler OnUpdateRetrieved = delegate { };
+    public event UpdateEventHandler OnUpdateSuccess = delegate { };
+    public event UpdateEventHandler OnUpdateFailure = delegate { };
 
     private UpdateState _state;
 
     private UpdateConfig Config { get; }
     private IMqttClient MqttClient { get; set; }
     private MqttClientOptions ClientOptions { get; set; }
-    private Queue<(UpdateInfo, UpdateMessage)> UpdateQueue { get; set; } = new Queue<(UpdateInfo, UpdateMessage)>();
     private UpdateStore Store { get; }
     
     public UpdateService(UpdateConfig config)
@@ -89,20 +89,28 @@ public class UpdateService : IUpdateService
                 PropertyNameCaseInsensitive = true
             };
 
-            var message = JsonSerializer.Deserialize<UpdateMessage>(json, opts);
+            var info = JsonSerializer.Deserialize<UpdateMessage>(json, opts);
 
-            var info = new UpdateInfo
+            if (info == null)
             {
-                // TODO: fill this
-                 PublicationDate = message.PublishedOn
-            };
-
-            lock (UpdateQueue)
-            {
-                UpdateQueue.Enqueue(new(info, message));
+                Resolver.Log.Warn($"Unable to deserialize Updater Message");
             }
+            else
+            {
+                Resolver.Log.Trace($"Updater Message Received: {info.ID}");
 
-            Resolver.Log.Trace($"Updater Message Received: {message.MpakID}");
+                // do we already know about this update?
+                if (Store.TryGetMessage(info.ID, out UpdateMessage? msg))
+                {
+                    Resolver.Log.Trace($"Already know about Update {info.ID}");
+                }
+                else
+                {
+                    Store.Add(info);
+                    OnUpdateAvailable?.Invoke(this, info);
+                }
+
+            }
             return Task.CompletedTask;
         };
 
@@ -131,19 +139,6 @@ public class UpdateService : IUpdateService
                     await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(Config.RootTopic).Build());
                     break;
                 case UpdateState.Idle:
-                    if (UpdateQueue.Count > 0)
-                    {
-                        State = UpdateState.UpdateAvailable;
-                    }
-                    else
-                    {
-                        await Task.Delay(1000);
-                    }
-                    break;
-                case UpdateState.UpdateAvailable:
-                    State = UpdateState.Idle;
-                    OnUpdateAvailable?.Invoke(this, null); // TODO: track these notifications
-                    break;
                 case UpdateState.DownloadingFile:
                 case UpdateState.UpdateInProgress:
                 default:
@@ -155,16 +150,72 @@ public class UpdateService : IUpdateService
         State = UpdateState.Dead;
     }
 
+    public void ClearUpdates()
+    {
+        switch (State)
+        {
+            case UpdateState.Dead:
+            case UpdateState.Idle:
+                break;
+            default:
+                throw new Exception("Cannot clear until Idle");
+        }
+
+        Store.Clear();
+    }
+
     public void RetrieveUpdate(UpdateInfo updateInfo)
     {
         State = UpdateState.DownloadingFile;
-        OnUpdateRetrieved(this, updateInfo);
+
+        UpdateMessage? message;
+
+
+        if(!Store.TryGetMessage(updateInfo.ID, out message))
+        {
+            throw new Exception($"Cannot find update with ID {updateInfo.ID}");
+        }
+
+        if (message != null)
+        {
+            Task.Run(() => DownloadProc(message));
+        }
+    }
+
+    private async Task DownloadProc(UpdateMessage message)
+    {
+        try
+        {
+            // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
+            using (var httpClient = new HttpClient())
+            {
+                using (var stream = await httpClient.GetStreamAsync(message.MpakDownloadUrl))
+                {
+                    using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                    {
+                        await stream.CopyToAsync(fileStream);
+                    }
+                }
+            }
+            OnUpdateRetrieved(this, message);
+
+            State = UpdateState.Idle;
+        }
+        catch(Exception ex)
+        {
+            // TODO: raise some event?
+            Resolver.Log.Error($"Failed to download Update: {ex.Message}");
+        }
     }
 
     public void ApplyUpdate(UpdateInfo updateInfo)
     {
         State = UpdateState.UpdateInProgress;
 
+        // TODO: do stuff
+
         OnUpdateSuccess(this, updateInfo);
+
+        State = UpdateState.Idle;
     }
 }

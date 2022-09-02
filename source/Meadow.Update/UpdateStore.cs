@@ -4,24 +4,26 @@ using System.Text.Json;
 
 public class UpdateStore : IEnumerable<UpdateInfo>
 {
-    private List<UpdateInfo> _updates = new List<UpdateInfo>();
+    private const string UpdateInfoFileName = "info.json";
+
+    private List<UpdateMessage> _updates = new List<UpdateMessage>();
     private DirectoryInfo _storeDirectory;
 
     internal UpdateStore(string dataDirectory)
     {
         // each update is a subdirectory of the store
-        var di = new DirectoryInfo(dataDirectory);
-        if (!di.Exists)
+        _storeDirectory = new DirectoryInfo(dataDirectory);
+        if (!_storeDirectory.Exists)
         {
-            di.Create();
+            _storeDirectory.Create();
         }
         else
         {
             // load from persistence
-            foreach(var d in di.GetDirectories())
+            foreach(var d in _storeDirectory.GetDirectories())
             {
                 // load the update info
-                var infoFile = d.GetFiles("info.json").FirstOrDefault();
+                var infoFile = d.GetFiles(UpdateInfoFileName).FirstOrDefault();
                 if(infoFile == null)
                 {
                     // not a valid update
@@ -29,11 +31,11 @@ public class UpdateStore : IEnumerable<UpdateInfo>
                     Resolver.Log.Warn($"Invalid Update: {d.Name}");
                     continue;
                 }
-                UpdateInfo? info;
+                UpdateMessage? info;
                 try
                 {
                     var json = File.ReadAllText(infoFile.FullName);
-                    info = JsonSerializer.Deserialize<UpdateInfo>(json);
+                    info = JsonSerializer.Deserialize<UpdateMessage>(json);
 
                     if (info == null)
                     {
@@ -78,13 +80,64 @@ public class UpdateStore : IEnumerable<UpdateInfo>
                         info.Retrieved = true;
                     }
                 }
+
+                _updates.Add(info);
             }
         }
     }
 
-    internal void Add(UpdateInfo info)
+    internal void Add(UpdateMessage info)
     {
+        // create a folder
+        var di = _storeDirectory.CreateSubdirectory(info.ID);
+
+        // persist this update
+        info.Retrieved = false;
+        info.Applied = false;
+        var json = JsonSerializer.Serialize(info);
+
+        var dest = Path.Combine(di.FullName, UpdateInfoFileName);
+        File.WriteAllText(dest, json);
+
         _updates.Add(info);
+    }
+
+    public void Clear()
+    {
+        _updates.Clear();
+        foreach (var d in _storeDirectory.EnumerateDirectories())
+        {
+            foreach(var file in d.EnumerateFiles())
+            {
+                file.Delete();
+            }
+            d.Delete();
+        }
+    }
+
+    internal bool TryGetMessage(string id, out UpdateMessage? message)
+    {
+        message = _updates.FirstOrDefault(m => m.MpakID == id);
+        return message != null;
+    }
+
+    internal FileStream GetUpdateFileStream(string updateID)
+    {
+        // make sure the update folder exists
+        var dest = Path.Combine(_storeDirectory.FullName, updateID);
+        var di = new DirectoryInfo(dest);
+        if(!di.Exists)
+        {
+            di.Create();
+        }
+
+        var fi = new FileInfo(Path.Combine(dest, $"{updateID}.zip"));
+        if(fi.Exists)
+        {
+            fi.Delete();
+        }
+
+        return fi.Create();
     }
 
     public IEnumerator<UpdateInfo> GetEnumerator()
