@@ -88,18 +88,34 @@ public class UpdateStore : IEnumerable<UpdateInfo>
 
     internal void Add(UpdateMessage info)
     {
+        info.Retrieved = false;
+        info.Applied = false;
+        SaveOrUpdateMessage(info);
+        _updates.Add(info);
+    }
+
+    private void SaveOrUpdateMessage(UpdateMessage info)
+    {
         // create a folder
         var di = _storeDirectory.CreateSubdirectory(info.ID);
 
         // persist this update
-        info.Retrieved = false;
-        info.Applied = false;
         var json = JsonSerializer.Serialize(info);
 
         var dest = Path.Combine(di.FullName, UpdateInfoFileName);
         File.WriteAllText(dest, json);
+    }
 
-        _updates.Add(info);
+    private void SaveOrUpdateMessage(UpdateInfo info)
+    {
+        // create a folder
+        var di = _storeDirectory.CreateSubdirectory(info.ID);
+
+        // persist this update
+        var json = JsonSerializer.Serialize(info);
+
+        var dest = Path.Combine(di.FullName, UpdateInfoFileName);
+        File.WriteAllText(dest, json);
     }
 
     public void Clear()
@@ -138,6 +154,26 @@ public class UpdateStore : IEnumerable<UpdateInfo>
         }
 
         return fi.Create();
+    }
+
+    internal void SetRetrieved(UpdateMessage message)
+    {
+        message.Retrieved = true;
+        SaveOrUpdateMessage(message);
+    }
+
+    internal void SetApplied(UpdateInfo message)
+    {
+        // delete the binary to save space
+        var dest = Path.Combine(_storeDirectory.FullName, message.ID);
+        var fi = new FileInfo(Path.Combine(dest, $"{message.ID}.zip"));
+        if (fi.Exists)
+        {
+            fi.Delete();
+        }
+
+        message.Applied = true;
+        SaveOrUpdateMessage(message);
     }
 
     public IEnumerator<UpdateInfo> GetEnumerator()

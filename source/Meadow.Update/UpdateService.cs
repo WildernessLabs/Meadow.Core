@@ -198,6 +198,7 @@ public class UpdateService : IUpdateService
                 }
             }
             OnUpdateRetrieved(this, message);
+            Store.SetRetrieved(message);
 
             State = UpdateState.Idle;
         }
@@ -214,6 +215,7 @@ public class UpdateService : IUpdateService
 
         // TODO: do stuff
 
+        Store.SetApplied(updateInfo);
         OnUpdateSuccess(this, updateInfo);
 
         State = UpdateState.Idle;
