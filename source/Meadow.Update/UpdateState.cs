@@ -4,5 +4,8 @@
     Disconnected,
     Connecting,
     Connected,
-    Idle
+    Idle,
+    UpdateAvailable,
+    DownloadingFile,
+    UpdateInProgress
 }

@@ -5,25 +5,49 @@ using MQTTnet.Server;
 using System.Text;
 using System.Text.Json;
 
-public class UpdateService
+public delegate void UpdateEventHandler(IUpdateService updateService, UpdateInfo info);
+
+public interface IUpdateService
 {
+    event UpdateEventHandler OnUpdateAvailable;
+    event UpdateEventHandler OnUpdateRetrieved;
+    event UpdateEventHandler OnUpdateSuccess;
+    event UpdateEventHandler OnUpdateFailure;
+
+    bool CanUpdate => State == UpdateState.Idle;
+    UpdateState State { get; }
+    void RetrieveUpdate(UpdateInfo updateInfo);
+    void ApplyUpdate(UpdateInfo updateInfo);
+}
+
+public class UpdateService : IUpdateService
+{
+    public event UpdateEventHandler OnUpdateAvailable;
+    public event UpdateEventHandler OnUpdateRetrieved;
+    public event UpdateEventHandler OnUpdateSuccess;
+    public event UpdateEventHandler OnUpdateFailure;
+
     private UpdateState _state;
 
-    private IUpdateHandler Handler { get; }
     private UpdateConfig Config { get; }
     private IMqttClient MqttClient { get; set; }
     private MqttClientOptions ClientOptions { get; set; }
-
-    public UpdateService(IUpdateHandler handler, UpdateConfig config)
+    private Queue<(UpdateInfo, UpdateMessage)> UpdateQueue { get; set; } = new Queue<(UpdateInfo, UpdateMessage)>();
+    private UpdateStore Store { get; }
+    
+    public UpdateService(UpdateConfig config)
     {
-        Handler = handler;
+        var folder = Path.Combine(Path.GetTempPath(), "meadow-update");
+
+        Store = new UpdateStore(folder);
+
         Config = config;
     }
 
-    private UpdateState State
+    public UpdateState State
     {
         get => _state;
-        set
+        private set
         {
             _state = value;
             Resolver.Log.Trace($"Updater State -> {State}");
@@ -67,6 +91,17 @@ public class UpdateService
 
             var message = JsonSerializer.Deserialize<UpdateMessage>(json, opts);
 
+            var info = new UpdateInfo
+            {
+                // TODO: fill this
+                 PublicationDate = message.PublishedOn
+            };
+
+            lock (UpdateQueue)
+            {
+                UpdateQueue.Enqueue(new(info, message));
+            }
+
             Resolver.Log.Trace($"Updater Message Received: {message.MpakID}");
             return Task.CompletedTask;
         };
@@ -96,11 +131,40 @@ public class UpdateService
                     await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(Config.RootTopic).Build());
                     break;
                 case UpdateState.Idle:
+                    if (UpdateQueue.Count > 0)
+                    {
+                        State = UpdateState.UpdateAvailable;
+                    }
+                    else
+                    {
+                        await Task.Delay(1000);
+                    }
+                    break;
+                case UpdateState.UpdateAvailable:
+                    State = UpdateState.Idle;
+                    OnUpdateAvailable?.Invoke(this, null); // TODO: track these notifications
+                    break;
+                case UpdateState.DownloadingFile:
+                case UpdateState.UpdateInProgress:
+                default:
                     await Task.Delay(1000);
                     break;
             }
         }
 
         State = UpdateState.Dead;
+    }
+
+    public void RetrieveUpdate(UpdateInfo updateInfo)
+    {
+        State = UpdateState.DownloadingFile;
+        OnUpdateRetrieved(this, updateInfo);
+    }
+
+    public void ApplyUpdate(UpdateInfo updateInfo)
+    {
+        State = UpdateState.UpdateInProgress;
+
+        OnUpdateSuccess(this, updateInfo);
     }
 }
