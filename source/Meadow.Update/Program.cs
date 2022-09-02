@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Meadow;
 using Meadow.Logging;
+using Meadow.Update;
 
 Resolver.Services.Add(new Logger(new ConsoleLogProvider()));
 Resolver.Log.Loglevel = LogLevel.Trace;

@@ -1,11 +1,14 @@
-﻿public enum UpdateState
+﻿namespace Meadow.Update
 {
-    Dead,
-    Disconnected,
-    Connecting,
-    Connected,
-    Idle,
-    UpdateAvailable,
-    DownloadingFile,
-    UpdateInProgress
+    public enum UpdateState
+    {
+        Dead,
+        Disconnected,
+        Connecting,
+        Connected,
+        Idle,
+        UpdateAvailable,
+        DownloadingFile,
+        UpdateInProgress
+    }
 }

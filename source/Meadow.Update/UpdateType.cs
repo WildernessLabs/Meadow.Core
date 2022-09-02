@@ -1,6 +1,9 @@
-﻿public enum UpdateType
+﻿namespace Meadow.Update
 {
-    Bootloader,
-    OS,
-    Application
+    public enum UpdateType
+    {
+        Bootloader,
+        OS,
+        Application
+    }
 }
