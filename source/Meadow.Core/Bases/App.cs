@@ -45,10 +45,6 @@
 
         public virtual void OnRecovery(Exception e) { }
 
-        public virtual void OnUpdate(Version newVersion, out bool approveUpdate) { approveUpdate = true; }
-
-        public virtual void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate) { rollbackUpdate = false; }
-
         public virtual void OnReset() { }
 
         /// <summary>

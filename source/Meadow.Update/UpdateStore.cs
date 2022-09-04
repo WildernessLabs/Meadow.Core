@@ -140,6 +140,18 @@ namespace Meadow.Update
             return message != null;
         }
 
+        public string? GetUpdateArchivePath(string updateID)
+        {
+            var dest = Path.Combine(_storeDirectory.FullName, updateID);
+            var di = new DirectoryInfo(dest);
+            if (!di.Exists)
+            {
+                return null;
+            }
+
+            return di.GetFiles("*.zip").FirstOrDefault()?.FullName;
+        }
+
         internal FileStream GetUpdateFileStream(string updateID)
         {
             // make sure the update folder exists

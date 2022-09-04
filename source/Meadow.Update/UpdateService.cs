@@ -2,6 +2,7 @@
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Server;
+using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 
@@ -26,6 +27,8 @@ namespace Meadow.Update
 
     public class UpdateService : IUpdateService
     {
+        private const string UpdateDirectory = "/meadow0/update";
+
         public event UpdateEventHandler OnUpdateAvailable = delegate { };
         public event UpdateEventHandler OnUpdateRetrieved = delegate { };
         public event UpdateEventHandler OnUpdateSuccess = delegate { };
@@ -38,8 +41,9 @@ namespace Meadow.Update
         private MqttClientOptions ClientOptions { get; set; }
         private UpdateStore Store { get; }
 
-        public UpdateService(UpdateConfig config)
+        internal UpdateService(UpdateConfig config)
         {
+            // NOTE: this is a temporary path for desktop testing right now
             var folder = Path.Combine(Path.GetTempPath(), "meadow-update");
 
             Store = new UpdateStore(folder);
@@ -176,7 +180,7 @@ namespace Meadow.Update
 
             if (!Store.TryGetMessage(updateInfo.ID, out message))
             {
-                throw new Exception($"Cannot find update with ID {updateInfo.ID}");
+                throw new ArgumentException($"Cannot find update with ID {updateInfo.ID}");
             }
 
             if (message != null)
@@ -212,11 +216,94 @@ namespace Meadow.Update
             }
         }
 
+        private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
+        {
+            foreach(var f in di.EnumerateFiles())
+            {
+                f.Delete();
+            }
+
+            foreach (var d in di.EnumerateDirectories())
+            {
+                DeleteDirectoryContents(d, true);
+                if(deleteDirectory)
+                {
+                    d.Delete();
+                }
+            }
+        }
+
+        private bool CurrentUpdateContainsAppUpdate()
+        {
+            var di = new DirectoryInfo(UpdateDirectory);
+            var appDir = di.GetDirectories("app").FirstOrDefault();
+            if(appDir == null)
+            {
+                return false;
+            }
+
+            // make sure that some files exist - no files would brick us.  A bad set still can
+            return appDir.GetFiles().Count() > 0;
+        }
+
+        private bool CurrentUpdateContainsOSUpdate()
+        {
+            var di = new DirectoryInfo(UpdateDirectory);
+            var osDir = di.GetDirectories("os").FirstOrDefault();
+            if (osDir == null)
+            {
+                return false;
+            }
+
+            // make sure that some files exist
+            return osDir.GetFiles().Count() > 0;
+        }
+
         public void ApplyUpdate(UpdateInfo updateInfo)
         {
             State = UpdateState.UpdateInProgress;
 
-            // TODO: do stuff
+            var sourcePath = Store.GetUpdateArchivePath(updateInfo.ID);
+
+            if (sourcePath == null)
+            {
+                throw new ArgumentException($"Cannot find update with ID {updateInfo.ID}");
+            }
+
+            // ensure the update directory is currently empty
+            var di = new DirectoryInfo(UpdateDirectory);
+            if(!di.Exists)
+            {
+                di.Create();
+            }
+            else
+            {
+                DeleteDirectoryContents(di);
+            }
+
+            // extract zip
+            ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
+
+            // TODO: should we verify paths, etc?
+
+            // TODO: shut down the app
+            Resolver.App.OnShutdown();
+
+            // updates can be OS and/or App
+            // they are extracted to `/meadow0/update/os` or `/meadow0/update/os` respectively
+            if (CurrentUpdateContainsAppUpdate())
+            {
+                // TODO: app updates first
+                // TODO: if we have an app update, erase the existing app
+            }
+
+            if (CurrentUpdateContainsOSUpdate())
+            {
+                // TODO: OS updates next
+            }
+
+            // TODO: restart the device 
+
 
             Store.SetApplied(updateInfo);
             OnUpdateSuccess(this, updateInfo);

@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Meadow;
+﻿using Meadow;
 using Meadow.Logging;
 using Meadow.Update;
 
