@@ -12,9 +12,9 @@ namespace Meadow.Devices
                   new AnalogCapabilities(true, DefaultA2DResolution),
                   new NetworkCapabilities(true, false))
         {
-            if (this.Information.Platform != Hardware.MeadowPlatform.F7CoreComputeV1)
+            if (this.Information.Platform != Hardware.MeadowPlatform.F7CoreComputeV2)
             {
-                var message = $"Application is defined as F7CoreComputeV1, but running hardware is {this.Information.Platform}";
+                var message = $"Application is defined as F7CoreComputeV2, but running hardware is {this.Information.Platform}";
                 Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
