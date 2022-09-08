@@ -2,11 +2,11 @@
 
 namespace Meadow.Devices
 {
-    public partial class F7CoreComputeV1 : F7CoreComputeBase
+    public partial class F7CoreComputeV2 : F7CoreComputeBase
     {
         public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
 
-        public F7CoreComputeV1()
+        public F7CoreComputeV2()
             : base(new Pinout(),
                   new F7CoreComputeGpioManager(),
                   new AnalogCapabilities(true, DefaultA2DResolution),
@@ -22,12 +22,12 @@ namespace Meadow.Devices
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
         {
-            if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.I2C1_SCL.Name)
+            if (clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL.Name)
             {
                 return 1;
             }
 
-            if (clock.Name == (Pins as F7CoreComputeV1.Pinout)?.I2C3_SCL.Name)
+            if (clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C3_SCL.Name)
             {
                 return 3;
             }
