@@ -1,5 +1,4 @@
-﻿using Meadow;
-using MQTTnet;
+﻿using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Server;
 using System.IO.Compression;
@@ -218,7 +217,7 @@ namespace Meadow.Update
 
         private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
         {
-            foreach(var f in di.EnumerateFiles())
+            foreach (var f in di.EnumerateFiles())
             {
                 f.Delete();
             }
@@ -226,7 +225,7 @@ namespace Meadow.Update
             foreach (var d in di.EnumerateDirectories())
             {
                 DeleteDirectoryContents(d, true);
-                if(deleteDirectory)
+                if (deleteDirectory)
                 {
                     d.Delete();
                 }
@@ -237,7 +236,7 @@ namespace Meadow.Update
         {
             var di = new DirectoryInfo(UpdateDirectory);
             var appDir = di.GetDirectories("app").FirstOrDefault();
-            if(appDir == null)
+            if (appDir == null)
             {
                 return false;
             }
@@ -272,7 +271,7 @@ namespace Meadow.Update
 
             // ensure the update directory is currently empty
             var di = new DirectoryInfo(UpdateDirectory);
-            if(!di.Exists)
+            if (!di.Exists)
             {
                 di.Create();
             }
@@ -284,27 +283,32 @@ namespace Meadow.Update
             // extract zip
             ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
 
+            // do we actually contain an update?
+            var updateValid = CurrentUpdateContainsAppUpdate() || CurrentUpdateContainsOSUpdate();
+
             // TODO: should we verify paths, etc?
 
-            // TODO: shut down the app
-            Resolver.App.OnShutdown();
-
-            // updates can be OS and/or App
-            // they are extracted to `/meadow0/update/os` or `/meadow0/update/os` respectively
-            if (CurrentUpdateContainsAppUpdate())
+            if (!updateValid)
             {
-                // TODO: app updates first
-                // TODO: if we have an app update, erase the existing app
+                Resolver.Log.Warn($"Update {updateInfo.ID} contains no valid Update data");
+                return;
             }
 
-            if (CurrentUpdateContainsOSUpdate())
-            {
-                // TODO: OS updates next
-            }
+            // shut down the app (or timeout)
+            var shutdownTimeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
+            var shutDownTask = Resolver.App.OnShutdown();
 
-            // TODO: restart the device 
+            // TODO: cancel the app run cancellation token
 
+            // wait for the app to return, or the timeout
+            Task.WaitAny(shutDownTask, shutdownTimeoutTask);
 
+            // restart the device
+            Resolver.Device.Reset();
+
+            // the OS will handle updates on the next boot
+
+            // TODO: these will never happen due to the above reset. need to be moved to "post update boot"
             Store.SetApplied(updateInfo);
             OnUpdateSuccess(this, updateInfo);
 
