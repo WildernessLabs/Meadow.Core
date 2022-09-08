@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Meadow.Devices
 {
-    public partial class F7CoreComputeV1
+    public partial class F7CoreComputeV2
     {
         private const int ADCPrecisionBits = 12;
 
