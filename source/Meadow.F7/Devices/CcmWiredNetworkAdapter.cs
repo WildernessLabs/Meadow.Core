@@ -3,110 +3,117 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Threading.Tasks;
 
 namespace Meadow.Devices
 {
-    public class CcmWiredNetworkAdapter : IWiredNetworkAdapter
+    public class CcmWiredNetworkAdapter : NetworkAdapterBase
+    {
+        public override bool IsConnected => false;
+    }
+
+    public abstract class NetworkAdapterBase : IWiredNetworkAdapter
     {
         public event NetworkConnectionHandler NetworkConnected;
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
-        private NetworkInterface? nativeInterface;
+        private readonly Lazy<NetworkInterface?> nativeInterface;
 
-        public bool IsConnected => false;
+        public abstract bool IsConnected { get; }
+
         public PhysicalAddress MacAddress { get; private set; }
 
-        internal CcmWiredNetworkAdapter()
+        internal NetworkAdapterBase()
         {
-            LoadAdapterInfo();
+            nativeInterface = new Lazy<NetworkInterface?>(() =>
+            {
+                return LoadAdapterInfo();
+            });
         }
 
+        /// <summary>
+        /// IP Address of the network adapter.
+        /// </summary>
         public IPAddress IpAddress
         {
             get
             {
-                if(nativeInterface == null)
+                if (nativeInterface == null)
                 {
                     return IPAddress.None;
                 }
 
-                return nativeInterface.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface.Value?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
             }
         }
 
+        /// <summary>
+        /// Subnet mask of the adapter.
+        /// </summary>
         public IPAddress SubnetMask
         {
             get
             {
-                if(nativeInterface == null)
+                if (nativeInterface == null)
                 {
                     return IPAddress.None;
                 }
 
-                return nativeInterface.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.IPv4Mask ?? IPAddress.None;
+                return nativeInterface.Value?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.IPv4Mask ?? IPAddress.None;
             }
         }
 
+        /// <summary>
+        /// Default gateway for the adapter.
+        /// </summary>
         public IPAddress Gateway
         {
             get
             {
-                if(nativeInterface == null)
+                if (nativeInterface == null)
                 {
                     return IPAddress.None;
                 }
 
-                return nativeInterface.GetIPProperties()?.GatewayAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface.Value?.GetIPProperties()?.GatewayAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
             }
         }
 
-        private void LoadAdapterInfo()
+        private NetworkInterface? LoadAdapterInfo()
         {
-            Task.Run(async () =>
+            Resolver.Log.Info($"Searching for wired network interface...");
+
+            try
             {
-                Resolver.Log.Info($"Searching for wired network interface...");
+                var interfaces = NetworkInterface.GetAllNetworkInterfaces();
 
-                try
+                Resolver.Log.Info($"{interfaces.Length} interfaces...");
+
+                if (interfaces.Length > 0)
                 {
-                    while(true)
+                    foreach (var intf in interfaces)
                     {
-                        var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                        Resolver.Log.Info($"Interface: {intf.Id}: {intf.Name} {intf.NetworkInterfaceType} {intf.OperationalStatus}");
 
-                        Resolver.Log.Info($"{interfaces.Length} interfaces...");
+                        var p = intf.GetIPProperties();
+                        Resolver.Log.Info($"MA: {p.MulticastAddresses.FirstOrDefault()}");
+                        Resolver.Log.Info($"GA: {p.GatewayAddresses.FirstOrDefault()}");
 
-                        if(interfaces.Length > 0)
+                        MacAddress = intf.GetPhysicalAddress();
+                        Resolver.Log.Info($"Mac: {MacAddress}");
+
+                        // TODO: check for wired (v. wifi)
+                        if (intf.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                         {
-                            foreach(var intf in interfaces)
-                            {
-                                Resolver.Log.Info($"Interface: {intf.Id}: {intf.Name} {intf.NetworkInterfaceType} {intf.OperationalStatus}");
-
-                                var p = intf.GetIPProperties();
-                                Resolver.Log.Info($"MA: {p.MulticastAddresses.FirstOrDefault()}");
-                                Resolver.Log.Info($"GA: {p.GatewayAddresses.FirstOrDefault()}");
-
-                                MacAddress = intf.GetPhysicalAddress();
-                                Resolver.Log.Info($"Mac: {MacAddress}");
-
-                                // TODO: check for wired (v. wifi)
-                                if(intf.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                                {
-                                    nativeInterface = intf;
-                                    return;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            await Task.Delay(TimeSpan.FromSeconds(5));
+                            return intf;
                         }
                     }
                 }
-                catch(Exception ex)
-                {
-                    Resolver.Log.Error(ex.Message);
-                }
-            });
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error(ex.Message);
+            }
+            return null;
         }
     }
 }
