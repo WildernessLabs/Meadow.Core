@@ -1,6 +1,5 @@
 ﻿namespace Meadow
 {
-    using Meadow.Devices;
     using Meadow.Logging;
     using System;
     using System.IO;
@@ -45,7 +44,11 @@
                 try
                 {
                     Resolver.Log.Trace("Running App");
-                    await App.Run();
+
+                    var runTask = Task.Run(() => App.Run(AppAbort.Token), AppAbort.Token);
+
+                    await runTask;
+
                     appRunning = true;
                 }
                 catch (Exception e)
@@ -74,7 +77,7 @@
                 Resolver.Log.Trace($"App shutting down");
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
-                App.OnShutdown();
+                await App.OnShutdown();
             }
             catch (Exception e)
             {
@@ -161,7 +164,7 @@
                         }
                         catch (Exception ex)
                         {
-                            Resolver.Log.Warn($"Unable to load assembly '{name}': { ex.Message}");
+                            Resolver.Log.Warn($"Unable to load assembly '{name}': {ex.Message}");
                         }
                     }
                 }

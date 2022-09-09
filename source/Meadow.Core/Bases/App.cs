@@ -1,6 +1,5 @@
 ﻿namespace Meadow
 {
-    using Meadow.Devices;
     using System;
     using System.Threading;
     using System.Threading.Tasks;
@@ -31,11 +30,14 @@
             ExecutionContext.Run(executionContext, new ContextCallback(action), state);
         }
 
-        public virtual Task Run() { return Task.CompletedTask; }
+        public virtual Task Run(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
         public virtual Task Initialize() { return Task.CompletedTask; }
 
-        public virtual void OnShutdown() { }
+        public virtual Task OnShutdown() { return Task.CompletedTask; }
 
         public virtual void OnError(Exception e, out bool recovered) { recovered = false; }
 
@@ -46,6 +48,22 @@
         public virtual void OnRecovery(Exception e) { }
 
         public virtual void OnReset() { }
+
+        /// <summary>
+        /// Called when the application is about to update itself.
+        /// </summary>
+        public void OnUpdate(Version newVersion, out bool approveUpdate)
+        {
+            approveUpdate = true;
+        }
+
+        /// <summary>
+        /// Called when the application has updated itself.
+        /// </summary>
+        public void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
+        {
+            rollbackUpdate = false;
+        }
 
         /// <summary>
         /// The root Device interface
