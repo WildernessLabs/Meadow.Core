@@ -78,6 +78,7 @@ namespace Meadow.Devices
         /// Default constructor of the Esp32Coprocessor class.
         /// </summary>
         internal Esp32Coprocessor()
+            : base(System.Net.NetworkInformation.NetworkInterfaceType.Wireless80211)
         {
             _mac = System.Net.NetworkInformation.PhysicalAddress.None;
             Bssid = System.Net.NetworkInformation.PhysicalAddress.None;
