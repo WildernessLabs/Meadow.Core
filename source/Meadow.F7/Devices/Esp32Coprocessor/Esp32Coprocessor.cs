@@ -3,7 +3,6 @@ using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateways;
 using Meadow.Hardware;
 using System;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -79,22 +78,19 @@ namespace Meadow.Devices
         /// Default constructor of the Esp32Coprocessor class.
         /// </summary>
         internal Esp32Coprocessor()
+            : base(System.Net.NetworkInformation.NetworkInterfaceType.Wireless80211)
         {
-            IpAddress = IPAddress.None;
-            SubnetMask = IPAddress.None;
-            Gateway = IPAddress.None;
-
             _mac = System.Net.NetworkInformation.PhysicalAddress.None;
             Bssid = System.Net.NetworkInformation.PhysicalAddress.None;
             _apMac = System.Net.NetworkInformation.PhysicalAddress.None;
 
-            IsConnected = false;
+            _isConnected = false;
             ClearNetworkDetails();
             HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
             _antenna = AntennaType.NotKnown;
 
-            if(_eventHandlerThread == null)
+            if (_eventHandlerThread == null)
             {
                 _eventHandlerThread = new Thread(EventHandlerServiceThread)
                 {
@@ -162,13 +158,13 @@ namespace Meadow.Devices
                     Result = IntPtr.Zero
                 };
 
-                if(encodedRequest != null && encodedRequest.Length > 0)
+                if (encodedRequest != null && encodedRequest.Length > 0)
                 {
                     payloadGcHandle = GCHandle.Alloc(encodedRequest, GCHandleType.Pinned);
                     command.Payload = payloadGcHandle.AddrOfPinnedObject();
                     command.PayloadLength = (uint)encodedRequest.Length;
                 }
-                if(encodedResult != null && encodedResult.Length > 0 && block)
+                if (encodedResult != null && encodedResult.Length > 0 && block)
                 {
                     resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
                     command.Result = resultGcHandle.AddrOfPinnedObject();
@@ -180,7 +176,7 @@ namespace Meadow.Devices
                 }
 
                 int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.Esp32Command, ref command);
-                if(updResult == 0)
+                if (updResult == 0)
                 {
                     result = (StatusCodes)command.StatusCode;
                 }
@@ -190,17 +186,17 @@ namespace Meadow.Devices
                     result = StatusCodes.Failure;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}");
             }
             finally
             {
-                if(payloadGcHandle.IsAllocated)
+                if (payloadGcHandle.IsAllocated)
                 {
                     payloadGcHandle.Free();
                 }
-                if(resultGcHandle.IsAllocated)
+                if (resultGcHandle.IsAllocated)
                 {
                     resultGcHandle.Free();
                 }
@@ -233,7 +229,7 @@ namespace Meadow.Devices
                 };
 
                 int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.UpdEsp32EventDataPayload, ref request);
-                if(updResult == 0)
+                if (updResult == 0)
                 {
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Payload: ");
                     Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
@@ -249,7 +245,7 @@ namespace Meadow.Devices
             }
             finally
             {
-                if(resultGcHandle.IsAllocated)
+                if (resultGcHandle.IsAllocated)
                 {
                     resultGcHandle.Free();
                 }
@@ -266,7 +262,7 @@ namespace Meadow.Devices
             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Starting Esp32Coprocessor event handler thread.");
             IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
             byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
-            while(true)
+            while (true)
             {
                 int priority = 0;
                 try
@@ -274,13 +270,13 @@ namespace Meadow.Devices
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
                     int result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event received.");
-                    if(result >= 0)
+                    if (result >= 0)
                     {
                         Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Processing event.");
                         Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), rxBuffer);
                         EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
                         byte[]? payload = null;
-                        if(eventData.MessageId == 0)
+                        if (eventData.MessageId == 0)
                         {
                             Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
                         }
@@ -292,7 +288,7 @@ namespace Meadow.Devices
                         Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");
                         Task.Run(() =>
                         {
-                            switch((Esp32Interfaces)eventData.Interface)
+                            switch ((Esp32Interfaces)eventData.Interface)
                             {
                                 case Esp32Interfaces.WiFi:
                                     InvokeEvent((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
@@ -310,7 +306,7 @@ namespace Meadow.Devices
                         throw new Exception($"ESP32 Coprocessor event handler error code {result}");
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw ex;
                 }
@@ -332,7 +328,7 @@ namespace Meadow.Devices
         {
             byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
             double voltage = 0;
-            if(SendCommand((byte)Esp32Interfaces.System, (UInt32)SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
+            if (SendCommand((byte)Esp32Interfaces.System, (UInt32)SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
             {
                 GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
                 voltage = (float)(response.Level) / 1000f;
