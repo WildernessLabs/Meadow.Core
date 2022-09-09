@@ -25,7 +25,6 @@ namespace Meadow.Devices
 
         //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
-        //        public IWiFiAdapter? WiFiAdapter { get; protected set; }
         public ICoprocessor? Coprocessor { get; protected set; }
 
         public DeviceCapabilities Capabilities { get; }
@@ -80,14 +79,13 @@ namespace Meadow.Devices
                         // to be it.
                         this.esp32 = new Esp32Coprocessor();
                         BluetoothAdapter = esp32;
-                        //                        WiFiAdapter = esp32;
                         Coprocessor = esp32;
 
                         networkAdapters.Add(esp32);
 
                         esp32.NtpTimeChanged += (s, e) =>
                         {
-                            // forward to the NtpClient
+                            // TODO: forward to the NtpClient
                         };
                     }
                     catch (Exception e)

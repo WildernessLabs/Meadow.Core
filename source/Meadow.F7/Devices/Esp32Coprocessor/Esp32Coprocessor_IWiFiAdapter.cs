@@ -4,7 +4,6 @@ using Meadow.Gateways.Exceptions;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +13,7 @@ namespace Meadow.Devices
     /// <summary>
 	/// This file holds the WiFi specific methods, properties etc for the IWiFiAdapter interface.
 	/// </summary>
-    public partial class Esp32Coprocessor : IWiFiNetworkAdapter
+    public partial class Esp32Coprocessor : NetworkAdapterBase, IWiFiNetworkAdapter
     {
         #region Events
 
@@ -77,27 +76,11 @@ namespace Meadow.Devices
 
         #endregion Member variables.
 
-        #region Properties
-
-        /// <summary>
-        /// IP Address of the network adapter.
-        /// </summary>
-        public IPAddress IpAddress { get; private set; }
-
-        /// <summary>
-        /// Subnet mask of the adapter.
-        /// </summary>
-        public IPAddress SubnetMask { get; private set; }
-
-        /// <summary>
-        /// Default gateway for the adapter.
-        /// </summary>
-        public IPAddress Gateway { get; private set; }
 
         /// <summary>
         /// Record if the WiFi ESP32 is connected to an access point.
         /// </summary>
-        public bool IsConnected { get; private set; }
+        public override bool IsConnected { get => _isConnected; }
 
         /// <summary>
         /// Current onboard antenna in use.
@@ -116,7 +99,7 @@ namespace Meadow.Devices
         {
             get
             {
-                if(_mac == null)
+                if (_mac == null)
                 {
                     byte[] mac = new byte[6];
                     F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
@@ -134,7 +117,7 @@ namespace Meadow.Devices
         {
             get
             {
-                if(_apMac == null)
+                if (_apMac == null)
                 {
                     byte[] mac = new byte[6];
                     F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.SoftApMacAddress, mac);
@@ -199,7 +182,7 @@ namespace Meadow.Devices
             set
             {
                 uint retryCount = value;
-                if(retryCount < 3)
+                if (retryCount < 3)
                 {
                     retryCount = 3;
                 }
@@ -211,8 +194,6 @@ namespace Meadow.Devices
         /// Does the access point the WiFi adapter is currently connected to have internet access?
         /// </summary>
         public bool HasInternetAccess { get; protected set; }
-
-        #endregion Properties
 
         #region Methods
 
@@ -231,7 +212,7 @@ namespace Meadow.Devices
             get { return (_scanPeriod); }
             set
             {
-                if((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
+                if ((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
                 {
                     throw new ArgumentOutOfRangeException($"{nameof(ScanPeriod)} should be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
                 }
@@ -239,6 +220,7 @@ namespace Meadow.Devices
             }
         }
         private TimeSpan _scanPeriod = DefaultScanPeriod;
+        private bool _isConnected;
 
         /// <summary>
         /// Use the event data to work out which event to invoke and create any event args that will be consumed.
@@ -248,7 +230,7 @@ namespace Meadow.Devices
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
         protected void InvokeEvent(WiFiFunction eventId, StatusCodes statusCode, byte[] payload)
         {
-            switch(eventId)
+            switch (eventId)
             {
                 case WiFiFunction.ConnectToAccessPointEvent:
                     try
@@ -283,13 +265,10 @@ namespace Meadow.Devices
         /// </summary>
         private void ClearNetworkDetails()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 byte[] addressBytes = new byte[4];
                 Array.Clear(addressBytes, 0, addressBytes.Length);
-                IpAddress = new IPAddress(addressBytes);
-                SubnetMask = new IPAddress(addressBytes);
-                Gateway = new IPAddress(addressBytes);
                 Ssid = string.Empty;
                 Bssid = PhysicalAddress.None;
                 Channel = 0;
@@ -342,15 +321,15 @@ namespace Meadow.Devices
 
                       token.ThrowIfCancellationRequested();
 
-                      if(result == StatusCodes.CompletedOk)
+                      if (result == StatusCodes.CompletedOk)
                       {
                           var accessPointList = Encoders.ExtractAccessPointList(resultBuffer, 0);
                           var accessPoints = new AccessPoint[accessPointList.NumberOfAccessPoints];
 
-                          if(accessPointList.NumberOfAccessPoints > 0)
+                          if (accessPointList.NumberOfAccessPoints > 0)
                           {
                               int accessPointOffset = 0;
-                              for(int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
+                              for (int count = 0; count < accessPointList.NumberOfAccessPoints; count++)
                               {
                                   var accessPoint = Encoders.ExtractAccessPoint(accessPointList.AccessPoints, accessPointOffset);
                                   accessPointOffset += Encoders.EncodedAccessPointBufferSize(accessPoint);
@@ -368,7 +347,7 @@ namespace Meadow.Devices
                       }
                       return (networks);
                   }
-                  catch(Exception ex)
+                  catch (Exception ex)
                   {
                       Console.WriteLine($"Error getting access points: {ex.Message}");
 
@@ -379,13 +358,13 @@ namespace Meadow.Devices
 
             tasks.Add(scanTask);
 
-            if(timeout.TotalMilliseconds > 0)
+            if (timeout.TotalMilliseconds > 0)
             {
                 tasks.Add(Task.Delay(timeout));
             }
 
             var index = Task.WaitAny(tasks.ToArray());
-            if(index == 1)
+            if (index == 1)
             {
                 throw new TimeoutException();
             }
@@ -455,7 +434,7 @@ namespace Meadow.Devices
         {
             ConnectionResult connectionResult;
             StatusCodes result = await ConnectToAccessPoint(ssid, password, timeout, token, reconnection);
-            switch(result)
+            switch (result)
             {
                 case StatusCodes.CompletedOk:
                     connectionResult = new ConnectionResult(ConnectionStatus.Success);
@@ -501,11 +480,11 @@ namespace Meadow.Devices
         /// <returns>true if the connection was successfully made.</returns>
         private Task<StatusCodes> ConnectToAccessPoint(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection)
         {
-            if(string.IsNullOrEmpty(ssid))
+            if (string.IsNullOrEmpty(ssid))
             {
                 throw new ArgumentNullException("Invalid SSID.");
             }
-            if(password == null)
+            if (password == null)
             {
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
@@ -540,7 +519,7 @@ namespace Meadow.Devices
                     _connectionSemaphore.WaitOne();
 
                     ConnectEventData data;
-                    switch(result)
+                    switch (result)
                     {
                         case StatusCodes.CompletedOk:
                             //
@@ -549,7 +528,7 @@ namespace Meadow.Devices
                             break;
                         case StatusCodes.WiFiDisconnected:
                             data = Encoders.ExtractConnectEventData(resultBuffer, 0);
-                            switch((WiFiReasons)data.Reason)
+                            switch ((WiFiReasons)data.Reason)
                             {
                                 case WiFiReasons.AuthenticationFailed:
                                     result = StatusCodes.AuthenticationFailed;
@@ -571,7 +550,7 @@ namespace Meadow.Devices
                     }
                     return (result);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Error connecting to access point: {ex.Message}");
 
@@ -582,13 +561,13 @@ namespace Meadow.Devices
 
             tasks.Add(connectTask);
 
-            if(timeout.TotalMilliseconds > 0)
+            if (timeout.TotalMilliseconds > 0)
             {
                 tasks.Add(Task.Delay(timeout));
             }
 
             var index = Task.WaitAny(tasks.ToArray());
-            if(index == 1)
+            if (index == 1)
             {
                 throw new TimeoutException();
             }
@@ -607,7 +586,7 @@ namespace Meadow.Devices
             {
                 StatusCodes result = DisconnectFromAccessPoint(turnOffWiFiInterface);
                 ConnectionResult connectionResult;
-                switch(result)
+                switch (result)
                 {
                     case StatusCodes.CompletedOk:
                         ClearNetworkDetails();
@@ -660,13 +639,13 @@ namespace Meadow.Devices
         /// <param name="persist">Make the antenna change persistent.</param>
         public void SetAntenna(AntennaType antenna, bool persist = true)
         {
-            if(antenna == AntennaType.NotKnown)
+            if (antenna == AntennaType.NotKnown)
             {
                 throw new ArgumentException("Setting the antenna type NotKnown is not allowed.");
             }
 
             SetAntennaRequest request = new SetAntennaRequest();
-            if(persist)
+            if (persist)
             {
                 request.Persist = 1;
             }
@@ -674,7 +653,7 @@ namespace Meadow.Devices
             {
                 request.Persist = 0;
             }
-            if(antenna == AntennaType.OnBoard)
+            if (antenna == AntennaType.OnBoard)
             {
                 request.Antenna = (byte)AntennaTypes.OnBoard;
             }
@@ -685,7 +664,7 @@ namespace Meadow.Devices
             byte[] encodedPayload = Encoders.EncodeSetAntennaRequest(request);
             byte[] encodedResult = new byte[4000];
             StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
-            if(result == StatusCodes.CompletedOk)
+            if (result == StatusCodes.CompletedOk)
             {
                 _antenna = antenna;
             }
@@ -710,16 +689,13 @@ namespace Meadow.Devices
             byte channel = 0;
 
             ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
-            lock(_lock)
+            lock (_lock)
             {
-                IpAddress = new IPAddress(connectEventData.IpAddress);
-                SubnetMask = new IPAddress(connectEventData.SubnetMask);
-                Gateway = new IPAddress(connectEventData.Gateway);
                 Ssid = connectEventData.Ssid;
                 Bssid = new PhysicalAddress(connectEventData.Bssid);
                 channel = connectEventData.Channel;
                 Channel = channel;
-                IsConnected = true;
+                _isConnected = true;
                 HasInternetAccess = true;
             }
 
@@ -739,7 +715,7 @@ namespace Meadow.Devices
         {
             ClearNetworkDetails();
             HasInternetAccess = false;
-            IsConnected = false;
+            _isConnected = false;
 
             var e = new WiFiDisconnectEventArgs(statusCode);
             NetworkDisconnected?.Invoke(this);
