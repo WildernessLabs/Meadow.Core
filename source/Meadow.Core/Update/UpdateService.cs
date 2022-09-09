@@ -1,9 +1,17 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Server;
+using MQTTnet.Exceptions;
+using System;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
+
+[assembly: InternalsVisibleTo("Meadow.Update")]
 
 namespace Meadow.Update
 {
@@ -55,6 +63,8 @@ namespace Meadow.Update
             get => _state;
             private set
             {
+                if (value == State) return;
+
                 _state = value;
                 Resolver.Log.Trace($"Updater State -> {State}");
             }
@@ -138,11 +148,35 @@ namespace Meadow.Update
                 {
                     case UpdateState.Disconnected:
                         State = UpdateState.Connecting;
-                        await MqttClient.ConnectAsync(ClientOptions);
+                        try
+                        {
+                            await MqttClient.ConnectAsync(ClientOptions);
+                        }
+                        catch (MqttCommunicationTimedOutException)
+                        {
+                            Resolver.Log.Debug("Timeout connecting to Meadow.Cloud");
+                            State = UpdateState.Disconnected;
+                            //  just delay for a while
+                            await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
+                        }
+                        catch (Exception ex)
+                        {
+                            Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
+                            State = UpdateState.Disconnected;
+                        }
                         break;
                     case UpdateState.Connected:
                         State = UpdateState.Idle;
-                        await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(Config.RootTopic).Build());
+                        try
+                        {
+                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(Config.RootTopic).Build());
+                        }
+                        catch (Exception ex)
+                        {
+                            Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
+                            // TODO: what should be the state here?  What do we do (untested failure mode)
+                            State = UpdateState.Idle;
+                        }
                         break;
                     case UpdateState.Idle:
                     case UpdateState.DownloadingFile:

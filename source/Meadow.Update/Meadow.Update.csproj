@@ -8,12 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MQTTnet" Version="4.1.0.247" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Meadow.Logging\lib\Meadow.Logging.csproj" />
+    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
 
 </Project>

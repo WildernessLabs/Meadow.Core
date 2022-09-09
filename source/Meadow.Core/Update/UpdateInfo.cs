@@ -1,4 +1,6 @@
-﻿namespace Meadow.Update
+﻿using System;
+
+namespace Meadow.Update
 {
     internal class UpdateMessage : UpdateInfo
     {

@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Logging", "..\..\Mea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Update", "Meadow.Update\Meadow.Update.csproj", "{91A73126-30FF-4A8E-BFC6-750053BD51D5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MQTTnet", "..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj", "{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
@@ -86,6 +88,12 @@ Global
 		{91A73126-30FF-4A8E-BFC6-750053BD51D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91A73126-30FF-4A8E-BFC6-750053BD51D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91A73126-30FF-4A8E-BFC6-750053BD51D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,6 +104,7 @@ Global
 		{A3467CEB-5392-4166-93AF-C0A1C20DF0F8} = {7BCFC6D6-228E-4C93-8145-EAD121AA8587}
 		{93DFC566-A413-4039-A0C1-90A42A356386} = {7BCFC6D6-228E-4C93-8145-EAD121AA8587}
 		{AB2ED826-2E09-42F5-9106-BDB956984385} = {E5D88D38-57E0-46E0-913A-0CCE91826F18}
+		{7E26CCF1-DDB2-4A49-93AA-08F2612A47A8} = {E5D88D38-57E0-46E0-913A-0CCE91826F18}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}

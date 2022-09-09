@@ -1,5 +1,4 @@
 ﻿using Meadow;
-using Meadow.Devices;
 using Meadow.Logging;
 using Meadow.Update;
 
@@ -7,10 +6,6 @@ Resolver.Services.Add(new Logger(new ConsoleLogProvider()));
 Resolver.Log.Loglevel = LogLevel.Trace;
 
 Resolver.Log.Info("Updater Test Harness");
-
-var adapter = new WiredNetworkAdapter();
-Resolver.Log.Info($"IP: {adapter.IpAddress}");
-
 
 var svc = new UpdateService(new UpdateConfig());
 Resolver.Services.Add<IUpdateService>(svc);

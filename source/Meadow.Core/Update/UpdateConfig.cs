@@ -6,5 +6,6 @@
         public int UpdatePort { get; set; } = 1883;
         public string ClientID { get; set; } = "simple_client";
         public string RootTopic { get; set; } = "Meadow.OtA";
+        public int CloudConnectRetrySeconds { get; set; } = 15;
     }
 }
