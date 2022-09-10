@@ -15,23 +15,6 @@ using System.Threading.Tasks;
 
 namespace Meadow.Update
 {
-
-    public delegate void UpdateEventHandler(IUpdateService updateService, UpdateInfo info);
-
-    public interface IUpdateService
-    {
-        event UpdateEventHandler OnUpdateAvailable;
-        event UpdateEventHandler OnUpdateRetrieved;
-        event UpdateEventHandler OnUpdateSuccess;
-        event UpdateEventHandler OnUpdateFailure;
-
-        bool CanUpdate => State == UpdateState.Idle;
-        UpdateState State { get; }
-        void RetrieveUpdate(UpdateInfo updateInfo);
-        void ApplyUpdate(UpdateInfo updateInfo);
-        void ClearUpdates();
-    }
-
     public class UpdateService : IUpdateService
     {
         private string UpdateDirectory { get; }
@@ -44,12 +27,12 @@ namespace Meadow.Update
 
         private UpdateState _state;
 
-        private UpdateConfig Config { get; }
+        private IUpdateSettings Config { get; }
         private IMqttClient MqttClient { get; set; }
         private MqttClientOptions ClientOptions { get; set; }
         private UpdateStore Store { get; }
 
-        internal UpdateService(UpdateConfig config)
+        internal UpdateService(IUpdateSettings config)
         {
             string root;
 

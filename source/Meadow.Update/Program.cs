@@ -7,7 +7,7 @@ Resolver.Log.Loglevel = LogLevel.Trace;
 
 Resolver.Log.Info("Updater Test Harness");
 
-var svc = new UpdateService(new UpdateConfig());
+var svc = new UpdateService(new UpdateSettings());
 Resolver.Services.Add<IUpdateService>(svc);
 svc.ClearUpdates(); // uncomment to clear persisted info
 svc.Start();

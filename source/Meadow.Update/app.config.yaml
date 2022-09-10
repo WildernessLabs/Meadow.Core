@@ -6,5 +6,8 @@
   },
   "Lifecycle": {
     "ResetOnAppFailure": false
+  },
+  "Update": {
+    "UpdateServer": "localhost"
   }
 }

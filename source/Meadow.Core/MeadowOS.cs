@@ -1,6 +1,7 @@
 ﻿namespace Meadow
 {
     using Meadow.Logging;
+    using Meadow.Update;
     using System;
     using System.IO;
     using System.Reflection;
@@ -20,6 +21,7 @@
 
         private static IApp App { get; set; }
         private static ILifecycleSettings LifecycleSettings { get; set; }
+        private static IUpdateSettings UpdateSettings { get; set; }
 
         static bool appRunning = false;
 
@@ -136,6 +138,18 @@
             }
             Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
             Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
+
+            try
+            {
+                UpdateSettings = new UpdateSettings();
+            }
+            catch (Exception ex)
+            {
+                UpdateSettings = AppSettings.DefaultUpdateSettings;
+
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default Update Config");
+            }
         }
 
 
@@ -244,6 +258,10 @@
                 CurrentDevice.BeforeSleep += () => { app.OnSleep(); };
                 CurrentDevice.AfterWake += () => { app.OnResume(); };
                 CurrentDevice.BeforeReset += () => { app.OnReset(); };
+
+                var updateService = new UpdateService(UpdateSettings);
+                Resolver.Services.Add<IUpdateService>(updateService);
+
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
