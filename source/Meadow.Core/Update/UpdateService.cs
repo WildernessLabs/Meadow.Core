@@ -34,7 +34,8 @@ namespace Meadow.Update
 
     public class UpdateService : IUpdateService
     {
-        private const string UpdateDirectory = "/meadow0/update";
+        private string UpdateDirectory { get; }
+        private string UpdateStoreDirectory { get; }
 
         public event UpdateEventHandler OnUpdateAvailable = delegate { };
         public event UpdateEventHandler OnUpdateRetrieved = delegate { };
@@ -50,10 +51,22 @@ namespace Meadow.Update
 
         internal UpdateService(UpdateConfig config)
         {
-            // NOTE: this is a temporary path for desktop testing right now
-            var folder = Path.Combine(Path.GetTempPath(), "meadow-update");
+            string root;
 
-            Store = new UpdateStore(folder);
+            // NOTE: this is a temporary path for desktop testing right now
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                root = Path.Combine(Path.GetTempPath(), "meadow");
+            }
+            else
+            {
+                root = "/meadow0";
+            }
+
+            UpdateStoreDirectory = Path.Combine(root, "update-store");
+            UpdateDirectory = Path.Combine(root, "update");
+
+            Store = new UpdateStore(UpdateStoreDirectory);
 
             Config = config;
         }
@@ -102,7 +115,8 @@ namespace Meadow.Update
 
                 var opts = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true
+                    PropertyNameCaseInsensitive = true,
+
                 };
 
                 var info = JsonSerializer.Deserialize<UpdateMessage>(json, opts);
@@ -159,6 +173,13 @@ namespace Meadow.Update
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
                         }
+                        catch (MqttCommunicationException)
+                        {
+                            Resolver.Log.Debug("Error connecting to Meadow.Cloud");
+                            State = UpdateState.Disconnected;
+                            //  just delay for a while
+                            await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
+                        }
                         catch (Exception ex)
                         {
                             Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
@@ -175,7 +196,7 @@ namespace Meadow.Update
                         {
                             Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
                             // TODO: what should be the state here?  What do we do (untested failure mode)
-                            State = UpdateState.Idle;
+                            State = UpdateState.Disconnected;
                         }
                         break;
                     case UpdateState.Idle:
@@ -237,6 +258,25 @@ namespace Meadow.Update
                         }
                     }
                 }
+
+                // TODO: verify hash
+                var path = Store.GetUpdateArchivePath(message.ID);
+                var hash = Store.GetFileHash(new FileInfo(path));
+
+                if (!string.IsNullOrWhiteSpace(message.DownloadHash))
+                {
+                    if (hash != message.DownloadHash)
+                    {
+                        Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
+                        // TODO: what do we do? Retry? Ignore?
+                    }
+                }
+                else
+                {
+                    Resolver.Log.Warn("Downloaded Updated was not Hashed by server!");
+                    // TODO: what do we do?
+                }
+
                 OnUpdateRetrieved(this, message);
                 Store.SetRetrieved(message);
 
@@ -292,6 +332,21 @@ namespace Meadow.Update
             return osDir.GetFiles().Count() > 0;
         }
 
+        private void DisplayTree(DirectoryInfo di)
+        {
+            Resolver.Log.Info(di.Name);
+
+            foreach (var f in di.GetFiles())
+            {
+                Resolver.Log.Info($" {f.Name}");
+            }
+
+            foreach (var d in di.GetDirectories())
+            {
+                DisplayTree(d);
+            }
+        }
+
         public void ApplyUpdate(UpdateInfo updateInfo)
         {
             State = UpdateState.UpdateInProgress;
@@ -317,6 +372,8 @@ namespace Meadow.Update
             // extract zip
             ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
 
+            DisplayTree(new DirectoryInfo(UpdateDirectory));
+
             // do we actually contain an update?
             var updateValid = CurrentUpdateContainsAppUpdate() || CurrentUpdateContainsOSUpdate();
 
@@ -330,7 +387,7 @@ namespace Meadow.Update
 
             // shut down the app (or timeout)
             var shutdownTimeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
-            var shutDownTask = Resolver.App.OnShutdown();
+            var shutDownTask = Resolver.App?.OnShutdown();
 
             // TODO: cancel the app run cancellation token
 

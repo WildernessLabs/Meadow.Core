@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace Meadow.Update
@@ -171,6 +172,15 @@ namespace Meadow.Update
             }
 
             return fi.Create();
+        }
+
+        public string GetFileHash(FileInfo file)
+        {
+            using (var sha = SHA256.Create())
+            using (var stream = file.OpenRead())
+            {
+                return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "");
+            }
         }
 
         internal void SetRetrieved(UpdateMessage message)

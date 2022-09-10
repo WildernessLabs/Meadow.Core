@@ -15,15 +15,15 @@ namespace Meadow.Update
 
     public class UpdateInfo
     {
-        public DateTime PublishedOn { get; internal set; }
+        public DateTime PublishedOn { get; set; }
         public string ID { get; protected set; }
-        public UpdateType UpdateType { get; internal set; }
-        public string Version { get; internal set; }
-        public long DownloadSize { get; internal set; }
-        public string? Summary { get; internal set; }
-        public string? Detail { get; internal set; }
-        public bool Retrieved { get; internal set; }
-        public bool Applied { get; internal set; }
-        public bool DownloadHash { get; internal set; }
+        public UpdateType UpdateType { get; set; }
+        public string Version { get; set; }
+        public long DownloadSize { get; set; }
+        public string? Summary { get; set; }
+        public string? Detail { get; set; }
+        public bool Retrieved { get; set; }
+        public bool Applied { get; set; }
+        public string DownloadHash { get; set; }
     }
 }
