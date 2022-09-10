@@ -142,6 +142,7 @@
             try
             {
                 UpdateSettings = new UpdateSettings();
+                Resolver.Log.Trace($"Using Update Server {UpdateSettings.UpdateServer}:{UpdateSettings.UpdatePort}");
             }
             catch (Exception ex)
             {
@@ -262,6 +263,11 @@
                 var updateService = new UpdateService(UpdateSettings);
                 Resolver.Services.Add<IUpdateService>(updateService);
 
+                Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
+                if (UpdateSettings.Enabled)
+                {
+                    updateService.Start();
+                }
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }

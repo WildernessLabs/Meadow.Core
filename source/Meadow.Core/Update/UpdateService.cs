@@ -156,9 +156,9 @@ namespace Meadow.Update
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
                         }
-                        catch (MqttCommunicationException)
+                        catch (MqttCommunicationException e)
                         {
-                            Resolver.Log.Debug("Error connecting to Meadow.Cloud");
+                            Resolver.Log.Debug($"Error connecting to Meadow.Cloud: {e.Message}");
                             State = UpdateState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
