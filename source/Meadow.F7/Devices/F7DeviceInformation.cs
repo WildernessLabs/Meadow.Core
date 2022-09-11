@@ -1,5 +1,4 @@
-﻿using System;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using static Meadow.IPlatformOS;
 
 namespace Meadow.Devices
@@ -25,7 +24,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Get the hardware revision.
         /// </summary>
-        public MeadowPlatform Platform => (MeadowPlatform) F7PlatformOS.GetUInt(ConfigurationValues.Product);
+        public MeadowPlatform Platform => (MeadowPlatform)F7PlatformOS.GetUInt(ConfigurationValues.Product);
 
         /// <summary>
         /// Get the processor type.
@@ -40,10 +39,9 @@ namespace Meadow.Devices
         public string ProcessorSerialNumber => F7PlatformOS.GetString(ConfigurationValues.SerialNumber);
 
         /// <summary>
-        /// Get the unique ID of the micrcontroller.
+        /// Gets the unique ID of the F7 microcontroller.
         /// </summary>
-        /// <returns>Unique ID of the microcontroller.</returns>
-        public string ChipID => F7PlatformOS.GetString(ConfigurationValues.UniqueId);
+        public string UniqueID => F7PlatformOS.GetString(ConfigurationValues.UniqueId);
 
         /// <summary>
         /// Get the coprocessor type.

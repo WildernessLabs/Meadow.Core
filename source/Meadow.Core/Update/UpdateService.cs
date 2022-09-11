@@ -31,6 +31,7 @@ namespace Meadow.Update
         private IMqttClient MqttClient { get; set; }
         private MqttClientOptions ClientOptions { get; set; }
         private UpdateStore Store { get; }
+        private string MqttClientID { get; }
 
         internal UpdateService(IUpdateSettings config)
         {
@@ -50,6 +51,8 @@ namespace Meadow.Update
             UpdateDirectory = Path.Combine(root, "update");
 
             Store = new UpdateStore(UpdateStoreDirectory);
+            var id = Resolver.Device?.Information?.UniqueID ?? "simple";
+            MqttClientID = $"{id}_client";
 
             Config = config;
         }
@@ -128,7 +131,7 @@ namespace Meadow.Update
             };
 
             ClientOptions = new MqttClientOptionsBuilder()
-                            .WithClientId(Config.ClientID)
+                            .WithClientId(MqttClientID)
                             .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
                             .WithCleanSession()
                             .Build();

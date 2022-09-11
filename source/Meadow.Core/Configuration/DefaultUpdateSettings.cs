@@ -7,7 +7,6 @@ namespace Meadow
         public bool Enabled { get; } = false;
         public string UpdateServer { get; } = "20.253.228.77";
         public int UpdatePort { get; } = 1883;
-        public string ClientID { get; } = "simple_client";
         public string RootTopic { get; } = "Meadow.OtA";
         public int CloudConnectRetrySeconds { get; } = 15;
     }
