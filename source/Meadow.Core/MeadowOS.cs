@@ -257,22 +257,6 @@
             Resolver.Log.Debug("Shutdown");
         }
 
-
-        public static void Sleep(DateTime until)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(TimeSpan duration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(WakeUpOptions wakeUp)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Creates the named OS directories if they don't exist, and makes sure
         /// the `/Temp` directory is emptied out.
