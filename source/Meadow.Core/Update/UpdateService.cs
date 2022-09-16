@@ -1,4 +1,5 @@
-﻿using MQTTnet;
+﻿using Meadow.Hardware;
+using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Exceptions;
 using System;
@@ -9,6 +10,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Meadow.Update")]
@@ -17,6 +19,8 @@ namespace Meadow.Update
 {
     public class UpdateService : IUpdateService
     {
+        public const int NetworkRetryTimeoutSeconds = 15;
+
         private string UpdateDirectory { get; }
         private string UpdateStoreDirectory { get; }
 
@@ -73,8 +77,9 @@ namespace Meadow.Update
         {
             if (State == UpdateState.Dead)
             {
-                Initialize();
-                Task.Run(UpdateStateMachine);
+                // using Thread instead of a Task because of a bug (in the runtime or BCL)
+                new Thread(() => UpdateStateMachine())
+                    .Start();
             }
         }
 
@@ -133,13 +138,19 @@ namespace Meadow.Update
             ClientOptions = new MqttClientOptionsBuilder()
                             .WithClientId(MqttClientID)
                             .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
-                            .WithCleanSession()
+                            //.WithCleanSession()
                             .Build();
         }
 
-        private async Task UpdateStateMachine()
+        private async void UpdateStateMachine()
         {
+            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+
+            Initialize();
+
             State = UpdateState.Disconnected;
+
+            var nic = Resolver.Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 
             // update state machine
             while (true)
@@ -147,29 +158,37 @@ namespace Meadow.Update
                 switch (State)
                 {
                     case UpdateState.Disconnected:
-                        State = UpdateState.Connecting;
-                        try
+                        if (nic.IsConnected)
                         {
-                            await MqttClient.ConnectAsync(ClientOptions);
+                            State = UpdateState.Connecting;
+                            try
+                            {
+                                await MqttClient.ConnectAsync(ClientOptions);
+                            }
+                            catch (MqttCommunicationTimedOutException)
+                            {
+                                Resolver.Log.Debug("Timeout connecting to Meadow.Cloud");
+                                State = UpdateState.Disconnected;
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
+                            }
+                            catch (MqttCommunicationException e)
+                            {
+                                Resolver.Log.Debug($"Error connecting to Meadow.Cloud: {e.Message}");
+                                State = UpdateState.Disconnected;
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
+                            }
+                            catch (Exception ex)
+                            {
+                                Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
+                                State = UpdateState.Disconnected;
+                            }
                         }
-                        catch (MqttCommunicationTimedOutException)
+                        else
                         {
-                            Resolver.Log.Debug("Timeout connecting to Meadow.Cloud");
-                            State = UpdateState.Disconnected;
-                            //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
-                        }
-                        catch (MqttCommunicationException e)
-                        {
-                            Resolver.Log.Debug($"Error connecting to Meadow.Cloud: {e.Message}");
-                            State = UpdateState.Disconnected;
-                            //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
-                        }
-                        catch (Exception ex)
-                        {
-                            Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
-                            State = UpdateState.Disconnected;
+                            Resolver.Log.Debug("Update Service waiting for network connection");
+                            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                         }
                         break;
                     case UpdateState.Connected:
@@ -189,12 +208,10 @@ namespace Meadow.Update
                     case UpdateState.DownloadingFile:
                     case UpdateState.UpdateInProgress:
                     default:
-                        await Task.Delay(1000);
+                        Thread.Sleep(1000);
                         break;
                 }
             }
-
-            State = UpdateState.Dead;
         }
 
         public void ClearUpdates()
