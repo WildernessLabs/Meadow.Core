@@ -1,5 +1,4 @@
-﻿using System;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using static Meadow.IPlatformOS;
 
 namespace Meadow.Devices
@@ -25,7 +24,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Get the hardware revision.
         /// </summary>
-        public MeadowPlatform Platform => (MeadowPlatform) F7PlatformOS.GetUInt(ConfigurationValues.Product);
+        public MeadowPlatform Platform => (MeadowPlatform)F7PlatformOS.GetUInt(ConfigurationValues.Product);
 
         /// <summary>
         /// Get the processor type.
@@ -56,6 +55,11 @@ namespace Meadow.Devices
         /// </summary>
         /// <returns>Coprocessor firmware version..</returns>
         public string CoprocessorOSVersion => F7PlatformOS.GetString(ConfigurationValues.CoprocessorFirmwareVersion);
+
+        /// <summary>
+        /// Get the version of the firmware flashed to the microcontroller.
+        /// </summary>
+        public string OSVersion => F7PlatformOS.GetString(ConfigurationValues.OsVersion);
 
 
         //TODO: what about coprocessor build date

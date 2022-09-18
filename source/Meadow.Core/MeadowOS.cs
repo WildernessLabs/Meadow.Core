@@ -1,6 +1,5 @@
 ﻿namespace Meadow
 {
-    using Meadow.Devices;
     using Meadow.Logging;
     using System;
     using System.IO;
@@ -161,7 +160,7 @@
                         }
                         catch (Exception ex)
                         {
-                            Resolver.Log.Warn($"Unable to load assembly '{name}': { ex.Message}");
+                            Resolver.Log.Warn($"Unable to load assembly '{name}': {ex.Message}");
                         }
                     }
                 }
@@ -238,10 +237,6 @@
 
                 App = app;
 
-                CurrentDevice.BeforeSleep += () => { app.OnSleep(); };
-                CurrentDevice.AfterWake += () => { app.OnResume(); };
-                CurrentDevice.BeforeReset += () => { app.OnReset(); };
-
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
             catch (Exception e)
@@ -255,22 +250,6 @@
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             Resolver.Log.Debug("Shutdown");
-        }
-
-
-        public static void Sleep(DateTime until)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(TimeSpan duration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(WakeUpOptions wakeUp)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -336,7 +315,7 @@
 
                 Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
                 Thread.Sleep(restart * 1000);
-                CurrentDevice.Reset();
+                CurrentDevice.PlatformOS.Reset();
             }
             throw e; // no return from this function
         }
