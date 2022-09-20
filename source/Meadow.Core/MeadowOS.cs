@@ -1,6 +1,7 @@
 ﻿namespace Meadow
 {
     using Meadow.Logging;
+    using Meadow.Update;
     using System;
     using System.IO;
     using System.Reflection;
@@ -20,6 +21,7 @@
 
         private static IApp App { get; set; }
         private static ILifecycleSettings LifecycleSettings { get; set; }
+        private static IUpdateSettings UpdateSettings { get; set; }
 
         static bool appRunning = false;
 
@@ -132,6 +134,19 @@
             }
             Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
             Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
+
+            try
+            {
+                UpdateSettings = new UpdateSettings();
+                Resolver.Log.Trace($"Using Update Server {UpdateSettings.UpdateServer}:{UpdateSettings.UpdatePort}");
+            }
+            catch (Exception ex)
+            {
+                UpdateSettings = AppSettings.DefaultUpdateSettings;
+
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default Update Config");
+            }
         }
 
 
@@ -238,11 +253,19 @@
                 // feels off, but not seeing a super clean way without the generics, etc.
                 if (app.GetType().GetProperty(nameof(App.CancellationToken)) is PropertyInfo pi)
                 {
-                    Resolver.Log.Trace($"Setting app CancellationToken");
                     pi.SetValue(app, AppAbort.Token);
                 }
 
                 App = app;
+
+                var updateService = new UpdateService(UpdateSettings);
+                Resolver.Services.Add<IUpdateService>(updateService);
+
+                Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
+                if (UpdateSettings.Enabled)
+                {
+                    updateService.Start();
+                }
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }

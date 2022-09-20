@@ -145,7 +145,7 @@ namespace Meadow.Update
 
         private async void UpdateStateMachine()
         {
-            //            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
 
             Initialize();
 
