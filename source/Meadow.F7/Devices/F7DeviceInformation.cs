@@ -55,6 +55,11 @@ namespace Meadow.Devices
         /// <returns>Coprocessor firmware version..</returns>
         public string CoprocessorOSVersion => F7PlatformOS.GetString(ConfigurationValues.CoprocessorFirmwareVersion);
 
+        /// <summary>
+        /// Get the version of the firmware flashed to the microcontroller.
+        /// </summary>
+        public string OSVersion => F7PlatformOS.GetString(ConfigurationValues.OsVersion);
+
 
         //TODO: what about coprocessor build date
     }

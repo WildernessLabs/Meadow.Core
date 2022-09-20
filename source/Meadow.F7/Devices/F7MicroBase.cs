@@ -2,9 +2,6 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
-using System.Threading;
-using static Meadow.Core.Interop;
-using static Meadow.Core.Interop.Nuttx;
 
 namespace Meadow.Devices
 {
@@ -19,9 +16,6 @@ namespace Meadow.Devices
 
         //==== events
         public event EventHandler WiFiAdapterInitialized = delegate { };
-        public event PowerTransitionHandler BeforeReset = delegate { };
-        public event PowerTransitionHandler BeforeSleep = delegate { };
-        public event PowerTransitionHandler AfterWake = delegate { };
 
         //==== public properties
         public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
@@ -133,12 +127,6 @@ namespace Meadow.Devices
             return IoController.GetTemperature();
         }
 
-        public void Reset()
-        {
-            BeforeReset?.Invoke();
-
-            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerReset);
-        }
 
         public void SetClock(DateTime dateTime)
         {
@@ -148,36 +136,6 @@ namespace Meadow.Devices
             };
 
             Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
-        }
-
-        public void Sleep(TimeSpan duration)
-        {
-            var seconds = (int)duration.TotalSeconds;
-
-            if (seconds <= 0)
-            {
-                throw new ArgumentOutOfRangeException("duration must be > 0 seconds");
-            }
-            if (seconds > 0xffff)
-            {
-                throw new ArgumentOutOfRangeException("duration must be < 0xffff seconds");
-            }
-
-            var cmd = new UpdSleepCommand
-            {
-                SecondsToSleep = seconds
-            };
-
-            BeforeSleep?.Invoke();
-
-            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep, cmd);
-
-            // Stop execution while the device actually does it's thing
-            Thread.Sleep(100);
-
-            // TODO: see how long this actually takes
-
-            AfterWake?.Invoke();
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿namespace Meadow
 {
     using Meadow.Logging;
-    using Meadow.Update;
     using System;
     using System.IO;
     using System.Reflection;
@@ -21,7 +20,6 @@
 
         private static IApp App { get; set; }
         private static ILifecycleSettings LifecycleSettings { get; set; }
-        private static IUpdateSettings UpdateSettings { get; set; }
 
         static bool appRunning = false;
 
@@ -46,11 +44,7 @@
                 try
                 {
                     Resolver.Log.Trace("Running App");
-
-                    var runTask = Task.Run(() => App.Run(AppAbort.Token), AppAbort.Token);
-
-                    await runTask;
-
+                    await App.Run();
                     appRunning = true;
                 }
                 catch (Exception e)
@@ -79,7 +73,7 @@
                 Resolver.Log.Trace($"App shutting down");
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
-                await App.OnShutdown();
+                App.OnShutdown();
             }
             catch (Exception e)
             {
@@ -138,19 +132,6 @@
             }
             Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
             Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
-
-            try
-            {
-                UpdateSettings = new UpdateSettings();
-                Resolver.Log.Trace($"Using Update Server {UpdateSettings.UpdateServer}:{UpdateSettings.UpdatePort}");
-            }
-            catch (Exception ex)
-            {
-                UpdateSettings = AppSettings.DefaultUpdateSettings;
-
-                Resolver.Log.Warn(ex.Message);
-                Resolver.Log.Warn("Using Default Update Config");
-            }
         }
 
 
@@ -256,19 +237,6 @@
 
                 App = app;
 
-                CurrentDevice.BeforeSleep += () => { app.OnSleep(); };
-                CurrentDevice.AfterWake += () => { app.OnResume(); };
-                CurrentDevice.BeforeReset += () => { app.OnReset(); };
-
-                var updateService = new UpdateService(UpdateSettings);
-                Resolver.Services.Add<IUpdateService>(updateService);
-
-                Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
-                if (UpdateSettings.Enabled)
-                {
-                    updateService.Start();
-                }
-
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
             }
             catch (Exception e)
@@ -282,22 +250,6 @@
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             Resolver.Log.Debug("Shutdown");
-        }
-
-
-        public static void Sleep(DateTime until)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(TimeSpan duration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(WakeUpOptions wakeUp)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -363,7 +315,7 @@
 
                 Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
                 Thread.Sleep(restart * 1000);
-                CurrentDevice.Reset();
+                CurrentDevice.PlatformOS.Reset();
             }
             throw e; // no return from this function
         }
