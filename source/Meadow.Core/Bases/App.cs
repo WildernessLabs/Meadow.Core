@@ -14,6 +14,8 @@
     {
         private ExecutionContext executionContext;
 
+        public CancellationToken CancellationToken { get; internal set; }
+
         protected App()
         {
             executionContext = Thread.CurrentThread.ExecutionContext;
@@ -30,7 +32,7 @@
             ExecutionContext.Run(executionContext, new ContextCallback(action), state);
         }
 
-        public virtual Task Run(CancellationToken cancellationToken)
+        public virtual Task Run()
         {
             return Task.CompletedTask;
         }

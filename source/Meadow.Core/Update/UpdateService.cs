@@ -398,7 +398,7 @@ namespace Meadow.Update
             Task.WaitAny(shutDownTask, shutdownTimeoutTask);
 
             // restart the device
-            Resolver.Device.Reset();
+            Resolver.Device.PlatformOS.Reset();
 
             // the OS will handle updates on the next boot
 

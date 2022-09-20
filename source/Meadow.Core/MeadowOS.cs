@@ -235,6 +235,13 @@
                     throw new Exception($"Failed to create instance of '{appType.Name}'");
                 }
 
+                // feels off, but not seeing a super clean way without the generics, etc.
+                if (app.GetType().GetProperty(nameof(App.CancellationToken)) is PropertyInfo pi)
+                {
+                    Resolver.Log.Trace($"Setting app CancellationToken");
+                    pi.SetValue(app, AppAbort.Token);
+                }
+
                 App = app;
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
