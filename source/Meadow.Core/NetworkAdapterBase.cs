@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace Meadow.Devices
+namespace Meadow
 {
-    public abstract class NetworkAdapterBase : IWiredNetworkAdapter
+    public abstract class NetworkAdapterBase : INetworkAdapter
     {
         public event NetworkConnectionHandler NetworkConnected;
         public event NetworkDisconnectionHandler NetworkDisconnected;

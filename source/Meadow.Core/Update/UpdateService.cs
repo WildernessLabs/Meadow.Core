@@ -1,6 +1,10 @@
 ﻿using Meadow.Hardware;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Disconnecting;
+using MQTTnet.Client.Options;
+using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
 using System.IO;
@@ -33,7 +37,7 @@ namespace Meadow.Update
 
         private IUpdateSettings Config { get; }
         private IMqttClient MqttClient { get; set; }
-        private MqttClientOptions ClientOptions { get; set; }
+        private IMqttClientOptions ClientOptions { get; set; }
         private UpdateStore Store { get; }
         private string MqttClientID { get; }
 
@@ -88,19 +92,17 @@ namespace Meadow.Update
             var factory = new MqttFactory();
             MqttClient = factory.CreateMqttClient();
 
-            MqttClient.ConnectedAsync += (f) =>
+            MqttClient.ConnectedHandler = new MqttClientConnectedHandlerDelegate((f) =>
             {
                 State = UpdateState.Connected;
-                return Task.CompletedTask;
-            };
+            });
 
-            MqttClient.DisconnectedAsync += (f) =>
+            MqttClient.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate((f) =>
             {
                 State = UpdateState.Disconnected;
-                return Task.CompletedTask;
-            };
+            });
 
-            MqttClient.ApplicationMessageReceivedAsync += (f) =>
+            MqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate((f) =>
             {
                 var json = Encoding.UTF8.GetString(f.ApplicationMessage.Payload);
 
@@ -132,8 +134,7 @@ namespace Meadow.Update
                     }
 
                 }
-                return Task.CompletedTask;
-            };
+            });
 
             ClientOptions = new MqttClientOptionsBuilder()
                             .WithClientId(MqttClientID)
@@ -144,13 +145,13 @@ namespace Meadow.Update
 
         private async void UpdateStateMachine()
         {
-            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+            //            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
 
             Initialize();
 
             State = UpdateState.Disconnected;
 
-            var nic = Resolver.Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
+            var nic = Resolver.Device?.NetworkAdapters?.Primary<INetworkAdapter>();
 
             // update state machine
             while (true)
