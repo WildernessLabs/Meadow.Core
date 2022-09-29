@@ -125,7 +125,16 @@ namespace Meadow.Update
                     // do we already know about this update?
                     if (Store.TryGetMessage(info.ID, out UpdateMessage? msg))
                     {
-                        Resolver.Log.Trace($"Already know about Update {info.ID}");
+                        if (!(msg?.Retrieved ?? false))
+                        {
+                            Resolver.Log.Trace($"Update {info.ID} is known but not retrieved");
+
+                            OnUpdateAvailable?.Invoke(this, info);
+                        }
+                        else
+                        {
+                            Resolver.Log.Trace($"Update {info.ID} has already been retrieved");
+                        }
                     }
                     else
                     {
@@ -258,12 +267,13 @@ namespace Meadow.Update
                     {
                         using (var fileStream = Store.GetUpdateFileStream(message.ID))
                         {
+                            Resolver.Log.Trace($"Copying update to {fileStream.Name}");
+
                             await stream.CopyToAsync(fileStream);
                         }
                     }
                 }
 
-                // TODO: verify hash
                 var path = Store.GetUpdateArchivePath(message.ID);
                 var hash = Store.GetFileHash(new FileInfo(path));
 
@@ -273,6 +283,10 @@ namespace Meadow.Update
                     {
                         Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
                         // TODO: what do we do? Retry? Ignore?
+                    }
+                    else
+                    {
+                        Resolver.Log.Trace("Update package hash matched");
                     }
                 }
                 else
@@ -290,6 +304,7 @@ namespace Meadow.Update
             {
                 // TODO: raise some event?
                 Resolver.Log.Error($"Failed to download Update: {ex.Message}");
+                State = UpdateState.Idle;
             }
         }
 
