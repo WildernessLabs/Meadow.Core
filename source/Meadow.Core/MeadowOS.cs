@@ -305,6 +305,21 @@
             Resolver.Log.Error(message ?? " System Failure");
             Resolver.Log.Error($" {e.GetType()}: {e.Message}");
             Resolver.Log.Debug(e.StackTrace);
+
+            if (e is AggregateException ae)
+            {
+                foreach (var ex in ae.InnerExceptions)
+                {
+                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
+                    Resolver.Log.Debug(ex.StackTrace);
+                }
+            }
+            else if (e.InnerException != null)
+            {
+                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
+                Resolver.Log.Debug(e.InnerException.StackTrace);
+            }
+
             if (LifecycleSettings.RestartOnAppFailure)
             {
                 int restart = 5;
