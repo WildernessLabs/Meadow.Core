@@ -118,6 +118,14 @@ namespace Meadow
             return Convert.ToInt32(stringVal);
         }
 
+        public string GetConfiguredString([CallerMemberName] string? name = null, string defaultValue = "")
+        {
+            if (string.IsNullOrWhiteSpace(name)) return defaultValue;
+            var stringVal = GetConfiguredValue(name);
+            if (stringVal == null) return defaultValue;
+            return stringVal;
+        }
+
         private string PathTypeName { get; }
 
         public string? GetConfiguredValue([CallerMemberName] string? name = null)

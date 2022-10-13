@@ -14,6 +14,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Checkout MQTTnet fork
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/MQTTnet
+        path: MQTTnet
+        ref: meadow
+        
     - name: Checkout Meadow.Core
       uses: actions/checkout@v3
       with:
