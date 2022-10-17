@@ -43,13 +43,7 @@
 
         public virtual void OnError(Exception e, out bool recovered) { recovered = false; }
 
-        public virtual void OnResume() { }
-
-        public virtual void OnSleep() { }
-
         public virtual void OnRecovery(Exception e) { }
-
-        public virtual void OnReset() { }
 
         /// <summary>
         /// Called when the application is about to update itself.
