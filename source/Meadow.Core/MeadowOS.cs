@@ -29,7 +29,13 @@
 
         public async static Task Main(string[] _)
         {
-            Initialize();
+            if (!Initialize())
+            {
+                // device initialization failed - don't try bring up the app
+                SystemFailure("Device Initialization Failure");
+                return;
+            }
+
             try
             {
                 Resolver.Log.Trace("Initializing App");
@@ -39,6 +45,7 @@
             {
                 // exception on bring-up; not good
                 SystemFailure(e, "App initialization failed");
+                return;
             }
 
             while (!appRunning)
@@ -202,7 +209,7 @@
             return appType;
         }
 
-        private static void Initialize()
+        private static bool Initialize()
         {
             try
             {
@@ -215,6 +222,7 @@
             {
                 // must use Console because the logger failed
                 Console.WriteLine($"Failed to create Logger: {ex.Message}");
+                return false;
             }
 
             try
@@ -231,12 +239,20 @@
 
                 var deviceType = appType.BaseType.GetGenericArguments()[0];
 
-                if (Activator.CreateInstance(deviceType) is not IMeadowDevice device)
+                try
                 {
-                    throw new Exception($"Failed to create instance of '{deviceType.Name}'");
+                    if (Activator.CreateInstance(deviceType) is not IMeadowDevice device)
+                    {
+                        throw new Exception($"Failed to create instance of '{deviceType.Name}'");
+                    }
+
+                    CurrentDevice = device;
+                }
+                catch (Exception)
+                {
+                    return false;
                 }
 
-                CurrentDevice = device;
                 CurrentDevice.Initialize();
                 CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
@@ -268,10 +284,13 @@
                 }
 
                 Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
+
+                return true;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return false;
             }
         }
 
@@ -321,6 +340,13 @@
             }
         }
 
+        private static void SystemFailure(string message)
+        {
+            Resolver.Log.Error(message);
+            SystemFailure();
+
+        }
+
         private static Exception SystemFailure(Exception e, string? message = null)
         {
             if (App is null)
@@ -350,6 +376,13 @@
                 Resolver.Log.Debug(e.InnerException.StackTrace);
             }
 
+            SystemFailure();
+
+            return e;
+        }
+
+        private static void SystemFailure()
+        {
             if (LifecycleSettings.RestartOnAppFailure)
             {
                 int restart = 5;
@@ -358,11 +391,18 @@
                     restart = LifecycleSettings.AppFailureRestartDelaySeconds;
                 }
 
-                Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
-                Thread.Sleep(restart * 1000);
-                CurrentDevice.PlatformOS.Reset();
+                if (CurrentDevice != null && CurrentDevice.PlatformOS != null)
+                {
+                    Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
+                    Thread.Sleep(restart * 1000);
+
+                    CurrentDevice.PlatformOS.Reset();
+                }
+                else
+                {
+                    Resolver.Log.Info($"Initialization failure prevents automatic restart.");
+                }
             }
-            throw e; // no return from this function
         }
 
         private static void StaticOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
