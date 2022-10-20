@@ -54,6 +54,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Foundation.Core", ".
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Graphics.MicroGraphics", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Graphics.MicroGraphics\Driver\Graphics.MicroGraphics.csproj", "{4C742EAE-C51D-40DD-BF13-1419A3C7469A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Displays.TftSpi", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.TftSpi\Driver\Displays.TftSpi.csproj", "{750DFD5B-97A9-40B8-8FEB-11B0E594313A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ICs.ADC.Ads1x15", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\ICs.ADC.Ads1x15\Driver\ICs.ADC.Ads1x15.csproj", "{7559C239-3B0D-4C0F-8051-EB814916B56B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sensors.Atmospheric.Bme280", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Sensors.Atmospheric.Bme280\Driver\Sensors.Atmospheric.Bme280.csproj", "{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -140,6 +146,24 @@ Global
 		{4C742EAE-C51D-40DD-BF13-1419A3C7469A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C742EAE-C51D-40DD-BF13-1419A3C7469A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4C742EAE-C51D-40DD-BF13-1419A3C7469A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7559C239-3B0D-4C0F-8051-EB814916B56B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7559C239-3B0D-4C0F-8051-EB814916B56B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7559C239-3B0D-4C0F-8051-EB814916B56B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{7559C239-3B0D-4C0F-8051-EB814916B56B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7559C239-3B0D-4C0F-8051-EB814916B56B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7559C239-3B0D-4C0F-8051-EB814916B56B}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +187,9 @@ Global
 		{C70C470C-84A1-4993-AD3F-A94B7224917E} = {608ED7EE-E06F-4FB6-B1B4-C6032E817330}
 		{6C728CA5-3C8B-46C8-A16E-1FB51A2F97C1} = {608ED7EE-E06F-4FB6-B1B4-C6032E817330}
 		{4C742EAE-C51D-40DD-BF13-1419A3C7469A} = {608ED7EE-E06F-4FB6-B1B4-C6032E817330}
+		{750DFD5B-97A9-40B8-8FEB-11B0E594313A} = {608ED7EE-E06F-4FB6-B1B4-C6032E817330}
+		{7559C239-3B0D-4C0F-8051-EB814916B56B} = {608ED7EE-E06F-4FB6-B1B4-C6032E817330}
+		{7B50BF55-E1EF-412D-AE32-50CFB9D51F7D} = {608ED7EE-E06F-4FB6-B1B4-C6032E817330}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6CC77371-5880-4AD7-8506-1FB909E18343}

@@ -1,6 +1,6 @@
 ﻿using Meadow;
 using Meadow.Foundation;
-using Meadow.Foundation.Displays.TftSpi;
+using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
 using Meadow.Pinouts;
@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace PushButton_Sample
 {
-    public class MeadowApp : App<MeadowForLinux<RaspberryPi>, MeadowApp>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>>
     {
         private St7789 _display;
         private MicroGraphics _graphics;
@@ -49,8 +49,7 @@ namespace PushButton_Sample
                     dcPin: Device.Pins.GPIO27, // A04
                     resetPin: Device.Pins.GPIO22, // A05
                     width: 240,
-                    height: 240,
-                    displayColorMode: ColorType.Format16bppRgb565);
+                    height: 240);
             }
             catch (NativeException e)
             {

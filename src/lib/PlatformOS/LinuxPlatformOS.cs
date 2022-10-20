@@ -5,15 +5,6 @@ using System.Threading;
 
 namespace Meadow
 {
-    public class LinuxNtpClient : INtpClient
-    {
-        public bool Enabled => false;
-
-        public TimeSpan PollPeriod { get; set; }
-
-        public event TimeChangedEventHandler TimeChanged;
-    }
-
     public class LinuxPlatformOS : IPlatformOS
     {
         public virtual string OSVersion { get; private set; }
@@ -22,6 +13,10 @@ namespace Meadow
         public virtual string MonoVersion => ".NET 6.0"; // TODO"
 
         internal static CancellationTokenSource AppAbort = new();
+
+        public event PowerTransitionHandler BeforeReset;
+        public event PowerTransitionHandler BeforeSleep;
+        public event PowerTransitionHandler AfterWake;
 
         public INtpClient NtpClient { get; private set; }
 
@@ -40,7 +35,7 @@ namespace Meadow
                 var proc = Process.Start(psi);
                 OSVersion = proc.StandardOutput.ReadToEnd().Trim();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Resolver.Log.Debug($"Unable to parse lsb_release: {ex.Message}");
             }
@@ -56,7 +51,7 @@ namespace Meadow
                 var proc = Process.Start(psi);
                 OSBuildDate = proc.StandardOutput.ReadToEnd().Trim();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Resolver.Log.Debug($"Unable to parse uname: {ex.Message}");
             }
@@ -79,6 +74,16 @@ namespace Meadow
         }
 
         public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Sleep(TimeSpan duration)
         {
             throw new NotImplementedException();
         }

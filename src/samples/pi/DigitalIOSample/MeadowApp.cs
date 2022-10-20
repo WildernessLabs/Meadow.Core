@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace DigitalIOSample
 {
-    public class MeadowApp : App<MeadowForLinux<SnickerdoodleBlack>>
+    public class MeadowApp : App<MeadowForLinux<RaspberryPi>>
     {
         public MeadowApp()
         {
@@ -26,7 +26,7 @@ namespace DigitalIOSample
         void RunPulse()
         {
             // this is pin 40 on a Pi4, so last outer pin (easy to clip with a scope)
-            var output = Device.CreateDigitalOutputPort(Device.Pins.GPIO1);
+            var output = Device.CreateDigitalOutputPort(Device.Pins.Pin40);
             var state = false;
 
             while (true)

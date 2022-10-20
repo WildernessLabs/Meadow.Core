@@ -118,20 +118,17 @@ namespace Meadow
             }
 
             Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            Interop.cfsetspeed(ref settings, BaudRate);
-
-            /*
-            if (_showSerialDebug)
+            var result = Interop.cfsetspeed(ref settings, BaudRate);
+            if(result != 0)
             {
-                ShowSettings(settings);
+                throw new NativeException($"cfsetspeed failed: {Marshal.GetLastWin32Error()}");
             }
-            */
 
-            var result = Interop.tcsetattr(handle.ToInt32(), Interop.TCSANOW, ref settings);
+            result = Interop.tcsetattr(handle.ToInt32(), Interop.TCSANOW, ref settings);
 
             if(result != 0)
             {
-                //                throw new NativeException(UPD.GetLastError().ToString());
+                throw new NativeException($"tcsetattr failed: {Marshal.GetLastWin32Error()}");
             }
         }
 

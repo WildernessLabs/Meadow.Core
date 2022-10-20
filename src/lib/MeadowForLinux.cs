@@ -35,15 +35,15 @@ namespace Meadow
         {
             get
             {
-                if(typeof(TPinout) == typeof(JetsonNano))
+                if (typeof(TPinout) == typeof(JetsonNano))
                 {
                     return new JetsonNanoSerialPortNameDefinitions();
                 }
-                else if(typeof(TPinout) == typeof(JetsonXavierAGX))
+                else if (typeof(TPinout) == typeof(JetsonXavierAGX))
                 {
                     return new JetsonXavierAGXSerialPortNameDefinitions();
                 }
-                else if(typeof(TPinout) == typeof(RaspberryPi))
+                else if (typeof(TPinout) == typeof(RaspberryPi))
                 {
                     return new RaspberryPiSerialPortNameDefinitions();
                 }
@@ -61,7 +61,7 @@ namespace Meadow
         /// </summary>
         public MeadowForLinux()
         {
-            if(typeof(TPinout) == typeof(JetsonNano) || typeof(TPinout) == typeof(JetsonXavierAGX))
+            if (typeof(TPinout) == typeof(JetsonNano) || typeof(TPinout) == typeof(JetsonXavierAGX))
             {
                 PlatformOS = new JetsonPlatformOS();
             }
@@ -115,36 +115,36 @@ namespace Meadow
         {
             // TODO: implement this based on channel caps (this is platform specific right now)
 
-            if(Pins is JetsonNano)
+            if (Pins is JetsonNano)
             {
-                if(clock == Pins["PIN05"] && data == Pins["PIN03"])
+                if (clock == Pins["PIN05"] && data == Pins["PIN03"])
                 {
                     return new I2CBus(1, frequency);
                 }
-                else if(clock == Pins["PIN28"] && data == Pins["PIN27"])
+                else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
                 {
                     return new I2CBus(0, frequency);
                 }
             }
-            if(Pins is JetsonXavierAGX)
+            if (Pins is JetsonXavierAGX)
             {
-                if(clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
+                if (clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
                 {
                     return new I2CBus(1, frequency);
                 }
-                else if(clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
+                else if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
                 {
                     return new I2CBus(8, frequency);
                 }
             }
-            else if(Pins is RaspberryPi)
+            else if (Pins is RaspberryPi)
             {
-                if(clock == Pins["PIN05"] && data == Pins["PIN03"])
+                if (clock == Pins["PIN05"] && data == Pins["PIN03"])
                 {
                     return new I2CBus(1, frequency);
                 }
             }
-            else if(Pins is SnickerdoodleBlack)
+            else if (Pins is SnickerdoodleBlack)
             {
                 return new KrtklI2CBus(frequency);
             }
@@ -171,7 +171,7 @@ namespace Meadow
 
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
-            if(_gpiod != null)
+            if (_gpiod != null)
             {
                 return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
             }
@@ -188,7 +188,7 @@ namespace Meadow
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
-            if(_gpiod != null)
+            if (_gpiod != null)
             {
                 return new GpiodDigitalInputPort(_gpiod, pin, new GpiodDigitalChannelInfo(pin.Name), interruptMode, resistorMode, debounceDuration, glitchDuration);
             }
@@ -272,12 +272,14 @@ namespace Meadow
 
         public void Reset()
         {
+            // TODO: $ sudo reboot
             throw new NotImplementedException();
         }
 
-        public void Sleep(int seconds = -1)
+        public void Sleep(TimeSpan duration)
         {
-            throw new NotImplementedException();
+            // not supported on RasPi
+            throw new PlatformNotSupportedException();
         }
 
         public void OnShutdown(out bool complete, Exception? e = null)

@@ -5,11 +5,9 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj" />
+    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\ICs.ADC.Ads1x15\Driver\ICs.ADC.Ads1x15.csproj" />
     <ProjectReference Include="..\..\..\lib\Meadow.Linux.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Meadow" Version="0.*" />
-    <PackageReference Include="Meadow.Foundation.ICs.ADC.Ads1x15" Version="0.1.7" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\PublishProfiles\" />
