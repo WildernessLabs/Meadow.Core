@@ -41,9 +41,7 @@
 
         public virtual Task OnShutdown() { return Task.CompletedTask; }
 
-        public virtual void OnError(Exception e, out bool recovered) { recovered = false; }
-
-        public virtual void OnRecovery(Exception e) { }
+        public virtual Task OnError(Exception e) { return Task.CompletedTask; }
 
         /// <summary>
         /// Called when the application is about to update itself.
