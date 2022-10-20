@@ -9,7 +9,7 @@ namespace Meadow
     public class CubeApp : App<Simulation.SimulatedMeadow<Simulation.SimulatedPinout>>
     {
         MicroGraphics graphics;
-        private Display display;
+        private GtkDisplay display;
 
         //needs cleanup - quick port from c code
         double rot, rotationX, rotationY, rotationZ;
@@ -30,7 +30,7 @@ namespace Meadow
 
         public override Task Initialize()
         {
-            display = new Meadow.Graphics.Display();
+            display = new Meadow.Graphics.GtkDisplay(ColorType.Format16bppRgb565);
 
             int cubeSize = 100;
 

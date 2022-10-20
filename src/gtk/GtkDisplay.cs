@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace Meadow.Graphics
 {
-    public class Display : IGraphicsDisplay
+    public class GtkDisplay : IGraphicsDisplay
     {
         private Window _window;
         private IPixelBuffer _pixelBuffer;
@@ -23,17 +23,17 @@ namespace Meadow.Graphics
         public int Width => _window.Window.Width;
         public int Height => _window.Window.Height;
 
-        static Display()
+        static GtkDisplay()
         {
             Application.Init();
         }
 
-        public Display(ColorType mode = ColorType.Format24bppRgb888)
+        public GtkDisplay(ColorType mode = ColorType.Format24bppRgb888)
         {
             Initialize(800, 600, mode); // TODO: query screen size and caps
         }
 
-        public Display(int width, int height, ColorType mode = ColorType.Format24bppRgb888)
+        public GtkDisplay(int width, int height, ColorType mode = ColorType.Format24bppRgb888)
         {
             Initialize(width, height, mode);
         }
@@ -42,7 +42,7 @@ namespace Meadow.Graphics
         {
             _window = new Window(WindowType.Popup);
 
-            switch(mode)
+            switch (mode)
             {
                 case ColorType.Format24bppRgb888:
                     _pixelBuffer = new BufferRgb888(width, height);
@@ -77,13 +77,13 @@ namespace Meadow.Graphics
         {
             _bufferConverter?.Invoke(_pixelBuffer.Buffer);
 
-            using(var surface = new ImageSurface(_pixelBuffer.Buffer, _format, Width, Height, _stride))
+            using (var surface = new ImageSurface(_pixelBuffer.Buffer, _format, Width, Height, _stride))
             {
                 args.Cr.SetSource(surface);
                 args.Cr.Paint();
 
-                if(args.Cr.GetTarget() is IDisposable d) d.Dispose();
-                if(args.Cr is IDisposable cd) cd.Dispose();
+                if (args.Cr.GetTarget() is IDisposable d) d.Dispose();
+                if (args.Cr is IDisposable cd) cd.Dispose();
                 args.RetVal = true;
             }
             ShowComplete.Set();
@@ -162,7 +162,7 @@ namespace Meadow.Graphics
         /// <param name="buffer"></param>
         private void ConvertRGBBufferToBGRBuffer24(byte[] buffer)
         {
-            for(int i = 0; i < buffer.Length; i += 2)
+            for (int i = 0; i < buffer.Length; i += 2)
             {
                 // convert two bytes into a short
                 ushort pixel = (ushort)(buffer[i] << 8 | buffer[i + 1]);
