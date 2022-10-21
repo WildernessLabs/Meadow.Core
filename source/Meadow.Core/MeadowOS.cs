@@ -60,16 +60,17 @@
                 {
                     Resolver.Log.Error($"App Error: {e.Message}");
 
-                    App.OnError(e, out bool recovered);
-                    if (recovered)
+                    try
                     {
-                        App.OnRecovery(e);
+                        await App.OnError(e);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        AppAbort.Cancel();
-                        throw SystemFailure(e);
+                        Resolver.Log.Error($"Exception in OnError handling: {ex.Message}");
                     }
+
+                    AppAbort.Cancel();
+                    throw SystemFailure(e);
                 }
                 finally
                 {
@@ -82,7 +83,7 @@
                 Resolver.Log.Trace($"App shutting down");
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
-                App.OnShutdown();
+                await App.OnShutdown();
             }
             catch (Exception e)
             {
