@@ -284,8 +284,6 @@
                     updateService.Start();
                 }
 
-                Resolver.Log.Info($"Meadow OS v.{MeadowOS.CurrentDevice.PlatformOS.OSVersion}");
-
                 return true;
             }
             catch (Exception e)
