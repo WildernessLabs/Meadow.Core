@@ -14,6 +14,8 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7FeatherV2 : F7FeatherBase
     {
+        private Lazy<IAnalogInputPort> _adc_bat;
+
         public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
 
         public F7FeatherV2()
@@ -28,6 +30,11 @@ namespace Meadow.Devices
                 Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
+
+            _adc_bat = new Lazy<IAnalogInputPort>(() =>
+            {
+                return this.CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT);
+            });
         }
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
@@ -39,6 +46,15 @@ namespace Meadow.Devices
 
             // this is an unsupported bus, but will get caught elsewhere
             return -1;
+        }
+
+        public override BatteryInfo GetBatteryInfo()
+        {
+            return new BatteryInfo
+            {
+                // on V2 there is a voltage divider 2 x 499R and the voltage is taken from the center of the divider, effectively halving the input
+                Voltage = _adc_bat.Value.Voltage * 2
+            };
         }
     }
 }

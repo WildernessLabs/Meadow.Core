@@ -1,4 +1,5 @@
 ﻿using Meadow.Hardware;
+using Meadow.Units;
 using System;
 
 namespace Meadow.Devices
@@ -27,6 +28,19 @@ namespace Meadow.Devices
                 Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
+        }
+
+        public override BatteryInfo GetBatteryInfo()
+        {
+            if (Coprocessor != null)
+            {
+                return new BatteryInfo
+                {
+                    Voltage = new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts)
+                };
+            }
+
+            throw new Exception("Coprocessor not initialized.");
         }
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
