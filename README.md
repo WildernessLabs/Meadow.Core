@@ -19,6 +19,8 @@ Currently tested platforms and distributions:
 | Raspberry Pi Zero 2w | Raspberry Pi OS | Beta 6.2 |
 | Jetson Nano | Ubuntu 20.04 | Beta 6.2 |
 | Jetson Xavier AGX | Ubuntu 18.04 | Beta 6.2 |
+| KRTKL Snickerdoodle Black | Ubuntu 20.04 | RC-1 |
+| AMD64 Ubuntu 20.04 under WSL2  | Ubuntu 20.04 | RC-1 |
 
 ## License
 
@@ -34,7 +36,7 @@ For this documentation, we assume you are developing your application code on a 
 
 `Meadow.Linux` runs applications using the .NET 6.0 Core Runtime, so you must install it on the target.
 
-### Install .NET 5.0 or .NET 6.0
+### Install .NET 6.0
 
 Follow the instructions based on your distro:
 
@@ -112,3 +114,7 @@ $ dotnet App.dll
 ## Work in Progress
 
 `Meadow.Linux` is currently an *Beta* product with several core features that are not yet implemented.  Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
+
+## Running Meadow.Linux under Windows
+
+`Meadow.Linux` can be run on Windows 11 using WSL2.  Since a PC has no GPIOs or hardware busses, it requires the `Meadow.Simulation` platform.

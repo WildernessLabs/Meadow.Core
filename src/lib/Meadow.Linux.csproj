@@ -21,8 +21,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
-   <ProjectReference Include="..\..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj" />
-   <ProjectReference Include="..\..\..\Meadow.Logging\lib\Meadow.Logging.csproj" />
+   <PackageReference Include="Meadow" Version="0.32.1" />
  </ItemGroup>
 </Project>
