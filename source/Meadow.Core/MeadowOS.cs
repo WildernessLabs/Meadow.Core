@@ -298,6 +298,7 @@
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             Resolver.Log.Debug("Shutdown");
+            Thread.Sleep(Timeout.Infinite);
         }
 
         /// <summary>
