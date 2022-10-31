@@ -86,7 +86,6 @@ namespace Meadow.Devices
 
             _isConnected = false;
             ClearNetworkDetails();
-            HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
             _antenna = AntennaType.NotKnown;
 
