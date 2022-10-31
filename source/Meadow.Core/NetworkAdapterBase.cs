@@ -11,7 +11,7 @@ namespace Meadow
         public event NetworkConnectionHandler NetworkConnected;
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
-        private readonly Lazy<NetworkInterface?> nativeInterface;
+        private NetworkInterface? nativeInterface;
 
         public abstract bool IsConnected { get; }
 
@@ -22,10 +22,13 @@ namespace Meadow
         protected internal NetworkAdapterBase(NetworkInterfaceType expectedType)
         {
             InterfaceType = expectedType;
-            nativeInterface = new Lazy<NetworkInterface?>(() =>
-            {
-                return LoadAdapterInfo();
-            });
+
+            Refresh();
+        }
+
+        protected void Refresh()
+        {
+            nativeInterface = LoadAdapterInfo();
         }
 
         /// <summary>
@@ -40,7 +43,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface.Value?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
             }
         }
 
@@ -56,7 +59,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface.Value?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.IPv4Mask ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.IPv4Mask ?? IPAddress.None;
             }
         }
 
@@ -72,7 +75,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface.Value?.GetIPProperties()?.GatewayAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.GatewayAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
             }
         }
 
