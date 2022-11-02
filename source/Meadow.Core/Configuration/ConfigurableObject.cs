@@ -97,33 +97,61 @@ namespace Meadow
         public float GetConfiguredFloat([CallerMemberName] string? name = null, float defaultValue = 0f)
         {
             if (string.IsNullOrWhiteSpace(name)) return defaultValue;
-            var stringVal = GetConfiguredValue(name);
-            if (stringVal == null) return defaultValue;
-            return Convert.ToSingle(stringVal);
+            try
+            {
+                var stringVal = GetConfiguredValue(name);
+                if (stringVal == null) return defaultValue;
+                return Convert.ToSingle(stringVal);
+            }
+            catch
+            {
+                return defaultValue;
+            }
         }
 
         public bool GetConfiguredBool([CallerMemberName] string? name = null, bool defaultValue = false)
         {
             if (string.IsNullOrWhiteSpace(name)) return defaultValue;
-            var stringVal = GetConfiguredValue(name);
-            if (stringVal == null) return defaultValue;
-            return Convert.ToBoolean(stringVal);
+            try
+            {
+                var stringVal = GetConfiguredValue(name);
+                if (stringVal == null) return defaultValue;
+                return Convert.ToBoolean(stringVal);
+            }
+            catch
+            {
+                return defaultValue;
+            }
         }
 
         public int GetConfiguredInt([CallerMemberName] string? name = null, int defaultValue = 0)
         {
             if (string.IsNullOrWhiteSpace(name)) return defaultValue;
-            var stringVal = GetConfiguredValue(name);
-            if (stringVal == null) return defaultValue;
-            return Convert.ToInt32(stringVal);
+            try
+            {
+                var stringVal = GetConfiguredValue(name);
+                if (stringVal == null) return defaultValue;
+                return Convert.ToInt32(stringVal);
+            }
+            catch
+            {
+                return defaultValue;
+            }
         }
 
         public string GetConfiguredString([CallerMemberName] string? name = null, string defaultValue = "")
         {
             if (string.IsNullOrWhiteSpace(name)) return defaultValue;
-            var stringVal = GetConfiguredValue(name);
-            if (stringVal == null) return defaultValue;
-            return stringVal;
+            try
+            {
+                var stringVal = GetConfiguredValue(name);
+                if (stringVal == null) return defaultValue;
+                return stringVal;
+            }
+            catch
+            {
+                return defaultValue;
+            }
         }
 
         private string PathTypeName { get; }
