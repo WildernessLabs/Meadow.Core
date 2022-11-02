@@ -27,16 +27,6 @@ namespace Meadow.Devices
         public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
 
         /// <summary>
-        /// Raised when the WiFi interface starts.
-        /// </summary>
-        public event EventHandler WiFiInterfaceStarted = delegate { };
-
-        /// <summary>
-        /// Raised when the WiFi interface stops.
-        /// </summary>
-        public event EventHandler WiFiInterfaceStopped = delegate { };
-
-        /// <summary>
         /// Raise the NTP time changed event.
         /// </summary>
         public event EventHandler NtpTimeChanged = delegate { };
@@ -261,10 +251,8 @@ namespace Meadow.Devices
                     CurrentState = WiFiState.Disconnected;
                     break;
                 case WiFiFunction.StartWiFiInterfaceEvent:
-                    RaiseWiFiInterfaceStarted(statusCode, payload);
-                    break;
                 case WiFiFunction.StopWiFiInterfaceEvent:
-                    RaiseWiFiInterfaceStopped(statusCode, payload);
+                    // just sink these for now - we don't raise them to application-land
                     break;
                 case WiFiFunction.NtpUpdateEvent:
                     RaiseNtpTimeChangedEvent();
@@ -640,30 +628,6 @@ namespace Meadow.Devices
 
             var e = new WiFiDisconnectEventArgs(statusCode);
             NetworkDisconnected?.Invoke(this);
-        }
-
-        /// <summary>
-        /// Process the InterfaceStarted event extracing any event data from the
-        /// payload and create an EventArg object if necessary
-        /// </summary>
-        /// <param name="statusCode">Status code for the WiFi interface start event (should be CompletedOK).</param>
-        /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseWiFiInterfaceStarted(StatusCodes statusCode, byte[] payload)
-        {
-            WiFiInterfaceStartedEventArgs e = new WiFiInterfaceStartedEventArgs(statusCode);
-            WiFiInterfaceStarted?.Invoke(this, e);
-        }
-
-        /// <summary>
-        /// Process the InterfaceStopped event extracing any event data from the
-        /// payload and create an EventArg object if necessary
-        /// </summary>
-        /// <param name="statusCode">Status code for the WiFi interface stop event (should be CompletedOK).</param>
-        /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseWiFiInterfaceStopped(StatusCodes statusCode, byte[] payload)
-        {
-            WiFiInterfaceStoppedEventArgs e = new WiFiInterfaceStoppedEventArgs(statusCode);
-            WiFiInterfaceStopped?.Invoke(this, e);
         }
 
         /// <summary>
