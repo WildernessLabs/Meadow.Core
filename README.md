@@ -2,12 +2,12 @@
 
 ## Repo Status
 
-[![Build](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml)  
+[![Build](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/build.yml)
 [![NuGet Package Creation](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/package.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Linux/actions/workflows/package.yml)
 
 ## Summary
 
-Wilderness Labs Meadow.Linux is a .NET Framework for running IoT applications on Linux devices.  A Meadow.Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
+Wilderness Labs Meadow.Linux is a .NET Framework for running IoT applications on Linux devices. A Meadow.Linux application provides developers the ease of quickly creating applications for popular platforms that can use any of the peripheral drivers available in the [Meadow.Foundation](https://github.com/WildernessLabs/Meadow.Foundation) library.
 
 ## Supported Platforms and Distributions
 
@@ -16,7 +16,7 @@ Currently tested platforms and distributions:
 | Hardware | Distro | Meadow.Core Version tested |
 | :---: | :---: | :---: |
 | Raspberry Pi 4 | Raspberry Pi OS | Beta 6.2 |
-| Raspberry Pi Zero 2w | Raspberry Pi OS | Beta 6.2 |
+| Raspberry Pi Zero 2 W | Raspberry Pi OS | Beta 6.2 |
 | Jetson Nano | Ubuntu 20.04 | Beta 6.2 |
 | Jetson Xavier AGX | Ubuntu 18.04 | Beta 6.2 |
 | KRTKL Snickerdoodle Black | Ubuntu 20.04 | RC-1 |
@@ -40,9 +40,9 @@ For this documentation, we assume you are developing your application code on a 
 
 Follow the instructions based on your distro:
 
-https://docs.microsoft.com/en-us/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website
+https://docs.microsoft.com/en-us/dotnet/core/install/linux
 
-```
+```console
 $ dotnet --list-runtimes
 Microsoft.NETCore.App 6.0.1 [/opt/dotnet/shared/Microsoft.NETCore.App]
 ```
@@ -65,7 +65,7 @@ The simplest, most reliable way to collect all of those binaries is by using `do
 
 For example, the `Bme280_Sample` in this repo can be published to a local folder like this:
 
-```
+```console
 C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample>dotnet publish -c Release -o publish
 Microsoft (R) Build Engine version 17.2.0+41abc5629 for .NET
 Copyright (C) Microsoft Corporation. All rights reserved.
@@ -88,7 +88,7 @@ Now use a tool such as SCP to copy all of these files to a folder on you target 
 
 Here's an example of all of the binaries for the Bme280_Sample aaplication after deployment to a target Raspberry Pi:
 
-```
+```console
 $ ls -al
 total 472
 drwxr-xr-x  2 pi pi   4096 Nov  7 17:56 .
@@ -107,13 +107,13 @@ drwxr-xr-x 16 pi pi   4096 Nov  7 17:55 ..
 
 Use `dotnet` *on the target hardware* to execute your application
 
-```
+```console
 $ dotnet App.dll
 ```
  
 ## Work in Progress
 
-`Meadow.Linux` is currently an *Beta* product with several core features that are not yet implemented.  Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
+`Meadow.Linux` is currently an *Beta* product with several core features that are not yet implemented. Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
 
 ## Running Meadow.Linux under Windows
 
