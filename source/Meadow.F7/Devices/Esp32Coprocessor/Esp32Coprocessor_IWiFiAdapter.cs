@@ -182,7 +182,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
         /// </summary>
-        public bool HasInternetAccess => CurrentState == WiFiState.Connected; // not sure this is true - this just means we're connected
+        public bool HasInternetAccess => CurrentState == NetworkState.Connected; // not sure this is true - this just means we're connected
 
         #region Methods
 
@@ -225,7 +225,7 @@ namespace Meadow.Devices
             if (statusCode != StatusCodes.CompletedOk)
             {
                 _lastStatus = statusCode;
-                CurrentState = WiFiState.Error;
+                CurrentState = NetworkState.Error;
                 Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
                 return;
             }
@@ -245,10 +245,10 @@ namespace Meadow.Devices
                         _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
                     }
 
-                    CurrentState = WiFiState.Connected;
+                    CurrentState = NetworkState.Connected;
                     break;
                 case WiFiFunction.DisconnectFromAccessPointEvent:
-                    CurrentState = WiFiState.Disconnected;
+                    CurrentState = NetworkState.Disconnected;
                     break;
                 case WiFiFunction.StartWiFiInterfaceEvent:
                 case WiFiFunction.StopWiFiInterfaceEvent:
@@ -436,10 +436,19 @@ namespace Meadow.Devices
         {
             switch (CurrentState)
             {
-                case WiFiState.Connecting:
+                case NetworkState.Connecting:
                     throw new Exception("Adapter already connecting");
-                case WiFiState.Disconnecting:
+                case NetworkState.Disconnecting:
                     throw new Exception("Adapter is in the process of disconnecting");
+            }
+
+            switch (Resolver.Device.PlatformOS.SelectedNetwork)
+            {
+                case IPlatformOS.NetworkConnectionType.WiFi:
+                    // pass through
+                    break;
+                default:
+                    throw new NotSupportedException($"Connect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
             }
 
             if (string.IsNullOrEmpty(ssid))
@@ -451,7 +460,7 @@ namespace Meadow.Devices
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
 
-            CurrentState = WiFiState.Connecting;
+            CurrentState = NetworkState.Connecting;
 
             var connectTask = Task.Run(async () =>
             {
@@ -487,7 +496,7 @@ namespace Meadow.Devices
                 var t = 0;
 
                 // wait for a state transition
-                while (CurrentState == WiFiState.Connecting)
+                while (CurrentState == NetworkState.Connecting)
                 {
                     await Task.Delay(500);
                     t += 500;
@@ -497,7 +506,7 @@ namespace Meadow.Devices
                     }
                 }
 
-                if (CurrentState == WiFiState.Connected)
+                if (CurrentState == NetworkState.Connected)
                 {
                     // tesing has revealded that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
                     while (IpAddress.Equals(System.Net.IPAddress.Any))
@@ -515,7 +524,7 @@ namespace Meadow.Devices
 
             await connectTask;
 
-            if (CurrentState == WiFiState.Error)
+            if (CurrentState == NetworkState.Error)
             {
                 throw new Exception($"Connection error: {_lastStatus}");
             }
@@ -530,11 +539,20 @@ namespace Meadow.Devices
         {
             switch (CurrentState)
             {
-                case WiFiState.Connected:
+                case NetworkState.Connected:
                     break;
                 default:
                     // do nothing if we're not connected
                     return;
+            }
+
+            switch (Resolver.Device.PlatformOS.SelectedNetwork)
+            {
+                case IPlatformOS.NetworkConnectionType.WiFi:
+                    // pass through
+                    break;
+                default:
+                    throw new NotSupportedException($"Disconnect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
             }
 
             await Task.Run(async () =>
@@ -552,7 +570,7 @@ namespace Meadow.Devices
                 var t = 0;
 
                 // wait for a state transition
-                while (CurrentState == WiFiState.Disconnecting)
+                while (CurrentState == NetworkState.Disconnecting)
                 {
                     await Task.Delay(500);
                     t += 500;
@@ -642,11 +660,11 @@ namespace Meadow.Devices
 
         #endregion Event raising methods
 
-        private WiFiState _state;
+        private NetworkState _state;
         private NetworkAuthenticationType _authenticationType;
         private StatusCodes _lastStatus;
 
-        private WiFiState CurrentState
+        private NetworkState CurrentState
         {
             get => _state;
             set
@@ -657,24 +675,24 @@ namespace Meadow.Devices
 
                 switch (CurrentState)
                 {
-                    case WiFiState.Connecting:
+                    case NetworkState.Connecting:
                         break;
-                    case WiFiState.Connected:
+                    case NetworkState.Connected:
                         var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
                         this.Refresh();
                         NetworkConnected?.Invoke(this, args);
                         break;
-                    case WiFiState.Disconnecting:
+                    case NetworkState.Disconnecting:
                         break;
-                    case WiFiState.Disconnected:
+                    case NetworkState.Disconnected:
                         break;
-                    case WiFiState.Error:
+                    case NetworkState.Error:
                         break;
                 }
             }
         }
 
-        private enum WiFiState
+        private enum NetworkState
         {
             Unknown,
             Disconnected,
