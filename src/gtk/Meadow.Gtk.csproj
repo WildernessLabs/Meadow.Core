@@ -1,8 +1,8 @@
-﻿<Project Sdk="Meadow.Sdk/1.1.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
  <PropertyGroup>
-   <TargetFramework>netstandard2.1</TargetFramework>
-   <OutputType>Library</OutputType>
-   <AssemblyName>Meadow.Linux</AssemblyName>   
+	 <TargetFramework>net6.0</TargetFramework>
+	 <OutputType>Library</OutputType>
+   <AssemblyName>Meadow.Gtk</AssemblyName>   
    <Company>Wilderness Labs, Inc</Company>
    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
    <PackageId>Meadow.Linux</PackageId>
@@ -13,7 +13,7 @@
    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
-   <Description>Linux .NET libraries for Wilderness Labs Meadow</Description>
+   <Description>GTK .NET libraries for Wilderness Labs Meadow</Description>
  </PropertyGroup>
  <PropertyGroup>
    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,6 +21,7 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="Meadow" Version="0.32.1" />
+   <PackageReference Include="GtkSharp" Version="3.24.24.*" />
+   <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.9.57" />
  </ItemGroup>
 </Project>

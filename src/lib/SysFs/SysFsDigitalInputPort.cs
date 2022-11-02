@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Meadow
 {
-    public class SysFsDigitalInputPort :DigitalInputPortBase, IDigitalInputPort
+    public class SysFsDigitalInputPort : DigitalInputPortBase, IDigitalInputPort
     {
         private int Gpio { get; set; } = -1;
         private SysFsGpioDriver Driver { get; }
@@ -12,29 +12,33 @@ namespace Meadow
         public override bool State => Driver.GetValue(Gpio);
 
         internal SysFsDigitalInputPort(
-            SysFsGpioDriver driver, 
+            SysFsGpioDriver driver,
             IPin pin,
             SysFsDigitalChannelInfo channel,
-            InterruptMode interruptMode = InterruptMode.None, 
-            ResistorMode resistorMode = ResistorMode.Disabled, 
-            double debounceDuration = 0, 
-            double glitchDuration = 0)
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration)
             : base(pin, channel, interruptMode)
         {
             if(resistorMode != ResistorMode.Disabled)
             {
                 throw new NotSupportedException("Resistor Mode not supported on this platform");
             }
-            if(debounceDuration > 0 || glitchDuration > 0)
+            if(debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
             {
                 throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
             }
 
             Driver = driver;
             Pin = pin;
-            if (pin is SysFsPin { } sp)
+            if(pin is SysFsPin { } sp)
             {
                 Gpio = sp.Gpio;
+            }
+            else if(pin is LinuxFlexiPin { } l)
+            {
+                Gpio = l.SysFsGpio;
             }
             else
             {
@@ -63,30 +67,32 @@ namespace Meadow
             RaiseChangedAndNotify(new DigitalPortResult());
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (Gpio >= 0)
+            if(Gpio >= 0)
             {
                 Driver.UnhookInterrupt(Gpio);
                 Driver.Unexport(Gpio);
             }
+
+            base.Dispose(disposing);
         }
 
-        public override ResistorMode Resistor 
-        { 
-            get => ResistorMode.Disabled; 
-            set => throw new NotSupportedException("Resistor Mode not supported on this platform"); 
+        public override ResistorMode Resistor
+        {
+            get => ResistorMode.Disabled;
+            set => throw new NotSupportedException("Resistor Mode not supported on this platform");
         }
 
-        public override double DebounceDuration
-        { 
-            get => 0;
+        public override TimeSpan DebounceDuration
+        {
+            get => TimeSpan.Zero;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
 
-        public override double GlitchDuration
+        public override TimeSpan GlitchDuration
         {
-            get => 0;
+            get => TimeSpan.Zero;
             set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
     }
