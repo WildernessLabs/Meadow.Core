@@ -16,33 +16,33 @@ namespace Meadow.Pinouts
             GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21
         };
 
-        public IPin GPIO2 => new GpiodPin("GPIO2", "PIN03", "gpiochip0", 2);
-        public IPin GPIO3 => new GpiodPin("GPIO3", "PIN05", "gpiochip0", 3);
-        public IPin GPIO4 => new GpiodPin("GPIO4", "PIN07", "gpiochip0", 4);
-        public IPin GPIO17 => new GpiodPin("GPIO17", "PIN11", "gpiochip0", 17);
-        public IPin GPIO18 => new GpiodPin("GPIO18", "PIN12", "gpiochip0", 18);
-        public IPin GPIO27 => new GpiodPin("GPIO27", "PIN13", "gpiochip0", 27);
-        public IPin GPIO22 => new GpiodPin("GPIO22", "PIN15", "gpiochip0", 22);
+        public IPin GPIO2 => new LinuxFlexiPin("GPIO2", "PIN03", 2, "gpiochip0", 2);
+        public IPin GPIO3 => new LinuxFlexiPin("GPIO3", "PIN05", 3, "gpiochip0", 3);
+        public IPin GPIO4 => new LinuxFlexiPin("GPIO4", "PIN07", 4, "gpiochip0", 4);
+        public IPin GPIO17 => new LinuxFlexiPin("GPIO17", "PIN11", 17, "gpiochip0", 17);
+        public IPin GPIO18 => new LinuxFlexiPin("GPIO18", "PIN12", 18, "gpiochip0", 18);
+        public IPin GPIO27 => new LinuxFlexiPin("GPIO27", "PIN13", 27, "gpiochip0", 27);
+        public IPin GPIO22 => new LinuxFlexiPin("GPIO22", "PIN15", 22, "gpiochip0", 22);
 
         // Pi may or may not support GPIOD - depends on OS
         public IPin GPIO23 => new LinuxFlexiPin("GPIO23", "PIN16", 23, "gpiochip0", 23);
         public IPin GPIO24 => new LinuxFlexiPin("GPIO24", "PIN18", 24, "gpiochip0", 24);
 
-        public IPin GPIO10 => new GpiodPin("GPIO10", "PIN19", "gpiochip0", 10);
-        public IPin GPIO9 => new GpiodPin("GPIO9", "PIN21", "gpiochip0", 9);
-        public IPin GPIO25 => new GpiodPin("GPIO25", "PIN22", "gpiochip0", 25);
-        public IPin GPIO11 => new GpiodPin("GPIO11", "PIN23", "gpiochip0", 11);
-        public IPin GPIO8 => new GpiodPin("GPIO8", "PIN24", "gpiochip0", 8);
-        public IPin GPIO7 => new GpiodPin("GPIO7", "PIN26", "gpiochip0", 7);
-        public IPin GPIO5 => new GpiodPin("GPIO5", "PIN29", "gpiochip0", 5);
-        public IPin GPIO6 => new GpiodPin("GPIO6", "PIN31", "gpiochip0", 6);
-        public IPin GPIO12 => new GpiodPin("GPIO12", "PIN32", "gpiochip0", 12);
-        public IPin GPIO13 => new GpiodPin("GPIO13", "PIN33", "gpiochip0", 13);
-        public IPin GPIO19 => new GpiodPin("GPIO19", "PIN35", "gpiochip0", 19);
-        public IPin GPIO16 => new GpiodPin("GPIO16", "PIN36", "gpiochip0", 16);
-        public IPin GPIO26 => new GpiodPin("GPIO26", "PIN37", "gpiochip0", 26);
-        public IPin GPIO20 => new GpiodPin("GPIO20", "PIN38", "gpiochip0", 20);
-        public IPin GPIO21 => new GpiodPin("GPIO21", "PIN40", "gpiochip0", 21);
+        public IPin GPIO10 => new LinuxFlexiPin("GPIO10", "PIN19", 10, "gpiochip0", 10);
+        public IPin GPIO9 => new LinuxFlexiPin("GPIO9", "PIN21", 9, "gpiochip0", 9);
+        public IPin GPIO25 => new LinuxFlexiPin("GPIO25", "PIN22", 25, "gpiochip0", 25);
+        public IPin GPIO11 => new LinuxFlexiPin("GPIO11", "PIN23", 11, "gpiochip0", 11);
+        public IPin GPIO8 => new LinuxFlexiPin("GPIO8", "PIN24", 8, "gpiochip0", 8);
+        public IPin GPIO7 => new LinuxFlexiPin("GPIO7", "PIN26", 7, "gpiochip0", 7);
+        public IPin GPIO5 => new LinuxFlexiPin("GPIO5", "PIN29", 5, "gpiochip0", 5);
+        public IPin GPIO6 => new LinuxFlexiPin("GPIO6", "PIN31", 6, "gpiochip0", 6);
+        public IPin GPIO12 => new LinuxFlexiPin("GPIO12", "PIN32", 12, "gpiochip0", 12);
+        public IPin GPIO13 => new LinuxFlexiPin("GPIO13", "PIN33", 13, "gpiochip0", 13);
+        public IPin GPIO19 => new LinuxFlexiPin("GPIO19", "PIN35", 19, "gpiochip0", 19);
+        public IPin GPIO16 => new LinuxFlexiPin("GPIO16", "PIN36", 16, "gpiochip0", 16);
+        public IPin GPIO26 => new LinuxFlexiPin("GPIO26", "PIN37", 26, "gpiochip0", 26);
+        public IPin GPIO20 => new LinuxFlexiPin("GPIO20", "PIN38", 20, "gpiochip0", 20);
+        public IPin GPIO21 => new LinuxFlexiPin("GPIO21", "PIN40", 21, "gpiochip0", 21);
 
         // aliases for sanity
         public IPin Pin3 => GPIO2;
