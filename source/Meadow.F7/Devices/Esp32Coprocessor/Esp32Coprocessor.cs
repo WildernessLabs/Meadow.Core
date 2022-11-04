@@ -289,6 +289,9 @@ namespace Meadow.Devices
                         {
                             switch ((Esp32Interfaces)eventData.Interface)
                             {
+                                case Esp32Interfaces.WiredEthernet:
+                                    // Implement
+                                    break;
                                 case Esp32Interfaces.WiFi:
                                     InvokeEvent((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
                                     break;
