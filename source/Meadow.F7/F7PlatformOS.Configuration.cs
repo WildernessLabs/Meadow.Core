@@ -21,7 +21,13 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        public NetworkConnectionType SelectedNetwork { get; internal set; }
+        /// <summary>
+        /// Get the selected network.
+        /// </summary>
+        /// <remarks>The current network can be changed through the meadow.config.yaml file.</remarks>
+        /// <returns>Currently selected network.</returns>
+        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType) GetByte(ConfigurationValues.SelectedNetwork);
+
 
         //==== public config properties
         /// <summary>
@@ -38,12 +44,6 @@ namespace Meadow
         public string OSBuildDate => GetString(ConfigurationValues.BuildDate);
 
         /// <summary>
-        /// Get the mono version on the device.
-        /// </summary>
-        /// <returns>Mono version.</returns>
-        public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
-
-        /// <summary>
         /// Should the system reboot if an unhandled exception is encounted in the user application?
         /// </summary>
         public bool RebootOnUnhandledException => GetBoolean(ConfigurationValues.RebootOnUnhandledException);
@@ -54,6 +54,12 @@ namespace Meadow
         /// </summary>
         /// <remarks>A value of 0 indicates an infinite period.</remarks>
         public uint InitializationTimeout => GetUInt(ConfigurationValues.InitializationTimeout);
+
+        /// <summary>
+        /// Get the mono version on the device.
+        /// </summary>
+        /// <returns>Mono version.</returns>
+        public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
 
         /// <summary>
         /// Is an SD card present?

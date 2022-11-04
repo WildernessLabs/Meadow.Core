@@ -20,10 +20,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     public struct SystemConfiguration
     {
         /// <summary>
-        /// SoftwareVersion element.
-        /// </summary>
-        public String SoftwareVersion;
-        /// <summary>
         /// MaximumMessageQueueLength element.
         /// </summary>
         public Byte MaximumMessageQueueLength;
@@ -44,6 +40,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         public Byte[] SoftApMacAddress;
         /// <summary>
+        /// BluetoothMacAddress element.
+        /// </summary>
+        public Byte[] BluetoothMacAddress;
+        /// <summary>
         /// DeviceName element.
         /// </summary>
         public String DeviceName;
@@ -55,6 +55,54 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// ResetReason element.
         /// </summary>
         public Byte ResetReason;
+        /// <summary>
+        /// VersionMajor element.
+        /// </summary>
+        public UInt32 VersionMajor;
+        /// <summary>
+        /// VersionMinor element.
+        /// </summary>
+        public UInt32 VersionMinor;
+        /// <summary>
+        /// VersionRevision element.
+        /// </summary>
+        public UInt32 VersionRevision;
+        /// <summary>
+        /// VersionBuild element.
+        /// </summary>
+        public UInt32 VersionBuild;
+        /// <summary>
+        /// BuildDay element.
+        /// </summary>
+        public Byte BuildDay;
+        /// <summary>
+        /// BuildMonth element.
+        /// </summary>
+        public Byte BuildMonth;
+        /// <summary>
+        /// BuildYear element.
+        /// </summary>
+        public Byte BuildYear;
+        /// <summary>
+        /// BuildHour element.
+        /// </summary>
+        public Byte BuildHour;
+        /// <summary>
+        /// BuildMinute element.
+        /// </summary>
+        public Byte BuildMinute;
+        /// <summary>
+        /// BuildSecond element.
+        /// </summary>
+        public Byte BuildSecond;
+        /// <summary>
+        /// BuildHash element.
+        /// </summary>
+        public UInt32 BuildHash;
+        /// <summary>
+        /// BuildBranchName element.
+        /// </summary>
+        public String BuildBranchName;
     };
 
     /// <summary>

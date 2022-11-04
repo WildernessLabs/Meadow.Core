@@ -188,7 +188,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Esp32Interfaces - Transport
         /// </summary>
-        Transport = 5
+        Transport = 5,
+        /// <summary>
+        /// Esp32Interfaces - WiredEthernet
+        /// </summary>
+        WiredEthernet = 6
     };
 
     /// <summary>
