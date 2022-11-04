@@ -232,7 +232,7 @@ namespace Meadow.Devices
 
             switch (eventId)
             {
-                case WiFiFunction.ConnectToAccessPointEvent:
+                case WiFiFunction.NetworkConnectedEvent:
                     byte channel = 0;
 
                     ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
@@ -247,12 +247,8 @@ namespace Meadow.Devices
 
                     CurrentState = NetworkState.Connected;
                     break;
-                case WiFiFunction.DisconnectFromAccessPointEvent:
+                case WiFiFunction.NetworkDisconnectedEvent:
                     CurrentState = NetworkState.Disconnected;
-                    break;
-                case WiFiFunction.StartWiFiInterfaceEvent:
-                case WiFiFunction.StopWiFiInterfaceEvent:
-                    // just sink these for now - we don't raise them to application-land
                     break;
                 case WiFiFunction.NtpUpdateEvent:
                     RaiseNtpTimeChangedEvent();
@@ -372,55 +368,6 @@ namespace Meadow.Devices
             }
 
             return Task.FromResult(scanTask.Result as IList<WifiNetwork>);
-        }
-
-        /// <summary>
-        /// Start the network interface on the WiFi adapter.
-        /// </summary>
-        /// <remarks>
-        /// This method starts the network interface hardware.  The result of this action depends upon the
-        /// settings stored in the WiFi adapter memory.
-        ///
-        /// No Stored Configuration
-        /// If no settings are stored in the adapter then the hardware will simply start.  IP addresses
-        /// will not be obtained in this mode.
-        ///
-        /// In this case, the return result indicates if the hardware started successfully.
-        ///
-        /// Stored Configuration Present NOTE NOT IMPLEMENTED IN THIS RELEASE
-        /// If a default access point (and optional password) are stored in the adapter then the network
-        /// interface and the system is set to connect at startup then the system will then attempt to
-        /// connect to the specified access point.
-        ///
-        /// In this case, the return result indicates if the interface was started successfully and a
-        /// connection to the access point was made.
-        /// </remarks>
-        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
-        public async Task<bool> StartWiFiInterface()
-        {
-            return await Task.Run(() =>
-            {
-                StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StartWiFiInterface, true, null);
-                return (result == StatusCodes.CompletedOk);
-            });
-        }
-
-        /// <summary>
-        /// Stop the WiFi interface,
-        /// </summary>
-        /// <remarks>
-        /// Stopping the WiFi interface will release all resources associated with the WiFi running on the ESP32.
-        ///
-        /// Errors could occur if the adapter was not started.
-        /// </remarks>
-        /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
-        public async Task<bool> StopWiFiInterface()
-        {
-            return await Task.Run(() =>
-            {
-                StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StopWiFiInterface, true, null);
-                return (result == StatusCodes.CompletedOk);
-            });
         }
 
         /// <summary>
