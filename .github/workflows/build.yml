@@ -26,6 +26,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore src/Meadow.Linux.sln
+      run: dotnet restore Meadow.Linux/src/Meadow.Linux.sln
     - name: Build
       run: dotnet build -c Release Meadow.Linux/src/Meadow.Linux.sln --no-restore
