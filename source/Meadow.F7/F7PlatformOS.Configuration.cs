@@ -26,8 +26,13 @@ namespace Meadow
         /// </summary>
         /// <remarks>The current network can be changed through the meadow.config.yaml file.</remarks>
         /// <returns>Currently selected network.</returns>
-        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType) GetByte(ConfigurationValues.SelectedNetwork);
+        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
 
+        /// <summary>
+        /// Should a WiFi connection be made on startup.
+        /// </summary>
+        /// <remarks>This assumes that the default access point is configured through wifi.config.yaml.</remarks>
+        public bool AutomaticallyStartNetwork => GetBoolean(ConfigurationValues.AutomaticallyStartNetwork);
 
         //==== public config properties
         /// <summary>
