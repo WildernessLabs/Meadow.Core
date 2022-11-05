@@ -530,6 +530,39 @@ namespace Meadow.Devices
         }
 
         /// <summary>
+        /// Connect to the default access point.
+        /// </summary>
+        /// <remarks>The access point credentials should be stored in the coprocessor memory.</remarks>
+        public async Task ConnectToDefaultAccessPoint()
+        {
+            if (Resolver.Device.PlatformOS.SelectedNetwork != IPlatformOS.NetworkConnectionType.WiFi)
+            {
+                throw new NotSupportedException($"ConnectToDefaultAccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+            }
+
+            if (CurrentState != NetworkState.Disconnected)
+            {
+                throw new InvalidOperationException("Already connected to an access point.");
+            }
+
+            await Task.Run(async () =>
+            {
+                SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+            });
+        }
+
+        /// <summary>
+        /// Removed any stored access point information from the coprocessor memory.
+        /// </summary>
+        public async Task ClearStoredAccessPointInformation()
+        {
+            await Task.Run(async () =>
+            {
+                SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ClearDefaultAccessPoint, false, null);
+            });
+        }
+
+        /// <summary>
         /// Change the current WiFi antenna.
         /// </summary>
         /// <remarks>
