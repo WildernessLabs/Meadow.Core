@@ -1,4 +1,6 @@
-﻿namespace Meadow
+﻿using static Meadow.IPlatformOS;
+
+namespace Meadow
 {
     public static partial class MeadowOS
     {
@@ -42,6 +44,13 @@
             /// <remarks>This is currently only relevant to the CCM.</remarks>
             /// <returns>True if an SD card is connected to the STM32, false otherwise.</returns>
             public static bool SdCardPresent => CurrentDevice.PlatformOS.SdCardPresent;
+
+            /// <summary>
+            /// Get the selected network.
+            /// </summary>
+            /// <remarks>The current network can be changed through the meadow.config.yaml file.</remarks>
+            /// <returns>Currently selected network.</returns>
+            public static NetworkConnectionType SelectedNetwork => CurrentDevice.PlatformOS.SelectedNetwork;
         }
     }
 }
