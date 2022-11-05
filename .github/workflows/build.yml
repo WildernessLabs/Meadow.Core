@@ -28,4 +28,4 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore src/Meadow.Linux.sln
     - name: Build
-      run: dotnet build -c Release src/Meadow.Linux.sln --no-restore
+      run: dotnet build -c Release Meadow.Linux/src/Meadow.Linux.sln --no-restore
