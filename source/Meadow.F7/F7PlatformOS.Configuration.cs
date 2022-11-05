@@ -75,17 +75,6 @@ namespace Meadow
         internal enum Direction { Get = 0, Set = 1 };
 
         /// <summary>
-        /// Hardware version (product).
-        /// </summary>
-        public enum HardwareModel
-        {
-            Unknown = 0,
-            MeadowF7v1 = 1,
-            MeadowF7v2 = 2,
-            MeadowF7v2_Core = 3,
-        };
-
-        /// <summary>
         /// Get or Set the specified value in the OS configuration.
         /// </summary>
         /// <param name="item">Item to retrieve.</param>
