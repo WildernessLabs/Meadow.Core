@@ -12,12 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checkout Meadow.Linux
+      uses: actions/checkout@v2
+      with:
+        path: Meadow.Linux # we have to put this in a sub-folder so we can pull simulation to a parent folder
+    - name: Checkout Meadow.Simulation
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Simulation
+        path: Meadow.Simulation
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore src/MeadowForLinux.sln
+      run: dotnet restore Meadow.Linux/src/Meadow.Linux.sln
     - name: Build
-      run: dotnet build -c Release src/MeadowForLinux.sln --no-restore
+      run: dotnet build -c Release Meadow.Linux/src/Meadow.Linux.sln --no-restore
