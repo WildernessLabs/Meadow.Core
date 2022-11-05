@@ -12,5 +12,7 @@ namespace Meadow.Simulation
         public string ChipID => "SIM";
         public string CoprocessorType => "None";
         public string? CoprocessorOSVersion => null;
+        public string UniqueID => "SIM";
+        public string OSVersion => "SIM";
     }
 }
