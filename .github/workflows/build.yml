@@ -12,7 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checkout Meadow.Linux
+      uses: actions/checkout@v2
+      with:
+        path: Meadow.Linux # we have to put this in a sub-folder so we can pull simulation to a parent folder
+    - name: Checkout Meadow.Simulation
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Simulation
+        path: Meadow.Simulation
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
