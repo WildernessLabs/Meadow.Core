@@ -427,8 +427,6 @@ namespace Meadow.Devices
                 {
                     // TODO: should be async and awaited
                     var result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
-
-                    // NOTE: 'result' here is only the result of the ioctl, *not* the result of the connection request
                 }
                 catch (Exception ex)
                 {
@@ -533,22 +531,19 @@ namespace Meadow.Devices
         /// Connect to the default access point.
         /// </summary>
         /// <remarks>The access point credentials should be stored in the coprocessor memory.</remarks>
-        public async Task ConnectToDefaultAccessPoint()
+        public void ConnectToDefaultAccessPoint()
         {
             if (Resolver.Device.PlatformOS.SelectedNetwork != IPlatformOS.NetworkConnectionType.WiFi)
             {
                 throw new NotSupportedException($"ConnectToDefaultAccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
             }
 
-            if (CurrentState != NetworkState.Disconnected)
+            if ((CurrentState == NetworkState.Connected) || (CurrentState == NetworkState.Connecting))
             {
-                throw new InvalidOperationException("Already connected to an access point.");
+                throw new InvalidOperationException($"Already connected or connecting to an access point, current state {CurrentState}");
             }
 
-            await Task.Run(async () =>
-            {
-                SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToDefaultAccessPoint, false, null);
-            });
+            SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToDefaultAccessPoint, false, null);
         }
 
         /// <summary>
@@ -558,7 +553,7 @@ namespace Meadow.Devices
         {
             await Task.Run(async () =>
             {
-                SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ClearDefaultAccessPoint, false, null);
+                SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ClearDefaultAccessPoint, true, null);
             });
         }
 
