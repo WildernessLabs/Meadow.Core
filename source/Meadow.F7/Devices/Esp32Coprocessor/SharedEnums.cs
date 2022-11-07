@@ -405,7 +405,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// BluetoothFunction - ClientWriteRequestEvent
         /// </summary>
-        ClientWriteRequestEvent = 4
+        ClientWriteRequestEvent = 4,
+        /// <summary>
+        /// BluetoothFunction - ErrorEvent
+        /// </summary>
+        ErrorEvent = 5
     };
 
     /// <summary>
