@@ -1,0 +1,24 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout Meadow.Simulation
+      uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore Meadow.Simulation/src/Meadow.Simulation.sln
+    - name: Build
+      run: dotnet build -c Release Meadow.Simulation/src/Meadow.Simulation.sln --no-restore
