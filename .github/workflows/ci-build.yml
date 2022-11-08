@@ -19,6 +19,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore Meadow.Simulation/src/Meadow.Simulation.sln
+      run: dotnet restore src/Meadow.Simulation.sln
     - name: Build
-      run: dotnet build -c Release Meadow.Simulation/src/Meadow.Simulation.sln --no-restore
+      run: dotnet build -c Release src/Meadow.Simulation.sln --no-restore
