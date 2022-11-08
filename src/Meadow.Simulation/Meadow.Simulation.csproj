@@ -3,13 +3,18 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+	  <AssemblyName>Meadow.Simulation</AssemblyName>
+	  <Company>Wilderness Labs, Inc</Company>
+	  <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+	  <PackageId>Meadow.Simulation</PackageId>
+	  <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
+	  <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Linux</RepositoryUrl>
+	  <PackageTags>Meadow</PackageTags>
+	  <Version>0.1.0</Version>
+	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	  <Nullable>enable</Nullable>
+	  <Description>A simulation Environment for Wilderness Labs' Meadow Platform</Description>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="REST\**" />
-    <EmbeddedResource Remove="REST\**" />
-    <None Remove="REST\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Meadow" Version="0.*" />
