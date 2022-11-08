@@ -1,4 +1,3 @@
-using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Units;
@@ -71,6 +70,11 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
+        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, OutputType output = OutputType.PushPull)
+        {
+            return CreateBiDirectionalPort(pin, initialState, interruptMode, resistorMode, initialDirection, TimeSpan.Zero, TimeSpan.Zero);
+        }
+
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
             var dc = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
@@ -80,6 +84,11 @@ namespace Meadow.Simulation
             }
 
             throw new NotSupportedException();
+        }
+
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled)
+        {
+            return CreateDigitalInputPort(pin, interruptMode, resistorMode, TimeSpan.Zero, TimeSpan.Zero);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
