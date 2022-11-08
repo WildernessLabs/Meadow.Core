@@ -14,9 +14,9 @@ jobs:
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Build
-      run: dotnet build -c Release src/Meadow.Simulation.csproj /p:Version=${VERSION}
+      run: dotnet build -c Release src/Meadow.Simulation/Meadow.Simulation.csproj /p:Version=${VERSION}
     - name: Pack
-      run: dotnet pack -c Release src/Meadow.Simulation.csproj /p:Version=${VERSION} --output .
+      run: dotnet pack -c Release src/Meadow.Simulation/Meadow.Simulation.csproj /p:Version=${VERSION} --output .
     - name: Push
       run: dotnet nuget push Meadow.Simulation.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
       env:
