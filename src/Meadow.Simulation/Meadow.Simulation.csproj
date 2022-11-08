@@ -6,13 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="0.32.1" />
-    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" Version="0.5.0" />
-    <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+    <Compile Remove="REST\**" />
+    <EmbeddedResource Remove="REST\**" />
+    <None Remove="REST\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="REST\" />
+    <PackageReference Include="Meadow" Version="0.*" />
+    <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

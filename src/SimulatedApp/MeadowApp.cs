@@ -3,7 +3,7 @@ using Meadow;
 using Meadow.Hardware;
 using Meadow.Simulation;
 
-public class MeadowApp : App<SimulatedMeadow<SimulatedPinout>, MeadowApp>
+public class MeadowApp : App<SimulatedMeadow<SimulatedPinout>>
 {
     private IDigitalOutputPort _out1;
 
@@ -18,7 +18,7 @@ public class MeadowApp : App<SimulatedMeadow<SimulatedPinout>, MeadowApp>
     {
         bool state = false;
 
-        while(true)
+        while (true)
         {
             Device.Logger.Info($"Setting {_out1.Pin.Name} to {state}");
             _out1.State = state;

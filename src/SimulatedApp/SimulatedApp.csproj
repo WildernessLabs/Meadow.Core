@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj" />
     <ProjectReference Include="..\Meadow.Simulation\Meadow.Simulation.csproj" />
   </ItemGroup>
 
