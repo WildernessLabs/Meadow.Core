@@ -660,6 +660,7 @@ namespace Meadow.Devices
                     case NetworkState.Disconnecting:
                         break;
                     case NetworkState.Disconnected:
+                        NetworkDisconnected?.Invoke(this);
                         break;
                     case NetworkState.Error:
                         break;
