@@ -72,6 +72,21 @@ namespace Meadow
         /// <remarks>Only really relevant to the CCM at the moment.</remarks>
         public bool SdCardPresent => GetBoolean(ConfigurationValues.SdCardPresent);
 
+        /// <summary>
+        /// IP address (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint IpAddress => GetUInt(ConfigurationValues.StaticIpAddress);
+
+        /// <summary>
+        /// Subnet mask (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint SubnetMask => GetUInt(ConfigurationValues.SubnetMask);
+
+        /// <summary>
+        /// Default gateway (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint DefaultGateway => GetUInt(ConfigurationValues.DefaultGateway);
+
         //==== Configuration internals
 
         /// <summary>

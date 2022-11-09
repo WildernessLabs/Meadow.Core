@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
+using static Meadow.IPlatformOS;
 
 namespace Meadow.Devices
 {
@@ -156,6 +157,21 @@ namespace Meadow.Devices
         /// WiFi channel the ESP32 and the access point are using for communication.
         /// </summary>
         public int Channel { get; private set; }
+
+        /// <summary>
+        /// IP address (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint ConfiguredIpAddress => F7PlatformOS.GetUInt(ConfigurationValues.StaticIpAddress);
+
+        /// <summary>
+        /// Subnet mask (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint ConfiguredSubnetMask => F7PlatformOS.GetUInt(ConfigurationValues.SubnetMask);
+
+        /// <summary>
+        /// Default gateway (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint ConfiguredGateway => F7PlatformOS.GetUInt(ConfigurationValues.DefaultGateway);
 
         /// <summary>
         /// The maximum number of times the ESP32 will retry an operation before returning an error.
@@ -413,12 +429,18 @@ namespace Meadow.Devices
             {
                 token.ThrowIfCancellationRequested();
 
-                WiFiCredentials request = new WiFiCredentials()
+                AccessPointInformation request = new AccessPointInformation()
                 {
                     NetworkName = ssid,
-                    Password = password
+                    Password = password,
+                    //IpAddress = 0,
+                    //Gateway = 0,
+                    //SubnetMask = 0
+                    IpAddress = ConfiguredIpAddress,
+                    Gateway = ConfiguredGateway,
+                    SubnetMask = ConfiguredSubnetMask
                 };
-                byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
+                byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
                 byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
 
                 ClearNetworkDetails();

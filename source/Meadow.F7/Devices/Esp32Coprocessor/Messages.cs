@@ -148,9 +148,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     };
 
     /// <summary>
-    /// Structure to hold WiFiCredentials data.
+    /// Structure to hold AccessPointInformation data.
     /// </summary>
-    public struct WiFiCredentials
+    public struct AccessPointInformation
     {
         /// <summary>
         /// NetworkName element.
@@ -160,6 +160,18 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// Password element.
         /// </summary>
         public String Password;
+        /// <summary>
+        /// IpAddress element.
+        /// </summary>
+        public UInt32 IpAddress;
+        /// <summary>
+        /// SubnetMask element.
+        /// </summary>
+        public UInt32 SubnetMask;
+        /// <summary>
+        /// Gateway element.
+        /// </summary>
+        public UInt32 Gateway;
     };
 
     /// <summary>
