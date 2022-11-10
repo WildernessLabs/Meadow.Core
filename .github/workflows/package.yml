@@ -13,11 +13,21 @@ jobs:
       uses: actions/checkout@v2
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-    - name: Build
+      
+    - name: Build Meadow.Linux
       run: dotnet build -c Release src/lib/Meadow.Linux.csproj /p:Version=${VERSION}
-    - name: Pack
+    - name: Package Meadow.Linux
       run: dotnet pack -c Release src/lib/Meadow.Linux.csproj /p:Version=${VERSION} --output .
-    - name: Push
+    - name: Push Meadow.Linux to NuGet
+      run: dotnet nuget push Meadow.Linux.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+
+    - name: Build Meadow.Gtk
+      run: dotnet build -c Release src/gtk/Meadow.Gtk.csproj /p:Version=${VERSION}
+    - name: Package Meadow.Gtk
+      run: dotnet pack -c Release src/gtk/Meadow.Gtk.csproj /p:Version=${VERSION} --output .
+    - name: Push Meadow.Gtk to NuGet
       run: dotnet nuget push Meadow.Linux.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
