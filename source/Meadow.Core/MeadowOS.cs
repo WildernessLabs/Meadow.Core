@@ -236,9 +236,11 @@
                 LoadSettings();
 
                 // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
+                var b4 = Environment.TickCount;
+                var et = Environment.TickCount - b4;
                 var appType = FindAppType();
-
                 Resolver.Log.Trace($"App is type {appType.Name}");
+                Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
 
                 var deviceType = appType.BaseType.GetGenericArguments()[0];
 
@@ -248,6 +250,8 @@
                     {
                         throw new Exception($"Failed to create instance of '{deviceType.Name}'");
                     }
+                    et = Environment.TickCount - b4;
+                    Resolver.Log.Trace($"Creating '{deviceType.Name}' instance took {et}ms");
 
                     CurrentDevice = device;
                 }
@@ -264,10 +268,13 @@
                 InitializeFileSystem();
 
                 // Create the app object, bound immediately to the <IMeadowDevice>
+                b4 = Environment.TickCount;
                 if (Activator.CreateInstance(appType, nonPublic: true) is not IApp app)
                 {
                     throw new Exception($"Failed to create instance of '{appType.Name}'");
                 }
+                et = Environment.TickCount - b4;
+                Resolver.Log.Trace($"Creating '{appType.Name}' instance took {et}ms");
 
                 // feels off, but not seeing a super clean way without the generics, etc.
                 if (app.GetType().GetProperty(nameof(App.CancellationToken)) is PropertyInfo pi)
