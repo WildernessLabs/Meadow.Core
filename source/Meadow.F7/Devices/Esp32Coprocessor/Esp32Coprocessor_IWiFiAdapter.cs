@@ -32,6 +32,11 @@ namespace Meadow.Devices
         /// </summary>
         public event EventHandler NtpTimeChanged = delegate { };
 
+        /// <summary>
+        /// Raise an Error event.
+        /// </summary>
+        public event EventHandler NetworkError = delegate { };
+
         #endregion Events
 
 
@@ -238,12 +243,19 @@ namespace Meadow.Devices
             Resolver.Log.Trace($"Wifi InvokeEvent {eventId} returned {statusCode}");
 
             // look for errors first
-            if (statusCode != StatusCodes.CompletedOk)
+            if (eventId == WiFiFunction.ErrorEvent)
             {
-                _lastStatus = statusCode;
-                CurrentState = NetworkState.Error;
-                Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
-                return;
+                //  Need to work out if we have to do anything here.
+            }
+            else
+            {
+                if (statusCode != StatusCodes.CompletedOk)
+                {
+                    _lastStatus = statusCode;
+                    CurrentState = NetworkState.Error;
+                    Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
+                    return;
+                }
             }
 
             switch (eventId)
@@ -268,6 +280,10 @@ namespace Meadow.Devices
                     break;
                 case WiFiFunction.NtpUpdateEvent:
                     RaiseNtpTimeChangedEvent();
+                    break;
+                case WiFiFunction.ErrorEvent:
+                    Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
+                    RaiseErrorEvent(statusCode);
                     break;
                 default:
                     throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
@@ -433,11 +449,12 @@ namespace Meadow.Devices
                 {
                     NetworkName = ssid,
                     Password = password,
-                    //IpAddress = 0,
-                    //Gateway = 0,
-                    //SubnetMask = 0
                     IpAddress = ConfiguredIpAddress,
                     Gateway = ConfiguredGateway,
+                    //
+                    //  Setting Gateway to 0 will allow an error event to be raised.
+                    //
+                    //Gateway = 0,
                     SubnetMask = ConfiguredSubnetMask
                 };
                 byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
@@ -653,6 +670,16 @@ namespace Meadow.Devices
             NtpTimeChangedEventArgs e = new NtpTimeChangedEventArgs();
 
             NtpTimeChanged?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Process the Error event.
+        /// </summary>
+        protected void RaiseErrorEvent(StatusCodes statusCode)
+        {
+            NetworkErrorEventArgs e = new NetworkErrorEventArgs((uint) statusCode);
+
+            NetworkError?.Invoke(this, e);
         }
 
         #endregion Event raising methods

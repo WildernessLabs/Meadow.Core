@@ -11,6 +11,8 @@ namespace Meadow
         public event NetworkConnectionHandler NetworkConnected;
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
+        public event NetworkErrorHandler NetworkError;
+
         private NetworkInterface? nativeInterface;
 
         public abstract bool IsConnected { get; }

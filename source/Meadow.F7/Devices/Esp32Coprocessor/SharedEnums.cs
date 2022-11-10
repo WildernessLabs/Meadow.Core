@@ -103,61 +103,65 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         InvalidAntennaValue = 19,
         /// <summary>
+        /// StatusCodes - InvalidIp
+        /// </summary>
+        InvalidIp = 20,
+        /// <summary>
         /// StatusCodes - NoMessagesWaiting
         /// </summary>
-        NoMessagesWaiting = 20,
+        NoMessagesWaiting = 21,
         /// <summary>
         /// StatusCodes - CoprocessorNotResponding
         /// </summary>
-        CoprocessorNotResponding = 21,
+        CoprocessorNotResponding = 22,
         /// <summary>
         /// StatusCodes - EspWiFiNotStarted
         /// </summary>
-        EspWiFiNotStarted = 22,
+        EspWiFiNotStarted = 23,
         /// <summary>
         /// StatusCodes - EspOutOfMemory
         /// </summary>
-        EspOutOfMemory = 23,
+        EspOutOfMemory = 24,
         /// <summary>
         /// StatusCodes - EspWiFiInvalidSsid
         /// </summary>
-        EspWiFiInvalidSsid = 24,
+        EspWiFiInvalidSsid = 25,
         /// <summary>
         /// StatusCodes - AccessPointNotFound
         /// </summary>
-        AccessPointNotFound = 25,
+        AccessPointNotFound = 26,
         /// <summary>
         /// StatusCodes - BeaconTimeout
         /// </summary>
-        BeaconTimeout = 26,
+        BeaconTimeout = 27,
         /// <summary>
         /// StatusCodes - AuthenticationFailed
         /// </summary>
-        AuthenticationFailed = 27,
+        AuthenticationFailed = 28,
         /// <summary>
         /// StatusCodes - AssociationFailed
         /// </summary>
-        AssociationFailed = 28,
+        AssociationFailed = 29,
         /// <summary>
         /// StatusCodes - HandshakeTimeout
         /// </summary>
-        HandshakeTimeout = 29,
+        HandshakeTimeout = 30,
         /// <summary>
         /// StatusCodes - ConnectionFailed
         /// </summary>
-        ConnectionFailed = 30,
+        ConnectionFailed = 31,
         /// <summary>
         /// StatusCodes - ApTsfReset
         /// </summary>
-        ApTsfReset = 31,
+        ApTsfReset = 32,
         /// <summary>
         /// StatusCodes - UnmappedErrorCode
         /// </summary>
-        UnmappedErrorCode = 32,
+        UnmappedErrorCode = 33,
         /// <summary>
         /// StatusCodes - UnknownConfigurationItem
         /// </summary>
-        UnknownConfigurationItem = 33
+        UnknownConfigurationItem = 34
     };
 
     /// <summary>
