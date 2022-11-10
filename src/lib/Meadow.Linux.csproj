@@ -9,7 +9,7 @@
    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Linux</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
-   <Version>0.26.0</Version>
+   <Version>0.30.0</Version>
    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
    <RootNamespace>Meadow</RootNamespace>
    <Nullable>enable</Nullable>
@@ -21,6 +21,6 @@
    <Nullable>enable</Nullable>
  </PropertyGroup>
  <ItemGroup>
-   <PackageReference Include="Meadow" Version="0.32.1" />
+   <PackageReference Include="Meadow" Version="0.*" />
  </ItemGroup>
 </Project>
