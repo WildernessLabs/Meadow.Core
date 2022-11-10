@@ -117,6 +117,8 @@
 
             }
 
+            Resolver.Log.ShowTicks = s.ShowTicks;
+
             if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
             {
                 Resolver.Log.Loglevel = level;
