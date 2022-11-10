@@ -1,0 +1,33 @@
+name: NuGet Package Creation
+
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set VERSION variable from tag
+      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      
+    - name: Build Meadow.Core
+      run: dotnet build -c Release source/Meadow.Core/Meadow.Core.csproj /p:Version=${VERSION}
+    - name: Package Meadow.Linux
+      run: dotnet pack -c Release source/Meadow.Core/Meadow.Core.csproj /p:Version=${VERSION} --output .
+    - name: Push Meadow.Linux to NuGet
+      run: dotnet nuget push Meadow.Core.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+
+    - name: Build Meadow.F7
+      run: dotnet build -c Release source/Meadow.F7/Meadow.F7.csproj /p:Version=${VERSION}
+    - name: Package Meadow.F7
+      run: dotnet pack -c Release source/Meadow.F7/Meadow.F7.csproj /p:Version=${VERSION} --output .
+    - name: Push Meadow.F7 to NuGet
+      run: dotnet nuget push Meadow.Gtk.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
