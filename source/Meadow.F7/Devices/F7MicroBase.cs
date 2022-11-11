@@ -32,6 +32,12 @@ namespace Meadow.Devices
         public abstract IPin GetPin(string pinName);
         public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
+        /// <summary>
+        /// Gets the current Battery information
+        /// </summary>
+        /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
+        public abstract BatteryInfo GetBatteryInfo();
+
         //==== internals
         protected NetworkAdapterCollection networkAdapters;
         protected Esp32Coprocessor? esp32;
@@ -99,23 +105,6 @@ namespace Meadow.Devices
                 }
 
             }
-        }
-
-        /// <summary>
-        /// Gets the current Battery information
-        /// </summary>
-        /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
-        public virtual BatteryInfo GetBatteryInfo()
-        {
-            if (Coprocessor != null)
-            {
-                return new BatteryInfo
-                {
-                    Voltage = new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts)
-                };
-            }
-
-            throw new Exception("Coprocessor not initialized.");
         }
 
         /// <summary>

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Meadow.Core;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using Meadow.Units;
+using System;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -60,7 +58,7 @@ namespace Meadow.Devices
             // do the grunt work to set up the ADC itself
 
             // enable the ADC1 clock - all Meadow ADCs are in ADC1
-            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0,  STM32.RCC_APB2ENR_ADC1EN);
+            UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2ENR_OFFSET, 0, STM32.RCC_APB2ENR_ADC1EN);
 
             // reset the ADC RCC clock - set the reset bit
             UPD.UpdateRegister(STM32.RCC_BASE + STM32.RCC_APB2RSTR_OFFSET, 0, STM32.RCC_APB2RSTR_ADCRST);
@@ -80,7 +78,7 @@ namespace Meadow.Devices
             //  scan mode disabled
             // 
             // basically clear all non-reserved bits
-            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR1_OFFSET, 
+            UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR1_OFFSET,
                 STM32.ADC_CR1_NON_RESERVED_MASK, 0);
 
             // Set up the CR2 control register.  This translates to:
@@ -97,7 +95,7 @@ namespace Meadow.Devices
             //  112 sample cycles for channels 10 & 11 
             // 
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SMPR1_OFFSET,
-                STM32.ADC_SMPR1_NON_RESERVED_MASK, 
+                STM32.ADC_SMPR1_NON_RESERVED_MASK,
                 (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH10_SHIFT) | (STM32.ADC_SMPx_SAMPLING_112_CYCLES << STM32.ADC_SMPR1_CH11_SHIFT));
 
             // Set up the SMPR2 sample time register.  This translates to:
@@ -215,7 +213,7 @@ namespace Meadow.Devices
                     channel = designator.pin + 8;
                     break;
                 case STM32.GpioPort.PortC:
-                    // PC0 and PC1 have additional functions of ADC1_IN10 and 11 (see manual 'STM32F777xx STM32F778Ax STM32F779xx')
+                    // PC0-3 have additional functions of ADC1_IN10 - 13 (see manual 'DS11532 Rev 7' (STM32F777xx STM32F778Ax STM32F779xx), Table 11, pg 69)
                     channel = designator.pin + 10;
                     break;
                 default:
@@ -235,7 +233,7 @@ namespace Meadow.Devices
                 (uint)channel << STM32.ADC_SQR3_SQ1_SHIFT);
 
             Output.WriteLineIf(_debuggingADC, $"SQR3::SQ1 set to {channel}");
-            
+
             // make sure EOC is cleared
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_SR_OFFSET,
                 STM32.ADC_SR_EOC,
@@ -247,7 +245,7 @@ namespace Meadow.Devices
 
             // start a conversion via the CR2 SWSTART bit
             UPD.UpdateRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CR2_OFFSET,
-                0, 
+                0,
                 STM32.ADC_CR2_SWSTART);
 
             Output.WriteLineIf(_debuggingADC, $"Polling status register...");
