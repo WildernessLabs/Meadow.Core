@@ -7,5 +7,6 @@
         }
 
         public ILogLevelSettings LogLevel => new DefaultLogLevelSettings();
+        public bool ShowTicks => false;
     }
 }
