@@ -17,6 +17,7 @@ namespace Meadow.Devices
 
         private Thread? _ist;
         private List<int> _interruptGroupsInUse = new();
+        private List<long> _wiredInterrupts = new();
 
         public void WireInterrupt(IPin pin,
             InterruptMode interruptMode,
@@ -113,36 +114,48 @@ namespace Meadow.Devices
                     Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
                             $"failed to register interrupts: {err}");
                 }
+                else
+                {
+                    _wiredInterrupts.Add(((int)port << 8) | pin);
+                }
             }
             else
             {
-                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                // only disable if it was previously enabled!
+                if (_wiredInterrupts.Contains(((int)port << 8) | pin))
                 {
-                    Enable = 0,   // Disable
-                    Port = (uint)port,
-                    Pin = (uint)pin,
-                    RisingEdge = 0,
-                    FallingEdge = 0,
-                    ResistorMode = 0,
-                    DebounceDuration = 0,
-                    GlitchDuration = 0
-                };
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                    $"Calling ioctl to disable interrupts for Input: {port}{pin}");
 
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+                    var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                    {
+                        Enable = 0,   // Disable
+                        Port = (uint)port,
+                        Pin = (uint)pin,
+                        RisingEdge = 0,
+                        FallingEdge = 0,
+                        ResistorMode = 0,
+                        DebounceDuration = 0,
+                        GlitchDuration = 0
+                    };
 
-                lock (_interruptGroupsInUse)
-                {
-                    if (_interruptGroupsInUse.Contains(pin))
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                        $"Calling ioctl to disable interrupts for Input: {port}{pin}");
+
+                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+
+                    lock (_interruptGroupsInUse)
                     {
-                        _interruptGroupsInUse.Remove(pin);
+                        if (_interruptGroupsInUse.Contains(pin))
+                        {
+                            _interruptGroupsInUse.Remove(pin);
+                        }
+                        else
+                        {
+                            Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                                $"Int group: {pin} not in use");
+                        }
                     }
-                    else
-                    {
-                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                            $"Int group: {pin} not in use");
-                    }
+
+                    _wiredInterrupts.Remove(((int)port << 8) | pin);
                 }
             }
         }
