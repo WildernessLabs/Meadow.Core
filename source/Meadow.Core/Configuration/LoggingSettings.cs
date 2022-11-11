@@ -8,6 +8,7 @@
         }
 
         public ILogLevelSettings LogLevel { get; set; }
+        public bool ShowTicks => this.GetConfiguredBool(defaultValue: false);
 
         public class LogLevelSettings : ConfigurableObject, ILogLevelSettings
         {
