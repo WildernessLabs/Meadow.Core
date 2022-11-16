@@ -13,7 +13,6 @@ namespace Meadow.Hardware
 
         // internals
         protected bool _currentState;
-        protected bool _isDisposed;
 
         public bool InitialState { get; }
         public OutputType InitialOutputType { get; }
@@ -23,13 +22,11 @@ namespace Meadow.Hardware
         public abstract bool State { get; set; }
         public abstract PortDirectionType Direction { get; set; }
 
-        protected abstract void Dispose(bool disposing);
+        protected TimeSpan _debounceDuration;
+        protected TimeSpan _glitchDuration;
 
-        protected double _debounceDuration;
-        protected double _glitchDuration;
-
-        public abstract double DebounceDuration { get; set; }
-        public abstract double GlitchDuration { get; set; }
+        public abstract TimeSpan DebounceDuration { get; set; }
+        public abstract TimeSpan GlitchDuration { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating the type of interrupt monitoring this input.
@@ -43,10 +40,21 @@ namespace Meadow.Hardware
             bool initialState,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input,
-            double debounceDuration = 0.0,
-            double glitchDuration = 0.0,
-            OutputType initialOutputType = OutputType.PushPull)
+            PortDirectionType initialDirection = PortDirectionType.Input)
+            : this(pin, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration: TimeSpan.Zero, glitchDuration: TimeSpan.Zero, initialOutputType: OutputType.PushPull)
+        {
+        }
+
+        protected BiDirectionalPortBase(
+            IPin pin,
+            IDigitalChannelInfo channel,
+            bool initialState,
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            PortDirectionType initialDirection,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration,
+            OutputType initialOutputType)
             : base(pin, channel)
         {
             this.InterruptMode = interruptMode;
@@ -58,17 +66,10 @@ namespace Meadow.Hardware
             InitialOutputType = initialOutputType;
         }
 
-        public override void Dispose()
-        {
-            Dispose(true);
-            _isDisposed = true;
-            GC.SuppressFinalize(this);
-        }
-
         protected void RaiseChangedAndNotify(DigitalPortResult changeResult)
         {
-            if (_isDisposed) return;
-            
+            if (disposed) return;
+
             Changed?.Invoke(this, changeResult);
             // TODO: implement Subscribe patter (see DigitalInputPortBase)
             // _observers.ForEach(x => x.OnNext(changeResult));

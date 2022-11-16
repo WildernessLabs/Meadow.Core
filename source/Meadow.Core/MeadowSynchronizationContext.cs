@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System;
 
 namespace Meadow
 {
@@ -6,13 +7,20 @@ namespace Meadow
     {
         public override void Post(SendOrPostCallback action, object state)
         {
+
             SendOrPostCallback actionWrap = (object state2) =>
             {
                 SynchronizationContext.SetSynchronizationContext(new MeadowSynchronizationContext());
-                action.Invoke(state2);
+                var async_result = action.BeginInvoke(state2, null, null);
+                try {
+                    action.EndInvoke(async_result);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine ($"!!! {e.GetType()}: {e.Message}");
+                }
             };
-            var callback = new WaitCallback(actionWrap.Invoke);
-            ThreadPool.QueueUserWorkItem(callback, state);
+            ThreadPool.QueueUserWorkItem(new WaitCallback(action.Invoke));
         }
 
         public override SynchronizationContext CreateCopy()

@@ -3,18 +3,19 @@ using System.Linq;
 
 namespace Meadow.Hardware
 {
-  /// <summary>
-  /// Represents a port that is capable of reading and writing digital input
-  /// and output.
-  /// </summary>
-  public class BiDirectionalPort : BiDirectionalPortBase
+    /// <summary>
+    /// Represents a port that is capable of reading and writing digital input
+    /// and output.
+    /// </summary>
+    public class BiDirectionalPort : BiDirectionalPortBase
     {
         private PortDirectionType _currentDirection;
         protected IMeadowIOController IOController { get; }
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         // Direction change
-        public override PortDirectionType Direction {
+        public override PortDirectionType Direction
+        {
             get => _currentDirection;
             set
             {
@@ -27,7 +28,7 @@ namespace Meadow.Hardware
                 else
                 {
                     // InterruptMode.None disables interrupts within Nuttx via WireInterrupt
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None, 0.0, 0.0);
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None, TimeSpan.Zero, TimeSpan.Zero);
                     this.IOController.ConfigureOutput(this.Pin, this.InitialState, InitialOutputType);
                 }
                 _currentDirection = value;
@@ -36,17 +37,29 @@ namespace Meadow.Hardware
 
         protected BiDirectionalPort(
             IPin pin,
-            IMeadowIOController gpioController,
             IDigitalChannelInfo channel,
-            bool initialState = false, 
+            IMeadowIOController gpioController,
+            bool initialState,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input,
-            double debounceDuration = 0,
-            double glitchDuration = 0,
-            OutputType outputType = OutputType.PushPull
+            PortDirectionType initialDirection = PortDirectionType.Input)
+            : this(pin, gpioController, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration: TimeSpan.Zero, glitchDuration: TimeSpan.Zero, outputType: OutputType.PushPull)
+        {
+        }
+
+        protected BiDirectionalPort(
+            IPin pin,
+            IMeadowIOController gpioController,
+            IDigitalChannelInfo channel,
+            bool initialState,
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            PortDirectionType initialDirection,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration,
+            OutputType outputType
             )
-            : base (pin, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType)
+            : base(pin, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType)
         {
             if (interruptMode != InterruptMode.None && (!channel.InterruptCapable))
             {
@@ -60,11 +73,11 @@ namespace Meadow.Hardware
             {
                 throw new Exception("Unable to create port; channel is not capable of outputs");
             }
-            if (debounceDuration < 0.0 || debounceDuration > 1000.0)
+            if (debounceDuration.TotalMilliseconds < 0.0 || debounceDuration.TotalMilliseconds > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
-            if (glitchDuration < 0.0 || glitchDuration > 1000.0)
+            if (glitchDuration.TotalMilliseconds < 0.0 || glitchDuration.TotalMilliseconds > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(glitchDuration), "Unable to create an input port, because glitchDuration is out of range (0.1-1000.0)");
             }
@@ -73,11 +86,11 @@ namespace Meadow.Hardware
             this.IOController.Interrupt += OnInterrupt;
 
             // attempt to reserve the pin - we'll reserve it as an input even though we use it for bi-directional
-            var result = DeviceChannelManager.ReservePin(
-                this.Pin, 
+            var result = this.IOController.DeviceChannelManager.ReservePin(
+                this.Pin,
                 ChannelConfigurationType.DigitalInput);
 
-            if(result.Item1)
+            if (result.Item1)
             {
                 _currentDirection = initialDirection;
 
@@ -90,7 +103,7 @@ namespace Meadow.Hardware
                 else
                 {
                     // InterruptMode.None disables interrupts within Nuttx via WireInterrupt
-                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None, 0.0, 0.0);
+                    this.IOController.ConfigureInput(this.Pin, this.Resistor, InterruptMode.None, TimeSpan.Zero, TimeSpan.Zero);
                     this.IOController.ConfigureOutput(this.Pin, InverseLogic ? !this.InitialState : this.InitialState, outputType);
                 }
             }
@@ -106,14 +119,26 @@ namespace Meadow.Hardware
             bool initialState = false,
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled,
-            PortDirectionType initialDirection = PortDirectionType.Input,
-            double debounceDuration = 0.0,
-            double glitchDuration = 0.0,
-            OutputType outputType = OutputType.PushPull
+            PortDirectionType initialDirection = PortDirectionType.Input
+            )
+        {
+            return From(pin, ioController, initialState, interruptMode, resistorMode, initialDirection, TimeSpan.Zero, TimeSpan.Zero, OutputType.PushPull);
+        }
+
+        public static BiDirectionalPort From(
+            IPin pin,
+            IMeadowIOController ioController,
+            bool initialState,
+            InterruptMode interruptMode,
+            ResistorMode resistorMode,
+            PortDirectionType initialDirection,
+            TimeSpan debounceDuration,
+            TimeSpan glitchDuration,
+            OutputType outputType
             )
         {
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
-            if(chan == null) 
+            if (chan == null)
             {
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
@@ -123,12 +148,6 @@ namespace Meadow.Hardware
         ~BiDirectionalPort()
         {
             Dispose(false);
-        }
-
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected override void Dispose(bool disposing)
@@ -144,7 +163,7 @@ namespace Meadow.Hardware
                 {
                     this.IOController.Interrupt -= OnInterrupt;
                     this.IOController.UnconfigureGpio(this.Pin);
-                    bool success = DeviceChannelManager.ReleasePin(this.Pin);
+                    bool success = this.IOController.DeviceChannelManager.ReleasePin(this.Pin);
                 }
                 disposed = true;
             }
@@ -158,31 +177,31 @@ namespace Meadow.Hardware
                 var value = IOController.GetDiscrete(this.Pin);
                 return InverseLogic ? !value : value;
             }
-            set 
+            set
             {
                 Direction = PortDirectionType.Output;
                 IOController.SetDiscrete(this.Pin, InverseLogic ? !value : value);
             }
         }
 
-        public override double DebounceDuration
+        public override TimeSpan DebounceDuration
         {
             get => _debounceDuration;
             set
             {
-                if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
+                if (value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("DebounceDuration");
                 _debounceDuration = value;
                 // Update in MCU
                 this.IOController.WireInterrupt(Pin, InterruptMode, this.Resistor, _debounceDuration, _glitchDuration);
-           }
+            }
         }
 
-        public override double GlitchDuration
+        public override TimeSpan GlitchDuration
         {
             get => _glitchDuration;
             set
             {
-                if (value < 0.0 || value > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
+                if (value.TotalMilliseconds < 0.0 || value.TotalMilliseconds > 1000.0) throw new ArgumentOutOfRangeException("GlitchDuration");
                 _glitchDuration = value;
                 // Update in MCU
                 this.IOController.WireInterrupt(Pin, InterruptMode, this.Resistor, _debounceDuration, _glitchDuration);

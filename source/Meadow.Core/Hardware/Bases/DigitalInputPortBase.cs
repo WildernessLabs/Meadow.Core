@@ -21,10 +21,12 @@ namespace Meadow.Hardware
 
         public abstract bool State { get; }
         public abstract ResistorMode Resistor { get; set; }
-        public abstract double DebounceDuration { get; set; }
-        public abstract double GlitchDuration { get; set; }
+        public abstract TimeSpan DebounceDuration { get; set; }
+        public abstract TimeSpan GlitchDuration { get; set; }
 
         protected List<IObserver<IChangeResult<DigitalState>>> _observers { get; set; } = new List<IObserver<IChangeResult<DigitalState>>>();
+
+        private List<Unsubscriber> unsubscribers = new List<Unsubscriber>();
 
         protected DigitalInputPortBase(
             IPin pin,
@@ -33,6 +35,7 @@ namespace Meadow.Hardware
             )
             : base(pin, channel)
         {
+            // TODO: check interrupt mode (i.e. if != none, make sure channel info agrees)
             this.InterruptMode = interruptMode;
         }
 
@@ -44,8 +47,20 @@ namespace Meadow.Hardware
 
         public IDisposable Subscribe(IObserver<IChangeResult<DigitalState>> observer)
         {
-            if (!_observers.Contains(observer)) _observers.Add(observer);
-            return new Unsubscriber(_observers, observer);
+            if(!_observers.Contains(observer)) _observers.Add(observer);
+            var u = new Unsubscriber(_observers, observer);
+            unsubscribers.Add(u);
+            return u;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            foreach(var u in unsubscribers)
+            {
+                u.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
         private class Unsubscriber : IDisposable
@@ -61,7 +76,7 @@ namespace Meadow.Hardware
 
             public void Dispose()
             {
-                if (!(_observer == null)) _observers.Remove(_observer);
+                if(!(_observer == null)) _observers.Remove(_observer);
             }
         }
     }

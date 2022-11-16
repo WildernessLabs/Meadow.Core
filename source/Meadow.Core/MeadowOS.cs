@@ -1,93 +1,423 @@
-﻿using System;
-using Meadow.Devices;
-using Meadow.Hardware;
-using static Meadow.Core.Interop;
-
-namespace Meadow
+﻿namespace Meadow
 {
-    public static class MeadowOS//<D> where D : IIODevice
+    using Meadow.Logging;
+    using Meadow.Update;
+    using System;
+    using System.IO;
+    using System.Reflection;
+    using System.Threading;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// The entry point of the .NET part of Meadow OS.
+    /// </summary>
+    public static partial class MeadowOS
     {
-        internal static void Init(IMeadowDevice device)
+        //==== internals
+        private static SynchronizationContext? synchronizationContext;
+
+        //==== properties
+        internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
+
+        private static IApp App { get; set; }
+        private static ILifecycleSettings LifecycleSettings { get; set; }
+        private static IUpdateSettings UpdateSettings { get; set; }
+
+        static bool appRunning = false;
+
+        internal static CancellationTokenSource AppAbort = new();
+
+        public async static Task Main(string[] _)
         {
-            CurrentDevice = device;
-        }
-
-        public static IMeadowDevice CurrentDevice { get; private set; }
-
-
-        public static void Sleep(DateTime until)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(TimeSpan duration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static void Sleep(WakeUpOptions wakeUp)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Resets the Meadow hardware immediately
-        /// </summary>
-        public static void Reset()
-        {
-            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerReset);
-        }
-
-        /// <summary>
-        /// Enables a watchdog timer with the specified timeout in milliseconds.
-        /// If Watchdog.Reset is not called before the timeout period, the Meadow
-        /// will reset.
-        /// </summary>
-        /// <param name="timeoutMs">Watchdog timeout period, in milliseconds.
-        /// Maximum allowed timeout of 32,768ms</param>
-        public static void WatchdogEnable(int timeoutMs)
-        {
-            // we'll use the IWDG registers.  
-            // WWDG is too fast, with a max timeout in the 40ms range, which for a managed app is a recipe for lots of restarts
-            // the IWDG uses the LSI clock, which has a freq of 32000
-            // if we set the prescaler divider at /32, we end up with a simple 1ms per tick
-
-            // from the data sheet:
-            //1. Enable the IWDG by writing 0x0000 CCCC in the Key register (IWDG_KR).
-            //2. Enable register access by writing 0x0000 5555 in the Key register (IWDG_KR).
-            //3. Write the prescaler by programming the Prescaler register (IWDG_PR) from 0 to 7.
-            //4. Write the Reload register (IWDG_RLR).
-            //5. Wait for the registers to be updated (IWDG_SR = 0x0000 0000).
-            //6. Refresh the counter value with IWDG_RLR (IWDG_KR = 0x0000 AAAA)
-
-            // The RLR can have a maximum of 4096, so we have to play with the prescaler to get close to the desired value
-            uint prescale, rlr;
-
-            if (timeoutMs < 4096) {
-                prescale = STM32.IWDG_PR_DIV_32;
-                rlr = (uint)timeoutMs;
-            } else if (timeoutMs < 4096 * 2) {
-                prescale = STM32.IWDG_PR_DIV_64;
-                rlr = (uint)timeoutMs / 2;
-            } else if (timeoutMs < 4096 * 4) {
-                prescale = STM32.IWDG_PR_DIV_128;
-                rlr = (uint)timeoutMs / 4;
-            } else if (timeoutMs < 4096 * 8) {
-                prescale = STM32.IWDG_PR_DIV_256;
-                rlr = (uint)timeoutMs / 8;
-            } else {
-                throw new ArgumentOutOfRangeException($"Timeout must be less than {4096 * 8}ms");
+            if (!Initialize())
+            {
+                // device initialization failed - don't try bring up the app
+                SystemFailure("Device Initialization Failure");
+                return;
             }
 
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000cccc);
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x00005555);
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_PR_OFFSET, prescale);
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_RLR_OFFSET, rlr);
+            try
+            {
+                Resolver.Log.Trace("Initializing App");
+                await App.Initialize();
+            }
+            catch (Exception e)
+            {
+                // exception on bring-up; not good
+                SystemFailure(e, "App initialization failed");
+                return;
+            }
+
+            while (!appRunning)
+            {
+                try
+                {
+                    Resolver.Log.Trace("Running App");
+                    await App.Run();
+                    appRunning = true;
+                }
+                catch (Exception e)
+                {
+                    Resolver.Log.Error($"App Error: {e.Message}");
+
+                    try
+                    {
+                        await App.OnError(e);
+                    }
+                    catch (Exception ex)
+                    {
+                        Resolver.Log.Error($"Exception in OnError handling: {ex.Message}");
+                    }
+
+                    AppAbort.Cancel();
+                    throw SystemFailure(e);
+                }
+                finally
+                {
+                    await Task.Delay(Timeout.Infinite, AppAbort.Token);
+                }
+            }
+
+            try
+            {
+                Resolver.Log.Trace($"App shutting down");
+
+                AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
+                await App.OnShutdown();
+            }
+            catch (Exception e)
+            {
+                // we can't recover while shutting down
+                throw SystemFailure(e, "App shutdown error");
+            }
+            finally
+            {
+                if (App is IAsyncDisposable { } da)
+                {
+                    await da.DisposeAsync();
+                }
+            }
+            Shutdown();
         }
 
-        public static void WatchdogReset()
+        private static void LoadSettings()
         {
-            UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000aaaa);
+            ILoggingSettings s;
+
+            try
+            {
+                s = new LoggingSettings();
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default App Config");
+
+                s = AppSettings.DefaultLoggingSettings;
+
+            }
+
+            Resolver.Log.ShowTicks = s.ShowTicks;
+
+            if (Enum.TryParse<LogLevel>(s.LogLevel.Default, true, out LogLevel level))
+            {
+                Resolver.Log.Loglevel = level;
+                Resolver.Log.Trace($"Setting log level to: {level}");
+            }
+            else
+            {
+                Resolver.Log.Info($"Log level: {level}");
+            }
+
+            Resolver.Log.Trace("LifecycleSettings:");
+
+            try
+            {
+                LifecycleSettings = new LifecycleSettings();
+            }
+            catch (Exception ex)
+            {
+                LifecycleSettings = AppSettings.DefaultLifecycleSettings;
+
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default App Config");
+            }
+            Resolver.Log.Trace($"  {nameof(LifecycleSettings.RestartOnAppFailure)}: {LifecycleSettings.RestartOnAppFailure}");
+            Resolver.Log.Trace($"  {nameof(LifecycleSettings.AppFailureRestartDelaySeconds)}: {LifecycleSettings.AppFailureRestartDelaySeconds}");
+
+            try
+            {
+                UpdateSettings = new UpdateSettings();
+                Resolver.Log.Trace($"Using Update Server {UpdateSettings.UpdateServer}:{UpdateSettings.UpdatePort}");
+            }
+            catch (Exception ex)
+            {
+                UpdateSettings = AppSettings.DefaultUpdateSettings;
+
+                Resolver.Log.Warn(ex.Message);
+                Resolver.Log.Warn("Using Default Update Config");
+            }
         }
+
+
+        private static Type FindAppType()
+        {
+            Resolver.Log.Trace($"Looking for app assembly...");
+
+            // support app.exe or app.dll
+            var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
+
+            if (assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
+
+            Assembly? FindByPath(string[] namesToCheck)
+            {
+                var root = AppDomain.CurrentDomain.BaseDirectory;
+
+                foreach (var name in namesToCheck)
+                {
+                    var path = Path.Combine(root, name);
+                    if (File.Exists(path))
+                    {
+                        Resolver.Log.Trace($"Found '{path}'");
+                        try
+                        {
+                            return Assembly.LoadFrom(path);
+                        }
+                        catch (Exception ex)
+                        {
+                            Resolver.Log.Warn($"Unable to load assembly '{name}': {ex.Message}");
+                        }
+                    }
+                }
+
+                return null;
+            }
+
+            Resolver.Log.Trace($"Looking for IApp...");
+            var searchType = typeof(IApp);
+            Type? appType = null;
+            foreach (var type in assembly.GetTypes())
+            {
+                if (searchType.IsAssignableFrom(type) && !type.IsAbstract)
+                {
+                    appType = type;
+                    break;
+                }
+            }
+
+            if (appType is null)
+            {
+                throw new Exception("App not found. Looking for 'MeadowApp.MeadowApp' type");
+            }
+            return appType;
+        }
+
+        private static bool Initialize()
+        {
+            try
+            {
+                Resolver.Services.Create<Logger>();
+                Resolver.Log.AddProvider(new ConsoleLogProvider());
+
+                Resolver.Log.Trace($"Initializing OS... ");
+            }
+            catch (Exception ex)
+            {
+                // must use Console because the logger failed
+                Console.WriteLine($"Failed to create Logger: {ex.Message}");
+                return false;
+            }
+
+            try
+            {
+                //capture unhandled exceptions
+                AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
+
+                LoadSettings();
+
+                // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
+                var b4 = Environment.TickCount;
+                var et = Environment.TickCount - b4;
+                var appType = FindAppType();
+                Resolver.Log.Trace($"App is type {appType.Name}");
+                Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
+
+                var deviceType = appType.BaseType.GetGenericArguments()[0];
+
+                try
+                {
+                    if (Activator.CreateInstance(deviceType) is not IMeadowDevice device)
+                    {
+                        throw new Exception($"Failed to create instance of '{deviceType.Name}'");
+                    }
+                    et = Environment.TickCount - b4;
+                    Resolver.Log.Trace($"Creating '{deviceType.Name}' instance took {et}ms");
+
+                    CurrentDevice = device;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
+                CurrentDevice.Initialize();
+                CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
+
+                // initialize file system folders and such
+                // TODO: move this to platformOS
+                InitializeFileSystem();
+
+                // Create the app object, bound immediately to the <IMeadowDevice>
+                b4 = Environment.TickCount;
+                if (Activator.CreateInstance(appType, nonPublic: true) is not IApp app)
+                {
+                    throw new Exception($"Failed to create instance of '{appType.Name}'");
+                }
+                et = Environment.TickCount - b4;
+                Resolver.Log.Trace($"Creating '{appType.Name}' instance took {et}ms");
+
+                // feels off, but not seeing a super clean way without the generics, etc.
+                if (app.GetType().GetProperty(nameof(App.CancellationToken)) is PropertyInfo pi)
+                {
+                    pi.SetValue(app, AppAbort.Token);
+                }
+
+                App = app;
+
+                var updateService = new UpdateService(UpdateSettings);
+                Resolver.Services.Add<IUpdateService>(updateService);
+
+                Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
+                if (UpdateSettings.Enabled)
+                {
+                    updateService.Start();
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        private static void Shutdown()
+        {
+            // Do a best-attempt at freeing memory and resources
+            GC.Collect(GC.MaxGeneration);
+            Resolver.Log.Debug("Shutdown");
+            Thread.Sleep(Timeout.Infinite);
+        }
+
+        /// <summary>
+        /// Creates the named OS directories if they don't exist, and makes sure
+        /// the `/Temp` directory is emptied out.
+        /// </summary>
+        internal static void InitializeFileSystem()
+        {
+            CreateFolderIfNeeded(FileSystem.CacheDirectory);
+            CreateFolderIfNeeded(FileSystem.DataDirectory);
+            CreateFolderIfNeeded(FileSystem.DocumentsDirectory);
+            EmptyDirectory(FileSystem.TempDirectory);
+            CreateFolderIfNeeded(FileSystem.TempDirectory);
+        }
+
+        private static void EmptyDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                foreach (var file in Directory.GetFiles(path))
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+
+        private static void CreateFolderIfNeeded(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                try
+                {
+                    Directory.CreateDirectory(path);
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Failed: {ex.Message}");
+                }
+            }
+        }
+
+        private static void SystemFailure(string message)
+        {
+            Resolver.Log.Error(message);
+            SystemFailure();
+
+        }
+
+        private static Exception SystemFailure(Exception e, string? message = null)
+        {
+            if (App is null)
+            {
+                Resolver.Log.Error("OS startup failure:");
+            }
+            else
+            {
+                Resolver.Log.Error("App failure:");
+            }
+
+            Resolver.Log.Error(message ?? " System Failure");
+            Resolver.Log.Error($" {e.GetType()}: {e.Message}");
+            Resolver.Log.Error(e.StackTrace);
+
+            if (e is AggregateException ae)
+            {
+                foreach (var ex in ae.InnerExceptions)
+                {
+                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
+                    Resolver.Log.Error(ex.StackTrace);
+                }
+            }
+            else if (e.InnerException != null)
+            {
+                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
+                Resolver.Log.Error(e.InnerException.StackTrace);
+            }
+
+            SystemFailure();
+
+            return e;
+        }
+
+        private static void SystemFailure()
+        {
+            if (LifecycleSettings.RestartOnAppFailure)
+            {
+                int restart = 5;
+                if (LifecycleSettings.AppFailureRestartDelaySeconds >= 0)
+                {
+                    restart = LifecycleSettings.AppFailureRestartDelaySeconds;
+                }
+
+                if (CurrentDevice != null && CurrentDevice.PlatformOS != null)
+                {
+                    Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
+                    Thread.Sleep(restart * 1000);
+
+                    CurrentDevice.PlatformOS.Reset();
+                }
+                else
+                {
+                    Resolver.Log.Info($"Initialization failure prevents automatic restart.");
+                }
+            }
+        }
+
+        private static void StaticOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            SystemFailure(e.ExceptionObject as Exception, "Unhandled exception");
+        }
+
     }
 }

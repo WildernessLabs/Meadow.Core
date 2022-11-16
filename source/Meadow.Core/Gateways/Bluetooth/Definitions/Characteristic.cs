@@ -21,7 +21,7 @@ namespace Meadow.Gateways.Bluetooth
         public CharacteristicPermission Permissions { get; }
         public CharacteristicProperty Properties { get; }
         public int MaxLength { get; }
-        public Descriptor[] Descriptors { get; }
+        public IDescriptor[] Descriptors { get; }
 
         internal Characteristic(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, int maxLength, params Descriptor[] descriptors)
         {

@@ -8,11 +8,11 @@ namespace Meadow.Hardware
     /// </summary>
     public class PortInUseException : Exception
     {
-        internal PortInUseException()
+        public PortInUseException()
         {
         }
 
-        internal PortInUseException(string message)
+        public PortInUseException(string message)
             : base(message)
         {
         }

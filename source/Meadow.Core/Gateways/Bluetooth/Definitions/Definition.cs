@@ -2,19 +2,19 @@
 
 namespace Meadow.Gateways.Bluetooth
 {
-    public class Definition
+    public class Definition : IDefinition
     {
         public string DeviceName { get; }
         public ServiceCollection Services { get; }
 
-        public Definition(string deviceName, params Service[] services)
+        public Definition(string deviceName, params IService[] services)
         {
             DeviceName = deviceName;
             Services = new ServiceCollection();
             Services.AddRange(services);
         }
 
-        internal string ToJson()
+        public string ToJson()
         {
             // serialize to JSON, but without pulling in a JSON lib dependency
             var json = $@"{{

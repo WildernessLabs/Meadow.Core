@@ -1,6 +1,5 @@
 ﻿using System;
 
-//TODO: this should be Meadow.Gateways.Bluetooth
 namespace Meadow.Gateways.Bluetooth
 {
     /// <summary>

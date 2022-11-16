@@ -1,97 +1,74 @@
-﻿using Meadow.Hardware;
-using Meadow.Devices;
-using System;
-using System.Threading;
-
-namespace Meadow
+﻿namespace Meadow
 {
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     /// <summary>
-    /// Provides a base implementation for the Meadow IApp contract. Use this 
+    /// Provides a base implementation for the Meadow App. Use this
     /// class for Meadow applications to get strongly-typed access to the current
     /// device information.
     /// </summary>
-    public abstract class App<D, A> : IApp 
-        where A : class, IApp
-        where D : class, IMeadowDevice
+    public abstract class App<D> : IApp, IAsyncDisposable
+            where D : class, IMeadowDevice
     {
-        /// <summary>
-        /// </summary>
-        /// <value>The current.</value>
-        public static A Current
-        {
-            get { return _current; }
-        } private static A? _current;
+        private ExecutionContext executionContext;
 
-        private static SynchronizationContext _mainContext { get; }
-
-        static App()
-        {
-            AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
-
-            _mainContext = new MeadowSynchronizationContext();
-            SynchronizationContext.SetSynchronizationContext(_mainContext);
-        }
+        public CancellationToken CancellationToken { get; internal set; }
 
         protected App()
         {
-            //BUGBUG: because a user's `App` class doesn't have to call this
-            // base ctor, then this might not ever run, or it might run
-            // non-deterministically. so we need to figure out how to make sure
-            // this stuff happens
-            _current = this as A;
+            executionContext = Thread.CurrentThread.ExecutionContext;
+
+            Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
+            Abort = MeadowOS.AppAbort.Token;
+
+            Resolver.Services.Add<IMeadowDevice>(Device);
+            Resolver.Services.Add<IApp>(this);
         }
 
-        public static D Device
+        public void InvokeOnMainThread(Action<object> action, object? state = null)
         {
-            get 
-            {
-                if (_device == null) {
-                    _device = Activator.CreateInstance<D>();
-                    _device.SetSynchronizationContext(_mainContext);
+            ExecutionContext.Run(executionContext, new ContextCallback(action), state);
+        }
 
-                    // set our device on the MeadowOS class
-                    MeadowOS.Init(_device);
-                }
-                return _device; 
-            }
-        } private static D? _device;
-
-        /// <summary>
-        /// Called when the application is put to sleep.
-        /// </summary>
-        public virtual void WillSleep() {}
-
-        /// <summary>
-        /// Called when the application wakes up from sleep.
-        /// </summary>
-        public virtual void OnWake() {}
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual void WillReset() {}
-
-        private static void StaticOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        public virtual Task Run()
         {
-            if(_current == null)
-            {
-                // in the event the user never called the base c'tor
-                Console.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
-            }
-            else
-            {
-                (_current as App<D,A>)?.OnUnhandledException(sender, e);
-            }
+            return Task.CompletedTask;
+        }
+
+        public virtual Task Initialize() { return Task.CompletedTask; }
+
+        public virtual Task OnShutdown() { return Task.CompletedTask; }
+
+        public virtual Task OnError(Exception e) { return Task.CompletedTask; }
+
+        /// <summary>
+        /// Called when the application is about to update itself.
+        /// </summary>
+        public void OnUpdate(Version newVersion, out bool approveUpdate)
+        {
+            approveUpdate = true;
         }
 
         /// <summary>
-        /// Called when the application encounters an unhandled Exception
+        /// Called when the application has updated itself.
         /// </summary>
-        /// <param name="sender">The source of the exception</param>
-        /// <param name="e">The unhandled Exception object</param>
-        internal virtual void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        public void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
         {
-            Console.WriteLine($"Unhandled Exception: {e.ExceptionObject}");
+            rollbackUpdate = false;
         }
+
+        /// <summary>
+        /// The root Device interface
+        /// </summary>
+        public static D Device { get; protected set; }
+
+        /// <summary>
+        /// The app cancellation token
+        /// </summary>
+        public static CancellationToken Abort { get; protected set; }
+
+        public async virtual ValueTask DisposeAsync() { return; }
     }
 }

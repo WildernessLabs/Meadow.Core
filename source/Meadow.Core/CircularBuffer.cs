@@ -56,6 +56,7 @@ namespace Meadow
         /// The buffer will never reset this value except when Clear is called.  It is up to the consumer to set this back to false if desired.
         /// </remarks>
         public bool HasOverrun { get; set; }
+        /// <summary>
         /// Returns true when an underrun condition has occurred.
         /// </summary>
         /// <remarks>

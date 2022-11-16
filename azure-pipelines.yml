@@ -1,14 +1,32 @@
 # Meadow.Core pipeline
 # Reference: https://aka.ms/yaml
 
+resources:
+  repositories:
+    - repository: MeadowCore
+      type: github
+      endpoint: WildernessLabs
+      name: WildernessLabs/Meadow.Core
+    - repository: MeadowContracts
+      type: github
+      endpoint: WildernessLabs
+      name: WildernessLabs/Meadow.Contracts
+    - repository: MeadowUnits
+      type: github
+      endpoint: WildernessLabs
+      name: WildernessLabs/Meadow.Units
+
 trigger:
   - main
   - develop
+  - staging
+  - release
 
 variables:
   solution: "**/Meadow.Core.sln"
   buildPlatform: "Any CPU"
   buildConfiguration: "Release"
+  internalFeedName: "Meadow.Staging"
 
 pool:
   vmImage: windows-2019
@@ -18,9 +36,15 @@ stages:
     jobs:
       - job: Build_Solution
         steps:
+          - checkout: self
+          - checkout: MeadowContracts
+          - checkout: MeadowUnits
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
+            displayName: Use_Nugets
             inputs:
+              feedsToUse: "select"
+              vstsFeed: $(internalFeedName) #use internal feed
               restoreSolution: "$(solution)"
           - task: VSBuild@1
             inputs:
