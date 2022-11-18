@@ -17,6 +17,9 @@ namespace Meadow
             /// </summary>
             /// <returns>OS build date.</returns>
 
+            /// <summary>
+            /// Build date abd time of the operating system.
+            /// </summary>
             //TODO: parse as datetime
             public static string OSBuildDate => CurrentDevice.PlatformOS.OSBuildDate;
 
@@ -43,7 +46,12 @@ namespace Meadow
             /// </summary>
             /// <remarks>This is currently only relevant to the CCM.</remarks>
             /// <returns>True if an SD card is connected to the STM32, false otherwise.</returns>
-            public static bool SdCardPresent => CurrentDevice.PlatformOS.SdCardPresent;
+            public static bool SdCardEnabled => CurrentDevice.PlatformOS.SdCardEnabled;
+
+            /// <summary>
+            /// Mount point for the SD card (if enabled and present).
+            /// </summary>
+            public static string SdCardMountPoint => CurrentDevice.PlatformOS.SdCardMountPoint;
 
             /// <summary>
             /// Get the selected network.

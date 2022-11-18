@@ -240,149 +240,165 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     public enum WiFiFunction
     {
         /// <summary>
+        /// WiFiFunction - StartWiFiInterface
+        /// </summary>
+        StartWiFiInterface = 0,
+        /// <summary>
+        /// WiFiFunction - StopWiFiInterface
+        /// </summary>
+        StopWiFiInterface = 1,
+        /// <summary>
         /// WiFiFunction - ConnectToAccessPoint
         /// </summary>
-        ConnectToAccessPoint = 0,
+        ConnectToAccessPoint = 2,
         /// <summary>
         /// WiFiFunction - ConnectToDefaultAccessPoint
         /// </summary>
-        ConnectToDefaultAccessPoint = 1,
+        ConnectToDefaultAccessPoint = 3,
         /// <summary>
         /// WiFiFunction - ClearDefaultAccessPoint
         /// </summary>
-        ClearDefaultAccessPoint = 2,
+        ClearDefaultAccessPoint = 4,
         /// <summary>
         /// WiFiFunction - DisconnectFromAccessPoint
         /// </summary>
-        DisconnectFromAccessPoint = 3,
+        DisconnectFromAccessPoint = 5,
         /// <summary>
         /// WiFiFunction - GetAccessPoints
         /// </summary>
-        GetAccessPoints = 4,
+        GetAccessPoints = 6,
         /// <summary>
         /// WiFiFunction - SetAntenna
         /// </summary>
-        SetAntenna = 5,
+        SetAntenna = 7,
         /// <summary>
         /// WiFiFunction - Socket
         /// </summary>
-        Socket = 6,
+        Socket = 8,
         /// <summary>
         /// WiFiFunction - Connect
         /// </summary>
-        Connect = 7,
+        Connect = 9,
         /// <summary>
         /// WiFiFunction - Write
         /// </summary>
-        Write = 8,
+        Write = 10,
         /// <summary>
         /// WiFiFunction - SetSockOpt
         /// </summary>
-        SetSockOpt = 9,
+        SetSockOpt = 11,
         /// <summary>
         /// WiFiFunction - GetSockOpt
         /// </summary>
-        GetSockOpt = 10,
+        GetSockOpt = 12,
         /// <summary>
         /// WiFiFunction - Read
         /// </summary>
-        Read = 11,
+        Read = 13,
         /// <summary>
         /// WiFiFunction - Close
         /// </summary>
-        Close = 12,
+        Close = 14,
         /// <summary>
         /// WiFiFunction - SendTo
         /// </summary>
-        SendTo = 13,
+        SendTo = 15,
         /// <summary>
         /// WiFiFunction - RecvFrom
         /// </summary>
-        RecvFrom = 14,
+        RecvFrom = 16,
         /// <summary>
         /// WiFiFunction - Poll
         /// </summary>
-        Poll = 15,
+        Poll = 17,
         /// <summary>
         /// WiFiFunction - InterruptPollResponse
         /// </summary>
-        InterruptPollResponse = 16,
+        InterruptPollResponse = 18,
         /// <summary>
         /// WiFiFunction - Send
         /// </summary>
-        Send = 17,
+        Send = 19,
         /// <summary>
         /// WiFiFunction - Bind
         /// </summary>
-        Bind = 18,
+        Bind = 20,
         /// <summary>
         /// WiFiFunction - Listen
         /// </summary>
-        Listen = 19,
+        Listen = 21,
         /// <summary>
         /// WiFiFunction - Accept
         /// </summary>
-        Accept = 20,
+        Accept = 22,
         /// <summary>
         /// WiFiFunction - Ioctl
         /// </summary>
-        Ioctl = 21,
+        Ioctl = 23,
         /// <summary>
         /// WiFiFunction - GetSockName
         /// </summary>
-        GetSockName = 22,
+        GetSockName = 24,
         /// <summary>
         /// WiFiFunction - GetPeerName
         /// </summary>
-        GetPeerName = 23,
+        GetPeerName = 25,
         /// <summary>
         /// WiFiFunction - FreeAddrInfo
         /// </summary>
-        FreeAddrInfo = 24,
+        FreeAddrInfo = 26,
         /// <summary>
         /// WiFiFunction - GetAddrInfo
         /// </summary>
-        GetAddrInfo = 25,
+        GetAddrInfo = 27,
         /// <summary>
         /// WiFiFunction - RecvMsg
         /// </summary>
-        RecvMsg = 26,
+        RecvMsg = 28,
         /// <summary>
         /// WiFiFunction - Shutdown
         /// </summary>
-        Shutdown = 27,
+        Shutdown = 29,
         /// <summary>
         /// WiFiFunction - SendMsg
         /// </summary>
-        SendMsg = 28,
+        SendMsg = 30,
         /// <summary>
         /// WiFiFunction - Dup2
         /// </summary>
-        Dup2 = 29,
+        Dup2 = 31,
         /// <summary>
         /// WiFiFunction - AddRef
         /// </summary>
-        AddRef = 30,
+        AddRef = 32,
         /// <summary>
         /// WiFiFunction - SockCaps
         /// </summary>
-        SockCaps = 31,
+        SockCaps = 33,
+        /// <summary>
+        /// WiFiFunction - StartWiFiInterfaceEvent
+        /// </summary>
+        StartWiFiInterfaceEvent = 34,
+        /// <summary>
+        /// WiFiFunction - StopWiFiInterfaceEvent
+        /// </summary>
+        StopWiFiInterfaceEvent = 35,
         /// <summary>
         /// WiFiFunction - NetworkConnectedEvent
         /// </summary>
-        NetworkConnectedEvent = 32,
+        NetworkConnectedEvent = 36,
         /// <summary>
         /// WiFiFunction - NetworkDisconnectedEvent
         /// </summary>
-        NetworkDisconnectedEvent = 33,
-        /// <summary>
-        /// WiFiFunction - ErrorEvent
-        /// </summary>
-        ErrorEvent = 34,
+        NetworkDisconnectedEvent = 37,
         /// <summary>
         /// WiFiFunction - NtpUpdateEvent
         /// </summary>
-        NtpUpdateEvent = 35
+        NtpUpdateEvent = 38,
+        /// <summary>
+        /// WiFiFunction - ErrorEvent
+        /// </summary>
+        ErrorEvent = 39
     };
 
     /// <summary>
@@ -409,11 +425,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// BluetoothFunction - ClientWriteRequestEvent
         /// </summary>
-        ClientWriteRequestEvent = 4,
-        /// <summary>
-        /// BluetoothFunction - ErrorEvent
-        /// </summary>
-        ErrorEvent = 5
+        ClientWriteRequestEvent = 4
     };
 
     /// <summary>

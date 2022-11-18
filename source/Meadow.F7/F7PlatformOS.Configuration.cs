@@ -70,7 +70,12 @@ namespace Meadow
         /// Is an SD card present?
         /// </summary>
         /// <remarks>Only really relevant to the CCM at the moment.</remarks>
-        public bool SdCardPresent => GetBoolean(ConfigurationValues.SdCardPresent);
+        public bool SdCardEnabled => GetBoolean(ConfigurationValues.SdCardEnabled);
+
+        /// <summary>
+        /// Mount point for the SD card (if enabled).
+        /// </summary>
+        public string SdCardMountPoint => GetString(ConfigurationValues.SdCardMountPoint);
 
         //==== Configuration internals
 
