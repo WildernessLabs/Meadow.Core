@@ -60,7 +60,9 @@ namespace Meadow.Devices
         /// </summary>
         public string OSVersion => F7PlatformOS.GetString(ConfigurationValues.OsVersion);
 
-
         //TODO: what about coprocessor build date
+
+        public bool SdCardEnabled => F7PlatformOS.GetBoolean(ConfigurationValues.SdCardEnabled);
+        public string SdCardMountPoint => F7PlatformOS.GetString(ConfigurationValues.SdCardMountPoint);
     }
 }

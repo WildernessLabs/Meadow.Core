@@ -51,9 +51,20 @@ namespace Meadow
 
             /// <summary>
             /// Gets the `/Temp` directory. Use this directory to store transient
-            /// files. This contens of this folder will be erased on device restart.
+            /// files. 
             /// </summary>
+            /// <remarks>
+            /// The contents of this folder will be erased on device restart.
+            /// </remarks>
             public static string TempDirectory => Path.GetFullPath("Temp", UserFileSystemRoot);
+
+            /// <summary>
+            /// Gets the path to the SD Card on systems that support it.  
+            /// </summary>
+            /// <remarks>
+            /// Note that the device configuration must also have the SD Card enabled for this to be valid
+            /// </remarks>
+            public static string SDCard => "/sdcard";
         }
     }
 }
