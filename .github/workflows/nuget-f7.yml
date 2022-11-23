@@ -18,6 +18,6 @@ jobs:
     - name: Package Meadow.F7
       run: dotnet pack -c Release source/Meadow.F7/Meadow.F7.csproj /p:Version=${VERSION} --output .
     - name: Push Meadow.F7 to NuGet
-      run: dotnet nuget push Meadow.Gtk.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      run: dotnet nuget push Meadow.F7.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
