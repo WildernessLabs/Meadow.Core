@@ -19,6 +19,6 @@ jobs:
     - name: Package Meadow.Core
       run: dotnet pack -c Release source/Meadow.Core/Meadow.Core.csproj /p:Version=${VERSION} --output .
     - name: Push Meadow.Core to NuGet
-      run: dotnet nuget push Meadow.Core.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      run: dotnet nuget push Meadow.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
