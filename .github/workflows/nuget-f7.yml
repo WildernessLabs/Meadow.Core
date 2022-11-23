@@ -1,4 +1,4 @@
-name: NuGet Package Creation
+name: Meadow F7 NuGet Package Creation
 
 on:
   workflow_dispatch:
