@@ -1,4 +1,4 @@
-name: NuGet Package Creation
+name: Meadow.Core NuGet Package Creation
 
 on:
   push:
