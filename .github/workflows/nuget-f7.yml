@@ -1,0 +1,23 @@
+name: NuGet Package Creation
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set VERSION variable from tag
+      run: echo "VERSION=0.90.0" >> $GITHUB_ENV
+      
+    - name: Build Meadow.F7
+      run: dotnet build -c Release source/Meadow.F7/Meadow.F7.csproj /p:Version=${VERSION}
+    - name: Package Meadow.F7
+      run: dotnet pack -c Release source/Meadow.F7/Meadow.F7.csproj /p:Version=${VERSION} --output .
+    - name: Push Meadow.F7 to NuGet
+      run: dotnet nuget push Meadow.Gtk.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
