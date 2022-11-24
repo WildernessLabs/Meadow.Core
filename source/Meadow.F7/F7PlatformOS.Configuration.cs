@@ -53,17 +53,6 @@ namespace Meadow
         /// <remarks>A value of 0 indicates an infinite period.</remarks>
         public uint InitializationTimeout => GetUInt(ConfigurationValues.InitializationTimeout);
 
-        /// <summary>
-        /// Is an SD card present?
-        /// </summary>
-        /// <remarks>Only really relevant to the CCM at the moment.</remarks>
-        public bool SdCardEnabled => GetBoolean(ConfigurationValues.SdCardEnabled);
-
-        /// <summary>
-        /// Mount point for the SD card (if enabled).
-        /// </summary>
-        public string SdCardMountPoint => GetString(ConfigurationValues.SdCardMountPoint);
-
         //==== Configuration internals
 
         /// <summary>

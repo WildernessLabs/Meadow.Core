@@ -365,6 +365,13 @@ namespace Meadow.Devices
                 }
             );
 
+            public IPin SD_IN_L => new Pin(
+                "SD_IN_L", "PG6",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PG6", interruptCapable: false)
+                }
+            );
+
 
             // ==== ALIASES ====
             public IPin I2C1_SDA => D07;
