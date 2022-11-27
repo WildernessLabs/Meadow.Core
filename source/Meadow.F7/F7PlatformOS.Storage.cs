@@ -1,6 +1,4 @@
 ﻿using Meadow.Devices;
-using Meadow.Units;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,10 +12,11 @@ namespace Meadow
         private List<IExternalStorage> _externalStorage = new();
 
         public IEnumerable<IExternalStorage> ExternalStorage => _externalStorage;
+        public string FileSystemRoot => "/meadow0/";
 
         private void InitializeStorage()
         {
-            if(F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage store))
+            if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage store))
             {
                 _externalStorage.Add(store);
             }
@@ -58,7 +57,7 @@ namespace Meadow
             var lastState = input.State;
             var firstRun = true;
 
-            while(true)
+            while (true)
             {
                 if (firstRun || input.State != lastState)
                 {
@@ -69,7 +68,7 @@ namespace Meadow
                         // inserted
                         HandleInserted();
                     }
-                    else if(!firstRun)
+                    else if (!firstRun)
                     {
                         // removed
                         HandleRemoved();
