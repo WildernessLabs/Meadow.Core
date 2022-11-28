@@ -105,7 +105,7 @@ drwxr-xr-x 16 pi pi   4096 Nov  7 17:55 ..
 
 ## Running
 
-Starting with the `RC1.0` release, Meadow now has a defined lifecycle.  This is imposed to allow automated application shutdown by the OtA update service. What this means, practically, is that your Meadow application is now a _library_ that gets loaded by `the actual entry Exe, which is `Meadow.dll`.
+Starting with the `RC1.0` release, Meadow now has a defined lifecycle.  This is imposed to allow automated application shutdown by the OtA update service. What this means, practically, is that your Meadow application is now a _library_ that gets loaded by the actual entry executable, which is `Meadow.dll`.
 
 Use `dotnet` *on the target hardware* to execute your application by doing the following:
 
