@@ -59,11 +59,14 @@ namespace Meadow
 
             while (true)
             {
-                if (firstRun || input.State != lastState)
-                {
-                    lastState = input.State;
+                var currentState = input.State;
 
-                    if (lastState)
+                if (firstRun || currentState != lastState)
+                {
+                    Resolver.Log.Debug($"SD State changed to {input.State}");
+
+                    // DEV NOTE: The CCM SD Module uses inverse logic for card detect (high == no card, low == card)
+                    if (!currentState)
                     {
                         // inserted
                         HandleInserted();
@@ -73,7 +76,11 @@ namespace Meadow
                         // removed
                         HandleRemoved();
                     }
+
+                    lastState = input.State;
                 }
+
+                firstRun = false;
 
                 Thread.Sleep(1000); // slow - TODO: make configurable, maybe?
             }

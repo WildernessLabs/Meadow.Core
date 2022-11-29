@@ -17,17 +17,14 @@ namespace Meadow
             try
             {
                 // ret = mount("/dev/mmcsd0", "/sdcard", "vfat", 0, NULL);
-                Resolver.Log.Trace("Mounting SD card...");
                 var result = Core.Interop.Nuttx.mount(driver, mountPoint, "vfat", 0, IntPtr.Zero);
                 if (result == 0)
                 {
-                    Resolver.Log.Info("SD Card detected and mounted");
                     store = new F7ExternalStorage(mountPoint);
                     return true;
                 }
 
-                Resolver.Log.Trace($"Mount returned {result}");
-                Resolver.Log.Info("No SD Card detected");
+                Resolver.Log.Warn($"Mount returned {result}");
             }
             catch (Exception ex)
             {
@@ -39,15 +36,10 @@ namespace Meadow
 
         public void Eject()
         {
-            Resolver.Log.Trace("Unmounting SD card...");
             var result = Core.Interop.Nuttx.umount2(this.Directory.FullName, 0);
-            if (result == 0)
+            if (result != 0)
             {
-                Resolver.Log.Info("SD Card unmounted");
-            }
-            else
-            {
-                Resolver.Log.Info($"SD Card unmount failure: {result}");
+                Resolver.Log.Warn($"SD Card unmount failure: {result}");
             }
         }
     }
