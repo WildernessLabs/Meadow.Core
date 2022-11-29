@@ -165,7 +165,7 @@
             Resolver.Log.Trace($"Looking for app assembly...");
 
             // support app.exe or app.dll
-            var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
+            var assembly = FindByPath(new string[] { "App.dll", "App.exe", "app.dll", "app.exe" });
 
             if (assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
 
@@ -254,6 +254,7 @@
                     Resolver.Log.Trace($"Creating '{deviceType.Name}' instance took {et}ms");
 
                     CurrentDevice = device;
+                    Resolver.Services.Add<IMeadowDevice>(CurrentDevice);
                 }
                 catch (Exception)
                 {

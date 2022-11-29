@@ -16,5 +16,6 @@
         IPin D18 { get; }
         IPin D19 { get; }
         IPin D20 { get; }
+        IPin SD_IN_L { get; }
     }
 }
