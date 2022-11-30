@@ -1,5 +1,8 @@
 ﻿using Meadow.Units;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Meadow
 {
@@ -32,7 +35,7 @@ namespace Meadow
         /// </summary>
         public void Initialize()
         {
-
+            InitializeStorage();
         }
     }
 }

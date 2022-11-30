@@ -21,19 +21,6 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Get the selected network.
-        /// </summary>
-        /// <remarks>The current network can be changed through the meadow.config.yaml file.</remarks>
-        /// <returns>Currently selected network.</returns>
-        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
-
-        /// <summary>
-        /// Should a WiFi connection be made on startup.
-        /// </summary>
-        /// <remarks>This assumes that the default access point is configured through wifi.config.yaml.</remarks>
-        public bool AutomaticallyStartNetwork => GetBoolean(ConfigurationValues.AutomaticallyStartNetwork);
-
         //==== public config properties
         /// <summary>
         /// Get the OS version.
@@ -49,6 +36,12 @@ namespace Meadow
         public string OSBuildDate => GetString(ConfigurationValues.BuildDate);
 
         /// <summary>
+        /// Get the mono version on the device.
+        /// </summary>
+        /// <returns>Mono version.</returns>
+        public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
+
+        /// <summary>
         /// Should the system reboot if an unhandled exception is encounted in the user application?
         /// </summary>
         public bool RebootOnUnhandledException => GetBoolean(ConfigurationValues.RebootOnUnhandledException);
@@ -60,29 +53,23 @@ namespace Meadow
         /// <remarks>A value of 0 indicates an infinite period.</remarks>
         public uint InitializationTimeout => GetUInt(ConfigurationValues.InitializationTimeout);
 
-        /// <summary>
-        /// Get the mono version on the device.
-        /// </summary>
-        /// <returns>Mono version.</returns>
-        public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
-
-        /// <summary>
-        /// Is an SD card present?
-        /// </summary>
-        /// <remarks>Only really relevant to the CCM at the moment.</remarks>
-        public bool SdCardEnabled => GetBoolean(ConfigurationValues.SdCardEnabled);
-
-        /// <summary>
-        /// Mount point for the SD card (if enabled).
-        /// </summary>
-        public string SdCardMountPoint => GetString(ConfigurationValues.SdCardMountPoint);
-
         //==== Configuration internals
 
         /// <summary>
         /// Indicate if a read or write operation is to be executed.
         /// </summary>
         internal enum Direction { Get = 0, Set = 1 };
+
+        /// <summary>
+        /// Hardware version (product).
+        /// </summary>
+        public enum HardwareModel
+        {
+            Unknown = 0,
+            MeadowF7v1 = 1,
+            MeadowF7v2 = 2,
+            MeadowF7v2_Core = 3,
+        };
 
         /// <summary>
         /// Get or Set the specified value in the OS configuration.

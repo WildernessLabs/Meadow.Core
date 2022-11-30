@@ -23,7 +23,6 @@
             Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
             Abort = MeadowOS.AppAbort.Token;
 
-            Resolver.Services.Add<IMeadowDevice>(Device);
             Resolver.Services.Add<IApp>(this);
         }
 
