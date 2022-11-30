@@ -1,5 +1,6 @@
 ﻿using Meadow.Units;
 using System;
+using System.Collections.Generic;
 
 namespace Meadow.Simulation
 {
@@ -8,8 +9,11 @@ namespace Meadow.Simulation
         public event PowerTransitionHandler BeforeReset;
         public event PowerTransitionHandler BeforeSleep;
         public event PowerTransitionHandler AfterWake;
+        public event ExternalStorageEventHandler ExternalStorageEvent;
 
         public string OSVersion => "0.1";
+
+        public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public string OSBuildDate => throw new NotImplementedException();
 
@@ -19,9 +23,9 @@ namespace Meadow.Simulation
 
         public uint InitializationTimeout => throw new NotImplementedException();
 
-        public bool SdCardPresent => throw new NotImplementedException();
-
         public INtpClient NtpClient => throw new NotImplementedException();
+
+        public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
 
         public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
         {

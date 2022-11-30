@@ -119,6 +119,36 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
+        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
+        {
+            return SerialMessagePort.From(
+                new SerialPortProxy(portName, baudRate, dataBits, parity, stopBits, readBufferSize),
+                suffixDelimiter,
+                preserveDelimiter);
+        }
+
+        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
+        {
+            return SerialMessagePort.From(
+                new SerialPortProxy(portName, baudRate, dataBits, parity, stopBits, readBufferSize),
+                prefixDelimiter,
+                preserveDelimiter,
+                messageLength);
+        }
+
+        public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
+        {
+            return new SerialPortProxy(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+        }
+
+        public IPin GetPin(string name)
+        {
+            return Pins[name];
+        }
+
+
+        // ========= not implemented below here =========
+
         public II2cBus CreateI2cBus(int busNumber = 0)
         {
             throw new NotImplementedException();
@@ -144,21 +174,6 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
-        {
-            throw new NotImplementedException();
-        }
-
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
         {
             throw new NotImplementedException();
@@ -167,11 +182,6 @@ namespace Meadow.Simulation
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, Meadow.Units.Frequency speed)
         {
             throw new NotImplementedException();
-        }
-
-        public IPin GetPin(string name)
-        {
-            return Pins[name];
         }
 
         public void Initialize()
