@@ -12,6 +12,7 @@
         IPin SPI5_SCK { get; }
         IPin SPI5_COPI { get; }
         IPin SPI5_CIPO { get; }
+        IPin D16 { get; }
         IPin D17 { get; }
         IPin D18 { get; }
         IPin D19 { get; }
