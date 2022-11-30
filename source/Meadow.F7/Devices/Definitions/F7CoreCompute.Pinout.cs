@@ -21,7 +21,7 @@ namespace Meadow.Devices
                 A00, A01, A02, A03, A04, A05,
                 SPI3_SCK, SPI3_CIPO, SPI3_COPI, SPI5_SCK, SPI5_CIPO, SPI5_COPI,
                 D00, D01, D02, D03, D04, D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
-                D17, D18, D19, D20,
+                D16, D17, D18, D19, D20,
                 ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
                 I2C1_SCL, I2C1_SDA, I2C3_SCL, I2C3_SDA,
             };
@@ -252,8 +252,17 @@ namespace Meadow.Devices
             // TODO: shared with SDMMC2_D3?
             public IPin D15 => new Pin(
                 "D15", "PG12",
+                new List<IChannelInfo>
+                {
+                    // consumed by SD card, so no capability, but required by the I32PinFeatherBoardPinout interface
+                }
+            );
+
+            // TODO: shared with SDMMC2_D3?
+            public IPin D16 => new Pin(
+                "D16", "PI11",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PG12", interruptGroup: 12)
+                    new DigitalChannelInfo("PI11", interruptGroup: 11)
                 }
             );
 
@@ -362,6 +371,13 @@ namespace Meadow.Devices
                 "ESP_UART5_TX", "PC12",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC12", interruptGroup: 12),
+                }
+            );
+
+            public IPin SD_IN_L => new Pin(
+                "SD_IN_L", "PG6",
+                new List<IChannelInfo> {
+                    new DigitalChannelInfo("PG6", interruptCapable: false)
                 }
             );
 

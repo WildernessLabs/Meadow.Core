@@ -1,5 +1,4 @@
-﻿using Meadow.Hardware;
-using System.IO;
+﻿using System.IO;
 namespace Meadow
 {
 
@@ -15,17 +14,7 @@ namespace Meadow
             /// </summary>
             public static string UserFileSystemRoot
             {
-                get
-                {
-                    if (RuntimeInformation.IsPlatform(MeadowPlatform.MeadowForLinux))
-                    {
-                        return System.AppDomain.CurrentDomain.BaseDirectory;
-                    }
-                    else
-                    {
-                        return "/meadow0/";
-                    }
-                }
+                get => Resolver.Device.PlatformOS.FileSystemRoot ?? "/meadow0/";
             }
 
             /// <summary>
@@ -51,8 +40,11 @@ namespace Meadow
 
             /// <summary>
             /// Gets the `/Temp` directory. Use this directory to store transient
-            /// files. This contens of this folder will be erased on device restart.
+            /// files. 
             /// </summary>
+            /// <remarks>
+            /// The contents of this folder will be erased on device restart.
+            /// </remarks>
             public static string TempDirectory => Path.GetFullPath("Temp", UserFileSystemRoot);
         }
     }

@@ -35,13 +35,6 @@
             /// </summary>
             /// <remarks>A value of 0 indicates an infinite period.</remarks>
             public static uint InitizationTimeout => CurrentDevice.PlatformOS.InitializationTimeout;
-
-            /// <summary>
-            /// Is an SD Card connected to the module.
-            /// </summary>
-            /// <remarks>This is currently only relevant to the CCM.</remarks>
-            /// <returns>True if an SD card is connected to the STM32, false otherwise.</returns>
-            public static bool SdCardPresent => CurrentDevice.PlatformOS.SdCardPresent;
         }
     }
 }
