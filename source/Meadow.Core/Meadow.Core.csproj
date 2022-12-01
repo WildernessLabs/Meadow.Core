@@ -28,8 +28,8 @@
    <Folder Include="Gateways\Bluetooth\Definitions\" />
  </ItemGroup>
  <ItemGroup>
-   <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
-   <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+   <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+   <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
  </ItemGroup>
  <ItemGroup>
