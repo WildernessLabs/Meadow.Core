@@ -6,6 +6,9 @@ using System.Net.NetworkInformation;
 
 namespace Meadow
 {
+    /// <summary>
+    /// A base class for INetworkAdapter implementations
+    /// </summary>
     public abstract class NetworkAdapterBase : INetworkAdapter
     {
         /// <summary>
@@ -23,6 +26,9 @@ namespace Meadow
 
         private NetworkInterface? nativeInterface;
 
+        /// <summary>
+        /// returns the connection state of the NetworkAdapter
+        /// </summary>
         public abstract bool IsConnected { get; }
 
         /// <summary>
@@ -42,21 +48,36 @@ namespace Meadow
             Refresh();
         }
 
+        /// <summary>
+        /// Raises the <see cref="NetworkConnected"/> event
+        /// </summary>
+        /// <param name="args"></param>
         protected void RaiseNetworkConnected(WirelessNetworkConnectionEventArgs args)
         {
             NetworkConnected?.Invoke(this, args);
         }
 
+        /// <summary>
+        /// Raises the <see cref="NetworkDisconnected"/> event
+        /// </summary>
+        /// <param name="args"></param>
         protected void RaiseNetworkDisconnected()
         {
             NetworkDisconnected?.Invoke(this);
         }
 
+        /// <summary>
+        /// Raises the <see cref="NetworkError"/> event
+        /// </summary>
+        /// <param name="args"></param>
         protected void RaiseNetworkError(NetworkErrorEventArgs args)
         {
             NetworkError?.Invoke(this, args);
         }
 
+        /// <summary>
+        /// Refreshes the NetworkAdapter's information
+        /// </summary>
         protected void Refresh()
         {
             nativeInterface = LoadAdapterInfo();
