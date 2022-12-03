@@ -444,8 +444,23 @@ namespace Meadow.Devices
 
                 try
                 {
-                    // TODO: should be async and awaited
-                    var result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+                    Resolver.Log.Trace($"Sending command to connect");
+                    _lastStatus = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+                    Resolver.Log.Trace($"SendingCommand returned: {_lastStatus}");
+
+                    switch (_lastStatus)
+                    {
+                        case StatusCodes.AccessPointNotFound:
+                        case StatusCodes.AuthenticationFailed:
+                        case StatusCodes.CannotConnectToAccessPoint:
+                            CurrentState = NetworkState.Error;
+                            break;
+                    }
+
+                    if (CurrentState == NetworkState.Error)
+                    {
+                        throw new Exception($"Connection failed: {_lastStatus}");
+                    }
                 }
                 catch (Exception ex)
                 {
