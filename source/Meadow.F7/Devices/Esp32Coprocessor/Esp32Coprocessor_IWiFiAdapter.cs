@@ -15,30 +15,10 @@ namespace Meadow.Devices
 	/// </summary>
     public partial class Esp32Coprocessor : NetworkAdapterBase, IWiFiNetworkAdapter
     {
-        #region Events
-
-        /// <summary>
-        /// Raised when the device connects to WiFi.
-        /// </summary>
-        public event NetworkConnectionHandler NetworkConnected = delegate { };
-
-        /// <summary>
-        /// Raised when the device disconnects from WiFi.
-        /// </summary>
-        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
-
         /// <summary>
         /// Raise the NTP time changed event.
         /// </summary>
         public event EventHandler NtpTimeChanged = delegate { };
-
-        /// <summary>
-        /// Raise an Error event.
-        /// </summary>
-        public event EventHandler NetworkError = delegate { };
-
-        #endregion Events
-
 
         /// <summary>
         /// Default delay between WiFi network scans <see cref="ScanPeriod"/>.
@@ -582,7 +562,7 @@ namespace Meadow.Devices
                 throw new InvalidOperationException($"Already connected or connecting to an access point, current state {CurrentState}");
             }
 
-            SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+            SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
         }
 
         /// <summary>
@@ -592,7 +572,7 @@ namespace Meadow.Devices
         {
             await Task.Run(async () =>
             {
-                SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.ClearDefaultAccessPoint, true, null);
+                SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ClearDefaultAccessPoint, true, null);
             });
         }
 
@@ -659,7 +639,7 @@ namespace Meadow.Devices
             _isConnected = false;
 
             var e = new WiFiDisconnectEventArgs(statusCode);
-            NetworkDisconnected?.Invoke(this);
+            RaiseNetworkDisconnected();
         }
 
         /// <summary>
@@ -677,9 +657,7 @@ namespace Meadow.Devices
         /// </summary>
         protected void RaiseErrorEvent(StatusCodes statusCode)
         {
-            NetworkErrorEventArgs e = new NetworkErrorEventArgs((uint) statusCode);
-
-            NetworkError?.Invoke(this, e);
+            RaiseNetworkError(new NetworkErrorEventArgs((uint)statusCode));
         }
 
         #endregion Event raising methods
@@ -702,14 +680,14 @@ namespace Meadow.Devices
                     case NetworkState.Connecting:
                         break;
                     case NetworkState.Connected:
-                        var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
                         this.Refresh();
-                        NetworkConnected?.Invoke(this, args);
+                        var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
+                        RaiseNetworkConnected(args);
                         break;
                     case NetworkState.Disconnecting:
                         break;
                     case NetworkState.Disconnected:
-                        NetworkDisconnected?.Invoke(this);
+                        RaiseNetworkDisconnected();
                         break;
                     case NetworkState.Error:
                         break;

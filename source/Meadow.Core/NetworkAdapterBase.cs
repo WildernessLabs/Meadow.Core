@@ -8,23 +8,53 @@ namespace Meadow
 {
     public abstract class NetworkAdapterBase : INetworkAdapter
     {
+        /// <summary>
+        /// Raised when the device connects to a network.
+        /// </summary>
         public event NetworkConnectionHandler NetworkConnected;
+        /// <summary>
+        /// Raised when the device disconnects from a network.
+        /// </summary>
         public event NetworkDisconnectionHandler NetworkDisconnected;
+        /// <summary>
+        /// Raised when a network error occurs
+        /// </summary>
         public event NetworkErrorHandler NetworkError;
 
         private NetworkInterface? nativeInterface;
 
         public abstract bool IsConnected { get; }
 
+        /// <summary>
+        /// Gets the physical (MAC) address of the network adapter
+        /// </summary>
         public PhysicalAddress MacAddress { get; private set; }
 
-        public NetworkInterfaceType InterfaceType { get; private set; }
+        /// <summary>
+        /// Gets the network interface type
+        /// </summary>
+        public NetworkInterfaceType InterfaceType { get; }
 
         protected internal NetworkAdapterBase(NetworkInterfaceType expectedType)
         {
             InterfaceType = expectedType;
 
             Refresh();
+        }
+
+        protected void RaiseNetworkConnected(WirelessNetworkConnectionEventArgs args)
+        {
+            NetworkConnected?.Invoke(this, args);
+        }
+
+        protected void RaiseNetworkDisconnected()
+        {
+            NetworkDisconnected?.Invoke(this);
+        }
+
+        protected void RaiseNetworkError(NetworkErrorEventArgs args)
+        {
+            NetworkError?.Invoke(this, args);
         }
 
         protected void Refresh()
