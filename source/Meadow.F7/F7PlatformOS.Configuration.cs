@@ -62,7 +62,7 @@ namespace Meadow
         /// <summary>
         /// Which network is selected in meadow.config.yaml.
         /// </summary>
-        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetUInt(ConfigurationValues.SelectedNetwork);
+        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
 
 
         //==== Configuration internals

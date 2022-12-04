@@ -81,7 +81,11 @@ namespace Meadow.Devices
                         BluetoothAdapter = esp32;
                         Coprocessor = esp32;
 
-                        networkAdapters.Add(esp32);
+                        if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
+                        {
+                            Resolver.Log.Error($"WiFi Adapter Selected");
+                            networkAdapters.Add(esp32);
+                        }
 
                         esp32.NtpTimeChanged += (s, e) =>
                         {
@@ -90,7 +94,7 @@ namespace Meadow.Devices
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
+                        Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
                     }
                     finally
