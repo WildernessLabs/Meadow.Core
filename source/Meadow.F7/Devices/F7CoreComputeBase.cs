@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// A base class for F7 Core Compute Module platforms
+    /// </summary>
     public abstract partial class F7CoreComputeBase : F7MicroBase, IF7CoreComputeMeadowDevice
     {
         protected F7CoreComputeBase(
@@ -15,6 +18,12 @@ namespace Meadow.Devices
             : base(ioController, analogCapabilities, networkCapabilities)
         {
             Pins = pins;
+
+            if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
+            {
+                Resolver.Log.Error($"Wired Ethernet Adapter Selected");
+                networkAdapters.Add(new WiredNetworkAdapter());
+            }
         }
 
         public override IPin GetPin(string pinName)

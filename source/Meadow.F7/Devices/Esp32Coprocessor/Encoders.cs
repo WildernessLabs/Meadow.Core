@@ -264,20 +264,19 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += (int) (systemConfiguration.SoftwareVersion.Length + 1);
+            length += (int) 6;
             length += (int) 6;
             length += (int) 6;
             length += (int) (systemConfiguration.DeviceName.Length + 1);
             length += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
-            length += 7;
+            length += (int) (systemConfiguration.BuildBranchName.Length + 1);
+            length += 33;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeString(systemConfiguration.SoftwareVersion, buffer, offset);
-            offset += systemConfiguration.SoftwareVersion.Length + 1;
             buffer[offset] = systemConfiguration.MaximumMessageQueueLength;
             offset += 1;
             EncodeInt32(systemConfiguration.MaximumRetryCount, buffer, offset);
@@ -288,11 +287,37 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += (int) 6;
             Array.Copy(systemConfiguration.SoftApMacAddress, 0, buffer, offset, 6);
             offset += (int) 6;
+            Array.Copy(systemConfiguration.BluetoothMacAddress, 0, buffer, offset, 6);
+            offset += (int) 6;
             EncodeString(systemConfiguration.DeviceName, buffer, offset);
             offset += systemConfiguration.DeviceName.Length + 1;
             EncodeString(systemConfiguration.DefaultAccessPoint, buffer, offset);
             offset += systemConfiguration.DefaultAccessPoint.Length + 1;
             buffer[offset] = systemConfiguration.ResetReason;
+            offset += 1;
+            EncodeUInt32(systemConfiguration.VersionMajor, buffer, offset);
+            offset += 4;
+            EncodeUInt32(systemConfiguration.VersionMinor, buffer, offset);
+            offset += 4;
+            EncodeUInt32(systemConfiguration.VersionRevision, buffer, offset);
+            offset += 4;
+            EncodeUInt32(systemConfiguration.VersionBuild, buffer, offset);
+            offset += 4;
+            buffer[offset] = systemConfiguration.BuildDay;
+            offset += 1;
+            buffer[offset] = systemConfiguration.BuildMonth;
+            offset += 1;
+            buffer[offset] = systemConfiguration.BuildYear;
+            offset += 1;
+            buffer[offset] = systemConfiguration.BuildHour;
+            offset += 1;
+            buffer[offset] = systemConfiguration.BuildMinute;
+            offset += 1;
+            buffer[offset] = systemConfiguration.BuildSecond;
+            offset += 1;
+            EncodeUInt32(systemConfiguration.BuildHash, buffer, offset);
+            offset += 4;
+            EncodeString(systemConfiguration.BuildBranchName, buffer, offset);
             return(buffer);
         }
 
@@ -306,8 +331,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             SystemConfiguration systemConfiguration = new MessagePayloads.SystemConfiguration();
 
-            systemConfiguration.SoftwareVersion = ExtractString(buffer, offset);
-            offset += (int) (systemConfiguration.SoftwareVersion.Length + 1);
             systemConfiguration.MaximumMessageQueueLength = buffer[offset];
             offset += 1;
             systemConfiguration.MaximumRetryCount = ExtractInt32(buffer, offset);
@@ -320,11 +343,38 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             systemConfiguration.SoftApMacAddress = new byte[6];
             Array.Copy(buffer, offset, systemConfiguration.SoftApMacAddress, 0, 6);
             offset += (int) 6;
+            systemConfiguration.BluetoothMacAddress = new byte[6];
+            Array.Copy(buffer, offset, systemConfiguration.BluetoothMacAddress, 0, 6);
+            offset += (int) 6;
             systemConfiguration.DeviceName = ExtractString(buffer, offset);
             offset += (int) (systemConfiguration.DeviceName.Length + 1);
             systemConfiguration.DefaultAccessPoint = ExtractString(buffer, offset);
             offset += (int) (systemConfiguration.DefaultAccessPoint.Length + 1);
             systemConfiguration.ResetReason = buffer[offset];
+            offset += 1;
+            systemConfiguration.VersionMajor = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.VersionMinor = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.VersionRevision = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.VersionBuild = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.BuildDay = buffer[offset];
+            offset += 1;
+            systemConfiguration.BuildMonth = buffer[offset];
+            offset += 1;
+            systemConfiguration.BuildYear = buffer[offset];
+            offset += 1;
+            systemConfiguration.BuildHour = buffer[offset];
+            offset += 1;
+            systemConfiguration.BuildMinute = buffer[offset];
+            offset += 1;
+            systemConfiguration.BuildSecond = buffer[offset];
+            offset += 1;
+            systemConfiguration.BuildHash = ExtractUInt32(buffer, offset);
+            offset += 4;
+            systemConfiguration.BuildBranchName = ExtractString(buffer, offset);
             return(systemConfiguration);
         }
 
@@ -336,10 +386,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public static int EncodedSystemConfigurationBufferSize(MessagePayloads.SystemConfiguration systemConfiguration)
         {
             int result = 0;
-            result += (int) systemConfiguration.SoftwareVersion.Length;
             result += (int) systemConfiguration.DeviceName.Length;
             result += (int) systemConfiguration.DefaultAccessPoint.Length;
-            return(result + 22);
+            result += (int) systemConfiguration.BuildBranchName.Length;
+            return(result + 54);
         }
 
         /// <summary>
@@ -479,11 +529,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
-        /// Encode a WiFiCredentials object and return a byte array containing the encoded message.
+        /// Encode a AccessPointInformation object and return a byte array containing the encoded message.
         /// </summary>
-        /// <param name="wiFiCredentials">WiFiCredentials object to be encoded.</param>
-        /// <returns>Byte array containing the encoded WiFiCredentials object.</returns>
-        public static byte[] EncodeWiFiCredentials(MessagePayloads.WiFiCredentials wiFiCredentials)
+        /// <param name="accessPointInformation">AccessPointInformation object to be encoded.</param>
+        /// <returns>Byte array containing the encoded AccessPointInformation object.</returns>
+        public static byte[] EncodeAccessPointInformation(MessagePayloads.AccessPointInformation accessPointInformation)
         {
             int offset = 0;
             int length = 0;
@@ -491,47 +541,60 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += (int) (wiFiCredentials.NetworkName.Length + 1);
-            length += (int) (wiFiCredentials.Password.Length + 1);
+            length += (int) (accessPointInformation.NetworkName.Length + 1);
+            length += (int) (accessPointInformation.Password.Length + 1);
+            length += 12;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeString(wiFiCredentials.NetworkName, buffer, offset);
-            offset += wiFiCredentials.NetworkName.Length + 1;
-            EncodeString(wiFiCredentials.Password, buffer, offset);
+            EncodeString(accessPointInformation.NetworkName, buffer, offset);
+            offset += accessPointInformation.NetworkName.Length + 1;
+            EncodeString(accessPointInformation.Password, buffer, offset);
+            offset += accessPointInformation.Password.Length + 1;
+            EncodeUInt32(accessPointInformation.IpAddress, buffer, offset);
+            offset += 4;
+            EncodeUInt32(accessPointInformation.SubnetMask, buffer, offset);
+            offset += 4;
+            EncodeUInt32(accessPointInformation.Gateway, buffer, offset);
             return(buffer);
         }
 
         /// <summary>
-        /// Extract a WiFiCredentials object from a byte array.
+        /// Extract a AccessPointInformation object from a byte array.
         /// </summary>
         /// <param name="buffer">Byte array containing the encoded data.</param>
         /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
-        /// <returns>WiFiCredentials object.</returns>
-        public static MessagePayloads.WiFiCredentials ExtractWiFiCredentials(byte[] buffer, int offset)
+        /// <returns>AccessPointInformation object.</returns>
+        public static MessagePayloads.AccessPointInformation ExtractAccessPointInformation(byte[] buffer, int offset)
         {
-            WiFiCredentials wiFiCredentials = new MessagePayloads.WiFiCredentials();
+            AccessPointInformation accessPointInformation = new MessagePayloads.AccessPointInformation();
 
-            wiFiCredentials.NetworkName = ExtractString(buffer, offset);
-            offset += (int) (wiFiCredentials.NetworkName.Length + 1);
-            wiFiCredentials.Password = ExtractString(buffer, offset);
-            return(wiFiCredentials);
+            accessPointInformation.NetworkName = ExtractString(buffer, offset);
+            offset += (int) (accessPointInformation.NetworkName.Length + 1);
+            accessPointInformation.Password = ExtractString(buffer, offset);
+            offset += (int) (accessPointInformation.Password.Length + 1);
+            accessPointInformation.IpAddress = ExtractUInt32(buffer, offset);
+            offset += 4;
+            accessPointInformation.SubnetMask = ExtractUInt32(buffer, offset);
+            offset += 4;
+            accessPointInformation.Gateway = ExtractUInt32(buffer, offset);
+            return(accessPointInformation);
         }
 
          /// <summary>
-        /// Calculate the amount of memory required to hold the given instance of the WiFiCredentials object.
+        /// Calculate the amount of memory required to hold the given instance of the AccessPointInformation object.
          /// </summary>
-        /// <param name="wiFiCredentials">WiFiCredentials object to be encoded.</param>
-        /// <returns>Number of bytes required to hold the encoded WiFiCredentials object.</returns>
-        public static int EncodedWiFiCredentialsBufferSize(MessagePayloads.WiFiCredentials wiFiCredentials)
+        /// <param name="accessPointInformation">AccessPointInformation object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded AccessPointInformation object.</returns>
+        public static int EncodedAccessPointInformationBufferSize(MessagePayloads.AccessPointInformation accessPointInformation)
         {
             int result = 0;
-            result += (int) wiFiCredentials.NetworkName.Length;
-            result += (int) wiFiCredentials.Password.Length;
-            return(result + 2);
+            result += (int) accessPointInformation.NetworkName.Length;
+            result += (int) accessPointInformation.Password.Length;
+            return(result + 14);
         }
 
         /// <summary>

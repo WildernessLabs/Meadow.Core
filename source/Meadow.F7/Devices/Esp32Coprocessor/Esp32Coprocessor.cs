@@ -86,7 +86,6 @@ namespace Meadow.Devices
 
             _isConnected = false;
             ClearNetworkDetails();
-            HasInternetAccess = false;
             Status = ICoprocessor.CoprocessorState.NotReady;
             _antenna = AntennaType.NotKnown;
 
@@ -290,6 +289,9 @@ namespace Meadow.Devices
                         {
                             switch ((Esp32Interfaces)eventData.Interface)
                             {
+                                case Esp32Interfaces.WiredEthernet:
+                                    // Implement
+                                    break;
                                 case Esp32Interfaces.WiFi:
                                     InvokeEvent((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
                                     break;

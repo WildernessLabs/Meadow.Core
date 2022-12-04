@@ -1,12 +1,12 @@
 ﻿using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateway.WiFi;
-using Meadow.Gateways.Exceptions;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
+using static Meadow.IPlatformOS;
 
 namespace Meadow.Devices
 {
@@ -15,35 +15,10 @@ namespace Meadow.Devices
 	/// </summary>
     public partial class Esp32Coprocessor : NetworkAdapterBase, IWiFiNetworkAdapter
     {
-        #region Events
-
-        /// <summary>
-        /// Raised when the device connects to WiFi.
-        /// </summary>
-        public event NetworkConnectionHandler NetworkConnected = delegate { };
-
-        /// <summary>
-        /// Raised when the device disconnects from WiFi.
-        /// </summary>
-        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
-
-        /// <summary>
-        /// Raised when the WiFi interface starts.
-        /// </summary>
-        public event EventHandler WiFiInterfaceStarted = delegate { };
-
-        /// <summary>
-        /// Raised when the WiFi interface stops.
-        /// </summary>
-        public event EventHandler WiFiInterfaceStopped = delegate { };
-
         /// <summary>
         /// Raise the NTP time changed event.
         /// </summary>
         public event EventHandler NtpTimeChanged = delegate { };
-
-        #endregion Events
-
 
         /// <summary>
         /// Default delay between WiFi network scans <see cref="ScanPeriod"/>.
@@ -169,6 +144,21 @@ namespace Meadow.Devices
         public int Channel { get; private set; }
 
         /// <summary>
+        /// IP address (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint ConfiguredIpAddress => F7PlatformOS.GetUInt(ConfigurationValues.StaticIpAddress);
+
+        /// <summary>
+        /// Subnet mask (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint ConfiguredSubnetMask => F7PlatformOS.GetUInt(ConfigurationValues.SubnetMask);
+
+        /// <summary>
+        /// Default gateway (for the selected network interface) specified in the configuration file.
+        /// </summary>
+        public uint ConfiguredGateway => F7PlatformOS.GetUInt(ConfigurationValues.DefaultGateway);
+
+        /// <summary>
         /// The maximum number of times the ESP32 will retry an operation before returning an error.
         /// </summary>
         /// <remarks>
@@ -193,7 +183,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Does the access point the WiFi adapter is currently connected to have internet access?
         /// </summary>
-        public bool HasInternetAccess { get; protected set; }
+        public bool HasInternetAccess => CurrentState == NetworkState.Connected; // not sure this is true - this just means we're connected
 
         #region Methods
 
@@ -230,30 +220,50 @@ namespace Meadow.Devices
         /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
         protected void InvokeEvent(WiFiFunction eventId, StatusCodes statusCode, byte[] payload)
         {
+            Resolver.Log.Trace($"Wifi InvokeEvent {eventId} returned {statusCode}");
+
+            // look for errors first
+            if (eventId == WiFiFunction.ErrorEvent)
+            {
+                //  Need to work out if we have to do anything here.
+            }
+            else
+            {
+                if (statusCode != StatusCodes.CompletedOk)
+                {
+                    _lastStatus = statusCode;
+                    CurrentState = NetworkState.Error;
+                    Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
+                    return;
+                }
+            }
+
             switch (eventId)
             {
-                case WiFiFunction.ConnectToAccessPointEvent:
-                    try
+                case WiFiFunction.NetworkConnectedEvent:
+                    byte channel = 0;
+
+                    ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
+                    lock (_lock)
                     {
-                        RaiseWiFiConnected(statusCode, payload);
+                        Ssid = connectEventData.Ssid;
+                        Bssid = new PhysicalAddress(connectEventData.Bssid);
+                        Channel = channel;
+                        _isConnected = true;
+                        _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
                     }
-                    finally
-                    {
-                        // always release the connection semaphore, whether we connected successfully or failed
-                        _connectionSemaphore.Release();
-                    }
+
+                    CurrentState = NetworkState.Connected;
                     break;
-                case WiFiFunction.DisconnectFromAccessPointEvent:
-                    RaiseWiFiDisconnected(statusCode, payload);
-                    break;
-                case WiFiFunction.StartWiFiInterfaceEvent:
-                    RaiseWiFiInterfaceStarted(statusCode, payload);
-                    break;
-                case WiFiFunction.StopWiFiInterfaceEvent:
-                    RaiseWiFiInterfaceStopped(statusCode, payload);
+                case WiFiFunction.NetworkDisconnectedEvent:
+                    CurrentState = NetworkState.Disconnected;
                     break;
                 case WiFiFunction.NtpUpdateEvent:
                     RaiseNtpTimeChangedEvent();
+                    break;
+                case WiFiFunction.ErrorEvent:
+                    Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
+                    RaiseErrorEvent(statusCode);
                     break;
                 default:
                     throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
@@ -343,13 +353,13 @@ namespace Meadow.Devices
                       }
                       else
                       {
-                          Console.WriteLine($"Error getting access points: {result}");
+                          Resolver.Log.Error($"Error getting access points: {result}");
                       }
                       return (networks);
                   }
                   catch (Exception ex)
                   {
-                      Console.WriteLine($"Error getting access points: {ex.Message}");
+                      Resolver.Log.Error($"Error getting access points: {ex.Message}");
 
                       token.ThrowIfCancellationRequested();
                       throw ex;
@@ -373,55 +383,6 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Start the network interface on the WiFi adapter.
-        /// </summary>
-        /// <remarks>
-        /// This method starts the network interface hardware.  The result of this action depends upon the
-        /// settings stored in the WiFi adapter memory.
-        ///
-        /// No Stored Configuration
-        /// If no settings are stored in the adapter then the hardware will simply start.  IP addresses
-        /// will not be obtained in this mode.
-        ///
-        /// In this case, the return result indicates if the hardware started successfully.
-        ///
-        /// Stored Configuration Present NOTE NOT IMPLEMENTED IN THIS RELEASE
-        /// If a default access point (and optional password) are stored in the adapter then the network
-        /// interface and the system is set to connect at startup then the system will then attempt to
-        /// connect to the specified access point.
-        ///
-        /// In this case, the return result indicates if the interface was started successfully and a
-        /// connection to the access point was made.
-        /// </remarks>
-        /// <returns>true if the adapter was started successfully, false if there was an error.</returns>
-        public async Task<bool> StartWiFiInterface()
-        {
-            return await Task.Run(() =>
-            {
-                StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StartWiFiInterface, true, null);
-                return (result == StatusCodes.CompletedOk);
-            });
-        }
-
-        /// <summary>
-        /// Stop the WiFi interface,
-        /// </summary>
-        /// <remarks>
-        /// Stopping the WiFi interface will release all resources associated with the WiFi running on the ESP32.
-        ///
-        /// Errors could occur if the adapter was not started.
-        /// </remarks>
-        /// <returns>true if the adapter was successfully turned off, false if there was a problem.</returns>
-        public async Task<bool> StopWiFiInterface()
-        {
-            return await Task.Run(() =>
-            {
-                StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.StopWiFiInterface, true, null);
-                return (result == StatusCodes.CompletedOk);
-            });
-        }
-
-        /// <summary>
         /// Connect to a WiFi network.
         /// </summary>
         /// <param name="ssid">SSID of the network to connect to</param>
@@ -430,56 +391,25 @@ namespace Meadow.Devices
         /// <param name="token">Cancellation token for the connection attempt</param>
         /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
         /// <returns>The connection result</returns>
-        public async Task<ConnectionResult> Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
+        public async Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
         {
-            ConnectionResult connectionResult;
-            StatusCodes result = await ConnectToAccessPoint(ssid, password, timeout, token, reconnection);
-            switch (result)
+            switch (CurrentState)
             {
-                case StatusCodes.CompletedOk:
-                    connectionResult = new ConnectionResult(ConnectionStatus.Success);
-                    break;
-                case StatusCodes.AuthenticationFailed:
-                case StatusCodes.CannotConnectToAccessPoint:
-                    connectionResult = new ConnectionResult(ConnectionStatus.ConnectionRefused);
-                    break;
-                case StatusCodes.CannotStartNetworkInterface:
-                    connectionResult = new ConnectionResult(ConnectionStatus.NetworkInterfaceCannotBeStarted);
-                    break;
-                case StatusCodes.AccessPointNotFound:
-                case StatusCodes.EspWiFiInvalidSsid:
-                    connectionResult = new ConnectionResult(ConnectionStatus.NetworkNotAvailable);
-                    break;
-                case StatusCodes.Timeout:
-                    connectionResult = new ConnectionResult(ConnectionStatus.Timeout);
-                    break;
-                case StatusCodes.ConnectionFailed:
-                    connectionResult = new ConnectionResult(ConnectionStatus.ConnectionRefused);
-                    break;
-                case StatusCodes.WiFiAlreadyStarted:
-                    connectionResult = new ConnectionResult(ConnectionStatus.AlreadyConnected);
-                    break;
-                case StatusCodes.UnmappedErrorCode:
-                default:
-                    connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
-                    break;
+                case NetworkState.Connecting:
+                    throw new Exception("Adapter already connecting");
+                case NetworkState.Disconnecting:
+                    throw new Exception("Adapter is in the process of disconnecting");
             }
-            HasInternetAccess = (result == StatusCodes.CompletedOk);
-            return connectionResult;
-        }
 
-        /// <summary>
-        /// Request the ESP32 to connect to the specified network.
-        /// </summary>
-        /// <param name="ssid">Name of the network to connect to.</param>
-        /// <param name="password">Password for the network.</param>
-        /// <param name="reconnection">Should the adapter reconnect automatically?</param>
-        /// <param name="token">Cancellation token for the connection attempt</param>
-        /// <param name="timeout">Amount of time to wait for a connection before a failure is declared.</param>
-        /// <exception cref="ArgumentNullException">Thrown if the ssid is null or empty or the password is null.</exception>
-        /// <returns>true if the connection was successfully made.</returns>
-        private Task<StatusCodes> ConnectToAccessPoint(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection)
-        {
+            switch (Resolver.Device.PlatformOS.SelectedNetwork)
+            {
+                case IPlatformOS.NetworkConnectionType.WiFi:
+                    // pass through
+                    break;
+                default:
+                    throw new NotSupportedException($"Connect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+            }
+
             if (string.IsNullOrEmpty(ssid))
             {
                 throw new ArgumentNullException("Invalid SSID.");
@@ -488,91 +418,95 @@ namespace Meadow.Devices
             {
                 throw new ArgumentNullException($"{nameof(password)} cannot be null.");
             }
-            var tasks = new List<Task>();
 
-            var connectTask = Task.Run(() =>
+            CurrentState = NetworkState.Connecting;
+
+            var connectTask = Task.Run(async () =>
             {
                 token.ThrowIfCancellationRequested();
 
-                WiFiCredentials request = new WiFiCredentials()
+                AccessPointInformation request = new AccessPointInformation()
                 {
                     NetworkName = ssid,
-                    Password = password
+                    Password = password,
+                    IpAddress = ConfiguredIpAddress,
+                    Gateway = ConfiguredGateway,
+                    //
+                    //  Setting Gateway to 0 will allow an error event to be raised.
+                    //
+                    //Gateway = 0,
+                    SubnetMask = ConfiguredSubnetMask
                 };
-                byte[] encodedPayload = Encoders.EncodeWiFiCredentials(request);
+                byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
                 byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
 
                 ClearNetworkDetails();
-                //
-                //  The connection semaphore is used to synchronise the connection event
-                //  and the return from this method.  This fixes the problem where the
-                //  event could sometimes be fired before this method had the chance to set
-                //  the various network properties.
-                //
+
                 try
                 {
-                    // TODO: should be async and awaited
-                    StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+                    Resolver.Log.Trace($"Sending command to connect");
+                    _lastStatus = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
+                    Resolver.Log.Trace($"SendingCommand returned: {_lastStatus}");
 
-                    token.ThrowIfCancellationRequested();
-
-                    _connectionSemaphore.WaitOne();
-
-                    ConnectEventData data;
-                    switch (result)
+                    switch (_lastStatus)
                     {
-                        case StatusCodes.CompletedOk:
-                            //
-                            //  Nothing to do here as setting properties now dealt with by the connection event.
-                            //
+                        case StatusCodes.AccessPointNotFound:
+                        case StatusCodes.AuthenticationFailed:
+                        case StatusCodes.CannotConnectToAccessPoint:
+                            CurrentState = NetworkState.Error;
                             break;
-                        case StatusCodes.WiFiDisconnected:
-                            data = Encoders.ExtractConnectEventData(resultBuffer, 0);
-                            switch ((WiFiReasons)data.Reason)
-                            {
-                                case WiFiReasons.AuthenticationFailed:
-                                    result = StatusCodes.AuthenticationFailed;
-                                    break;
-                                case WiFiReasons.NoAccessPointFound:
-                                    result = StatusCodes.AccessPointNotFound;
-                                    break;
-                                case WiFiReasons.FourWayHandshakeTimeout:
-                                case WiFiReasons.ConnectionFailed:
-                                    result = StatusCodes.ConnectionFailed;
-                                    break;
-                                default:
-                                    result = StatusCodes.ConnectionFailed;
-                                    break;
-                            }
-                            break;
-                        case StatusCodes.CoprocessorNotResponding:
-                            throw new InvalidNetworkOperationException("ESP32 coprocessor is not responding.");
                     }
-                    return (result);
+
+                    if (CurrentState == NetworkState.Error)
+                    {
+                        throw new Exception($"Connection failed: {_lastStatus}");
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error connecting to access point: {ex.Message}");
+                    Resolver.Log.Error($"Error connecting to access point: {ex.Message}");
 
                     token.ThrowIfCancellationRequested();
                     throw ex;
                 }
+
+                token.ThrowIfCancellationRequested();
+
+                var t = 0;
+
+                // wait for a state transition
+                while (CurrentState == NetworkState.Connecting)
+                {
+                    await Task.Delay(500);
+                    t += 500;
+                    if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
+                    {
+                        throw new TimeoutException();
+                    }
+                }
+
+                if (CurrentState == NetworkState.Connected)
+                {
+                    // tesing has revealded that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
+                    while (IpAddress.Equals(System.Net.IPAddress.Any))
+                    {
+                        Resolver.Log.Info($"WIFI: {CurrentState}: {IpAddress}");
+                        await Task.Delay(500);
+                        t += 500;
+                        if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
+                        {
+                            throw new TimeoutException();
+                        }
+                    }
+                }
             }, token);
 
-            tasks.Add(connectTask);
+            await connectTask;
 
-            if (timeout.TotalMilliseconds > 0)
+            if (CurrentState == NetworkState.Error)
             {
-                tasks.Add(Task.Delay(timeout));
+                throw new Exception($"Connection error: {_lastStatus}");
             }
-
-            var index = Task.WaitAny(tasks.ToArray());
-            if (index == 1)
-            {
-                throw new TimeoutException();
-            }
-
-            return Task.FromResult(connectTask.Result);
         }
 
         /// <summary>
@@ -580,51 +514,81 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="turnOffWiFiInterface">Stop the WiFi interface.</param>
         /// <returns></returns>
-        public async Task<ConnectionResult> Disconnect(bool turnOffWiFiInterface)
+        public async Task Disconnect(bool turnOffWiFiInterface)
         {
-            var t = await Task.Run<ConnectionResult>(() =>
+            switch (CurrentState)
             {
-                StatusCodes result = DisconnectFromAccessPoint(turnOffWiFiInterface);
-                ConnectionResult connectionResult;
-                switch (result)
+                case NetworkState.Connected:
+                    break;
+                default:
+                    // do nothing if we're not connected
+                    return;
+            }
+
+            switch (Resolver.Device.PlatformOS.SelectedNetwork)
+            {
+                case IPlatformOS.NetworkConnectionType.WiFi:
+                    // pass through
+                    break;
+                default:
+                    throw new NotSupportedException($"Disconnect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+            }
+
+            await Task.Run(async () =>
+            {
+                var request = new DisconnectFromAccessPointRequest()
                 {
-                    case StatusCodes.CompletedOk:
-                        ClearNetworkDetails();
-                        connectionResult = new ConnectionResult(ConnectionStatus.Success);
-                        break;
-                    case StatusCodes.Failure:
-                        connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
-                        break;
-                    case StatusCodes.EspWiFiNotStarted:
-                        connectionResult = new ConnectionResult(ConnectionStatus.WiFiNotStarted);
-                        break;
-                    default:
-                        connectionResult = new ConnectionResult(ConnectionStatus.UnspecifiedFailure);
-                        break;
+                    TurnOffWiFiInterface = (byte)((turnOffWiFiInterface ? 1 : 0) & 0xff)
+                };
+                byte[] encodedRequest = Encoders.EncodeDisconnectFromAccessPointRequest(request);
+
+                var result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.DisconnectFromAccessPoint, true, encodedRequest, null);
+
+                // NOTE: 'result' here is only the result of the ioctl, *not* the result of the disconnection request
+
+                var t = 0;
+
+                // wait for a state transition
+                while (CurrentState == NetworkState.Disconnecting)
+                {
+                    await Task.Delay(500);
+                    t += 500;
+                    if (t > TimeSpan.FromSeconds(30).TotalMilliseconds)
+                    {
+                        throw new TimeoutException();
+                    }
                 }
-                return (connectionResult);
             });
-            return (t);
         }
 
         /// <summary>
-        /// Disconnect from the the currently active access point.
+        /// Connect to the default access point.
         /// </summary>
-        /// <remarks>
-        /// Setting turnOffWiFiInterface to true will call StopWiFiInterface following
-        /// the disconnection from the current access point.
-        /// </remarks>
-        /// <param name="turnOffWiFiInterface">Should the WiFi interface be turned off?</param>
-        private StatusCodes DisconnectFromAccessPoint(bool turnOffWiFiInterface)
+        /// <remarks>The access point credentials should be stored in the coprocessor memory.</remarks>
+        public void ConnectToDefaultAccessPoint()
         {
-            DisconnectFromAccessPointRequest request = new DisconnectFromAccessPointRequest()
+            if (Resolver.Device.PlatformOS.SelectedNetwork != IPlatformOS.NetworkConnectionType.WiFi)
             {
-                TurnOffWiFiInterface = (byte)((turnOffWiFiInterface ? 1 : 0) & 0xff)
-            };
-            byte[] encodedRequest = Encoders.EncodeDisconnectFromAccessPointRequest(request);
+                throw new NotSupportedException($"ConnectToDefaultAccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+            }
 
-            StatusCodes result = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.DisconnectFromAccessPoint, true, encodedRequest, null);
-            return (result);
+            if ((CurrentState == NetworkState.Connected) || (CurrentState == NetworkState.Connecting))
+            {
+                throw new InvalidOperationException($"Already connected or connecting to an access point, current state {CurrentState}");
+            }
+
+            SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+        }
+
+        /// <summary>
+        /// Removed any stored access point information from the coprocessor memory.
+        /// </summary>
+        public async Task ClearStoredAccessPointInformation()
+        {
+            await Task.Run(async () =>
+            {
+                SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ClearDefaultAccessPoint, true, null);
+            });
         }
 
         /// <summary>
@@ -679,33 +643,6 @@ namespace Meadow.Devices
         #region Event raising methods
 
         /// <summary>
-        /// Process the ConnectionCompleted event extracing any event data from the
-        /// payload and create an EventArg object if necessary
-        /// </summary>
-        /// <param name="statusCode">Status code for the WiFi connection</param>
-        /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseWiFiConnected(StatusCodes statusCode, byte[] payload)
-        {
-            byte channel = 0;
-
-            ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
-            lock (_lock)
-            {
-                Ssid = connectEventData.Ssid;
-                Bssid = new PhysicalAddress(connectEventData.Bssid);
-                channel = connectEventData.Channel;
-                Channel = channel;
-                _isConnected = true;
-                HasInternetAccess = true;
-            }
-
-            NetworkAuthenticationType authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
-
-            var ea = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, channel, authenticationType);
-            NetworkConnected?.Invoke(this, ea);
-        }
-
-        /// <summary>
         /// Process the Disconnected event extracting any event data from the
         /// payload and create an EventArg object if necessary
         /// </summary>
@@ -714,35 +651,10 @@ namespace Meadow.Devices
         protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
         {
             ClearNetworkDetails();
-            HasInternetAccess = false;
             _isConnected = false;
 
             var e = new WiFiDisconnectEventArgs(statusCode);
-            NetworkDisconnected?.Invoke(this);
-        }
-
-        /// <summary>
-        /// Process the InterfaceStarted event extracing any event data from the
-        /// payload and create an EventArg object if necessary
-        /// </summary>
-        /// <param name="statusCode">Status code for the WiFi interface start event (should be CompletedOK).</param>
-        /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseWiFiInterfaceStarted(StatusCodes statusCode, byte[] payload)
-        {
-            WiFiInterfaceStartedEventArgs e = new WiFiInterfaceStartedEventArgs(statusCode);
-            WiFiInterfaceStarted?.Invoke(this, e);
-        }
-
-        /// <summary>
-        /// Process the InterfaceStopped event extracing any event data from the
-        /// payload and create an EventArg object if necessary
-        /// </summary>
-        /// <param name="statusCode">Status code for the WiFi interface stop event (should be CompletedOK).</param>
-        /// <param name="payload">Event data encoded in the payload.</param>
-        protected void RaiseWiFiInterfaceStopped(StatusCodes statusCode, byte[] payload)
-        {
-            WiFiInterfaceStoppedEventArgs e = new WiFiInterfaceStoppedEventArgs(statusCode);
-            WiFiInterfaceStopped?.Invoke(this, e);
+            RaiseNetworkDisconnected();
         }
 
         /// <summary>
@@ -755,6 +667,57 @@ namespace Meadow.Devices
             NtpTimeChanged?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Process the Error event.
+        /// </summary>
+        protected void RaiseErrorEvent(StatusCodes statusCode)
+        {
+            RaiseNetworkError(new NetworkErrorEventArgs((uint)statusCode));
+        }
+
         #endregion Event raising methods
+
+        private NetworkState _state;
+        private NetworkAuthenticationType _authenticationType;
+        private StatusCodes _lastStatus;
+
+        private NetworkState CurrentState
+        {
+            get => _state;
+            set
+            {
+                if (value == _state) return;
+
+                _state = value;
+
+                switch (CurrentState)
+                {
+                    case NetworkState.Connecting:
+                        break;
+                    case NetworkState.Connected:
+                        this.Refresh();
+                        var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
+                        RaiseNetworkConnected(args);
+                        break;
+                    case NetworkState.Disconnecting:
+                        break;
+                    case NetworkState.Disconnected:
+                        RaiseNetworkDisconnected();
+                        break;
+                    case NetworkState.Error:
+                        break;
+                }
+            }
+        }
+
+        private enum NetworkState
+        {
+            Unknown,
+            Disconnected,
+            Connecting,
+            Connected,
+            Disconnecting,
+            Error
+        }
     }
 }

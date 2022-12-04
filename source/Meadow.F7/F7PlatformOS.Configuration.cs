@@ -53,6 +53,18 @@ namespace Meadow
         /// <remarks>A value of 0 indicates an infinite period.</remarks>
         public uint InitializationTimeout => GetUInt(ConfigurationValues.InitializationTimeout);
 
+        /// <summary>
+        /// Should a WiFi connection be made on startup.
+        /// </summary>
+        /// <remarks>This assumes that the default access point is configured through wifi.config.yaml.</remarks>
+        public bool AutomaticallyStartNetwork => GetBoolean(ConfigurationValues.AutomaticallyStartNetwork);
+
+        /// <summary>
+        /// Which network is selected in meadow.config.yaml.
+        /// </summary>
+        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
+
+
         //==== Configuration internals
 
         /// <summary>

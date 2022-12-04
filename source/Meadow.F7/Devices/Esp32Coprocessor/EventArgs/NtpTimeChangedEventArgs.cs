@@ -1,10 +1,9 @@
 ﻿using System;
-using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Gateway.WiFi
 {
     /// <summary>
-    /// Data relating to a stop WiFi interface request.
+    /// Data relating to NTP time changed event.
     /// </summary>
     public class NtpTimeChangedEventArgs : EventArgs
     {
@@ -14,7 +13,7 @@ namespace Meadow.Gateway.WiFi
         public DateTime When { get; private set; }
 
         /// <summary>
-        /// Construct a WiFiInterfaceStoppedEventArgs object.
+        /// Construct a NtpTimeChangedEventArgs object.
         /// </summary>
         public NtpTimeChangedEventArgs()
         {

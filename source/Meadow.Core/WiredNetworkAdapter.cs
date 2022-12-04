@@ -5,7 +5,7 @@ namespace Meadow.Devices
 {
     public class WiredNetworkAdapter : NetworkAdapterBase, IWiredNetworkAdapter
     {
-        internal WiredNetworkAdapter()
+        public WiredNetworkAdapter()
             : base(NetworkInterfaceType.Ethernet)
         {
         }

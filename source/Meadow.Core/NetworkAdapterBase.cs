@@ -6,26 +6,81 @@ using System.Net.NetworkInformation;
 
 namespace Meadow
 {
+    /// <summary>
+    /// A base class for INetworkAdapter implementations
+    /// </summary>
     public abstract class NetworkAdapterBase : INetworkAdapter
     {
+        /// <summary>
+        /// Raised when the device connects to a network.
+        /// </summary>
         public event NetworkConnectionHandler NetworkConnected;
+        /// <summary>
+        /// Raised when the device disconnects from a network.
+        /// </summary>
         public event NetworkDisconnectionHandler NetworkDisconnected;
+        /// <summary>
+        /// Raised when a network error occurs
+        /// </summary>
+        public event NetworkErrorHandler NetworkError;
 
-        private readonly Lazy<NetworkInterface?> nativeInterface;
+        private NetworkInterface? nativeInterface;
 
+        /// <summary>
+        /// returns the connection state of the NetworkAdapter
+        /// </summary>
         public abstract bool IsConnected { get; }
 
+        /// <summary>
+        /// Gets the physical (MAC) address of the network adapter
+        /// </summary>
         public PhysicalAddress MacAddress { get; private set; }
 
-        public NetworkInterfaceType InterfaceType { get; private set; }
+        /// <summary>
+        /// Gets the network interface type
+        /// </summary>
+        public NetworkInterfaceType InterfaceType { get; }
 
         protected internal NetworkAdapterBase(NetworkInterfaceType expectedType)
         {
             InterfaceType = expectedType;
-            nativeInterface = new Lazy<NetworkInterface?>(() =>
-            {
-                return LoadAdapterInfo();
-            });
+
+            Refresh();
+        }
+
+        /// <summary>
+        /// Raises the <see cref="NetworkConnected"/> event
+        /// </summary>
+        /// <param name="args"></param>
+        protected void RaiseNetworkConnected(WirelessNetworkConnectionEventArgs args)
+        {
+            NetworkConnected?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="NetworkDisconnected"/> event
+        /// </summary>
+        /// <param name="args"></param>
+        protected void RaiseNetworkDisconnected()
+        {
+            NetworkDisconnected?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Raises the <see cref="NetworkError"/> event
+        /// </summary>
+        /// <param name="args"></param>
+        protected void RaiseNetworkError(NetworkErrorEventArgs args)
+        {
+            NetworkError?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// Refreshes the NetworkAdapter's information
+        /// </summary>
+        protected void Refresh()
+        {
+            nativeInterface = LoadAdapterInfo();
         }
 
         /// <summary>
@@ -40,7 +95,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface.Value?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
             }
         }
 
@@ -56,7 +111,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface.Value?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.IPv4Mask ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.IPv4Mask ?? IPAddress.None;
             }
         }
 
@@ -72,7 +127,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface.Value?.GetIPProperties()?.GatewayAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.GatewayAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
             }
         }
 
