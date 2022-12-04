@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Meadow
 {
@@ -56,22 +56,26 @@ namespace Meadow
 
             if (firstMatch == null) return -1;
 
-            for (int i = 0; i < totalLength; i++) {
+            for (int i = 0; i < totalLength; i++)
+            {
                 // is this the right equality?
                 if ((firstMatch.Equals(source.ElementAt(i))) // begin match?
                      &&
                      (totalLength - i >= patternLength) // can match exist?
-                   ) {
+                   )
+                {
                     TSource[] matchTest = new TSource[patternLength];
                     // copy the potential match into the matchTest array.
                     // can't use .Skip() and .Take() because it will actually
                     // enumerate over stuff and can have side effects
-                    for (int x = 0; x < patternLength; x++) {
+                    for (int x = 0; x < patternLength; x++)
+                    {
                         matchTest[x] = source.ElementAt(i + x);
                     }
                     // if the pattern pulled from source matches our search pattern
                     // then the pattern exists.
-                    if (matchTest.SequenceEqual(pattern)) {
+                    if (matchTest.SequenceEqual(pattern))
+                    {
                         return i;
                     }
                 }
@@ -126,6 +130,59 @@ namespace Meadow
         static public int Map(this int souceValue, int sourceMin, int sourceMax, int targetMin, int targetMax)
         {
             return (souceValue - sourceMin) / (sourceMax - sourceMin) * (targetMax - targetMin) + targetMin;
+        }
+
+        public static void Fire(this Delegate handler, params object[] args)
+        {
+            if (handler == null) return;
+            foreach (var d in handler.GetInvocationList())
+            {
+                try
+                {
+                    d.DynamicInvoke(args);
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Event handler threw {ex.GetType().Name}: {ex.Message}");
+                }
+            }
+        }
+
+        public static void Fire(this EventHandler h, object sender)
+        {
+            Fire(h, sender, EventArgs.Empty);
+        }
+
+        public static void Fire(this EventHandler handler, object sender, EventArgs args)
+        {
+            if (handler == null) return;
+            foreach (var d in handler.GetInvocationList())
+            {
+                try
+                {
+                    d.DynamicInvoke(sender, args);
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Event handler threw {ex.GetType().Name}: {ex.Message}");
+                }
+            }
+        }
+
+        public static void Fire<T>(this EventHandler<T> handler, object sender, T args) where T : EventArgs
+        {
+            if (handler == null) return;
+            foreach (var d in handler.GetInvocationList())
+            {
+                try
+                {
+                    d.DynamicInvoke(sender, args);
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Event handler threw {ex.GetType().Name}: {ex.Message}");
+                }
+            }
         }
     }
 }
