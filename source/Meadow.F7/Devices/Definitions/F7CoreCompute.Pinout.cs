@@ -138,7 +138,7 @@ namespace Meadow.Devices
             public IPin D01 => new Pin(
                 "D01", "PH13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH13", interruptGroup: 14),
+                    new DigitalChannelInfo("PH13", interruptGroup: 13),
                     new UartChannelInfo("UART4_TX", SerialDirectionType.Transmit)
                 }
             );
