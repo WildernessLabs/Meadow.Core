@@ -136,9 +136,9 @@ namespace Meadow.Devices
 
             // TODO: shared with ETH_IRQ?
             public IPin D01 => new Pin(
-                "D01", "PH14",
+                "D01", "PH13",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PH14", interruptGroup: 14),
+                    new DigitalChannelInfo("PH13", interruptGroup: 14),
                     new UartChannelInfo("UART4_TX", SerialDirectionType.Transmit)
                 }
             );
