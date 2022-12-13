@@ -81,6 +81,11 @@ namespace Meadow.Devices
                         BluetoothAdapter = esp32;
                         Coprocessor = esp32;
 
+                        if ((esp32.AutoConnect) && (esp32.DefaultSsid.Length > 0))
+                        {
+                            esp32.ConnectToDefaultAccessPoint();
+                        }
+
                         if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                         {
                             Resolver.Log.Error($"WiFi Adapter Selected");
