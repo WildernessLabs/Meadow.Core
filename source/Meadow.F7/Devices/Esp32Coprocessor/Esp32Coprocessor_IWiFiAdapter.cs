@@ -74,7 +74,7 @@ namespace Meadow.Devices
         {
             get
             {
-                if (_mac == null)
+                if ((_mac == null) || (_mac == System.Net.NetworkInformation.PhysicalAddress.None))
                 {
                     byte[] mac = new byte[6];
                     F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
