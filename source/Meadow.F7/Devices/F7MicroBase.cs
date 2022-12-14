@@ -45,6 +45,12 @@ namespace Meadow.Devices
         protected IMeadowIOController IoController { get; }
 
         //==== constructors
+        /// <summary>
+        /// Provides required construction of the F7MicroBase abstract class
+        /// </summary>
+        /// <param name="ioController"></param>
+        /// <param name="analogCapabilities"></param>
+        /// <param name="networkCapabilities"></param>
         public F7MicroBase(IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
         {
             IoController = ioController;
@@ -60,6 +66,9 @@ namespace Meadow.Devices
             networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
         }
 
+        /// <summary>
+        /// Initializes the F7Micro platform hardware
+        /// </summary>
         public void Initialize()
         {
             IoController.Initialize();
@@ -67,6 +76,10 @@ namespace Meadow.Devices
             InitCoprocessor();
         }
 
+        /// <summary>
+        /// Initializes the ESP32 Coprocessor
+        /// </summary>
+        /// <returns></returns>
         protected bool InitCoprocessor()
         {
             lock (coprocInitLock)
@@ -88,8 +101,22 @@ namespace Meadow.Devices
 
                         if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                         {
-                            Resolver.Log.Error($"WiFi Adapter Selected");
+                            Resolver.Log.Info($"WiFi Adapter Selected");
                             networkAdapters.Add(esp32);
+
+                            if (esp32.AutoConnect)
+                            {
+                                Resolver.Log.Debug($"Device configured to auto-connect to SSID '{esp32.DefaultSsid}'");
+
+                                if (string.IsNullOrEmpty(esp32.DefaultSsid))
+                                {
+                                    Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.");
+                                }
+                                else
+                                {
+                                    esp32.ConnectToDefaultAccessPoint();
+                                }
+                            }
                         }
 
                         esp32.NtpTimeChanged += (s, e) =>

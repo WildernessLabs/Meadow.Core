@@ -24,7 +24,7 @@ namespace Meadow
                     return true;
                 }
 
-                Resolver.Log.Warn($"Mount returned {result}");
+                Resolver.Log.Debug($"SD Card Mount returned {result}");
             }
             catch (Exception ex)
             {
