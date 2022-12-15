@@ -145,6 +145,8 @@ namespace Meadow.Devices
             StatusCodes result = StatusCodes.CompletedOk;
             try
             {
+                Resolver.Log.Trace($"Sending ESP command. destination:{destination}, function:{function}");
+
                 var command = new Nuttx.UpdEsp32Command()
                 {
                     Interface = destination,
@@ -178,16 +180,17 @@ namespace Meadow.Devices
                 if (updResult == 0)
                 {
                     result = (StatusCodes)command.StatusCode;
+                    Resolver.Log.Trace($"ESP Ioctl returned success: {result}");
                 }
                 else
                 {
-                    Console.WriteLine($"ESP Ioctl failed: {updResult}");
+                    Resolver.Log.Warn($"ESP Ioctl returned non-success: {updResult}");
                     result = StatusCodes.Failure;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: {ex.Message}");
+                Resolver.Log.Error($"Exception sending ESP32 command: {ex.Message}");
             }
             finally
             {
