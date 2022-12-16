@@ -99,6 +99,8 @@ namespace Meadow.Devices
                             Resolver.Log.Info($"WiFi Adapter Selected");
                             networkAdapters.Add(esp32);
 
+                            // TODO: uncomment to re-enable auto-connect once the ESP is figured out
+                            /*
                             if (esp32.AutoConnect)
                             {
                                 Resolver.Log.Debug($"Device configured to auto-connect to SSID '{esp32.DefaultSsid}'");
@@ -112,6 +114,7 @@ namespace Meadow.Devices
                                     esp32.ConnectToDefaultAccessPoint();
                                 }
                             }
+                            */
                         }
 
                         esp32.NtpTimeChanged += (s, e) =>
