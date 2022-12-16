@@ -14,7 +14,6 @@
             /// Get the OS build date.
             /// </summary>
             /// <returns>OS build date.</returns>
-
             //TODO: parse as datetime
             public static string OSBuildDate => CurrentDevice.PlatformOS.OSBuildDate;
 
