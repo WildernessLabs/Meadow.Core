@@ -25,6 +25,11 @@
 
         internal static CancellationTokenSource AppAbort = new();
 
+        /// <summary>
+        /// The entry point for Meadow applications
+        /// </summary>
+        /// <param name="_"></param>
+        /// <returns></returns>
         public async static Task Main(string[] _)
         {
             bool systemInitialized = false;
@@ -295,15 +300,20 @@
                     return false;
                 }
 
+                Resolver.Log.Trace($"Device Initialize starting...");
                 CurrentDevice.Initialize();
+                Resolver.Log.Trace($"PlatformOS Initialize starting...");
                 CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
 
                 // initialize file system folders and such
                 // TODO: move this to platformOS
+                Resolver.Log.Trace($"File system Initialize starting...");
                 InitializeFileSystem();
 
                 // Create the app object, bound immediately to the <IMeadowDevice>
                 b4 = Environment.TickCount;
+                Resolver.Log.Trace($"Creating instance of {appType.Name}...");
+
                 if (Activator.CreateInstance(appType, nonPublic: true) is not IApp app)
                 {
                     throw new Exception($"Failed to create instance of '{appType.Name}'");

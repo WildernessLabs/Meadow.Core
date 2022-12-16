@@ -14,17 +14,17 @@ namespace Meadow
         /// <summary>
         /// Raised when the device connects to a network.
         /// </summary>
-        public event NetworkConnectionHandler NetworkConnected;
+        public event NetworkConnectionHandler NetworkConnected = delegate { };
         /// <summary>
         /// Raised when the device disconnects from a network.
         /// </summary>
-        public event NetworkDisconnectionHandler NetworkDisconnected;
+        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
         /// <summary>
         /// Raised when a network error occurs
         /// </summary>
-        public event NetworkErrorHandler NetworkError;
+        public event NetworkErrorHandler NetworkError = delegate { };
 
-        private NetworkInterface? nativeInterface;
+        private NetworkInterface? nativeInterface = default!;
 
         /// <summary>
         /// returns the connection state of the NetworkAdapter
@@ -34,13 +34,17 @@ namespace Meadow
         /// <summary>
         /// Gets the physical (MAC) address of the network adapter
         /// </summary>
-        public PhysicalAddress MacAddress { get; private set; }
+        public PhysicalAddress MacAddress { get; private set; } = PhysicalAddress.None;
 
         /// <summary>
         /// Gets the network interface type
         /// </summary>
         public NetworkInterfaceType InterfaceType { get; }
 
+        /// <summary>
+        /// Constructor for the NetworkAdapterBase class
+        /// </summary>
+        /// <param name="expectedType"></param>
         protected internal NetworkAdapterBase(NetworkInterfaceType expectedType)
         {
             InterfaceType = expectedType;
@@ -60,7 +64,6 @@ namespace Meadow
         /// <summary>
         /// Raises the <see cref="NetworkDisconnected"/> event
         /// </summary>
-        /// <param name="args"></param>
         protected void RaiseNetworkDisconnected()
         {
             NetworkDisconnected?.Invoke(this);
