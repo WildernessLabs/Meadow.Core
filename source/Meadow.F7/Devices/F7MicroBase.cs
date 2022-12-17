@@ -51,11 +51,16 @@ namespace Meadow.Devices
         /// <param name="ioController"></param>
         /// <param name="analogCapabilities"></param>
         /// <param name="networkCapabilities"></param>
-        public F7MicroBase(IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
+        /// <param name="storageCapabilities"></param>
+        public F7MicroBase(
+            IMeadowIOController ioController,
+            AnalogCapabilities analogCapabilities,
+            NetworkCapabilities networkCapabilities,
+            StorageCapabilities storageCapabilities)
         {
             IoController = ioController;
 
-            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
+            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities, storageCapabilities);
 
             PlatformOS = new F7PlatformOS();
 

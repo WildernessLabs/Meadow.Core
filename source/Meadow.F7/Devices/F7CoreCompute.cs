@@ -10,7 +10,8 @@ namespace Meadow.Devices
             : base(new Pinout(),
                   new F7CoreComputeGpioManager(),
                   new AnalogCapabilities(true, DefaultA2DResolution),
-                  new NetworkCapabilities(true, false))
+                  new NetworkCapabilities(true, false),
+                  new StorageCapabilities(true))
         {
             if (this.Information.Platform != Hardware.MeadowPlatform.F7CoreComputeV2)
             {

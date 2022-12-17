@@ -303,7 +303,7 @@
                 Resolver.Log.Trace($"Device Initialize starting...");
                 CurrentDevice.Initialize();
                 Resolver.Log.Trace($"PlatformOS Initialize starting...");
-                CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
+                CurrentDevice.PlatformOS.Initialize(CurrentDevice.Capabilities); // initialize the devices' platform OS
 
                 // initialize file system folders and such
                 // TODO: move this to platformOS

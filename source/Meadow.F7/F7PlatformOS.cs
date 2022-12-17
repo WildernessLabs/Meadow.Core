@@ -1,8 +1,5 @@
 ﻿using Meadow.Units;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Meadow
 {
@@ -33,9 +30,10 @@ namespace Meadow
         /// <summary>
         /// Initialize the F7PlatformOS instance.
         /// </summary>
-        public void Initialize()
+        /// <param name="capabilities"></param>
+        public void Initialize(DeviceCapabilities capabilities)
         {
-            InitializeStorage();
+            InitializeStorage(capabilities.Storage);
         }
     }
 }

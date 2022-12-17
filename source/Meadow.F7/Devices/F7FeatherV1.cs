@@ -20,7 +20,8 @@ namespace Meadow.Devices
                   new Pinout(),
                   new F7FeatherGpioManager(),
                   new AnalogCapabilities(true, DefaultA2DResolution),
-                  new NetworkCapabilities(true, false))
+                  new NetworkCapabilities(true, false),
+                  new StorageCapabilities(false))
         {
             if (this.Information.Platform != Hardware.MeadowPlatform.F7FeatherV1)
             {
