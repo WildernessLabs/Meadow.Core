@@ -26,7 +26,7 @@ namespace Meadow
 
         private void InitializeStorage(StorageCapabilities capabilities)
         {
-            if (capabilities.HasSd)
+            if (capabilities.HasSd && SdStorageSupported)
             {
                 Resolver.Log.Trace("Device is SD Card Capable");
 
@@ -40,6 +40,10 @@ namespace Meadow
                     // thread an not interrupt because we don't want to consume int group 6 for this and speed isn't critical
                     new Thread(() => SdMonitorProc(ccm)).Start();
                 }
+            }
+            else if (!SdStorageSupported)
+            {
+                Resolver.Log.Trace("SD Card is configured to 'off'");
             }
             else
             {

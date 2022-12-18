@@ -15,6 +15,10 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7FeatherV1 : F7FeatherBase
     {
+        /// <summary>
+        /// Creates an F7FeatherV1 instance
+        /// </summary>
+        /// <exception cref="UnsupportedPlatformException"></exception>
         public F7FeatherV1()
             : base(
                   new Pinout(),
@@ -31,6 +35,11 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Gets a BatteryInfo instance for the current state of the platform
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public override BatteryInfo GetBatteryInfo()
         {
             if (Coprocessor != null)
@@ -44,6 +53,12 @@ namespace Meadow.Devices
             throw new Exception("Coprocessor not initialized.");
         }
 
+        /// <summary>
+        /// Gets the hardware I2C bus number corresponding to the requested pins
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
         {
             if (clock.Name == (Pins as F7FeatherV1.Pinout)?.I2C_SCL.Name)
