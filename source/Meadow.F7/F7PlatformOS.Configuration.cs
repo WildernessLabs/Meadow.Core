@@ -64,6 +64,11 @@ namespace Meadow
         /// </summary>
         public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
 
+        /// <summary>
+        /// Should SD storage be enabled on this device?
+        /// </summary>
+        public bool SdStorageSupported => GetBoolean(ConfigurationValues.SdStorageSupported);
+
 
         //==== Configuration internals
 

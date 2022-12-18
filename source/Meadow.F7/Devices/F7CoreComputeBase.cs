@@ -14,8 +14,9 @@ namespace Meadow.Devices
             IF7CoreComputePinout pins,
             IMeadowIOController ioController,
             AnalogCapabilities analogCapabilities,
-            NetworkCapabilities networkCapabilities)
-            : base(ioController, analogCapabilities, networkCapabilities)
+            NetworkCapabilities networkCapabilities,
+            StorageCapabilities storageCapabilities)
+            : base(ioController, analogCapabilities, networkCapabilities, storageCapabilities)
         {
             Pins = pins;
 

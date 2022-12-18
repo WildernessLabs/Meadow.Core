@@ -7,24 +7,47 @@ namespace Meadow
 {
     public partial class F7PlatformOS : IPlatformOS
     {
+        /// <summary>
+        /// This Event is raised when an external storage device event occurs.
+        /// </summary>
         public event ExternalStorageEventHandler ExternalStorageEvent;
 
         private List<IExternalStorage> _externalStorage = new();
 
+        /// <summary>
+        /// A list of available external storage devices
+        /// </summary>
         public IEnumerable<IExternalStorage> ExternalStorage => _externalStorage;
+
+        /// <summary>
+        /// The path the the platforms root file system folder
+        /// </summary>
         public string FileSystemRoot => "/meadow0/";
 
-        private void InitializeStorage()
+        private void InitializeStorage(StorageCapabilities capabilities)
         {
-            if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage store))
+            if (capabilities.HasSd && SdStorageSupported)
             {
-                _externalStorage.Add(store);
-            }
+                Resolver.Log.Trace("Device is SD Card Capable");
 
-            if (Resolver.Device is F7CoreComputeBase ccm)
+                if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage store))
+                {
+                    _externalStorage.Add(store);
+                }
+
+                if (Resolver.Device is F7CoreComputeBase ccm)
+                {
+                    // thread an not interrupt because we don't want to consume int group 6 for this and speed isn't critical
+                    new Thread(() => SdMonitorProc(ccm)).Start();
+                }
+            }
+            else if (!SdStorageSupported)
             {
-                // thread an not interrupt because we don't want to consume int group 6 for this and speed isn't critical
-                new Thread(() => SdMonitorProc(ccm)).Start();
+                Resolver.Log.Trace("SD Card is configured to 'off'");
+            }
+            else
+            {
+                Resolver.Log.Trace("Device is not SD Card Capable");
             }
         }
 
@@ -34,8 +57,11 @@ namespace Meadow
             {
                 if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage? store))
                 {
-                    _externalStorage.Add(store);
-                    ExternalStorageEvent?.Invoke(store, ExternalStorageState.Inserted);
+                    if (store != null)
+                    {
+                        _externalStorage.Add(store);
+                        ExternalStorageEvent?.Invoke(store, ExternalStorageState.Inserted);
+                    }
                 }
             }
         }

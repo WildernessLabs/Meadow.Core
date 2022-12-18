@@ -51,11 +51,16 @@ namespace Meadow.Devices
         /// <param name="ioController"></param>
         /// <param name="analogCapabilities"></param>
         /// <param name="networkCapabilities"></param>
-        public F7MicroBase(IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
+        /// <param name="storageCapabilities"></param>
+        public F7MicroBase(
+            IMeadowIOController ioController,
+            AnalogCapabilities analogCapabilities,
+            NetworkCapabilities networkCapabilities,
+            StorageCapabilities storageCapabilities)
         {
             IoController = ioController;
 
-            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
+            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities, storageCapabilities);
 
             PlatformOS = new F7PlatformOS();
 
@@ -99,8 +104,6 @@ namespace Meadow.Devices
                             Resolver.Log.Info($"WiFi Adapter Selected");
                             networkAdapters.Add(esp32);
 
-                            // TODO: uncomment to re-enable auto-connect once the ESP is figured out
-                            /*
                             if (esp32.AutoConnect)
                             {
                                 Resolver.Log.Debug($"Device configured to auto-connect to SSID '{esp32.DefaultSsid}'");
@@ -114,7 +117,6 @@ namespace Meadow.Devices
                                     esp32.ConnectToDefaultAccessPoint();
                                 }
                             }
-                            */
                         }
 
                         esp32.NtpTimeChanged += (s, e) =>
