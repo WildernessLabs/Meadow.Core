@@ -45,6 +45,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.Logging
         path: Meadow.Logging
+        ref: develop
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
