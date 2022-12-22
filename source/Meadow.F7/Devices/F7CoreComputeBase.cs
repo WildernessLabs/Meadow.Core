@@ -22,7 +22,7 @@ namespace Meadow.Devices
 
             if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
             {
-                Resolver.Log.Error($"Wired Ethernet Adapter Selected");
+                Resolver.Log.Info($"Device is configured to use Wired Ethernet for the network interface");
                 networkAdapters.Add(new WiredNetworkAdapter());
             }
         }

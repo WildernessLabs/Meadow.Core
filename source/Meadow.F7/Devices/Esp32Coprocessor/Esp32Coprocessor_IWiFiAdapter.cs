@@ -10,6 +10,7 @@ using static Meadow.IPlatformOS;
 
 namespace Meadow.Devices
 {
+
     /// <summary>
 	/// This file holds the WiFi specific methods, properties etc for the IWiFiAdapter interface.
 	/// </summary>
@@ -448,17 +449,23 @@ namespace Meadow.Devices
                     _lastStatus = SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
                     Resolver.Log.Trace($"SendingCommand returned: {_lastStatus}");
 
+                    NetworkException? ne = null;
                     switch (_lastStatus)
                     {
                         case StatusCodes.AccessPointNotFound:
+                            ne = new NetworkNotFoundException($"Access point not found");
+                            break;
                         case StatusCodes.AuthenticationFailed:
+                            ne = new NetworkAuthenticationException($"Authentication Failed");
+                            break;
                         case StatusCodes.CannotConnectToAccessPoint:
-                            CurrentState = NetworkState.Error;
+                            ne = new NetworkException("Network error", (int)_lastStatus);
                             break;
                     }
 
-                    if (CurrentState == NetworkState.Error)
+                    if (ne != null)
                     {
+                        CurrentState = NetworkState.Error;
                         throw new Exception($"Connection failed: {_lastStatus}");
                     }
                 }
@@ -467,7 +474,7 @@ namespace Meadow.Devices
                     Resolver.Log.Error($"Error connecting to access point: {ex.Message}");
 
                     token.ThrowIfCancellationRequested();
-                    throw ex;
+                    throw new NetworkException(ex.Message);
                 }
 
                 token.ThrowIfCancellationRequested();
