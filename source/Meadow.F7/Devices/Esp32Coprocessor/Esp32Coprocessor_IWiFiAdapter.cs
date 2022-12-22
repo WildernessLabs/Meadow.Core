@@ -453,7 +453,6 @@ namespace Meadow.Devices
                         case StatusCodes.AccessPointNotFound:
                         case StatusCodes.AuthenticationFailed:
                         case StatusCodes.CannotConnectToAccessPoint:
-                        case StatusCodes.WiFiAlreadyStarted:
                             CurrentState = NetworkState.Error;
                             break;
                     }
