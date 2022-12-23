@@ -101,7 +101,7 @@ namespace Meadow.Devices
 
                         if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                         {
-                            Resolver.Log.Info($"WiFi Adapter Selected");
+                            Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
                             networkAdapters.Add(esp32);
 
                             if (esp32.AutoConnect)
