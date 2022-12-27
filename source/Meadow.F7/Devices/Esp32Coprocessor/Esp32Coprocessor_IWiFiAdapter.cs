@@ -287,6 +287,20 @@ namespace Meadow.Devices
                     Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
                     RaiseErrorEvent(statusCode);
                     break;
+                case WiFiFunction.AccessPointStartedEvent:
+                    RaiseAccessPointStartedEvent();
+                    break;
+                case WiFiFunction.AccessPointStoppedEvent:
+                    RaiseAccessPointStoppedEvent();
+                    break;
+                case WiFiFunction.NodeConnectedEvent:
+                    NodeConnectionChangeEventData data = Encoders.ExtractNodeConnectionChangeEventData(payload, 0);
+                    RaiseNodeConnectedEvent(data);
+                    break;
+                case WiFiFunction.NodeDisconnectedEvent:
+                    data = Encoders.ExtractNodeConnectionChangeEventData(payload, 0);
+                    RaiseNodeDisconnectedEvent(data);
+                    break;
                 default:
                     throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
             }
