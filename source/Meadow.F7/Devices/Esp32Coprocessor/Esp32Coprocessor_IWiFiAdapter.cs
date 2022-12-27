@@ -25,22 +25,22 @@ namespace Meadow.Devices
         /// <summary>
         /// Raise the access point started event.
         /// </summary>
-        public EventHandler AccessPointStarted = delegate { };
+        public event AccessPointStartedHandler AccessPointStarted = delegate { };
 
         /// <summary>
         /// Raise the access point stopped event.
         /// </summary>
-        public EventHandler AccessPointStopped = delegate { };
+        public event AccessPointStoppedHandler AccessPointStopped = delegate { };
 
         /// <summary>
         /// Rais the event indicating that a new node has connected to the access point.
         /// </summary>
-        public EventHandler NodeConnected = delegate { };
+        public event NodeConnectedHandler NodeConnected = delegate { };
 
         /// <summary>
         /// Raise the event indicating that a node has disconnected from the access point.
         /// </summary>
-        public EventHandler NodeDisconnected = delegate { };
+        public event NodeDisconnectedHandler NodeDisconnected = delegate { };
 
         /// <summary>
         /// Default delay between WiFi network scans <see cref="ScanPeriod"/>.
