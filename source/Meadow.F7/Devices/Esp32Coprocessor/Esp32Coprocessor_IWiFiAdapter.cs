@@ -3,6 +3,7 @@ using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,14 +13,34 @@ namespace Meadow.Devices
 {
 
     /// <summary>
-	/// This file holds the WiFi specific methods, properties etc for the IWiFiAdapter interface.
+	/// This file holds the WiFi specific methods, properties etc for the IWiFiNetworkAdapter interface.
 	/// </summary>
     public partial class Esp32Coprocessor : NetworkAdapterBase, IWiFiNetworkAdapter
     {
         /// <summary>
         /// Raise the NTP time changed event.
         /// </summary>
-        public event EventHandler NtpTimeChanged = delegate { };
+        public EventHandler NtpTimeChanged = delegate { };
+
+        /// <summary>
+        /// Raise the access point started event.
+        /// </summary>
+        public EventHandler AccessPointStarted = delegate { };
+
+        /// <summary>
+        /// Raise the access point stopped event.
+        /// </summary>
+        public EventHandler AccessPointStopped = delegate { };
+
+        /// <summary>
+        /// Rais the event indicating that a new node has connected to the access point.
+        /// </summary>
+        public EventHandler NodeConnected = delegate { };
+
+        /// <summary>
+        /// Raise the event indicating that a node has disconnected from the access point.
+        /// </summary>
+        public EventHandler NodeDisconnected = delegate { };
 
         /// <summary>
         /// Default delay between WiFi network scans <see cref="ScanPeriod"/>.
@@ -411,13 +432,13 @@ namespace Meadow.Devices
                     throw new NotSupportedException($"Connect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
             }
 
-            if (string.IsNullOrEmpty(ssid))
+            if (IsSsidNameValid(ssid))
             {
                 throw new ArgumentNullException("Invalid SSID.");
             }
-            if (password == null)
+            if (!IsAccessPointPasswordValid(password))
             {
-                throw new ArgumentNullException($"{nameof(password)} cannot be null.");
+                throw new ArgumentNullException($"{nameof(password)} cannot be null or loner than 64 characters long.");
             }
 
             CurrentState = NetworkState.Connecting;
@@ -436,7 +457,13 @@ namespace Meadow.Devices
                     //  Setting Gateway to 0 will allow an error event to be raised.
                     //
                     //Gateway = 0,
-                    SubnetMask = ConfiguredSubnetMask
+                    SubnetMask = ConfiguredSubnetMask,
+                    //
+                    //  The following three properties are ignored at the moment.
+                    //
+                    WiFiAuthenticationMode = 0,
+                    Channel = 0,
+                    Hidden = 0
                 };
                 byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
                 byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
@@ -588,6 +615,55 @@ namespace Meadow.Devices
         }
 
         /// <summary>
+        /// Create a new access point on the ESP32 with the specified SSID and password.
+        /// </summary>
+        /// <remarks>
+        /// The IP address and subnet mask must allow for 10 IP addresses.
+        /// </remarks>
+        /// <param name="ssid">SSID for the access point.</param>
+        /// <param name="password">Password for the access point.</param>
+        /// <param name="ip">IP address for the DHCP server.</param>
+        /// <param name="subnet"><Subnet mask for the DHCP server./param>
+        /// <param name="gateway"Default gateway for the DHCP server.></param>
+        public async Task StartaccessPoint(string ssid, string password, IPAddress ip, IPAddress subnet, IPAddress gateway)
+        {
+            if (Resolver.Device.PlatformOS.SelectedNetwork != IPlatformOS.NetworkConnectionType.WiFi)
+            {
+                throw new NotSupportedException($"StartaccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+            }
+
+            if (!IsSsidNameValid(ssid))
+            {
+                throw new ArgumentNullException("Invalid SSID.");
+            }
+            if (!IsAccessPointPasswordValid(password))
+            {
+                throw new ArgumentNullException($"{nameof(password)} cannot be null or loner than 64 characters long.");
+            }
+
+            var startAccessPointTask = Task.Run(async () =>
+            {
+
+                AccessPointInformation request = new AccessPointInformation()
+                {
+                    NetworkName = ssid,
+                    Password = password,
+                    IpAddress = 0,
+                    Gateway = 0,
+                    SubnetMask = 0,
+                    //
+                    //  The following three properties are ignored at the moment.
+                    //
+                    WiFiAuthenticationMode = 0,
+                    Channel = 0,
+                    Hidden = 0
+                };
+                byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
+                byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+            });
+        }
+
+        /// <summary>
         /// Removed any stored access point information from the coprocessor memory.
         /// </summary>
         public async Task ClearStoredAccessPointInformation()
@@ -680,6 +756,45 @@ namespace Meadow.Devices
         protected void RaiseErrorEvent(StatusCodes statusCode)
         {
             RaiseNetworkError(new NetworkErrorEventArgs((uint)statusCode));
+        }
+
+        /// <summary>
+        /// Process the AccessPointStarted event.
+        /// </summary>
+        protected void RaiseAccessPointStartedEvent()
+        {
+            AccessPointStateChangeArgs args = new AccessPointStateChangeArgs();
+            AccessPointStarted?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// Process the AccessPointStoppedEvent.
+        /// </summary>
+        protected void RaiseAccessPointStoppedEvent()
+        {
+            AccessPointStateChangeArgs args = new AccessPointStateChangeArgs();
+            AccessPointStopped?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// Process the NodeConnected event.
+        /// </summary>
+        /// <param name="node">Information about the node that has connected to the access point.</param>
+        protected void RaiseNodeConnectedEvent(NodeConnectionChangeEventData node)
+        {
+            IPAddress ip = new IPAddress(node.IpAddress);
+            NodeConnectionChangeEventArgs args = new NodeConnectionChangeEventArgs(node.MacAddress, ip);
+            NodeConnected?.Invoke(this, args);
+        }
+
+        /// <summary>
+        /// Proces the NodeDisconnected event.
+        /// </summary>
+        /// <param name="node">Information about the node that has disconnected from the access point.</param>
+        protected void RaiseNodeDisconnectedEvent(NodeConnectionChangeEventData node)
+        {
+            NodeConnectionChangeEventArgs args = new NodeConnectionChangeEventArgs(node.MacAddress, IPAddress.None);
+            NodeDisconnected?.Invoke(this, args);
         }
 
         #endregion Event raising methods

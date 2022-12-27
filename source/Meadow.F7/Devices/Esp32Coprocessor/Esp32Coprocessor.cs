@@ -27,6 +27,16 @@ namespace Meadow.Devices
         /// </summary>
         public const uint MAXIMUM_SPI_BUFFER_LENGTH = 4000;
 
+        /// <summary>
+        /// Maximum length of a name for an access point.
+        /// </summary>
+        public const uint MAXIMUM_SSID_LENGTH = 32;
+
+        /// <summary>
+        /// Maximum length of a password for an access point.
+        /// </summary>
+        public const uint MAXIMUM_PASSOWRD_LENGTH = 64;
+
         #endregion Constants
 
         #region Enums
@@ -100,6 +110,26 @@ namespace Meadow.Devices
         }
 
         #region Methods
+
+        /// <summary>
+        /// Is the SSID name valid.
+        /// </summary>
+        /// <param name="ssid">SSID to check.</param>
+        /// <returns>True if the SSID name is valid, false otherwise.</returns>
+        protected bool IsSsidNameValid(string ssid)
+        {
+            return (!string.IsNullOrEmpty(ssid) && (ssid.Length < MAXIMUM_SSID_LENGTH));
+        }
+
+        /// <summary>
+        /// Is the access point password valid
+        /// </summary>
+        /// <param name="password">Password to check.</param>
+        /// <returns>True if the password is valid, false otherwise.</returns>
+        protected bool IsAccessPointPasswordValid(string password)
+        {
+            return ((password is not null) && (password.Length < MAXIMUM_PASSOWRD_LENGTH));
+        }
 
         /// <summary>
         /// Send a parameterless command (i.e a command where no payload is required) to the ESP32.
