@@ -673,7 +673,17 @@ namespace Meadow.Devices
                     Hidden = 0
                 };
                 byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
-                byte[] resultBuffer = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
+
+                try
+                {
+                    Resolver.Log.Trace($"Sending command to start the access point");
+                    _lastStatus = SendCommand((byte) Esp32Interfaces.WiFi, (UInt32) WiFiFunction.StartAccessPoint, true, encodedPayload, null);
+                    Resolver.Log.Trace($"SendingCommand returned: {_lastStatus}");
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Error starting access point: {ex.Message}");
+                }
             });
         }
 
