@@ -446,7 +446,7 @@ namespace Meadow.Devices
                     throw new NotSupportedException($"Connect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
             }
 
-            if (IsSsidNameValid(ssid))
+            if (!IsSsidNameValid(ssid))
             {
                 throw new ArgumentNullException("Invalid SSID.");
             }
