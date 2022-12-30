@@ -254,7 +254,21 @@ namespace Meadow.Devices
                         _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
                     }
 
-                    CurrentState = NetworkState.Connected;
+                    // tesing has revealded that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
+                    var t = 3000;
+
+                    Task.Run(async () =>
+                    {
+                        while (IpAddress.Equals(System.Net.IPAddress.Any) || IpAddress.Equals(System.Net.IPAddress.None))
+                        {
+                            await Task.Delay(500);
+                            t -= 500;
+                            if (t < 0) break;
+                        }
+
+                        CurrentState = NetworkState.Connected;
+                    });
+
                     break;
                 case WiFiFunction.NetworkDisconnectedEvent:
                     CurrentState = NetworkState.Disconnected;
@@ -413,7 +427,7 @@ namespace Meadow.Devices
 
             if (string.IsNullOrEmpty(ssid))
             {
-                throw new ArgumentNullException("Invalid SSID.");
+                throw new ArgumentNullException($"Invalid SSID '{ssid}'");
             }
             if (password == null)
             {
@@ -497,7 +511,6 @@ namespace Meadow.Devices
                     // tesing has revealded that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
                     while (IpAddress.Equals(System.Net.IPAddress.Any))
                     {
-                        Resolver.Log.Info($"WIFI: {CurrentState}: {IpAddress}");
                         await Task.Delay(500);
                         t += 500;
                         if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
