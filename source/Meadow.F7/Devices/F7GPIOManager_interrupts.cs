@@ -205,7 +205,10 @@ namespace Meadow.Devices
                                 Task.Run(() =>
                                 {
                                     var ipin = _interruptPins[key];
-                                    Interrupt?.Invoke(ipin, state);
+                                    if (Interrupt != null)
+                                    {
+                                        Interrupt.Fire(ipin, state);
+                                    }
                                 });
                             }
                         }

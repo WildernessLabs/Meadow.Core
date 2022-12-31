@@ -23,45 +23,55 @@
         private static ILifecycleSettings LifecycleSettings { get; set; }
         private static IUpdateSettings UpdateSettings { get; set; }
 
-        static bool appRunning = false;
-
         internal static CancellationTokenSource AppAbort = new();
 
+        /// <summary>
+        /// The entry point for Meadow applications
+        /// </summary>
+        /// <param name="_"></param>
+        /// <returns></returns>
         public async static Task Main(string[] _)
         {
-            if (!Initialize())
-            {
-                // device initialization failed - don't try bring up the app
-                SystemFailure("Device Initialization Failure");
-                return;
-            }
-
+            bool systemInitialized = false;
             try
             {
-                Resolver.Log.Trace("Initializing App");
-                await App.Initialize();
+                systemInitialized = Initialize();
+
+                if (!systemInitialized)
+                {
+                    // device initialization failed - don't try bring up the app
+                    Resolver.Log.Error("Device (system) Initialization Failure");
+                }
             }
             catch (Exception e)
             {
-                // exception on bring-up; not good
-                SystemFailure(e, "App initialization failed");
-                return;
+                ReportAppException(e, "Device (system) Initialization Failure");
             }
 
-            while (!appRunning)
+            if (systemInitialized)
             {
+                var stepName = "App Initialize";
+
                 try
                 {
+                    Resolver.Log.Trace("Initializing App");
+                    await App.Initialize();
+
+                    stepName = "App Run";
+
                     Resolver.Log.Trace("Running App");
                     await App.Run();
-                    appRunning = true;
+
+                    // the user's app has exited, which is almost certainly not intended
+                    Resolver.Log.Warn("App.Run has exited normally");
                 }
                 catch (Exception e)
                 {
-                    Resolver.Log.Error($"App Error: {e.Message}");
+                    ReportAppException(e, $"App Error in {stepName}: {e.Message}");
 
                     try
                     {
+                        // let the app handle error conditions
                         await App.OnError(e);
                     }
                     catch (Exception ex)
@@ -69,35 +79,64 @@
                         Resolver.Log.Error($"Exception in OnError handling: {ex.Message}");
                     }
 
+                    // set the cancel token so any waiting Tasks, etc can abort cleanly
                     AppAbort.Cancel();
-                    throw SystemFailure(e);
+                }
+
+                try
+                {
+                    // let the app handle shutdown
+                    Resolver.Log.Trace($"App shutting down");
+
+                    AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
+                    await App.OnShutdown();
+                }
+                catch (Exception e)
+                {
+                    // we can't recover while shutting down
+                    Resolver.Log.Error($"Exception in App.OnShutdown: {e.Message}");
                 }
                 finally
                 {
-                    await Task.Delay(Timeout.Infinite, AppAbort.Token);
+                    if (App is IAsyncDisposable { } da)
+                    {
+                        try
+                        {
+                            await da.DisposeAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Resolver.Log.Error($"Exception in App.Dispose: {ex.Message}");
+                        }
+                    }
                 }
             }
 
-            try
-            {
-                Resolver.Log.Trace($"App shutting down");
-
-                AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
-                await App.OnShutdown();
-            }
-            catch (Exception e)
-            {
-                // we can't recover while shutting down
-                throw SystemFailure(e, "App shutdown error");
-            }
-            finally
-            {
-                if (App is IAsyncDisposable { } da)
-                {
-                    await da.DisposeAsync();
-                }
-            }
+            // final shutdown process
             Shutdown();
+
+            // we should never get to this point
+        }
+
+        private static void ReportAppException(Exception e, string? message = null)
+        {
+            Resolver.Log.Error(message ?? " System Failure");
+            Resolver.Log.Error($" {e.GetType()}: {e.Message}");
+            Resolver.Log.Error(e.StackTrace);
+
+            if (e is AggregateException ae)
+            {
+                foreach (var ex in ae.InnerExceptions)
+                {
+                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
+                    Resolver.Log.Error(ex.StackTrace);
+                }
+            }
+            else if (e.InnerException != null)
+            {
+                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
+                Resolver.Log.Error(e.InnerException.StackTrace);
+            }
         }
 
         private static void LoadSettings()
@@ -165,7 +204,7 @@
             Resolver.Log.Trace($"Looking for app assembly...");
 
             // support app.exe or app.dll
-            var assembly = FindByPath(new string[] { "App.exe", "App.dll", "app.exe", "app.dll" });
+            var assembly = FindByPath(new string[] { "App.dll", "App.exe", "app.dll", "app.exe" });
 
             if (assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
 
@@ -254,21 +293,27 @@
                     Resolver.Log.Trace($"Creating '{deviceType.Name}' instance took {et}ms");
 
                     CurrentDevice = device;
+                    Resolver.Services.Add<IMeadowDevice>(CurrentDevice);
                 }
                 catch (Exception)
                 {
                     return false;
                 }
 
+                Resolver.Log.Trace($"Device Initialize starting...");
                 CurrentDevice.Initialize();
-                CurrentDevice.PlatformOS.Initialize(); // initialize the devices' platform OS
+                Resolver.Log.Trace($"PlatformOS Initialize starting...");
+                CurrentDevice.PlatformOS.Initialize(CurrentDevice.Capabilities); // initialize the devices' platform OS
 
                 // initialize file system folders and such
                 // TODO: move this to platformOS
+                Resolver.Log.Trace($"File system Initialize starting...");
                 InitializeFileSystem();
 
                 // Create the app object, bound immediately to the <IMeadowDevice>
                 b4 = Environment.TickCount;
+                Resolver.Log.Trace($"Creating instance of {appType.Name}...");
+
                 if (Activator.CreateInstance(appType, nonPublic: true) is not IApp app)
                 {
                     throw new Exception($"Failed to create instance of '{appType.Name}'");
@@ -304,9 +349,14 @@
 
         private static void Shutdown()
         {
+            // schedule a device restart if possible and if the user hasn't disabled it
+            ScheduleRestart();
+
             // Do a best-attempt at freeing memory and resources
             GC.Collect(GC.MaxGeneration);
             Resolver.Log.Debug("Shutdown");
+
+            // just put the Main thread to sleep (don't exit) because we want the Update service to still be able to work
             Thread.Sleep(Timeout.Infinite);
         }
 
@@ -349,48 +399,7 @@
             }
         }
 
-        private static void SystemFailure(string message)
-        {
-            Resolver.Log.Error(message);
-            SystemFailure();
-
-        }
-
-        private static Exception SystemFailure(Exception e, string? message = null)
-        {
-            if (App is null)
-            {
-                Resolver.Log.Error("OS startup failure:");
-            }
-            else
-            {
-                Resolver.Log.Error("App failure:");
-            }
-
-            Resolver.Log.Error(message ?? " System Failure");
-            Resolver.Log.Error($" {e.GetType()}: {e.Message}");
-            Resolver.Log.Error(e.StackTrace);
-
-            if (e is AggregateException ae)
-            {
-                foreach (var ex in ae.InnerExceptions)
-                {
-                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
-                    Resolver.Log.Error(ex.StackTrace);
-                }
-            }
-            else if (e.InnerException != null)
-            {
-                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
-                Resolver.Log.Error(e.InnerException.StackTrace);
-            }
-
-            SystemFailure();
-
-            return e;
-        }
-
-        private static void SystemFailure()
+        private static void ScheduleRestart()
         {
             if (LifecycleSettings.RestartOnAppFailure)
             {
@@ -416,7 +425,14 @@
 
         private static void StaticOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            SystemFailure(e.ExceptionObject as Exception, "Unhandled exception");
+            // unsure how this would ever happen, but trap it anyway
+            if (e.ExceptionObject is Exception ex)
+            {
+                ReportAppException(ex, "UnhandledException");
+            }
+
+            // final shutdown - which really is just an infinite Sleep()
+            Shutdown();
         }
 
     }

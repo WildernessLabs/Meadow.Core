@@ -15,6 +15,10 @@ resources:
       type: github
       endpoint: WildernessLabs
       name: WildernessLabs/Meadow.Units
+    - repository: MeadowLogging
+      type: github
+      endpoint: WildernessLabs
+      name: WildernessLabs/Meadow.Logging
 
 trigger:
   - main
@@ -39,6 +43,7 @@ stages:
           - checkout: self
           - checkout: MeadowContracts
           - checkout: MeadowUnits
+          - checkout: MeadowLogging
           - task: NuGetToolInstaller@1
           - task: NuGetCommand@2
             displayName: Use_Nugets

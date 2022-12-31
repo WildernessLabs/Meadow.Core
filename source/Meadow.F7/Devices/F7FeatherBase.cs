@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using Meadow.Units;
+using System.Linq;
 
 namespace Meadow.Devices
 {
@@ -17,11 +17,12 @@ namespace Meadow.Devices
         public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
 
         protected F7FeatherBase(
-            IF7FeatherPinout pins, 
-            IMeadowIOController ioController, 
-            AnalogCapabilities analogCapabilities, 
-            NetworkCapabilities networkCapabilities) 
-            : base(ioController, analogCapabilities, networkCapabilities)
+            IF7FeatherPinout pins,
+            IMeadowIOController ioController,
+            AnalogCapabilities analogCapabilities,
+            NetworkCapabilities networkCapabilities,
+            StorageCapabilities storageCapabilities)
+            : base(ioController, analogCapabilities, networkCapabilities, storageCapabilities)
         {
             Pins = pins;
         }

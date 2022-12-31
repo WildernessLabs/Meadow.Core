@@ -54,10 +54,21 @@ namespace Meadow
         public uint InitializationTimeout => GetUInt(ConfigurationValues.InitializationTimeout);
 
         /// <summary>
-        /// Is an SD card present?
+        /// Should a WiFi connection be made on startup.
         /// </summary>
-        /// <remarks>Only really relevant to the CCM at the moment.</remarks>
-        public bool SdCardPresent => GetBoolean(ConfigurationValues.SdCardPresent);
+        /// <remarks>This assumes that the default access point is configured through wifi.config.yaml.</remarks>
+        public bool AutomaticallyStartNetwork => GetBoolean(ConfigurationValues.AutomaticallyStartNetwork);
+
+        /// <summary>
+        /// Which network is selected in meadow.config.yaml.
+        /// </summary>
+        public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
+
+        /// <summary>
+        /// Should SD storage be enabled on this device?
+        /// </summary>
+        public bool SdStorageSupported => GetBoolean(ConfigurationValues.SdStorageSupported);
+
 
         //==== Configuration internals
 
@@ -102,7 +113,7 @@ namespace Meadow
                     ReturnDataLength = 0
                 };
                 int updResult = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetSetConfigurationValue, ref request);
-                if(updResult == 0)
+                if (updResult == 0)
                 {
                     length = request.ReturnDataLength;
                 }
@@ -112,14 +123,14 @@ namespace Meadow
                     result = false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"Configuration ioctl failed: {ex.Message}");
                 result = false;
             }
             finally
             {
-                if(bufferHandle.IsAllocated)
+                if (bufferHandle.IsAllocated)
                 {
                     bufferHandle.Free();
                 }
@@ -139,7 +150,7 @@ namespace Meadow
             string str = String.Empty;
 
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-            if(result && (length > 0))
+            if (result && (length > 0))
             {
                 str = Encoding.ASCII.GetString(buffer, 0, length);
             }
@@ -172,7 +183,7 @@ namespace Meadow
             uint ui = 0;
 
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-            if(result && (length == 4))
+            if (result && (length == 4))
             {
                 ui = Encoders.ExtractUInt32(buffer, 0);
             }
@@ -191,7 +202,7 @@ namespace Meadow
             byte b = 0;
 
             (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-            if(result && (length == 1))
+            if (result && (length == 1))
             {
                 b = buffer[0];
             }

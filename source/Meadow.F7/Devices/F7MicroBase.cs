@@ -45,11 +45,22 @@ namespace Meadow.Devices
         protected IMeadowIOController IoController { get; }
 
         //==== constructors
-        public F7MicroBase(IMeadowIOController ioController, AnalogCapabilities analogCapabilities, NetworkCapabilities networkCapabilities)
+        /// <summary>
+        /// Provides required construction of the F7MicroBase abstract class
+        /// </summary>
+        /// <param name="ioController"></param>
+        /// <param name="analogCapabilities"></param>
+        /// <param name="networkCapabilities"></param>
+        /// <param name="storageCapabilities"></param>
+        public F7MicroBase(
+            IMeadowIOController ioController,
+            AnalogCapabilities analogCapabilities,
+            NetworkCapabilities networkCapabilities,
+            StorageCapabilities storageCapabilities)
         {
             IoController = ioController;
 
-            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities);
+            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities, storageCapabilities);
 
             PlatformOS = new F7PlatformOS();
 
@@ -60,6 +71,9 @@ namespace Meadow.Devices
             networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
         }
 
+        /// <summary>
+        /// Initializes the F7Micro platform hardware
+        /// </summary>
         public void Initialize()
         {
             IoController.Initialize();
@@ -67,6 +81,10 @@ namespace Meadow.Devices
             InitCoprocessor();
         }
 
+        /// <summary>
+        /// Initializes the ESP32 Coprocessor
+        /// </summary>
+        /// <returns></returns>
         protected bool InitCoprocessor()
         {
             lock (coprocInitLock)
@@ -81,7 +99,25 @@ namespace Meadow.Devices
                         BluetoothAdapter = esp32;
                         Coprocessor = esp32;
 
-                        networkAdapters.Add(esp32);
+                        if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
+                        {
+                            Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
+                            networkAdapters.Add(esp32);
+
+                            if (esp32.AutoConnect)
+                            {
+                                Resolver.Log.Debug($"Device configured to auto-connect to SSID '{esp32.DefaultSsid}'");
+
+                                if (string.IsNullOrEmpty(esp32.DefaultSsid))
+                                {
+                                    Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.");
+                                }
+                                else
+                                {
+                                    esp32.ConnectToDefaultAccessPoint();
+                                }
+                            }
+                        }
 
                         esp32.NtpTimeChanged += (s, e) =>
                         {
@@ -90,7 +126,7 @@ namespace Meadow.Devices
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"Unable to create ESP32 coprocessor: {e.Message}");
+                        Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}");
                         return false;
                     }
                     finally

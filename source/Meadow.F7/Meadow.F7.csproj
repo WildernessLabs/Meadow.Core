@@ -28,6 +28,6 @@
 		<None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
 	</ItemGroup>
 	<ItemGroup>
-    <PackageReference Include="Meadow" Version="0.*" />
- </ItemGroup>
+	  <PackageReference Include="Meadow" Version="0.*" />
+	</ItemGroup>
 </Project>

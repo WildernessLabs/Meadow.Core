@@ -5,16 +5,26 @@ using System.Linq;
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// A base class for F7 Core Compute Module platforms
+    /// </summary>
     public abstract partial class F7CoreComputeBase : F7MicroBase, IF7CoreComputeMeadowDevice
     {
         protected F7CoreComputeBase(
             IF7CoreComputePinout pins,
             IMeadowIOController ioController,
             AnalogCapabilities analogCapabilities,
-            NetworkCapabilities networkCapabilities)
-            : base(ioController, analogCapabilities, networkCapabilities)
+            NetworkCapabilities networkCapabilities,
+            StorageCapabilities storageCapabilities)
+            : base(ioController, analogCapabilities, networkCapabilities, storageCapabilities)
         {
             Pins = pins;
+
+            if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
+            {
+                Resolver.Log.Info($"Device is configured to use Wired Ethernet for the network interface");
+                networkAdapters.Add(new WiredNetworkAdapter());
+            }
         }
 
         public override IPin GetPin(string pinName)

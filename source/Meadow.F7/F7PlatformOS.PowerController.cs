@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
@@ -8,6 +9,8 @@ namespace Meadow
 {
     public partial class F7PlatformOS
     {
+        private List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
+
         /// <summary>
         /// Event called before a software reset
         /// </summary>
@@ -58,6 +61,14 @@ namespace Meadow
 
             Resolver.Log.Trace($"Device sleeping for {duration.TotalSeconds}...");
 
+            lock (_sleepAwarePeripherals)
+            {
+                foreach (var p in _sleepAwarePeripherals)
+                {
+                    p.BeforeSleep(Resolver.App.CancellationToken).Wait();
+                }
+            }
+
             BeforeSleep?.Invoke();
 
             // This should suspend the processor and code should stop executing
@@ -71,6 +82,27 @@ namespace Meadow
             Resolver.Log.Trace($"Device wake");
 
             AfterWake?.Invoke();
+
+            lock (_sleepAwarePeripherals)
+            {
+                foreach (var p in _sleepAwarePeripherals)
+                {
+                    p.AfterWake(Resolver.App.CancellationToken).Wait();
+                }
+            }
+        }
+
+        public void RegisterForSleep(ISleepAwarePeripheral peripheral)
+        {
+            lock (_sleepAwarePeripherals)
+            {
+                if (_sleepAwarePeripherals.Contains(peripheral))
+                {
+                    throw new ArgumentException("Peripheral already registered for sleep callbacks");
+                }
+
+                _sleepAwarePeripherals.Add(peripheral);
+            }
         }
     }
 }

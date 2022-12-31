@@ -60,7 +60,6 @@ namespace Meadow.Devices
         /// </summary>
         public string OSVersion => F7PlatformOS.GetString(ConfigurationValues.OsVersion);
 
-
         //TODO: what about coprocessor build date
     }
 }

@@ -44,7 +44,13 @@ namespace Meadow.Hardware
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
         static readonly object _analogSyncRoot = new object();
 
+        /// <summary>
+        /// The default sampling interval for the Input (40ms)
+        /// </summary>
         public static readonly TimeSpan DefaultSampleInterval = TimeSpan.FromMilliseconds(40);
+        /// <summary>
+        /// The default reference votlage for the Input (3.3V)
+        /// </summary>
         public static readonly Voltage DefaultReferenceVoltage = new Voltage(3.3, Voltage.UnitType.Volts);
 
         protected IMeadowIOController IOController { get; }
@@ -84,6 +90,13 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Creates an AnalogInputPort given the povided parameters
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="ioController"></param>
+        /// <param name="sampleCount"></param>
+        /// <returns></returns>
         public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
@@ -92,6 +105,17 @@ namespace Meadow.Hardware
             return From(pin, ioController, sampleCount, DefaultSampleInterval, DefaultReferenceVoltage);
         }
 
+        /// <summary>
+        /// Creates an AnalogInputPort given the povided parameters
+        /// </summary>
+        /// <param name="pin"></param>
+        /// <param name="ioController"></param>
+        /// <param name="sampleCount"></param>
+        /// <param name="sampleInterval"></param>
+        /// <param name="referenceVoltage"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="Exception"></exception>
         public static AnalogInputPort From(
             IPin pin,
             IMeadowIOController ioController,
