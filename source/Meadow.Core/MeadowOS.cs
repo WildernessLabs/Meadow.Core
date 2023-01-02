@@ -62,8 +62,13 @@
                     Resolver.Log.Trace("Running App");
                     await App.Run();
 
+                    while (!AppAbort.IsCancellationRequested)
+                    {
+                        await Task.Delay(500);
+                    }
+
                     // the user's app has exited, which is almost certainly not intended
-                    Resolver.Log.Warn("App.Run has exited normally");
+                    Resolver.Log.Warn("AppAbort cancellation has been requested");
                 }
                 catch (Exception e)
                 {

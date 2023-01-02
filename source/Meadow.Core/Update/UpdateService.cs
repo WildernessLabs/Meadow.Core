@@ -408,7 +408,8 @@ namespace Meadow.Update
             var shutdownTimeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
             var shutDownTask = Resolver.App?.OnShutdown();
 
-            // TODO: cancel the app run cancellation token
+            // cancel the app run cancellation token
+            MeadowOS.AppAbort.Cancel();
 
             // wait for the app to return, or the timeout
             Task.WaitAny(shutDownTask, shutdownTimeoutTask);
