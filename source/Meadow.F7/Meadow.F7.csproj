@@ -25,9 +25,9 @@
    <Compile Remove="Devices\Esp32Coprocessor\Esp32Coprocessor_WiredNetworkAdapter.cs" />
  </ItemGroup>
 	<ItemGroup>
-		<None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+	  <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
+	  <PackageReference Include="Meadow" Version="0.*" />
 	</ItemGroup>
 </Project>
