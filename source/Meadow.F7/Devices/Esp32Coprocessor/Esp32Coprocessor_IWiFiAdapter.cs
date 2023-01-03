@@ -288,7 +288,8 @@ namespace Meadow.Devices
                     RaiseErrorEvent(statusCode);
                     break;
                 case WiFiFunction.AccessPointStartedEvent:
-                    RaiseAccessPointStartedEvent();
+                    AccessPointInformation accessPointInformation = Encoders.ExtractAccessPointInformation(payload, 0);
+                    RaiseAccessPointStartedEvent(accessPointInformation);
                     break;
                 case WiFiFunction.AccessPointStoppedEvent:
                     RaiseAccessPointStoppedEvent();
@@ -637,13 +638,13 @@ namespace Meadow.Devices
         /// <param name="ssid">SSID for the access point.</param>
         /// <param name="password">Password for the access point.</param>
         /// <param name="ip">IP address for the DHCP server.</param>
-        /// <param name="subnet"><Subnet mask for the DHCP server./param>
-        /// <param name="gateway"Default gateway for the DHCP server.></param>
-        public async Task StartaccessPoint(string ssid, string password, IPAddress ip, IPAddress subnet, IPAddress gateway)
+        /// <param name="subnet">Subnet mask for the DHCP server.</param>
+        /// <param name="gateway">Default gateway for the DHCP server.</param>
+        public async Task StartAccessPoint(string ssid, string password, IPAddress ip, IPAddress subnet, IPAddress gateway)
         {
             if (Resolver.Device.PlatformOS.SelectedNetwork != IPlatformOS.NetworkConnectionType.WiFi)
             {
-                throw new NotSupportedException($"StartaccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+                throw new NotSupportedException($"StartAccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
             }
 
             if (!IsSsidNameValid(ssid))
@@ -662,9 +663,9 @@ namespace Meadow.Devices
                 {
                     NetworkName = ssid,
                     Password = password,
-                    IpAddress = 0,
-                    Gateway = 0,
-                    SubnetMask = 0,
+                    IpAddress = (uint) (ip.Address & 0xffffffff),
+                    Gateway = (uint) (gateway.Address & 0xffffffff),
+                    SubnetMask = (uint) (subnet.Address & 0xffffffff),
                     //
                     //  The following three properties are ignored at the moment.
                     //
@@ -785,9 +786,12 @@ namespace Meadow.Devices
         /// <summary>
         /// Process the AccessPointStarted event.
         /// </summary>
-        protected void RaiseAccessPointStartedEvent()
+        protected void RaiseAccessPointStartedEvent(AccessPointInformation accessPointInformation)
         {
-            AccessPointStateChangeArgs args = new AccessPointStateChangeArgs();
+            IPAddress ip = new IPAddress(accessPointInformation.IpAddress);
+            IPAddress subnet = new IPAddress(accessPointInformation.SubnetMask);
+            IPAddress gateway = new IPAddress(accessPointInformation.Gateway);
+            AccessPointStartedArgs args = new AccessPointStartedArgs(ip, subnet, gateway);
             AccessPointStarted?.Invoke(this, args);
         }
 
@@ -796,7 +800,7 @@ namespace Meadow.Devices
         /// </summary>
         protected void RaiseAccessPointStoppedEvent()
         {
-            AccessPointStateChangeArgs args = new AccessPointStateChangeArgs();
+            AccessPointStoppedArgs args = new AccessPointStoppedArgs();
             AccessPointStopped?.Invoke(this, args);
         }
 
