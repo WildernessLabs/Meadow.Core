@@ -63,10 +63,6 @@ namespace Meadow.Hardware
             TimeSpan glitchDuration
             )
         {
-            // convert to microseconds
-            var debounce = debounceDuration.TotalMilliseconds * 10;
-            var glitch = glitchDuration.TotalMilliseconds * 10;
-
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             //TODO: may need other checks here.
             if (chan == null)
@@ -77,11 +73,11 @@ namespace Meadow.Hardware
             {
                 throw new Exception("Unable to create input; channel is not capable of interrupts");
             }
-            if (debounce < 0.0 || debounce > 1000.0)
+            if (debounceDuration.TotalMilliseconds > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
-            if (glitch < 0.0 || glitch > 1000.0)
+            if (glitchDuration.TotalMilliseconds > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(glitchDuration), "Unable to create an input port, because glitchDuration is out of range (0.1-1000.0)");
             }
