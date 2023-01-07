@@ -89,8 +89,6 @@ namespace Meadow.Devices
         {
             switch (busNumber)
             {
-                case 2:
-                    return CreateSpiBus(Pins.ESP_CLK, Pins.ESP_COPI, Pins.ESP_CIPO, speed);
                 case 3:
                     return CreateSpiBus(Pins.SPI3_SCK, Pins.SPI3_COPI, Pins.SPI3_CIPO, speed);
                 case 5:

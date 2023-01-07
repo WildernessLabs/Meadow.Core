@@ -79,7 +79,7 @@ namespace Meadow
 
         private void SdMonitorProc(F7CoreComputeBase ccm)
         {
-            var input = Resolver.Device.CreateDigitalInputPort(ccm.Pins.SD_IN_L);
+            var input = Resolver.Device.CreateDigitalInputPort(ccm.Pins.PG6_SDMMC_IN_L);
             var lastState = input.State;
             var firstRun = true;
 
