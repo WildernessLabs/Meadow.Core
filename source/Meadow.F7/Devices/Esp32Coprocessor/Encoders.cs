@@ -543,7 +543,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             length += (int) (accessPointInformation.NetworkName.Length + 1);
             length += (int) (accessPointInformation.Password.Length + 1);
-            length += 12;
+            length += 15;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
@@ -559,6 +559,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt32(accessPointInformation.SubnetMask, buffer, offset);
             offset += 4;
             EncodeUInt32(accessPointInformation.Gateway, buffer, offset);
+            offset += 4;
+            buffer[offset] = accessPointInformation.WiFiAuthenticationMode;
+            offset += 1;
+            buffer[offset] = accessPointInformation.Channel;
+            offset += 1;
+            buffer[offset] = accessPointInformation.Hidden;
             return(buffer);
         }
 
@@ -581,6 +587,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             accessPointInformation.SubnetMask = ExtractUInt32(buffer, offset);
             offset += 4;
             accessPointInformation.Gateway = ExtractUInt32(buffer, offset);
+            offset += 4;
+            accessPointInformation.WiFiAuthenticationMode = buffer[offset];
+            offset += 1;
+            accessPointInformation.Channel = buffer[offset];
+            offset += 1;
+            accessPointInformation.Hidden = buffer[offset];
             return(accessPointInformation);
         }
 
@@ -594,7 +606,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += (int) accessPointInformation.NetworkName.Length;
             result += (int) accessPointInformation.Password.Length;
-            return(result + 14);
+            return(result + 17);
         }
 
         /// <summary>
@@ -730,6 +742,60 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public static int EncodedConnectEventDataBufferSize(MessagePayloads.ConnectEventData connectEventData)
         {
             return(57);
+        }
+
+        /// <summary>
+        /// Encode a NodeConnectionChangeEventData object and return a byte array containing the encoded message.
+        /// </summary>
+        /// <param name="nodeConnectionChangeEventData">NodeConnectionChangeEventData object to be encoded.</param>
+        /// <returns>Byte array containing the encoded NodeConnectionChangeEventData object.</returns>
+        public static byte[] EncodeNodeConnectionChangeEventData(MessagePayloads.NodeConnectionChangeEventData nodeConnectionChangeEventData)
+        {
+            int offset = 0;
+            int length = 0;
+
+            //
+            //  Calculate the amount of memory needed.
+            //
+            length += (int) 6;
+            length += 4;
+
+            //
+            //  Now allocate a new buffer and copy the data in to the buffer.
+            //
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeUInt32(nodeConnectionChangeEventData.IpAddress, buffer, offset);
+            offset += 4;
+            Array.Copy(nodeConnectionChangeEventData.MacAddress, 0, buffer, offset, 6);
+            return(buffer);
+        }
+
+        /// <summary>
+        /// Extract a NodeConnectionChangeEventData object from a byte array.
+        /// </summary>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
+        /// <returns>NodeConnectionChangeEventData object.</returns>
+        public static MessagePayloads.NodeConnectionChangeEventData ExtractNodeConnectionChangeEventData(byte[] buffer, int offset)
+        {
+            NodeConnectionChangeEventData nodeConnectionChangeEventData = new MessagePayloads.NodeConnectionChangeEventData();
+
+            nodeConnectionChangeEventData.IpAddress = ExtractUInt32(buffer, offset);
+            offset += 4;
+            nodeConnectionChangeEventData.MacAddress = new byte[6];
+            Array.Copy(buffer, offset, nodeConnectionChangeEventData.MacAddress, 0, 6);
+            return(nodeConnectionChangeEventData);
+        }
+
+         /// <summary>
+        /// Calculate the amount of memory required to hold the given instance of the NodeConnectionChangeEventData object.
+         /// </summary>
+        /// <param name="nodeConnectionChangeEventData">NodeConnectionChangeEventData object to be encoded.</param>
+        /// <returns>Number of bytes required to hold the encoded NodeConnectionChangeEventData object.</returns>
+        public static int EncodedNodeConnectionChangeEventDataBufferSize(MessagePayloads.NodeConnectionChangeEventData nodeConnectionChangeEventData)
+        {
+            return(10);
         }
 
         /// <summary>
