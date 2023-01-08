@@ -172,6 +172,18 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// Gateway element.
         /// </summary>
         public UInt32 Gateway;
+        /// <summary>
+        /// WiFiAuthenticationMode element.
+        /// </summary>
+        public Byte WiFiAuthenticationMode;
+        /// <summary>
+        /// Channel element.
+        /// </summary>
+        public Byte Channel;
+        /// <summary>
+        /// Hidden element.
+        /// </summary>
+        public Byte Hidden;
     };
 
     /// <summary>
@@ -222,6 +234,21 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// Reason element.
         /// </summary>
         public UInt32 Reason;
+    };
+
+    /// <summary>
+    /// Structure to hold NodeConnectionChangeEventData data.
+    /// </summary>
+    public struct NodeConnectionChangeEventData
+    {
+        /// <summary>
+        /// IpAddress element.
+        /// </summary>
+        public UInt32 IpAddress;
+        /// <summary>
+        /// MacAddress element.
+        /// </summary>
+        public Byte[] MacAddress;
     };
 
     /// <summary>
