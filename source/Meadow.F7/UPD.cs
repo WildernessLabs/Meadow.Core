@@ -43,18 +43,18 @@ namespace Meadow.Devices
             var dckcfg1 = GetRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR1_OFFSET);
             var dckcfg2 = GetRegister(STM32.RCC_BASE + STM32.RCC_DCKCFGR2_OFFSET);
 
-            Console.WriteLine("Clock Registers");
-            Console.WriteLine($"\tRCC_CR:       {cr:X8}");
-            Console.WriteLine($"\tRCC_CFGR:     {cfg:X8}");
-            Console.WriteLine($"\tRCC_AHB1RSTR: {ahb1rst:X8}");
-            Console.WriteLine($"\tRCC_AHB1ENR:  {ahb1en:X8}");
-            Console.WriteLine($"\tRCC_APB1RSTR: {apb1rst:X8}");
-            Console.WriteLine($"\tRCC_APB1ENR:  {apb1en:X8}");
-            Console.WriteLine($"\tRCC_APB2RSTR: {apb2rst:X8}");
-            Console.WriteLine($"\tRCC_APB2ENR:  {apb2en:X8}");
-            Console.WriteLine($"\tRCC_PLLCFGR:  {pllcfg:X8}");
-            Console.WriteLine($"\tRCC_DCKCFGR1: {dckcfg1:X8}");
-            Console.WriteLine($"\tRCC_DCKCFGR2: {dckcfg2:X8}");
+            Resolver.Log.Info("Clock Registers");
+            Resolver.Log.Info($"\tRCC_CR:       {cr:X8}");
+            Resolver.Log.Info($"\tRCC_CFGR:     {cfg:X8}");
+            Resolver.Log.Info($"\tRCC_AHB1RSTR: {ahb1rst:X8}");
+            Resolver.Log.Info($"\tRCC_AHB1ENR:  {ahb1en:X8}");
+            Resolver.Log.Info($"\tRCC_APB1RSTR: {apb1rst:X8}");
+            Resolver.Log.Info($"\tRCC_APB1ENR:  {apb1en:X8}");
+            Resolver.Log.Info($"\tRCC_APB2RSTR: {apb2rst:X8}");
+            Resolver.Log.Info($"\tRCC_APB2ENR:  {apb2en:X8}");
+            Resolver.Log.Info($"\tRCC_PLLCFGR:  {pllcfg:X8}");
+            Resolver.Log.Info($"\tRCC_DCKCFGR1: {dckcfg1:X8}");
+            Resolver.Log.Info($"\tRCC_DCKCFGR2: {dckcfg2:X8}");
         }
 
         public static void DumpI2CRegisters()
@@ -65,12 +65,12 @@ namespace Meadow.Devices
             var timing = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMINGR_OFFSET);
             var timeout = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_TIMEOUTR_OFFSET);
 
-            Console.WriteLine("I2C Registers");
-            Console.WriteLine($"\tI2C_CR1:      {cr1:X8}");
-            Console.WriteLine($"\tI2C_CR2:      {cr2:X8}");
-            Console.WriteLine($"\tI2C_ISR:      {isr:X8}");
-            Console.WriteLine($"\tI2C_TIMINGR:  {timing:X8}");
-            Console.WriteLine($"\tI2C_TIMEOUTR: {timeout:X8}");
+            Resolver.Log.Info("I2C Registers");
+            Resolver.Log.Info($"\tI2C_CR1:      {cr1:X8}");
+            Resolver.Log.Info($"\tI2C_CR2:      {cr2:X8}");
+            Resolver.Log.Info($"\tI2C_ISR:      {isr:X8}");
+            Resolver.Log.Info($"\tI2C_TIMINGR:  {timing:X8}");
+            Resolver.Log.Info($"\tI2C_TIMEOUTR: {timeout:X8}");
         }
 
         public static void SetRegister(uint address, uint value)
@@ -103,7 +103,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -115,7 +115,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -127,7 +127,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -139,7 +139,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -151,7 +151,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -163,7 +163,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -176,7 +176,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -237,7 +237,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -249,7 +249,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -261,7 +261,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -273,7 +273,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int) err;
             }
             return result;
@@ -285,7 +285,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int) err;
             }
             return result;
@@ -297,7 +297,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int) err;
             }
             return result;
@@ -309,7 +309,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -321,7 +321,7 @@ namespace Meadow.Devices
             if (result != 0)
             {
                 var err = GetLastError();
-                Console.WriteLine($"ioctl {request} failed {err}");
+                Resolver.Log.Error($"ioctl {request} failed {err}");
                 return (int)err;
             }
             return result;
@@ -337,7 +337,7 @@ namespace Meadow.Devices
                 if (result != 0)
                 {
                     var err = GetLastError();
-                    Console.WriteLine($"PWM setup failed {err}");
+                    Resolver.Log.Error($"PWM setup failed {err}");
                     return false;
                 }
 

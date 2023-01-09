@@ -59,7 +59,7 @@ namespace Meadow.Hardware
                             actual = 100000;
                         }
 
-                        Console.WriteLine($"Warning: Invalid I2C Frequency of {value}. Adjusting to {actual}");
+                        Resolver.Log.Warn($"Warning: Invalid I2C Frequency of {value}. Adjusting to {actual}");
                         _frequency = new Frequency(actual, Frequency.UnitType.Hertz);
                         break;
 

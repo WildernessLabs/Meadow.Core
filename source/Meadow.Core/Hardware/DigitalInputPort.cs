@@ -106,7 +106,7 @@ namespace Meadow.Hardware
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = DateTime.Now;
-                //Console.WriteLine($"event on pin: {pin.Name}, state: {state}");
+                //Resolver.Log.Info($"event on pin: {pin.Name}, state: {state}");
                 // BC 2021.05.21 b5.0: Changed this to the new result type.
                 // assuming that old state is just an inversion of the new state if date time isn't min, yeah?
                 DigitalState? old = (capturedLastTime == DateTime.MinValue) ? null : new DigitalState(!state, capturedLastTime);

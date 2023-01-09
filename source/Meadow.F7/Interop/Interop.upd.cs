@@ -366,7 +366,7 @@ namespace Meadow.Core
                 if (result != 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Console.WriteLine($"GetRegister failed: {errno}");
+                    Resolver.Log.Info($"GetRegister failed: {errno}");
                     value = (uint)result;
                     return false;
                 }
@@ -392,7 +392,7 @@ namespace Meadow.Core
                 if (result != 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Console.WriteLine($"SetRegister failed: {errno}");
+                    Resolver.Log.Error($"SetRegister failed: {errno}");
                     return false;
                 }
                 return true;
@@ -416,7 +416,7 @@ namespace Meadow.Core
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.UpdateRegister, ref update);
                 if (result != 0)
                 {
-                    Console.WriteLine($"Update failed: {result}");
+                    Resolver.Log.Error($"Update failed: {result}");
                     return false;
                 }
                 return true;

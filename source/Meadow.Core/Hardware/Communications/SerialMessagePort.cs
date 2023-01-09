@@ -206,8 +206,8 @@ namespace Meadow.Hardware
                                 //todo: should this run on a new thread?
                                 // it doesn't seem to return, otherwise
                                 System.Threading.Tasks.Task.Run(() => {
-                                    //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
-                                    //Console.WriteLine($"Message:{Encoding.ASCII.GetString(msg)}");
+                                    //Resolver.Log.Info($"raising message received, msg.length: {msg.Length}");
+                                    //Resolver.Log.Info($"Message:{Encoding.ASCII.GetString(msg)}");
                                     this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
                                 });
 
@@ -263,7 +263,7 @@ namespace Meadow.Hardware
             }
             catch(Exception ex)
             {
-                Console.WriteLine($"!! {ex.Message}");
+                Resolver.Log.Error($"!! {ex.Message}");
             }
             //TODO: figure out the IObservable when there's no change context
             //base.NotifyObservers(messageResult);

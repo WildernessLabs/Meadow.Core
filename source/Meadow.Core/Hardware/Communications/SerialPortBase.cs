@@ -222,7 +222,7 @@ namespace Meadow.Hardware
             catch (Exception ex)
             {
                 // ignore errors in the consumer's code
-                Console.WriteLine($"Error in BufferOverrun handler: {ex.Message}");
+                Resolver.Log.Error($"Error in BufferOverrun handler: {ex.Message}");
             }
         }
 
