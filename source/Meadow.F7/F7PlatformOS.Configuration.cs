@@ -119,13 +119,13 @@ namespace Meadow
                 }
                 else
                 {
-                    Console.WriteLine($"Configuration ioctl failed, result code: {updResult}");
+                    Resolver.Log.Error($"Configuration ioctl failed, result code: {updResult}");
                     result = false;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Configuration ioctl failed: {ex.Message}");
+                Resolver.Log.Error($"Configuration ioctl failed: {ex.Message}");
                 result = false;
             }
             finally

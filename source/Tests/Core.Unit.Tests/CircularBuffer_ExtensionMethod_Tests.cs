@@ -21,7 +21,7 @@ namespace Core.Unit.Tests
                 buffer.Append(b);
             }
 
-            //Console.WriteLine($"Buffer.Count():{buffer.Count()}");
+            //Resolver.Log.Info($"Buffer.Count():{buffer.Count()}");
 
             byte[] searchPattern = new byte[] { 3, 4, 5 };
 

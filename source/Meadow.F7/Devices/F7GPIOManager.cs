@@ -37,7 +37,7 @@ namespace Meadow.Devices
             DebugFeatures = DebugFeature.None;
             DeviceChannelManager = new DeviceChannelManager();
 #if DEBUG
-            //Console.WriteLine($"DirectRegisterAccess = {DirectRegisterAccess}");
+            //Resolver.Log.Info($"DirectRegisterAccess = {DirectRegisterAccess}");
             // Adjust this during test and debug for your (developer)'s purposes.  The Conditional will turn it all off in a Release build.
             //DebugFeatures = DebugFeature.Startup | DebugFeature.PinInitilize | DebugFeature.GpioDetail;
             //            DebugFeatures = DebugFeature.GpioDetail;

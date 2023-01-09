@@ -16,7 +16,7 @@ namespace Meadow.Devices
         {
             if (test)
             {
-                Console.Write(value);
+                Resolver.Log.Info(value);
             }
         }
 
@@ -25,20 +25,20 @@ namespace Meadow.Devices
         {
             if (test)
             {
-                Console.WriteLine(value);
+                Resolver.Log.Info(value);
             }
         }
 
         [Conditional("DEBUG")]
         public static void Write(string value)
         {
-            Console.Write(value);
+            Resolver.Log.Info(value);
         }
 
         [Conditional("DEBUG")]
         public static void WriteLine(string value)
         {
-            Console.WriteLine(value);
+            Resolver.Log.Info(value);
         }
 
         /// <summary>

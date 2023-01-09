@@ -12,13 +12,13 @@ namespace Meadow.Gateways.Bluetooth
 
         public override void HandleDataWrite(byte[] data)
         {
-            Console.WriteLine($"HandleDataWrite in {this.GetType().Name}");
+            Resolver.Log.Info($"HandleDataWrite in {this.GetType().Name}");
 
             // TODO: if the written data isn't 4 bytes, then what??
             // for now I'll right-pad with zeros
             if (data.Length < 4)
             {
-                Console.WriteLine($"HandleDataWrite only got {data.Length} bytes - padding");
+                Resolver.Log.Info($"HandleDataWrite only got {data.Length} bytes - padding");
                 var temp = new byte[4];
                 Array.Copy(data, temp, data.Length);
                 RaiseValueSet(BitConverter.ToInt32(temp));
@@ -27,7 +27,7 @@ namespace Meadow.Gateways.Bluetooth
             {
                 if (data.Length > 4)
                 {
-                    Console.WriteLine($"HandleDataWrite got {data.Length} bytes - using only the first 4");
+                    Resolver.Log.Info($"HandleDataWrite got {data.Length} bytes - using only the first 4");
                 }
                 RaiseValueSet(BitConverter.ToInt32(data));
             }

@@ -126,11 +126,11 @@ namespace Meadow.Hardware
 
         private void ShowSettings(Nuttx.Termios settings)
         {
-            Console.WriteLine($"  Speed: {settings.c_speed}");
-            Console.WriteLine($"  Input Flags: 0x{settings.c_iflag:x}");
-            Console.WriteLine($"  OutputFlags: 0x{settings.c_oflag:x}");
-            Console.WriteLine($"  Local Flags: 0x{settings.c_lflag:x}");
-            Console.WriteLine($"  Control Flags: 0x{settings.c_cflag:x}");
+            Resolver.Log.Info($"  Speed: {settings.c_speed}");
+            Resolver.Log.Info($"  Input Flags: 0x{settings.c_iflag:x}");
+            Resolver.Log.Info($"  OutputFlags: 0x{settings.c_oflag:x}");
+            Resolver.Log.Info($"  Local Flags: 0x{settings.c_lflag:x}");
+            Resolver.Log.Info($"  Control Flags: 0x{settings.c_cflag:x}");
         }
 
         protected override unsafe void SetHardwarePortSettings(IntPtr handle)

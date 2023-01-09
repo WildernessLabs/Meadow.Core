@@ -216,7 +216,7 @@ namespace Meadow.Devices
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"IST: {ex.Message}");
+                    Resolver.Log.Error($"IST: {ex.Message}");
                     Thread.Sleep(5000);
                 }
             }

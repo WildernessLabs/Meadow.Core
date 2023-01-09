@@ -268,7 +268,7 @@
             catch (Exception ex)
             {
                 // must use Console because the logger failed
-                Console.WriteLine($"Failed to create Logger: {ex.Message}");
+                Resolver.Log.Error($"Failed to create Logger: {ex.Message}");
                 return false;
             }
 
@@ -347,7 +347,7 @@
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Resolver.Log.Error(e.ToString());
                 return false;
             }
         }
