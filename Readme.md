@@ -1,4 +1,6 @@
-# Meadow Core Library
+<img src="Design/banner.jpg" style="margin-bottom:10px" />
+
+# Meadow.Core
 
 ## Repo Status
 
@@ -10,55 +12,53 @@
 
 ### Peripherals Must Support Pin and Port
 
-All peripherals must be able to be constructed with either a an `IPort` or an `IPin`:
-
-```
-protected IDigitalPort _port;
-
-public Relay (IDigitalPin pin) 
-  : this (new DigitalPort(pin)) { }
-
-public Relay (IDigitalPort port) {
-   _port = port;
-}
-```
-
-
-### Peripherals Must Only Accept Correct Port Type
-
-e.g. `IDigitalPin` or `IPWMPin`
+All peripherals must be able to be constructed with an `IPin` along with a device with the capabilities to configure a proper port (digital IO, analog, PWM, etc.) and a specific type of port such as `IDigitalOutputPort`, `IPwmPort`, `IAnalogInputPort`, etc. 
 
 #### Analog Example
 
 ```
-public class AnalogSensor {
-   public AnalogSensor (IAnalogPin pin) { ... }
-   public AnalogSensor (IAnalogPort port) { ... }
+public class AnalogSensor 
+{
+   protected IAnalogInputPort AnalogInputPort  { get; set; }
+
+   public AnalogSensor (IAnalogInputController device, IPin pin)
+     : this (device.CreateAnalogInputPort(pin)) { }
+
+   public AnalogSensor (IAnalogInputPort analogInputPort) 
+   { 
+      AnalogInputPort = analogInputPort;
+   }
 }
 ```
 #### Digital Example
 
 ```
-public class LED {
-   public PwmLed (IDigitalPin pin) { ... }
-   public PwmLed (IDigitalPort port { ... }
+public class Led 
+{
+   protected IDigitalOutputPort DigitalOutputPort { get; set; }
+
+   public Led (IDigitalOutputController device, IPin pin)
+   : this(device.CreateDigitalOutputPort(pin)) { }
+
+   public Led (IDigitalPort digitalOutputPort) 
+   {
+      DigitalOutputPort = digitalOutputPort;
+   }
 }
 ```
 #### PWM Example
 
 ```
-public class PwmLed {
-   public PwmLed (IPwmPin pin) { ... }
-   public PwmLed (IPwmPort port { ... }
+public class PwmLed 
+{
+   protected IPwmPort PwmPort { get; set; }
+
+   public PwmLed (IPwmOutputController device, IPin pin) 
+      : this (device.CreatePwmPort(pin)) {  }
+
+   public PwmLed (IPwmPort pwmPort) 
+   {  
+      PwmPort = pwmPort;
+   }
 }
 ```
-# Publishing Nuget Packages
-
-CI builds are [setup in Jenkins](http://jenkins.wildernesslabs.co/job/Meadow.Core/).  
-To trigger a new build:  
-- Go to project properties in VS 2017  
-- in the `Package` tab, increment either the MAJOR or MINOR `Package version`.  
-
-The CI job will pick up the changes, pack, and push the Nuget package. 
-
-[![Build Status](http://jenkins.wildernesslabs.co/buildStatus/icon?job=Meadow.Core)](http://jenkins.wildernesslabs.co/job/Meadow.Core/)
