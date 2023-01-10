@@ -1,4 +1,4 @@
-<img src="Design/banner.jpg" style="margin-bottom:10px" />
+<img src="design/banner.jpg" style="margin-bottom:10px" />
 
 # Meadow.Core
 
