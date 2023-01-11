@@ -1,5 +1,6 @@
-[![Stable Build](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
-[![NuGet Badge](https://buildstats.info/nuget/Meadow)](https://www.nuget.org/packages/MQTTnet)
+[![NuGet Badge](https://buildstats.info/nuget/Meadow)](https://www.nuget.org/packages/Meadow)
+[![Stable](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
+[![License: MIT](https://img.shields.io/badge/License-Apache-green.svg)](license.txt)
 
 <img src="design/banner.jpg" style="margin-bottom:10px" />
 
