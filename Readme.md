@@ -1,12 +1,21 @@
+[![Stable Build](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
 <img src="design/banner.jpg" style="margin-bottom:10px" />
 
 # Meadow.Core
 
-## Repo Status
+[]
 
-[![Stable Build](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
+## Repositories
 
-# Framework Design
+### Dependencies
+
+If this repo is cloned, it will only build if the following repositories are cloned and stored at the same folder level:
+1. [Meadow.Units](https://github.com/WildernessLabs/Meadow.Units)  contains a strong unitization into the entire stack of Meadow.
+2. [Meadow.Logging](https://github.com/WildernessLabs/Meadow.Logging) a lightweight logging library for embedded hardware.
+3. [Meadow.Contracts](https://github.com/WildernessLabs/Meadow.Contracts) contains the interfaces used by the entire Meadow stack.
+4. [MQTTnet](https://github.com/WildernessLabs/MQTTnet) is a high performance .NET library for MQTT based communication.
+
+Additionally, you might want to check out our [Meadow.Core.Samples](https://github.com/WildernessLabs/Meadow.Core.Samples) repo that has all our sample projects that cover every feature Meadow has to offer with no extra peripherals required. 
 
 ## Unified GPIO Architecture
 
