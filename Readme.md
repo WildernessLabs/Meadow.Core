@@ -1,4 +1,6 @@
 [![Stable Build](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
+[![NuGet Badge](https://buildstats.info/nuget/Meadow)](https://www.nuget.org/packages/MQTTnet)
+
 <img src="design/banner.jpg" style="margin-bottom:10px" />
 
 # Meadow.Core
