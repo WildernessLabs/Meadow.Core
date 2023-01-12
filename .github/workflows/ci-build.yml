@@ -1,4 +1,4 @@
-name: .NET Core CI Build
+name: Stable Build
 
 on:
   workflow_dispatch:
