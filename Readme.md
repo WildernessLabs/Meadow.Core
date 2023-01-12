@@ -6,7 +6,7 @@
 
 # Meadow.Core
 
-[]
+"Welcome to the Meadow Core library GitHub repository! This library is the foundation of the Meadow platform and provides a powerful set of tools for creating connected devices. The Meadow Core library includes APIs for common protocols such as SPI, I2C, and UART, as well as APIs for networking, storage, and more. The library is written in C# and is designed to work with the Meadow F7 Microcontroller. With Meadow Core, you can quickly and easily build connected devices that are powerful, reliable, and secure. Join our community and start building with Meadow Core today!"
 
 ## Repositories
 
