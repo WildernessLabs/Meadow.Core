@@ -61,7 +61,7 @@ namespace Meadow.Hardware
                 }
                 else
                 {
-                    throw new PortInUseException(success.Item2);
+                    throw new PortInUseException($"PwmPort: Pin {pin.Name} is already in use");
                 }
             }
             else
