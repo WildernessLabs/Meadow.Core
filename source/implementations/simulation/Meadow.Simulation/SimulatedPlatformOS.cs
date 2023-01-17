@@ -27,6 +27,12 @@ namespace Meadow.Simulation
 
         public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
 
+        public bool AutomaticallyStartNetwork => throw new NotImplementedException();
+
+        public IPlatformOS.NetworkConnectionType SelectedNetwork => throw new NotImplementedException();
+
+        public bool SdStorageSupported => throw new NotImplementedException();
+
         public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
         {
             throw new NotImplementedException();
@@ -52,6 +58,16 @@ namespace Meadow.Simulation
         }
 
         public void Sleep(TimeSpan duration)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Initialize(DeviceCapabilities capabilities)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegisterForSleep(ISleepAwarePeripheral peripheral)
         {
             throw new NotImplementedException();
         }
