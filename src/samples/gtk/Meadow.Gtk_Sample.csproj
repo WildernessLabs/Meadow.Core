@@ -14,7 +14,6 @@
  </ItemGroup>
  <ItemGroup>
    <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.9.57" />
-   <PackageReference Include="Meadow.Foundation.Displays.TftSpi" Version="0.7.61" />
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\..\..\..\Meadow.Simulation\src\Meadow.Simulation\Meadow.Simulation.csproj" />

@@ -1,5 +1,6 @@
 ﻿using Meadow.Units;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
@@ -17,6 +18,7 @@ namespace Meadow
         public event PowerTransitionHandler BeforeReset;
         public event PowerTransitionHandler BeforeSleep;
         public event PowerTransitionHandler AfterWake;
+        public event ExternalStorageEventHandler ExternalStorageEvent;
 
         public INtpClient NtpClient { get; private set; }
 
@@ -66,7 +68,9 @@ namespace Meadow
 
         public uint InitializationTimeout => throw new NotImplementedException();
 
-        public bool SdCardPresent => throw new NotImplementedException();
+        public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
+
+        public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
         {

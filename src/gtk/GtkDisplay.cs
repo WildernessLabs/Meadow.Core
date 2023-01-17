@@ -2,19 +2,25 @@
 using Gtk;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Graphics.Buffers;
+using Meadow.Hardware;
 using System;
 using System.Buffers.Binary;
 using System.Threading;
 
 namespace Meadow.Graphics
 {
-    public class GtkDisplay : IGraphicsDisplay
+    public class GtkDisplay : IGraphicsDisplay, ITouchScreen
     {
+        public event Hardware.TouchEventHandler TouchDown;
+        public event Hardware.TouchEventHandler TouchUp;
+        public event Hardware.TouchEventHandler TouchClick;
+
         private Window _window;
         private IPixelBuffer _pixelBuffer;
         private Cairo.Format _format;
         private int _stride;
         private Action<byte[]>? _bufferConverter = null;
+        private bool _leftButtonState = false;
 
         private EventWaitHandle ShowComplete { get; } = new EventWaitHandle(true, EventResetMode.ManualReset);
         public IPixelBuffer PixelBuffer => _pixelBuffer;
@@ -41,6 +47,7 @@ namespace Meadow.Graphics
         private void Initialize(int width, int height, ColorType mode)
         {
             _window = new Window(WindowType.Popup);
+            _window.WidgetEvent += _window_WidgetEvent;
 
             switch (mode)
             {
@@ -66,6 +73,44 @@ namespace Meadow.Graphics
             _window.DefaultSize = new Gdk.Size(width, height);
             _window.ShowAll();
             _window.Drawn += OnWindowDrawn;
+        }
+
+        private void RaiseTouchDown(double x, double y)
+        {
+            _leftButtonState = true;
+            TouchDown?.Invoke((int)x, (int)y);
+        }
+
+        private void RaiseTouchUp(double x, double y)
+        {
+            TouchUp?.Invoke((int)x, (int)y);
+            if (_leftButtonState)
+            {
+                TouchClick?.Invoke((int)x, (int)y);
+            }
+            _leftButtonState = false;
+
+        }
+
+        private void _window_WidgetEvent(object o, WidgetEventArgs args)
+        {
+            if (args.Event is Gdk.EventButton b)
+            {
+                switch (b.Button)
+                {
+                    case 1: // left
+                        switch (b.State)
+                        {
+                            case Gdk.ModifierType.None:
+                                RaiseTouchDown(b.X, b.Y);
+                                break;
+                            case Gdk.ModifierType.Button1Mask:
+                                RaiseTouchUp(b.X, b.Y);
+                                break;
+                        }
+                        break;
+                }
+            }
         }
 
         public void Run()
