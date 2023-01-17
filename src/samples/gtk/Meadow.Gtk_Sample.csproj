@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+	 <TargetFramework>net6.0</TargetFramework>
+	 <OutputType>Exe</OutputType>
+   <AssemblyName>App</AssemblyName>   
+ </PropertyGroup>
+ <PropertyGroup>
+   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+   <LangVersion>9.0</LangVersion>
+   <Nullable>enable</Nullable>
+ </PropertyGroup>
+ <ItemGroup>
+   <Compile Remove="MeadowApp.cs" />
+ </ItemGroup>
+ <ItemGroup>
+   <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.9.57" />
+ </ItemGroup>
+ <ItemGroup>
+   <ProjectReference Include="..\..\..\..\Meadow.Simulation\src\Meadow.Simulation\Meadow.Simulation.csproj" />
+   <ProjectReference Include="..\..\gtk\Meadow.Gtk.csproj" />
+ </ItemGroup>
+</Project>
