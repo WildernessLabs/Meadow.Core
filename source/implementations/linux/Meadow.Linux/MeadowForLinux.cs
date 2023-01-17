@@ -73,7 +73,8 @@ namespace Meadow
             Pins = new TPinout();
             Capabilities = new DeviceCapabilities(
                 new AnalogCapabilities(false, null),
-                new NetworkCapabilities(false, true)
+                new NetworkCapabilities(false, true),
+                new StorageCapabilities(true)
                 );
         }
 
