@@ -105,10 +105,12 @@ drwxr-xr-x 16 pi pi   4096 Nov  7 17:55 ..
 
 ## Running
 
-Use `dotnet` *on the target hardware* to execute your application
+Starting with the `RC1.0` release, Meadow now has a defined lifecycle.  This is imposed to allow automated application shutdown by the OtA update service. What this means, practically, is that your Meadow application is now a _library_ that gets loaded by the actual entry executable, which is `Meadow.dll`.
+
+Use `dotnet` *on the target hardware* to execute your application by doing the following:
 
 ```console
-$ dotnet App.dll
+$ dotnet Meadow.dll
 ```
  
 ## Work in Progress
