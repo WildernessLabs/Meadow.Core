@@ -1,30 +1,17 @@
 ﻿using Meadow.Hardware;
-using Meadow.Logging;
 using Meadow.Units;
 using System;
 
 namespace Meadow
 {
-    public class MeadowForWindows<TIoProvider, TPinDefinitions> : IMeadowDevice
-        where TIoProvider : IIoDevice, new()
-        where TPinDefinitions : IPinDefinitions, new()
+    public class MeadowForWindows : IMeadowDevice
     {
-        private TIoProvider _ioProvider;
-
-        public Logger Logger { get; }
-        public TPinDefinitions Pins { get; }
-
         public IPlatformOS PlatformOS { get; }
         public DeviceCapabilities Capabilities { get; private set; }
         public IDeviceInformation Information { get; private set; }
 
         public MeadowForWindows()
         {
-            Logger = new Logger(new ConsoleLogProvider());
-            Logger.Loglevel = LogLevel.Information;
-
-            Pins = new TPinDefinitions();
-            _ioProvider = new TIoProvider();
             PlatformOS = new WindowsPlatformOS();
         }
 
@@ -42,7 +29,7 @@ namespace Meadow
 
         public II2cBus CreateI2cBus(int busNumber = 0)
         {
-            return _ioProvider.CreateI2cBus(busNumber);
+            throw new NotSupportedException("Add an IO Expander to your platform");
         }
 
 
