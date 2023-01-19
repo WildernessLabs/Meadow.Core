@@ -14,7 +14,7 @@
     public static partial class MeadowOS
     {
         //==== internals
-        private static SynchronizationContext? synchronizationContext;
+        private static bool _startedDirectly = false;  // true when this assembly is the entry point
 
         //==== properties
         internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
@@ -31,6 +31,16 @@
         /// <param name="_"></param>
         /// <returns></returns>
         public async static Task Main(string[] _)
+        {
+            _startedDirectly = true;
+            await Start();
+        }
+
+        /// <summary>
+        /// Initializes and starts up the Meadow Core software stack
+        /// </summary>
+        /// <returns></returns>
+        public async static Task Start()
         {
             bool systemInitialized = false;
             try
@@ -208,11 +218,21 @@
         {
             Resolver.Log.Trace($"Looking for app assembly...");
 
-            // support app.exe or app.dll
-            var assembly = FindByPath(new string[] { "App.dll", "App.exe", "app.dll", "app.exe" });
+            Assembly appAssembly;
 
-            if (assembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
+            if (_startedDirectly)
+            {
+                // support app.exe or app.dll
+                appAssembly = FindByPath(new string[] { "App.dll", "App.exe", "app.dll", "app.exe" });
 
+                if (appAssembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
+            }
+            else
+            {
+                appAssembly = Assembly.GetEntryAssembly();
+            }
+
+            // === LOCAL METHOD ===
             Assembly? FindByPath(string[] namesToCheck)
             {
                 var root = AppDomain.CurrentDomain.BaseDirectory;
@@ -240,7 +260,7 @@
             Resolver.Log.Trace($"Looking for IApp...");
             var searchType = typeof(IApp);
             Type? appType = null;
-            foreach (var type in assembly.GetTypes())
+            foreach (var type in appAssembly.GetTypes())
             {
                 if (searchType.IsAssignableFrom(type) && !type.IsAbstract)
                 {

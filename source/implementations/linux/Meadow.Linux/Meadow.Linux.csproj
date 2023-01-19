@@ -7,7 +7,7 @@
    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
    <PackageId>Meadow.Linux</PackageId>
 	 <PackageIcon>icon.png</PackageIcon>
-   <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Linux</RepositoryUrl>
+   <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
    <PackageTags>Meadow</PackageTags>
    <Version>0.31.0</Version>
    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
