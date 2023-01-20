@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Meadow.Simulation
 {
-    public class SimulatedPin : PinBase
+    public class SimulatedPin : Pin
     {
         private Voltage _voltage;
 
@@ -13,11 +13,11 @@ namespace Meadow.Simulation
 
         internal SimulatedPin(string name, object key, IList<IChannelInfo>? supportedChannels = null)
             : base(name, key, supportedChannels)
-        {            
+        {
         }
 
-        internal Voltage Voltage 
-        { 
+        internal Voltage Voltage
+        {
             get => _voltage;
             set
             {
@@ -26,7 +26,7 @@ namespace Meadow.Simulation
                     _voltage = value;
                     VoltageChanged?.Invoke(this, EventArgs.Empty);
                 }
-                
+
             }
         }
     }
