@@ -10,18 +10,18 @@ namespace Meadow.Pinouts
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IList<IPin> AllPins => new List<IPin> {
-            I2C_2_SDA, I2C_2_SCL, 
+            I2C_2_SDA, I2C_2_SCL,
             UART_2_TX, UART_2_RX,
             I2C_1_SDA, I2C_1_SCL,
         };
 
-        public IPin I2C_2_SDA => new Pin("I2C_2_SDA", "PIN03");
-        public IPin I2C_2_SCL => new Pin("I2C_2_SCL", "PIN05");
+        public IPin I2C_2_SDA => new Pin("I2C_2_SDA", "PIN03", null);
+        public IPin I2C_2_SCL => new Pin("I2C_2_SCL", "PIN05", null);
 
         public IPin D04 => new SysFsPin("D04", "PIN07", 216);
 
-        public IPin UART_2_TX => new Pin("UART_2_TX", "PIN08");
-        public IPin UART_2_RX => new Pin("UART_2_RX", "PIN10");
+        public IPin UART_2_TX => new Pin("UART_2_TX", "PIN08", null);
+        public IPin UART_2_RX => new Pin("UART_2_RX", "PIN10", null);
 
         public IPin D17 => new SysFsPin("D17", "PIN11", 50);
         public IPin D18 => new SysFsPin("D18", "PIN12", 79);
@@ -37,8 +37,8 @@ namespace Meadow.Pinouts
         public IPin D08 => new SysFsPin("D08", "PIN24", 19);
         public IPin D07 => new SysFsPin("D07", "PIN26", 20);
 
-        public IPin I2C_1_SDA => new Pin("I2C_1_SDA", "PIN27");
-        public IPin I2C_1_SCL => new Pin("I2C_1_SCL", "PIN28");
+        public IPin I2C_1_SDA => new Pin("I2C_1_SDA", "PIN27", null);
+        public IPin I2C_1_SCL => new Pin("I2C_1_SCL", "PIN28", null);
 
         public IPin D05 => new SysFsPin("D05", "PIN29", 149);
         public IPin D06 => new SysFsPin("D06", "PIN31", 200);

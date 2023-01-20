@@ -36,8 +36,8 @@ namespace Meadow.Pinouts
             I2S_SDOUT
         };
 
-        public IPin I2C_GP5_DAT => new Pin("I2C_GP5_DAT", "PIN03");
-        public IPin I2C_GP5_CLK => new Pin("I2C_GP5_CLK", "PIN05");
+        public IPin I2C_GP5_DAT => new Pin("I2C_GP5_DAT", "PIN03", null);
+        public IPin I2C_GP5_CLK => new Pin("I2C_GP5_CLK", "PIN05", null);
         public IPin MCLK05 => new SysFsPin("MCLK05", "PIN07", 422);
         public IPin UART1_RTS => new SysFsPin("UART1_RTS", "PIN11", 428);
         public IPin I2S2_CLK => new SysFsPin("I2S2_CLK", "PIN12", 351);
@@ -51,8 +51,8 @@ namespace Meadow.Pinouts
         public IPin SPI1_SCLK => new SysFsPin("SPI1_SCLK", "PIN23", 491);
         public IPin SPI1_CS0 => new SysFsPin("SPI1_CS0", "PIN24", 494);
         public IPin SPI1_CS1 => new SysFsPin("SPI1_CS1", "PIN26", 495);
-        public IPin I2C_GP2_DAT => new Pin("I2C_GP2_DAT", "PIN27");
-        public IPin I2C_GP2_CLK => new Pin("I2C_GP2_CLK", "PIN28");
+        public IPin I2C_GP2_DAT => new Pin("I2C_GP2_DAT", "PIN27", null);
+        public IPin I2C_GP2_CLK => new Pin("I2C_GP2_CLK", "PIN28", null);
         public IPin CAN0_DIN => new SysFsPin("CAN0_DIN", "PIN29", 251);
         public IPin CAN0_DOUT => new SysFsPin("CAN0_DOUT", "PIN31", 250);
         public IPin GPIO9_CAN1_GPIO0_DMIC_CLK => new SysFsPin("GPIO9_CAN1_GPIO0_DMIC_CLK", "PIN32", 257);
