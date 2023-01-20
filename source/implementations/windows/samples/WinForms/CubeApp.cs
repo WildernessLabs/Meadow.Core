@@ -119,8 +119,6 @@ namespace Meadow
                         frameRate = $"{(1000 / et):0.0}fps";
                         start = Environment.TickCount;
                     }
-
-                    Thread.Sleep(100);
                 });
             }
         }

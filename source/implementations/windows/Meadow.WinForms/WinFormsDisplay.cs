@@ -10,61 +10,75 @@ public class WinFormsDisplay : Form, IGraphicsDisplay, ITouchScreen
     public event TouchEventHandler TouchUp;
     public event TouchEventHandler TouchClick;
 
+    private WinFormsPixelBuffer _buffer;
+
     public ColorType ColorMode => PixelBuffer.ColorMode;
-    public IPixelBuffer PixelBuffer { get; private set; }
+    public IPixelBuffer PixelBuffer => _buffer;
 
-    public WinFormsDisplay()
+    public WinFormsDisplay(int width = 800, int height = 600)
     {
-
-        this.Width = 800;
-        this.Height = 600;
-        PixelBuffer = new BufferRgb888(Width, Height);
+        this.Width = width;
+        this.Height = height;
+        _buffer = new WinFormsPixelBuffer(Width, Height);
     }
 
     void IGraphicsDisplay.Show()
     {
-        var g = this.CreateGraphics();
-
-        throw new NotImplementedException();
+        this.Invalidate(true);
+        this.Update();
     }
 
     void IGraphicsDisplay.Show(int left, int top, int right, int bottom)
     {
-        throw new NotImplementedException();
+        this.Invalidate(new Rectangle(left, top, right - left, bottom - top), true);
     }
 
     void IGraphicsDisplay.Clear(bool updateDisplay)
     {
-        throw new NotImplementedException();
+        _buffer.Clear();
+        if (updateDisplay)
+        {
+            this.Show();
+        }
     }
 
     void IGraphicsDisplay.Fill(Foundation.Color fillColor, bool updateDisplay)
     {
-        throw new NotImplementedException();
+        _buffer.Fill(fillColor);
+        if (updateDisplay)
+        {
+            this.Show();
+        }
     }
 
     void IGraphicsDisplay.Fill(int x, int y, int width, int height, Foundation.Color fillColor)
     {
-        throw new NotImplementedException();
+        _buffer.Fill(x, y, width, height, fillColor);
     }
 
     void IGraphicsDisplay.DrawPixel(int x, int y, Foundation.Color color)
     {
-        throw new NotImplementedException();
+        _buffer.SetPixel(x, y, color);
     }
 
     void IGraphicsDisplay.DrawPixel(int x, int y, bool enabled)
     {
-        throw new NotImplementedException();
+        _buffer.SetPixel(x, y, enabled ? Foundation.Color.White : Foundation.Color.Black);
     }
 
     void IGraphicsDisplay.InvertPixel(int x, int y)
     {
-        throw new NotImplementedException();
+        _buffer.InvertPixel(x, y);
     }
 
     void IGraphicsDisplay.WriteBuffer(int x, int y, IPixelBuffer displayBuffer)
     {
-        throw new NotImplementedException();
+        _buffer.WriteBuffer(x, y, displayBuffer);
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        e.Graphics.DrawImage(_buffer.Image, 0, 0);
+        base.OnPaint(e);
     }
 }
