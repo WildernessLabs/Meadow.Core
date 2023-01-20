@@ -24,7 +24,7 @@ jobs:
     - name: Checkout Meadow.Core
       uses: actions/checkout@v3
       with:
-        path: root # we have to put this in a sub-folder so we can pull Contracts/Units to a parent folder
+        path: Meadow.Core # we have to put this in a sub-folder so we can pull Contracts/Units to a parent folder
 
     - name: Checkout Meadow.Foundation
       # required for the FT232H driver, which is used by Meadow.Windows
