@@ -1,6 +1,4 @@
-﻿using Meadow.Devices;
-using Meadow.Peripherals;
-using System;
+﻿using System;
 using System.Threading;
 
 namespace Meadow.Hardware

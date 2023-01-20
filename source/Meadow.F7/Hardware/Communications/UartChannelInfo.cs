@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Meadow.Hardware
 {
     public class UartChannelInfo : DigitalChannelInfoBase, IUartChannelInfo
