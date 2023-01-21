@@ -258,7 +258,6 @@ namespace Meadow.Hardware
             if (_readBuffer != null)
             {
                 _readBuffer.Clear();
-                //_readBuffer.Overrun -= OnReadBufferOverrun; - Adrian, this shouldn't be needed Aug 12, 2020
             }
         }
 
