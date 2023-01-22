@@ -25,32 +25,32 @@ namespace Meadow.Hardware
             get => classicSerialPort.BaudRate;
             set => classicSerialPort.BaudRate = value;
         }
-      
+
         /// <summary>
         /// Gets the port name used for communications.
         /// </summary>
         public string PortName { get => classicSerialPort.PortName; }
-       
+
         /// <summary>
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
         public bool IsOpen { get => classicSerialPort.IsOpen; }
-      
+
         /// <summary>
         /// Gets or sets the parity-checking protocol.
         /// </summary>
         public Parity Parity { get => classicSerialPort.Parity; set => classicSerialPort.Parity = value; }
-      
+
         /// <summary>
         /// Gets or sets the standard length of data bits per byte.
         /// </summary>
         public int DataBits { get => classicSerialPort.DataBits; set => classicSerialPort.DataBits = value; }
-     
+
         /// <summary>
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
         public StopBits StopBits { get => classicSerialPort.StopBits; set => classicSerialPort.StopBits = value; }
-       
+
 
         /// <summary>
         /// Raised when a message, as defined in the constructor, arrives.
