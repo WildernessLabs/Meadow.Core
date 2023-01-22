@@ -6,7 +6,7 @@ using Windows.UI.Core;
 
 namespace Meadow.WinUI
 {
-    class View : IFrameworkView, IFrameworkViewSource
+    class WinUIDisplay : IFrameworkView, IFrameworkViewSource
     {
         public IFrameworkView CreateView()
         {
