@@ -1,8 +1,5 @@
 ﻿using Meadow.Devices;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
 
@@ -52,7 +49,7 @@ namespace Meadow.Hardware
             {
                 throw new NotSupportedException($"Pin {miso.Name} does not support SPI MISO capability");
             }
-            
+
             // we can't set the speed here yet because the caller has to set the bus number first
             return new SpiBus();
         }
@@ -64,7 +61,7 @@ namespace Meadow.Hardware
         {
             get
             {
-                if(_clockConfig == null)
+                if (_clockConfig == null)
                 {
                     Configuration = new SpiClockConfiguration(
                         new Units.Frequency(375, Units.Frequency.UnitType.Kilohertz),
@@ -78,7 +75,7 @@ namespace Meadow.Hardware
             {
                 if (value == null) { throw new ArgumentNullException(); }
 
-                if(_clockConfig != null)
+                if (_clockConfig != null)
                 {
                     _clockConfig.Changed -= OnConfigChanged;
                 }
@@ -132,15 +129,18 @@ namespace Meadow.Hardware
         {
             _busSemaphore.Wait();
 
-            try {
-                if (chipSelect != null) {
+            try
+            {
+                if (chipSelect != null)
+                {
                     // activate the chip select
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
                 fixed (byte* pRead = readBuffer)
                 {
-                    var command = new Nuttx.UpdSPIDataCommand() {
+                    var command = new Nuttx.UpdSPIDataCommand()
+                    {
                         TxBuffer = IntPtr.Zero,
                         BufferLength = readBuffer.Length,
                         RxBuffer = (IntPtr)pRead,
@@ -148,16 +148,20 @@ namespace Meadow.Hardware
                     };
 
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                    if (result != 0) {
+                    if (result != 0)
+                    {
                         DecipherSPIError(UPD.GetLastError());
                     }
 
-                    if (chipSelect != null) {
+                    if (chipSelect != null)
+                    {
                         // deactivate the chip select
                         chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
                     }
                 }
-            } finally {
+            }
+            finally
+            {
                 _busSemaphore.Release();
             }
         }
@@ -176,14 +180,18 @@ namespace Meadow.Hardware
             _busSemaphore.Wait();
             Output.WriteLineIf(_showSpiDebug, $" +SendData");
 
-            try {
-                if (chipSelect != null) {
+            try
+            {
+                if (chipSelect != null)
+                {
                     // activate the chip select
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
-                fixed (byte* pWrite = writeBuffer) {
-                    var command = new Nuttx.UpdSPIDataCommand() {
+                fixed (byte* pWrite = writeBuffer)
+                {
+                    var command = new Nuttx.UpdSPIDataCommand()
+                    {
                         BufferLength = writeBuffer.Length,
                         TxBuffer = (IntPtr)pWrite,
                         RxBuffer = IntPtr.Zero,
@@ -192,17 +200,21 @@ namespace Meadow.Hardware
 
                     Output.WriteLineIf(_showSpiDebug, $" sending {writeBuffer.Length} bytes: {BitConverter.ToString(writeBuffer.ToArray())}");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                    if (result != 0) {
+                    if (result != 0)
+                    {
                         DecipherSPIError(UPD.GetLastError());
                     }
                     Output.WriteLineIf(_showSpiDebug, $" send complete");
 
-                    if (chipSelect != null) {
+                    if (chipSelect != null)
+                    {
                         // deactivate the chip select
                         chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
                     }
                 }
-            } finally {
+            }
+            finally
+            {
                 _busSemaphore.Release();
                 Output.WriteLineIf(_showSpiDebug, $" -SendData");
             }
@@ -227,15 +239,19 @@ namespace Meadow.Hardware
 
             _busSemaphore.Wait();
 
-            try {
-                if (chipSelect != null) {
+            try
+            {
+                if (chipSelect != null)
+                {
                     // activate the chip select
                     chipSelect.State = csMode == ChipSelectMode.ActiveLow ? false : true;
                 }
 
                 fixed (byte* pWrite = writeBuffer)
-                fixed (byte* pRead = readBuffer) {
-                    var command = new Nuttx.UpdSPIDataCommand() {
+                fixed (byte* pRead = readBuffer)
+                {
+                    var command = new Nuttx.UpdSPIDataCommand()
+                    {
                         BufferLength = readBuffer.Length,
                         TxBuffer = (IntPtr)pWrite,
                         RxBuffer = (IntPtr)pRead,
@@ -245,17 +261,21 @@ namespace Meadow.Hardware
                     Output.WriteLineIf(_showSpiDebug, "+Exchange");
                     Output.WriteLineIf(_showSpiDebug, $" Sending {writeBuffer.Length} bytes");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
-                    if (result != 0) {
+                    if (result != 0)
+                    {
                         DecipherSPIError(UPD.GetLastError());
                     }
                     Output.WriteLineIf(_showSpiDebug, $" Received {readBuffer.Length} bytes");
 
-                    if (chipSelect != null) {
+                    if (chipSelect != null)
+                    {
                         // deactivate the chip select
                         chipSelect.State = csMode == ChipSelectMode.ActiveLow ? true : false;
                     }
                 }
-            } finally {
+            }
+            finally
+            {
                 _busSemaphore.Release();
             }
         }
@@ -280,7 +300,7 @@ namespace Meadow.Hardware
 
         private void SetBitsPerWord(int bitsPerWord)
         {
-            if(bitsPerWord < 4 || bitsPerWord > 16)
+            if (bitsPerWord < 4 || bitsPerWord > 16)
             {
                 throw new ArgumentOutOfRangeException();
             }

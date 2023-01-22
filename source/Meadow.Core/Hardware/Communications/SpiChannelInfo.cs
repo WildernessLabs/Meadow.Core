@@ -1,12 +1,11 @@
-﻿using System;
-namespace Meadow.Hardware
+﻿namespace Meadow.Hardware
 {
-    public class UartChannelInfo : DigitalChannelInfoBase, IUartChannelInfo
+    public class SpiChannelInfo : DigitalChannelInfoBase, ISpiChannelInfo
     {
-        public SerialDirectionType SerialDirection { get; protected set; }
+        public SpiLineType LineTypes { get; protected set; }
 
-        public UartChannelInfo(string name,
-            SerialDirectionType serialDirection,
+        public SpiChannelInfo(string name,
+            SpiLineType lineTypes,
             bool pullDownCapable = false,
             bool pullUpCapable = false)
             : base(
@@ -18,7 +17,7 @@ namespace Meadow.Hardware
                 pullUpCapable: pullUpCapable,
                 inverseLogic: false) //TODO: switch to C# 7.2+ to get rid of trailing names
         {
-            this.SerialDirection = serialDirection;
+            LineTypes = lineTypes;
         }
     }
 }
