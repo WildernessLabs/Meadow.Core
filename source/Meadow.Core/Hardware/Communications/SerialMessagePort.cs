@@ -15,7 +15,7 @@ namespace Meadow.Hardware
     /// thread-safe and asynchronous in nature. This is the recommended way to
     /// use serial on Meadow for nearly all use cases.
     /// </summary>
-    public class SerialMessagePort : SerialMessageBuffer, ISerialMessagePort
+    public class SerialMessagePort : SerialMessageProcessor, ISerialMessagePort
     {
         /// <summary>
         /// Gets or sets the serial baud rate.
@@ -131,7 +131,7 @@ namespace Meadow.Hardware
             {
                 byte[] data = new byte[classicSerialPort.BytesToRead];
                 classicSerialPort.ReadAll(data);
-                AddData(data);
+                Process(data);
             }
         }
 
