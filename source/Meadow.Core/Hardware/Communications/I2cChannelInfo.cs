@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow.Hardware
+﻿namespace Meadow.Hardware
 {
     //TODO: what else should this have? allowed speeds?
     public class I2cChannelInfo : DigitalChannelInfoBase, II2cChannelInfo
