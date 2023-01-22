@@ -62,4 +62,4 @@ jobs:
           7.0.x
 
     - name: Build Meadow.Core
-      run: dotnet build -c Release root/source/Meadow.Core.sln
+      run: dotnet build -c Release Meadow.Core/source/Meadow.Core.sln
