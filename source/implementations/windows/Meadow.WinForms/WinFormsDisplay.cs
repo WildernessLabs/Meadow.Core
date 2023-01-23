@@ -19,6 +19,9 @@ public class WinFormsDisplay : Form, IGraphicsDisplay, ITouchScreen
     {
         this.Width = width;
         this.Height = height;
+
+        this.DoubleBuffered = true;
+
         _buffer = new WinFormsPixelBuffer(Width, Height);
     }
 
