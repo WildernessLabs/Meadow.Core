@@ -16,8 +16,6 @@ namespace Meadow.Devices
     {
         private Lazy<IAnalogInputPort> _adc_bat;
 
-        public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
-
         public F7FeatherV2()
             : base(new Pinout(),
                   new F7FeatherGpioManager(),

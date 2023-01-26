@@ -24,43 +24,45 @@ namespace Meadow.Graphics
 
         private EventWaitHandle ShowComplete { get; } = new EventWaitHandle(true, EventResetMode.ManualReset);
         public IPixelBuffer PixelBuffer => _pixelBuffer;
-        public ColorType ColorMode => _pixelBuffer.ColorMode;
+        public ColorMode ColorMode => _pixelBuffer.ColorMode;
 
         public int Width => _window.Window.Width;
         public int Height => _window.Window.Height;
+
+        public ColorMode SupportedColorModes => ColorMode.Format24bppRgb888 | ColorMode.Format16bppRgb565 | ColorMode.Format32bppRgba8888;
 
         static GtkDisplay()
         {
             Application.Init();
         }
 
-        public GtkDisplay(ColorType mode = ColorType.Format24bppRgb888)
+        public GtkDisplay(ColorMode mode = ColorMode.Format24bppRgb888)
         {
             Initialize(800, 600, mode); // TODO: query screen size and caps
         }
 
-        public GtkDisplay(int width, int height, ColorType mode = ColorType.Format24bppRgb888)
+        public GtkDisplay(int width, int height, ColorMode mode = ColorMode.Format24bppRgb888)
         {
             Initialize(width, height, mode);
         }
 
-        private void Initialize(int width, int height, ColorType mode)
+        private void Initialize(int width, int height, ColorMode mode)
         {
             _window = new Window(WindowType.Popup);
             _window.WidgetEvent += _window_WidgetEvent;
 
             switch (mode)
             {
-                case ColorType.Format24bppRgb888:
+                case ColorMode.Format24bppRgb888:
                     _pixelBuffer = new BufferRgb888(width, height);
                     _format = Cairo.Format.Rgb24;
                     break;
-                case ColorType.Format16bppRgb565:
+                case ColorMode.Format16bppRgb565:
                     _pixelBuffer = new BufferRgb565(width, height);
                     _format = Cairo.Format.Rgb16565;
                     _bufferConverter = ConvertRGBBufferToBGRBuffer24;
                     break;
-                case ColorType.Format32bppRgba8888:
+                case ColorMode.Format32bppRgba8888:
                     _pixelBuffer = new BufferRgb8888(width, height);
                     _format = Cairo.Format.Argb32;
                     break;

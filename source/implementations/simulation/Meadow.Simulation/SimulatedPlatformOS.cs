@@ -1,6 +1,9 @@
-﻿using Meadow.Units;
+﻿using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
+using System.Linq;
 
 namespace Meadow.Simulation
 {
@@ -12,6 +15,15 @@ namespace Meadow.Simulation
         public event ExternalStorageEventHandler ExternalStorageEvent;
 
         public string OSVersion => "0.1";
+
+        public virtual SerialPortName[] GetSerialPortNames()
+        {
+            return SerialPort.GetPortNames().Select(n =>
+                new SerialPortName(n, n))
+            .ToArray();
+        }
+
+
 
         public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 

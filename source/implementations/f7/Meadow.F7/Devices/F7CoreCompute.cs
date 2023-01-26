@@ -4,8 +4,6 @@ namespace Meadow.Devices
 {
     public partial class F7CoreComputeV2 : F7CoreComputeBase
     {
-        public SerialPortNameDefinitions SerialPortNames => new SerialPortNameDefinitions();
-
         public F7CoreComputeV2()
             : base(new Pinout(),
                   new F7CoreComputeGpioManager(),
