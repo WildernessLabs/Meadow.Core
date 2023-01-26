@@ -9,12 +9,6 @@ namespace Meadow.Devices
     {
         private const int ADCPrecisionBits = 12;
 
-        public class SerialPortNameDefinitions
-        {
-            public SerialPortName Com1 { get; } = new SerialPortName("COM1", "ttyS0");
-            public SerialPortName Com4 { get; } = new SerialPortName("COM4", "ttyS1");
-        }
-
         public partial class Pinout : IF7CoreComputePinout
         {
             public IList<IPin> AllPins { get; }
