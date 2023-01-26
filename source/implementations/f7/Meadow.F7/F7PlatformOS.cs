@@ -1,4 +1,5 @@
-﻿using Meadow.Units;
+﻿using Meadow.Hardware;
+using Meadow.Units;
 using System;
 
 namespace Meadow
@@ -34,6 +35,15 @@ namespace Meadow
         public void Initialize(DeviceCapabilities capabilities)
         {
             InitializeStorage(capabilities.Storage);
+        }
+
+        public SerialPortName[] GetSerialPortNames()
+        {
+            return new SerialPortName[]
+            {
+                new SerialPortName("COM1", "ttyS0"),
+                new SerialPortName("COM4", "ttyS1")
+            };
         }
     }
 }

@@ -1,7 +1,10 @@
-﻿using Meadow.Units;
+﻿using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 
 namespace Meadow
@@ -58,6 +61,16 @@ namespace Meadow
                 Resolver.Log.Debug($"Unable to parse uname: {ex.Message}");
             }
         }
+
+        public virtual SerialPortName[] GetSerialPortNames()
+        {
+            return SerialPort.GetPortNames().Select(n =>
+                new SerialPortName(n, n))
+            .ToArray();
+        }
+
+
+
 
         public virtual Temperature GetCpuTemperature()
         {

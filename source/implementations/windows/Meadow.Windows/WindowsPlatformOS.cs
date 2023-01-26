@@ -1,7 +1,10 @@
-﻿using Meadow.Units;
+﻿using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
+using System.Linq;
 
 namespace Meadow
 {
@@ -30,7 +33,12 @@ namespace Meadow
             FileSystemRoot = di.FullName;
         }
 
-
+        public SerialPortName[] GetSerialPortNames()
+        {
+            return SerialPort.GetPortNames().Select(n =>
+                new SerialPortName(n, n))
+            .ToArray();
+        }
 
 
 

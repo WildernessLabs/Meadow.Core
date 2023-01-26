@@ -26,27 +26,6 @@ namespace Meadow
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
 
-        public LinuxSerialPortNameDefinitions SerialPortNames
-        {
-            get
-            {
-                if (typeof(TPinout) == typeof(JetsonNano))
-                {
-                    return new JetsonNanoSerialPortNameDefinitions();
-                }
-                else if (typeof(TPinout) == typeof(JetsonXavierAGX))
-                {
-                    return new JetsonXavierAGXSerialPortNameDefinitions();
-                }
-                else if (typeof(TPinout) == typeof(RaspberryPi))
-                {
-                    return new RaspberryPiSerialPortNameDefinitions();
-                }
-
-                throw new PlatformNotSupportedException();
-            }
-        }
-
         public IDeviceInformation Information => throw new NotImplementedException();
 
         public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();

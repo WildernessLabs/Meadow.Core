@@ -1,4 +1,5 @@
-﻿using Meadow.Units;
+﻿using Meadow.Hardware;
+using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,6 +52,14 @@ namespace Meadow
         public override Temperature GetCpuTemperature()
         {
             return GetTemperature("CPU-therm");
+        }
+
+        public override SerialPortName[] GetSerialPortNames()
+        {
+            return new SerialPortName[]
+                {
+                    new SerialPortName("UART2", "/dev/ttyTHS1")
+                };
         }
     }
 }

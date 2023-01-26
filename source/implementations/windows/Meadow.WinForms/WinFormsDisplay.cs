@@ -12,8 +12,10 @@ public class WinFormsDisplay : Form, IGraphicsDisplay, ITouchScreen
 
     private WinFormsPixelBuffer _buffer;
 
-    public ColorType ColorMode => PixelBuffer.ColorMode;
+    public ColorMode ColorMode => PixelBuffer.ColorMode;
     public IPixelBuffer PixelBuffer => _buffer;
+
+    public ColorMode SupportedColorModes => ColorMode.Format24bppRgb888;
 
     public WinFormsDisplay(int width = 800, int height = 600)
     {

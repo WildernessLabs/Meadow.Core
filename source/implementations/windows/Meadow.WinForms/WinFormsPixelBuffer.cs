@@ -11,7 +11,7 @@ internal class WinFormsPixelBuffer : IPixelBuffer
     public int Width { get; private set; }
     public int Height { get; private set; }
 
-    public ColorType ColorMode => ColorType.Format24bppRgb888;
+    public ColorMode ColorMode => ColorMode.Format24bppRgb888;
     public int BitDepth => 24;
     public int ByteCount => _buffer.Length;
     public byte[] Buffer => _buffer;
