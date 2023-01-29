@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Meadow.Hardware
+﻿namespace Meadow.Hardware
 {
     // TODO: to optimize, this really should re-implement its own serialport stuff
     // rather than using the ClassicSerialPort. That way we don't maintain two
@@ -50,12 +48,6 @@ namespace Meadow.Hardware
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
         public StopBits StopBits { get => classicSerialPort.StopBits; set => classicSerialPort.StopBits = value; }
-
-
-        /// <summary>
-        /// Raised when a message, as defined in the constructor, arrives.
-        /// </summary>
-        public event EventHandler<SerialMessageData> MessageReceived = delegate { };
 
         protected ISerialPort classicSerialPort;
 
