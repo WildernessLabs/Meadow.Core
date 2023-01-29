@@ -37,28 +37,11 @@ namespace Meadow.Devices
         /// </summary>
         /// <returns>An instance of an I2cBus</returns>
         public override II2cBus CreateI2cBus(
-            I2cBusSpeed busSpeed,
-            int busNumber = 1
+            int busNumber = 1,
+            I2cBusSpeed busSpeed = I2cBusSpeed.Standard
         )
         {
-            return CreateI2cBus(busNumber, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
-        }
-
-        /// <summary>
-        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
-        /// </summary>
-        /// <param name="frequency">The bus speed in (in Hz) defaulting to 100k</param>
-        /// <returns>An instance of an I2cBus</returns>
-        public override II2cBus CreateI2cBus(
-            int busNumber,
-            Frequency frequency
-        )
-        {
-            if (busNumber == 3)
-            {
-                return CreateI2cBus(Pins.I2C3_SCL, Pins.I2C3_SDA, frequency);
-            }
-            return CreateI2cBus(Pins.I2C1_SCL, Pins.I2C1_SDA, frequency);
+            return CreateI2cBus(busNumber, busSpeed);
         }
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)

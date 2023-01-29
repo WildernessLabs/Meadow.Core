@@ -8,10 +8,9 @@ namespace Meadow.Simulation
     {
         private SimulatedPin _pin;
 
-        public SimulatedDigitalInputPort(IPin pin, IDigitalChannelInfo channel, InterruptMode interruptMode = InterruptMode.None)
+        public SimulatedDigitalInputPort(SimulatedPin pin, IDigitalChannelInfo channel, InterruptMode interruptMode = InterruptMode.None)
             : base(pin, channel, interruptMode)
         {
-            _pin = pin as SimulatedPin;
             _pin.VoltageChanged += OnPinVoltageChanged;
         }
 

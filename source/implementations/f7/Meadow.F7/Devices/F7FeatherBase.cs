@@ -59,25 +59,25 @@ namespace Meadow.Devices
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
         /// <returns>An instance of an I2cBus</returns>
-        public override II2cBus CreateI2cBus(
-            I2cBusSpeed busSpeed,
-            int busNumber = 0
+        public II2cBus CreateI2cBus(
+            I2cBusSpeed busSpeed = I2cBusSpeed.Standard
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, new Frequency((int)busSpeed, Frequency.UnitType.Hertz));
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, busSpeed);
         }
 
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
-        /// <param name="frequency">The bus speed in (in Hz) defaulting to 100k</param>
+        /// <param name="busSpeed">The bus speed desired</param>
+        /// <param name="busNumber">The hardware bus number</param>
         /// <returns>An instance of an I2cBus</returns>
         public override II2cBus CreateI2cBus(
-            int busNumber,
-            Frequency frequency
+            int busNumber = 0,
+            I2cBusSpeed busSpeed = I2cBusSpeed.Standard
         )
         {
-            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequency);
+            return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, busSpeed);
         }
 
         public override ISpiBus CreateSpiBus(
