@@ -39,7 +39,7 @@ namespace Meadow
         /// Get the mono version on the device.
         /// </summary>
         /// <returns>Mono version.</returns>
-        public string MonoVersion => GetString(ConfigurationValues.MonoVersion);
+        public string RuntimeVersion => GetString(ConfigurationValues.MonoVersion);
 
         /// <summary>
         /// Should the system reboot if an unhandled exception is encounted in the user application?

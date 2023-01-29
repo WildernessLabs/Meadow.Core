@@ -3,6 +3,7 @@ using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
@@ -13,8 +14,7 @@ namespace Meadow
     {
         public virtual string OSVersion { get; private set; }
         public virtual string OSBuildDate { get; private set; }
-
-        public virtual string MonoVersion => ".NET 6.0"; // TODO"
+        public virtual string RuntimeVersion { get; }
 
         internal static CancellationTokenSource AppAbort = new();
 
@@ -24,6 +24,11 @@ namespace Meadow
         public event ExternalStorageEventHandler ExternalStorageEvent;
 
         public INtpClient NtpClient { get; private set; }
+
+        internal LinuxPlatformOS()
+        {
+            RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+        }
 
         public void Initialize()
         {

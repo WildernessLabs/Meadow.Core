@@ -16,6 +16,13 @@ namespace Meadow.Simulation
 
         public string OSVersion => "0.1";
 
+        public string RuntimeVersion { get; }
+
+        internal SimulatedPlatformOS()
+        {
+            RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+        }
+
         public virtual SerialPortName[] GetSerialPortNames()
         {
             return SerialPort.GetPortNames().Select(n =>
@@ -28,8 +35,6 @@ namespace Meadow.Simulation
         public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public string OSBuildDate => throw new NotImplementedException();
-
-        public string MonoVersion => throw new NotImplementedException();
 
         public bool RebootOnUnhandledException => throw new NotImplementedException();
 
