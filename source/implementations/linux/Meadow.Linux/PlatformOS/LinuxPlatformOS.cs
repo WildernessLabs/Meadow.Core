@@ -69,7 +69,12 @@ namespace Meadow
             .ToArray();
         }
 
+        public void Initialize(DeviceCapabilities capabilities)
+        {
+            // TODO: deal with capabilities
+        }
 
+        public string FileSystemRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".meadow");
 
 
         public virtual Temperature GetCpuTemperature()
@@ -82,8 +87,6 @@ namespace Meadow
         public uint InitializationTimeout => throw new NotImplementedException();
 
         public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
-
-        public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public bool AutomaticallyStartNetwork => throw new NotImplementedException();
 
@@ -107,11 +110,6 @@ namespace Meadow
         }
 
         public void Sleep(TimeSpan duration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Initialize(DeviceCapabilities capabilities)
         {
             throw new NotImplementedException();
         }

@@ -25,8 +25,7 @@ namespace Meadow
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
-
-        public IDeviceInformation Information => throw new NotImplementedException();
+        public IDeviceInformation Information { get; }
 
         public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
 
@@ -43,6 +42,8 @@ namespace Meadow
             {
                 PlatformOS = new LinuxPlatformOS();
             }
+
+            Information = new LinuxDeviceInfo();
 
             Pins = new TPinout();
             Capabilities = new DeviceCapabilities(
