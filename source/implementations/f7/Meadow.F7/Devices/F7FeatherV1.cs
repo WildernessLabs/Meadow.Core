@@ -4,7 +4,10 @@ using System;
 
 namespace Meadow.Devices
 {
-    [Obsolete("Use the F7FeatherV1 class instead.")]
+    /// <summary>
+    /// Represents an F7Micro1 device.
+    /// </summary>
+    [Obsolete("Use the F7FeatherV1 class instead.", true)]
     public class F7Micro : F7FeatherV1
     {
     }
@@ -38,7 +41,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Gets a BatteryInfo instance for the current state of the platform
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A BatteryInfo instance</returns>
         /// <exception cref="Exception"></exception>
         public override BatteryInfo GetBatteryInfo()
         {

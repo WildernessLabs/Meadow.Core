@@ -27,6 +27,11 @@ namespace Meadow.Devices
             return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted, isOnboard);
         }
 
+        /// <summary>
+        /// Retrives the IPin for the given pin name
+        /// </summary>
+        /// <param name="pinName"></param>
+        /// <returns></returns>
         public override IPin GetPin(string pinName)
         {
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
@@ -80,6 +85,12 @@ namespace Meadow.Devices
             return CreateI2cBus(Pins.I2C_SCL, Pins.I2C_SDA, frequency);
         }
 
+        /// <summary>
+        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// </summary>
+        /// <param name="speed">The bus speed desired</param>
+        /// <param name="busNumber">The hardware bus number</param>
+        /// <returns>An instance of an I2cBus</returns>
         public override ISpiBus CreateSpiBus(
             Units.Frequency speed,
             int busNumber = 3
@@ -88,6 +99,13 @@ namespace Meadow.Devices
             return CreateSpiBus(Pins.SCK, Pins.COPI, Pins.CIPO, speed);
         }
 
+        /// <summary>
+        /// Retrieves the hardware bus number for the provided pins
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <param name="copi"></param>
+        /// <param name="cipo"></param>
+        /// <returns></returns>
         protected override int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo)
         {
             // we're only looking at clock pin.  

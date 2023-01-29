@@ -1,10 +1,16 @@
-﻿using System;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 
 namespace Meadow.Devices
 {
     public abstract partial class F7MicroBase
     {
+        /// <summary>
+        /// Retrieves the hardware bus number for the provided pins
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <param name="copi"></param>
+        /// <param name="cipo"></param>
+        /// <returns></returns>
         protected abstract int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo);
         public abstract ISpiBus CreateSpiBus(Units.Frequency speed, int busNumber = 3);
 
@@ -12,7 +18,7 @@ namespace Meadow.Devices
         /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO
         /// </summary>
         /// <returns>An instance of an IISpiBus</returns>
-        public ISpiBus CreateSpiBus()            
+        public ISpiBus CreateSpiBus()
         {
             return CreateSpiBus(IMeadowDevice.DefaultSpiBusSpeed);
         }

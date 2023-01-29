@@ -3,7 +3,10 @@ using System;
 
 namespace Meadow.Devices
 {
-    [Obsolete("Use the F7FeatherV2 class instead.")]
+    /// <summary>
+    /// Represents an F7Micro2  device.
+    /// </summary>
+    [Obsolete("Use the F7FeatherV2 class instead.", true)]
     public class F7Micro2 : F7FeatherV2
     {
     }
@@ -14,7 +17,7 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7FeatherV2 : F7FeatherBase
     {
-        private Lazy<IAnalogInputPort> _adc_bat;
+        private Lazy<IAnalogInputPort?> _adc_bat;
 
         public F7FeatherV2()
             : base(new Pinout(),
@@ -30,12 +33,18 @@ namespace Meadow.Devices
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
 
-            _adc_bat = new Lazy<IAnalogInputPort>(() =>
+            _adc_bat = new Lazy<IAnalogInputPort?>(() =>
             {
-                return this.CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT);
+                return this.CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT) ?? null;
             });
         }
 
+        /// <summary>
+        /// Retrieves the hardware bus number for the provided pins
+        /// </summary>
+        /// <param name="clock"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
         {
             if (clock.Name == (Pins as F7FeatherV2.Pinout)?.I2C_SCL.Name)
@@ -47,12 +56,16 @@ namespace Meadow.Devices
             return -1;
         }
 
+        /// <summary>
+        /// Gets a BatteryInfo instance for the current state of the platform
+        /// </summary>
+        /// <returns>A BatteryInfo instance</returns>
         public override BatteryInfo GetBatteryInfo()
         {
             return new BatteryInfo
             {
                 // on V2 there is a voltage divider 2 x 499R and the voltage is taken from the center of the divider, effectively halving the input
-                Voltage = _adc_bat.Value.Voltage * 2
+                Voltage = _adc_bat?.Value?.Voltage * 2
             };
         }
     }
