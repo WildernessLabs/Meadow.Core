@@ -77,17 +77,17 @@ namespace Meadow
             return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
         }
 
-        public II2cBus CreateI2cBus(int busNumber, Frequency frequency)
+        public II2cBus CreateI2cBus(int busNumber, I2cBusSpeed busSpeed)
         {
-            return new I2CBus(busNumber, frequency);
+            return new I2CBus(busNumber, busSpeed);
         }
 
-        public II2cBus CreateI2cBus(IPin[] pins, Frequency frequency)
+        public II2cBus CreateI2cBus(IPin[] pins, I2cBusSpeed busSpeed)
         {
-            return CreateI2cBus(pins[0], pins[1], frequency);
+            return CreateI2cBus(pins[0], pins[1], busSpeed);
         }
 
-        public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
+        public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
         {
             // TODO: implement this based on channel caps (this is platform specific right now)
 
@@ -95,34 +95,34 @@ namespace Meadow
             {
                 if (clock == Pins["PIN05"] && data == Pins["PIN03"])
                 {
-                    return new I2CBus(1, frequency);
+                    return new I2CBus(1, busSpeed);
                 }
                 else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
                 {
-                    return new I2CBus(0, frequency);
+                    return new I2CBus(0, busSpeed);
                 }
             }
             if (Pins is JetsonXavierAGX)
             {
                 if (clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
                 {
-                    return new I2CBus(1, frequency);
+                    return new I2CBus(1, busSpeed);
                 }
                 else if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
                 {
-                    return new I2CBus(8, frequency);
+                    return new I2CBus(8, busSpeed);
                 }
             }
             else if (Pins is RaspberryPi)
             {
                 if (clock == Pins["PIN05"] && data == Pins["PIN03"])
                 {
-                    return new I2CBus(1, frequency);
+                    return new I2CBus(1, busSpeed);
                 }
             }
             else if (Pins is SnickerdoodleBlack)
             {
-                return new KrtklI2CBus(frequency);
+                return new KrtklI2CBus(busSpeed);
             }
 
             throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");

@@ -96,7 +96,7 @@ namespace Meadow.Simulation
             var dci = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dci != null)
             {
-                return new SimulatedDigitalInputPort(pin, dci, interruptMode);
+                return new SimulatedDigitalInputPort(pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"), dci, interruptMode);
             }
 
             throw new NotSupportedException();
@@ -150,21 +150,6 @@ namespace Meadow.Simulation
         // ========= not implemented below here =========
 
         public II2cBus CreateI2cBus(int busNumber = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public II2cBus CreateI2cBus(int busNumber, Meadow.Units.Frequency frequency)
-        {
-            throw new NotImplementedException();
-        }
-
-        public II2cBus CreateI2cBus(IPin[] pins, Meadow.Units.Frequency frequency)
-        {
-            throw new NotImplementedException();
-        }
-
-        public II2cBus CreateI2cBus(IPin clock, IPin data, Meadow.Units.Frequency frequency)
         {
             throw new NotImplementedException();
         }
@@ -229,6 +214,21 @@ namespace Meadow.Simulation
         }
 
         public ICounter CreateCounter(IPin pin, InterruptMode edge)
+        {
+            throw new NotImplementedException();
+        }
+
+        public II2cBus CreateI2cBus(int busNumber, I2cBusSpeed busSpeed)
+        {
+            throw new NotImplementedException();
+        }
+
+        public II2cBus CreateI2cBus(IPin[] pins, I2cBusSpeed busSpeed)
+        {
+            throw new NotImplementedException();
+        }
+
+        public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
         {
             throw new NotImplementedException();
         }

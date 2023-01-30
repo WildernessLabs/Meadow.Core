@@ -32,6 +32,31 @@ namespace Meadow
             throw new NotSupportedException("Add an IO Expander to your platform");
         }
 
+        public II2cBus CreateI2cBus(int busNumber, I2cBusSpeed busSpeed)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
+        public II2cBus CreateI2cBus(IPin[] pins, I2cBusSpeed busSpeed)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
+        public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
+        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
+        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, Frequency speed)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
 
 
 
@@ -74,21 +99,6 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        public II2cBus CreateI2cBus(int busNumber, Frequency frequency)
-        {
-            throw new NotImplementedException();
-        }
-
-        public II2cBus CreateI2cBus(IPin[] pins, Frequency frequency)
-        {
-            throw new NotImplementedException();
-        }
-
-        public II2cBus CreateI2cBus(IPin clock, IPin data, Frequency frequency)
-        {
-            throw new NotImplementedException();
-        }
-
         public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
         {
             throw new NotImplementedException();
@@ -105,16 +115,6 @@ namespace Meadow
         }
 
         public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, Frequency speed)
         {
             throw new NotImplementedException();
         }

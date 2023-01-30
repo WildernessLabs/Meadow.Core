@@ -154,7 +154,7 @@ namespace Meadow.Devices
                 "PB5", "PB5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB5", interruptGroup: 5),
-                    new SpiChannelInfo("SPI3_COPI", SpiLineType.MOSI)
+                    new SpiChannelInfo("SPI3_COPI", SpiLineType.COPI)
                 }
             );
 
@@ -310,7 +310,7 @@ namespace Meadow.Devices
                 "PC11", "PC11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC11", interruptGroup: 11),
-                    new SpiChannelInfo("SPI3_CIPO", SpiLineType.MISO)
+                    new SpiChannelInfo("SPI3_CIPO", SpiLineType.CIPO)
                 }
             );
 
@@ -339,7 +339,7 @@ namespace Meadow.Devices
                 "PF8", "PF8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF8", interruptGroup: 8),
-                    new SpiChannelInfo("SPI5_CIPO", SpiLineType.MISO)
+                    new SpiChannelInfo("SPI5_CIPO", SpiLineType.CIPO)
                 }
             );
 
@@ -347,7 +347,7 @@ namespace Meadow.Devices
                 "PF9", "PF9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF9", interruptGroup: 9),
-                    new SpiChannelInfo("SPI5_COPI", SpiLineType.MOSI)
+                    new SpiChannelInfo("SPI5_COPI", SpiLineType.COPI)
                 }
             );
 

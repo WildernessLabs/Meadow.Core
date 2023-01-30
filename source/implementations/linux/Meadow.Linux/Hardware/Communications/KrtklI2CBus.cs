@@ -1,5 +1,4 @@
 ﻿using Meadow.Hardware;
-using Meadow.Units;
 using System;
 using System.Collections.Generic;
 
@@ -7,11 +6,12 @@ namespace Meadow
 {
     public class KrtklI2CBus : II2cBus, IDisposable
     {
-        public Frequency Frequency { get; set; }
+        public I2cBusSpeed BusSpeed { get; set; }
 
-        public KrtklI2CBus(Frequency frequency)
+
+        public KrtklI2CBus(I2cBusSpeed busSpeed)
         {
-            Frequency = frequency;
+            BusSpeed = busSpeed;
         }
 
         public void Dispose()
