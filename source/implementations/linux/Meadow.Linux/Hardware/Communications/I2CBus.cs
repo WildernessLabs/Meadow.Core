@@ -1,8 +1,6 @@
 ﻿using Meadow.Hardware;
-using Meadow.Units;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Meadow
@@ -34,16 +32,17 @@ namespace Meadow
         }
 
         public int BusNumber { get; set; } = 1;
-        public Frequency Frequency { get; set; }
+        public I2cBusSpeed BusSpeed { get; set; }
 
         private PeripheralMap InfoMap { get; }
 
-        public I2CBus(int busNumber, Frequency frequency)
+        public I2CBus(int busNumber, I2cBusSpeed busSpeed)
         {
             BusNumber = busNumber;
 
             // TODO: how do we affect frequency on these platforms?
-            Frequency = frequency;
+            BusSpeed = busSpeed;
+
             InfoMap = new PeripheralMap(BusNumber);
         }
 

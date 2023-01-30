@@ -135,7 +135,7 @@ namespace Meadow.Devices
                 "COPI", "PB5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB5", interruptGroup: 5),
-                    new SpiChannelInfo("PB5", SpiLineType.MOSI)
+                    new SpiChannelInfo("PB5", SpiLineType.COPI)
                 }
             );
             // CIPO
@@ -145,7 +145,7 @@ namespace Meadow.Devices
                 "CIPO", "PC11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC11", interruptGroup: 11),
-                    new SpiChannelInfo("PC11", SpiLineType.MISO)
+                    new SpiChannelInfo("PC11", SpiLineType.CIPO)
                 }
             );
 
@@ -351,7 +351,7 @@ namespace Meadow.Devices
                 "ESP_MOSI", "PI3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI3"),
-                    new SpiChannelInfo("PI3", SpiLineType.MOSI)
+                    new SpiChannelInfo("PI3", SpiLineType.COPI)
                 }
             );
             // ESP_MISO
@@ -359,7 +359,7 @@ namespace Meadow.Devices
                 "ESP_MISO", "PI2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI2", interruptCapable: false),
-                    new SpiChannelInfo("PI2", SpiLineType.MISO)
+                    new SpiChannelInfo("PI2", SpiLineType.CIPO)
                 }
             );
             // ESP_CLK

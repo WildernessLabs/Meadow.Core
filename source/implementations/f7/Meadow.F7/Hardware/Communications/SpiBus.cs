@@ -41,11 +41,11 @@ namespace Meadow.Hardware
             {
                 throw new NotSupportedException($"Pin {clock.Name} does not support SPI Clock capability");
             }
-            if (!mosi.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MOSI) != SpiLineType.None))
+            if (!mosi.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.COPI) != SpiLineType.None))
             {
                 throw new NotSupportedException($"Pin {mosi.Name} does not support SPI MOSI capability");
             }
-            if (!miso.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.MISO) != SpiLineType.None))
+            if (!miso.Supports<SpiChannelInfo>(p => (p.LineTypes & SpiLineType.CIPO) != SpiLineType.None))
             {
                 throw new NotSupportedException($"Pin {miso.Name} does not support SPI MISO capability");
             }

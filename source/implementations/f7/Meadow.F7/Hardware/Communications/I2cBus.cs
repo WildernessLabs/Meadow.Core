@@ -1,10 +1,5 @@
 ﻿using Meadow.Devices;
-using Meadow.Units;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
 
@@ -18,7 +13,6 @@ namespace Meadow.Hardware
     {
         private bool _showI2cDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
-        private Frequency _frequency;
 
         private IMeadowIOController IOController { get; }
         internal int BusNumber { get; set; } = 1;
@@ -28,44 +22,9 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Bus Clock speed in Hz
+        /// Bus Clock speed
         /// </summary>
-        public Frequency Frequency 
-        {
-            get => _frequency;
-            set
-            {
-                switch (value.Hertz)
-                {
-                    case 100000:
-                    case 400000:
-                    case 1000000:
-                        _frequency = value;
-                        break;
-                    default:
-                        int actual;
-
-                        // always round down (except if we're below the floor)
-                        if (value.Hertz > 1000000)
-                        {
-                            actual = 1000000;
-                        }
-                        else if (value.Hertz > 400000)
-                        {
-                            actual = 400000;
-                        }
-                        else
-                        {
-                            actual = 100000;
-                        }
-
-                        Resolver.Log.Warn($"Warning: Invalid I2C Frequency of {value}. Adjusting to {actual}");
-                        _frequency = new Frequency(actual, Frequency.UnitType.Hertz);
-                        break;
-
-                }
-            }
-        }
+        public I2cBusSpeed BusSpeed { get; set; }
 
         /// <summary>
         /// Default constructor for the I2CBus class.  This is private to prevent the
@@ -77,11 +36,11 @@ namespace Meadow.Hardware
             II2cChannelInfo clockChannel,
             IPin data,
             II2cChannelInfo dataChannel,
-            Frequency frequency,
+            I2cBusSpeed busSpeed,
             ushort transactionTimeout = 100)
         {
             IOController = ioController;
-            Frequency = frequency;
+            BusSpeed = busSpeed;
 
 #if !DEBUG
             // ensure this is off in release (in case a dev sets it to true and fogets during check-in
@@ -110,36 +69,8 @@ namespace Meadow.Hardware
         /// <returns>An I2CBus instance</returns>
         public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
         {
-            return From(ioController, clock, data, new Frequency((int)busSpeed, Units.Frequency.UnitType.Hertz), transactionTimeout);
+            return From(ioController, clock, data, busSpeed, transactionTimeout);
         }
-
-        /// <summary>
-        /// Creates an I2C bus for a set of given pins and parameters
-        /// </summary>
-        /// <param name="ioController">The Meadow IO Controller</param>
-        /// <param name="clock">Clock (SCL) pin</param>
-        /// <param name="data">Data (SDA) pin</param>
-        /// <param name="frequency">Bus clock speed</param>
-        /// <param name="transactionTimeout">Bus transaction timeout</param>
-        /// <returns>An I2CBus instance</returns>
-        public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, Frequency frequency, ushort transactionTimeout = 100)
-        {
-            var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
-            if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
-            {
-                throw new Exception($"Pin {clock.Name} does not have I2C Clock capabilities");
-            }
-
-            var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
-            if (dataChannel == null || dataChannel.ChannelFunction != I2cChannelFunctionType.Data)
-            {
-                throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
-            }
-
-            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, frequency, transactionTimeout);
-        }
-
-        //==== NEW HOTNESS
 
         /// <summary>
         /// Reads bytes from a peripheral.
@@ -154,11 +85,14 @@ namespace Meadow.Hardware
         {
             _busSemaphore.Wait();
 
-            try {
-                fixed (byte* pData = readBuffer) {
-                    var command = new Nuttx.UpdI2CCommand() {
+            try
+            {
+                fixed (byte* pData = readBuffer)
+                {
+                    var command = new Nuttx.UpdI2CCommand()
+                    {
                         Address = peripheralAddress,
-                        Frequency = (int)this.Frequency.Hertz,
+                        Frequency = (int)BusSpeed,
                         TxBufferLength = 0,
                         TxBuffer = IntPtr.Zero,
                         RxBufferLength = readBuffer.Length,
@@ -166,14 +100,15 @@ namespace Meadow.Hardware
                         BusNumber = this.BusNumber
                     };
 
-                    Output.WriteIf(_showI2cDebug, " +SendData");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-                    if (result != 0) {
+                    if (result != 0)
+                    {
                         DecipherI2CError(UPD.GetLastError());
                     }
                 }
-            } finally {
+            }
+            finally
+            {
                 _busSemaphore.Release();
             }
         }
@@ -190,11 +125,14 @@ namespace Meadow.Hardware
         {
             _busSemaphore.Wait();
 
-            try {
-                fixed (byte* pData = data) {
-                    var command = new Nuttx.UpdI2CCommand() {
+            try
+            {
+                fixed (byte* pData = data)
+                {
+                    var command = new Nuttx.UpdI2CCommand()
+                    {
                         Address = peripheralAddress,
-                        Frequency = (int)this.Frequency.Hertz,
+                        Frequency = (int)this.BusSpeed,
                         TxBufferLength = data.Length,
                         TxBuffer = (IntPtr)pData,
                         RxBufferLength = 0,
@@ -202,14 +140,15 @@ namespace Meadow.Hardware
                         BusNumber = this.BusNumber
                     };
 
-                    Output.WriteIf(_showI2cDebug, " +Write");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
-                    Output.WriteLineIf(_showI2cDebug, $" returned {result}");
-                    if (result != 0) {
+                    if (result != 0)
+                    {
                         DecipherI2CError(UPD.GetLastError());
                     }
                 }
-            } finally {
+            }
+            finally
+            {
                 _busSemaphore.Release();
             }
         }
@@ -224,12 +163,15 @@ namespace Meadow.Hardware
         public unsafe void Exchange(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
         {
             _busSemaphore.Wait();
-            try {
+            try
+            {
                 fixed (byte* pWrite = writeBuffer)
-                fixed (byte* pRead = readBuffer) {
-                    var command = new Nuttx.UpdI2CCommand() {
+                fixed (byte* pRead = readBuffer)
+                {
+                    var command = new Nuttx.UpdI2CCommand()
+                    {
                         Address = peripheralAddress,
-                        Frequency = (int)this.Frequency.Hertz,
+                        Frequency = (int)BusSpeed,
                         TxBufferLength = writeBuffer.Length,
                         TxBuffer = (IntPtr)pWrite,
                         RxBufferLength = readBuffer.Length,
@@ -239,18 +181,21 @@ namespace Meadow.Hardware
 
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
 
-                    if (result != 0) {
+                    if (result != 0)
+                    {
                         DecipherI2CError(UPD.GetLastError());
                     }
                 }
-            } finally {
+            }
+            finally
+            {
                 _busSemaphore.Release();
             }
         }
 
         private void DecipherI2CError(Nuttx.ErrorCode ec)
         {
-            switch(ec)
+            switch (ec)
             {
                 case (Nuttx.ErrorCode)125:
                     throw new NativeException("Communication error.  Verify address and that SCL and SDA are not reversed.");
