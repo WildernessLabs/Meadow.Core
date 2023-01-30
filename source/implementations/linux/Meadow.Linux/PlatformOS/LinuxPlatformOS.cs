@@ -3,6 +3,7 @@ using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
@@ -13,8 +14,7 @@ namespace Meadow
     {
         public virtual string OSVersion { get; private set; }
         public virtual string OSBuildDate { get; private set; }
-
-        public virtual string MonoVersion => ".NET 6.0"; // TODO"
+        public virtual string RuntimeVersion { get; }
 
         internal static CancellationTokenSource AppAbort = new();
 
@@ -24,6 +24,11 @@ namespace Meadow
         public event ExternalStorageEventHandler ExternalStorageEvent;
 
         public INtpClient NtpClient { get; private set; }
+
+        internal LinuxPlatformOS()
+        {
+            RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+        }
 
         public void Initialize()
         {
@@ -69,7 +74,12 @@ namespace Meadow
             .ToArray();
         }
 
+        public void Initialize(DeviceCapabilities capabilities)
+        {
+            // TODO: deal with capabilities
+        }
 
+        public string FileSystemRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".meadow");
 
 
         public virtual Temperature GetCpuTemperature()
@@ -82,8 +92,6 @@ namespace Meadow
         public uint InitializationTimeout => throw new NotImplementedException();
 
         public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
-
-        public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public bool AutomaticallyStartNetwork => throw new NotImplementedException();
 
@@ -107,11 +115,6 @@ namespace Meadow
         }
 
         public void Sleep(TimeSpan duration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Initialize(DeviceCapabilities capabilities)
         {
             throw new NotImplementedException();
         }

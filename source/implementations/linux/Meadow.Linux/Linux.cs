@@ -6,16 +6,11 @@ using System.Linq;
 
 namespace Meadow
 {
-    public class LinuxApp<T> : App<T>
-        where T : class, IMeadowDevice, new()
-    {
-    }
-
     /// <summary>
     /// Represents an instance of Meadow as a generic Linux process
     /// </summary>
     /// <typeparam name="TPinout"></typeparam>
-    public class MeadowForLinux<TPinout> : IMeadowDevice
+    public class Linux<TPinout> : IMeadowDevice
         where TPinout : IPinDefinitions, new()
     {
         private SysFsGpioDriver _sysfs = null!;
@@ -30,15 +25,14 @@ namespace Meadow
         public TPinout Pins { get; }
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
-
-        public IDeviceInformation Information => throw new NotImplementedException();
+        public IDeviceInformation Information { get; }
 
         public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
 
         /// <summary>
         /// Creates the Meadow on Linux infrastructure instance
         /// </summary>
-        public MeadowForLinux()
+        public Linux()
         {
             if (typeof(TPinout) == typeof(JetsonNano) || typeof(TPinout) == typeof(JetsonXavierAGX))
             {
@@ -48,6 +42,8 @@ namespace Meadow
             {
                 PlatformOS = new LinuxPlatformOS();
             }
+
+            Information = new LinuxDeviceInfo();
 
             Pins = new TPinout();
             Capabilities = new DeviceCapabilities(

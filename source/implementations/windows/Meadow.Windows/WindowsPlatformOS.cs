@@ -17,8 +17,15 @@ namespace Meadow
 
         public string FileSystemRoot { get; private set; }
 
+        public string OSVersion { get; }
+        public string OSBuildDate { get; }
+        public string RuntimeVersion { get; }
+
         internal WindowsPlatformOS()
         {
+            OSVersion = Environment.OSVersion.ToString();
+            OSBuildDate = "Unknown";
+            RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
         }
 
         public void Initialize(DeviceCapabilities capabilities)
@@ -40,6 +47,10 @@ namespace Meadow
             .ToArray();
         }
 
+        public Temperature GetCpuTemperature()
+        {
+            throw new PlatformNotSupportedException();
+        }
 
 
 
@@ -52,9 +63,6 @@ namespace Meadow
 
         public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
         public INtpClient NtpClient => throw new NotImplementedException();
-        public string OSVersion => throw new NotImplementedException();
-        public string OSBuildDate => throw new NotImplementedException();
-        public string MonoVersion => throw new NotImplementedException();
         public bool RebootOnUnhandledException => throw new NotImplementedException();
         public uint InitializationTimeout => throw new NotImplementedException();
         public bool AutomaticallyStartNetwork => throw new NotImplementedException();
@@ -62,11 +70,6 @@ namespace Meadow
         public bool SdStorageSupported => throw new NotImplementedException();
 
         public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
-        {
-            throw new NotImplementedException();
-        }
-
-        public Temperature GetCpuTemperature()
         {
             throw new NotImplementedException();
         }

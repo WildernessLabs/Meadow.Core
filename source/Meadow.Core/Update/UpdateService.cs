@@ -36,27 +36,15 @@ namespace Meadow.Update
         private UpdateState _state;
 
         private IUpdateSettings Config { get; }
-        private IMqttClient MqttClient { get; set; }
-        private IMqttClientOptions ClientOptions { get; set; }
+        private IMqttClient MqttClient { get; set; } = default!;
+        private IMqttClientOptions ClientOptions { get; set; } = default!;
         private UpdateStore Store { get; }
         private string MqttClientID { get; }
 
-        internal UpdateService(IUpdateSettings config)
+        internal UpdateService(string fsRoot, IUpdateSettings config)
         {
-            string root;
-
-            // NOTE: this is a temporary path for desktop testing right now
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                root = Path.Combine(Path.GetTempPath(), "meadow");
-            }
-            else
-            {
-                root = "/meadow0";
-            }
-
-            UpdateStoreDirectory = Path.Combine(root, "update-store");
-            UpdateDirectory = Path.Combine(root, "update");
+            UpdateStoreDirectory = Path.Combine(fsRoot, "update-store");
+            UpdateDirectory = Path.Combine(fsRoot, "update");
 
             Store = new UpdateStore(UpdateStoreDirectory);
             var id = Resolver.Device?.Information?.UniqueID ?? "simple";

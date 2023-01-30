@@ -4,13 +4,13 @@ using System;
 
 namespace Meadow
 {
-    public class MeadowForWindows : IMeadowDevice
+    public class Windows : IMeadowDevice
     {
         public IPlatformOS PlatformOS { get; }
         public DeviceCapabilities Capabilities { get; private set; }
         public IDeviceInformation Information { get; private set; }
 
-        public MeadowForWindows()
+        public Windows()
         {
             PlatformOS = new WindowsPlatformOS();
         }
