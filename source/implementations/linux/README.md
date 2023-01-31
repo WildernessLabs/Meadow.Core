@@ -18,7 +18,7 @@ Currently tested platforms and distributions:
 | Raspberry Pi 4 | Raspberry Pi OS | Beta 6.2 |
 | Raspberry Pi Zero 2 W | Raspberry Pi OS | Beta 6.2 |
 | Jetson Nano | Ubuntu 20.04 | Beta 6.2 |
-| Jetson Xavier AGX | Ubuntu 18.04 | Beta 6.2 |
+| Jetson Xavier AGX | Ubuntu 18.04 | RC-2 |
 | KRTKL Snickerdoodle Black | Ubuntu 20.04 | RC-1 |
 | AMD64 Ubuntu 20.04 under WSL2  | Ubuntu 20.04 | RC-1 |
 
@@ -36,7 +36,7 @@ For this documentation, we assume you are developing your application code on a 
 
 `Meadow.Linux` runs applications using the .NET 6.0 Core Runtime, so you must install it on the target.
 
-### Install .NET 6.0
+### Install .NET 7.0
 
 Follow the instructions based on your distro:
 
@@ -44,7 +44,7 @@ https://docs.microsoft.com/en-us/dotnet/core/install/linux
 
 ```console
 $ dotnet --list-runtimes
-Microsoft.NETCore.App 6.0.1 [/opt/dotnet/shared/Microsoft.NETCore.App]
+Microsoft.NETCore.App 7.0.2 [/opt/dotnet/shared/Microsoft.NETCore.App]
 ```
 
 ### Enable Hardware Access
@@ -53,7 +53,7 @@ Different platforms will have different rules for enabling application access to
 
 ## Develop your Application
 
-- Create a .NET 6 Core Application Project
+- Create a .NET 7 Core Application Project
 - Add NuGet references to Meadow.Linux and any other requirements (e.g Meadow.Foundation and peripheral drivers)
 - Develop/Compile 
 
@@ -73,7 +73,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   Determining projects to restore...
   All projects are up-to-date for restore.
   Meadow.Linux -> C:\repos\wilderness\Meadow.Linux\src\lib\bin\Release\netstandard2.1\Meadow.Linux.dll
-  Bme280_Sample -> C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample\bin\Release\net6.0\App.dll
+  Bme280_Sample -> C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample\bin\Release\net7.0\App.dll
   Bme280_Sample -> C:\repos\wilderness\Meadow.Linux\src\samples\Bme280_Sample\publish\
 ``` 
 
@@ -105,18 +105,25 @@ drwxr-xr-x 16 pi pi   4096 Nov  7 17:55 ..
 
 ## Running
 
-Starting with the `RC1.0` release, Meadow now has a defined lifecycle.  This is imposed to allow automated application shutdown by the OtA update service. What this means, practically, is that your Meadow application is now a _library_ that gets loaded by the actual entry executable, which is `Meadow.dll`.
-
-Use `dotnet` *on the target hardware* to execute your application by doing the following:
+Starting with the `RC1.0` release, Meadow now has a defined lifecycle.  This is imposed to allow automated application shutdown by the OtA update service. What this means, practically, is that your Meadow.Linux application must define an entry point in your `App<T>` implementation and and manually start the MeadowOS stack.
 
 ```console
-$ dotnet Meadow.dll
+public class MeadowApp : App<Linux>
+{
+    public static async Task Main(string[] _)
+    {
+        await MeadowOS.Start();
+    }
+    ...
+}
+```
+
+Then launch the application using `dotnet`
+
+```console
+$ dotnet MyAppAssembly.dll
 ```
  
 ## Work in Progress
 
 `Meadow.Linux` is currently an *Beta* product with several core features that are not yet implemented. Details are available in the [Issues Tab](https://github.com/WildernessLabs/Meadow.Linux/issues) and the source.
-
-## Running Meadow.Linux under Windows
-
-`Meadow.Linux` can be run on Windows 11 using WSL2.  Since a PC has no GPIOs or hardware busses, it requires the `Meadow.Simulation` platform.
