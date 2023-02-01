@@ -28,10 +28,8 @@
    <Folder Include="Gateways\Bluetooth\Definitions\" />
  </ItemGroup>
  <ItemGroup>
-	 <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
-	 <ProjectReference Include="..\..\..\Meadow.Logging\Source\Meadow.Logging\lib\Meadow.Logging.csproj" />
-	 <ProjectReference Include="..\..\..\Meadow.Units\Source\Meadow.Units\Meadow.Units.csproj" />
-	 <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
+     <PackageReference Include="Meadow.Contracts" Version="0.*" />
+     <PackageReference Include="Meadow.MQTT" Version="0.*" />
      <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
      <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
