@@ -1,5 +1,7 @@
 ﻿using Meadow.Devices;
+using Meadow.Units;
 using System;
+using System.Linq;
 using System.Threading;
 using static Meadow.Core.Interop;
 
@@ -69,7 +71,19 @@ namespace Meadow.Hardware
         /// <returns>An I2CBus instance</returns>
         public static I2cBus From(IMeadowIOController ioController, IPin clock, IPin data, I2cBusSpeed busSpeed, ushort transactionTimeout = 100)
         {
-            return From(ioController, clock, data, busSpeed, transactionTimeout);
+            var clockChannel = clock.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
+            if (clockChannel == null || clockChannel.ChannelFunction != I2cChannelFunctionType.Clock)
+            {
+                throw new Exception($"Pin {clock.Name} does not have I2C Clock capabilities");
+            }
+
+            var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
+            if (dataChannel == null || dataChannel.ChannelFunction != I2cChannelFunctionType.Data)
+            {
+                throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
+            }
+
+            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, busSpeed, transactionTimeout);
         }
 
         /// <summary>
