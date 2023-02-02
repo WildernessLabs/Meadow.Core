@@ -21,12 +21,3 @@ jobs:
       run: dotnet nuget push Meadow.Windows.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
-
-    - name: Build Meadow.WinForms
-      run: dotnet build -c Release source/implementations/windows/Meadow.WinForms/Meadow.WinForms.csproj /p:Version=${VERSION}
-    - name: Package Meadow.WinForms
-      run: dotnet pack -c Release source/implementations/windows/Meadow.WinForms/Meadow.WinForms.csproj /p:Version=${VERSION} --output .
-    - name: Push Meadow.WinForms to NuGet
-      run: dotnet nuget push Meadow.WinForms.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
-      env:
-        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
