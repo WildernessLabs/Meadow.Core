@@ -1,4 +1,4 @@
-<Project Sdk="Meadow.Sdk/1.1.0">
+﻿<Project Sdk="Meadow.Sdk/1.1.0">
  <PropertyGroup>
    <TargetFramework>netstandard2.1</TargetFramework>
    <OutputType>Library</OutputType>
@@ -28,7 +28,6 @@
 	  <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
 	  <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
 	</ItemGroup>
 </Project>
