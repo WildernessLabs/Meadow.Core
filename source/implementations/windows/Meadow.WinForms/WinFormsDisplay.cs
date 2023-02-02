@@ -4,11 +4,14 @@ using Meadow.Hardware;
 
 namespace Meadow.Graphics;
 
+/// <summary>
+/// Represents a WinForms graphics display
+/// </summary>
 public class WinFormsDisplay : Form, IGraphicsDisplay, ITouchScreen
 {
-    public event TouchEventHandler TouchDown;
-    public event TouchEventHandler TouchUp;
-    public event TouchEventHandler TouchClick;
+    public event TouchEventHandler TouchDown = delegate { };
+    public event TouchEventHandler TouchUp = delegate { };
+    public event TouchEventHandler TouchClick = delegate { };
 
     private WinFormsPixelBuffer _buffer;
 
@@ -25,6 +28,24 @@ public class WinFormsDisplay : Form, IGraphicsDisplay, ITouchScreen
         this.DoubleBuffered = true;
 
         _buffer = new WinFormsPixelBuffer(Width, Height);
+    }
+
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        TouchDown?.Invoke(e.X, e.Y);
+        base.OnMouseDown(e);
+    }
+
+    protected override void OnMouseUp(MouseEventArgs e)
+    {
+        TouchUp?.Invoke(e.X, e.Y);
+        base.OnMouseUp(e);
+    }
+
+    protected override void OnClick(EventArgs e)
+    {
+        TouchClick?.Invoke(-1, -1);
+        base.OnClick(e);
     }
 
     void IGraphicsDisplay.Show()
