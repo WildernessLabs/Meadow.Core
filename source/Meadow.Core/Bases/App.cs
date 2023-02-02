@@ -68,6 +68,6 @@
         /// </summary>
         public static CancellationToken Abort { get; protected set; }
 
-        public async virtual ValueTask DisposeAsync() { return; }
+        public virtual ValueTask DisposeAsync() { return new ValueTask(Task.CompletedTask); }
     }
 }

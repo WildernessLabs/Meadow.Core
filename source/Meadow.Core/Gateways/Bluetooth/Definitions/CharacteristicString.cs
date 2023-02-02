@@ -13,7 +13,7 @@ namespace Meadow.Gateways.Bluetooth
 
         public override void HandleDataWrite(byte[] data)
         {
-            Console.WriteLine($"HandleDataWrite in {this.GetType().Name}");
+            Resolver.Log.Info($"HandleDataWrite in {this.GetType().Name}");
 
             RaiseValueSet(Encoding.UTF8.GetString(data));
         }

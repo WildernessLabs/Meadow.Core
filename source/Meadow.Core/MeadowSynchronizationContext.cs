@@ -17,7 +17,7 @@ namespace Meadow
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine ($"!!! {e.GetType()}: {e.Message}");
+                    Resolver.Log.Error($"!!! {e.GetType()}: {e.Message}");
                 }
             };
             ThreadPool.QueueUserWorkItem(new WaitCallback(action.Invoke));

@@ -21,7 +21,7 @@
             /// Get the mono version on the device.
             /// </summary>
             /// <returns>Mono version.</returns>
-            public static string MonoVersion => CurrentDevice.PlatformOS.MonoVersion;
+            public static string RuntimeVersion => CurrentDevice.PlatformOS.RuntimeVersion;
 
             /// <summary>
             /// Should the system reboot if an unhandled exception is encounted in the user application?

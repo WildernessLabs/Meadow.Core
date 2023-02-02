@@ -222,7 +222,7 @@ namespace Meadow.Hardware
             catch (Exception ex)
             {
                 // ignore errors in the consumer's code
-                Console.WriteLine($"Error in BufferOverrun handler: {ex.Message}");
+                Resolver.Log.Error($"Error in BufferOverrun handler: {ex.Message}");
             }
         }
 
@@ -258,7 +258,6 @@ namespace Meadow.Hardware
             if (_readBuffer != null)
             {
                 _readBuffer.Clear();
-                //_readBuffer.Overrun -= OnReadBufferOverrun; - Adrian, this shouldn't be needed Aug 12, 2020
             }
         }
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-
-namespace Meadow.Hardware
+﻿namespace Meadow.Hardware
 {
     // TODO: to optimize, this really should re-implement its own serialport stuff
     // rather than using the ClassicSerialPort. That way we don't maintain two
@@ -16,62 +13,48 @@ namespace Meadow.Hardware
     /// thread-safe and asynchronous in nature. This is the recommended way to
     /// use serial on Meadow for nearly all use cases.
     /// </summary>
-    public class SerialMessagePort : ISerialMessagePort// : FilterableObservableBase<AtmosphericConditionChangeResult, AtmosphericConditions>
+    public class SerialMessagePort : SerialMessageProcessor, ISerialMessagePort
     {
         /// <summary>
         /// Gets or sets the serial baud rate.
         /// </summary>
         public int BaudRate
         {
-            get => _classicSerialPort.BaudRate;
-            set => _classicSerialPort.BaudRate = value;
+            get => classicSerialPort.BaudRate;
+            set => classicSerialPort.BaudRate = value;
         }
+
         /// <summary>
         /// Gets the port name used for communications.
         /// </summary>
-        public string PortName { get => _classicSerialPort.PortName; }
+        public string PortName { get => classicSerialPort.PortName; }
+
         /// <summary>
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
-        public bool IsOpen { get => _classicSerialPort.IsOpen; }
+        public bool IsOpen { get => classicSerialPort.IsOpen; }
+
         /// <summary>
         /// Gets or sets the parity-checking protocol.
         /// </summary>
-        public Parity Parity { get => _classicSerialPort.Parity; set => _classicSerialPort.Parity = value; }
+        public Parity Parity { get => classicSerialPort.Parity; set => classicSerialPort.Parity = value; }
+
         /// <summary>
         /// Gets or sets the standard length of data bits per byte.
         /// </summary>
-        public int DataBits { get => _classicSerialPort.DataBits; set => _classicSerialPort.DataBits = value; }
+        public int DataBits { get => classicSerialPort.DataBits; set => classicSerialPort.DataBits = value; }
+
         /// <summary>
         /// Gets or sets the standard number of stopbits per byte.
         /// </summary>
-        public StopBits StopBits { get => _classicSerialPort.StopBits; set => _classicSerialPort.StopBits = value; }
-        /// <summary>
-        /// The buffer size, in bytes.
-        /// </summary>
-        public int ReceiveBufferSize {
-            get => _classicSerialPort.ReceiveBufferSize;
-        }
+        public StopBits StopBits { get => classicSerialPort.StopBits; set => classicSerialPort.StopBits = value; }
 
-        /// <summary>
-        /// Raised when a message, as defined in the constructor, arrives.
-        /// </summary>
-        public event EventHandler<SerialMessageData> MessageReceived = delegate { };
-
-        protected ISerialPort _classicSerialPort;
-        protected SerialMessageMode _messageMode;
-        protected byte[] _messageDelimiterTokens;
-        protected int _messageLength;
-        protected bool _preserveDelimiter;
-
-        protected CircularBuffer<byte>? _readBuffer;
-        protected object _msgParseLock = new object();
+        protected ISerialPort classicSerialPort;
 
         public static SerialMessagePort From(
             ISerialPort commsPort,
             byte[] suffixDelimiter,
-            bool preserveDelimiter
-            )
+            bool preserveDelimiter)
         {
             return new SerialMessagePort(commsPort, suffixDelimiter, preserveDelimiter);
         }
@@ -80,8 +63,7 @@ namespace Meadow.Hardware
             ISerialPort commsPort,
             byte[] prefixDelimiter,
             bool preserveDelimiter,
-            int messageLength
-            )
+            int messageLength)
         {
             return new SerialMessagePort(commsPort, prefixDelimiter, preserveDelimiter, messageLength);
         }
@@ -98,13 +80,10 @@ namespace Meadow.Hardware
         protected SerialMessagePort(
             ISerialPort commsPort,
             byte[] suffixDelimiter,
-            bool preserveDelimiter)
+            bool preserveDelimiter) : base(commsPort.ReceiveBufferSize, suffixDelimiter, preserveDelimiter)
         {
-            this._messageMode = SerialMessageMode.SuffixDelimited;
-            this._preserveDelimiter = preserveDelimiter;
-            this._messageDelimiterTokens = suffixDelimiter;
-            this._classicSerialPort = commsPort;
-            this.Init(commsPort.ReceiveBufferSize);
+            classicSerialPort = commsPort;
+            Init();
         }
 
         /// <summary>
@@ -123,176 +102,55 @@ namespace Meadow.Hardware
             ISerialPort commsPort,
             byte[] prefixDelimiter,
             bool preserveDelimiter,
-            int messageLength)
+            int messageLength) : base(commsPort.ReceiveBufferSize, prefixDelimiter, preserveDelimiter, messageLength)
         {
-
-            this._messageMode = SerialMessageMode.PrefixDelimited;
-            this._preserveDelimiter = preserveDelimiter;
-            this._messageDelimiterTokens = prefixDelimiter;
-            this._messageLength = messageLength;
-            this._classicSerialPort = commsPort;
-            this.Init(commsPort.ReceiveBufferSize);
+            classicSerialPort = commsPort;
+            Init();
         }
 
         /// <summary>
         /// Initializes the buffer and underlying serial port
         /// </summary>
         /// <param name="readBufferSize"></param>
-        protected void Init(int readBufferSize)
+        protected void Init()
         {
-            _readBuffer = new CircularBuffer<byte>(readBufferSize);
-            this._classicSerialPort.DataReceived += SerialPort_DataReceived;
+            classicSerialPort.DataReceived += SerialPortDataReceived;
         }
 
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (_readBuffer == null) return;
-
-            // only one message processor at a time
-            lock (_msgParseLock) {
-
-                if (e.EventType == SerialDataType.Chars) {
-
-                    // read all the available data from the underlying port
-                    // HACK: note that this is where this class actually re-implementing
-                    // serial port comms would be beneifical. we wouldn't have to do
-                    // these additional allocations (`tempBuffer`)
-                    byte[] tempBuffer = new byte[_classicSerialPort.BytesToRead];
-                    _classicSerialPort.ReadAll(tempBuffer);
-                    this._readBuffer.Append(tempBuffer);
-
-                    int firstIndex;
-                    switch (this._messageMode) {
-
-                        // PREFIX DELIMITED PARSING ROUTINE
-                        case SerialMessageMode.PrefixDelimited:
-
-                            // if the buffer contains the prefix
-                            firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
-
-                            // while there are messages to Remove
-                            while (firstIndex >= 0) {
-                                // calculations
-                                // length of the entire message that needs to be Removed
-                                int totalMsgLength = _messageDelimiterTokens.Length + _messageLength;
-                                // length of the message to return (depends on delimiter preservation)
-                                int returnMsgLength = ( _preserveDelimiter ? totalMsgLength : _messageLength);
-
-                                byte[] msg = new byte[returnMsgLength];
-
-                                // throw away anything before the prefix
-                                for (int i = 0; i < firstIndex; i++) {
-                                    _readBuffer.Remove();
-                                }
-
-                                // presever delimiter?
-                                switch (_preserveDelimiter) {
-                                    case true: // if preserving, dump the whole message in
-                                        for (int i = 0; i < totalMsgLength; i++) {
-                                            msg[i] = _readBuffer.Remove();
-                                        }
-                                        break;
-                                    case false:
-                                        // if tossing away, throw away first part
-                                        for (int i = 0; i < _messageDelimiterTokens.Length; i++) {
-                                            _readBuffer.Remove();
-                                        }
-                                        for (int i = 0; i < returnMsgLength; i++) {
-                                            msg[i] = _readBuffer.Remove();
-                                        }
-                                        break;
-                                }
-
-                                //todo: should this run on a new thread?
-                                // it doesn't seem to return, otherwise
-                                System.Threading.Tasks.Task.Run(() => {
-                                    //Console.WriteLine($"raising message received, msg.length: {msg.Length}");
-                                    //Console.WriteLine($"Message:{Encoding.ASCII.GetString(msg)}");
-                                    this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
-                                });
-
-                                // check if there are any left
-                                firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
-                            }
-
-                            break;
-
-                        // SUFFIX DELIMITED PARSING ROUTINE
-                        case SerialMessageMode.SuffixDelimited:
-                            // if the buffer contains the suffix
-                            firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
-
-                            // while there are valid messages in here (multiple
-                            // messages can be in a single data event
-                            while (firstIndex >= 0) {
-                                var bytesToRemove = firstIndex + _messageDelimiterTokens.Length;
-                                byte[] msg = new byte[(_preserveDelimiter ? bytesToRemove : (bytesToRemove - _messageDelimiterTokens.Length))];
-
-                                // deuque the message, sans delimeter
-                                for (int i = 0; i < firstIndex; i++) {
-                                    msg[i] = _readBuffer.Remove();
-                                }
-                                // handle the delimeters. either add to msg or toss away.
-                                for (int i = firstIndex; i < bytesToRemove; i++) {
-                                    if (_preserveDelimiter) {
-                                        msg[i] = _readBuffer.Remove();
-                                    } else {
-                                        _readBuffer.Remove();
-                                    }
-                                }
-
-                                //todo: should this run on a new thread?
-                                // it doesn't seem to return, otherwise
-                                System.Threading.Tasks.Task.Run(() => {
-                                    this.RaiseMessageReceivedAndNotify(new SerialMessageData() { Message = msg });
-                                });
-
-                                firstIndex = _readBuffer.FirstIndexOf(_messageDelimiterTokens);
-                            }
-                            break;
-                    }
-                }
-            }
-        }
-
-        protected void RaiseMessageReceivedAndNotify(SerialMessageData messageData)
-        {
-            try
+            if (e.EventType == SerialDataType.Chars)
             {
-                MessageReceived(this, messageData);
+                byte[] data = new byte[classicSerialPort.BytesToRead];
+                classicSerialPort.ReadAll(data);
+                Process(data);
             }
-            catch(Exception ex)
-            {
-                Console.WriteLine($"!! {ex.Message}");
-            }
-            //TODO: figure out the IObservable when there's no change context
-            //base.NotifyObservers(messageResult);
         }
 
         /// <summary>
-        /// Opens a new serial port connection.
+        /// Opens a new serial port connection
         /// </summary>
         public void Open()
         {
-            this._classicSerialPort.Open();
+            classicSerialPort.Open();
         }
 
         /// <summary>
-        /// Closes the port connection and sets the IsOpen property to false.
+        /// Closes the port connection and sets the IsOpen property to false
         /// </summary>
         public void Close()
         {
-            this._classicSerialPort.Close();
+            classicSerialPort.Close();
         }
 
         /// <summary>
-        /// Writes data to the serial port.
+        /// Writes data to the serial port
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
         public int Write(byte[] buffer)
         {
-            return this._classicSerialPort.Write(buffer);
+            return classicSerialPort.Write(buffer);
         }
 
         /// <summary>
@@ -304,25 +162,15 @@ namespace Meadow.Hardware
         /// <returns></returns>
         public int Write(byte[] buffer, int offset, int count)
         {
-            return this._classicSerialPort.Write(buffer, offset, count);
+            return classicSerialPort.Write(buffer, offset, count);
         }
 
         /// <summary>
-        /// Discards all data from the receive buffer.
+        /// Discards all data from the receive buffer
         /// </summary>
         public void ClearReceiveBuffer()
         {
-            _classicSerialPort.ClearReceiveBuffer();
+            classicSerialPort.ClearReceiveBuffer();
         }
-
-        /// <summary>
-        /// Whether we're defining messages by prefix + length, or suffix.
-        /// </summary>
-        protected enum SerialMessageMode
-        {
-            PrefixDelimited,
-            SuffixDelimited
-        }
-
     }
 }

@@ -50,7 +50,7 @@ namespace Meadow.Hardware
             }
             else
             {
-                throw new PortInUseException($"Pin {pin.Name} is already in use");
+                throw new PortInUseException($"{this.GetType().Name}: Pin {pin.Name} is already in use");
             }
         }
 
@@ -63,10 +63,6 @@ namespace Meadow.Hardware
             TimeSpan glitchDuration
             )
         {
-            // convert to microseconds
-            var debounce = debounceDuration.TotalMilliseconds * 10;
-            var glitch = glitchDuration.TotalMilliseconds * 10;
-
             var chan = pin.SupportedChannels.OfType<IDigitalChannelInfo>().FirstOrDefault();
             //TODO: may need other checks here.
             if (chan == null)
@@ -77,11 +73,11 @@ namespace Meadow.Hardware
             {
                 throw new Exception("Unable to create input; channel is not capable of interrupts");
             }
-            if (debounce < 0.0 || debounce > 1000.0)
+            if (debounceDuration.TotalMilliseconds > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
-            if (glitch < 0.0 || glitch > 1000.0)
+            if (glitchDuration.TotalMilliseconds > 1000.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(glitchDuration), "Unable to create an input port, because glitchDuration is out of range (0.1-1000.0)");
             }
@@ -110,7 +106,7 @@ namespace Meadow.Hardware
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
                 this.LastEventTime = DateTime.Now;
-                //Console.WriteLine($"event on pin: {pin.Name}, state: {state}");
+                //Resolver.Log.Info($"event on pin: {pin.Name}, state: {state}");
                 // BC 2021.05.21 b5.0: Changed this to the new result type.
                 // assuming that old state is just an inversion of the new state if date time isn't min, yeah?
                 DigitalState? old = (capturedLastTime == DateTime.MinValue) ? null : new DigitalState(!state, capturedLastTime);
