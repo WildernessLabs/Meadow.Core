@@ -1,39 +1,31 @@
 ﻿<Project Sdk="Meadow.Sdk/1.1.0">
- <PropertyGroup>
-   <TargetFramework>netstandard2.1</TargetFramework>
-   <OutputType>Exe</OutputType>
-   <AssemblyName>Meadow</AssemblyName>   
-   <Company>Wilderness Labs, Inc</Company>
-   <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
-   <PackageId>Meadow</PackageId>
-	 <PackageIcon>icon.png</PackageIcon>
-	 <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
-   <PackageTags>Meadow</PackageTags>
-   <Version>0.23.0</Version>
-   <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-   <GenerateDocumentationFile>true</GenerateDocumentationFile>
-   <RootNamespace>Meadow</RootNamespace>
-   <Nullable>enable</Nullable>
-   <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
- </PropertyGroup>
- <PropertyGroup>
-   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-   <LangVersion>9.0</LangVersion>
-   <Nullable>enable</Nullable>
- </PropertyGroup>
-	<ItemGroup>
-		<None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-	</ItemGroup>
-	<ItemGroup>
-   <Folder Include="Gateways\Bluetooth\Definitions\" />
- </ItemGroup>
- <ItemGroup>
-     <PackageReference Include="Meadow.Contracts" Version="0.*" />
-     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
- </ItemGroup>
- <ItemGroup>
-   <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
-   <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
- </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Meadow</AssemblyName>   
+    <Company>Wilderness Labs, Inc</Company>
+    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+    <PackageId>Meadow</PackageId>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+    <PackageTags>Meadow</PackageTags>
+    <Version>0.23.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Meadow</RootNamespace>
+    <Nullable>enable</Nullable>
+    <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
+    <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
+  </ItemGroup>
 </Project>

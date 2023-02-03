@@ -1,36 +1,28 @@
 ﻿<Project Sdk="Meadow.Sdk/1.1.0">
- <PropertyGroup>
-   <TargetFramework>netstandard2.1</TargetFramework>
-   <OutputType>Library</OutputType>
-   <AssemblyName>Meadow.F7</AssemblyName>   
-   <Company>Wilderness Labs, Inc</Company>
-   <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
-   <PackageId>Meadow.F7</PackageId>
-	 <PackageIcon>icon.png</PackageIcon>
-	 <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
-   <PackageTags>Meadow</PackageTags>
-   <Version>0.24.2</Version>
-   <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-   <GenerateDocumentationFile>true</GenerateDocumentationFile>
-   <RootNamespace>Meadow</RootNamespace>
-   <Nullable>enable</Nullable>
-   <Description>STM32F7 .NET libraries for Wilderness Labs Meadow</Description>
- </PropertyGroup>
- <PropertyGroup>
-   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-   <LangVersion>9.0</LangVersion>
-   <Nullable>enable</Nullable>
- </PropertyGroup>
- <ItemGroup>
-   <Compile Remove="Devices\Esp32Coprocessor\Esp32Coprocessor_WiredNetworkAdapter.cs" />
- </ItemGroup>
-	<ItemGroup>
-	  <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-	</ItemGroup>
-	<ItemGroup>
-	  <PackageReference Include="Meadow" Version="0.*" />
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
-	</ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Meadow.F7</AssemblyName>   
+    <Company>Wilderness Labs, Inc</Company>
+    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+    <PackageId>Meadow.F7</PackageId>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+    <PackageTags>Meadow</PackageTags>
+    <Version>0.24.2</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Meadow</RootNamespace>
+    <Nullable>enable</Nullable>
+    <Description>STM32F7 .NET libraries for Wilderness Labs Meadow</Description>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>9.0</LangVersion>
+  <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+    <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
+  </ItemGroup>
 </Project>
