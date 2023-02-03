@@ -57,6 +57,20 @@ namespace Meadow
             throw new NotSupportedException("Add an IO Expander to your platform");
         }
 
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
+
+        public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
+        {
+            throw new NotSupportedException("Add an IO Expander to your platform");
+        }
 
 
 
@@ -74,10 +88,6 @@ namespace Meadow
         public event NetworkConnectionHandler NetworkConnected;
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
-        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
-        {
-            throw new NotImplementedException();
-        }
 
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
@@ -89,15 +99,6 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
-        {
-            throw new NotImplementedException();
-        }
 
         public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
         {
