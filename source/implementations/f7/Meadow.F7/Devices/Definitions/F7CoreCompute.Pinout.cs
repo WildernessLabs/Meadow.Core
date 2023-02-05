@@ -11,9 +11,11 @@ namespace Meadow.Devices
 
         public partial class Pinout : IF7CoreComputePinout
         {
+            public IPinController Controller { get; set; }
+
             public IList<IPin> AllPins { get; }
 
-            public Pinout()
+            internal Pinout()
             {
                 AllPins = new List<IPin>();
 
@@ -32,6 +34,7 @@ namespace Meadow.Devices
             // ==== DISCRETES ====
 
             public IPin PA0 => new Pin(
+                Controller,
                 "PA0", "PA0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA0", interruptGroup: 0),
@@ -40,6 +43,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA1_ETH_REF_CLK => new Pin(
+                Controller,
                 "PA1", "PA1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA1", interruptGroup: 1),
@@ -47,6 +51,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA2_ETH_MDIO => new Pin(
+                Controller,
                 "PA2", "PA2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA2", interruptGroup: 2),
@@ -54,6 +59,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA3 => new Pin(
+                Controller,
                 "PA3", "PA3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA3", interruptGroup: 3),
@@ -62,6 +68,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA4 => new Pin(
+                Controller,
                 "PA4", "PA4",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA4", interruptGroup: 4),
@@ -70,6 +77,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA5 => new Pin(
+                Controller,
                 "PA5", "PA5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA5", interruptGroup: 5),
@@ -78,6 +86,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA7_ETH_CRS_DV => new Pin(
+                Controller,
                 "PA7", "PA7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA7", interruptGroup: 7),
@@ -85,6 +94,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA9 => new Pin(
+                Controller,
                 "PA9", "PA9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA9", interruptGroup: 9),
@@ -92,6 +102,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA10 => new Pin(
+                Controller,
                 "PA10", "PA10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA10", interruptCapable: false),
@@ -99,6 +110,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA13 => new Pin(
+                Controller,
                 "PA13", "PA13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA13", interruptGroup: 13),
@@ -106,6 +118,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA14 => new Pin(
+                Controller,
                 "PA14", "PA14",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA14", interruptGroup: 14),
@@ -113,6 +126,7 @@ namespace Meadow.Devices
             );
 
             public IPin PA15 => new Pin(
+                Controller,
                 "PA15", "PA15",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PA15", interruptGroup: 15),
@@ -120,6 +134,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB0 => new Pin(
+                Controller,
                 "PB0", "PB0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB0", interruptGroup: 0),
@@ -128,6 +143,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB1 => new Pin(
+                Controller,
                 "PB1", "PB1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB1", interruptGroup: 1),
@@ -136,6 +152,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB3 => new Pin(
+                Controller,
                 "PB3", "PB3",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB3", interruptGroup: 3),
@@ -143,6 +160,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB4 => new Pin(
+                Controller,
                 "PB4", "PB4",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB4", interruptGroup: 4),
@@ -151,6 +169,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB5 => new Pin(
+                Controller,
                 "PB5", "PB5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB5", interruptGroup: 5),
@@ -159,6 +178,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB6 => new Pin(
+                Controller,
                 "PB6", "PB6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB6", interruptGroup: 6),
@@ -168,6 +188,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB7 => new Pin(
+                Controller,
                 "PB7", "PB7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7", interruptGroup: 7),
@@ -177,6 +198,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB8 => new Pin(
+                Controller,
                 "PB8", "PB8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB8", interruptGroup: 8),
@@ -185,6 +207,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB9 => new Pin(
+                Controller,
                 "PB9", "PB9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9", interruptGroup: 9),
@@ -193,6 +216,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB11_ETH_TX_EN => new Pin(
+                Controller,
                 "PB11", "PB11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB11", interruptGroup: 11),
@@ -200,6 +224,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB12 => new Pin(
+                Controller,
                 "PB12", "PB12",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB12", interruptGroup: 12),
@@ -207,6 +232,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB13 => new Pin(
+                Controller,
                 "PB13", "PB13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB13", interruptGroup: 13),
@@ -214,6 +240,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB14 => new Pin(
+                Controller,
                 "PB14", "PB14",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB14", interruptGroup: 14),
@@ -223,6 +250,7 @@ namespace Meadow.Devices
             );
 
             public IPin PB15 => new Pin(
+                Controller,
                 "PB15", "PB15",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB15", interruptGroup: 15),
@@ -232,6 +260,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC0 => new Pin(
+                Controller,
                 "PC0", "PC0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC0", interruptGroup: 0),
@@ -240,6 +269,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC1_ETH_MDC => new Pin(
+                Controller,
                 "PC1", "PC1",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC1", interruptGroup: 1),
@@ -247,6 +277,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC2 => new Pin(
+                Controller,
                 "PC2", "PC2",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC2", interruptGroup: 2),
@@ -254,6 +285,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC4_ETH_RXD0 => new Pin(
+                Controller,
                 "PC4", "PC4",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC4", interruptGroup: 4),
@@ -261,6 +293,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC5_ETH_RXD1 => new Pin(
+                Controller,
                 "PC5", "PC5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC5", interruptGroup: 5),
@@ -268,6 +301,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC6 => new Pin(
+                Controller,
                 "PC6", "PC6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC6", interruptGroup: 6),
@@ -276,6 +310,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC7 => new Pin(
+                Controller,
                 "PC7", "PC7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC7", interruptGroup: 7),
@@ -284,6 +319,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC8 => new Pin(
+                Controller,
                 "PC8", "PC8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC8", interruptGroup: 8),
@@ -291,6 +327,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC9 => new Pin(
+                Controller,
                 "PC9", "PC9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC9", interruptGroup: 9),
@@ -299,6 +336,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC10 => new Pin(
+                Controller,
                 "PC10", "PC10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC10", inputCapable: false ),
@@ -307,6 +345,7 @@ namespace Meadow.Devices
             );
 
             public IPin PC11 => new Pin(
+                Controller,
                 "PC11", "PC11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC11", interruptGroup: 11),
@@ -315,6 +354,7 @@ namespace Meadow.Devices
             );
 
             public IPin PD5 => new Pin(
+                Controller,
                 "PD5", "PD5",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD5", interruptGroup: 5),
@@ -322,6 +362,7 @@ namespace Meadow.Devices
             );
 
             public IPin PD6_SDMMC_CLK => new Pin(
+                Controller,
                 "PD6", "PD6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD6", interruptGroup: 6),
@@ -329,6 +370,7 @@ namespace Meadow.Devices
             );
 
             public IPin PD7_SDMMC_CMD => new Pin(
+                Controller,
                 "PD7", "PD7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PD7", interruptGroup: 7),
@@ -336,6 +378,7 @@ namespace Meadow.Devices
             );
 
             public IPin PF8 => new Pin(
+                Controller,
                 "PF8", "PF8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF8", interruptGroup: 8),
@@ -344,6 +387,7 @@ namespace Meadow.Devices
             );
 
             public IPin PF9 => new Pin(
+                Controller,
                 "PF9", "PF9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PF9", interruptGroup: 9),
@@ -352,6 +396,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG6_SDMMC_IN_L => new Pin(
+                Controller,
                 "PG6", "PG6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG6", interruptCapable: false),
@@ -359,6 +404,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG9_SDMMC_D0 => new Pin(
+                Controller,
                 "PG9", "PG9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG9", interruptGroup: 9),
@@ -366,6 +412,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG10_SDMMC_D1 => new Pin(
+                Controller,
                 "PG10", "PG10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG10", interruptCapable: false),
@@ -373,6 +420,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG11_SDMMC_D2 => new Pin(
+                Controller,
                 "PG11", "PG11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG11", interruptGroup: 11),
@@ -380,6 +428,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG12_SDMMC_D3 => new Pin(
+                Controller,
                 "PG12", "PG12",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG12", interruptGroup: 12),
@@ -387,6 +436,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG13_ETH_TXD0 => new Pin(
+                Controller,
                 "PG13", "PG13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG13", interruptGroup: 13),
@@ -394,6 +444,7 @@ namespace Meadow.Devices
             );
 
             public IPin PG14_ETH_TXD1 => new Pin(
+                Controller,
                 "PG14", "PG14",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PG14", interruptGroup: 14),
@@ -401,6 +452,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH6 => new Pin(
+                Controller,
                 "PH6", "PH6",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH6", interruptGroup: 6),
@@ -409,6 +461,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH7 => new Pin(
+                Controller,
                 "PH7", "PH7",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH7", interruptGroup: 7),
@@ -417,6 +470,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH8 => new Pin(
+                Controller,
                 "PH8", "PH8",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH8", interruptGroup: 8),
@@ -425,6 +479,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH10 => new Pin(
+                Controller,
                 "PH10", "PH10",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH10", interruptCapable: false ),
@@ -433,6 +488,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH12 => new Pin(
+                Controller,
                 "PH12", "PH12",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH12", interruptGroup: 12),
@@ -440,6 +496,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH13 => new Pin(
+                Controller,
                 "PH13", "PH13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH13", interruptGroup: 13),
@@ -447,6 +504,7 @@ namespace Meadow.Devices
             );
 
             public IPin PH14_ETH_IRQ => new Pin(
+                Controller,
                 "PH14", "PH14",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH14", interruptGroup: 14),
@@ -454,6 +512,7 @@ namespace Meadow.Devices
             );
 
             public IPin PI9 => new Pin(
+                Controller,
                 "PI9", "PI9",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI9", interruptGroup: 9),
@@ -462,6 +521,7 @@ namespace Meadow.Devices
             );
 
             public IPin PI11 => new Pin(
+                Controller,
                 "PI11", "PI11",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PI11", interruptGroup: 11),

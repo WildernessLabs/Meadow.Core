@@ -29,7 +29,13 @@ namespace Meadow.Devices
 
         public INetworkAdapterCollection NetworkAdapters => networkAdapters;
 
+        /// <summary>
+        /// Gets an IPin by name
+        /// </summary>
+        /// <param name="pinName"></param>
+        /// <returns></returns>
         public abstract IPin GetPin(string pinName);
+
         public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
         /// <summary>

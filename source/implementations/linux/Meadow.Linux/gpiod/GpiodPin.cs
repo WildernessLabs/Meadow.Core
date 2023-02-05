@@ -8,8 +8,8 @@ namespace Meadow
         public string Chip { get; }
         public int Offset { get; }
 
-        public GpiodPin(string name, object key, string chip, int offset, IList<IChannelInfo>? supportedChannels = null)
-            : base(name, key, supportedChannels)
+        public GpiodPin(IPinController controller, string name, object key, string chip, int offset, IList<IChannelInfo>? supportedChannels = null)
+            : base(controller, name, key, supportedChannels)
         {
             Chip = chip;
             Offset = offset;
