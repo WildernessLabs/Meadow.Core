@@ -78,7 +78,7 @@ namespace Meadow.Devices
         /// <param name="busNumber">The hardware bus number</param>
         /// <returns>An instance of an I2cBus</returns>
         public override II2cBus CreateI2cBus(
-            int busNumber = 0,
+            int busNumber = 1,
             I2cBusSpeed busSpeed = I2cBusSpeed.Standard
         )
         {
