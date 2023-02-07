@@ -1,0 +1,23 @@
+name: Meadow Linux NuGet Package Creation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set VERSION variable from tag
+      run: echo "VERSION=0.94.0" >> $GITHUB_ENV
+      
+    - name: Build Meadow.Linux
+      run: dotnet build -c Release source/implementations/linux/Meadow.Linux/Meadow.Linux.csproj /p:Version=${VERSION}
+    - name: Package Meadow.Linux
+      run: dotnet pack -c Release source/implementations/linux/Meadow.Linux/Meadow.Linux.csproj /p:Version=${VERSION} --output .
+    - name: Push Meadow.Linux to NuGet
+      run: dotnet nuget push Meadow.Linux.${VERSION}.nupkg -s https://api.nuget.org/v3/index.json -k ${NUGET_TOKEN}
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
