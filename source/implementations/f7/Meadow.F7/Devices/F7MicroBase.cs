@@ -179,7 +179,7 @@ namespace Meadow.Devices
             IPin pin,
             InterruptMode edge)
         {
-            return new Counter(this, pin, edge);
+            return new Counter(pin, edge);
         }
     }
 }
