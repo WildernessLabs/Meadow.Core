@@ -46,6 +46,8 @@ namespace Meadow
             Information = new LinuxDeviceInfo();
 
             Pins = new TPinout();
+            Pins.Controller = this;
+
             Capabilities = new DeviceCapabilities(
                 new AnalogCapabilities(false, null),
                 new NetworkCapabilities(false, true),

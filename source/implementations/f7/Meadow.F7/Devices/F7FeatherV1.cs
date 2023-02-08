@@ -36,6 +36,8 @@ namespace Meadow.Devices
                 Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
+
+            Pins.Controller = this;
         }
 
         /// <summary>

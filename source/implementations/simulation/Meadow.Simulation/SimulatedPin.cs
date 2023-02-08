@@ -11,8 +11,8 @@ namespace Meadow.Simulation
 
         internal event EventHandler VoltageChanged = delegate { };
 
-        internal SimulatedPin(string name, object key, IList<IChannelInfo>? supportedChannels = null)
-            : base(name, key, supportedChannels)
+        internal SimulatedPin(IPinController controller, string name, object key, IList<IChannelInfo>? supportedChannels = null)
+            : base(controller, name, key, supportedChannels)
         {
         }
 

@@ -41,29 +41,30 @@ namespace Meadow.Hardware
         /// </summary>
         public bool Inverted { get; set; }
 
-        
+
         /// <summary>
         /// Duty cycle of PWM
         /// </summary>
-        public float DutyCycle 
+        public float DutyCycle
         {
             get => dutyCycle;
-            set 
+            set
             {
                 dutyCycle = value;
                 onTimeMilliseconds = CalculateOnTimeMillis();
                 offTimeMilliseconds = CalculateOffTimeMillis();
             }
-        } 
+        }
         float dutyCycle;
 
         /// <summary>
         /// Frequency of soft PWM
         /// </summary>
-        public Frequency Frequency 
+        public Frequency Frequency
         {
             get => frequency;
-            set {
+            set
+            {
                 frequency = value;
                 onTimeMilliseconds = CalculateOnTimeMillis();
                 offTimeMilliseconds = CalculateOffTimeMillis();
@@ -74,7 +75,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Channel info for PWM port
         /// </summary>
-        public IPwmChannelInfo Channel {get; protected set;}
+        public IPwmChannelInfo Channel { get; protected set; }
 
         /// <summary>
         /// State of PWM port (running / not running)
@@ -105,12 +106,11 @@ namespace Meadow.Hardware
         /// <summary>
         /// Instantiate a SoftPwm object that can perform PWM using digital pins
         /// </summary>
-        /// <param name="device"></param>
         /// <param name="outputPin"></param>
         /// <param name="dutyCycle"></param>
         /// <param name="frequency"></param>
-        public SoftPwmPort(IMeadowDevice device, IPin outputPin, float dutyCycle = 0.5f, float frequency = 1.0f) :
-            this(device.CreateDigitalOutputPort(outputPin, false), dutyCycle, frequency)
+        public SoftPwmPort(IPin outputPin, float dutyCycle = 0.5f, float frequency = 1.0f) :
+            this(outputPin.CreateDigitalOutputPort(false), dutyCycle, frequency)
         {
         }
 
@@ -137,8 +137,8 @@ namespace Meadow.Hardware
             running = true;
 
             // create a new thread that actually writes the pwm to the output port
-            thread = new Thread(() => 
-            { 
+            thread = new Thread(() =>
+            {
                 while (running)
                 {
                     Port.State = !Inverted;
@@ -198,16 +198,16 @@ namespace Meadow.Hardware
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue) 
+            if (!disposedValue)
             {
-                if (disposing) 
+                if (disposing)
                 {
                 }
 
                 disposedValue = true;
             }
         }
-        
+
         /// <summary>
         /// Dispose soft pwm port
         /// </summary>

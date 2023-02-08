@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Hardware;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -79,7 +80,7 @@ namespace Meadow
 
         private void SdMonitorProc(F7CoreComputeBase ccm)
         {
-            var input = Resolver.Device.CreateDigitalInputPort(ccm.Pins.PG6_SDMMC_IN_L);
+            var input = ccm.Pins.PG6_SDMMC_IN_L.CreateDigitalInputPort();
             var lastState = input.State;
             var firstRun = true;
 
