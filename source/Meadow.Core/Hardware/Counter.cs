@@ -25,7 +25,6 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates a Counter instance
         /// </summary>
-        /// <param name="device"></param>
         /// <param name="pin"></param>
         /// <param name="edge"></param>
         /// <exception cref="ArgumentException"></exception>
