@@ -2,48 +2,47 @@
 using Meadow.Units;
 using System;
 
-namespace Meadow
+namespace Meadow;
+
+public partial class F7PlatformOS : IPlatformOS
 {
-    public partial class F7PlatformOS : IPlatformOS
+    /// <summary>
+    /// NTP client.
+    /// </summary>
+    public INtpClient NtpClient { get; }
+
+    /// <summary>
+    /// Default construcotr for the F7PlatformOS objects.
+    /// </summary>
+    public F7PlatformOS()
     {
-        /// <summary>
-        /// NTP client.
-        /// </summary>
-        public INtpClient NtpClient { get; }
+        NtpClient = new NtpClient();
+    }
 
-        /// <summary>
-        /// Default construcotr for the F7PlatformOS objects.
-        /// </summary>
-        public F7PlatformOS()
-        {
-            NtpClient = new NtpClient();
-        }
+    /// <summary>
+    /// Get the current CPU temperature (Not supported on F7).
+    /// </summary>
+    /// <exception cref="NotSupportedException">Method is not supported on the F7 platform.</exception>
+    public Temperature GetCpuTemperature()
+    {
+        throw new NotSupportedException();
+    }
 
-        /// <summary>
-        /// Get the current CPU temperature (Not supported on F7).
-        /// </summary>
-        /// <exception cref="NotSupportedException">Method is not supported on the F7 platform.</exception>
-        public Temperature GetCpuTemperature()
-        {
-            throw new NotSupportedException();
-        }
+    /// <summary>
+    /// Initialize the F7PlatformOS instance.
+    /// </summary>
+    /// <param name="capabilities"></param>
+    public void Initialize(DeviceCapabilities capabilities)
+    {
+        InitializeStorage(capabilities.Storage);
+    }
 
-        /// <summary>
-        /// Initialize the F7PlatformOS instance.
-        /// </summary>
-        /// <param name="capabilities"></param>
-        public void Initialize(DeviceCapabilities capabilities)
+    public SerialPortName[] GetSerialPortNames()
+    {
+        return new SerialPortName[]
         {
-            InitializeStorage(capabilities.Storage);
-        }
-
-        public SerialPortName[] GetSerialPortNames()
-        {
-            return new SerialPortName[]
-            {
-                new SerialPortName("COM1", "ttyS0"),
-                new SerialPortName("COM4", "ttyS1")
-            };
-        }
+            new SerialPortName("COM1", "ttyS0"),
+            new SerialPortName("COM4", "ttyS1")
+        };
     }
 }
