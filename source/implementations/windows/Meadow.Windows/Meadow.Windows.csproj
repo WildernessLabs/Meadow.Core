@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<PackageReference Include="System.IO.Ports" Version="7.0.0" />
 		<PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+    <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
