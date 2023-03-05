@@ -25,11 +25,10 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates a Counter instance
         /// </summary>
-        /// <param name="device"></param>
         /// <param name="pin"></param>
         /// <param name="edge"></param>
         /// <exception cref="ArgumentException"></exception>
-        public Counter(IMeadowDevice device, IPin pin, InterruptMode edge)
+        public Counter(IPin pin, InterruptMode edge)
         {
             if (edge == InterruptMode.None)
             {
@@ -42,7 +41,7 @@ namespace Meadow.Hardware
             }
 
 
-            this.input = device.CreateDigitalInputPort(pin, edge);
+            this.input = pin.CreateDigitalInputPort(edge);
             portCreated = true;
 
             input.Changed += OnInputChanged;

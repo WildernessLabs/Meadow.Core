@@ -17,6 +17,9 @@ namespace Meadow.Devices
                 Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
+
+            // because we cant use new Pinout(this) in the cass to the base ('this' doesn't exist at that point and the compiler denies usage)
+            Pins.Controller = this;
         }
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)

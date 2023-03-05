@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\Meadow.Linux.csproj" />
+    <PackageReference Include="Meadow.Linux" Version="0.*" />
   </ItemGroup>
 
 </Project>

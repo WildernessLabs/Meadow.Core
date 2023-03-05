@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -7,6 +7,7 @@
 		<Company>Wilderness Labs, Inc</Company>
 		<PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
 		<PackageId>Meadow.Windows</PackageId>
+		<PackageIcon>icon.png</PackageIcon>
 		<PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
 		<RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
 		<PackageTags>Meadow</PackageTags>
@@ -17,10 +18,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Meadow" Version="0.94.0" />
-		<PackageReference Include="Meadow.Foundation.ICs.IOExpanders.Ft232h" Version="0.94.0" />
 		<PackageReference Include="System.IO.Ports" Version="7.0.0" />
 		<PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+    <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

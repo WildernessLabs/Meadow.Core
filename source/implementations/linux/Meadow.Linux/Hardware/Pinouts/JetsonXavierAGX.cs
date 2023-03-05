@@ -36,32 +36,38 @@ namespace Meadow.Pinouts
             I2S_SDOUT
         };
 
-        public IPin I2C_GP5_DAT => new Pin("I2C_GP5_DAT", "PIN03", null);
-        public IPin I2C_GP5_CLK => new Pin("I2C_GP5_CLK", "PIN05", null);
-        public IPin MCLK05 => new SysFsPin("MCLK05", "PIN07", 422);
-        public IPin UART1_RTS => new SysFsPin("UART1_RTS", "PIN11", 428);
-        public IPin I2S2_CLK => new SysFsPin("I2S2_CLK", "PIN12", 351);
-        public IPin PWM01 => new SysFsPin("PWM01", "PIN13", 424);
-        public IPin GPIO27_PWM2 => new SysFsPin("GPIO27_PWM2", "PIN15", 393);
-        public IPin GPIO8_AO_DMIC_IN_DAT => new SysFsPin("GPIO8_AO_DMIC_IN_DAT", "PIN16", 256);
-        public IPin GPIO35_PWM3 => new SysFsPin("GPIO35_PWM3", "PIN18", 344);
-        public IPin SPI1_MOSI => new SysFsPin("SPI1_MOSI", "PIN19", 493);
-        public IPin SPI1_MISO => new SysFsPin("SPI1_MISO", "PIN21", 492);
-        public IPin GPIO17_40HEADER => new SysFsPin("GPIO17_40HEADER", "PIN22", 417);
-        public IPin SPI1_SCLK => new SysFsPin("SPI1_SCLK", "PIN23", 491);
-        public IPin SPI1_CS0 => new SysFsPin("SPI1_CS0", "PIN24", 494);
-        public IPin SPI1_CS1 => new SysFsPin("SPI1_CS1", "PIN26", 495);
-        public IPin I2C_GP2_DAT => new Pin("I2C_GP2_DAT", "PIN27", null);
-        public IPin I2C_GP2_CLK => new Pin("I2C_GP2_CLK", "PIN28", null);
-        public IPin CAN0_DIN => new SysFsPin("CAN0_DIN", "PIN29", 251);
-        public IPin CAN0_DOUT => new SysFsPin("CAN0_DOUT", "PIN31", 250);
-        public IPin GPIO9_CAN1_GPIO0_DMIC_CLK => new SysFsPin("GPIO9_CAN1_GPIO0_DMIC_CLK", "PIN32", 257);
-        public IPin CAN1_DOUT => new SysFsPin("CAN1_DOUT", "PIN33", 248);
-        public IPin I2S_FS => new SysFsPin("I2S_FS", "PIN35", 354);
-        public IPin UART1_CTS => new SysFsPin("UART1_CTS", "PIN36", 429);
-        public IPin CAN1_DIN => new SysFsPin("CAN1_DIN", "PIN37", 249);
-        public IPin I2S_SDIN => new SysFsPin("I2S_SDIN", "PIN38", 353);
-        public IPin I2S_SDOUT => new SysFsPin("I2S_SDOUT", "PIN40", 352);
+        public IPinController Controller { get; set; }
+
+        internal JetsonXavierAGX()
+        {
+        }
+
+        public IPin I2C_GP5_DAT => new Pin(Controller, "I2C_GP5_DAT", "PIN03", null);
+        public IPin I2C_GP5_CLK => new Pin(Controller, "I2C_GP5_CLK", "PIN05", null);
+        public IPin MCLK05 => new SysFsPin(Controller, "MCLK05", "PIN07", 422);
+        public IPin UART1_RTS => new SysFsPin(Controller, "UART1_RTS", "PIN11", 428);
+        public IPin I2S2_CLK => new SysFsPin(Controller, "I2S2_CLK", "PIN12", 351);
+        public IPin PWM01 => new SysFsPin(Controller, "PWM01", "PIN13", 424);
+        public IPin GPIO27_PWM2 => new SysFsPin(Controller, "GPIO27_PWM2", "PIN15", 393);
+        public IPin GPIO8_AO_DMIC_IN_DAT => new SysFsPin(Controller, "GPIO8_AO_DMIC_IN_DAT", "PIN16", 256);
+        public IPin GPIO35_PWM3 => new SysFsPin(Controller, "GPIO35_PWM3", "PIN18", 344);
+        public IPin SPI1_MOSI => new SysFsPin(Controller, "SPI1_MOSI", "PIN19", 493);
+        public IPin SPI1_MISO => new SysFsPin(Controller, "SPI1_MISO", "PIN21", 492);
+        public IPin GPIO17_40HEADER => new SysFsPin(Controller, "GPIO17_40HEADER", "PIN22", 417);
+        public IPin SPI1_SCLK => new SysFsPin(Controller, "SPI1_SCLK", "PIN23", 491);
+        public IPin SPI1_CS0 => new SysFsPin(Controller, "SPI1_CS0", "PIN24", 494);
+        public IPin SPI1_CS1 => new SysFsPin(Controller, "SPI1_CS1", "PIN26", 495);
+        public IPin I2C_GP2_DAT => new Pin(Controller, "I2C_GP2_DAT", "PIN27", null);
+        public IPin I2C_GP2_CLK => new Pin(Controller, "I2C_GP2_CLK", "PIN28", null);
+        public IPin CAN0_DIN => new SysFsPin(Controller, "CAN0_DIN", "PIN29", 251);
+        public IPin CAN0_DOUT => new SysFsPin(Controller, "CAN0_DOUT", "PIN31", 250);
+        public IPin GPIO9_CAN1_GPIO0_DMIC_CLK => new SysFsPin(Controller, "GPIO9_CAN1_GPIO0_DMIC_CLK", "PIN32", 257);
+        public IPin CAN1_DOUT => new SysFsPin(Controller, "CAN1_DOUT", "PIN33", 248);
+        public IPin I2S_FS => new SysFsPin(Controller, "I2S_FS", "PIN35", 354);
+        public IPin UART1_CTS => new SysFsPin(Controller, "UART1_CTS", "PIN36", 429);
+        public IPin CAN1_DIN => new SysFsPin(Controller, "CAN1_DIN", "PIN37", 249);
+        public IPin I2S_SDIN => new SysFsPin(Controller, "I2S_SDIN", "PIN38", 353);
+        public IPin I2S_SDOUT => new SysFsPin(Controller, "I2S_SDOUT", "PIN40", 352);
 
         // aliases for sanity
         public IPin Pin7 => MCLK05;

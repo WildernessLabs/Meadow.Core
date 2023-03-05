@@ -37,6 +37,8 @@ namespace Meadow.Devices
             {
                 return this.CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT) ?? null;
             });
+
+            Pins.Controller = this;
         }
 
         /// <summary>

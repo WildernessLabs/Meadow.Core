@@ -1,5 +1,4 @@
-﻿using Meadow.Devices;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +9,12 @@ namespace Meadow.Simulation
     {
         private Dictionary<string, SimulatedPin> _pins = new Dictionary<string, SimulatedPin>();
 
+        public IPinController Controller { get; set; }
+
         public SimulatedPinout()
         {
             _pins.Add("LED0", new SimulatedPin(
+                Controller,
                 "LED0", "LED0",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("LED0", inputCapable: false, interruptCapable: false)
@@ -20,6 +22,7 @@ namespace Meadow.Simulation
             ));
 
             _pins.Add("AI0", new SimulatedPin(
+                Controller,
                 "AI0", "AI0",
                 new List<IChannelInfo> {
                     new AnalogChannelInfo("AI0", 12, true, false)
@@ -27,6 +30,7 @@ namespace Meadow.Simulation
             ));
 
             _pins.Add("AI1", new SimulatedPin(
+                Controller,
                 "AI1", "AI1",
                 new List<IChannelInfo> {
                     new AnalogChannelInfo("AI0", 12, true, false)
@@ -34,6 +38,7 @@ namespace Meadow.Simulation
             ));
 
             _pins.Add("D00", new SimulatedPin(
+                Controller,
                 "D00", "D00",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("D00", interruptGroup: 0)
@@ -41,18 +46,21 @@ namespace Meadow.Simulation
             ));
 
             _pins.Add("D01", new SimulatedPin(
+                Controller,
                 "D01", "D01",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("D01", interruptGroup: 0)
                 }
             ));
             _pins.Add("D02", new SimulatedPin(
+                Controller,
                 "D02", "D02",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("D02", interruptGroup: 0)
                 }
             ));
             _pins.Add("D03", new SimulatedPin(
+                Controller,
                 "D03", "D03",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("D03", interruptGroup: 0)
