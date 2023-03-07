@@ -38,10 +38,26 @@ namespace Meadow.Devices
         /// <returns>An instance of an I2cBus</returns>
         public override II2cBus CreateI2cBus(
             int busNumber = 1,
-            I2cBusSpeed busSpeed = I2cBusSpeed.Standard
-        )
+            I2cBusSpeed busSpeed = I2cBusSpeed.Standard)
         {
-            return CreateI2cBus(busNumber, busSpeed);
+            IPin? pinClock;
+            IPin? pinData;
+
+            switch (busNumber)
+            {
+                case 1:
+                    pinClock = (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL;
+                    pinData = (Pins as F7CoreComputeV2.Pinout)?.I2C1_SDA;
+                    break;
+                case 3:
+                    pinClock = (Pins as F7CoreComputeV2.Pinout)?.I2C3_SCL;
+                    pinData = (Pins as F7CoreComputeV2.Pinout)?.I2C3_SDA;
+                    break;
+                default:
+                    throw new ArgumentException($"Bus {busNumber} is not supported");
+            }
+
+            return CreateI2cBus(pinClock, pinData, busSpeed);
         }
 
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
