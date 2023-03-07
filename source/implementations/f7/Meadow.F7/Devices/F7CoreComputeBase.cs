@@ -46,12 +46,12 @@ namespace Meadow.Devices
             switch (busNumber)
             {
                 case 1:
-                    pinClock = (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL;
-                    pinData = (Pins as F7CoreComputeV2.Pinout)?.I2C1_SDA;
+                    pinClock = Pins.I2C1_SCL;
+                    pinData = Pins.I2C1_SDA;
                     break;
                 case 3:
-                    pinClock = (Pins as F7CoreComputeV2.Pinout)?.I2C3_SCL;
-                    pinData = (Pins as F7CoreComputeV2.Pinout)?.I2C3_SDA;
+                    pinClock = Pins.I2C3_SCL;
+                    pinData = Pins.I2C3_SDA;
                     break;
                 default:
                     throw new ArgumentException($"Bus {busNumber} is not supported");
