@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meadow.Contracts" Version="0.*" />
+    <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
     <PackageReference Include="Meadow.Logging" Version="0.*" />
-    <PackageReference Include="Meadow" Version="0.*" />
+    <ProjectReference Include="..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
 
 </Project>
