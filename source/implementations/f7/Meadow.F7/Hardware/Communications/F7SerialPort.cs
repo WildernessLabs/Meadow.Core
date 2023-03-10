@@ -1,18 +1,20 @@
 ﻿using Meadow.Devices;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a serial port on STM32F7 devices
+    /// </summary>
     public class F7SerialPort : SerialPortBase
     {
-        protected const int TCSANOW = 0x00;
-        protected const int TCGETS = 0x0101;
-        protected const int TCSETS = 0x0102;
-        protected const string DriverFolder = "/dev";
-        protected const string SerialPortDriverPrefix = "tty";
+        private const int TCSANOW = 0x00;
+        private const int TCGETS = 0x0101;
+        private const int TCSETS = 0x0102;
+        private const string DriverFolder = "/dev";
+        private const string SerialPortDriverPrefix = "tty";
 
         internal static F7SerialPort From(
             SerialPortName portName,
@@ -75,6 +77,12 @@ namespace Meadow.Hardware
             return list.ToArray();
         }
 
+        /// <summary>
+        /// Opens the OS hardware port
+        /// </summary>
+        /// <param name="portName"></param>
+        /// <returns></returns>
+        /// <exception cref="NativeException"></exception>
         protected override IntPtr OpenHardwarePort(string portName)
         {
             var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput);
@@ -85,11 +93,23 @@ namespace Meadow.Hardware
             return handle;
         }
 
+        /// <summary>
+        /// Closes the OS hardware port
+        /// </summary>
+        /// <param name="handle"></param>
         protected override void CloseHardwarePort(IntPtr handle)
         {
             Nuttx.close(handle);
         }
 
+        /// <summary>
+        /// Writes data to the OS hardware port
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <param name="data"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        /// <exception cref="NativeException"></exception>
         protected override int WriteHardwarePort(IntPtr handle, byte[] data, int count)
         {
             var result = Nuttx.write(handle, data, count);
@@ -102,6 +122,14 @@ namespace Meadow.Hardware
             return result;
         }
 
+        /// <summary>
+        /// Reads data from the OS hardware port
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <param name="readBuffer"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        /// <exception cref="NativeException"></exception>
         protected override int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count)
         {
             var result = Nuttx.read(handle, readBuffer, count);
@@ -133,6 +161,11 @@ namespace Meadow.Hardware
             Resolver.Log.Info($"  Control Flags: 0x{settings.c_cflag:x}");
         }
 
+        /// <summary>
+        /// Calls the OS to set serial port settings (e.g. parity and stop bits)
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <exception cref="NativeException"></exception>
         protected override unsafe void SetHardwarePortSettings(IntPtr handle)
         {
             var settings = new Nuttx.Termios();
