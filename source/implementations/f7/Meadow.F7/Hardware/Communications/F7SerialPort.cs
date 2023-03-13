@@ -155,10 +155,10 @@ namespace Meadow.Hardware
         private void ShowSettings(Nuttx.Termios settings)
         {
             Resolver.Log.Info($"  Speed: {settings.c_speed}");
-            Resolver.Log.Info($"  Input Flags: 0x{settings.c_iflag:x}");
-            Resolver.Log.Info($"  OutputFlags: 0x{settings.c_oflag:x}");
-            Resolver.Log.Info($"  Local Flags: 0x{settings.c_lflag:x}");
-            Resolver.Log.Info($"  Control Flags: 0x{settings.c_cflag:x}");
+            Resolver.Log.Info($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
+            Resolver.Log.Info($"  OutputFlags:   {settings.c_oflag} (0x{settings.c_oflag:x})");
+            Resolver.Log.Info($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
+            Resolver.Log.Info($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Meadow.Hardware
             var settings = new Nuttx.Termios();
 
             // get the current settings           
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {handle}...");
+            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.tcgetattr(handle, ref settings);
             if (result != 0)
             {
@@ -179,7 +179,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -222,13 +222,14 @@ namespace Meadow.Hardware
                     break;
             }
 
-            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
+            Resolver.Log.Debug($"  Setting port speed to {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
 
+            Resolver.Log.Debug("Setting serial handle attributes...");
             result = Nuttx.tcsetattr(handle, TCSANOW, ref settings);
 
             if (result != 0)
@@ -236,7 +237,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 // get the settings again
                 result = Nuttx.tcgetattr(handle, ref settings);
@@ -256,7 +257,7 @@ namespace Meadow.Hardware
             // get the current settings
             var p = (IntPtr)(&settings);
 
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {handle}...");
+            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.ioctl(handle, TCGETS, p);
             if (result != 0)
             {
@@ -264,7 +265,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -309,8 +310,8 @@ namespace Meadow.Hardware
 
             settings.c_speed = BaudRate;
 
-            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            if (_showSerialDebug)
+            Resolver.Log.Debug($"  Setting port settings at {BaudRate}...");
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -321,7 +322,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 // get the settings again
                 result = Nuttx.ioctl(handle, TCGETS, p);
