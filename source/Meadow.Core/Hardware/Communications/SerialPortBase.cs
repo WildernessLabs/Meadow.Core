@@ -54,10 +54,6 @@ namespace Meadow.Hardware
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096)
         {
-#if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
-            _showSerialDebug = false;
-#endif
             if (baudRate <= 0) { throw new ArgumentOutOfRangeException("Invalid baud rate"); }
             if (dataBits < 5 || dataBits > 8) { throw new ArgumentOutOfRangeException("Invalid dataBits"); }
 
