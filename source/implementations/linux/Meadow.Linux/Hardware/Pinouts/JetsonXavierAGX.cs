@@ -38,7 +38,7 @@ namespace Meadow.Pinouts
 
         public IPinController Controller { get; set; }
 
-        internal JetsonXavierAGX()
+        public JetsonXavierAGX()
         {
         }
 

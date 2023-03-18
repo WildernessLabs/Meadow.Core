@@ -15,10 +15,8 @@
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
     <Description>STM32F7 .NET libraries for Wilderness Labs Meadow</Description>
-  </PropertyGroup>
-  <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>

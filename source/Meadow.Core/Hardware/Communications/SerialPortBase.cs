@@ -1,5 +1,4 @@
-﻿using Meadow.Devices;
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,6 @@ namespace Meadow.Hardware
     public abstract class SerialPortBase : IDisposable, ISerialPort
     {
         private IntPtr _driverHandle = IntPtr.Zero;
-        protected bool _showSerialDebug = false;
         private CircularBuffer<byte>? _readBuffer;
         protected Thread? _readThread;
         protected int _baudRate;
@@ -56,16 +54,12 @@ namespace Meadow.Hardware
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096)
         {
-#if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
-            _showSerialDebug = false;
-#endif
             if (baudRate <= 0) { throw new ArgumentOutOfRangeException("Invalid baud rate"); }
             if (dataBits < 5 || dataBits > 8) { throw new ArgumentOutOfRangeException("Invalid dataBits"); }
 
             PortName = portName.SystemName;
             BaudRate = baudRate;
-            Parity = Parity;
+            Parity = parity;
             DataBits = dataBits;
             StopBits = stopBits;
             ReadTimeout = TimeSpan.FromMilliseconds(-1);
@@ -329,9 +323,6 @@ namespace Meadow.Hardware
                 int bytesToWriteThisLoop = maxCount;
                 int bytesLeft = count;
 
-                Output.WriteLineIf(_showSerialDebug, $"count:{count}, maxCount:{maxCount}");
-                Output.WriteLineIf(_showSerialDebug, $"Starting with: {(BitConverter.ToString(buffer, 0, (buffer.Length > 6) ? 6 : buffer.Length))}");
-
                 Timer? writeTimeoutTimer = null;
 
                 if (WriteTimeout.TotalMilliseconds > 0)
@@ -350,7 +341,6 @@ namespace Meadow.Hardware
                         // if there's an offset, we want to slice
                         if (currentIndex > 0)
                         {
-                            Output.WriteLineIf(_showSerialDebug, $"Slicing. currentIndex:{currentIndex}, bytesLeft:{bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
                             Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
                             result = WriteHardwarePort(_driverHandle, data.ToArray(), count);
                         }
@@ -362,13 +352,10 @@ namespace Meadow.Hardware
                         // otherwise,
                         totalBytesWritten += result;
 
-                        Output.WriteLineIf(_showSerialDebug, $"bytesActallyWrittenThisLoop: {result} totalBytesWritten: {totalBytesWritten}");
-
                         // recalculate the current index, including the original offset
                         currentIndex = totalBytesWritten + index;
                         bytesLeft = count - totalBytesWritten;
                         bytesToWriteThisLoop = bytesLeft > systemBufferMax ? systemBufferMax : bytesLeft;
-                        Output.WriteLineIf(_showSerialDebug, $"currentIndex: {currentIndex}, bytesLeft: {bytesLeft}, bytesToWriteThisLoop:{bytesToWriteThisLoop}");
                     }
                 }
                 finally
@@ -388,7 +375,7 @@ namespace Meadow.Hardware
         {
             var readBuffer = new byte[4096];
 
-            Output.WriteLineIf(_showSerialDebug, $"ReadThreadProc: {IsOpen}");
+            Resolver.Log.Debug($"ReadThreadProc: {IsOpen}");
 
             while (IsOpen)
             {
@@ -398,9 +385,6 @@ namespace Meadow.Hardware
 
                     if (result > 0)
                     {
-                        Output.WriteLineIf(_showSerialDebug, $"data read");
-                        Output.WriteLineIf(_showSerialDebug, $"Enqueuing {result} bytes");
-
                         _readBuffer?.Append(readBuffer, 0, result);
 
                         if (DataReceived != null)
@@ -410,14 +394,12 @@ namespace Meadow.Hardware
                             {
                                 try
                                 {
-                                    Output.WriteLineIf(_showSerialDebug, $"Calling event handlers");
                                     DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
-                                    Output.WriteLineIf(_showSerialDebug, $"event handler complete");
                                 }
                                 catch (Exception ex)
                                 {
                                     // if the event handler throws, we don't want this to die
-                                    Output.WriteLine($"Serial event handler threw: {ex.Message}");
+                                    Resolver.Log.Error($"Serial event handler threw: {ex.Message}");
                                 }
                             });
                         }
@@ -432,11 +414,11 @@ namespace Meadow.Hardware
                 }
                 catch (Exception ex)
                 {
-                    Output.WriteLine($"ReadThreadProc error: {ex.Message}");
+                    Resolver.Log.Error($"ReadThreadProc error: {ex.Message}");
                 }
             }
 
-            Output.WriteLineIf(_showSerialDebug, $"ReadThreadProc: port closed");
+            Resolver.Log.Debug($"ReadThreadProc: port closed");
         }
 
         /// <summary>

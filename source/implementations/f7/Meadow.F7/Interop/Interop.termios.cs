@@ -10,105 +10,156 @@ namespace Meadow.Core
             [Flags]
             public enum InputFlags : short
             {
-                IGNBRK = 0x00000001,      /* ignore BREAK condition */
-                BRKINT = 0x00000002,      /* map BREAK to SIGINTR */
-                IGNPAR = 0x00000004,      /* ignore (discard) parity errors */
-                PARMRK = 0x00000008,      /* mark parity and framing errors */
-                INPCK = 0x00000010,      /* enable checking of parity errors */
-                ISTRIP = 0x00000020,      /* strip 8th bit off chars */
-                INLCR = 0x00000040,      /* map NL into CR */
-                IGNCR = 0x00000080,      /* ignore CR */
-                ICRNL = 0x00000100,      /* map CR to NL (ala CRMOD) */
-                IXON = 0x00000200,      /* enable output flow control */
-                IXOFF = 0x00000400,      /* enable input flow control */
-                IXANY = 0x00000800,      /* any char will restart after stop */
-                IMAXBEL = 0x00002000,      /* ring bell on input queue full */
-                IUTF8 = 0x00004000,      /* maintain state for UTF-8 VERASE */
+                //#define BRKINT    (1 << 0)  /* Bit 0:  Signal interrupt on break */
+                //#define ICRNL     (1 << 1)  /* Bit 1:  Map CR to NL on input */
+                //#define IGNBRK    (1 << 2)  /* Bit 2:  Ignore break condition */
+                //#define IGNCR     (1 << 3)  /* Bit 3:  Ignore CR */
+                //#define IGNPAR    (1 << 4)  /* Bit 4:  Ignore characters with parity errors */
+                //#define INLCR     (1 << 5)  /* Bit 5:  Map NL to CR on input */
+                //#define INPCK     (1 << 6)  /* Bit 6:  Enable input parity check */
+                //#define ISTRIP    (1 << 7)  /* Bit 7:  Strip character */
+                //#define IUCLC     (1 << 8)  /* Bit 8:  Map upper-case to lower-case on input (LEGACY)*/
+                //#define IXANY     (1 << 9)  /* Bit 9:  Enable any character to restart output */
+                //#define IXOFF     (1 << 10) /* Bit 10: Enable start/stop input control */
+                //#define IXON      (1 << 11) /* Bit 11: Enable start/stop output control */
+                //#define PARMRK    (1 << 12) /* Bit 12: Mark parity errors */
 
-                //#define IGNBRK          0x00000001      /* ignore BREAK condition */
-                //#define BRKINT          0x00000002      /* map BREAK to SIGINTR */
-                //#define IGNPAR          0x00000004      /* ignore (discard) parity errors */
-                //#define PARMRK          0x00000008      /* mark parity and framing errors */
-                //#define INPCK           0x00000010      /* enable checking of parity errors */
-                //#define ISTRIP          0x00000020      /* strip 8th bit off chars */
-                //#define INLCR           0x00000040      /* map NL into CR */
-                //#define IGNCR           0x00000080      /* ignore CR */
-                //#define ICRNL           0x00000100      /* map CR to NL (ala CRMOD) */
-                //#define IXON            0x00000200      /* enable output flow control */
-                //#define IXOFF           0x00000400      /* enable input flow control */
-                //#define IXANY           0x00000800      /* any char will restart after stop */
-                //#if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
-                //#define IMAXBEL         0x00002000      /* ring bell on input queue full */
-                //#define IUTF8           0x00004000      /* maintain state for UTF-8 VERASE */
+                BRKINT = (1 << 0),/* Bit 0:  Signal interrupt on break */
+                ICRNL = (1 << 1),/* Bit 1:  Map CR to NL on input */
+                IGNBRK = (1 << 2),/* Bit 2:  Ignore break condition */
+                IGNCR = (1 << 3),/* Bit 3:  Ignore CR */
+                IGNPAR = (1 << 4),/* Bit 4:  Ignore characters with parity errors */
+                INLCR = (1 << 5),/* Bit 5:  Map NL to CR on input */
+                INPCK = (1 << 6),/* Bit 6:  Enable input parity check */
+                ISTRIP = (1 << 7),/* Bit 7:  Strip character */
+                IUCLC = (1 << 8),/* Bit 8:  Map upper-case to lower-case on input (LEGACY)*/
+                IXANY = (1 << 9),/* Bit 9:  Enable any character to restart output */
+                IXOFF = (1 << 10),/* Bit 10: Enable start/stop input control */
+                IXON = (1 << 11),/* Bit 11: Enable start/stop output control */
+                PARMRK = (1 << 12),/* Bit 12: Mark parity errors */
             }
 
             [Flags]
             public enum OutputFlags : short
             {
-                OPOST = 0x00000001,     /* enable following output processing */
-                ONLCR = 0x00000002,     /* map NL to CR-NL (ala CRMOD) */
-                OXTABS = 0x00000004,     /* expand tabs to spaces */
-                ONOEOT = 0x00000008,     /* discard EOT's (^D) on output) */
-
-                //#define OPOST           0x00000001      /* enable following output processing */
-                //#define ONLCR           0x00000002      /* map NL to CR-NL (ala CRMOD) */
-                //#if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
-                //#define OXTABS          0x00000004      /* expand tabs to spaces */
-                //#define ONOEOT          0x00000008      /* discard EOT's (^D) on output) */
+                //#define OPOST     (1 << 0)  /* Bit 0:  Post-process output */
+                //#define OLCUC     (1 << 1)  /* Bit 1:  Map lower-case to upper-case on output (LEGACY)*/
+                //#define ONLCR     (1 << 2)  /* Bit 2:  Map NL to CR-NL on output */
+                //#define OCRNL     (1 << 3)  /* Bit 3:  Map CR to NL on output */
+                //#define ONOCR     (1 << 4)  /* Bit 4:  No CR output at column 0 */
+                //#define ONLRET    (1 << 5)  /* Bit 5:  NL performs CR function */
+                //#define OFILL     (1 << 6)  /* Bit 6:  Use fill characters for delay */
+                //#define NLDLY     (1 << 7)  /* Bit 7:  Select newline delays: */
+                //#  define NL0     (0 << 7)  /*   Newline character type 0 */
+                //#  define NL1     (1 << 7)  /*   Newline character type 1 */
+                //#define CRDLY     (3 << 8)  /* Bits 8-9:  Select carriage-return delays: */
+                //#  define CR0     (0 << 8)  /*   Carriage-return delay type 0 */
+                //#  define CR1     (1 << 8)  /*   Carriage-return delay type 1 */
+                //#  define CR2     (2 << 8)  /*   Carriage-return delay type 2 */
+                //#  define CR3     (3 << 8)  /*   Carriage-return delay type 3 */
+                //#define TABDLY    (3 << 10) /* Bit 10-11:  Select horizontal-tab delays: */
+                //#  define TAB0    (0 << 10) /*   Horizontal-tab delay type 0 */
+                //#  define TAB1    (1 << 10) /*   Horizontal-tab delay type 1 */
+                //#  define TAB2    (2 << 10) /*   Horizontal-tab delay type 2 */
+                //#  define TAB3    (3 << 10) /*   Expand tabs to spaces */
+                //#define BSDLY     (1 << 12) /* Bit 12:  Select backspace delays: */
+                //#  define BS0     (0 << 12) /*   Backspace-delay type 0 */
+                //#  define BS1     (1 << 12) /*   Backspace-delay type 1 */
+                //#define VTDLY     (1 << 13) /* Bit 13:  Select vertical-tab delays: */
+                //#  define VT0     (0 << 13) /*   Vertical-tab delay type 0 */
+                //#  define VT1     (1 << 13) /*   Vertical-tab delay type 1 */
+                //#define FFDLY     (1 << 14) /* Bit 14:  Select form-feed delays: */
+                //#  define FF0     (0 << 14) /*   Form-feed delay type 0 */
+                //#  define FF1     (1 << 14) /*   Form-feed delay type 1 */
+                OPOST = (1 << 0), /* Bit 0:  Post-process output */
+                OLCUC = (1 << 1), /* Bit 1:  Map lower-case to upper-case on output (LEGACY)*/
+                ONLCR = (1 << 2), /* Bit 2:  Map NL to CR-NL on output */
+                OCRNL = (1 << 3), /* Bit 3:  Map CR to NL on output */
+                ONOCR = (1 << 4), /* Bit 4:  No CR output at column 0 */
+                ONLRET = (1 << 5), /* Bit 5:  NL performs CR function */
+                OFILL = (1 << 6), /* Bit 6:  Use fill characters for delay */
+                NLDLY = (1 << 7), /* Bit 7:  Select newline delays: */
+                NL0 = (0 << 7), /*   Newline character type 0 */
+                NL1 = (1 << 7), /*   Newline character type 1 */
+                CRDLY = (3 << 8), /* Bits 8-9:  Select carriage-return delays: */
+                CR0 = (0 << 8), /*   Carriage-return delay type 0 */
+                CR1 = (1 << 8), /*   Carriage-return delay type 1 */
+                CR2 = (2 << 8), /*   Carriage-return delay type 2 */
+                CR3 = (3 << 8), /*   Carriage-return delay type 3 */
+                TABDLY = (3 << 10), /* Bit 10-11:  Select horizontal-tab delays: */
+                TAB0 = (0 << 10), /*   Horizontal-tab delay type 0 */
+                TAB1 = (1 << 10), /*   Horizontal-tab delay type 1 */
+                TAB2 = (2 << 10), /*   Horizontal-tab delay type 2 */
+                TAB3 = (3 << 10), /*   Expand tabs to spaces */
+                BSDLY = (1 << 12), /* Bit 12:  Select backspace delays: */
+                BS0 = (0 << 12), /*   Backspace-delay type 0 */
+                BS1 = (1 << 12), /*   Backspace-delay type 1 */
+                VTDLY = (1 << 13), /* Bit 13:  Select vertical-tab delays: */
+                VT0 = (0 << 13), /*   Vertical-tab delay type 0 */
+                VT1 = (1 << 13), /*   Vertical-tab delay type 1 */
+                FFDLY = (1 << 14), /* Bit 14:  Select form-feed delays: */
+                FF0 = (0 << 14), /*   Form-feed delay type 0 */
+                FF1 = (1 << 14), /*   Form-feed delay type 1 */
             }
 
             [Flags]
             public enum ControlFlags : ushort
             {
-                CSIZE = 0x00000300,  /* character size mask */
-                CS5 = 0x00000000,      /* 5 bits (pseudo) */
-                CS6 = 0x00000100,      /* 6 bits */
-                CS7 = 0x00000200,      /* 7 bits */
-                CS8 = 0x00000300,      /* 8 bits */
-                CSTOPB = 0x00000400,  /* send 2 stop bits */
-                CREAD = 0x00000800,  /* enable receiver */
-                PARENB = 0x00001000,  /* parity enable */
-                PARODD = 0x00002000,  /* odd parity, else even */
-                HUPCL = 0x00004000,  /* hang up on last close */
-                CLOCAL = 0x00008000,  /* ignore modem status lines */
+                //#define CSIZE     (3 << 0)  /* Bits 0-1: Character size: */
+                //#  define CS5     (0 << 0)  /*   5 bits */
+                //#  define CS6     (1 << 0)  /*   6 bits */
+                //#  define CS7     (2 << 0)  /*   7 bits */
+                //#  define CS8     (3 << 0)  /*   8 bits */
+                //#define CSTOPB    (1 << 2)  /* Bit 2: Send two stop bits, else one */
+                //#define CREAD     (1 << 3)  /* Bit 3: Enable receiver */
+                //#define PARENB    (1 << 4)  /* Bit 4: Parity enable */
+                //#define PARODD    (1 << 5)  /* Bit 5: Odd parity, else even */
+                //#define HUPCL     (1 << 6)  /* Bit 6: Hang up on last close */
+                //#define CLOCAL    (1 << 7)  /* Bit 7: Ignore modem status lines */
+                //#define CCTS_OFLOW (1 << 8) /* Bit 8: CTS flow control of output */
+                //#define CRTS_IFLOW (1 << 9) /* Bit 9: RTS flow control of input */
+                //#define CRTSCTS   (CRTS_IFLOW | CCTS_OFLOW)
 
-                //CCTS_OFLOW = 0x00010000,  /* CTS flow control of output */
-                //CRTSCTS = (CCTS_OFLOW | CRTS_IFLOW),
-                //CRTS_IFLOW = 0x00020000,   /* RTS flow control of input */
-                //CDTR_IFLOW = 0x00040000,   /* DTR flow control of input */
-                //CDSR_OFLOW = 0x00080000,   /* DSR flow control of output */
-                //CCAR_OFLOW = 0x00100000,   /* DCD flow control of output */
-                //MDMBUF = 0x00100000,   /* old name for CCAR_OFLOW */
-
-                //#define CSIZE           0x00000300      /* character size mask */
-                //#define     CS5             0x00000000      /* 5 bits (pseudo) */
-                //#define     CS6             0x00000100      /* 6 bits */
-                //#define     CS7             0x00000200      /* 7 bits */
-                //#define     CS8             0x00000300      /* 8 bits */
-                //#define CSTOPB          0x00000400      /* send 2 stop bits */
-                //#define CREAD           0x00000800      /* enable receiver */
-                //#define PARENB          0x00001000      /* parity enable */
-                //#define PARODD          0x00002000      /* odd parity, else even */
-                //#define HUPCL           0x00004000      /* hang up on last close */
-                //#define CLOCAL          0x00008000      /* ignore modem status lines */
-                //#if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
-                //#define CCTS_OFLOW      0x00010000      /* CTS flow control of output */
-                //#define CRTSCTS         (CCTS_OFLOW | CRTS_IFLOW)
-                //#define CRTS_IFLOW      0x00020000      /* RTS flow control of input */
-                //#define CDTR_IFLOW      0x00040000      /* DTR flow control of input */
-                //#define CDSR_OFLOW      0x00080000      /* DSR flow control of output */
-                //#define CCAR_OFLOW      0x00100000      /* DCD flow control of output */
-                //#define MDMBUF          0x00100000      /* old name for CCAR_OFLOW */
+                CSIZE = (3 << 0), /* Bits 0-1: Character size: */
+                CS5 = (0 << 0), /*   5 bits */
+                CS6 = (1 << 0), /*   6 bits */
+                CS7 = (2 << 0), /*   7 bits */
+                CS8 = (3 << 0), /*   8 bits */
+                CSTOPB = (1 << 2), /* Bit 2: Send two stop bits, else one */
+                CREAD = (1 << 3), /* Bit 3: Enable receiver */
+                PARENB = (1 << 4), /* Bit 4: Parity enable */
+                PARODD = (1 << 5), /* Bit 5: Odd parity, else even */
+                HUPCL = (1 << 6), /* Bit 6: Hang up on last close */
+                CLOCAL = (1 << 7), /* Bit 7: Ignore modem status lines */
+                CCTS_OFLOW = (1 << 8), /* Bit 8: CTS flow control of output */
+                CRTS_IFLOW = (1 << 9), /* Bit 9: RTS flow control of input */
+                CRTSCTS = (CRTS_IFLOW | CCTS_OFLOW)
             }
 
             [Flags]
             public enum LocalFlags : short
             {
-                ECHO = 0x00000008,      /* enable echoing */
-                ECHONL = 0x00000010,      /* echo NL even if ECHO is off */
-                ISIG = 0x00000080,      /* enable signals INTR, QUIT, [D]SUSP */
-                ICANON = 0x00000100,      /* canonicalize input lines */
-                IEXTEN = 0x00000400,      /* enable DISCARD and LNEXT */
+                //#define ECHO      (1 << 0)  /* Bit 0:  Enable echo */
+                //#define ECHOE     (1 << 1)  /* Bit 1:  Echo erase character as error-correcting backspace */
+                //#define ECHOK     (1 << 2)  /* Bit 2:  Echo KILL */
+                //#define ECHONL    (1 << 3)  /* Bit 3:  Echo NL */
+                //#define ICANON    (1 << 4)  /* Bit 4:  Canonical input (erase and kill processing) */
+                //#define IEXTEN    (1 << 5)  /* Bit 5:  Enable extended input character processing */
+                //#define ISIG      (1 << 6)  /* Bit 6:  Enable signals */
+                //#define NOFLSH    (1 << 7)  /* Bit 7:  Disable flush after interrupt or quit */
+                //#define TOSTOP    (1 << 8)  /* Bit 8:  Send SIGTTOU for background output */
+                //#define XCASE     (1 << 9)  /* Bit 9:  Canonical upper/lower presentation (LEGACY)*/
+
+                ECHO = (1 << 0),/* Bit 0:  Enable echo */
+                ECHOE = (1 << 1),/* Bit 1:  Echo erase character as error-correcting backspace */
+                ECHOK = (1 << 2),/* Bit 2:  Echo KILL */
+                ECHONL = (1 << 3),/* Bit 3:  Echo NL */
+                ICANON = (1 << 4),/* Bit 4:  Canonical input (erase and kill processing) */
+                IEXTEN = (1 << 5),/* Bit 5:  Enable extended input character processing */
+                ISIG = (1 << 6),/* Bit 6:  Enable signals */
+                NOFLSH = (1 << 7),/* Bit 7:  Disable flush after interrupt or quit */
+                TOSTOP = (1 << 8),/* Bit 8:  Send SIGTTOU for background output */
+                XCASE = (1 << 9),/* Bit 9:  Canonical upper/lower presentation (LEGACY)*/
             }
 
             [StructLayout(LayoutKind.Explicit)]

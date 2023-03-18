@@ -22,7 +22,6 @@
         private static IApp App { get; set; }
         private static ILifecycleSettings LifecycleSettings { get; set; }
         private static IUpdateSettings UpdateSettings { get; set; }
-
         internal static CancellationTokenSource AppAbort = new();
 
         /// <summary>
@@ -374,6 +373,12 @@
 
         private static void Shutdown()
         {
+            // stop the update service
+            if (Resolver.Services.Get<IUpdateService>() is { } updateService)
+            {
+                updateService.Shutdown();
+            }
+
             // schedule a device restart if possible and if the user hasn't disabled it
             ScheduleRestart();
 
