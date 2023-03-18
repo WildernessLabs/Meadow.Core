@@ -14,19 +14,31 @@ namespace Meadow.Core
 
             public static byte[] MeadowCloudDecryptAES(byte[] buf, byte[] key)
             {
-                IntPtr encrypted_buf = Marshal.AllocHGlobal(aes_block_size);
-                IntPtr decrypted_buf = Marshal.AllocHGlobal(aes_block_size);
-                IntPtr key_buf = Marshal.AllocHGlobal(key.Length);
+                IntPtr encryptedBufferPtr = IntPtr.Zero;
+                IntPtr decryptedBufferPtr = IntPtr.Zero;
+                IntPtr keyBufferPtr = IntPtr.Zero;
 
-                Marshal.Copy (buf, 0, encrypted_buf, aes_block_size);
-                meadow_cloud_decrypt_buf_aes(encrypted_buf, buf.Length, key_buf, key.Length, decrypted_buf);
+                try
+                {
+                    encryptedBufferPtr = Marshal.AllocHGlobal(aes_block_size);
+                    decryptedBufferPtr = Marshal.AllocHGlobal(aes_block_size);
+                    keyBufferPtr = Marshal.AllocHGlobal(key.Length);
 
-                byte[] result = new byte[aes_block_size];
-                Marshal.Copy (decrypted_buf, result, 0, aes_block_size);
-                Marshal.FreeHGlobal(encrypted_buf);
-                Marshal.FreeHGlobal(decrypted_buf);
-                Marshal.FreeHGlobal(key_buf);
-                return result;
+                    Marshal.Copy(buf, 0, encryptedBufferPtr, aes_block_size);
+                    meadow_cloud_decrypt_buf_aes(encryptedBufferPtr, buf.Length, keyBufferPtr, key.Length, decryptedBufferPtr);
+
+                    // TODO: there's a return value, can we detect success/fail here?
+
+                    byte[] result = new byte[aes_block_size];
+                    Marshal.Copy(decryptedBufferPtr, result, 0, aes_block_size);
+                    return result;
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(encryptedBufferPtr);
+                    Marshal.FreeHGlobal(decryptedBufferPtr);
+                    Marshal.FreeHGlobal(keyBufferPtr);
+                }
             }
         }
     }

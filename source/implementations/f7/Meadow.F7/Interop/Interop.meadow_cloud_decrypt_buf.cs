@@ -12,19 +12,28 @@ namespace Meadow.Core
 
             const int max_buf_size = 1024;
 
-            public static byte[] MeadowCloudDecrypt(byte[] buf)
+            public static byte[] MeadowCloudDecryptRsa(byte[] buf)
             {
-                IntPtr encrypted_buf = Marshal.AllocHGlobal(max_buf_size);
-                IntPtr decrypted_buf = Marshal.AllocHGlobal(max_buf_size);
+                IntPtr encryptedBufferPtr = IntPtr.Zero;
+                IntPtr decryptedBufferPtr = IntPtr.Zero;
 
-                Marshal.Copy (buf, 0, encrypted_buf, buf.Length);
-                int result_len = meadow_cloud_decrypt_buf(encrypted_buf, buf.Length, decrypted_buf);
+                try
+                {
+                    encryptedBufferPtr = Marshal.AllocHGlobal(max_buf_size);
+                    decryptedBufferPtr = Marshal.AllocHGlobal(max_buf_size);
 
-                byte[] result = new byte[result_len];
-                Marshal.Copy (decrypted_buf, result, 0, result_len);
-                Marshal.FreeHGlobal(encrypted_buf);
-                Marshal.FreeHGlobal(decrypted_buf);
-                return result;
+                    Marshal.Copy(buf, 0, encryptedBufferPtr, buf.Length);
+                    int result_len = meadow_cloud_decrypt_buf(encryptedBufferPtr, buf.Length, decryptedBufferPtr);
+
+                    byte[] result = new byte[result_len];
+                    Marshal.Copy(decryptedBufferPtr, result, 0, result_len);
+                    return result;
+                }
+                finally
+                {
+                    if (encryptedBufferPtr != IntPtr.Zero) Marshal.FreeHGlobal(encryptedBufferPtr);
+                    if (decryptedBufferPtr != IntPtr.Zero) Marshal.FreeHGlobal(decryptedBufferPtr);
+                }
             }
         }
     }

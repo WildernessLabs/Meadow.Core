@@ -1,13 +1,38 @@
 ﻿using Meadow.Update;
 
-namespace Meadow
+namespace Meadow;
+
+/// <summary>
+/// A default implementation of IUpdateSettings
+/// </summary>
+public class DefaultUpdateSettings : IUpdateSettings
 {
-    public class DefaultUpdateSettings : IUpdateSettings
-    {
-        public bool Enabled { get; } = false;
-        public string UpdateServer { get; } = "20.253.228.77";
-        public int UpdatePort { get; } = 1883;
-        public string RootTopic { get; } = "Meadow.OtA";
-        public int CloudConnectRetrySeconds { get; } = 15;
-    }
+    /// <summary>
+    /// Gets the desired enabled state of the service
+    /// </summary>
+    public bool Enabled { get; } = false;
+    /// <summary>
+    /// Gets the address of the Update server to use
+    /// </summary>
+    public string UpdateServer { get; } = "https://www.meadowcloud.co";
+    /// <summary>
+    /// Gets the port of the Update server to use
+    /// </summary>
+    public int UpdatePort { get; } = 1883;
+    /// <summary>
+    /// Gets the root MQTT topic to subscribe to for updates
+    /// </summary>
+    public string RootTopic { get; } = "Meadow.OtA";
+    /// <summary>
+    /// Reconnect period used when a disconnection from the Update server occrs
+    /// </summary>
+    public int CloudConnectRetrySeconds { get; } = 15;
+    /// <summary>
+    /// Gets the preference for using authentication when connecting to the Update server
+    /// </summary>
+    public bool UseAuthentication { get; } = true;
+    /// <summary>
+    /// Gets the Organization the device is registered to
+    /// </summary>
+    public string Organization { get; } = "Default organization";
 }
