@@ -29,22 +29,22 @@
         /// </summary>
         /// <param name="_"></param>
         /// <returns></returns>
-        public async static Task Main(string[] _)
+        public async static Task Main(string[] args)
         {
             _startedDirectly = true;
-            await Start();
+            await Start(args);
         }
 
         /// <summary>
         /// Initializes and starts up the Meadow Core software stack
         /// </summary>
         /// <returns></returns>
-        public async static Task Start()
+        public async static Task Start(string[]? args)
         {
             bool systemInitialized = false;
             try
             {
-                systemInitialized = Initialize();
+                systemInitialized = Initialize(args);
 
                 if (!systemInitialized)
                 {
@@ -275,7 +275,7 @@
             return appType;
         }
 
-        private static bool Initialize()
+        private static bool Initialize(string[]? args)
         {
             try
             {
@@ -327,7 +327,7 @@
                 Resolver.Log.Trace($"Device Initialize starting...");
                 CurrentDevice.Initialize();
                 Resolver.Log.Trace($"PlatformOS Initialize starting...");
-                CurrentDevice.PlatformOS.Initialize(CurrentDevice.Capabilities); // initialize the devices' platform OS
+                CurrentDevice.PlatformOS.Initialize(CurrentDevice.Capabilities, args); // initialize the devices' platform OS
 
                 // initialize file system folders and such
                 // TODO: move this to platformOS
