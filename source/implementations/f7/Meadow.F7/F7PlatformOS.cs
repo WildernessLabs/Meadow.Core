@@ -5,7 +5,7 @@ using System;
 namespace Meadow;
 
 /// <summary>
-/// Provides STM32F7-specific implementation for the Meadow platform
+/// Provides a STM32F7-specific implementation for the Meadow platform
 /// </summary>
 public partial class F7PlatformOS : IPlatformOS
 {
