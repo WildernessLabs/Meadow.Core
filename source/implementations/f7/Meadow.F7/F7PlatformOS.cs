@@ -4,15 +4,23 @@ using System;
 
 namespace Meadow;
 
+/// <summary>
+/// Provides a STM32F7-specific implementation for the Meadow platform
+/// </summary>
 public partial class F7PlatformOS : IPlatformOS
 {
+    /// <summary>
+    /// The command line arguments provided when the Meadow application was launched
+    /// </summary>
+    public string[]? LaunchArguments { get; private set; }
+
     /// <summary>
     /// NTP client.
     /// </summary>
     public INtpClient NtpClient { get; }
 
     /// <summary>
-    /// Default construcotr for the F7PlatformOS objects.
+    /// Default constructor for the F7PlatformOS objects.
     /// </summary>
     public F7PlatformOS()
     {
@@ -32,11 +40,17 @@ public partial class F7PlatformOS : IPlatformOS
     /// Initialize the F7PlatformOS instance.
     /// </summary>
     /// <param name="capabilities"></param>
-    public void Initialize(DeviceCapabilities capabilities)
+    /// <param name="args">The command line arguments provided when the Meadow application was launched</param>
+    public void Initialize(DeviceCapabilities capabilities, string[]? args)
     {
+        LaunchArguments = args;
         InitializeStorage(capabilities.Storage);
     }
 
+    /// <summary>
+    /// Gets the name of all available serial ports on the platform
+    /// </summary>
+    /// <returns></returns>
     public SerialPortName[] GetSerialPortNames()
     {
         return new SerialPortName[]

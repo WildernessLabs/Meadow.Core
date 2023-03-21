@@ -10,16 +10,33 @@ namespace Meadow
 {
     public class WindowsPlatformOS : IPlatformOS
     {
-        public event ExternalStorageEventHandler ExternalStorageEvent;
-        public event PowerTransitionHandler BeforeReset;
-        public event PowerTransitionHandler BeforeSleep;
-        public event PowerTransitionHandler AfterWake;
+        /// <summary>
+        /// Event raised before a software reset
+        /// </summary>
+        public event PowerTransitionHandler BeforeReset = delegate { };
+        /// <summary>
+        /// Event raised before Sleep mode
+        /// </summary>
+        public event PowerTransitionHandler BeforeSleep = delegate { };
+        /// <summary>
+        /// Event raised after returning from Sleep mode
+        /// </summary>
+        public event PowerTransitionHandler AfterWake = delegate { };
+        /// <summary>
+        /// Event raised when an external storage device event occurs.
+        /// </summary>
+        public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
 
         public string FileSystemRoot { get; private set; }
 
         public string OSVersion { get; }
         public string OSBuildDate { get; }
         public string RuntimeVersion { get; }
+
+        /// <summary>
+        /// The command line arguments provided when the Meadow application was launched
+        /// </summary>
+        public string[]? LaunchArguments { get; private set; }
 
         internal WindowsPlatformOS()
         {
@@ -28,8 +45,15 @@ namespace Meadow
             RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
         }
 
-        public void Initialize(DeviceCapabilities capabilities)
+        /// <summary>
+        /// Initialize the WindowsPlatformOS instance.
+        /// </summary>
+        /// <param name="capabilities"></param>
+        /// <param name="args">The command line arguments provided when the Meadow application was launched</param>
+        public void Initialize(DeviceCapabilities capabilities, string[]? args)
         {
+            // TODO: deal with capabilities
+
             // create the Meadow root folder
             var di = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Meadow"));
             if (!di.Exists)
