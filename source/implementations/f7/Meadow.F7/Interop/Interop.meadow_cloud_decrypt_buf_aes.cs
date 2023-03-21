@@ -1,44 +1,48 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Meadow.Core
+namespace Meadow.Core;
+
+internal static partial class Interop
 {
-    internal static partial class Interop
+    public static partial class Nuttx
     {
-        public static partial class Nuttx
+        [DllImport(LIBRARY_NAME, SetLastError = true)]
+        private static extern int meadow_cloud_decrypt_buf_aes(IntPtr encrypted_buf, int encrypted_len, IntPtr key, IntPtr iv, IntPtr decrypted_buf);
+
+        const int aes_block_size = 16;
+        const int aes_key_size = 16;
+
+        public static byte[] MeadowCloudDecryptAES(byte[] encrypted_data, byte[] key, byte[] iv)
         {
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            private static extern int meadow_cloud_decrypt_buf_aes(IntPtr encrypted_buf, int encrypted_len, IntPtr key, int key_len, IntPtr decrypted_buf);
+            IntPtr encryptedBufferPtr = IntPtr.Zero;
+            IntPtr decryptedBufferPtr = IntPtr.Zero;
+            IntPtr keyBufferPtr = IntPtr.Zero;
+            IntPtr ivBufferPtr = IntPtr.Zero;
 
-            const int aes_block_size = 16;
-
-            public static byte[] MeadowCloudDecryptAES(byte[] buf, byte[] key)
+            try
             {
-                IntPtr encryptedBufferPtr = IntPtr.Zero;
-                IntPtr decryptedBufferPtr = IntPtr.Zero;
-                IntPtr keyBufferPtr = IntPtr.Zero;
+                encryptedBufferPtr = Marshal.AllocHGlobal(encrypted_data.Length);
+                decryptedBufferPtr = Marshal.AllocHGlobal(encrypted_data.Length);
+                ivBufferPtr = Marshal.AllocHGlobal(aes_block_size);
+                keyBufferPtr = Marshal.AllocHGlobal(aes_key_size);
 
-                try
-                {
-                    encryptedBufferPtr = Marshal.AllocHGlobal(aes_block_size);
-                    decryptedBufferPtr = Marshal.AllocHGlobal(aes_block_size);
-                    keyBufferPtr = Marshal.AllocHGlobal(key.Length);
+                Marshal.Copy(encrypted_data, 0, encryptedBufferPtr, encrypted_data.Length);
+                Marshal.Copy(iv, 0, ivBufferPtr, iv.Length);
+                Marshal.Copy(key, 0, keyBufferPtr, key.Length);
 
-                    Marshal.Copy(buf, 0, encryptedBufferPtr, aes_block_size);
-                    meadow_cloud_decrypt_buf_aes(encryptedBufferPtr, buf.Length, keyBufferPtr, key.Length, decryptedBufferPtr);
+                var decryptLength = meadow_cloud_decrypt_buf_aes(encryptedBufferPtr, encrypted_data.Length, keyBufferPtr, ivBufferPtr, decryptedBufferPtr);
 
-                    // TODO: there's a return value, can we detect success/fail here?
-
-                    byte[] result = new byte[aes_block_size];
-                    Marshal.Copy(decryptedBufferPtr, result, 0, aes_block_size);
-                    return result;
-                }
-                finally
-                {
-                    Marshal.FreeHGlobal(encryptedBufferPtr);
-                    Marshal.FreeHGlobal(decryptedBufferPtr);
-                    Marshal.FreeHGlobal(keyBufferPtr);
-                }
+                byte[] result = new byte[decryptLength];
+                Marshal.Copy(decryptedBufferPtr, result, 0, result.Length);
+                return result;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(encryptedBufferPtr);
+                Marshal.FreeHGlobal(decryptedBufferPtr);
+                Marshal.FreeHGlobal(keyBufferPtr);
+                Marshal.FreeHGlobal(ivBufferPtr);
             }
         }
     }
