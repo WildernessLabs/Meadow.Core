@@ -25,9 +25,10 @@ public partial class F7PlatformOS : IPlatformOS
     /// </remarks>
     /// <param name="encryptedValue">The value to decrypt</param>
     /// <param name="iv">The initialization vector to use for decryption</param>
+    /// <param name="key">The key used for encrypting the buffer</param>
     /// <returns>The decrypted value</returns>
-    public byte[] AesDecrypt(byte[] encryptedValue, byte[] iv)
+    public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
     {
-        return Interop.Nuttx.MeadowCloudDecryptAES(encryptedValue, iv);
+        return Interop.Nuttx.MeadowCloudDecryptAES(encryptedValue, key, iv);
     }
 }

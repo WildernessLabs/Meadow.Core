@@ -214,9 +214,7 @@ public class UpdateService : IUpdateService
                 var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
                 var ivBytes = Convert.FromBase64String(payload.Iv);
 
-                // TODO: ummmm - shouldn't this require the decryptedKey from above? Signed, Confused
-
-                var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, ivBytes);
+                var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
                 _jwt = Convert.ToBase64String(decryptedToken);
 
                 return true;
