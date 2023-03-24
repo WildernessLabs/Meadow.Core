@@ -180,12 +180,11 @@ public class UpdateService : IUpdateService
         {
             client.Timeout = new TimeSpan(0, 15, 0);
 
-            var content = new StringContent("", Encoding.UTF8, "application/json");
+            var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            // TODO: should this be Device.UniqueID instead???
-
-            var endpoint = $"{Config.UpdateServer}{DefaultUpdateLoginApiEndpoint}{Resolver.Device.Information.ProcessorSerialNumber}";
-            Resolver.Log.Debug($"Attempting to login to {endpoint}...");
+            var endpoint = $"{Config.UpdateServer}{DefaultUpdateLoginApiEndpoint}";
+            Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
             var response = await client.PostAsync(endpoint, content);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -220,7 +219,15 @@ public class UpdateService : IUpdateService
                 return true;
             }
 
-            Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // device is likely not provisioned?
+                Resolver.Log.Warn($"Update service returned 'Not Found': this device has likely not been provisioned");
+            }
+            else
+            {
+                Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
+            }
             return false;
         }
     }
@@ -262,11 +269,13 @@ public class UpdateService : IUpdateService
                         else
                         {
                             Resolver.Log.Error("Failed to authenticate with Update Service");
+                            await Task.Delay(1000);
                         }
                     }
                     catch (Exception ae)
                     {
                         Resolver.Log.Error($"Failed to authenticate with Update Service: {ae.Message}");
+                        await Task.Delay(1000);
                     }
                     break;
                 case UpdateState.Connecting:
