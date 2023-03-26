@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices;
+using Meadow.Hardware;
 using Meadow.Units;
 using System;
 
@@ -20,9 +21,9 @@ public partial class F7PlatformOS : IPlatformOS
     public INtpClient NtpClient { get; }
 
     /// <summary>
-    /// Default constructor for the F7PlatformOS objects.
+    /// Default constructor for the F7PlatformOS object.
     /// </summary>
-    public F7PlatformOS()
+    internal F7PlatformOS()
     {
         NtpClient = new NtpClient();
     }
@@ -33,6 +34,12 @@ public partial class F7PlatformOS : IPlatformOS
     /// <exception cref="NotSupportedException">Method is not supported on the F7 platform.</exception>
     public Temperature GetCpuTemperature()
     {
+        if (Resolver.Device is F7MicroBase f7)
+        {
+            return f7.GetProcessorTemperature();
+        }
+
+        // should never occur, but makes the compiler happy
         throw new NotSupportedException();
     }
 
@@ -50,7 +57,7 @@ public partial class F7PlatformOS : IPlatformOS
     /// <summary>
     /// Gets the name of all available serial ports on the platform
     /// </summary>
-    /// <returns></returns>
+    /// <returns>A list of available serial port names</returns>
     public SerialPortName[] GetSerialPortNames()
     {
         return new SerialPortName[]
@@ -58,5 +65,15 @@ public partial class F7PlatformOS : IPlatformOS
             new SerialPortName("COM1", "ttyS0"),
             new SerialPortName("COM4", "ttyS1")
         };
+    }
+
+    public void SetClock(DateTime dateTime)
+    {
+        var ts = new Core.Interop.Nuttx.timespec
+        {
+            tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
+        };
+
+        Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
     }
 }
