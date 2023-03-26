@@ -33,6 +33,10 @@ namespace Meadow.Simulation
         /// </summary>
         public string[]? LaunchArguments { get; private set; }
 
+        /// <summary>
+        /// Get the current .NET runtime version being used to execute the application.
+        /// </summary>
+        /// <returns>Mono version.</returns>
         public string RuntimeVersion { get; }
 
         internal SimulatedPlatformOS()
@@ -106,6 +110,15 @@ namespace Meadow.Simulation
         public void RegisterForSleep(ISleepAwarePeripheral peripheral)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the platform OS clock
+        /// </summary>
+        /// <param name="dateTime"></param>
+        public void SetClock(DateTime dateTime)
+        {
+            throw new PlatformNotSupportedException();
         }
     }
 }

@@ -27,10 +27,22 @@ namespace Meadow
         /// </summary>
         public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
 
-        public string FileSystemRoot { get; private set; }
+        public string FileSystemRoot { get; private set; } = default!;
 
+        /// <summary>
+        /// Gets the OS version.
+        /// </summary>
+        /// <returns>OS version.</returns>
         public string OSVersion { get; }
+        /// <summary>
+        /// Gets the OS build date.
+        /// </summary>
+        /// <returns>OS build date.</returns>
         public string OSBuildDate { get; }
+        /// <summary>
+        /// Get the current .NET runtime version being used to execute the application.
+        /// </summary>
+        /// <returns>Mono version.</returns>
         public string RuntimeVersion { get; }
 
         /// <summary>
@@ -38,6 +50,9 @@ namespace Meadow
         /// </summary>
         public string[]? LaunchArguments { get; private set; }
 
+        /// <summary>
+        /// Default constructor for the WindowsPlatformOS object.
+        /// </summary>
         internal WindowsPlatformOS()
         {
             OSVersion = Environment.OSVersion.ToString();
@@ -64,6 +79,10 @@ namespace Meadow
             FileSystemRoot = di.FullName;
         }
 
+        /// <summary>
+        /// Gets the name of all available serial ports on the platform
+        /// </summary>
+        /// <returns>A list of available serial port names</returns>
         public SerialPortName[] GetSerialPortNames()
         {
             return SerialPort.GetPortNames().Select(n =>
@@ -72,6 +91,15 @@ namespace Meadow
         }
 
         public Temperature GetCpuTemperature()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        /// <summary>
+        /// Sets the platform OS clock
+        /// </summary>
+        /// <param name="dateTime"></param>
+        public void SetClock(DateTime dateTime)
         {
             throw new PlatformNotSupportedException();
         }
