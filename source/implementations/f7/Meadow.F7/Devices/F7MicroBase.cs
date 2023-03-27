@@ -3,183 +3,171 @@ using Meadow.Hardware;
 using Meadow.Units;
 using System;
 
-namespace Meadow.Devices
+namespace Meadow.Devices;
+
+/// <summary>
+/// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
+/// capabilities and provides access to the various device-specific features.
+/// </summary>
+public abstract partial class F7MicroBase : IF7MeadowDevice
 {
+    public event NetworkConnectionHandler NetworkConnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+
+    //==== events
+    public event EventHandler WiFiAdapterInitialized = delegate { };
+
+    //==== public properties
+    public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
+    public ICoprocessor? Coprocessor { get; protected set; }
+
+    public DeviceCapabilities Capabilities { get; }
+
+    public IPlatformOS PlatformOS { get; protected set; }
+
+    public IDeviceInformation Information { get; protected set; }
+
+    public INetworkAdapterCollection NetworkAdapters => networkAdapters;
+
     /// <summary>
-    /// Represents a Meadow F7 micro device. Includes device-specific IO mapping,
-    /// capabilities and provides access to the various device-specific features.
+    /// Gets an IPin by name
     /// </summary>
-    public abstract partial class F7MicroBase : IF7MeadowDevice
+    /// <param name="pinName"></param>
+    /// <returns></returns>
+    public abstract IPin GetPin(string pinName);
+
+    public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
+
+    /// <summary>
+    /// Gets the current Battery information
+    /// </summary>
+    /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
+    public abstract BatteryInfo GetBatteryInfo();
+
+    //==== internals
+    protected NetworkAdapterCollection networkAdapters;
+    protected Esp32Coprocessor? esp32;
+    protected object coprocInitLock = new object();
+    protected IMeadowIOController IoController { get; }
+
+    //==== constructors
+    /// <summary>
+    /// Provides required construction of the F7MicroBase abstract class
+    /// </summary>
+    /// <param name="ioController"></param>
+    /// <param name="analogCapabilities"></param>
+    /// <param name="networkCapabilities"></param>
+    /// <param name="storageCapabilities"></param>
+    public F7MicroBase(
+        IMeadowIOController ioController,
+        AnalogCapabilities analogCapabilities,
+        NetworkCapabilities networkCapabilities,
+        StorageCapabilities storageCapabilities)
     {
-        public event NetworkConnectionHandler NetworkConnected = delegate { };
-        public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+        IoController = ioController;
 
-        //==== events
-        public event EventHandler WiFiAdapterInitialized = delegate { };
+        Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities, storageCapabilities);
 
-        //==== public properties
-        public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
-        public ICoprocessor? Coprocessor { get; protected set; }
+        PlatformOS = new F7PlatformOS();
 
-        public DeviceCapabilities Capabilities { get; }
+        Information = new F7DeviceInformation();
 
-        public IPlatformOS PlatformOS { get; protected set; }
+        networkAdapters = new NetworkAdapterCollection();
+        networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
+        networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
+    }
 
-        public IDeviceInformation Information { get; protected set; }
+    /// <summary>
+    /// Initializes the F7Micro platform hardware
+    /// </summary>
+    public void Initialize()
+    {
+        IoController.Initialize();
 
-        public INetworkAdapterCollection NetworkAdapters => networkAdapters;
+        InitCoprocessor();
+    }
 
-        /// <summary>
-        /// Gets an IPin by name
-        /// </summary>
-        /// <param name="pinName"></param>
-        /// <returns></returns>
-        public abstract IPin GetPin(string pinName);
-
-        public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
-
-        /// <summary>
-        /// Gets the current Battery information
-        /// </summary>
-        /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
-        public abstract BatteryInfo GetBatteryInfo();
-
-        //==== internals
-        protected NetworkAdapterCollection networkAdapters;
-        protected Esp32Coprocessor? esp32;
-        protected object coprocInitLock = new object();
-        protected IMeadowIOController IoController { get; }
-
-        //==== constructors
-        /// <summary>
-        /// Provides required construction of the F7MicroBase abstract class
-        /// </summary>
-        /// <param name="ioController"></param>
-        /// <param name="analogCapabilities"></param>
-        /// <param name="networkCapabilities"></param>
-        /// <param name="storageCapabilities"></param>
-        public F7MicroBase(
-            IMeadowIOController ioController,
-            AnalogCapabilities analogCapabilities,
-            NetworkCapabilities networkCapabilities,
-            StorageCapabilities storageCapabilities)
+    /// <summary>
+    /// Initializes the ESP32 Coprocessor
+    /// </summary>
+    /// <returns></returns>
+    protected bool InitCoprocessor()
+    {
+        lock (coprocInitLock)
         {
-            IoController = ioController;
-
-            Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities, storageCapabilities);
-
-            PlatformOS = new F7PlatformOS();
-
-            Information = new F7DeviceInformation();
-
-            networkAdapters = new NetworkAdapterCollection();
-            networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
-            networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
-        }
-
-        /// <summary>
-        /// Initializes the F7Micro platform hardware
-        /// </summary>
-        public void Initialize()
-        {
-            IoController.Initialize();
-
-            InitCoprocessor();
-        }
-
-        /// <summary>
-        /// Initializes the ESP32 Coprocessor
-        /// </summary>
-        /// <returns></returns>
-        protected bool InitCoprocessor()
-        {
-            lock (coprocInitLock)
+            if (this.esp32 == null)
             {
-                if (this.esp32 == null)
+                try
                 {
-                    try
+                    // instantiate the co proc and set the various adapters
+                    // to be it.
+                    this.esp32 = new Esp32Coprocessor();
+                    BluetoothAdapter = esp32;
+                    Coprocessor = esp32;
+
+                    if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                     {
-                        // instantiate the co proc and set the various adapters
-                        // to be it.
-                        this.esp32 = new Esp32Coprocessor();
-                        BluetoothAdapter = esp32;
-                        Coprocessor = esp32;
+                        Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
+                        networkAdapters.Add(esp32);
 
-                        if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
+                        if (esp32.AutoConnect)
                         {
-                            Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
-                            networkAdapters.Add(esp32);
+                            Resolver.Log.Debug($"Device configured to auto-connect to SSID '{esp32.DefaultSsid}'");
 
-                            if (esp32.AutoConnect)
+                            if (string.IsNullOrEmpty(esp32.DefaultSsid))
                             {
-                                Resolver.Log.Debug($"Device configured to auto-connect to SSID '{esp32.DefaultSsid}'");
-
-                                if (string.IsNullOrEmpty(esp32.DefaultSsid))
-                                {
-                                    Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.");
-                                }
-                                else
-                                {
-                                    esp32.ConnectToDefaultAccessPoint();
-                                }
+                                Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.");
+                            }
+                            else
+                            {
+                                esp32.ConnectToDefaultAccessPoint();
                             }
                         }
-
-                        esp32.NtpTimeChanged += (s, e) =>
-                        {
-                            // TODO: forward to the NtpClient
-                        };
                     }
-                    catch (Exception e)
+
+                    esp32.NtpTimeChanged += (s, e) =>
                     {
-                        Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}");
-                        return false;
-                    }
-                    finally
-                    {
-
-                    }
-                    return true;
+                        // TODO: forward to the NtpClient
+                    };
                 }
-                else
-                { // already initialized, bail out
-                    return true;
+                catch (Exception e)
+                {
+                    Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}");
+                    return false;
                 }
+                finally
+                {
 
+                }
+                return true;
             }
+            else
+            { // already initialized, bail out
+                return true;
+            }
+
         }
+    }
 
-        /// <summary>
-        /// Gets the current processor temperature
-        /// </summary>
-        /// <returns></returns>
-        public virtual Temperature GetProcessorTemperature()
-        {
-            return IoController.GetTemperature();
-        }
+    /// <summary>
+    /// Gets the current processor temperature
+    /// </summary>
+    /// <returns></returns>
+    public Temperature GetProcessorTemperature()
+    {
+        return IoController.GetTemperature();
+    }
 
-
-        public void SetClock(DateTime dateTime)
-        {
-            var ts = new Core.Interop.Nuttx.timespec
-            {
-                tv_sec = new DateTimeOffset(dateTime).ToUnixTimeSeconds()
-            };
-
-            Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
-        }
-
-        /// <summary>
-        /// Creates a new `Counter` instance to count the given transitions on the given pin
-        /// </summary>
-        /// <param name="pin"></param>
-        /// <param name="edge"></param>
-        /// <returns></returns>
-        public ICounter CreateCounter(
-            IPin pin,
-            InterruptMode edge)
-        {
-            return new Counter(pin, edge);
-        }
+    /// <summary>
+    /// Creates a new `Counter` instance to count the given transitions on the given pin
+    /// </summary>
+    /// <param name="pin"></param>
+    /// <param name="edge"></param>
+    /// <returns></returns>
+    public ICounter CreateCounter(
+        IPin pin,
+        InterruptMode edge)
+    {
+        return new Counter(pin, edge);
     }
 }
