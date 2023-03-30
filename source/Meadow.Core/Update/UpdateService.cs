@@ -217,7 +217,7 @@ public class UpdateService : IUpdateService
                 Resolver.Log.Debug($" AES decrypt of {encryptedTokenBytes.Length} token bytes ({BitConverter.ToString(encryptedTokenBytes)})");
                 Resolver.Log.Debug($"   iv is {ivBytes.Length} bytes ({BitConverter.ToString(ivBytes)})");
                 var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
-                _jwt = Convert.ToBase64String(decryptedToken);
+                _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
 
                 return true;
             }
