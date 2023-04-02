@@ -1,18 +1,20 @@
 ﻿using Meadow.Devices;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Hardware
 {
+    /// <summary>
+    /// Represents a serial port on STM32F7 devices
+    /// </summary>
     public class F7SerialPort : SerialPortBase
     {
-        protected const int TCSANOW = 0x00;
-        protected const int TCGETS = 0x0101;
-        protected const int TCSETS = 0x0102;
-        protected const string DriverFolder = "/dev";
-        protected const string SerialPortDriverPrefix = "tty";
+        private const int TCSANOW = 0x00;
+        private const int TCGETS = 0x0101;
+        private const int TCSETS = 0x0102;
+        private const string DriverFolder = "/dev";
+        private const string SerialPortDriverPrefix = "tty";
 
         internal static F7SerialPort From(
             SerialPortName portName,
@@ -75,6 +77,12 @@ namespace Meadow.Hardware
             return list.ToArray();
         }
 
+        /// <summary>
+        /// Opens the OS hardware port
+        /// </summary>
+        /// <param name="portName"></param>
+        /// <returns></returns>
+        /// <exception cref="NativeException"></exception>
         protected override IntPtr OpenHardwarePort(string portName)
         {
             var handle = Nuttx.open($"/dev/{PortName}", Nuttx.DriverFlags.ReadWrite | Nuttx.DriverFlags.SynchronizeOutput);
@@ -85,11 +93,23 @@ namespace Meadow.Hardware
             return handle;
         }
 
+        /// <summary>
+        /// Closes the OS hardware port
+        /// </summary>
+        /// <param name="handle"></param>
         protected override void CloseHardwarePort(IntPtr handle)
         {
             Nuttx.close(handle);
         }
 
+        /// <summary>
+        /// Writes data to the OS hardware port
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <param name="data"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        /// <exception cref="NativeException"></exception>
         protected override int WriteHardwarePort(IntPtr handle, byte[] data, int count)
         {
             var result = Nuttx.write(handle, data, count);
@@ -102,6 +122,14 @@ namespace Meadow.Hardware
             return result;
         }
 
+        /// <summary>
+        /// Reads data from the OS hardware port
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <param name="readBuffer"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        /// <exception cref="NativeException"></exception>
         protected override int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count)
         {
             var result = Nuttx.read(handle, readBuffer, count);
@@ -127,18 +155,23 @@ namespace Meadow.Hardware
         private void ShowSettings(Nuttx.Termios settings)
         {
             Resolver.Log.Info($"  Speed: {settings.c_speed}");
-            Resolver.Log.Info($"  Input Flags: 0x{settings.c_iflag:x}");
-            Resolver.Log.Info($"  OutputFlags: 0x{settings.c_oflag:x}");
-            Resolver.Log.Info($"  Local Flags: 0x{settings.c_lflag:x}");
-            Resolver.Log.Info($"  Control Flags: 0x{settings.c_cflag:x}");
+            Resolver.Log.Info($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
+            Resolver.Log.Info($"  OutputFlags:   {settings.c_oflag} (0x{settings.c_oflag:x})");
+            Resolver.Log.Info($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
+            Resolver.Log.Info($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
         }
 
+        /// <summary>
+        /// Calls the OS to set serial port settings (e.g. parity and stop bits)
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <exception cref="NativeException"></exception>
         protected override unsafe void SetHardwarePortSettings(IntPtr handle)
         {
             var settings = new Nuttx.Termios();
 
             // get the current settings           
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {handle}...");
+            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.tcgetattr(handle, ref settings);
             if (result != 0)
             {
@@ -146,7 +179,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -189,13 +222,14 @@ namespace Meadow.Hardware
                     break;
             }
 
-            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
+            Resolver.Log.Debug($"  Setting port speed to {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
 
+            Resolver.Log.Debug("Setting serial handle attributes...");
             result = Nuttx.tcsetattr(handle, TCSANOW, ref settings);
 
             if (result != 0)
@@ -203,7 +237,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 // get the settings again
                 result = Nuttx.tcgetattr(handle, ref settings);
@@ -223,7 +257,7 @@ namespace Meadow.Hardware
             // get the current settings
             var p = (IntPtr)(&settings);
 
-            Output.WriteLineIf(_showSerialDebug, $"  Getting port settings for driver handle {handle}...");
+            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.ioctl(handle, TCGETS, p);
             if (result != 0)
             {
@@ -231,7 +265,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -276,8 +310,8 @@ namespace Meadow.Hardware
 
             settings.c_speed = BaudRate;
 
-            Output.WriteLineIf(_showSerialDebug, $"  Setting port settings at {BaudRate}...");
-            if (_showSerialDebug)
+            Resolver.Log.Debug($"  Setting port settings at {BaudRate}...");
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -288,7 +322,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (_showSerialDebug)
+            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
             {
                 // get the settings again
                 result = Nuttx.ioctl(handle, TCGETS, p);

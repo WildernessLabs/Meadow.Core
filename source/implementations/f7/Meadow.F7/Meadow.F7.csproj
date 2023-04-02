@@ -15,16 +15,14 @@
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
     <Description>STM32F7 .NET libraries for Wilderness Labs Meadow</Description>
-  </PropertyGroup>
-  <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="0.*" />
+    <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
 </Project>

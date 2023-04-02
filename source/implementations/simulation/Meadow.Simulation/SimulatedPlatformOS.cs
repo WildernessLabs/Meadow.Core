@@ -9,13 +9,34 @@ namespace Meadow.Simulation
 {
     public class SimulatedPlatformOS : IPlatformOS
     {
-        public event PowerTransitionHandler BeforeReset;
-        public event PowerTransitionHandler BeforeSleep;
-        public event PowerTransitionHandler AfterWake;
-        public event ExternalStorageEventHandler ExternalStorageEvent;
+        /// <summary>
+        /// Event raised before a software reset
+        /// </summary>
+        public event PowerTransitionHandler BeforeReset = delegate { };
+        /// <summary>
+        /// Event raised before Sleep mode
+        /// </summary>
+        public event PowerTransitionHandler BeforeSleep = delegate { };
+        /// <summary>
+        /// Event raised after returning from Sleep mode
+        /// </summary>
+        public event PowerTransitionHandler AfterWake = delegate { };
+        /// <summary>
+        /// Event raised when an external storage device event occurs.
+        /// </summary>
+        public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
 
         public string OSVersion => "0.1";
 
+        /// <summary>
+        /// The command line arguments provided when the Meadow application was launched
+        /// </summary>
+        public string[]? LaunchArguments { get; private set; }
+
+        /// <summary>
+        /// Get the current .NET runtime version being used to execute the application.
+        /// </summary>
+        /// <returns>Mono version.</returns>
         public string RuntimeVersion { get; }
 
         internal SimulatedPlatformOS()
@@ -30,6 +51,17 @@ namespace Meadow.Simulation
             .ToArray();
         }
 
+        /// <summary>
+        /// Initialize the SimulatedPlatformOS instance.
+        /// </summary>
+        /// <param name="capabilities"></param>
+        /// <param name="args">The command line arguments provided when the Meadow application was launched</param>
+        public void Initialize(DeviceCapabilities capabilities, string[]? args)
+        {
+            // TODO: deal with capabilities
+
+            LaunchArguments = args;
+        }
 
 
         public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
@@ -60,10 +92,6 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public void Initialize()
-        {
-        }
-
         public void Reset()
         {
             throw new NotImplementedException();
@@ -79,14 +107,18 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public void Initialize(DeviceCapabilities capabilities)
+        public void RegisterForSleep(ISleepAwarePeripheral peripheral)
         {
             throw new NotImplementedException();
         }
 
-        public void RegisterForSleep(ISleepAwarePeripheral peripheral)
+        /// <summary>
+        /// Sets the platform OS clock
+        /// </summary>
+        /// <param name="dateTime"></param>
+        public void SetClock(DateTime dateTime)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }

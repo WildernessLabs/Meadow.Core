@@ -7,6 +7,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -34,6 +35,7 @@ namespace Meadow.Update
         public event UpdateEventHandler OnUpdateFailure = delegate { };
 
         private UpdateState _state;
+        private bool _stopService = false;
 
         private IUpdateSettings Config { get; }
         private IMqttClient MqttClient { get; set; } = default!;
@@ -51,6 +53,11 @@ namespace Meadow.Update
             MqttClientID = $"{id}_client";
 
             Config = config;
+        }
+
+        public void Shutdown()
+        {
+            _stopService = true;
         }
 
         public UpdateState State
@@ -142,6 +149,8 @@ namespace Meadow.Update
 
         private async void UpdateStateMachine()
         {
+            _stopService = false;
+
             Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
 
             Initialize();
@@ -151,7 +160,7 @@ namespace Meadow.Update
             var nic = Resolver.Device?.NetworkAdapters?.Primary<INetworkAdapter>();
 
             // update state machine
-            while (true)
+            while (!_stopService)
             {
                 switch (State)
                 {
@@ -172,7 +181,7 @@ namespace Meadow.Update
                             }
                             catch (MqttCommunicationException e)
                             {
-                                Resolver.Log.Debug($"Error connecting to Meadow.Cloud: {e.Message}");
+                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e.Message}");
                                 State = UpdateState.Disconnected;
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
@@ -181,6 +190,8 @@ namespace Meadow.Update
                             {
                                 Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
                                 State = UpdateState.Disconnected;
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
                             }
                         }
                         else
@@ -193,12 +204,16 @@ namespace Meadow.Update
                         State = UpdateState.Idle;
                         try
                         {
+                            Resolver.Log.Debug($"Update service subscribing to '{Config.RootTopic}'");
                             await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(Config.RootTopic).Build());
                         }
                         catch (Exception ex)
                         {
                             Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
-                            // TODO: what should be the state here?  What do we do (untested failure mode)
+
+                            // if subscribing fails, then we need to disconnect from the server
+                            await MqttClient.DisconnectAsync();
+
                             State = UpdateState.Disconnected;
                         }
                         break;
@@ -210,6 +225,8 @@ namespace Meadow.Update
                         break;
                 }
             }
+
+            State = UpdateState.Dead;
         }
 
         public void ClearUpdates()
@@ -341,11 +358,11 @@ namespace Meadow.Update
 
         private void DisplayTree(DirectoryInfo di)
         {
-            Resolver.Log.Info(di.Name);
+            Resolver.Log.Debug($"+ {di.Name}");
 
             foreach (var f in di.GetFiles())
             {
-                Resolver.Log.Info($" {f.Name}");
+                Resolver.Log.Debug($"  - {f.Name}");
             }
 
             foreach (var d in di.GetDirectories())
@@ -359,6 +376,8 @@ namespace Meadow.Update
             State = UpdateState.UpdateInProgress;
 
             var sourcePath = Store.GetUpdateArchivePath(updateInfo.ID);
+
+            Resolver.Log.Debug($"Applying update from '{sourcePath}'");
 
             if (sourcePath == null)
             {
@@ -377,8 +396,14 @@ namespace Meadow.Update
             }
 
             // extract zip
+            Resolver.Log.Debug($"Extracting update to '{UpdateDirectory}'...");
+            var sw = Stopwatch.StartNew();
             ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
+            sw.Stop();
+            Resolver.Log.Debug($"Extracting took {sw.Elapsed.TotalSeconds} seconds.");
 
+            Resolver.Log.Debug($"Contents of Update");
+            Resolver.Log.Debug($"------------------");
             DisplayTree(new DirectoryInfo(UpdateDirectory));
 
             // do we actually contain an update?
@@ -393,6 +418,7 @@ namespace Meadow.Update
             }
 
             // shut down the app (or timeout)
+            Resolver.Log.Debug($"Stopping application to allow update");
             var shutdownTimeoutTask = Task.Delay(TimeSpan.FromSeconds(5));
             var shutDownTask = Resolver.App?.OnShutdown();
 
@@ -403,6 +429,7 @@ namespace Meadow.Update
             Task.WaitAny(shutDownTask, shutdownTimeoutTask);
 
             // restart the device
+            Resolver.Log.Debug($"Requesting a device reset to apply the Update");
             Resolver.Device.PlatformOS.Reset();
 
             // the OS will handle updates on the next boot
