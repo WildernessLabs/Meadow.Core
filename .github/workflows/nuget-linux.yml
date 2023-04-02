@@ -11,7 +11,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Set VERSION variable from tag
-      run: echo "VERSION=0.95.0" >> $GITHUB_ENV
+      run: echo "VERSION=0.96.0" >> $GITHUB_ENV
       
     - name: Build Meadow.Linux
       run: dotnet build -c Release source/implementations/linux/Meadow.Linux/Meadow.Linux.csproj /p:Version=${VERSION}
