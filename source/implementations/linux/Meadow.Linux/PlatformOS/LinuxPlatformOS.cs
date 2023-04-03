@@ -37,8 +37,20 @@ public class LinuxPlatformOS : IPlatformOS
     /// </summary>
     public string[]? LaunchArguments { get; private set; }
 
+    /// <summary>
+    /// Gets the OS version.
+    /// </summary>
+    /// <returns>OS version.</returns>
     public virtual string OSVersion { get; private set; }
+    /// <summary>
+    /// Gets the OS build date.
+    /// </summary>
+    /// <returns>OS build date.</returns>
     public virtual string OSBuildDate { get; private set; }
+    /// <summary>
+    /// Get the current .NET runtime version being used to execute the application.
+    /// </summary>
+    /// <returns>Mono version.</returns>
     public virtual string RuntimeVersion { get; }
 
     internal static CancellationTokenSource AppAbort = new();
@@ -147,5 +159,14 @@ public class LinuxPlatformOS : IPlatformOS
     public void RegisterForSleep(ISleepAwarePeripheral peripheral)
     {
         throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Sets the platform OS clock
+    /// </summary>
+    /// <param name="dateTime"></param>
+    public void SetClock(DateTime dateTime)
+    {
+        throw new PlatformNotSupportedException();
     }
 }

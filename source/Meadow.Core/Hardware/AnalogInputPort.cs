@@ -185,7 +185,7 @@ namespace Meadow.Hardware
                         if (ct.IsCancellationRequested)
                         {
                             // do task clean up here
-                            observers.ForEach(x => x.OnCompleted());
+                            Observers.ForEach(x => x.OnCompleted());
                             break;
                         }
 

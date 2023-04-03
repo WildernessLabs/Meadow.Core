@@ -10,6 +10,8 @@ namespace Meadow.Hardware
     public class BiDirectionalPort : BiDirectionalPortBase
     {
         private PortDirectionType _currentDirection;
+        private TimeSpan _debounceDuration;
+        private TimeSpan _glitchDuration;
         protected IMeadowIOController IOController { get; }
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
@@ -208,7 +210,7 @@ namespace Meadow.Hardware
             }
         }
 
-        void OnInterrupt(IPin pin, bool state)
+        private void OnInterrupt(IPin pin, bool state)
         {
             if (pin == this.Pin)
             {
