@@ -1,10 +1,6 @@
 ﻿using Meadow.Hardware;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
 using System.Diagnostics;
@@ -63,7 +59,7 @@ public class UpdateService : IUpdateService
 
     private IUpdateSettings Config { get; }
     private IMqttClient MqttClient { get; set; } = default!;
-    private IMqttClientOptions ClientOptions { get; set; } = default!;
+    private MqttClientOptions? ClientOptions { get; set; } = default!;
     private UpdateStore Store { get; }
     private string MqttClientID { get; }
 
@@ -120,17 +116,19 @@ public class UpdateService : IUpdateService
         var factory = new MqttFactory();
         MqttClient = factory.CreateMqttClient();
 
-        MqttClient.ConnectedHandler = new MqttClientConnectedHandlerDelegate((f) =>
+        MqttClient.ConnectedAsync += (f) =>
         {
             State = UpdateState.Connected;
-        });
+            return Task.CompletedTask;
+        };
 
-        MqttClient.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate((f) =>
+        MqttClient.DisconnectedAsync += (f) =>
         {
             State = UpdateState.Disconnected;
-        });
+            return Task.CompletedTask;
+        };
 
-        MqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate((f) =>
+        MqttClient.ApplicationMessageReceivedAsync += (f) =>
         {
             var json = Encoding.UTF8.GetString(f.ApplicationMessage.Payload);
 
@@ -171,7 +169,9 @@ public class UpdateService : IUpdateService
                 }
 
             }
-        });
+
+            return Task.CompletedTask;
+        };
     }
 
     private async Task<bool> AuthenticateWithServer()
@@ -207,6 +207,7 @@ public class UpdateService : IUpdateService
 
                 Resolver.Log.Debug($"Asking Device OS to decrypt keys...");
                 var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
+                //var encryptedKeyBytes = Encoding.UTF8.GetBytes(payload.EncryptedKey);
                 Resolver.Log.Debug($" RSA decrypt of {encryptedKeyBytes.Length} bytes ({BitConverter.ToString(encryptedKeyBytes)})");
                 var decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
 
