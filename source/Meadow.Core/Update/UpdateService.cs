@@ -183,7 +183,7 @@ public class UpdateService : IUpdateService
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var endpoint = $"{Config.UpdateServer}{DefaultUpdateLoginApiEndpoint}";
+            var endpoint = $"{Config.UpdateServer}:{Config.UpdatePort}{DefaultUpdateLoginApiEndpoint}";
             Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
             var response = await client.PostAsync(endpoint, content);
@@ -278,6 +278,10 @@ public class UpdateService : IUpdateService
                     catch (Exception ae)
                     {
                         Resolver.Log.Error($"Failed to authenticate with Update Service: {ae.Message}");
+                        if (ae.InnerException != null)
+                        {
+                            Resolver.Log.Error($" Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
+                        }
                         await Task.Delay(1000);
                     }
                     break;
@@ -287,7 +291,7 @@ public class UpdateService : IUpdateService
                         var builder = new MqttClientOptionsBuilder()
                                         .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                                         .WithClientId(MqttClientID)
-                                        .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
+                                        .WithTcpServer(Config.ContentServer, Config.ContentPort)
                                         .WithUserProperty(MqttOrganizationProperty, Config.Organization);
 
                         if (Config.UseAuthentication)

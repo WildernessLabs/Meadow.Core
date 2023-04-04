@@ -201,7 +201,8 @@
             try
             {
                 UpdateSettings = new UpdateSettings();
-                Resolver.Log.Trace($"Using Update Server {UpdateSettings.UpdateServer}:{UpdateSettings.UpdatePort}");
+                Resolver.Log.Trace($"Update API Server {UpdateSettings.UpdateServer}:{UpdateSettings.UpdatePort}");
+                Resolver.Log.Trace($"Update Content Server {UpdateSettings.ContentServer}:{UpdateSettings.ContentPort}");
             }
             catch (Exception ex)
             {
