@@ -215,7 +215,6 @@ public class UpdateService : IUpdateService
 
                 Resolver.Log.Debug($"Asking Device OS to decrypt keys...");
                 var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
-                Resolver.Log.Debug($" RSA decrypt of {encryptedKeyBytes.Length} bytes ({BitConverter.ToString(encryptedKeyBytes)})");
 
                 byte[]? decryptedKey;
                 try
@@ -233,13 +232,13 @@ public class UpdateService : IUpdateService
                 // then need to call method to AES decrypt the EncryptedToken with IV
                 var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
                 var ivBytes = Convert.FromBase64String(payload.Iv);
-
-                Resolver.Log.Debug($" AES decrypt of {encryptedTokenBytes.Length} token bytes ({BitConverter.ToString(encryptedTokenBytes)})");
-                Resolver.Log.Debug($"   iv is {ivBytes.Length} bytes ({BitConverter.ToString(ivBytes)})");
                 var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
+
                 _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
 
-                Resolver.Log.Debug($"JWT\r\n{_jwt}\r\n");
+                // trim off trailing 0x05 padding (no idea where or why this happens)
+                _jwt = _jwt.TrimEnd((char)0x05);
+
                 return true;
             }
 
