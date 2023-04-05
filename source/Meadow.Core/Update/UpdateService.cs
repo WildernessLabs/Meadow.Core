@@ -1,6 +1,10 @@
 ﻿using Meadow.Hardware;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Disconnecting;
+using MQTTnet.Client.Options;
+using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
 using System.Diagnostics;
@@ -59,7 +63,7 @@ public class UpdateService : IUpdateService
 
     private IUpdateSettings Config { get; }
     private IMqttClient MqttClient { get; set; } = default!;
-    private MqttClientOptions? ClientOptions { get; set; } = default!;
+    private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private UpdateStore Store { get; }
     private string MqttClientID { get; }
 
@@ -116,20 +120,24 @@ public class UpdateService : IUpdateService
         var factory = new MqttFactory();
         MqttClient = factory.CreateMqttClient();
 
-        MqttClient.ConnectedAsync += (f) =>
+        MqttClient.ConnectedHandler = new MqttClientConnectedHandlerDelegate((f) =>
         {
+            Resolver.Log.Debug("MQTT connected");
             State = UpdateState.Connected;
             return Task.CompletedTask;
-        };
+        });
 
-        MqttClient.DisconnectedAsync += (f) =>
+        MqttClient.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate((f) =>
         {
+            Resolver.Log.Debug("MQTT disconnected");
             State = UpdateState.Disconnected;
             return Task.CompletedTask;
-        };
+        });
 
-        MqttClient.ApplicationMessageReceivedAsync += (f) =>
+        MqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate((f) =>
         {
+            Resolver.Log.Debug("MQTT message received");
+
             var json = Encoding.UTF8.GetString(f.ApplicationMessage.Payload);
 
             var opts = new JsonSerializerOptions
@@ -171,7 +179,7 @@ public class UpdateService : IUpdateService
             }
 
             return Task.CompletedTask;
-        };
+        });
     }
 
     private async Task<bool> AuthenticateWithServer()
@@ -207,9 +215,20 @@ public class UpdateService : IUpdateService
 
                 Resolver.Log.Debug($"Asking Device OS to decrypt keys...");
                 var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
-                //var encryptedKeyBytes = Encoding.UTF8.GetBytes(payload.EncryptedKey);
                 Resolver.Log.Debug($" RSA decrypt of {encryptedKeyBytes.Length} bytes ({BitConverter.ToString(encryptedKeyBytes)})");
-                var decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
+
+                byte[]? decryptedKey;
+                try
+                {
+                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
+                }
+                catch (OverflowException)
+                {
+                    // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
+                    // TODO: add platform and OS checking for this?
+                    Resolver.Log.Error($" RSA decrypt failure. This device likely needs to be reprovisioned.");
+                    return false;
+                }
 
                 // then need to call method to AES decrypt the EncryptedToken with IV
                 var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
@@ -220,6 +239,7 @@ public class UpdateService : IUpdateService
                 var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
                 _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
 
+                Resolver.Log.Debug($"JWT\r\n{_jwt}\r\n");
                 return true;
             }
 
@@ -289,15 +309,19 @@ public class UpdateService : IUpdateService
                 case UpdateState.Connecting:
                     if (ClientOptions == null)
                     {
+                        Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                                        .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
-                                        .WithClientId(MqttClientID)
+                                        //.WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+                                        //.WithClientId(MqttClientID)
                                         .WithTcpServer(Config.ContentServer, Config.ContentPort)
-                                        .WithUserProperty(MqttOrganizationProperty, Config.Organization);
+                                        //.WithUserProperty(MqttOrganizationProperty, Config.Organization)
+                                        ;
 
                         if (Config.UseAuthentication)
                         {
-                            builder.WithCredentials("", _jwt);
+                            Resolver.Log.Debug("Adding MQTT creds");
+                            //builder.WithCredentials("", _jwt);
+                            builder.WithCredentials(Resolver.Device?.Information.UniqueID.ToUpper(), _jwt);
                         }
 
                         ClientOptions = builder.Build();
@@ -307,6 +331,7 @@ public class UpdateService : IUpdateService
                     {
                         try
                         {
+                            Resolver.Log.Debug("Connecting MQTT client");
                             await MqttClient.ConnectAsync(ClientOptions);
                         }
                         catch (MqttCommunicationTimedOutException)
