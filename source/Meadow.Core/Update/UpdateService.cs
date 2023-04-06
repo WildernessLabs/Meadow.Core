@@ -12,9 +12,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -236,8 +238,8 @@ public class UpdateService : IUpdateService
 
                 _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
 
-                // trim off trailing 0x05 padding (no idea where or why this happens)
-                _jwt = _jwt.TrimEnd((char)0x05);
+                // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
+                _jwt = Regex.Replace(_jwt, @"[^\w\.@-]", "");
 
                 return true;
             }
@@ -436,8 +438,12 @@ public class UpdateService : IUpdateService
         try
         {
             // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
+            Resolver.Log.Trace($"Attempting to retrieve {message.MpakDownloadUrl}");
+            var sw = Stopwatch.StartNew();
             using (var httpClient = new HttpClient())
             {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+
                 using (var stream = await httpClient.GetStreamAsync(message.MpakDownloadUrl))
                 {
                     using (var fileStream = Store.GetUpdateFileStream(message.ID))
@@ -449,8 +455,14 @@ public class UpdateService : IUpdateService
                 }
             }
 
+            sw.Stop();
+
             var path = Store.GetUpdateArchivePath(message.ID);
-            var hash = Store.GetFileHash(new FileInfo(path));
+            var fi = new FileInfo(path);
+
+            Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0.0}bps)");
+
+            var hash = Store.GetFileHash(fi);
 
             if (!string.IsNullOrWhiteSpace(message.DownloadHash))
             {
