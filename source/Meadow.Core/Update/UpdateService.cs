@@ -67,7 +67,6 @@ public class UpdateService : IUpdateService
     private IMqttClient MqttClient { get; set; } = default!;
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private UpdateStore Store { get; }
-    private string MqttClientID { get; }
 
     internal UpdateService(string fsRoot, IUpdateSettings config)
     {
@@ -75,8 +74,6 @@ public class UpdateService : IUpdateService
         UpdateDirectory = Path.Combine(fsRoot, DefaultUpdateDirectoryName);
 
         Store = new UpdateStore(UpdateStoreDirectory);
-        var id = Resolver.Device?.Information?.UniqueID ?? "simple";
-        MqttClientID = $"{id}_client";
 
         Config = config;
     }
@@ -312,16 +309,12 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                                        //.WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
-                                        //.WithClientId(MqttClientID)
                                         .WithTcpServer(Config.ContentServer, Config.ContentPort)
-                                        //.WithUserProperty(MqttOrganizationProperty, Config.Organization)
                                         ;
 
                         if (Config.UseAuthentication)
                         {
                             Resolver.Log.Debug("Adding MQTT creds");
-                            //builder.WithCredentials("", _jwt);
                             builder.WithCredentials(Resolver.Device?.Information.UniqueID.ToUpper(), _jwt);
                         }
 
@@ -435,14 +428,18 @@ public class UpdateService : IUpdateService
 
     private async Task DownloadProc(UpdateMessage message)
     {
+        Resolver.Log.Trace($"Attempting to retrieve {message.MpakDownloadUrl}");
+        var sw = Stopwatch.StartNew();
+
         try
         {
             // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
-            Resolver.Log.Trace($"Attempting to retrieve {message.MpakDownloadUrl}");
-            var sw = Stopwatch.StartNew();
             using (var httpClient = new HttpClient())
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                if (Config.UseAuthentication)
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                }
 
                 using (var stream = await httpClient.GetStreamAsync(message.MpakDownloadUrl))
                 {
@@ -489,8 +486,10 @@ public class UpdateService : IUpdateService
         }
         catch (Exception ex)
         {
+            sw.Stop();
+
             // TODO: raise some event?
-            Resolver.Log.Error($"Failed to download Update: {ex.Message}");
+            Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
             State = UpdateState.Idle;
         }
     }
