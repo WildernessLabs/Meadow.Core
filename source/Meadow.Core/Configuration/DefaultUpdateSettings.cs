@@ -14,19 +14,11 @@ public class DefaultUpdateSettings : IUpdateSettings
     /// <summary>
     /// Gets the address of the Update server to use
     /// </summary>
-    public string UpdateServer => "https://www.meadowcloud.co";
+    public string UpdateServer => "mqtt.meadowcloud.co";
     /// <summary>
     /// Gets the port of the Update server to use
     /// </summary>
-    public int UpdatePort => 443;
-    /// <summary>
-    /// Gets the address of the Update Content (MQTT) server to use
-    /// </summary>
-    public string ContentServer => "mqtt.meadowcloud.co";
-    /// <summary>
-    /// Gets the port of the Update Content (MQTT) server to use
-    /// </summary>
-    public int ContentPort => 1883;
+    public int UpdatePort => 1883;
     /// <summary>
     /// Gets the root MQTT topic to subscribe to for updates
     /// </summary>

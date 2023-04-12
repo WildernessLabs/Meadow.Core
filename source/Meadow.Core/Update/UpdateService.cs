@@ -291,7 +291,7 @@ public class UpdateService : IUpdateService
                         else
                         {
                             Resolver.Log.Error("Failed to authenticate with Update Service");
-                            await Task.Delay(1000);
+                            await Task.Delay(Config.CloudConnectRetrySeconds);
                         }
                     }
                     catch (Exception ae)
@@ -301,7 +301,7 @@ public class UpdateService : IUpdateService
                         {
                             Resolver.Log.Error($" Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
                         }
-                        await Task.Delay(1000);
+                        await Task.Delay(Config.CloudConnectRetrySeconds);
                     }
                     break;
                 case UpdateState.Connecting:
@@ -309,7 +309,7 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                                        .WithTcpServer(Config.ContentServer, Config.ContentPort)
+                                        .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
                                         ;
 
                         if (Config.UseAuthentication)
@@ -428,7 +428,21 @@ public class UpdateService : IUpdateService
 
     private async Task DownloadProc(UpdateMessage message)
     {
-        Resolver.Log.Trace($"Attempting to retrieve {message.MpakDownloadUrl}");
+        var destination = message.MpakDownloadUrl;
+
+        if (!destination.StartsWith("http://"))
+        {
+            if (Config.UseAuthentication)
+            {
+                destination = $"https://{destination}";
+            }
+            else
+            {
+                destination = $"http://{destination}";
+            }
+        }
+
+        Resolver.Log.Trace($"Attempting to retrieve {destination}");
         var sw = Stopwatch.StartNew();
 
         try
@@ -441,13 +455,13 @@ public class UpdateService : IUpdateService
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
                 }
 
-                using (var stream = await httpClient.GetStreamAsync(message.MpakDownloadUrl))
+                using (var stream = await httpClient.GetStreamAsync(destination))
                 {
                     using (var fileStream = Store.GetUpdateFileStream(message.ID))
                     {
                         Resolver.Log.Trace($"Copying update to {fileStream.Name}");
 
-                        await stream.CopyToAsync(fileStream);
+                        await stream.CopyToAsync(fileStream, 4096);
                     }
                 }
             }
@@ -457,7 +471,15 @@ public class UpdateService : IUpdateService
             var path = Store.GetUpdateArchivePath(message.ID);
             var fi = new FileInfo(path);
 
-            Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0.0}bps)");
+            if (sw.Elapsed.Seconds > 0)
+            {
+                Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0} bps)");
+            }
+            else
+            {
+                // don't divide by 0
+                Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec");
+            }
 
             var hash = Store.GetFileHash(fi);
 

@@ -14,19 +14,11 @@ public class UpdateSettings : ConfigurableObject, IUpdateSettings
     /// <summary>
     /// Gets the address of the Update (API) server to use
     /// </summary>
-    public string UpdateServer => GetConfiguredString(nameof(UpdateServer), "https://www.meadowcloud.co");
+    public string UpdateServer => GetConfiguredString(nameof(UpdateServer), "mqtt.meadowcloud.co");
     /// <summary>
     /// Gets the port of the Update (API) server to use
     /// </summary>
-    public int UpdatePort => GetConfiguredInt(nameof(UpdatePort), 443);
-    /// <summary>
-    /// Gets the address of the Update Content (MQTT) server to use
-    /// </summary>
-    public string ContentServer => GetConfiguredString(nameof(ContentServer), "mqtt.meadowcloud.co");
-    /// <summary>
-    /// Gets the port of the Update Content (MQTT) server to use
-    /// </summary>
-    public int ContentPort => GetConfiguredInt(nameof(ContentPort), 1883);
+    public int UpdatePort => GetConfiguredInt(nameof(UpdatePort), 1883);
     /// <summary>
     /// Gets the root MQTT topic to subscribe to for updates
     /// </summary>
