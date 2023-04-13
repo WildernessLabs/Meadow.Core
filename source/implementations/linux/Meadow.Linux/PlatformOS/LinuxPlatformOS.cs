@@ -161,6 +161,8 @@ public class LinuxPlatformOS : IPlatformOS
         throw new NotImplementedException();
     }
 
+    public string ReservedPins => string.Empty;
+
     /// <summary>
     /// Sets the platform OS clock
     /// </summary>

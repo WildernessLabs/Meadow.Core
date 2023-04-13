@@ -4,6 +4,7 @@
     using Meadow.Update;
     using System;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
@@ -305,7 +306,19 @@
                 Resolver.Log.Trace($"App is type {appType.Name}");
                 Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
 
-                var deviceType = appType.BaseType.GetGenericArguments()[0];
+                // local method to walk down the object graph to find the IMeadowDevice concrete type
+                Type FindDeviceType(Type type)
+                {
+                    if (type.IsGenericType)
+                    {
+                        var dt = type.GetGenericArguments().FirstOrDefault(a => typeof(IMeadowDevice).IsAssignableFrom(a));
+                        if (dt != null) return dt;
+                    }
+
+                    return FindDeviceType(type.BaseType);
+                }
+
+                var deviceType = FindDeviceType(appType);
 
                 try
                 {
