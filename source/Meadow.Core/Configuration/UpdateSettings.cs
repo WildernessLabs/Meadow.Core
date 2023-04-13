@@ -20,6 +20,14 @@ public class UpdateSettings : ConfigurableObject, IUpdateSettings
     /// </summary>
     public int UpdatePort => GetConfiguredInt(nameof(UpdatePort), 1883);
     /// <summary>
+    /// Gets the address of the authentication server to use
+    /// </summary>
+    public string AuthServer => GetConfiguredString(nameof(AuthServer), "https://www.meadowcloud.co");
+    /// <summary>
+    /// Gets the port of the authentication server to use
+    /// </summary>
+    public int AuthPort => GetConfiguredInt(nameof(AuthPort), 443);
+    /// <summary>
     /// Gets the root MQTT topic to subscribe to for updates
     /// </summary>
     public string RootTopic => GetConfiguredString(nameof(RootTopic), "ota");

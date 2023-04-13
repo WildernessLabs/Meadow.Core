@@ -190,7 +190,7 @@ public class UpdateService : IUpdateService
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var endpoint = $"{Config.UpdateServer}:{Config.UpdatePort}{DefaultUpdateLoginApiEndpoint}";
+            var endpoint = $"{Config.AuthServer}:{Config.AuthPort}{DefaultUpdateLoginApiEndpoint}";
             Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
             var response = await client.PostAsync(endpoint, content);
@@ -430,7 +430,7 @@ public class UpdateService : IUpdateService
     {
         var destination = message.MpakDownloadUrl;
 
-        if (!destination.StartsWith("http://"))
+        if (!destination.StartsWith("http"))
         {
             if (Config.UseAuthentication)
             {
