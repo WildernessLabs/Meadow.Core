@@ -113,6 +113,7 @@ namespace Meadow
 
         // TODO: implement everything below here
 
+        public string ReservedPins => string.Empty;
         public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
         public INtpClient NtpClient => throw new NotImplementedException();
         public bool RebootOnUnhandledException => throw new NotImplementedException();

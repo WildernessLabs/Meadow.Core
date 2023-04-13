@@ -64,6 +64,8 @@ namespace Meadow.Simulation
         }
 
 
+        public string ReservedPins => string.Empty;
+
         public string FileSystemRoot => System.AppDomain.CurrentDomain.BaseDirectory;
 
         public string OSBuildDate => throw new NotImplementedException();
