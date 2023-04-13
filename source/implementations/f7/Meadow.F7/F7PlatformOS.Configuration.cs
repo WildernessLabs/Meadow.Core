@@ -82,6 +82,12 @@ public partial class F7PlatformOS
     /// </summary>
     public bool SdStorageSupported => GetBoolean(ConfigurationValues.SdStorageSupported);
 
+    /// <summary>
+    /// Names of any pins that should be reserved for OS use.
+    /// </summary>
+    /// <remarks>This should be a semicolon list of pin names that will be reserved for OS use.</remarks>
+    public string ReservedPins => GetString(ConfigurationValues.ReservedPins);
+
 
     //==== Configuration internals
 
