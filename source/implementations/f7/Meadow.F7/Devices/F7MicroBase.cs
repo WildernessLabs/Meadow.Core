@@ -82,7 +82,8 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// </summary>
     public void Initialize()
     {
-        IoController.Initialize();
+        var reservedPins = PlatformOS.ReservedPins?.ToUpper().Split(';', StringSplitOptions.RemoveEmptyEntries) ?? null;
+        IoController.Initialize(reservedPins);
 
         InitCoprocessor();
     }
