@@ -33,7 +33,7 @@ namespace Meadow.Hardware
             set
             {
                 _reservedPins = value;
-                if (_reservedPins != null)
+                if (_reservedPins != null && _reservedPins.Length > 0)
                 {
                     Resolver.Log.Debug($"System reserved pins: {string.Join(';', SystemReservedPins)}");
                 }
