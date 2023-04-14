@@ -291,7 +291,7 @@ public class UpdateService : IUpdateService
                         else
                         {
                             Resolver.Log.Error("Failed to authenticate with Update Service");
-                            await Task.Delay(Config.CloudConnectRetrySeconds);
+                            await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
                         }
                     }
                     catch (Exception ae)
@@ -301,7 +301,7 @@ public class UpdateService : IUpdateService
                         {
                             Resolver.Log.Error($" Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
                         }
-                        await Task.Delay(Config.CloudConnectRetrySeconds);
+                        await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
                     }
                     break;
                 case UpdateState.Connecting:
