@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using static Meadow.Core.Interop;
 
@@ -45,9 +46,11 @@ namespace Meadow.Devices
 #endif
         }
 
-
-        public virtual void Initialize()
+        /// <inheritdoc />
+        public virtual void Initialize(string[]? reservedPinList)
         {
+            DeviceChannelManager.SystemReservedPins = reservedPinList;
+
             if ((DebugFeatures & DebugFeature.Interrupts) != 0)
             {
                 UPD.DumpClockRegisters();
@@ -316,6 +319,13 @@ namespace Meadow.Devices
              int alternateFunctionNumber, TimeSpan debounceDuration, TimeSpan glitchDuration,
              bool validateInterruptGroup, bool interruptCapable = true)
         {
+
+            if (DeviceChannelManager.SystemReservedPins != null)
+            {
+                var id = $"{(char)(0x41 + port)}{pin}";
+                if (DeviceChannelManager.SystemReservedPins.Contains(id)) return false;
+            }
+
             uint base_addr;
 
             switch (port)
