@@ -51,7 +51,7 @@ namespace Meadow.Hardware
             }
             else
             {
-                throw new PortInUseException($"{this.GetType().Name}: Pin {pin.Name} is already in use");
+                throw new PortInUseException($"{this.GetType().Name}: {success.Item2}");
             }
         }
 

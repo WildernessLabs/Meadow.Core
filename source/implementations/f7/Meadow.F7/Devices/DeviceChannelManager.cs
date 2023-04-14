@@ -17,6 +17,7 @@ namespace Meadow.Hardware
         private IDictionary<uint, double> _pwmTimerFrequencies;
         private List<uint> _pwmTimersInitialized = new List<uint>();
         private KeyValuePair<IPin, ChannelConfig>[]? _pinsToReasssertForPwm = null;
+        private string[]? _reservedPins = null;
 
         internal bool ShowDebug { get; set; } = false;
 
@@ -24,6 +25,19 @@ namespace Meadow.Hardware
         {
             _channelStates = new Dictionary<IPin, ChannelConfig>();
             _pwmTimerFrequencies = new Dictionary<uint, double>();
+        }
+
+        public string[]? SystemReservedPins
+        {
+            get => _reservedPins;
+            set
+            {
+                _reservedPins = value;
+                if (_reservedPins != null)
+                {
+                    Resolver.Log.Debug($"System reserved pins: {string.Join(';', SystemReservedPins)}");
+                }
+            }
         }
 
         /// <summary>
@@ -35,6 +49,15 @@ namespace Meadow.Hardware
         public Tuple<bool, string> ReservePin(IPin pin, ChannelConfigurationType configType)
         {
             Output.WriteLineIf(ShowDebug, "+ReservePin");
+
+            if (SystemReservedPins != null)
+            {
+                if (SystemReservedPins.Contains(pin.Key.ToString().Substring(1)))
+                {
+                    return new Tuple<bool, string>(false, "Pin is defined as System Reserved.");
+                }
+            }
+
             // thread sync
             try
             {
@@ -47,7 +70,7 @@ namespace Meadow.Hardware
                         if (_channelStates[pin].State == ChannelState.InUse)
                         {
                             // bail out
-                            return new Tuple<bool, string>(false, "Channel already in use.");
+                            return new Tuple<bool, string>(false, $"Pin {pin.Name} is already in use");
                         }
                         else
                         { // if it's not, probably need to do some cleanup
@@ -82,7 +105,7 @@ namespace Meadow.Hardware
                 switch (info.Timer)
                 {
                     case 2:
-                        c = new string[] { "OnboardLedBlue", "OnboardLedGreen", "OnboardLedRed" };                        
+                        c = new string[] { "OnboardLedBlue", "OnboardLedGreen", "OnboardLedRed" };
                         break;
                     case 3:
                         c = new string[] { "D05", "D06", "D09" };
@@ -113,11 +136,11 @@ namespace Meadow.Hardware
             if (!_pwmTimersInitialized.Contains(info.Timer))
             {
                 // TODO: re-assert AF
-                if(_pinsToReasssertForPwm != null)
+                if (_pinsToReasssertForPwm != null)
                 {
-                    foreach(var p in _pinsToReasssertForPwm)
+                    foreach (var p in _pinsToReasssertForPwm)
                     {
-                        ioController.ReassertConfig(p.Key, false); 
+                        ioController.ReassertConfig(p.Key, false);
                     }
                 }
                 _pinsToReasssertForPwm = null;

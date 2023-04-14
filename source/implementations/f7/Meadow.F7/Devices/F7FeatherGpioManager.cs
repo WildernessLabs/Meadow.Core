@@ -4,9 +4,10 @@ namespace Meadow.Devices
 {
     public class F7FeatherGpioManager : F7GPIOManager
     {
-        public override void Initialize()
+        /// <inheritdoc/>
+        public override void Initialize(string[]? reservedPins)
         {
-            base.Initialize();
+            base.Initialize(reservedPins);
 
             // LEDs are inverse logic - initialize to high/off
             ConfigureOutput(STM32.GpioPort.PortA, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, true);
