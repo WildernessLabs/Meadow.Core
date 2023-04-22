@@ -20,19 +20,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "krtkl", "krtkl", "{249BB39C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nvidia", "nvidia", "{5CA85A22-762C-4354-992E-BF0217E6DC67}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalIOSample", "samples\krtkl\DigitalIOSample\DigitalIOSample.csproj", "{6BA83178-2CB0-4B25-B07B-AECBEF1F8190}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalIOSample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\krtkl\DigitalIOSample\DigitalIOSample.csproj", "{6BA83178-2CB0-4B25-B07B-AECBEF1F8190}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XavierI2C_Sample", "samples\nvidia\XavierI2C_Sample\XavierI2C_Sample.csproj", "{D11CA6AD-B4C1-4D57-B74E-81FF23E27C91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XavierI2C_Sample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\nvidia\XavierI2C_Sample\XavierI2C_Sample.csproj", "{D11CA6AD-B4C1-4D57-B74E-81FF23E27C91}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalIOSample", "samples\pi\DigitalIOSample\DigitalIOSample.csproj", "{450CCC0A-93C0-49D0-A692-53D4A67C6653}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DigitalIOSample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\pi\DigitalIOSample\DigitalIOSample.csproj", "{450CCC0A-93C0-49D0-A692-53D4A67C6653}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ads1015_Sample", "samples\pi\Ads1015_Sample\Ads1015_Sample.csproj", "{10A98F28-C1D8-4572-9738-AB6A4CDD3668}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ads1015_Sample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\pi\Ads1015_Sample\Ads1015_Sample.csproj", "{10A98F28-C1D8-4572-9738-AB6A4CDD3668}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bme280_Sample", "samples\pi\Bme280_Sample\Bme280_Sample.csproj", "{0FAD6B89-96B8-43B8-AC3D-A542D52F20AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bme280_Sample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\pi\Bme280_Sample\Bme280_Sample.csproj", "{0FAD6B89-96B8-43B8-AC3D-A542D52F20AE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PushButton_Sample", "samples\pi\PushButton_Sample\PushButton_Sample.csproj", "{5D3B4E9E-D232-4CBD-AEA7-5AE9910F4C81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PushButton_Sample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\pi\PushButton_Sample\PushButton_Sample.csproj", "{5D3B4E9E-D232-4CBD-AEA7-5AE9910F4C81}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ST7789_Sample", "samples\pi\ST7789_Sample\ST7789_Sample.csproj", "{7DBE81E0-5020-470C-8A46-EC65B462C6FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ST7789_Sample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\pi\ST7789_Sample\ST7789_Sample.csproj", "{7DBE81E0-5020-470C-8A46-EC65B462C6FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Gtk", "gtk\Meadow.Gtk.csproj", "{4A1A7A9D-89F6-4BE4-886C-EFE01222F4BB}"
 EndProject
@@ -40,7 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{608ED7EE-E06
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gtk", "gtk", "{F21963C0-C877-4754-948A-D7F34F861F33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Gtk_Sample", "samples\gtk\Meadow.Gtk_Sample.csproj", "{27290168-8BCE-470F-96AC-6D72C90624CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Gtk_Sample", "..\..\..\..\Meadow.Core.Samples\Source\Meadow.Linux.Samples\gtk\Meadow.Gtk_Sample.csproj", "{27290168-8BCE-470F-96AC-6D72C90624CD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{26BE0786-BFDA-46DA-87D7-7B8FDDE38AEA}"
 	ProjectSection(SolutionItems) = preProject
