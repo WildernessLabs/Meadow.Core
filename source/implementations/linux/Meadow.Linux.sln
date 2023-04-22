@@ -47,13 +47,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{26BE0786-BFD
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Simulation", "..\..\Meadow.Simulation\src\Meadow.Simulation\Meadow.Simulation.csproj", "{A41A2CB9-6815-454D-B0F4-ACDDEE8E4197}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Simulation", "..\simulation\Meadow.Simulation\Meadow.Simulation.csproj", "{A41A2CB9-6815-454D-B0F4-ACDDEE8E4197}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "..\..\Meadow.Core\source\Meadow.Core\Meadow.Core.csproj", "{C47393AD-6785-45C5-B687-61A0935B691F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Core", "..\..\Meadow.Core\Meadow.Core.csproj", "{C47393AD-6785-45C5-B687-61A0935B691F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MQTTnet", "..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj", "{727ABAB6-DC2F-47F2-93DB-2FBB92419E7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MQTTnet", "..\..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj", "{727ABAB6-DC2F-47F2-93DB-2FBB92419E7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Contracts", "..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj", "{6009ADDE-F635-4B0A-B430-B2CED0146DAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Contracts", "..\..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj", "{6009ADDE-F635-4B0A-B430-B2CED0146DAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

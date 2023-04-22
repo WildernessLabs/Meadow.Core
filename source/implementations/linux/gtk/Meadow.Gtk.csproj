@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+	 <TargetFramework>net6.0</TargetFramework>
+	 <OutputType>Library</OutputType>
+   <AssemblyName>Meadow.Gtk</AssemblyName>   
+   <Company>Wilderness Labs, Inc</Company>
+   <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+   <PackageId>Meadow.Gtk</PackageId>
+	 <PackageIcon>icon.png</PackageIcon>
+	 <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Linux</RepositoryUrl>
+   <PackageTags>Meadow</PackageTags>
+   <Version>0.31.0</Version>
+   <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+   <RootNamespace>Meadow</RootNamespace>
+   <Nullable>enable</Nullable>
+   <Description>GTK .NET libraries for Wilderness Labs Meadow</Description>
+ </PropertyGroup>
+ <PropertyGroup>
+   <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+   <LangVersion>9.0</LangVersion>
+   <Nullable>enable</Nullable>
+ </PropertyGroup>
+ <ItemGroup>
+   <PackageReference Include="GtkSharp" Version="3.24.24.*" />
+   <PackageReference Include="Meadow.Foundation.Displays.MicroGraphics" Version="0.*" />
+ </ItemGroup>
+	<ItemGroup>
+		<None Include="../icon.png" Link="icon.png" Pack="true" PackagePath="" />
+	</ItemGroup>
+</Project>
