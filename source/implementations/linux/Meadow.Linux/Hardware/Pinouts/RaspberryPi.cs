@@ -18,7 +18,7 @@ namespace Meadow.Pinouts
 
         public IPinController Controller { get; set; }
 
-        internal RaspberryPi()
+        public RaspberryPi()
         {
         }
 
