@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M4L.Unit.Tests", "tests\M4L.Unit.Tests\M4L.Unit.Tests.csproj", "{7D66ACC4-3C11-4BE4-8803-204BAABFBA33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M4L.Unit.Tests", "tests\Meadow.Linux.Unit.Tests\M4L.Unit.Tests.csproj", "{7D66ACC4-3C11-4BE4-8803-204BAABFBA33}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pi", "pi", "{53A3F4CA-E259-45DA-B0F1-B9A54A3A24F7}"
 EndProject
