@@ -16,7 +16,7 @@ namespace Meadow.Pinouts
             GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21
         };
 
-        public IPinController Controller { get; set; }
+        public IPinController Controller { get; set; } = default!;
 
         public RaspberryPi()
         {
