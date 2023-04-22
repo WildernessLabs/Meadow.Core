@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Gtk_Sample", "..\..\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{26BE0786-BFDA-46DA-87D7-7B8FDDE38AEA}"
 	ProjectSection(SolutionItems) = preProject
-		..\README.md = ..\README.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Simulation", "..\simulation\Meadow.Simulation\Meadow.Simulation.csproj", "{A41A2CB9-6815-454D-B0F4-ACDDEE8E4197}"
