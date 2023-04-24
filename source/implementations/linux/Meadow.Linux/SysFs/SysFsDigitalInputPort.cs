@@ -8,6 +8,7 @@ namespace Meadow
     {
         private int Gpio { get; set; } = -1;
         private SysFsGpioDriver Driver { get; }
+        private ResistorMode _resistorMode = ResistorMode.Disabled;
 
         public override bool State => Driver.GetValue(Gpio);
 
@@ -21,22 +22,24 @@ namespace Meadow
             TimeSpan glitchDuration)
             : base(pin, channel, interruptMode)
         {
-            if(resistorMode != ResistorMode.Disabled)
+            switch (resistorMode)
             {
-                throw new NotSupportedException("Resistor Mode not supported on this platform");
+                case ResistorMode.InternalPullUp:
+                case ResistorMode.InternalPullDown:
+                    throw new NotSupportedException("Internal Resistor Modes are not supported on the current OS");
             }
-            if(debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
+            if (debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
             {
-                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
+                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on the current OS");
             }
 
             Driver = driver;
             Pin = pin;
-            if(pin is SysFsPin { } sp)
+            if (pin is SysFsPin { } sp)
             {
                 Gpio = sp.Gpio;
             }
-            else if(pin is LinuxFlexiPin { } l)
+            else if (pin is LinuxFlexiPin { } l)
             {
                 Gpio = l.SysFsGpio;
             }
@@ -48,7 +51,7 @@ namespace Meadow
             Driver.Export(Gpio);
             Thread.Sleep(100); // this seems to be required to prevent an error 13
             Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
-            switch(interruptMode)
+            switch (interruptMode)
             {
                 case InterruptMode.None:
                     // nothing to do
@@ -69,7 +72,7 @@ namespace Meadow
 
         protected override void Dispose(bool disposing)
         {
-            if(Gpio >= 0)
+            if (Gpio >= 0)
             {
                 Driver.UnhookInterrupt(Gpio);
                 Driver.Unexport(Gpio);
@@ -80,8 +83,16 @@ namespace Meadow
 
         public override ResistorMode Resistor
         {
-            get => ResistorMode.Disabled;
-            set => throw new NotSupportedException("Resistor Mode not supported on this platform");
+            get => _resistorMode;
+            set
+            {
+                switch (value)
+                {
+                    case ResistorMode.InternalPullUp:
+                    case ResistorMode.InternalPullDown:
+                        throw new NotSupportedException("Internal Resistor Modes are not supported on the current OS");
+                }
+            }
         }
 
         public override TimeSpan DebounceDuration
