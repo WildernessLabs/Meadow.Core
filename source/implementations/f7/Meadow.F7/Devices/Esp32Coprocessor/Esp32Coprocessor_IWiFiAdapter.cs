@@ -603,9 +603,9 @@ namespace Meadow.Devices
         /// <summary>
         /// Removed any stored access point information from the coprocessor memory.
         /// </summary>
-        public async Task ClearStoredAccessPointInformation()
+        public Task ClearStoredAccessPointInformation()
         {
-            await Task.Run(async () =>
+            return Task.Run(() =>
             {
                 SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ClearDefaultAccessPoint, true, null);
             });
