@@ -17,7 +17,7 @@
         public CancellationToken CancellationToken { get; internal set; }
 
         /// <summary>
-        /// ase constructor for the App class
+        /// Base constructor for the App class
         /// </summary>
         protected App()
         {
@@ -32,8 +32,8 @@
         /// <summary>
         /// Invokes an action in the context of the applications main thread
         /// </summary>
-        /// <param name="action"></param>
-        /// <param name="state"></param>
+        /// <param name="action">The action to call</param>
+        /// <param name="state">An optional state object to pass to the Action</param>
         public void InvokeOnMainThread(Action<object?> action, object? state = null)
         {
             ExecutionContext.Run(executionContext, new ContextCallback(action), state);
@@ -42,7 +42,6 @@
         /// <summary>
         /// Called by MeadowOS when everything is ready for the App to run
         /// </summary>
-        /// <returns></returns>
         public virtual Task Run()
         {
             return Task.CompletedTask;
@@ -63,7 +62,6 @@
         /// Called when the MeadowOS encounters an error
         /// </summary>
         /// <param name="e"></param>
-        /// <returns></returns>
         public virtual Task OnError(Exception e) { return Task.CompletedTask; }
 
         /// <summary>
@@ -95,7 +93,6 @@
         /// <summary>
         /// Virtual method provided for App implemenmtations to clean up resources on Disposal
         /// </summary>
-        /// <returns></returns>
         public virtual ValueTask DisposeAsync() { return new ValueTask(Task.CompletedTask); }
     }
 }
