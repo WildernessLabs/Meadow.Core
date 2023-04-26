@@ -61,7 +61,7 @@
         /// <summary>
         /// Called when the MeadowOS encounters an error
         /// </summary>
-        /// <param name="e"></param>
+        /// <param name="e">The exception from MeadowOS</param>
         public virtual Task OnError(Exception e) { return Task.CompletedTask; }
 
         /// <summary>
