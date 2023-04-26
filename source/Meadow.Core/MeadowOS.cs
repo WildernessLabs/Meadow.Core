@@ -39,13 +39,28 @@
         /// <summary>
         /// Initializes and starts up the Meadow Core software stack
         /// </summary>
-        /// <returns></returns>
         public async static Task Start(string[]? args)
+        {
+            await Start(args, null);
+        }
+
+        /// <summary>
+        /// Initializes and starts up the Meadow Core software stack
+        /// </summary>
+        public async static Task Start(IApp app, string[]? args = null)
+        {
+            await Start(args, app);
+        }
+
+        /// <summary>
+        /// Initializes and starts up the Meadow Core software stack
+        /// </summary>
+        private async static Task Start(string[]? args, IApp? app)
         {
             bool systemInitialized = false;
             try
             {
-                systemInitialized = Initialize(args);
+                systemInitialized = Initialize(args, app);
 
                 if (!systemInitialized)
                 {
@@ -277,7 +292,7 @@
             return appType;
         }
 
-        private static bool Initialize(string[]? args)
+        private static bool Initialize(string[]? args, IApp? app)
         {
             try
             {
@@ -303,9 +318,20 @@
                 // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
                 var b4 = Environment.TickCount;
                 var et = Environment.TickCount - b4;
-                var appType = FindAppType();
-                Resolver.Log.Trace($"App is type {appType.Name}");
-                Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
+
+                Type appType;
+
+                if (app != null)
+                {
+                    appType = app.GetType();
+                    Resolver.Log.Trace($"App is type {appType.Name}");
+                }
+                else
+                {
+                    appType = FindAppType();
+                    Resolver.Log.Trace($"App is type {appType.Name}");
+                    Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
+                }
 
                 // local method to walk down the object graph to find the IMeadowDevice concrete type
                 Type FindDeviceType(Type type)
@@ -348,21 +374,28 @@
                 Resolver.Log.Trace($"File system Initialize starting...");
                 InitializeFileSystem();
 
-                // Create the app object, bound immediately to the <IMeadowDevice>
-                b4 = Environment.TickCount;
-                Resolver.Log.Trace($"Creating instance of {appType.Name}...");
-
-                if (Activator.CreateInstance(appType, nonPublic: true) is not IApp app)
+                if (app == null)
                 {
-                    throw new Exception($"Failed to create instance of '{appType.Name}'");
+                    // Create the app object, bound immediately to the <IMeadowDevice>
+                    b4 = Environment.TickCount;
+                    Resolver.Log.Trace($"Creating instance of {appType.Name}...");
+
+                    if (Activator.CreateInstance(appType, nonPublic: true) is not IApp capp)
+                    {
+                        throw new Exception($"Failed to create instance of '{appType.Name}'");
+                    }
+                    app = capp;
+                    et = Environment.TickCount - b4;
+                    Resolver.Log.Trace($"Creating '{appType.Name}' instance took {et}ms");
                 }
-                et = Environment.TickCount - b4;
-                Resolver.Log.Trace($"Creating '{appType.Name}' instance took {et}ms");
 
                 // feels off, but not seeing a super clean way without the generics, etc.
-                if (app.GetType().GetProperty(nameof(App.CancellationToken)) is PropertyInfo pi)
+                if (appType.GetProperty(nameof(IApp.CancellationToken)) is PropertyInfo pi)
                 {
-                    pi.SetValue(app, AppAbort.Token);
+                    if (pi.CanWrite)
+                    {
+                        pi.SetValue(app, AppAbort.Token);
+                    }
                 }
 
                 App = app;
