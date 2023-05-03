@@ -30,7 +30,7 @@ public class DefaultUpdateSettings : IUpdateSettings
     /// <summary>
     /// Gets the root MQTT topic to subscribe to for updates
     /// </summary>
-    public string RootTopic { get; } = "ota";
+    public string RootTopic { get; } = "ota;ota/{ID}/updates";
     /// <summary>
     /// Reconnect period used when a disconnection from the Update server occrs
     /// </summary>
