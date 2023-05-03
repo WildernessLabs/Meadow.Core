@@ -360,8 +360,22 @@ public class UpdateService : IUpdateService
                     State = UpdateState.Idle;
                     try
                     {
-                        Resolver.Log.Debug($"Update service subscribing to '{Config.RootTopic}'");
-                        await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(Config.RootTopic).Build());
+                        // the config RootTopic can have multiple semicolon-delimited topics
+                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (var topic in topics)
+                        {
+                            string topicName = topic;
+
+                            // look for macro-substitutions
+                            if (topic.Contains("{ID}"))
+                            {
+                                topicName = topic.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
+                            }
+
+                            Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
+                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
+                        }
                     }
                     catch (Exception ex)
                     {
