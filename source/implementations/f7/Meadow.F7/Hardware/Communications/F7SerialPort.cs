@@ -154,11 +154,11 @@ namespace Meadow.Hardware
 
         private void ShowSettings(Nuttx.Termios settings)
         {
-            Resolver.Log.Info($"  Speed: {settings.c_speed}");
-            Resolver.Log.Info($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
-            Resolver.Log.Info($"  OutputFlags:   {settings.c_oflag} (0x{settings.c_oflag:x})");
-            Resolver.Log.Info($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
-            Resolver.Log.Info($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
+            Resolver.Log.Debug($"  Speed: {settings.c_speed}");
+            Resolver.Log.Debug($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
+            Resolver.Log.Debug($"  OutputFlags:   {settings.c_oflag} (0x{settings.c_oflag:x})");
+            Resolver.Log.Debug($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
+            Resolver.Log.Debug($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
         }
 
         /// <summary>
