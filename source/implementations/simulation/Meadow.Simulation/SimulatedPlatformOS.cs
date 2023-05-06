@@ -2,8 +2,10 @@
 using Meadow.Units;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace Meadow.Simulation
 {
@@ -121,6 +123,35 @@ namespace Meadow.Simulation
         public void SetClock(DateTime dateTime)
         {
             throw new PlatformNotSupportedException();
+        }
+
+        public byte[] RsaDecrypt(byte[] encryptedValue)
+        {
+            var rsa = RSA.Create();
+            return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+        }
+
+        public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
+        {
+            // Create an Aes object
+            // with the specified key and IV.
+            using (Aes aesAlg = Aes.Create())
+            {
+                aesAlg.Key = key;
+                aesAlg.IV = iv;
+
+                // Create a decryptor to perform the stream transform.
+                var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+                // Create the streams used for decryption.
+                using (var msDecrypt = new MemoryStream(encryptedValue))
+                using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                {
+                    var buffer = new byte[csDecrypt.Length];
+                    csDecrypt.Read(buffer, 0, buffer.Length);
+                    return buffer;
+                }
+            }
         }
     }
 }

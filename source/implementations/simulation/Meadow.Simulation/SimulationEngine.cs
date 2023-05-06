@@ -18,7 +18,7 @@ namespace Meadow.Simulation
             _wsServer = new WebSocketServer(logger);
             _wsServer.MessageReceived += OnWebSocketMessageReceived;
 
-            Initialize();
+            Initialize(null);
         }
 
         //        private Dictionary<IPin, bool> _discreteStates = new Dictionary<IPin, bool>();
@@ -34,7 +34,7 @@ namespace Meadow.Simulation
 
         public event InterruptHandler Interrupt;
 
-        public void Initialize()
+        public void Initialize(string[]? reservedPins)
         {
             /*
             foreach (var pin in _device.Pins)
@@ -82,7 +82,7 @@ namespace Meadow.Simulation
             }
         }
 
-        void IMeadowIOController.Initialize()
+        void IMeadowIOController.Initialize(string[]? reservedPins)
         {
         }
 
