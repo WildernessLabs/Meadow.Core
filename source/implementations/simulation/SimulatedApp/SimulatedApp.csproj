@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Meadow.Simulation\Meadow.Simulation.csproj" />
+    <PackageReference Include="Meadow.Simulation" Version="0.*" />
   </ItemGroup>
 
 </Project>
