@@ -16,7 +16,7 @@ namespace Meadow.Devices
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin)
         {
-            return CreateDigitalInputPort(pin, InterruptMode.None, ResistorMode.Disabled, TimeSpan.Zero, TimeSpan.Zero);
+            return CreateDigitalInputPort(pin, ResistorMode.Disabled);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(
@@ -24,18 +24,20 @@ namespace Meadow.Devices
             InterruptMode interruptMode = InterruptMode.None,
             ResistorMode resistorMode = ResistorMode.Disabled)
         {
-            return CreateDigitalInputPort(pin, interruptMode, resistorMode, TimeSpan.Zero, TimeSpan.Zero);
+            return CreateDigitalInputPort(pin, resistorMode);
         }
 
         public IDigitalInputPort CreateDigitalInputPort(
             IPin pin,
-            InterruptMode interruptMode,
-            ResistorMode resistorMode,
-            TimeSpan debounceDuration,    // 0 - 1000 msec in .1 increments
-            TimeSpan glitchDuration       // 0 - 1000 msec in .1 increments
+            ResistorMode resistorMode
             )
         {
-            return DigitalInputPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchDuration);
+            return DigitalInputPort.From(pin, this.IoController, resistorMode);
+        }
+
+        public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
+        {
+            return DigitalInterruptPort.From(pin, this.IoController, interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
     }
 }
