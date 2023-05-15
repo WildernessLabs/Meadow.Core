@@ -70,33 +70,28 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
-        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, OutputType output = OutputType.PushPull)
-        {
-            return CreateBiDirectionalPort(pin, initialState, interruptMode, resistorMode, initialDirection, TimeSpan.Zero, TimeSpan.Zero);
-        }
-
-        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
+        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
             var dc = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dc != null)
             {
-                return new SimulatedBiDirectionalPort(pin, dc, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration);
+                return new SimulatedBiDirectionalPort(pin, dc, initialState, resistorMode, initialDirection);
             }
 
             throw new NotSupportedException();
         }
 
-        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled)
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin)
         {
-            return CreateDigitalInputPort(pin, interruptMode, resistorMode, TimeSpan.Zero, TimeSpan.Zero);
+            return CreateDigitalInputPort(pin, ResistorMode.Disabled);
         }
 
-        public IDigitalInputPort CreateDigitalInputPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
+        public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
         {
             var dci = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dci != null)
             {
-                return new SimulatedDigitalInputPort(pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"), dci, interruptMode);
+                return new SimulatedDigitalInputPort(pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"), dci);
             }
 
             throw new NotSupportedException();
@@ -229,6 +224,21 @@ namespace Meadow.Simulation
         }
 
         public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState)
         {
             throw new NotImplementedException();
         }

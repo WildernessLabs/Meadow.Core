@@ -159,4 +159,24 @@ public class Windows : IMeadowDevice
     {
         throw new NotImplementedException();
     }
+
+    public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState)
+    {
+        throw new NotImplementedException();
+    }
 }
