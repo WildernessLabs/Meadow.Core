@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices
 {
@@ -42,7 +43,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Refreshes the collection
         /// </summary>
-        public void Refresh()
+        public Task Refresh()
         {
             lock (_adapters)
             {
@@ -61,6 +62,8 @@ namespace Meadow.Devices
                     }
                 }
             }
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -41,6 +41,9 @@ namespace Meadow
         /// </summary>
         public NetworkInterfaceType InterfaceType { get; }
 
+        /// <inheritdoc/>
+        public virtual string Name => nativeInterface?.Name ?? "<no name>";
+
         /// <summary>
         /// Constructor for the NetworkAdapterBase class
         /// </summary>
@@ -60,8 +63,6 @@ namespace Meadow
         {
             InterfaceType = nativeInterface.NetworkInterfaceType;
             this.nativeInterface = nativeInterface;
-
-            Refresh();
         }
 
         /// <summary>
@@ -110,7 +111,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)?.Address ?? IPAddress.None;
             }
         }
 
