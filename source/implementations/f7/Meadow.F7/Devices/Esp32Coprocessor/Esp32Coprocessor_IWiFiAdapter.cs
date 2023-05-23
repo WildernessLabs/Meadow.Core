@@ -17,11 +17,6 @@ namespace Meadow.Devices
     public partial class Esp32Coprocessor : NetworkAdapterBase, IWiFiNetworkAdapter
     {
         /// <summary>
-        /// Raise the NTP time changed event.
-        /// </summary>
-        public event EventHandler NtpTimeChanged = delegate { };
-
-        /// <summary>
         /// Default delay between WiFi network scans <see cref="ScanPeriod"/>.
         /// </summary>
         public static TimeSpan DefaultScanPeriod = TimeSpan.FromSeconds(5);
@@ -200,7 +195,7 @@ namespace Meadow.Devices
         /// <exception cref="ArgumentOutOfRangeException">Exception is thrown if value is less than <see cref="MinimumScanPeriod"/> or greater than <see cref="MaximumScanPeriod"/>.</exception>
         public TimeSpan ScanPeriod
         {
-            get { return (_scanPeriod); }
+            get { return _scanPeriod; }
             set
             {
                 if ((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
@@ -370,7 +365,7 @@ namespace Meadow.Devices
                       {
                           Resolver.Log.Error($"Error getting access points: {result}");
                       }
-                      return (networks);
+                      return networks;
                   }
                   catch (Exception ex)
                   {
@@ -660,8 +655,6 @@ namespace Meadow.Devices
 
         #endregion Methods
 
-        #region Event raising methods
-
         /// <summary>
         /// Process the Disconnected event extracting any event data from the
         /// payload and create an EventArg object if necessary
@@ -682,9 +675,12 @@ namespace Meadow.Devices
         /// </summary>
         protected void RaiseNtpTimeChangedEvent()
         {
-            NtpTimeChangedEventArgs e = new NtpTimeChangedEventArgs();
-
-            NtpTimeChanged?.Invoke(this, e);
+            // the NtpClient should have been added to the Resolver, so pull it and raise an event
+            var client = Resolver.Services.Get<INtpClient>();
+            if (client is NtpClient ntp)
+            {
+                ntp.RaiseTimeChanged();
+            }
         }
 
         /// <summary>
@@ -694,8 +690,6 @@ namespace Meadow.Devices
         {
             RaiseNetworkError(new NetworkErrorEventArgs((uint)statusCode));
         }
-
-        #endregion Event raising methods
 
         private NetworkState _state;
         private NetworkAuthenticationType _authenticationType;
