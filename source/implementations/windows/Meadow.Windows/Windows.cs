@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices;
+using Meadow.Hardware;
 using Meadow.Units;
 using System;
 
@@ -6,13 +7,18 @@ namespace Meadow;
 
 public class Windows : IMeadowDevice
 {
+    private Lazy<NativeNetworkAdapterCollection> _networkAdapters;
+
     public IPlatformOS PlatformOS { get; }
     public DeviceCapabilities Capabilities { get; private set; }
     public IDeviceInformation Information { get; private set; }
+    public INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
 
     public Windows()
     {
         PlatformOS = new WindowsPlatformOS();
+        _networkAdapters = new Lazy<NativeNetworkAdapterCollection>(
+            new NativeNetworkAdapterCollection());
     }
 
     public void Initialize()
@@ -108,10 +114,8 @@ public class Windows : IMeadowDevice
     // TODO: implement everything below here
 
 
-    public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
-
-    public event NetworkConnectionHandler NetworkConnected;
-    public event NetworkDisconnectionHandler NetworkDisconnected;
+    public event NetworkConnectionHandler NetworkConnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
 
 
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)

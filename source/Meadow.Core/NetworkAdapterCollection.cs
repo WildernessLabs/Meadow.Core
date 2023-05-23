@@ -1,6 +1,7 @@
 ﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -20,6 +21,8 @@ namespace Meadow
 
         private List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
 
+        public int Count => _adapters.Count;
+
         /// <summary>
         /// Gets an INetworkAdapter from the collection by position index.
         /// </summary>
@@ -38,6 +41,8 @@ namespace Meadow
             adapter.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
             adapter.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
         }
+
+        public virtual Task Refresh() { return Task.CompletedTask; }
 
         /// <summary>
         /// Enumerates all INetworkAdapters in the collection

@@ -41,15 +41,28 @@ namespace Meadow
         /// </summary>
         public NetworkInterfaceType InterfaceType { get; }
 
+        /// <inheritdoc/>
+        public virtual string Name => nativeInterface?.Name ?? "<no name>";
+
         /// <summary>
         /// Constructor for the NetworkAdapterBase class
         /// </summary>
-        /// <param name="expectedType"></param>
+        /// <param name="expectedType">The network type that is expected for this adapter</param>
         protected internal NetworkAdapterBase(NetworkInterfaceType expectedType)
         {
             InterfaceType = expectedType;
 
             Refresh();
+        }
+
+        /// <summary>
+        /// Constructor for the NetworkAdapterBase class
+        /// </summary>
+        /// <param name="nativeInterface">The native interface associated with this adapter</param>
+        protected internal NetworkAdapterBase(NetworkInterface nativeInterface)
+        {
+            InterfaceType = nativeInterface.NetworkInterfaceType;
+            this.nativeInterface = nativeInterface;
         }
 
         /// <summary>
@@ -98,7 +111,7 @@ namespace Meadow
                     return IPAddress.None;
                 }
 
-                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault()?.Address ?? IPAddress.None;
+                return nativeInterface?.GetIPProperties()?.UnicastAddresses?.FirstOrDefault(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)?.Address ?? IPAddress.None;
             }
         }
 

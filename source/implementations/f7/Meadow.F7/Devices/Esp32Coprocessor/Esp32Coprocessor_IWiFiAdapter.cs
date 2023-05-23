@@ -32,26 +32,20 @@ namespace Meadow.Devices
         public static TimeSpan MaximumScanPeriod = TimeSpan.FromSeconds(60);
 
 
-        #region Member variables.
-
         /// <summary>
         /// Lock object to make sure the events and the methods do not try to access
         /// properties simultaneously.
         /// </summary>
         private object _lock = new object();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private readonly Semaphore _connectionSemaphore = new Semaphore(0, 1);
-
-        #endregion Member variables.
-
 
         /// <summary>
         /// Record if the WiFi ESP32 is connected to an access point.
         /// </summary>
         public override bool IsConnected { get => _isConnected; }
+
+        /// <inheritdoc/>
+        public override string Name => "ESP32 WiFi";
 
         /// <summary>
         /// Current onboard antenna in use.
