@@ -58,7 +58,7 @@ namespace Meadow
         {
             return new SerialPortName[]
                 {
-                    new SerialPortName("UART2", "/dev/ttyTHS1")
+                    new SerialPortName("UART2", "/dev/ttyTHS1", Resolver.Device)
                 };
         }
     }
