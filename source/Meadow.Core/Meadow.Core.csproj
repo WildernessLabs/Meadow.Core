@@ -20,7 +20,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-    <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
+    <PackageReference Include="Meadow.Contracts" Version="0.*" />
 		<PackageReference Include="Meadow.Modbus" Version="0.98.0" />
 		<PackageReference Include="Meadow.MQTT" Version="0.33.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
