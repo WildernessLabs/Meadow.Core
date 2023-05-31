@@ -114,7 +114,7 @@ public class LinuxPlatformOS : IPlatformOS
     public virtual SerialPortName[] GetSerialPortNames()
     {
         return SerialPort.GetPortNames().Select(n =>
-            new SerialPortName(n, n))
+            new SerialPortName(n, n, Resolver.Device))
         .ToArray();
     }
 
