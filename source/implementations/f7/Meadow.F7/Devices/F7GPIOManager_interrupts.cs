@@ -4,9 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using static Meadow.Core.Interop;
-using static Meadow.Core.Interop.STM32;
 
 namespace Meadow.Devices
 {
@@ -17,146 +15,135 @@ namespace Meadow.Devices
 
         private Thread? _ist;
         private List<int> _interruptGroupsInUse = new();
-        private List<long> _wiredInterrupts = new();
 
         public void WireInterrupt(IPin pin,
             InterruptMode interruptMode,
             Hardware.ResistorMode resistorMode,
-            TimeSpan debounceDuration, TimeSpan glitchDuration,
-            bool validateInterruptGroup = true)
+            TimeSpan debounceDuration,
+                TimeSpan glitchDuration)
         {
-            STM32.ResistorMode stm32Resistor;
-
-            switch (resistorMode)
-            {
-                case Meadow.Hardware.ResistorMode.InternalPullDown:
-                    stm32Resistor = STM32.ResistorMode.PullDown;
-                    break;
-                case Meadow.Hardware.ResistorMode.InternalPullUp:
-                    stm32Resistor = STM32.ResistorMode.PullUp;
-                    break;
-                default:
-                    stm32Resistor = STM32.ResistorMode.Float;
-                    break;
-            }
-
             var designator = GetPortAndPin(pin);
-            WireInterrupt(designator.port, designator.pin, interruptMode, stm32Resistor, debounceDuration, glitchDuration, validateInterruptGroup);
-        }
 
-        private void WireInterrupt(GpioPort port, int pin, InterruptMode interruptMode,
-                    STM32.ResistorMode resistorMode,
-                    TimeSpan debounceDuration, TimeSpan glitchDuration,
-                    bool validateInterruptGroup = true)
-        {
             Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" + Wire Interrupt {interruptMode}");
 
             if (interruptMode != InterruptMode.None)
             {
-                lock (_interruptGroupsInUse)
-                {
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin}");
-
-                    // interrupt group is effectively the F7 pin number (not the Meadow pin number)
-                    if (validateInterruptGroup && _interruptGroupsInUse.Contains(pin))
-                    {
-                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} in use");
-
-                        throw new InterruptGroupInUseException(pin);
-                    }
-                    else
-                    {
-                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pin} not in use");
-
-                        if (_interruptGroupsInUse.Contains(pin) == false)
-                        {
-                            _interruptGroupsInUse.Add(pin);
-                        }
-                    }
-                }
-
-                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
-                {
-                    Enable = 1,
-                    Port = (uint)port,
-                    Pin = (uint)pin,
-                    RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
-                    FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
-                    ResistorMode = (uint)resistorMode,
-
-                    // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
-                    DebounceDuration = (uint)(debounceDuration.TotalMilliseconds * 10),
-                    GlitchDuration = (uint)(glitchDuration.TotalMilliseconds * 10)
-                };
-
-                if (_ist == null)
-                {
-                    _ist = new Thread(InterruptServiceThreadProc)
-                    {
-                        IsBackground = true
-                    };
-
-                    _ist.Start();
-                }
-
-                //Not sure why but Ioctl fails without this after reasserting interrupt groups
-                Thread.Sleep(10);
-
-                Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-                    $"Calling ioctl from WireInterrupt() enable Input: {port}{pin}, ResistorMode:0x{cfg.ResistorMode:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
-
-                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
-
-                if (result != 0)
-                {
-                    var err = UPD.GetLastError();
-
-                    Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-                            $"failed to register interrupts: {err}");
-                }
-                else
-                {
-                    _wiredInterrupts.Add(((int)port << 8) | pin);
-                }
+                ConnectInterrupt(pin, (int)designator.port, designator.pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
             }
             else
             {
-                // only disable if it was previously enabled!
-                if (_wiredInterrupts.Contains(((int)port << 8) | pin))
+                DisconnectInterrupt((int)designator.port, designator.pin);
+            }
+        }
+
+        private void ConnectInterrupt(IPin pin, int portNumber, int pinNumber, InterruptMode interruptMode, Hardware.ResistorMode resistorMode,
+            TimeSpan debounceDuration, TimeSpan glitchDuration)
+        {
+            lock (_interruptGroupsInUse)
+            {
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pinNumber}");
+
+                // interrupt group is effectively the F7 pin number (not the Meadow pin number)
+                if (_interruptGroupsInUse.Contains(pinNumber))
                 {
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pinNumber} in use");
 
-                    var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
-                    {
-                        Enable = 0,   // Disable
-                        Port = (uint)port,
-                        Pin = (uint)pin,
-                        RisingEdge = 0,
-                        FallingEdge = 0,
-                        ResistorMode = 0,
-                        DebounceDuration = 0,
-                        GlitchDuration = 0
-                    };
-
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"Calling ioctl to disable interrupts for Input: {port}{pin}");
-
-                    var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
-
-                    lock (_interruptGroupsInUse)
-                    {
-                        if (_interruptGroupsInUse.Contains(pin))
-                        {
-                            _interruptGroupsInUse.Remove(pin);
-                        }
-                        else
-                        {
-                            Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                                $"Int group: {pin} not in use");
-                        }
-                    }
-
-                    _wiredInterrupts.Remove(((int)port << 8) | pin);
+                    throw new InterruptGroupInUseException(pinNumber);
                 }
+                else
+                {
+                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pinNumber} not in use");
+
+                    if (_interruptGroupsInUse.Contains(pinNumber) == false)
+                    {
+                        _interruptGroupsInUse.Add(pinNumber);
+                    }
+                }
+            }
+
+            var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+            {
+                Enable = 1,
+                Port = (uint)portNumber,
+                Pin = (uint)pinNumber,
+                RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
+                FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
+                ResistorMode = (uint)resistorMode,
+
+                // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
+                DebounceDuration = (uint)(debounceDuration.TotalMilliseconds * 10),
+                GlitchDuration = (uint)(glitchDuration.TotalMilliseconds * 10)
+            };
+
+            if (_ist == null)
+            {
+                _ist = new Thread(InterruptServiceThreadProc)
+                {
+                    Priority = ThreadPriority.Highest
+                };
+
+                _ist.Start();
+            }
+
+            //Not sure why but Ioctl fails without this after reasserting interrupt groups
+            Thread.Sleep(10);
+
+            Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
+                $"Calling ioctl from WireInterrupt() enable Input: {portNumber}{pinNumber}, ResistorMode:0x{cfg.ResistorMode:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
+
+            var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+
+            if (result != 0)
+            {
+                var err = UPD.GetLastError();
+
+                Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
+                        $"failed to register interrupts: {err}");
+            }
+            else
+            {
+                _interruptPins[portNumber, pinNumber] = pin;
+            }
+        }
+
+        private void DisconnectInterrupt(int portNumber, int pinNumber)
+        {
+            // only disable if it was previously enabled!
+            if (_interruptPins[portNumber, pinNumber] != null)
+            {
+
+                var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
+                {
+                    Enable = 0,   // Disable
+                    Port = (uint)portNumber,
+                    Pin = (uint)pinNumber,
+                    RisingEdge = 0,
+                    FallingEdge = 0,
+                    ResistorMode = 0,
+                    DebounceDuration = 0,
+                    GlitchDuration = 0
+                };
+
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                    $"Calling ioctl to disable interrupts for Input: {portNumber}{pinNumber}");
+
+                var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+
+                lock (_interruptGroupsInUse)
+                {
+                    if (_interruptGroupsInUse.Contains(pinNumber))
+                    {
+                        _interruptGroupsInUse.Remove(pinNumber);
+                    }
+                    else
+                    {
+                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
+                            $"Int group: {pinNumber} not in use");
+                    }
+                }
+
+                _interruptPins[portNumber, pinNumber] = null;
+
             }
         }
 
@@ -175,16 +162,7 @@ namespace Meadow.Devices
                 int priority = 0;
                 try
                 {
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"+mq_receive...");
-
                     var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
-
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"-mq_receive...");
-
-                    Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                        $"queue data arrived: {BitConverter.ToString(rx_buffer)}");
 
                     // byte 1 contains the port and pin, byte 2 contains the stable state.
                     if (result >= 0)
@@ -193,23 +171,13 @@ namespace Meadow.Devices
                         bool state = rx_buffer[1] == 0 ? false : true;
                         var port = irq >> 4;
                         var pin = irq & 0xf;
-                        var key = $"P{(char)(65 + port)}{pin}";
-
-                        Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0,
-                            $"Interrupt on {key} state:{state}");
 
                         lock (_interruptPins)
                         {
-                            if (_interruptPins.ContainsKey(key))
+                            var ipin5 = _interruptPins[port, pin];
+                            if (ipin5 != null)
                             {
-                                Task.Run(() =>
-                                {
-                                    var ipin = _interruptPins[key];
-                                    if (Interrupt != null)
-                                    {
-                                        Interrupt.Fire(ipin, state);
-                                    }
-                                });
+                                Interrupt?.Invoke(ipin5, state);
                             }
                         }
                     }

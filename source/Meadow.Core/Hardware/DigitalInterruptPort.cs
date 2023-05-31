@@ -48,6 +48,10 @@ namespace Meadow.Hardware
             {
                 // make sure the pin is configured as a digital input with the proper state
                 ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
+                if (interruptMode != InterruptMode.None)
+                {
+                    IOController.WireInterrupt(pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
+                }
             }
             else
             {
