@@ -68,6 +68,7 @@ public partial class F7PlatformOS : IPlatformOS
         };
     }
 
+    /// <inheritdoc/>
     public void SetClock(DateTime dateTime)
     {
         var ts = new Core.Interop.Nuttx.timespec
