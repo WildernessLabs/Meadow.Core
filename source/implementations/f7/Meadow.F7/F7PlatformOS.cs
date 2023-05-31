@@ -26,6 +26,7 @@ public partial class F7PlatformOS : IPlatformOS
     internal F7PlatformOS()
     {
         NtpClient = new NtpClient();
+        Resolver.Services.Add(NtpClient);
     }
 
     /// <summary>

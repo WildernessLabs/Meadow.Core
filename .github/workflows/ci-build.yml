@@ -47,6 +47,13 @@ jobs:
         path: Meadow.Logging
         ref: develop
 
+    - name: Checkout Meadow.Modbus
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Modbus
+        path: Meadow.Modbus
+        ref: develop
+        
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
       with:

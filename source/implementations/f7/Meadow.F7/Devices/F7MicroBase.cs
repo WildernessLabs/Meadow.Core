@@ -129,11 +129,6 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                             }
                         }
                     }
-
-                    esp32.NtpTimeChanged += (s, e) =>
-                    {
-                        // TODO: forward to the NtpClient
-                    };
                 }
                 catch (Exception e)
                 {
@@ -158,7 +153,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// Gets the current processor temperature
     /// </summary>
     /// <returns></returns>
-    public Temperature GetProcessorTemperature()
+    internal Temperature GetProcessorTemperature()
     {
         return IoController.GetTemperature();
     }
