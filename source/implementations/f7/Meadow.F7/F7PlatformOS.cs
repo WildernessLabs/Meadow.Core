@@ -63,11 +63,12 @@ public partial class F7PlatformOS : IPlatformOS
     {
         return new SerialPortName[]
         {
-            new SerialPortName("COM1", "ttyS0"),
-            new SerialPortName("COM4", "ttyS1")
+            new SerialPortName("COM1", "ttyS0", Resolver.Device),
+            new SerialPortName("COM4", "ttyS1", Resolver.Device)
         };
     }
 
+    /// <inheritdoc/>
     public void SetClock(DateTime dateTime)
     {
         var ts = new Core.Interop.Nuttx.timespec
