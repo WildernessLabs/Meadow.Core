@@ -14,6 +14,7 @@
     {
         private ExecutionContext executionContext;
 
+        /// <inheritdoc/>
         public CancellationToken CancellationToken { get; internal set; }
 
         /// <summary>
