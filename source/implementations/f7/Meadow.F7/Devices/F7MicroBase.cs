@@ -149,7 +149,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// Gets the current processor temperature
     /// </summary>
     /// <returns></returns>
-    public Temperature GetProcessorTemperature()
+    internal Temperature GetProcessorTemperature()
     {
         return IoController.GetTemperature();
     }

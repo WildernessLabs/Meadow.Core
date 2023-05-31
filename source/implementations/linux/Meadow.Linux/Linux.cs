@@ -247,11 +247,6 @@ namespace Meadow
             throw new NotImplementedException();
         }
 
-        public Temperature GetProcessorTemperature()
-        {
-            return PlatformOS.GetCpuTemperature();
-        }
-
         public void Reset()
         {
             // TODO: $ sudo reboot

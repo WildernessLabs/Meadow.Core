@@ -144,11 +144,6 @@ public class Windows : IMeadowDevice
         throw new NotImplementedException();
     }
 
-    public Temperature GetProcessorTemperature()
-    {
-        throw new NotImplementedException();
-    }
-
     public void SetClock(DateTime dateTime)
     {
         throw new NotImplementedException();
