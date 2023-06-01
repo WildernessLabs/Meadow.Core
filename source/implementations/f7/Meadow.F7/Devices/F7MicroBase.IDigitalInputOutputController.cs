@@ -35,7 +35,7 @@ namespace Meadow.Devices
             return DigitalInputPort.From(pin, this.IoController, resistorMode);
         }
 
-        public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode)
+        public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
         {
             return CreateDigitalInterruptPort(pin, interruptMode, resistorMode, TimeSpan.Zero, TimeSpan.Zero);
         }
