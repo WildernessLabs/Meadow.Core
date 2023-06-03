@@ -21,7 +21,7 @@
 	<ItemGroup>
 		<None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
     <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
-    <ProjectReference Include="..\..\..\Meadow.Modbus\src\Meadow.Modbus\Meadow.Modbus.csproj" />
+    <PackageReference Include="Meadow.Modbus" Version="*" />
     <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
 		<PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />

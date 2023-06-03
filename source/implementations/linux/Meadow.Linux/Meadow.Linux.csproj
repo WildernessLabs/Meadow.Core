@@ -22,7 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
-    <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
+    <PackageReference Include="Meadow" Version="*" />
   </ItemGroup>
   <ItemGroup>
  	<None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
