@@ -114,7 +114,7 @@ public class LinuxPlatformOS : IPlatformOS
     public virtual SerialPortName[] GetSerialPortNames()
     {
         return SerialPort.GetPortNames().Select(n =>
-            new SerialPortName(n, n))
+            new SerialPortName(n, n, Resolver.Device))
         .ToArray();
     }
 
@@ -122,7 +122,18 @@ public class LinuxPlatformOS : IPlatformOS
 
     public virtual Temperature GetCpuTemperature()
     {
-        throw new PlatformNotSupportedException();
+        var fi = new FileInfo("/sys/class/thermal/thermal_zone0/temp");
+        if (!fi.Exists)
+        {
+            throw new PlatformNotSupportedException("CPU temp not available on this OS");
+        }
+
+        using (var r = fi.OpenText())
+        {
+            var data = r.ReadToEnd().Trim();
+            var temp = int.Parse(data);
+            return new Temperature(temp / 1000d, Temperature.UnitType.Celsius);
+        }
     }
 
     public bool RebootOnUnhandledException => false;

@@ -603,6 +603,7 @@ public class UpdateService : IUpdateService
 
         if (sourcePath == null)
         {
+            OnUpdateFailure?.Invoke(this, updateInfo);
             throw new ArgumentException($"Cannot find update with ID {updateInfo.ID}");
         }
 
@@ -617,16 +618,25 @@ public class UpdateService : IUpdateService
             DeleteDirectoryContents(di);
         }
 
-        // extract zip
-        Resolver.Log.Debug($"Extracting update to '{UpdateDirectory}'...");
-        var sw = Stopwatch.StartNew();
-        ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
-        sw.Stop();
-        Resolver.Log.Debug($"Extracting took {sw.Elapsed.TotalSeconds} seconds.");
+        try
+        {
+            // extract zip
+            Resolver.Log.Debug($"Extracting update to '{UpdateDirectory}'...");
+            var sw = Stopwatch.StartNew();
+            ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
+            sw.Stop();
+            Resolver.Log.Debug($"Extracting took {sw.Elapsed.TotalSeconds} seconds.");
 
-        Resolver.Log.Debug($"Contents of Update");
-        Resolver.Log.Debug($"------------------");
-        DisplayTree(new DirectoryInfo(UpdateDirectory));
+            Resolver.Log.Debug($"Contents of Update");
+            Resolver.Log.Debug($"------------------");
+            DisplayTree(new DirectoryInfo(UpdateDirectory));
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Failed to extract update package: {ex.Message}");
+            OnUpdateFailure?.Invoke(this, updateInfo);
+            throw ex;
+        }
 
         // do we actually contain an update?
         var updateValid = CurrentUpdateContainsAppUpdate() || CurrentUpdateContainsOSUpdate();
@@ -636,6 +646,7 @@ public class UpdateService : IUpdateService
         if (!updateValid)
         {
             Resolver.Log.Warn($"Update {updateInfo.ID} contains no valid Update data");
+            OnUpdateFailure?.Invoke(this, updateInfo);
             return;
         }
 

@@ -8,8 +8,8 @@ namespace Meadow
         {
             return new SerialPortName[]
             {
-                new SerialPortName("serial0", "/dev/serial0"),
-                new SerialPortName("ttyAMA0", "/dev/ttyAMA0")
+                new SerialPortName("serial0", "/dev/serial0", Resolver.Device),
+                new SerialPortName("ttyAMA0", "/dev/ttyAMA0", Resolver.Device)
             };
         }
     }

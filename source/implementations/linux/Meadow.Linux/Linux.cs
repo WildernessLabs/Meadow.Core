@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices;
+using Meadow.Hardware;
 using Meadow.Pinouts;
 using Meadow.Units;
 using System;
@@ -15,6 +16,7 @@ namespace Meadow
     {
         private SysFsGpioDriver _sysfs = null!;
         private Gpiod _gpiod = null!;
+        private Lazy<NativeNetworkAdapterCollection> _networkAdapters;
 
         public event PowerTransitionHandler BeforeReset;
         public event PowerTransitionHandler BeforeSleep;
@@ -26,8 +28,7 @@ namespace Meadow
         public DeviceCapabilities Capabilities { get; }
         public IPlatformOS PlatformOS { get; }
         public IDeviceInformation Information { get; }
-
-        public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
+        public INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
 
         /// <summary>
         /// Creates the Meadow on Linux infrastructure instance
@@ -42,6 +43,9 @@ namespace Meadow
             {
                 PlatformOS = new LinuxPlatformOS();
             }
+
+            _networkAdapters = new Lazy<NativeNetworkAdapterCollection>(
+                new NativeNetworkAdapterCollection());
 
             Information = new LinuxDeviceInfo();
 
@@ -241,11 +245,6 @@ namespace Meadow
         public BatteryInfo GetBatteryInfo()
         {
             throw new NotImplementedException();
-        }
-
-        public Temperature GetProcessorTemperature()
-        {
-            return PlatformOS.GetCpuTemperature();
         }
 
         public void Reset()

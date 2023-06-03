@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="0.*" />
+    <PackageReference Include="Meadow" Version="*" />
   </ItemGroup>
 
 </Project>
