@@ -61,7 +61,7 @@ jobs:
           7.0.x
           
     - name: apply required VS workloads
-      run: dotnet workload restore
+      run: dotnet workload restore Meadow.Core/source/Meadow.Core.sln
       
     - name: Build Meadow.Core
       run: dotnet build -c Release Meadow.Core/source/Meadow.Core.sln
