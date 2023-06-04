@@ -400,7 +400,7 @@
 
                 App = app;
 
-                var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystemRoot, UpdateSettings);
+                var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
                 Resolver.Services.Add<IUpdateService>(updateService);
 
                 Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
