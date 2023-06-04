@@ -30,7 +30,7 @@ public partial class F7PlatformOS : IPlatformOS
         E~2023-02-21T09:05:30Z~Error processing config file, using default config
         */
 
-        var path = Path.Combine(FileSystemRoot, OsMessageFile);
+        var path = Path.Combine(FileSystem.FileSystemRoot, OsMessageFile);
 
         if (File.Exists(path))
         {

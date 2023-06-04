@@ -28,8 +28,6 @@ namespace Meadow
         /// </summary>
         public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
 
-        public string FileSystemRoot { get; private set; } = default!;
-
         /// <summary>
         /// Gets the OS version.
         /// </summary>
@@ -51,6 +49,8 @@ namespace Meadow
         /// </summary>
         public string[]? LaunchArguments { get; private set; }
 
+        public IPlatformOS.FileSystemInfo FileSystem { get; }
+
         /// <summary>
         /// Default constructor for the WindowsPlatformOS object.
         /// </summary>
@@ -59,6 +59,7 @@ namespace Meadow
             OSVersion = Environment.OSVersion.ToString();
             OSBuildDate = "Unknown";
             RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+            FileSystem = new WindowsFileSystemInfo();
         }
 
         /// <summary>
@@ -69,15 +70,6 @@ namespace Meadow
         public void Initialize(DeviceCapabilities capabilities, string[]? args)
         {
             // TODO: deal with capabilities
-
-            // create the Meadow root folder
-            var di = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Meadow"));
-            if (!di.Exists)
-            {
-                di.Create();
-            }
-
-            FileSystemRoot = di.FullName;
         }
 
         /// <summary>

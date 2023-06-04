@@ -32,7 +32,7 @@ public class UpdateSettings : ConfigurableObject, IUpdateSettings
     /// </summary>
     public string RootTopic => GetConfiguredString(nameof(RootTopic), "ota;ota/{ID}/updates");
     /// <summary>
-    /// Reconnect period used when a disconnection from the Update server occrs
+    /// Reconnect period used when a disconnection from the Update server occurs
     /// </summary>
     public int CloudConnectRetrySeconds => GetConfiguredInt(nameof(CloudConnectRetrySeconds), 15);
     /// <summary>
