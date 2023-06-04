@@ -60,11 +60,11 @@ namespace Meadow.Devices
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
-        public PhysicalAddress MacAddress
+        public override PhysicalAddress MacAddress
         {
             get
             {
-                if ((_mac == null) || (_mac == System.Net.NetworkInformation.PhysicalAddress.None))
+                if ((_mac == null) || (_mac == PhysicalAddress.None))
                 {
                     byte[] mac = new byte[6];
                     F7PlatformOS.GetByteArray(IPlatformOS.ConfigurationValues.MacAddress, mac);
