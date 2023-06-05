@@ -52,7 +52,7 @@ public partial class F7PlatformOS : IPlatformOS
     public void Initialize(DeviceCapabilities capabilities, string[]? args)
     {
         LaunchArguments = args;
-        InitializeStorage(capabilities.Storage);
+        FileSystem = new F7FileSystemInfo(capabilities.Storage, SdStorageSupported);
     }
 
     /// <summary>

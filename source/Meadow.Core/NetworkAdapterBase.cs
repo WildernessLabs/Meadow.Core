@@ -34,7 +34,7 @@ namespace Meadow
         /// <summary>
         /// Gets the physical (MAC) address of the network adapter
         /// </summary>
-        public PhysicalAddress MacAddress { get; private set; } = PhysicalAddress.None;
+        public virtual PhysicalAddress MacAddress { get; private set; } = PhysicalAddress.None;
 
         /// <summary>
         /// Gets the network interface type
