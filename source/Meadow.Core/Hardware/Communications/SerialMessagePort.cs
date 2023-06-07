@@ -111,7 +111,6 @@
         /// <summary>
         /// Initializes the buffer and underlying serial port
         /// </summary>
-        /// <param name="readBufferSize"></param>
         protected void Init()
         {
             classicSerialPort.DataReceived += SerialPortDataReceived;

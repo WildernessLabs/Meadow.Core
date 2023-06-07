@@ -29,7 +29,10 @@ namespace Meadow.Hardware
         /// Creates a new DigitalOutputPort from a pin.
         /// </summary>
         /// <param name="pin"></param>
+        /// <param name="ioController"></param>
+        /// <param name="channel"></param>
         /// <param name="initialState"></param>
+        /// <param name="initialOutputType"></param>
         protected DigitalOutputPort(
             IPin pin,
             IMeadowIOController ioController,
@@ -60,7 +63,9 @@ namespace Meadow.Hardware
         /// </summary>
         /// <returns>The from.</returns>
         /// <param name="pin">Pin.</param>
+        /// <param name="ioController">The IO controller responsible for creating the port.</param>
         /// <param name="initialState">If set to <c>true</c> initial state.</param>
+        /// <param name="initialOutputType">The initial port output type.</param>
         public static DigitalOutputPort From(IPin pin,
             IMeadowIOController ioController,
             bool initialState = false,
