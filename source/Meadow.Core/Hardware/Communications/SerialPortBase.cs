@@ -460,7 +460,7 @@ namespace Meadow.Hardware
         /// leave bytes in the serial port buffer.
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="offset"></param>
+        /// <param name="index"></param>
         /// <returns></returns>
         public int ReadAll(byte[] buffer, int index)
         {
