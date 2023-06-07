@@ -174,10 +174,10 @@ namespace Meadow.Devices
 
                         lock (_interruptPins)
                         {
-                            var ipin5 = _interruptPins[port, pin];
-                            if (ipin5 != null)
+                            var ipin = _interruptPins[port, pin];
+                            if (ipin != null)
                             {
-                                Interrupt?.Invoke(ipin5, state);
+                                Interrupt?.Invoke(ipin, state);
                             }
                         }
                     }
