@@ -57,10 +57,12 @@ public class LinuxPlatformOS : IPlatformOS
     internal static CancellationTokenSource AppAbort = new();
 
     public INtpClient NtpClient { get; private set; }
+    public IPlatformOS.FileSystemInfo FileSystem { get; }
 
     internal LinuxPlatformOS()
     {
         RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+        FileSystem = new LinuxFileSystemInfo();
     }
 
     /// <summary>
@@ -117,8 +119,6 @@ public class LinuxPlatformOS : IPlatformOS
             new SerialPortName(n, n, Resolver.Device))
         .ToArray();
     }
-
-    public string FileSystemRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".meadow");
 
     public virtual Temperature GetCpuTemperature()
     {
