@@ -8,7 +8,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class Counter : ICounter, IDisposable
     {
-        private IDigitalInputPort input;
+        private IDigitalInterruptPort input;
         private long count;
         private bool portCreated = false;
         private bool isDisposed;
@@ -41,7 +41,7 @@ namespace Meadow.Hardware
             }
 
 
-            this.input = pin.CreateDigitalInputPort(edge);
+            this.input = pin.CreateDigitalInterruptPort(edge);
             portCreated = true;
 
             input.Changed += OnInputChanged;
@@ -50,9 +50,9 @@ namespace Meadow.Hardware
         /// <summary>
         /// Creates a Counter instance
         /// </summary>
-        /// <param name="input">The IDigitalInputPort to count on</param>
+        /// <param name="input">The IDigitalInterruptPort to count on</param>
         /// <exception cref="ArgumentException"></exception>
-        public Counter(IDigitalInputPort input)
+        public Counter(IDigitalInterruptPort input)
         {
             if (input.InterruptMode == InterruptMode.None)
             {

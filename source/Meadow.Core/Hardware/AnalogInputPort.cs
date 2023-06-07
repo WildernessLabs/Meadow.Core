@@ -42,7 +42,7 @@ namespace Meadow.Hardware
     public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Voltage>>
     {
         // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
-        static readonly object _analogSyncRoot = new object();
+        private static readonly object _analogSyncRoot = new object();
 
         /// <summary>
         /// The default sampling interval for the Input (40ms)
@@ -68,6 +68,15 @@ namespace Meadow.Hardware
 
         protected Voltage? _previousVoltageReading;
 
+        /// <summary>
+        /// Creates an AnalogInputPort given the povided parameters
+        /// </summary>
+        /// <param name="pin">The IPin to use for the input port</param>
+        /// <param name="ioController">The IMeadowIOController for the pin</param>
+        /// <param name="channel">The pin's channel info</param>
+        /// <param name="sampleCount">The number of ADC readings to average for a single sample</param>
+        /// <param name="sampleInterval">The time between readings used for calculating the average for a sample</param>
+        /// <param name="referenceVoltage">The ADCs reference voltage</param>
         protected AnalogInputPort(
                     IPin pin, IMeadowIOController ioController, IAnalogChannelInfo channel,
                     int sampleCount, TimeSpan sampleInterval,
@@ -194,7 +203,7 @@ namespace Meadow.Hardware
                         {
                             var rawValue = this.IOController.GetAnalogValue(this.Pin);
                             // convert the raw valute into an actual voltage.
-                            sampleBuffer[currentSampleCount] = new Voltage(((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts);
+                            sampleBuffer[currentSampleCount] = new Voltage(rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d) * ReferenceVoltage.Volts);
                         }
 
                         // increment our counter
@@ -282,7 +291,7 @@ namespace Meadow.Hardware
                 {
                     var rawValue = this.IOController.GetAnalogValue(this.Pin);
                     // convert the raw valute into an actual voltage.
-                    sampleBuffer[i] = ((double)rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d)) * ReferenceVoltage.Volts;
+                    sampleBuffer[i] = rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d) * ReferenceVoltage.Volts;
                 }
                 await Task.Delay(SampleInterval);
             }

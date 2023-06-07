@@ -15,26 +15,18 @@ namespace Meadow
             Gpiod driver,
             IPin pin,
             GpiodDigitalChannelInfo channel,
-            InterruptMode interruptMode,
-            ResistorMode resistorMode,
-            TimeSpan debounceDuration,
-            TimeSpan glitchDuration)
-            : base(pin, channel, interruptMode)
+            ResistorMode resistorMode)
+            : base(pin, channel)
         {
-            if(debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
-            {
-                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
-            }
-
             Driver = driver;
             Pin = pin;
 
             line_request_flags flags = line_request_flags.None;
 
-            if(pin is GpiodPin { } gp)
+            if (pin is GpiodPin { } gp)
             {
                 Line = Driver.GetLine(gp);
-                switch(resistorMode)
+                switch (resistorMode)
                 {
                     case ResistorMode.InternalPullUp:
                         flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
@@ -47,33 +39,13 @@ namespace Meadow
                         break;
                 }
 
-                InterruptMode = interruptMode;
-
-                switch(InterruptMode)
-                {
-                    case InterruptMode.EdgeRising:
-                    case InterruptMode.EdgeFalling:
-                    case InterruptMode.EdgeBoth:
-                        Line.InterruptOccurred += OnInterruptOccurred;
-                        Line.RequestInterrupts(InterruptMode, flags);
-                        break;
-                    default:
-                        Line.RequestInput(flags);
-                        break;
-                }
+                Line.RequestInput(flags);
 
             }
             else
             {
                 throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
             }
-        }
-
-        private void OnInterruptOccurred(LineInfo sender, gpiod_line_event e)
-        {
-            var state = e.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE ? true : false;
-
-            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
         }
 
         protected override void Dispose(bool disposing)
@@ -86,18 +58,6 @@ namespace Meadow
         {
             get => ResistorMode.Disabled;
             set => throw new NotSupportedException("Resistor Mode not supported on this platform");
-        }
-
-        public override TimeSpan DebounceDuration
-        {
-            get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
-        }
-
-        public override TimeSpan GlitchDuration
-        {
-            get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
     }
 }

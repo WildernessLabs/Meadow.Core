@@ -11,13 +11,17 @@ namespace Meadow.Devices;
 /// </summary>
 public abstract partial class F7MicroBase : IF7MeadowDevice
 {
+    /// <summary>
+    /// Event raised when a new network is connected
+    /// </summary>
     public event NetworkConnectionHandler NetworkConnected = delegate { };
+    /// <summary>
+    /// Event raised when an existing network connection is disconnected
+    /// </summary>
     public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
 
-    //==== events
     public event EventHandler WiFiAdapterInitialized = delegate { };
 
-    //==== public properties
     public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
     public ICoprocessor? Coprocessor { get; protected set; }
 

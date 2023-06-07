@@ -7,22 +7,16 @@ namespace Meadow.Simulation
     {
         private SimulatedPin _pin;
 
-        public SimulatedBiDirectionalPort(IPin pin, IDigitalChannelInfo channel, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType initialOutputType = OutputType.PushPull)
-            : base(pin, channel, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, initialOutputType)
+        public SimulatedBiDirectionalPort(IPin pin, IDigitalChannelInfo channel, bool initialState, ResistorMode resistorMode, PortDirectionType initialDirection, OutputType initialOutputType = OutputType.PushPull)
+            : base(pin, channel, initialState, resistorMode, initialDirection, initialOutputType)
         {
             _pin = pin as SimulatedPin;
-            _pin.VoltageChanged += OnPinVoltageChanged;
             Direction = initialDirection;
 
             if (initialState)
             {
                 State = InitialState;
             }
-        }
-
-        private void OnPinVoltageChanged(object sender, EventArgs e)
-        {
-            RaiseChangedAndNotify(new DigitalPortResult(new DigitalState(State, DateTime.Now), null));
         }
 
         public override bool State
@@ -36,8 +30,6 @@ namespace Meadow.Simulation
         }
 
         public override PortDirectionType Direction { get; set; }
-        public override TimeSpan DebounceDuration { get; set; }
-        public override TimeSpan GlitchDuration { get; set; }
 
         protected override void Dispose(bool disposing)
         {

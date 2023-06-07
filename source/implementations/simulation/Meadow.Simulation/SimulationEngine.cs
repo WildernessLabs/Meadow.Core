@@ -164,7 +164,7 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public void WireInterrupt(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration, bool validateInterruptGroup = true)
+        public void WireInterrupt(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
             throw new NotImplementedException();
         }
