@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Meadow.Core
 {
@@ -200,7 +198,7 @@ namespace Meadow.Core
                 public uint Enable;
                 public uint RisingEdge;
                 public uint FallingEdge;
-                public uint ResistorMode;
+                public STM32.ResistorMode ResistorMode;
                 public uint DebounceDuration;
                 public uint GlitchDuration;
             }
