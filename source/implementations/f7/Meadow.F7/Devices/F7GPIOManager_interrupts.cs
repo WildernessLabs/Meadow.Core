@@ -41,7 +41,7 @@ namespace Meadow.Devices
         {
             lock (_interruptGroupsInUse)
             {
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pinNumber}");
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" ConnectInterrupt {portNumber}:{pinNumber}");
 
                 // interrupt group is effectively the F7 pin number (not the Meadow pin number)
                 if (_interruptGroupsInUse.Contains(pinNumber))
@@ -61,6 +61,21 @@ namespace Meadow.Devices
                 }
             }
 
+            // STM resistor mode and Meadow resistor mode are inverted
+            STM32.ResistorMode rm;
+            switch (resistorMode)
+            {
+                case ResistorMode.InternalPullUp:
+                    rm = STM32.ResistorMode.PullUp;
+                    break;
+                case ResistorMode.InternalPullDown:
+                    rm = STM32.ResistorMode.PullDown;
+                    break;
+                default:
+                    rm = STM32.ResistorMode.Float;
+                    break;
+            }
+
             var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
             {
                 Enable = 1,
@@ -68,7 +83,7 @@ namespace Meadow.Devices
                 Pin = (uint)pinNumber,
                 RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
                 FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
-                ResistorMode = (uint)resistorMode,
+                ResistorMode = rm,
 
                 // Nuttx side expects 1 - 10000 to represent .1 - 1000 milliseconds
                 DebounceDuration = (uint)(debounceDuration.TotalMilliseconds * 10),
@@ -89,7 +104,7 @@ namespace Meadow.Devices
             Thread.Sleep(10);
 
             Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-                $"Calling ioctl from WireInterrupt() enable Input: {portNumber}{pinNumber}, ResistorMode:0x{cfg.ResistorMode:x02}, debounce:{debounceDuration}, glitch:{glitchDuration}");
+                $"Calling ioctl from WireInterrupt() enable Input: {portNumber}{pinNumber}, ResistorMode:{rm}, debounce:{debounceDuration}, glitch:{glitchDuration}");
 
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 

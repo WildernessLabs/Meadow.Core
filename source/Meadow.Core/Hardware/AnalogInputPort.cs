@@ -291,13 +291,16 @@ namespace Meadow.Hardware
                 {
                     var rawValue = this.IOController.GetAnalogValue(this.Pin);
                     // convert the raw valute into an actual voltage.
-                    sampleBuffer[i] = rawValue / (double)(MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d) * ReferenceVoltage.Volts;
+                    var refVal = (MeadowOS.CurrentDevice.Capabilities.Analog.MaxRawAdcVoltageValue ?? 1.0d) * ReferenceVoltage.Volts;
+
+                    sampleBuffer[i] = rawValue / (double)refVal;
                 }
                 await Task.Delay(SampleInterval);
             }
 
             // return the average of the samples
-            return new Voltage((float)(sampleBuffer.Select(x => (float)x).Sum() / SampleCount), Units.Voltage.UnitType.Volts);
+            var sum = sampleBuffer.Sum();
+            return new Voltage((double)(sampleBuffer.Select(x => (double)x).Sum() / SampleCount), Units.Voltage.UnitType.Volts);
         }
     }
 }

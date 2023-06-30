@@ -37,7 +37,18 @@
         /// <param name="state">An optional state object to pass to the Action</param>
         public void InvokeOnMainThread(Action<object?> action, object? state = null)
         {
-            ExecutionContext.Run(executionContext, new ContextCallback(action), state);
+            switch (Device.Information.Platform)
+            {
+                // ExecutionContext in Mono on the F7 isn't fully working - but we also don't worry about a MainThread there either
+                case Hardware.MeadowPlatform.F7FeatherV1:
+                case Hardware.MeadowPlatform.F7FeatherV2:
+                case Hardware.MeadowPlatform.F7CoreComputeV2:
+                    action.Invoke(state);
+                    break;
+                default:
+                    ExecutionContext.Run(executionContext, new ContextCallback(action), state);
+                    break;
+            }
         }
 
         /// <summary>
