@@ -41,7 +41,7 @@ namespace Meadow.Devices
         {
             lock (_interruptGroupsInUse)
             {
-                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" interrupt group {pinNumber}");
+                Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" ConnectInterrupt {portNumber}:{pinNumber}");
 
                 // interrupt group is effectively the F7 pin number (not the Meadow pin number)
                 if (_interruptGroupsInUse.Contains(pinNumber))
