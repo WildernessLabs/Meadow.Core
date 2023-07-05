@@ -248,13 +248,16 @@ namespace Meadow.Devices
 
                     Task.Run(async () =>
                     {
+                        this.Refresh();
                         while (IpAddress.Equals(System.Net.IPAddress.Any) || IpAddress.Equals(System.Net.IPAddress.None))
                         {
+                            Resolver.Log.Trace($"Wifi IpAddress: {IpAddress} SubnetMask:{SubnetMask} Gateway:{Gateway} t={t}");
                             await Task.Delay(500);
+                            this.Refresh();
                             t -= 500;
                             if (t < 0) break;
                         }
-
+                        Resolver.Log.Debug($"Wifi IpAddress: {IpAddress} SubnetMask:{SubnetMask} Gateway:{Gateway}");
                         CurrentState = NetworkState.Connected;
                     });
 
