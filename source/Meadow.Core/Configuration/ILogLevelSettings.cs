@@ -1,7 +1,9 @@
-﻿namespace Meadow
+﻿using Meadow.Logging;
+
+namespace Meadow
 {
     public interface ILogLevelSettings
     {
-        string Default { get; }
+        LogLevel Default { get; set; }
     }
 }

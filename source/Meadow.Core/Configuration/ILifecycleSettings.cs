@@ -2,7 +2,7 @@
 {
     public interface ILifecycleSettings
     {
-        bool RestartOnAppFailure => false;
-        int AppFailureRestartDelaySeconds => 5;
+        bool RestartOnAppFailure { get; set; }
+        int AppFailureRestartDelaySeconds { get; set; }
     }
 }
