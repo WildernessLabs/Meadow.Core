@@ -1,0 +1,12 @@
+﻿Update:
+  UpdateServer: mqtt.meadowcloud.co
+  UpdatePort: 8883
+  AuthServer: https://staging.meadowcloud.dev
+  AuthPort: 443
+  Enabled: false
+  UseAuthentication: true
+Logging:
+  LogLevel:
+    Default: Trace
+Lifecycle:
+  ResetOnAppFailure: false
