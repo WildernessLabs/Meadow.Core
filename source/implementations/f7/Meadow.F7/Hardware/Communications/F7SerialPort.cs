@@ -179,7 +179,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -224,7 +224,7 @@ namespace Meadow.Hardware
 
             Resolver.Log.Debug($"  Setting port speed to {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -237,7 +237,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
             {
                 // get the settings again
                 result = Nuttx.tcgetattr(handle, ref settings);
@@ -265,7 +265,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -311,7 +311,7 @@ namespace Meadow.Hardware
             settings.c_speed = BaudRate;
 
             Resolver.Log.Debug($"  Setting port settings at {BaudRate}...");
-            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
             {
                 ShowSettings(settings);
             }
@@ -322,7 +322,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (Resolver.Log.Loglevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
             {
                 // get the settings again
                 result = Nuttx.ioctl(handle, TCGETS, p);
