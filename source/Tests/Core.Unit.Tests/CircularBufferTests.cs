@@ -233,5 +233,27 @@ namespace Core.Unit.Tests
             var b = buffer.Remove();
             Assert.Equal(5, buffer.Count);
         }
+
+        [Fact]
+        public void TestMoveItemsToWithMultipleSourceAdds()
+        {
+            var bufferSize = 20;
+            var buffer = new CircularBuffer<byte>(bufferSize);
+
+            var source = new byte[bufferSize];
+            for (byte i = 0; i < bufferSize; i++)
+            {
+                source[i] = (byte)(i + 10); // just fill with sequential data, starting at non-zero
+            }
+
+            buffer.Append(source[0]); // append the first element
+            buffer.Append(source, 1, source.Length - 1); // append the rest
+
+            // now move it all to a destination
+            var dest = new byte[bufferSize];
+            buffer.MoveItemsTo(dest, 0, dest.Length);
+
+            Assert.Equal(source, dest);
+        }
     }
 }

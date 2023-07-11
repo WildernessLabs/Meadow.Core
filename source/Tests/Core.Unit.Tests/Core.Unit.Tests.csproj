@@ -17,4 +17,10 @@
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="app.config.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
