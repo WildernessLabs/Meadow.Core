@@ -23,7 +23,7 @@ namespace Meadow.Simulation
         public SimulatedMeadow()
         {
             Logger = new Logger(new ConsoleLogProvider());
-            Logger.Loglevel = LogLevel.Information;
+            Logger.LogLevel = LogLevel.Information;
 
             Pins = new TPinDefinitions();
             _platformOS = new SimulatedPlatformOS();
