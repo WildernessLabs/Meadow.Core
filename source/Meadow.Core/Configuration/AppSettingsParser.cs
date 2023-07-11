@@ -33,8 +33,20 @@ internal class AppSettingsParser
                 index += spacing;
                 level++;
             }
-            var line = settingsFile.Substring(index, endLine - index - 1).TrimEnd();
-            if (line != string.Empty)
+
+            string line;
+
+            if (endLine != -1)
+            {
+                line = settingsFile.Substring(index, endLine - index - 1).TrimEnd();
+            }
+            else
+            {
+                // last line with no newline
+                line = settingsFile.Substring(index).TrimEnd();
+            }
+
+            if (line != string.Empty && line[0] != '#')
             {
 
                 if (level > lastLevel)
