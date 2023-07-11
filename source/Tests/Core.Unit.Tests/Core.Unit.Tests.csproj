@@ -17,4 +17,16 @@
     <PackageReference Include="Meadow" Version="*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="app.config.comments.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.config.nospaces.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.config.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

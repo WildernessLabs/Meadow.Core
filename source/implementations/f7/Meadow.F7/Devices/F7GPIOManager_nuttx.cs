@@ -36,7 +36,7 @@ namespace Meadow.Devices
             }
         }
 
-        void RegisterConfig(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber)
+        private void RegisterConfig(STM32.GpioPort port, int pin, STM32.GpioMode mode, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState, InterruptMode interruptMode, int alternateFunctionNumber)
         {
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $" + RegisterConfig");
 

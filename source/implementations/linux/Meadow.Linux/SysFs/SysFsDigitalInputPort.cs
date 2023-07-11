@@ -16,21 +16,14 @@ namespace Meadow
             SysFsGpioDriver driver,
             IPin pin,
             SysFsDigitalChannelInfo channel,
-            InterruptMode interruptMode,
-            ResistorMode resistorMode,
-            TimeSpan debounceDuration,
-            TimeSpan glitchDuration)
-            : base(pin, channel, interruptMode)
+            ResistorMode resistorMode)
+            : base(pin, channel)
         {
             switch (resistorMode)
             {
                 case ResistorMode.InternalPullUp:
                 case ResistorMode.InternalPullDown:
                     throw new NotSupportedException("Internal Resistor Modes are not supported on the current OS");
-            }
-            if (debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
-            {
-                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on the current OS");
             }
 
             Driver = driver;
@@ -51,30 +44,12 @@ namespace Meadow
             Driver.Export(Gpio);
             Thread.Sleep(100); // this seems to be required to prevent an error 13
             Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
-            switch (interruptMode)
-            {
-                case InterruptMode.None:
-                    // nothing to do
-                    break;
-                default:
-                    Driver.HookInterrupt(Gpio, interruptMode, InterruptCallback);
-                    break;
-            }
-
-            InterruptMode = interruptMode;
-        }
-
-        private void InterruptCallback()
-        {
-            // TODO: implement old/new
-            RaiseChangedAndNotify(new DigitalPortResult());
         }
 
         protected override void Dispose(bool disposing)
         {
             if (Gpio >= 0)
             {
-                Driver.UnhookInterrupt(Gpio);
                 Driver.Unexport(Gpio);
             }
 
@@ -93,18 +68,6 @@ namespace Meadow
                         throw new NotSupportedException("Internal Resistor Modes are not supported on the current OS");
                 }
             }
-        }
-
-        public override TimeSpan DebounceDuration
-        {
-            get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
-        }
-
-        public override TimeSpan GlitchDuration
-        {
-            get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
         }
     }
 }

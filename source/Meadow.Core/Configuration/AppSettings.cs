@@ -2,10 +2,10 @@
 
 namespace Meadow
 {
-    public static class AppSettings
+    public interface IAppSettings
     {
-        public static ILoggingSettings DefaultLoggingSettings => new DefaultLoggingSettings();
-        public static ILifecycleSettings DefaultLifecycleSettings => new DefaultLifecycleSettings();
-        public static IUpdateSettings DefaultUpdateSettings => new DefaultUpdateSettings();
+        public ILoggingSettings LoggingSettings { get; }
+        public ILifecycleSettings LifecycleSettings { get; }
+        public IUpdateSettings UpdateSettings { get; }
     }
 }

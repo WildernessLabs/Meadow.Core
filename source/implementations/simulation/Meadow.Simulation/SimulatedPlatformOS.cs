@@ -9,6 +9,25 @@ using System.Security.Cryptography;
 
 namespace Meadow.Simulation
 {
+    public class SimulatedFileSystemInfo : IPlatformOS.FileSystemInfo
+    {
+        public override IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
+
+        public override string FileSystemRoot { get; }
+
+        internal SimulatedFileSystemInfo()
+        {
+            // create the Meadow root folder
+            var di = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Meadow"));
+            if (!di.Exists)
+            {
+                di.Create();
+            }
+
+            FileSystemRoot = di.FullName;
+        }
+    }
+
     public class SimulatedPlatformOS : IPlatformOS
     {
         /// <summary>
@@ -41,8 +60,11 @@ namespace Meadow.Simulation
         /// <returns>Mono version.</returns>
         public string RuntimeVersion { get; }
 
+        public IPlatformOS.FileSystemInfo FileSystem { get; }
+
         internal SimulatedPlatformOS()
         {
+            FileSystem = new SimulatedFileSystemInfo();
             RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
         }
 

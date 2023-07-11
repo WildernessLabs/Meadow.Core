@@ -60,7 +60,7 @@ namespace Meadow.Devices
         /// <summary>
         /// MAC address as used by the ESP32 when acting as a client.
         /// </summary>
-        public PhysicalAddress MacAddress
+        public override PhysicalAddress MacAddress
         {
             get
             {

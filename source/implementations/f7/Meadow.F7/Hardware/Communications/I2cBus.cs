@@ -1,5 +1,4 @@
 ﻿using Meadow.Devices;
-using Meadow.Units;
 using System;
 using System.Linq;
 using System.Threading;
@@ -82,6 +81,10 @@ namespace Meadow.Hardware
             {
                 throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
             }
+            var success = true;
+
+            success &= ioController.DeviceChannelManager.ReservePin(clock, ChannelConfigurationType.I2C).Item1;
+            success &= ioController.DeviceChannelManager.ReservePin(data, ChannelConfigurationType.I2C).Item1;
 
             return new I2cBus(ioController, clock, clockChannel, data, dataChannel, busSpeed, transactionTimeout);
         }

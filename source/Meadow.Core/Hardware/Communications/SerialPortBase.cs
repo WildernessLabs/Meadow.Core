@@ -23,9 +23,32 @@ namespace Meadow.Hardware
         private StopBits _stopBits;
 
         protected abstract void SetHardwarePortSettings(IntPtr handle);
+        /// <summary>
+        /// Override this method to open a hardware (OS) serial port
+        /// </summary>
+        /// <param name="portName">The name of the port</param>
+        /// <returns>The resulting port handle</returns>
         protected abstract IntPtr OpenHardwarePort(string portName);
+        /// <summary>
+        /// Override this method to close a hardware (OS) serial port
+        /// </summary>
+        /// <param name="handle">The port handle</param>
         protected abstract void CloseHardwarePort(IntPtr handle);
+        /// <summary>
+        /// Override this method to write data to a hardware serial port
+        /// </summary>
+        /// <param name="handle">The handle to the port</param>
+        /// <param name="writeBuffer">The source data buffer</param>
+        /// <param name="count">The number of bytes to write</param>
+        /// <returns>The number of bytes actually written</returns>
         protected abstract int WriteHardwarePort(IntPtr handle, byte[] writeBuffer, int count);
+        /// <summary>
+        /// Override this method to read data from a hardware serial port
+        /// </summary>
+        /// <param name="handle">The handle to the port</param>
+        /// <param name="readBuffer">The buffer to write the data to</param>
+        /// <param name="count">The number of bytes to read</param>
+        /// <returns>The actual number of bytes read</returns>
         protected abstract int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count);
 
         /// <summary>
@@ -375,8 +398,6 @@ namespace Meadow.Hardware
         {
             var readBuffer = new byte[4096];
 
-            Resolver.Log.Debug($"ReadThreadProc: {IsOpen}");
-
             while (IsOpen)
             {
                 try
@@ -417,8 +438,6 @@ namespace Meadow.Hardware
                     Resolver.Log.Error($"ReadThreadProc error: {ex.Message}");
                 }
             }
-
-            Resolver.Log.Debug($"ReadThreadProc: port closed");
         }
 
         /// <summary>
@@ -460,7 +479,7 @@ namespace Meadow.Hardware
         /// leave bytes in the serial port buffer.
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="offset"></param>
+        /// <param name="index"></param>
         /// <returns></returns>
         public int ReadAll(byte[] buffer, int index)
         {
