@@ -9,6 +9,6 @@ internal class MeadowLoggingSettings : ILoggingSettings
 
     public class LogLevelSettings : ILogLevelSettings
     {
-        public LogLevel Default { get; set; } = Logging.LogLevel.Error;
+        public LogLevel Default { get; set; } = Logging.LogLevel.Information;
     }
 }
