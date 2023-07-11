@@ -38,7 +38,7 @@ internal class AppSettingsParser
 
             if (endLine != -1)
             {
-                line = settingsFile.Substring(index, endLine - index - 1).TrimEnd();
+                line = settingsFile.Substring(index, endLine - index).TrimEnd();
             }
             else
             {
@@ -72,10 +72,17 @@ internal class AppSettingsParser
                         lastKey = kvp[0].Trim();
                         parents.Add(lastKey);
                         break;
-                    default:
+                    case 2:
                         var name = $"{parent}.{kvp[0]}";
                         var value = kvp[1].Trim();
                         ApplySetting(settings, name, value);
+                        break;
+                    default:
+                        // the value had a colon in it, so re-assemble
+                        var val = string.Join(':', kvp, 1, kvp.Length - 1);
+                        var n = $"{parent}.{kvp[0]}";
+                        var v = val.Trim();
+                        ApplySetting(settings, n, v);
                         break;
                 }
             }
