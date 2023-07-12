@@ -38,7 +38,7 @@ internal class AppSettingsParser
 
             if (endLine != -1)
             {
-                line = settingsFile.Substring(index, endLine - index - 1).TrimEnd();
+                line = settingsFile.Substring(index, endLine - index).TrimEnd();
             }
             else
             {
@@ -72,10 +72,17 @@ internal class AppSettingsParser
                         lastKey = kvp[0].Trim();
                         parents.Add(lastKey);
                         break;
-                    default:
+                    case 2:
                         var name = $"{parent}.{kvp[0]}";
                         var value = kvp[1].Trim();
                         ApplySetting(settings, name, value);
+                        break;
+                    default:
+                        // the value had a colon in it, so re-assemble
+                        var val = string.Join(':', kvp, 1, kvp.Length - 1);
+                        var n = $"{parent}.{kvp[0]}";
+                        var v = val.Trim();
+                        ApplySetting(settings, n, v);
                         break;
                 }
             }
@@ -91,15 +98,24 @@ internal class AppSettingsParser
         switch (settingName)
         {
             case "Logging.LogLevel.Default":
+                settingValue = settingValue.Trim('"'); // some users put it in quotes, just protect against that, even though it's invalid yaml
                 if (Enum.TryParse<LogLevel>(settingValue, true, out LogLevel level))
                 {
                     settings.LoggingSettings.LogLevel.Default = level;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to a LogLevel");
                 }
                 break;
             case "Logging.ShowTicks":
                 if (bool.TryParse(settingValue, out bool st))
                 {
                     settings.LoggingSettings.ShowTicks = st;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
                 }
                 break;
 
@@ -108,11 +124,19 @@ internal class AppSettingsParser
                 {
                     settings.LifecycleSettings.RestartOnAppFailure = r;
                 }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
+                }
                 break;
             case "Lifecycle.AppFailureRestartDelaySeconds":
                 if (int.TryParse(settingValue, out int rd))
                 {
                     settings.LifecycleSettings.AppFailureRestartDelaySeconds = rd;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
                 }
                 break;
 
@@ -120,6 +144,10 @@ internal class AppSettingsParser
                 if (bool.TryParse(settingValue, out bool ue))
                 {
                     settings.UpdateSettings.Enabled = ue;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
                 }
                 break;
             case "Update.UpdateServer":
@@ -130,6 +158,10 @@ internal class AppSettingsParser
                 {
                     settings.UpdateSettings.UpdatePort = up;
                 }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
+                }
                 break;
             case "Update.AuthServer":
                 settings.UpdateSettings.AuthServer = settingValue;
@@ -138,6 +170,10 @@ internal class AppSettingsParser
                 if (int.TryParse(settingValue, out int cp))
                 {
                     settings.UpdateSettings.AuthPort = cp;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
                 }
                 break;
         }

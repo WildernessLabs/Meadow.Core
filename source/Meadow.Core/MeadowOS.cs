@@ -178,12 +178,14 @@ public static partial class MeadowOS
 
         if (File.Exists("/meadow0/app.config.yaml"))
         {
+            Console.WriteLine($"Parsing app.config.yaml...");
             var parser = new AppSettingsParser();
             var yml = File.ReadAllText("/meadow0/app.config.yaml");
             settings = parser.Parse(yml);
         }
         else
         {
+            Console.WriteLine($"Using default app.config.yaml...");
             settings = new MeadowAppSettings(); // defaults
         }
 
@@ -268,12 +270,12 @@ public static partial class MeadowOS
             Resolver.Services.Add(new Logger());
             Resolver.Log.AddProvider(new ConsoleLogProvider());
 
-            Resolver.Log.Trace($"Initializing OS... ");
+            Console.WriteLine($"Initializing OS... ");
         }
         catch (Exception ex)
         {
             // must use Console because the logger failed
-            Resolver.Log.Error($"Failed to create Logger: {ex.Message}");
+            Console.WriteLine($"Failed to create Logger: {ex.Message}");
             return false;
         }
 

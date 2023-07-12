@@ -1,4 +1,5 @@
 ﻿using Meadow;
+using Meadow.Logging;
 using System.IO;
 using Xunit;
 
@@ -13,6 +14,20 @@ namespace Core.Unit.Tests
 
             var parser = new AppSettingsParser();
             var s = parser.Parse(yml);
+
+            Assert.True(s.UpdateSettings.Enabled);
+            Assert.Equal("https://staging.meadowcloud.dev", s.UpdateSettings.AuthServer);
+        }
+
+        [Fact]
+        public void Parse4SpaceFile()
+        {
+            var yml = File.ReadAllText("app.config.4.yaml");
+
+            var parser = new AppSettingsParser();
+            var s = parser.Parse(yml);
+
+            Assert.Equal(LogLevel.Debug, s.LoggingSettings.LogLevel.Default);
         }
 
         [Fact]
