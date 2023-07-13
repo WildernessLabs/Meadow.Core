@@ -1,6 +1,7 @@
 ﻿using Meadow.Logging;
 using Meadow.Update;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -172,7 +173,7 @@ public static partial class MeadowOS
         }
     }
 
-    private static void LoadSettings()
+    private static Dictionary<string, string> LoadSettings()
     {
         IAppSettings settings;
 
@@ -196,6 +197,8 @@ public static partial class MeadowOS
 
         LifecycleSettings = settings.LifecycleSettings;
         UpdateSettings = settings.UpdateSettings;
+
+        return settings.Settings;
     }
 
     private static Type FindAppType()
@@ -285,7 +288,7 @@ public static partial class MeadowOS
             AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
             var now = Environment.TickCount;
-            LoadSettings();
+            var settings = LoadSettings();
             Resolver.Log.Trace($"LoadSettings took {Environment.TickCount - now}");
 
             // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
@@ -368,6 +371,13 @@ public static partial class MeadowOS
                 if (pi.CanWrite)
                 {
                     pi.SetValue(app, AppAbort.Token);
+                }
+            }
+            if (appType.GetProperty(nameof(IApp.Settings)) is PropertyInfo spi)
+            {
+                if (spi.CanWrite)
+                {
+                    spi.SetValue(app, settings);
                 }
             }
 

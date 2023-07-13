@@ -176,6 +176,12 @@ internal class AppSettingsParser
                     Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
                 }
                 break;
+            default:
+                if (!settings.Settings.ContainsKey(settingName))
+                {
+                    settings.Settings.Add(settingName, settingValue);
+                }
+                break;
         }
     }
 }
