@@ -1,6 +1,7 @@
 ﻿namespace Meadow
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -16,6 +17,9 @@
 
         /// <inheritdoc/>
         public CancellationToken CancellationToken { get; internal set; }
+
+        /// <inheritdoc/>
+        public Dictionary<string, string> Settings { get; internal set; }
 
         /// <summary>
         /// Base constructor for the App class

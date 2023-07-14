@@ -17,6 +17,9 @@ namespace Meadow.UI
         /// </summary>
         public static T Device => Resolver.Services.Get<IMeadowDevice>() as T;
 
+        /// <inheritdoc/>
+        public Dictionary<string, string> Settings { get; internal set; } = new();
+
         protected AvaloniaMeadowApplication()
         {
         }
@@ -31,31 +34,37 @@ namespace Meadow.UI
             Dispatcher.UIThread.Post(() => action(state));
         }
 
-        virtual public Task OnError(Exception e)
+        /// <inheritdoc/>
+        public virtual Task OnError(Exception e)
         {
             return Task.CompletedTask;
         }
 
-        virtual public Task OnShutdown()
+        /// <inheritdoc/>
+        public virtual Task OnShutdown()
         {
             return Task.CompletedTask;
         }
 
-        virtual public void OnUpdate(Version newVersion, out bool approveUpdate)
+        /// <inheritdoc/>
+        public virtual void OnUpdate(Version newVersion, out bool approveUpdate)
         {
             approveUpdate = true;
         }
 
-        virtual public void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
+        /// <inheritdoc/>
+        public virtual void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
         {
             rollbackUpdate = false;
         }
 
-        virtual public Task MeadowRun()
+        /// <inheritdoc/>
+        public virtual Task MeadowRun()
         {
             return Task.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public virtual Task MeadowInitialize()
         {
             return Task.CompletedTask;
