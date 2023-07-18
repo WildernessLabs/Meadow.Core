@@ -39,12 +39,6 @@ namespace Meadow.Devices
             });
 
             Pins.Controller = this;
-
-            if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Cell)
-            {
-                Resolver.Log.Info($"Device is configured to use Cell for the network interface");
-                networkAdapters.Add(new CellNetworkAdapter());
-            }
         }
 
         /// <summary>
