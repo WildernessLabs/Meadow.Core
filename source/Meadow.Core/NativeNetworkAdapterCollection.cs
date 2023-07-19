@@ -59,6 +59,9 @@ namespace Meadow.Devices
                         case NetworkInterfaceType.Wireless80211:
                             _adapters.Add(new WiFiNetworkAdapter(ni));
                             break;
+                        case NetworkInterfaceType.Ppp:
+                            _adapters.Add(new CellNetworkAdapter(ni));
+                            break;
                     }
                 }
             }
