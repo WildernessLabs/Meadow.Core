@@ -42,21 +42,15 @@ public class UpdateService : IUpdateService
     private string UpdateDirectory { get; }
     private string UpdateStoreDirectory { get; }
 
-    /// <summary>
-    /// Event raised when an update is available on the defined Update server
-    /// </summary>
+    /// <inheritdoc/>
+    public event EventHandler<UpdateState> OnStateChanged = delegate { };
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateAvailable = delegate { };
-    /// <summary>
-    /// Event raised after an update package has been retrieved from the defined Update server
-    /// </summary>
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateRetrieved = delegate { };
-    /// <summary>
-    /// Event raised after an update package has been successfully applied
-    /// </summary>
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateSuccess = delegate { };
-    /// <summary>
-    /// Event raised if a failure occurs in an attempt to apply an update package
-    /// </summary>
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateFailure = delegate { };
 
     private UpdateState _state;
@@ -78,17 +72,13 @@ public class UpdateService : IUpdateService
         Config = config;
     }
 
-    /// <summary>
-    /// Stops the service
-    /// </summary>
+    /// <inheritdoc/>
     public void Shutdown()
     {
         _stopService = true;
     }
 
-    /// <summary>
-    /// Gets the current state of the service
-    /// </summary>
+    /// <inheritdoc/>
     public UpdateState State
     {
         get => _state;
@@ -97,6 +87,7 @@ public class UpdateService : IUpdateService
             if (value == State) return;
 
             _state = value;
+            OnStateChanged?.Invoke(this, State);
             Resolver.Log.Trace($"Updater State -> {State}");
         }
     }
@@ -399,10 +390,7 @@ public class UpdateService : IUpdateService
         State = UpdateState.Dead;
     }
 
-    /// <summary>
-    /// Clears all locally stored update package information
-    /// </summary>
-    /// <exception cref="Exception"></exception>
+    /// <inheritdoc/>
     public void ClearUpdates()
     {
         switch (State)
@@ -417,11 +405,7 @@ public class UpdateService : IUpdateService
         Store.Clear();
     }
 
-    /// <summary>
-    /// Retrieves an update package from defined update server with the provided parameters
-    /// </summary>
-    /// <param name="updateInfo"></param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <inheritdoc/>
     public void RetrieveUpdate(UpdateInfo updateInfo)
     {
         State = UpdateState.DownloadingFile;
@@ -588,11 +572,7 @@ public class UpdateService : IUpdateService
         }
     }
 
-    /// <summary>
-    /// Applies an already-retrieved update package with the provided parameters
-    /// </summary>
-    /// <param name="updateInfo"></param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <inheritdoc/>
     public void ApplyUpdate(UpdateInfo updateInfo)
     {
         State = UpdateState.UpdateInProgress;
