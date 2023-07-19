@@ -98,7 +98,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
         if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Cell)
         {
             Resolver.Log.Info($"Device is configured to use Cell for the network interface");
-            networkAdapters.Add(new CellNetworkAdapter());
+            networkAdapters.Add(new F7CellNetworkAdapter());
         }
     }
 
