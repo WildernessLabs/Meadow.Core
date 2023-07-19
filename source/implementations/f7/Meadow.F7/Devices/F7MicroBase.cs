@@ -89,7 +89,17 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
         var reservedPins = PlatformOS.ReservedPins?.ToUpper().Split(';', StringSplitOptions.RemoveEmptyEntries) ?? null;
         IoController.Initialize(reservedPins);
 
+        InitializeCellModem();
         InitCoprocessor();
+    }
+
+    private void InitializeCellModem()
+    {
+        if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Cell)
+        {
+            Resolver.Log.Info($"Device is configured to use Cell for the network interface");
+            networkAdapters.Add(new CellNetworkAdapter());
+        }
     }
 
     /// <summary>
