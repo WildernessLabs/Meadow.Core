@@ -180,9 +180,12 @@ public static partial class MeadowOS
         if (File.Exists("/meadow0/app.config.yaml"))
         {
             Console.WriteLine($"Parsing app.config.yaml...");
-            var parser = new AppSettingsParser();
+
+            // testing shows this takes ~375ms (7/20/23)
             var yml = File.ReadAllText("/meadow0/app.config.yaml");
-            settings = parser.Parse(yml);
+
+            // testing shows this takes ~1100ms (7/20/23)
+            settings = AppSettingsParser.Parse(yml);
         }
         else
         {
@@ -287,9 +290,7 @@ public static partial class MeadowOS
             //capture unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            var now = Environment.TickCount;
             var settings = LoadSettings();
-            Resolver.Log.Trace($"LoadSettings took {Environment.TickCount - now}");
 
             // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
             var b4 = Environment.TickCount;

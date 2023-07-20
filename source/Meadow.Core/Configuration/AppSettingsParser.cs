@@ -8,9 +8,9 @@ using System.Runtime.CompilerServices;
 
 namespace Meadow;
 
-internal class AppSettingsParser
+internal static class AppSettingsParser
 {
-    public MeadowAppSettings Parse(string settingsFile)
+    public static MeadowAppSettings Parse(string settingsFile)
     {
         var settings = new MeadowAppSettings();
 
@@ -93,7 +93,7 @@ internal class AppSettingsParser
         return settings;
     }
 
-    private void ApplySetting(MeadowAppSettings settings, string settingName, string settingValue)
+    private static void ApplySetting(MeadowAppSettings settings, string settingName, string settingValue)
     {
         switch (settingName)
         {
