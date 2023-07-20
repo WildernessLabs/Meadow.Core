@@ -12,8 +12,7 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
 
             Assert.True(s.UpdateSettings.Enabled);
             Assert.Equal("https://staging.meadowcloud.dev", s.UpdateSettings.AuthServer);
@@ -24,8 +23,7 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.4.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
 
             Assert.Equal(LogLevel.Debug, s.LoggingSettings.LogLevel.Default);
         }
@@ -35,8 +33,7 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.nospaces.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
         }
 
         [Fact]
@@ -44,8 +41,7 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.comments.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
         }
     }
 }
