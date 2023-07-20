@@ -11,6 +11,8 @@ namespace Meadow.Devices
     /// </summary>
     public class NativeNetworkAdapterCollection : INetworkAdapterCollection
     {
+        // DEV NOTE: This collection is not used in the F7 - it is used by Linux and Windows
+        //           For F7 implementations, see the NetworkAdapterCollection class
         private List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
 
         /// <summary>
@@ -58,9 +60,6 @@ namespace Meadow.Devices
                             break;
                         case NetworkInterfaceType.Wireless80211:
                             _adapters.Add(new WiFiNetworkAdapter(ni));
-                            break;
-                        case NetworkInterfaceType.Ppp:
-                            _adapters.Add(new CellNetworkAdapter(ni));
                             break;
                     }
                 }
