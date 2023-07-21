@@ -16,6 +16,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -351,6 +352,8 @@ public class UpdateService : IUpdateService
                     State = UpdateState.Idle;
                     try
                     {
+                        var jwtPayload = GetJsonWebTokenPayload(_jwt);
+
                         // the config RootTopic can have multiple semicolon-delimited topics
                         var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
@@ -359,9 +362,14 @@ public class UpdateService : IUpdateService
                             string topicName = topic;
 
                             // look for macro-substitutions
+                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
+                            {
+                                topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
+                            }
+
                             if (topic.Contains("{ID}"))
                             {
-                                topicName = topic.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
+                                topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
                             }
 
                             Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
@@ -570,6 +578,49 @@ public class UpdateService : IUpdateService
         {
             DisplayTree(d);
         }
+    }
+
+    // In order to not require the use of a library, this was taken from
+    // RFC7515, Appendix C: https://datatracker.ietf.org/doc/html/rfc7515#appendix-C
+    private string base64UrlDecode(string arg)
+    {
+        string s = arg;
+        s = s.Replace('-', '+'); // 62nd char of encoding
+        s = s.Replace('_', '/'); // 63rd char of encoding
+        switch (s.Length % 4) // Pad with trailing '='s
+        {
+            case 0: break; // No pad chars in this case
+            case 2: s += "=="; break; // Two pad chars
+            case 3: s += "="; break; // One pad char
+            default:
+                throw new Exception("Illegal base64url string!");
+        }
+
+        var bytes = Convert.FromBase64String(s);
+        return Encoding.UTF8.GetString(bytes);
+    }
+
+    private JsonWebTokenPayload? GetJsonWebTokenPayload(string? jwt)
+    {
+        if (string.IsNullOrWhiteSpace(jwt))
+        {
+            throw new ArgumentNullException(nameof(jwt));
+        }
+
+        var tokenParts = jwt.Split('.');
+        if (tokenParts.Length < 2)
+        {
+            throw new InvalidOperationException("Invalid JWT format");
+        }
+
+        var payloadJson = base64UrlDecode(tokenParts[1]);
+        return JsonSerializer.Deserialize<JsonWebTokenPayload>(payloadJson);
+    }
+
+    private class JsonWebTokenPayload
+    {
+        [JsonPropertyName("oid")]
+        public string? OrganizationId { get; set; }
     }
 
     /// <inheritdoc/>
