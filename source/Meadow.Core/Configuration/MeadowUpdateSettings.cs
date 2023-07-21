@@ -10,7 +10,7 @@ internal class MeadowUpdateSettings : IUpdateSettings
     public string AuthServer { get; set; } = "https://www.meadowcloud.co";
     public int AuthPort { get; set; } = 443;
     public string Organization { get; set; } = "Default organization";
-    public string RootTopic { get; set; } = "ota;ota/{ID}/updates;{OID}/ota/{ID}/update";
+    public string RootTopic { get; set; } = "ota;ota/{ID}/updates;{OID}/ota/{ID}";
     public int CloudConnectRetrySeconds { get; set; } = 15;
     public bool UseAuthentication { get; set; } = true;
 }
