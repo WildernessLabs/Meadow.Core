@@ -243,7 +243,7 @@ namespace Meadow.Devices
                         _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
                     }
 
-                    // tesing has revealded that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
+                    // testing has revealed that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
                     var t = 3000;
 
                     Task.Run(async () =>
@@ -251,6 +251,7 @@ namespace Meadow.Devices
                         while (IpAddress.Equals(System.Net.IPAddress.Any) || IpAddress.Equals(System.Net.IPAddress.None))
                         {
                             await Task.Delay(500);
+                            this.Refresh();
                             t -= 500;
                             if (t < 0) break;
                         }
@@ -497,10 +498,11 @@ namespace Meadow.Devices
 
                 if (CurrentState == NetworkState.Connected)
                 {
-                    // tesing has revealded that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
+                    // testing has revealed that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
                     while (IpAddress.Equals(System.Net.IPAddress.Any))
                     {
                         await Task.Delay(500);
+                        this.Refresh();
                         t += 500;
                         if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
                         {
