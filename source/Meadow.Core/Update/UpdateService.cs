@@ -38,7 +38,6 @@ public class UpdateService : IUpdateService
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
     private const string DefaultUpdateLoginApiEndpoint = "/api/devices/login/";
-    private const string MqttOrganizationProperty = "orgId";
 
     private string UpdateDirectory { get; }
     private string UpdateStoreDirectory { get; }
@@ -225,7 +224,7 @@ public class UpdateService : IUpdateService
                 var ivBytes = Convert.FromBase64String(payload.Iv);
                 var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
 
-                _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
+                _jwt = Encoding.UTF8.GetString(decryptedToken);
 
                 // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
                 _jwt = Regex.Replace(_jwt, @"[^\w\.@-]", "");
@@ -301,8 +300,7 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                                        .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
-                                        ;
+                                        .WithTcpServer(Config.UpdateServer, Config.UpdatePort);
 
                         if (Config.UseAuthentication)
                         {
@@ -352,7 +350,16 @@ public class UpdateService : IUpdateService
                     State = UpdateState.Idle;
                     try
                     {
-                        var jwtPayload = GetJsonWebTokenPayload(_jwt);
+                        JsonWebTokenPayload? jwtPayload = null;
+                        if (Config.UseAuthentication)
+                        {
+                            if (string.IsNullOrWhiteSpace(_jwt))
+                            {
+                                throw new InvalidOperationException("Update service authentication is enabled but no JWT is available");
+                            }
+
+                            jwtPayload = GetJsonWebTokenPayload(_jwt);
+                        }
 
                         // the config RootTopic can have multiple semicolon-delimited topics
                         var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
@@ -593,28 +600,31 @@ public class UpdateService : IUpdateService
             case 2: s += "=="; break; // Two pad chars
             case 3: s += "="; break; // One pad char
             default:
-                throw new Exception("Illegal base64url string!");
+                throw new ArgumentException("Argument is an invalid base64url string", nameof(arg));
         }
 
         var bytes = Convert.FromBase64String(s);
         return Encoding.UTF8.GetString(bytes);
     }
 
-    private JsonWebTokenPayload? GetJsonWebTokenPayload(string? jwt)
+    private JsonWebTokenPayload GetJsonWebTokenPayload(string jwt)
     {
         if (string.IsNullOrWhiteSpace(jwt))
         {
-            throw new ArgumentNullException(nameof(jwt));
+            throw new ArgumentException($"'{nameof(jwt)}' cannot be null or whitespace.", nameof(jwt));
         }
 
         var tokenParts = jwt.Split('.');
         if (tokenParts.Length < 2)
         {
-            throw new InvalidOperationException("Invalid JWT format");
+            throw new ArgumentException("Argument is an invalid JsonWebToken format.", nameof(jwt));
         }
 
         var payloadJson = base64UrlDecode(tokenParts[1]);
-        return JsonSerializer.Deserialize<JsonWebTokenPayload>(payloadJson);
+        var payload = JsonSerializer.Deserialize<JsonWebTokenPayload>(payloadJson)
+            ?? throw new JsonException("Payload could not be deserialized from JWT argument.");
+
+        return payload;
     }
 
     private class JsonWebTokenPayload
