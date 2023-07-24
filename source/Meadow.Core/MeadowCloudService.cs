@@ -1,3 +1,5 @@
+using Meadow.Cloud;
+using Meadow.Update;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -6,21 +8,32 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Meadow.Cloud;
-using Meadow.Update;
 
 namespace Meadow;
 
+/// <summary>
+/// Encapsulates logic for communicating with Meadow.Cloud
+/// </summary>
 public class MeadowCloudService : IMeadowCloudService
 {
+    /// <summary>
+    /// Creates a MeadowCloudService
+    /// </summary>
+    /// <param name="settings">The settings used for interacting with the service</param>
     public MeadowCloudService(IMeadowCloudSettings settings)
     {
         Settings = settings;
     }
 
+    /// <summary>
+    /// Gets or sets the cloud service settings
+    /// </summary>
     public IMeadowCloudSettings Settings { get; protected set; }
+
+    /// <inheritdoc/>
     public string? CurrentJwt { get; protected set; }
 
+    /// <inheritdoc/>
     public async Task<bool> Authenticate()
     {
         using (var client = new HttpClient())
@@ -29,7 +42,7 @@ public class MeadowCloudService : IMeadowCloudService
 
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            
+
             var endpoint = $"{Settings.Hostname}/api/devices/login";
             Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
@@ -79,7 +92,7 @@ public class MeadowCloudService : IMeadowCloudService
 
                 // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
                 CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
-                
+
                 Resolver.Log.Debug($"auth token successfully received");
                 return true;
             }
@@ -93,20 +106,21 @@ public class MeadowCloudService : IMeadowCloudService
             {
                 Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
             }
-            
+
             CurrentJwt = null;
             return false;
         }
     }
 
+    /// <inheritdoc/>
     public async Task<bool> SendLog(CloudLog log)
     {
         int attempt = 0;
         int maxRetries = 1;
         var result = false;
-        
-        retry:
-        
+
+    retry:
+
         if (CurrentJwt == null)
         {
             await Authenticate();

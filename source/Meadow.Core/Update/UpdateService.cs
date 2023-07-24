@@ -16,7 +16,6 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -250,7 +249,7 @@ public class UpdateService : IUpdateService
                         ClientOptions = builder.Build();
                     }
 
-                    if (nic.IsConnected)
+                    if (nic != null && nic.IsConnected)
                     {
                         try
                         {
