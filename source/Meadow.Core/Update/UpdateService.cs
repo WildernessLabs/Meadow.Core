@@ -36,7 +36,6 @@ public class UpdateService : IUpdateService
 
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
-    private const string DefaultUpdateLoginApiEndpoint = "/api/devices/login/";
     private const string MqttOrganizationProperty = "orgId";
 
     private string UpdateDirectory { get; }
@@ -174,75 +173,14 @@ public class UpdateService : IUpdateService
 
     private async Task<bool> AuthenticateWithServer()
     {
-        using (var client = new HttpClient())
+        var meadowCloudService = Resolver.MeadowCloudService;
+
+        if (await meadowCloudService.Authenticate())
         {
-            client.Timeout = new TimeSpan(0, 15, 0);
-
-            var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var endpoint = $"{Config.AuthServer}:{Config.AuthPort}{DefaultUpdateLoginApiEndpoint}";
-            Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
-
-            var response = await client.PostAsync(endpoint, content);
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                Resolver.Log.Debug($"Update service authentication succeeded");
-                var opts = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                };
-
-                var payload = JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent, opts);
-
-                if (payload == null)
-                {
-                    Resolver.Log.Warn($"Unable to parse the authentication response from the Update Service");
-                    return false;
-                }
-
-                Resolver.Log.Debug($"Asking Device OS to decrypt keys...");
-                var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
-
-                byte[]? decryptedKey;
-                try
-                {
-                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
-                }
-                catch (OverflowException)
-                {
-                    // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
-                    // TODO: add platform and OS checking for this?
-                    Resolver.Log.Error($" RSA decrypt failure. This device likely needs to be reprovisioned.");
-                    return false;
-                }
-
-                // then need to call method to AES decrypt the EncryptedToken with IV
-                var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
-                var ivBytes = Convert.FromBase64String(payload.Iv);
-                var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
-
-                _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
-
-                // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                _jwt = Regex.Replace(_jwt, @"[^\w\.@-]", "");
-
-                return true;
-            }
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                // device is likely not provisioned?
-                Resolver.Log.Warn($"Update service returned 'Not Found': this device has likely not been provisioned");
-            }
-            else
-            {
-                Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
-            }
-            return false;
+            _jwt = meadowCloudService.CurrentJwt;
         }
+
+        return _jwt != null;
     }
 
     private async void UpdateStateMachine()
