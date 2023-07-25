@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow.Cloud;
 
 namespace Meadow;
 
@@ -24,6 +25,7 @@ public static partial class MeadowOS
     private static IApp App { get; set; }
     private static ILifecycleSettings LifecycleSettings { get; set; }
     private static IUpdateSettings UpdateSettings { get; set; }
+    private static IMeadowCloudSettings MeadowCloudSettings { get; set; }
     public static CancellationTokenSource AppAbort = new();
     public static int StartupTick { get; set; }
 
@@ -200,6 +202,7 @@ public static partial class MeadowOS
 
         LifecycleSettings = settings.LifecycleSettings;
         UpdateSettings = settings.UpdateSettings;
+        MeadowCloudSettings = settings.MeadowCloudSettings;
 
         return settings.Settings;
     }
@@ -386,6 +389,9 @@ public static partial class MeadowOS
 
             var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
             Resolver.Services.Add<IUpdateService>(updateService);
+
+            var meadowCloudService = new MeadowCloudService(MeadowCloudSettings);
+            Resolver.Services.Add<IMeadowCloudService>(meadowCloudService);
 
             Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
             if (UpdateSettings.Enabled)
