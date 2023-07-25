@@ -69,7 +69,7 @@ namespace Meadow
         /// Raises the <see cref="NetworkConnected"/> event
         /// </summary>
         /// <param name="args"></param>
-        protected void RaiseNetworkConnected(WirelessNetworkConnectionEventArgs args)
+        protected void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
         {
             NetworkConnected?.Invoke(this, args);
         }

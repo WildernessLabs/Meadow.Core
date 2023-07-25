@@ -10,7 +10,7 @@ namespace Meadow.Devices;
 public class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
     /// <summary>
-    /// Creates an instance of a CellNetworkAdapter
+    /// Creates an instance of a F7CellNetworkAdapter
     /// </summary>
     /// <param name="ni">The associated native interface</param>
     internal F7CellNetworkAdapter(NetworkInterface ni)
@@ -23,7 +23,7 @@ public class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
     }
 
     /// <summary>
-    /// Creates an instance of a CellNetworkAdapter
+    /// Creates an instance of a F7CellNetworkAdapter
     /// </summary>
     internal F7CellNetworkAdapter()
         : base(NetworkInterfaceType.Ppp)

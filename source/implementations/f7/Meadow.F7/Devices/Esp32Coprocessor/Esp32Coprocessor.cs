@@ -283,6 +283,9 @@ public partial class Esp32Coprocessor : ICoprocessor
                             case Esp32Interfaces.BlueTooth:
                                 InvokeEvent((BluetoothFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
                                 break;
+                            case Esp32Interfaces.Cell:
+                                InvokeEvent((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
+                                break;
                             default:
                                 throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
                         }
