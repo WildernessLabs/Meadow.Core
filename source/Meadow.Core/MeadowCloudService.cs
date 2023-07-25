@@ -115,10 +115,21 @@ public class MeadowCloudService : IMeadowCloudService
     /// <inheritdoc/>
     public async Task<bool> SendLog(CloudLog log)
     {
+        return await Send(log, "/api/logs");
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> SendEvent(CloudEvent cloudEvent)
+    {
+        return await Send(cloudEvent, "/api/events");
+    }
+
+    private async Task<bool> Send<T>(T item, string endpoint)
+    {
         int attempt = 0;
         int maxRetries = 1;
         var result = false;
-
+        
     retry:
 
         if (CurrentJwt == null)
@@ -128,20 +139,15 @@ public class MeadowCloudService : IMeadowCloudService
 
         using (HttpClient client = new HttpClient())
         {
+            client.BaseAddress = new Uri(Settings.DataHostname);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", CurrentJwt);
 
-            var payload = new
-            {
-                timestamp = log.Timestamp,
-                severity = log.Level,
-                message = log.Message
-            };
-
-            var json = JsonSerializer.Serialize(payload);
+            var serializeOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(item, serializeOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            Resolver.Log.Debug("making cloud log httprequest");
-            var response = await client.PostAsync($"{Settings.DataHostname}/api/logs", content);
+            Resolver.Log.Debug($"making cloud log httprequest with json: {json}");
+            var response = await client.PostAsync($"{endpoint}", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -169,6 +175,7 @@ public class MeadowCloudService : IMeadowCloudService
                 result = false;
             }
         }
+
         GC.Collect();
         return result;
     }
