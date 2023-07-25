@@ -163,18 +163,11 @@ internal static class AppSettingsParser
                     Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
                 }
                 break;
-            case "Update.AuthServer":
-                settings.UpdateSettings.AuthServer = settingValue;
+            case "MeadowCloud.Hostname":
+                settings.MeadowCloudSettings.Hostname = settingValue;
                 break;
-            case "Update.AuthPort":
-                if (int.TryParse(settingValue, out int cp))
-                {
-                    settings.UpdateSettings.AuthPort = cp;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
-                }
+            case "MeadowCloud.DataHostname":
+                settings.MeadowCloudSettings.DataHostname = settingValue;
                 break;
             default:
                 if (!settings.Settings.ContainsKey(settingName))

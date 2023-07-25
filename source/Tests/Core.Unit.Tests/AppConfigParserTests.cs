@@ -15,7 +15,7 @@ namespace Core.Unit.Tests
             var s = AppSettingsParser.Parse(yml);
 
             Assert.True(s.UpdateSettings.Enabled);
-            Assert.Equal("https://staging.meadowcloud.dev", s.UpdateSettings.AuthServer);
+            Assert.Equal("mqtt.meadowcloud.co", s.UpdateSettings.UpdateServer);
         }
 
         [Fact]
