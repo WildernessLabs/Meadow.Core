@@ -37,8 +37,6 @@ public class UpdateService : IUpdateService
 
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
-    private const string MqttOrganizationProperty = "orgId";
-    private const string DefaultUpdateLoginApiEndpoint = "/api/devices/login/";
 
     private string UpdateDirectory { get; }
     private string UpdateStoreDirectory { get; }
@@ -134,7 +132,6 @@ public class UpdateService : IUpdateService
             var opts = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-
             };
 
             var info = JsonSerializer.Deserialize<UpdateMessage>(json, opts);
@@ -240,7 +237,7 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                                        .WithTcpServer(Config.UpdateServer, Config.UpdatePort);
+                            .WithTcpServer(Config.UpdateServer, Config.UpdatePort);
 
                         if (Config.UseAuthentication)
                         {
