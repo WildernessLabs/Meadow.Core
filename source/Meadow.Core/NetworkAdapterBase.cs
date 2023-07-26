@@ -11,10 +11,24 @@ namespace Meadow
     /// </summary>
     public abstract class NetworkAdapterBase : INetworkAdapter
     {
+        private NetworkConnectionHandler _connected = delegate { };
         /// <summary>
         /// Raised when the device connects to a network.
         /// </summary>
-        public event NetworkConnectionHandler NetworkConnected = delegate { };
+        public event NetworkConnectionHandler NetworkConnected
+        {
+            add
+            {
+                Resolver.Log.Info($"subscribe to NetworkConnected on {this.GetType().Name}");
+                _connected += value;
+            }
+            remove
+            {
+                Resolver.Log.Info($"unsubscribe to NetworkConnected on {this.GetType().Name}");
+                _connected -= value;
+            }
+        }
+
         /// <summary>
         /// Raised when the device disconnects from a network.
         /// </summary>
@@ -69,9 +83,14 @@ namespace Meadow
         /// Raises the <see cref="NetworkConnected"/> event
         /// </summary>
         /// <param name="args"></param>
-        protected void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
+        public void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
         {
-            NetworkConnected?.Invoke(this, args);
+            foreach (var d in _connected.GetInvocationList())
+            {
+                Resolver.Log.Info($"target: {d.Method.Name}");
+            }
+
+            _connected?.Invoke(this, args);
         }
 
         /// <summary>

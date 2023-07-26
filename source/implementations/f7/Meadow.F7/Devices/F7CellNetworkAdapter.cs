@@ -33,5 +33,19 @@ public class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
     /// <summary>
     /// Returns <b>true</b> if the adapter is connected, otherwise <b>false</b>
     /// </summary>
-    public override bool IsConnected => Core.Interop.Nuttx.meadow_cell_is_connected();
+    public override bool IsConnected
+    {
+        get
+        {
+            try
+            {
+                return Core.Interop.Nuttx.meadow_cell_is_connected();
+            }
+            catch (Exception e)
+            {
+                Resolver.Log.Error($"Failed to read meadow_cell_is_connected(): {e.Message}");
+                return false;
+            }
+        }
+    }
 }

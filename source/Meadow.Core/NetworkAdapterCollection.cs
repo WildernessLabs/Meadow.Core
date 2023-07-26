@@ -10,17 +10,14 @@ namespace Meadow
     /// </summary>
     public class NetworkAdapterCollection : INetworkAdapterCollection
     {
-        /// <summary>
-        /// Event raised when a network is connected on any adapter
-        /// </summary>
+        /// <inheritdoc/>
         public event NetworkConnectionHandler NetworkConnected = delegate { };
-        /// <summary>
-        /// Event raised when a network is disconnected on any adapter
-        /// </summary>
+        /// <inheritdoc/>
         public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
 
         private List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
 
+        /// <inheritdoc/>
         public int Count => _adapters.Count;
 
         /// <summary>

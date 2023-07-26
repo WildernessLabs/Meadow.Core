@@ -75,7 +75,7 @@ public partial class F7PlatformOS
     /// <summary>
     /// Which network is selected in meadow.config.yaml.
     /// </summary>
-    public NetworkConnectionType SelectedNetwork => (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
+    public NetworkConnectionType SelectedNetwork => NetworkConnectionType.Cell; // (NetworkConnectionType)GetByte(ConfigurationValues.SelectedNetwork);
 
     /// <summary>
     /// Should SD storage be enabled on this device?
