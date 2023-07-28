@@ -2,6 +2,8 @@
 using Meadow.Hardware;
 using System;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Meadow.Devices;
 
@@ -9,9 +11,40 @@ namespace Meadow.Devices;
 /// <summary>
 /// This file holds the Cell specific methods, properties etc for the ICellNetwork interface.
 /// </summary>
-internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
+unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
     private Esp32Coprocessor _esp32;
+
+    public string GetPPPDOutputs
+    {
+        get
+        {
+            // allocate a 1k buffer.  It will automatically initialize to zeros
+            var buffer = Marshal.AllocHGlobal(1024);
+
+            try
+            {
+                var len = Core.Interop.Nuttx.meadow_get_cell_pppd_output(buffer);
+
+                if (len > 0)
+                {
+                    var data = Encoding.UTF8.GetString((byte*)buffer.ToPointer(), len);
+
+                    return data;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            finally
+            {
+                // free resources. this will always run
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
+    }
+  
 
     public F7CellNetworkAdapter(Esp32Coprocessor esp32)
         : base(System.Net.NetworkInformation.NetworkInterfaceType.Ppp)
