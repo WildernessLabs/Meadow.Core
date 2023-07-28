@@ -1,8 +1,7 @@
 [![NuGet Badge](https://buildstats.info/nuget/Meadow)](https://www.nuget.org/packages/Meadow)
-[![Stable](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg?branch=develop)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
-[![License: MIT](https://img.shields.io/badge/License-Apache-green.svg)](license.txt)
+[![Stable](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml/badge.svg)](https://github.com/WildernessLabs/Meadow.Core/actions/workflows/ci-build.yml)
 
-<img src="design/banner.jpg" style="margin-bottom:10px" />
+<img src="design/meadow.core.jpg" alt="iot, dotnet, meadow, meadow-core" style="margin-bottom:10px" />
 
 # Meadow.Core
 
@@ -16,7 +15,8 @@ If this repo is cloned, it will only build if the following repositories are clo
 1. [Meadow.Units](https://github.com/WildernessLabs/Meadow.Units)  contains a strong unitization into the entire stack of Meadow.
 2. [Meadow.Logging](https://github.com/WildernessLabs/Meadow.Logging) a lightweight logging library for embedded hardware.
 3. [Meadow.Contracts](https://github.com/WildernessLabs/Meadow.Contracts) contains the interfaces used by the entire Meadow stack.
-4. [MQTTnet](https://github.com/WildernessLabs/MQTTnet) is a high performance .NET library for MQTT based communication.
+4. [Meadow.Modbus](https://github.com/WildernessLabs/Meadow.Modbus) is a .NET assembly that provides Modbus RTU and TCP as well as Modbus TCP server capabilities.
+5. [MQTTnet](https://github.com/WildernessLabs/MQTTnet) is a high performance .NET library for MQTT based communication.
 
 ### Samples
 
@@ -24,6 +24,7 @@ Additionally, you might want to check out our repos with tons of samples with di
 1. [Meadow.Core.Samples](https://github.com/WildernessLabs/Meadow.Core.Samples) has all our sample projects that cover every feature Meadow has to offer with no extra peripherals required. 
 1. [Meadow.Project.Samples](https://github.com/WildernessLabs/Meadow.Project.Samples) has en extensive collection of Meadow Projects using [Meadow.Foundation](https://github.com/WildernessLabs/Meadow.Foundation), our peripheral driver and hardware control libraries to make .NET IoT development plug-and-play.
 1. [Meadow.ProjectLab.Samples](https://github.com/WildernessLabs/Meadow.ProjectLab.Samples) contains project samples for the breadboardless rapid prototyping board [Project Lab](https://github.com/WildernessLabs/Meadow.ProjectLab).
+1. [Meadow.Desktop.Samples](https://github.com/WildernessLabs/Meadow.Desktop.Samples) contains project samples for [Meadow.Windows](http://developer.wildernesslabs.co/Meadow/Getting_Started/Getting_Started_Meadow.Desktop/Getting_Started_Windows/) and [Meadow.Linux](http://developer.wildernesslabs.co/Meadow/Getting_Started/Getting_Started_Meadow.Desktop/Getting_Started_Linux/).
 
 ## Unified GPIO Architecture
 
