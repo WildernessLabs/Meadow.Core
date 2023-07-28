@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Meadow.Devices;
 
@@ -14,37 +15,56 @@ namespace Meadow.Devices;
 unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
     private Esp32Coprocessor _esp32;
+    private string _imei;
+    private string _csq;
+    private string _pppdOutput;
 
-    public string GetPPPDOutputs
+    private static string ExtractValue(string input, string pattern)
     {
-        get
+        Match match = Regex.Match(input, pattern);
+        if (match.Success)
         {
-            // allocate a 1k buffer.  It will automatically initialize to zeros
-            var buffer = Marshal.AllocHGlobal(1024);
+            return match.Groups[1].Value;
+        }
+        return null;
+    }
 
-            try
+    /// <summary>
+    /// Reset cell temporary data that depends on the connection.
+    /// </summary>
+    private void ResetCellTempData()
+    {
+        _pppdOutput = null;
+        _csq = null;
+        // Since the IMEI doesn't depend on the connection, it'll not be reseted.
+    }
+
+    /// <summary>
+    /// Get the cell module AT commands output <b>PppdOutput</b> at the connection time, and then cache it.
+    /// </summary>
+    private void UpdatePppdOutput ()
+    {
+        IntPtr buffer = IntPtr.Zero;
+        buffer = Marshal.AllocHGlobal(1024);
+        
+        try
+        {
+            var len = Core.Interop.Nuttx.meadow_get_cell_pppd_output(buffer);
+
+            if (len > 0)
             {
-                var len = Core.Interop.Nuttx.meadow_get_cell_pppd_output(buffer);
-
-                if (len > 0)
-                {
-                    var data = Encoding.UTF8.GetString((byte*)buffer.ToPointer(), len);
-
-                    return data;
-                }
-                else
-                {
-                    return null;
-                }
+                _pppdOutput = Encoding.UTF8.GetString((byte*)buffer.ToPointer(), len);
             }
-            finally
+            else
             {
-                // free resources. this will always run
-                Marshal.FreeHGlobal(buffer);
+                Resolver.Log.Error("Fail to get the PPPD output!");
             }
         }
+        finally
+        {
+            Marshal.FreeHGlobal(buffer);
+        }
     }
-  
 
     public F7CellNetworkAdapter(Esp32Coprocessor esp32)
         : base(System.Net.NetworkInformation.NetworkInterfaceType.Ppp)
@@ -66,24 +86,26 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         Resolver.Log.Trace($"Cell InvokeEvent {eventId} returned {statusCode}");
 
-        // TODO: look for errors first?
-
-        // TODO: Convert WriteLine logs to the appropriated form
         switch (eventId)
         {
             case CellFunction.NetworkConnectedEvent:
+                Resolver.Log.Trace("Cell connected event triggered!");
+
                 // Sample IPAddress values for the object creation
                 var ipAddress = IPAddress.Parse("192.168.1.100");
                 var subnet = IPAddress.Parse("255.255.255.0");
                 var gateway = IPAddress.Parse("192.168.1.1");
 
-                // Create an object using the CellNetworkConnectionEventArgs constructor
                 var args = new CellNetworkConnectionEventArgs(ipAddress, subnet, gateway);
+
+                UpdatePppdOutput();
 
                 RaiseNetworkConnected(args);
                 break;
             case CellFunction.NetworkDisconnectedEvent:
-                Console.WriteLine("Cell disconnected event triggered!");
+                Resolver.Log.Trace("Cell disconnected event triggered!");
+
+                ResetCellTempData();
 
                 RaiseNetworkDisconnected();
                 break;
@@ -109,6 +131,65 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 Resolver.Log.Error($"Failed to read meadow_cell_is_connected(): {e.Message}");
                 return false;
             }
+        }
+    }
+
+    /// <summary>
+    /// Returns the cell module <b>IMEI</b> if the device has already been connected at least once, otherwise <b>null</b>
+    /// </summary>
+    public string Imei 
+    {
+        get 
+        { 
+            if (_imei == null)
+            {
+                string imeiPattern = @"\+GSN\r\r\n(\d+)";
+                
+                string imei = ExtractValue(_pppdOutput, imeiPattern);
+                if (imei != null)
+                    _imei = imei;
+                else
+                    Resolver.Log.Error("IMEI not found! Please ensure that you have established a cellular connection first!");
+            }
+
+            return _imei;
+        }
+    }
+
+    /// <summary>
+    /// Returns the cell signal quality <b>CSQ</b> at the connection time, if the device is connected, otherwise <b>null</b>
+    /// </summary>
+    public string Csq 
+    {
+        get 
+        { 
+            if (_csq == null)
+            {
+                string csqPattern = @"\+CSQ:\s+(\d+),\d+";
+                string csq = ExtractValue(_pppdOutput, csqPattern);
+                if (csq != null)
+                    _csq = csq;
+                else
+                    Resolver.Log.Error("CSQ not found! Please ensure that you have established a cellular connection first!");
+            }
+
+            return _csq;
+        }
+    }
+
+    /// <summary>
+    /// Returns the cell module AT commands output <b>PppdOutput</b> if the device has already been connected at least once, otherwise <b>null</b>
+    /// </summary>
+    public string PppdOutput
+    {
+        get
+        {
+            if (_pppdOutput == null)
+            {
+                Resolver.Log.Error("PPPD output not found! Please ensure that you have established a cellular connection first!");
+            } 
+            
+            return _pppdOutput;
         }
     }
 }
