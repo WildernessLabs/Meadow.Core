@@ -1,12 +1,12 @@
-name: Stable Build
+name: Develop Build
 
 on:
   workflow_dispatch:
   repository_dispatch:
   push:
-    branches: [ main, develop ]
+    branches: [ develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ develop ]
 
 jobs:
   build:
