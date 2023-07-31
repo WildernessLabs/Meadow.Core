@@ -5,9 +5,9 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using System.Collections.Generic;
 namespace Meadow.Devices;
-
+using Meadow.Networking;
 
 /// <summary>
 /// This file holds the Cell specific methods, properties etc for the ICellNetwork interface.
@@ -18,6 +18,7 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string _imei;
     private string _csq;
     private string _pppdOutput;
+    private List<CellNetwork> cellScan;
 
     private static string ExtractValue(string input, string pattern)
     {
@@ -192,4 +193,17 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             return _pppdOutput;
         }
     }
+    
+    /// <inheritdoc/>
+    public List <CellNetwork> Scan()
+    {
+        cellScan = Core.Interop.Nuttx.MeadowCellScannerNetwork();
+        
+        if( cellScan == null)
+        {
+            Resolver.Log.Error("Cell Scan - not found Operator");
+        }
+        return cellScan;
+    }
+
 }
