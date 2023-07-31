@@ -199,9 +199,9 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         cellScan = Core.Interop.Nuttx.MeadowCellScannerNetwork();
         
-        if( cellScan == null)
+        if (cellScan == null)
         {
-            Resolver.Log.Error("Cell Scan - not found Operator");
+            Resolver.Log.Error("Operator not found");
         }
         return cellScan;
     }
