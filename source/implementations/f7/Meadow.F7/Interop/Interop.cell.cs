@@ -9,8 +9,8 @@ namespace Meadow.Core;
 
 internal static partial class Interop
 {
-    internal enum CellNetworkMode {GSM =0,CAT_M1_BG77= 7,CAT_M1= 8,NB_IoT= 9};
-    internal enum CellNetworkStatus {Unknown=0,Available=1,Current=2,Forbidden=3};
+    internal enum CellNetworkMode {GSM=0, CAT_M1_BG77=7, CAT_M1=8, NB_IoT=9};
+    internal enum CellNetworkStatus {Unknown=0, Available=1, Current=2, Forbidden=3};
     public static partial class Nuttx
     {
         [DllImport(LIBRARY_NAME, SetLastError = true)]
@@ -33,7 +33,7 @@ internal static partial class Interop
                         case CellNetworkMode.CAT_M1:
                             return "Cat-M1";
                         case CellNetworkMode.NB_IoT:
-                           return  "NB-IoT";
+                            return "NB-IoT";
                         default:
                             return "Unknown";
                     }
@@ -51,7 +51,7 @@ internal static partial class Interop
                         case CellNetworkStatus.Current:
                             return "Current Operator";
                         case CellNetworkStatus.Forbidden:
-                           return  "Operator Forbidden";
+                            return "Operator Forbidden";
                         default:
                             return "Operator Undefined";
                     }
