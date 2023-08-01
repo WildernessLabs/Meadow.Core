@@ -411,24 +411,9 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Trace($"Copying update to {fileStream.Name}");
 
-                        var bufferSize = 4096;
-                        var totalBytesRead = 0L;
-                        var buffer = new byte[bufferSize];
-                        var bytesRead = 0;
-
-                        do
-                        {
-                            bytesRead = await stream.ReadAsync(buffer, 0, bufferSize);
-                            await fileStream.WriteAsync(buffer, 0, bytesRead);
-                            totalBytesRead += bytesRead;
-
-                            var progressPercentage = (double)totalBytesRead / stream.Length;
-                            Console.WriteLine("Downloading progress:" + progressPercentage);
-
-                        } while (bytesRead > 0);
+                        await stream.CopyToAsync(fileStream, 4096);
                     }
                 }
-
             }
 
             sw.Stop();
