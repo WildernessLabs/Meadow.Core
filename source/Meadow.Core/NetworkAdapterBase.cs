@@ -64,8 +64,6 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <param name="expectedType">The network type that is expected for this adapter</param>
     protected internal NetworkAdapterBase(NetworkInterfaceType expectedType)
     {
-        Resolver.Log.Info($"+ NetworkAdapterBase(NetworkInterfaceType)");
-
         InterfaceType = expectedType;
 
         Refresh();
@@ -77,8 +75,6 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <param name="nativeInterface">The native interface associated with this adapter</param>
     protected internal NetworkAdapterBase(NetworkInterface nativeInterface)
     {
-        Resolver.Log.Info($"+ NetworkAdapterBase(NetworkInterface)");
-
         InterfaceType = nativeInterface.NetworkInterfaceType;
         this.nativeInterface = nativeInterface;
     }
@@ -89,13 +85,6 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <param name="args"></param>
     public void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
     {
-        Resolver.Log.Info($"+ RaiseNetworkConnected<T>");
-
-        foreach (var d in _connected.GetInvocationList())
-        {
-            Resolver.Log.Info($"target: {d.Method.Name}");
-        }
-
         _connected?.Invoke(this, args);
     }
 

@@ -233,11 +233,6 @@ public partial class Esp32Coprocessor : ICoprocessor
         return (result);
     }
 
-    public void SimulateMessage(CellFunction eventId)
-    {
-        CellMessageReceived?.Invoke(this, (eventId, 0, EmptyPayload));
-    }
-
     /// <summary>
     /// Interrupt service handler for the ESP32 coprocessor.
     /// </summary>`
