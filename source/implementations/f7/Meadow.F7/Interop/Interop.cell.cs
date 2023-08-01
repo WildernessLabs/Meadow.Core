@@ -17,7 +17,7 @@ internal static partial class Interop
         public static extern bool meadow_cell_is_connected();
 
         [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern int meadow_get_cell_pppd_output(IntPtr buf);  
+        public static extern int meadow_get_cell_at_cmds_output(IntPtr buf);  
 
         [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern int meadow_cell_scanner(IntPtr buf);
@@ -37,7 +37,6 @@ internal static partial class Interop
                         default:
                             return "Unknown";
                     }
-
         }
         
         private static string GetStatusNetwork(CellNetworkStatus cellMode)
@@ -55,7 +54,6 @@ internal static partial class Interop
                         default:
                             return "Operator Undefined";
                     }
-
         }
         
         private static List<CellNetwork> Parse (string input)
@@ -64,6 +62,7 @@ internal static partial class Interop
             {
                 return null;
             }
+
             string pattern = @"\((\d+),""([^""]+)"",""([^""]+)"",""([^""]+)""(?:,(\d+))?\)";
             List<CellNetwork> cellNetworks = new List<CellNetwork>();
             MatchCollection matches = Regex.Matches(input, pattern);
@@ -87,7 +86,7 @@ internal static partial class Interop
                     mode = "GSM";
                 }
 
-                if(Enum.IsDefined(typeof(CellNetworkStatus), status))
+                if (Enum.IsDefined(typeof(CellNetworkStatus), status))
                 {
                     statusNetwork = GetStatusNetwork((CellNetworkStatus)status);
                 }
@@ -96,19 +95,20 @@ internal static partial class Interop
                     statusNetwork = "Operator Undefined";
                 }
                 
-                cellNetworks.Add(new CellNetwork {
-                                                    Status   = statusNetwork, 
-                                                    Name     = operatorName,
-                                                    Operator = operatorAlias,
-                                                    Code     = operatorCode,
-                                                    Mode     = mode,
-                                                 });
-
+                cellNetworks.Add(new CellNetwork
+                {
+                    Status   = statusNetwork, 
+                    Name     = operatorName,
+                    Operator = operatorAlias,
+                    Code     = operatorCode,
+                    Mode     = mode,
+                });
             } 
+
             return cellNetworks;
         }
 
-        public static unsafe List <CellNetwork> MeadowCellScannerNetwork()
+        public static unsafe List <CellNetwork> MeadowCellNetworkScanner()
         {
             var buffer = Marshal.AllocHGlobal(1024);
 
@@ -128,7 +128,6 @@ internal static partial class Interop
             }
             finally
             {
-                // free resources. this will always run
                 Marshal.FreeHGlobal(buffer);
             }
         }
