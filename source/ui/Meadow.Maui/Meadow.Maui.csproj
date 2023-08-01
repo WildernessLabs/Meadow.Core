@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 		<None Include="..\..\icon.png" Pack="true" PackagePath="" />
-		<ProjectReference Include="..\..\implementations\windows\Meadow.Windows\Meadow.Windows.csproj" />
+    <PackageReference Include="Meadow.Windows" Version="*" />
 	</ItemGroup>
 
 </Project>
