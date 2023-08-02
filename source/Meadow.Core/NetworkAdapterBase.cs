@@ -19,12 +19,10 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     {
         add
         {
-            Resolver.Log.Info($"subscribe to NetworkConnected on {this.GetType().Name}");
             _connected += value;
         }
         remove
         {
-            Resolver.Log.Info($"unsubscribe to NetworkConnected on {this.GetType().Name}");
             _connected -= value;
         }
     }

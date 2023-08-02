@@ -200,11 +200,6 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     public List <CellNetwork> Scan()
     {
         scannedCellNetworks = Core.Interop.Nuttx.MeadowCellNetworkScanner();
-        
-        if (scannedCellNetworks == null)
-        {
-            Resolver.Log.Error("No available networks found, please ensure that your device is in scanning mode.");
-        }
 
         return scannedCellNetworks;
     }

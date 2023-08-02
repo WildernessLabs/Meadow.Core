@@ -123,7 +123,7 @@ internal static partial class Interop
                 }
                 else
                 {
-                    return null;
+                    throw new System.IO.IOException("No available networks found, please ensure that your device is in scanning mode.");
                 }
             }
             finally
