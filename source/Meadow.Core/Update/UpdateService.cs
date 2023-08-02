@@ -16,6 +16,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,27 +37,19 @@ public class UpdateService : IUpdateService
 
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
-    private const string DefaultUpdateLoginApiEndpoint = "/api/devices/login/";
-    private const string MqttOrganizationProperty = "orgId";
 
     private string UpdateDirectory { get; }
     private string UpdateStoreDirectory { get; }
 
-    /// <summary>
-    /// Event raised when an update is available on the defined Update server
-    /// </summary>
+    /// <inheritdoc/>
+    public event EventHandler<UpdateState> OnStateChanged = delegate { };
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateAvailable = delegate { };
-    /// <summary>
-    /// Event raised after an update package has been retrieved from the defined Update server
-    /// </summary>
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateRetrieved = delegate { };
-    /// <summary>
-    /// Event raised after an update package has been successfully applied
-    /// </summary>
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateSuccess = delegate { };
-    /// <summary>
-    /// Event raised if a failure occurs in an attempt to apply an update package
-    /// </summary>
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateFailure = delegate { };
 
     private UpdateState _state;
@@ -78,17 +71,13 @@ public class UpdateService : IUpdateService
         Config = config;
     }
 
-    /// <summary>
-    /// Stops the service
-    /// </summary>
+    /// <inheritdoc/>
     public void Shutdown()
     {
         _stopService = true;
     }
 
-    /// <summary>
-    /// Gets the current state of the service
-    /// </summary>
+    /// <inheritdoc/>
     public UpdateState State
     {
         get => _state;
@@ -97,6 +86,7 @@ public class UpdateService : IUpdateService
             if (value == State) return;
 
             _state = value;
+            OnStateChanged?.Invoke(this, State);
             Resolver.Log.Trace($"Updater State -> {State}");
         }
     }
@@ -142,7 +132,6 @@ public class UpdateService : IUpdateService
             var opts = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-
             };
 
             var info = JsonSerializer.Deserialize<UpdateMessage>(json, opts);
@@ -183,75 +172,14 @@ public class UpdateService : IUpdateService
 
     private async Task<bool> AuthenticateWithServer()
     {
-        using (var client = new HttpClient())
+        var meadowCloudService = Resolver.MeadowCloudService;
+
+        if (await meadowCloudService.Authenticate())
         {
-            client.Timeout = new TimeSpan(0, 15, 0);
-
-            var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var endpoint = $"{Config.AuthServer}:{Config.AuthPort}{DefaultUpdateLoginApiEndpoint}";
-            Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
-
-            var response = await client.PostAsync(endpoint, content);
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                Resolver.Log.Debug($"Update service authentication succeeded");
-                var opts = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                };
-
-                var payload = JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent, opts);
-
-                if (payload == null)
-                {
-                    Resolver.Log.Warn($"Unable to parse the authentication response from the Update Service");
-                    return false;
-                }
-
-                Resolver.Log.Debug($"Asking Device OS to decrypt keys...");
-                var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
-
-                byte[]? decryptedKey;
-                try
-                {
-                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
-                }
-                catch (OverflowException)
-                {
-                    // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
-                    // TODO: add platform and OS checking for this?
-                    Resolver.Log.Error($" RSA decrypt failure. This device likely needs to be reprovisioned.");
-                    return false;
-                }
-
-                // then need to call method to AES decrypt the EncryptedToken with IV
-                var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
-                var ivBytes = Convert.FromBase64String(payload.Iv);
-                var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
-
-                _jwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
-
-                // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                _jwt = Regex.Replace(_jwt, @"[^\w\.@-]", "");
-
-                return true;
-            }
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                // device is likely not provisioned?
-                Resolver.Log.Warn($"Update service returned 'Not Found': this device has likely not been provisioned");
-            }
-            else
-            {
-                Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
-            }
-            return false;
+            _jwt = meadowCloudService.CurrentJwt;
         }
+
+        return _jwt != null;
     }
 
     private async void UpdateStateMachine()
@@ -309,8 +237,7 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                                        .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
-                                        ;
+                            .WithTcpServer(Config.UpdateServer, Config.UpdatePort);
 
                         if (Config.UseAuthentication)
                         {
@@ -321,7 +248,7 @@ public class UpdateService : IUpdateService
                         ClientOptions = builder.Build();
                     }
 
-                    if (nic.IsConnected)
+                    if (nic != null && nic.IsConnected)
                     {
                         try
                         {
@@ -360,6 +287,17 @@ public class UpdateService : IUpdateService
                     State = UpdateState.Idle;
                     try
                     {
+                        JsonWebTokenPayload? jwtPayload = null;
+                        if (Config.UseAuthentication)
+                        {
+                            if (string.IsNullOrWhiteSpace(_jwt))
+                            {
+                                throw new InvalidOperationException("Update service authentication is enabled but no JWT is available");
+                            }
+
+                            jwtPayload = GetJsonWebTokenPayload(_jwt);
+                        }
+
                         // the config RootTopic can have multiple semicolon-delimited topics
                         var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
@@ -368,9 +306,14 @@ public class UpdateService : IUpdateService
                             string topicName = topic;
 
                             // look for macro-substitutions
+                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
+                            {
+                                topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
+                            }
+
                             if (topic.Contains("{ID}"))
                             {
-                                topicName = topic.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
+                                topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
                             }
 
                             Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
@@ -399,10 +342,7 @@ public class UpdateService : IUpdateService
         State = UpdateState.Dead;
     }
 
-    /// <summary>
-    /// Clears all locally stored update package information
-    /// </summary>
-    /// <exception cref="Exception"></exception>
+    /// <inheritdoc/>
     public void ClearUpdates()
     {
         switch (State)
@@ -417,11 +357,7 @@ public class UpdateService : IUpdateService
         Store.Clear();
     }
 
-    /// <summary>
-    /// Retrieves an update package from defined update server with the provided parameters
-    /// </summary>
-    /// <param name="updateInfo"></param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <inheritdoc/>
     public void RetrieveUpdate(UpdateInfo updateInfo)
     {
         State = UpdateState.DownloadingFile;
@@ -588,11 +524,53 @@ public class UpdateService : IUpdateService
         }
     }
 
-    /// <summary>
-    /// Applies an already-retrieved update package with the provided parameters
-    /// </summary>
-    /// <param name="updateInfo"></param>
-    /// <exception cref="ArgumentException"></exception>
+    // In order to not require the use of a library, this was taken from
+    // RFC7515, Appendix C: https://datatracker.ietf.org/doc/html/rfc7515#appendix-C
+    private string base64UrlDecode(string arg)
+    {
+        string s = arg;
+        s = s.Replace('-', '+'); // 62nd char of encoding
+        s = s.Replace('_', '/'); // 63rd char of encoding
+        switch (s.Length % 4) // Pad with trailing '='s
+        {
+            case 0: break; // No pad chars in this case
+            case 2: s += "=="; break; // Two pad chars
+            case 3: s += "="; break; // One pad char
+            default:
+                throw new ArgumentException("Argument is an invalid base64url string", nameof(arg));
+        }
+
+        var bytes = Convert.FromBase64String(s);
+        return Encoding.UTF8.GetString(bytes);
+    }
+
+    private JsonWebTokenPayload GetJsonWebTokenPayload(string jwt)
+    {
+        if (string.IsNullOrWhiteSpace(jwt))
+        {
+            throw new ArgumentException($"'{nameof(jwt)}' cannot be null or whitespace.", nameof(jwt));
+        }
+
+        var tokenParts = jwt.Split('.');
+        if (tokenParts.Length < 2)
+        {
+            throw new ArgumentException("Argument is an invalid JsonWebToken format.", nameof(jwt));
+        }
+
+        var payloadJson = base64UrlDecode(tokenParts[1]);
+        var payload = JsonSerializer.Deserialize<JsonWebTokenPayload>(payloadJson)
+            ?? throw new JsonException("Payload could not be deserialized from JWT argument.");
+
+        return payload;
+    }
+
+    private class JsonWebTokenPayload
+    {
+        [JsonPropertyName("oid")]
+        public string? OrganizationId { get; set; }
+    }
+
+    /// <inheritdoc/>
     public void ApplyUpdate(UpdateInfo updateInfo)
     {
         State = UpdateState.UpdateInProgress;

@@ -1,11 +1,13 @@
 ﻿using Meadow.Logging;
 using Meadow.Update;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Meadow.Cloud;
 
 namespace Meadow;
 
@@ -23,6 +25,7 @@ public static partial class MeadowOS
     private static IApp App { get; set; }
     private static ILifecycleSettings LifecycleSettings { get; set; }
     private static IUpdateSettings UpdateSettings { get; set; }
+    private static IMeadowCloudSettings MeadowCloudSettings { get; set; }
     public static CancellationTokenSource AppAbort = new();
     public static int StartupTick { get; set; }
 
@@ -172,18 +175,23 @@ public static partial class MeadowOS
         }
     }
 
-    private static void LoadSettings()
+    private static Dictionary<string, string> LoadSettings()
     {
         IAppSettings settings;
 
         if (File.Exists("/meadow0/app.config.yaml"))
         {
-            var parser = new AppSettingsParser();
+            Console.WriteLine($"Parsing app.config.yaml...");
+
+            // testing shows this takes ~375ms (7/20/23)
             var yml = File.ReadAllText("/meadow0/app.config.yaml");
-            settings = parser.Parse(yml);
+
+            // testing shows this takes ~1100ms (7/20/23)
+            settings = AppSettingsParser.Parse(yml);
         }
         else
         {
+            Console.WriteLine($"Using default app.config.yaml...");
             settings = new MeadowAppSettings(); // defaults
         }
 
@@ -194,6 +202,9 @@ public static partial class MeadowOS
 
         LifecycleSettings = settings.LifecycleSettings;
         UpdateSettings = settings.UpdateSettings;
+        MeadowCloudSettings = settings.MeadowCloudSettings;
+
+        return settings.Settings;
     }
 
     private static Type FindAppType()
@@ -268,12 +279,12 @@ public static partial class MeadowOS
             Resolver.Services.Add(new Logger());
             Resolver.Log.AddProvider(new ConsoleLogProvider());
 
-            Resolver.Log.Trace($"Initializing OS... ");
+            Console.WriteLine($"Initializing OS... ");
         }
         catch (Exception ex)
         {
             // must use Console because the logger failed
-            Resolver.Log.Error($"Failed to create Logger: {ex.Message}");
+            Console.WriteLine($"Failed to create Logger: {ex.Message}");
             return false;
         }
 
@@ -282,9 +293,7 @@ public static partial class MeadowOS
             //capture unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
-            var now = Environment.TickCount;
-            LoadSettings();
-            Resolver.Log.Trace($"LoadSettings took {Environment.TickCount - now}");
+            var settings = LoadSettings();
 
             // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
             var b4 = Environment.TickCount;
@@ -368,11 +377,21 @@ public static partial class MeadowOS
                     pi.SetValue(app, AppAbort.Token);
                 }
             }
+            if (appType.GetProperty(nameof(IApp.Settings)) is PropertyInfo spi)
+            {
+                if (spi.CanWrite)
+                {
+                    spi.SetValue(app, settings);
+                }
+            }
 
             App = app;
 
             var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
             Resolver.Services.Add<IUpdateService>(updateService);
+
+            var meadowCloudService = new MeadowCloudService(MeadowCloudSettings);
+            Resolver.Services.Add<IMeadowCloudService>(meadowCloudService);
 
             Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
             if (UpdateSettings.Enabled)

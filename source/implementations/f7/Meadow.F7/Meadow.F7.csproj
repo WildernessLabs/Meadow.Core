@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>Meadow.F7</AssemblyName>   
     <Company>Wilderness Labs, Inc</Company>
-    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+    <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
     <PackageId>Meadow.F7</PackageId>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>

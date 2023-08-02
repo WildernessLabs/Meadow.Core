@@ -1,4 +1,5 @@
 ﻿using Meadow;
+using Meadow.Logging;
 using System.IO;
 using Xunit;
 
@@ -11,8 +12,20 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
+
+            Assert.True(s.UpdateSettings.Enabled);
+            Assert.Equal("mqtt.meadowcloud.co", s.UpdateSettings.UpdateServer);
+        }
+
+        [Fact]
+        public void Parse4SpaceFile()
+        {
+            var yml = File.ReadAllText("app.config.4.yaml");
+
+            var s = AppSettingsParser.Parse(yml);
+
+            Assert.Equal(LogLevel.Debug, s.LoggingSettings.LogLevel.Default);
         }
 
         [Fact]
@@ -20,8 +33,7 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.nospaces.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
         }
 
         [Fact]
@@ -29,8 +41,7 @@ namespace Core.Unit.Tests
         {
             var yml = File.ReadAllText("app.config.comments.yaml");
 
-            var parser = new AppSettingsParser();
-            var s = parser.Parse(yml);
+            var s = AppSettingsParser.Parse(yml);
         }
     }
 }
