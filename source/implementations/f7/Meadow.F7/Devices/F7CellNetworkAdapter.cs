@@ -5,20 +5,18 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 namespace Meadow.Devices;
 using Meadow.Networking;
 
 /// <summary>
 /// This file holds the Cell specific methods, properties etc for the ICellNetwork interface.
 /// </summary>
-unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
+internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
-    private Esp32Coprocessor _esp32;
+    private readonly Esp32Coprocessor _esp32;
     private string _imei;
     private string _csq;
     private string _at_cmds_output;
-    private List<CellNetwork> scannedCellNetworks;
 
     private static string ExtractValue(string input, string pattern)
     {
@@ -44,11 +42,10 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <summary>
     /// Get the cell module AT commands output <b>AtCmdsOutput</b> at the connection time, and then cache it.
     /// </summary>
-    private void UpdateAtCmdsOutput ()
+    private void UpdateAtCmdsOutput()
     {
-        IntPtr buffer = IntPtr.Zero;
-        buffer = Marshal.AllocHGlobal(1024);
-        
+        var buffer = Marshal.AllocHGlobal(1024);
+
         try
         {
             var len = Core.Interop.Nuttx.meadow_get_cell_at_cmds_output(buffer);
@@ -136,43 +133,51 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <summary>
     /// Returns the cell module <b>IMEI</b> if the device has already been connected at least once, otherwise <b>null</b>
     /// </summary>
-    public string Imei 
+    public string Imei
     {
-        get 
-        { 
+        get
+        {
             if (_imei == null)
             {
                 string imeiPattern = @"\+GSN\r\r\n(\d+)";
-                
+
                 string imei = ExtractValue(_at_cmds_output, imeiPattern);
                 if (imei != null)
+                {
                     _imei = imei;
+                }
                 else
+                {
                     Resolver.Log.Error("IMEI not found! Please ensure that you have established a cellular connection at least once!");
+                }
             }
 
-            return _imei;
+            return _imei ?? string.Empty;
         }
     }
 
     /// <summary>
     /// Returns the cell signal quality <b>CSQ</b> at the connection time, if the device is connected, otherwise <b>null</b>
     /// </summary>
-    public string Csq 
+    public string Csq
     {
-        get 
-        { 
+        get
+        {
             if (!IsConnected || _csq == null)
             {
                 string csqPattern = @"\+CSQ:\s+(\d+),\d+";
                 string csq = ExtractValue(_at_cmds_output, csqPattern);
                 if (csq != null)
+                {
                     _csq = csq;
+                }
                 else
+                {
                     Resolver.Log.Error("CSQ not found! Please ensure that you have established a cellular connection first!");
+                }
             }
 
-            return _csq;
+            return _csq ?? string.Empty;
         }
     }
 
@@ -184,24 +189,22 @@ unsafe internal class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         get
         {
             UpdateAtCmdsOutput();
-            
+
             if (_at_cmds_output == null)
             {
                 Resolver.Log.Error("AT commands output not found! Please ensure that you tried to established a cellular connection first!");
-            } 
-            
-            return _at_cmds_output;
+            }
+
+            return _at_cmds_output ?? string.Empty;
         }
     }
-    
+
     /// <summary>
     /// Returns the list of cell networks found, including its operator code, if the device is in scanning mode, otherwise <b>null</b>
     /// </summary>
-    public List <CellNetwork> Scan()
+    public CellNetwork[] Scan()
     {
-        scannedCellNetworks = Core.Interop.Nuttx.MeadowCellNetworkScanner();
-
-        return scannedCellNetworks;
+        return Core.Interop.Nuttx.MeadowCellNetworkScanner();
     }
 
 }
