@@ -1,7 +1,6 @@
 using Meadow.Core;
 using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateways;
-using Meadow.Hardware;
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -25,11 +24,16 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// </summary>
     public const uint MAXIMUM_SPI_BUFFER_LENGTH = 4000;
 
+    private static readonly byte[] EmptyPayload = new byte[0];
+
+    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = delegate { };
+    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = delegate { };
+
     /// <summary>
     /// Possible debug levels.
     /// </summary>
     [Flags]
-    private enum DebugOptions : UInt32 { None = 0x00, Information = 0x01, Errors = 0x02, EventHandling = 0x04, Full = 0xffffffff }
+    private enum DebugOptions : uint { None = 0x00, Information = 0x01, Errors = 0x02, EventHandling = 0x04, Full = 0xffffffff }
 
     /// <summary>
     /// Current debug level for this class.
@@ -62,16 +66,8 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// Default constructor of the Esp32Coprocessor class.
     /// </summary>
     internal Esp32Coprocessor()
-        : base(System.Net.NetworkInformation.NetworkInterfaceType.Wireless80211)
     {
-        _mac = System.Net.NetworkInformation.PhysicalAddress.None;
-        Bssid = System.Net.NetworkInformation.PhysicalAddress.None;
-        _apMac = System.Net.NetworkInformation.PhysicalAddress.None;
-
-        _isConnected = false;
-        ClearNetworkDetails();
         Status = ICoprocessor.CoprocessorState.NotReady;
-        _antenna = AntennaType.NotKnown;
 
         if (_eventHandlerThread == null)
         {
@@ -91,7 +87,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <param name="block">Is this a blocking command?</param>
     /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
     /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-    protected StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? encodedResult)
+    internal StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? encodedResult)
     {
         return (SendCommand(where, function, block, null, encodedResult));
     }
@@ -120,7 +116,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <param name="encodedRequest">Payload for the command to be executed by the ESP32.</param>
     /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
     /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-    protected StatusCodes SendCommand(byte destination, UInt32 function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
+    internal StatusCodes SendCommand(byte destination, UInt32 function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
     {
         var payloadGcHandle = default(GCHandle);
         var resultGcHandle = default(GCHandle);
@@ -278,10 +274,15 @@ public partial class Esp32Coprocessor : ICoprocessor
                                 // Implement
                                 break;
                             case Esp32Interfaces.WiFi:
-                                InvokeEvent((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
+                                WiFiMessageReceived?.Invoke(this, ((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
+                                //InvokeEvent((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
                                 break;
                             case Esp32Interfaces.BlueTooth:
-                                InvokeEvent((BluetoothFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
+                                InvokeEvent((BluetoothFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload);
+                                break;
+                            case Esp32Interfaces.Cell:
+                                CellMessageReceived?.Invoke(this, ((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
+                                //InvokeEvent((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload);
                                 break;
                             default:
                                 throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
@@ -305,7 +306,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// </summary>
     public void Reset()
     {
-        SendCommand((byte)Esp32Interfaces.Transport, (UInt32)TransportFunction.ResetEsp32, false, new byte[0]);
+        SendCommand((byte)Esp32Interfaces.Transport, (UInt32)TransportFunction.ResetEsp32, false, EmptyPayload);
     }
 
     /// <summary>
