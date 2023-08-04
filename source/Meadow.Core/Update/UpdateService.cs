@@ -409,9 +409,17 @@ public class UpdateService : IUpdateService
                 {
                     using (var fileStream = Store.GetUpdateFileStream(message.ID))
                     {
-                        Resolver.Log.Trace($"Copying update to {fileStream.Name}");
+                        long totalBytesRead = 0;
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
 
-                        await stream.CopyToAsync(fileStream, 4096);
+                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+
+                            Resolver.Log.Trace($"Download progress: {totalBytesRead}");
+                        }
                     }
                 }
             }
