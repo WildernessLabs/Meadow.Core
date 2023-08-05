@@ -15,26 +15,21 @@ internal static class AppSettingsParser
         var settings = new MeadowAppSettings();
 
         var index = 0;
-        var spacing = 2;
         var parent = string.Empty;
         var parents = new List<string>();
         var lastLevel = 0;
-
+        var lastIndent = 0;
         int endLine;
         string lastKey;
+
         do
         {
-            var level = 0;
+            var level = lastLevel;
 
             endLine = settingsFile.IndexOf('\n', index);
 
-            while (settingsFile[index] == ' ')
-            {
-                index += spacing;
-                level++;
-            }
-
             string line;
+            bool isCommentLine = false;
 
             if (endLine != -1)
             {
@@ -46,44 +41,77 @@ internal static class AppSettingsParser
                 line = settingsFile.Substring(index).TrimEnd();
             }
 
-            if (line != string.Empty && line[0] != '#')
+            if (line != string.Empty)
             {
-
-                if (level > lastLevel)
+                if (line.Length > 0)
                 {
-                    //parent = parent.Length == 0 ? lastKey : $"{parent}.{lastKey}";
-                    parent = string.Join('.', parents);
+                    // how far are we indented?
+                    var indent = 0;
+                    while (settingsFile[index] == ' ')
+                    {
+                        index++;
+                        indent++;
+                    }
+
+                    if (settingsFile[index] == '#')
+                    {
+                        isCommentLine = true;
+                    }
+                    else
+                    {
+                        if (indent == 0)
+                        {
+                            level = 0;
+                        }
+                        else if (indent > lastIndent)
+                        {
+                            level++;
+                        }
+                        else if (indent < lastIndent)
+                        {
+                            level--;
+                        }
+                        lastIndent = indent;
+                    }
                 }
-                else if (level < lastLevel)
-                {
-                    parents.RemoveRange(level, parents.Count - level);
-                    parent = string.Join('.', parents.Take(level));
-                }
-                lastLevel = level;
 
-                var kvp = line
-                    .Split(':', System.StringSplitOptions.RemoveEmptyEntries);
-
-                switch (kvp.Length)
+                if (!isCommentLine)
                 {
-                    case 0:
-                        break;
-                    case 1:
-                        lastKey = kvp[0].Trim();
-                        parents.Add(lastKey);
-                        break;
-                    case 2:
-                        var name = $"{parent}.{kvp[0]}";
-                        var value = kvp[1].Trim();
-                        ApplySetting(settings, name, value);
-                        break;
-                    default:
-                        // the value had a colon in it, so re-assemble
-                        var val = string.Join(':', kvp, 1, kvp.Length - 1);
-                        var n = $"{parent}.{kvp[0]}";
-                        var v = val.Trim();
-                        ApplySetting(settings, n, v);
-                        break;
+                    if (level > lastLevel)
+                    {
+                        parent = string.Join('.', parents);
+                    }
+                    else if (level < lastLevel)
+                    {
+                        parents.RemoveRange(level, parents.Count - level);
+                        parent = string.Join('.', parents.Take(level));
+                    }
+                    lastLevel = level;
+
+                    var kvp = line
+                        .Split(':', System.StringSplitOptions.RemoveEmptyEntries);
+
+                    switch (kvp.Length)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            lastKey = kvp[0].Trim();
+                            parents.Add(lastKey);
+                            break;
+                        case 2:
+                            var name = $"{parent}.{kvp[0].Trim()}";
+                            var value = kvp[1].Trim();
+                            ApplySetting(settings, name, value);
+                            break;
+                        default:
+                            // the value had a colon in it, so re-assemble
+                            var val = string.Join(':', kvp, 1, kvp.Length - 1);
+                            var n = $"{parent}.{kvp[0].Trim()}";
+                            var v = val.Trim();
+                            ApplySetting(settings, n, v);
+                            break;
+                    }
                 }
             }
 
@@ -119,7 +147,8 @@ internal static class AppSettingsParser
                 }
                 break;
 
-            case "Lifecycle.ResetOnAppFailure":
+            case "Lifecycle.RestartOnAppFailure":
+            case "Lifecycle.ResetOnAppFailure": // legacy
                 if (bool.TryParse(settingValue, out bool r))
                 {
                     settings.LifecycleSettings.RestartOnAppFailure = r;
@@ -172,6 +201,11 @@ internal static class AppSettingsParser
             default:
                 if (!settings.Settings.ContainsKey(settingName))
                 {
+
+                    settingValue = settingValue
+                        .Trim('"') // remove quotes at the beginning and end of the line
+                        .Replace("\\\"", "\""); // and un-escape any escaped internal quotes
+
                     settings.Settings.Add(settingName, settingValue);
                 }
                 break;
