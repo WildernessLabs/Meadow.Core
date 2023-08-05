@@ -1,0 +1,132 @@
+﻿Lifecycle:
+    RestartOnAppFailure: true
+    AppFailureRestartDelaySeconds: 20
+
+Logging:
+  LogLevel:
+    Default: Trace
+
+Update:
+    Enabled: false
+
+Envizor:
+    # === Envizor Device Settings
+    # Device name
+    DeviceName: EnvizorFC
+
+    # Device firmware version to display
+    DeviceVersion: 1.2.1
+
+    # Device config filename (stored in /root)
+    DeviceConfigFilename: "envizor.config.json"
+
+    # Database type (allowed values are: SQLite, InMemory, or JsonDB)
+    DatabaseType: "InMemory"
+
+    # Database file name (stored in /data)
+    DatabaseFilename: "envizor.db"
+
+    # Delete any existing database file on device boot up
+    DatabaseDeleteOnStartup: false
+
+    # Number of seconds to display splash screen
+    SplashScreenDisplaySeconds: 5
+
+    # Sleep time between command loop iterations
+    CommandLoopSleepMilliseconds: 1000
+    
+    # === Envizor Wifi Settings
+    # SSID Name and password
+    WifiSsid: "AllynTech-IoT"
+    WifiPassword: "allyntech5510"
+
+    # Number of seconds to wait for wifi to wake up
+    WifiWakeUpDelaySeconds: 15
+
+    # Number of seconds to wait before restarting wifi communications
+    WifiTimeoutSeconds: 60
+
+    # Number of times to retry wifi initialization before failing
+    WifiMaxRetryCount: 3
+
+    # === Envizor Cell Settings
+    # APN Name for the cellular network
+    CellApnName: "envizor.vzwentp"
+
+    # Number of seconds to wait for cell to wake up
+    CellWakeUpDelaySeconds: 15
+
+    # Number of seconds to wait before restarting cell communications
+    CellTimeoutSeconds: 60
+
+    # Amount of time to wait between failed communication sets
+    CellRetryDelaySeconds: 900
+
+    # Number of times to retry cell communication before failing
+    CellMaxRetryCount: 3
+
+    # === Envizor Server Settings
+    # IP Address or DNS name for the Envizor UDP server
+    EnvizorUdpServerDnsName: "cellara-gw.envizor.io"
+
+    # UDP Port number for communications
+    EnvizorUdpServerPort: 9091
+
+    # Server timeout for responses to device messages
+    EnvizorUdpTimeoutSeconds: 45
+    EnvizorUdpMaxRetryCount: 3
+
+    # Number of seconds before retrying a failed message sequence
+    ServerRetryDelaySeconds: 900
+
+    # Maximum number of retries per message sequence
+    ServerRetryMaxCount: 3
+
+    # === Envizor Sensor settings
+
+    # Maximum number of sensor readings to send in a Sensor Report
+    SensorReadingsMaxCount: 500
+
+    Calibrations:
+    
+        ION_PPM:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
+
+        ION_PPM_WR:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
+            
+        ION_PPB:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
+
+        ION_PPB_WR:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
+
+        ION_HS:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
+
+        ION_10EV:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
+
+        ION_11_7EV:
+            RangeHigh: 10
+            RangeLow: 0
+            CalibrationHigh: 10
+            CalibrationLow: 0
