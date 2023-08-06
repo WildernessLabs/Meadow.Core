@@ -393,6 +393,8 @@ public static partial class MeadowOS
             var meadowCloudService = new MeadowCloudService(MeadowCloudSettings);
             Resolver.Services.Add<IMeadowCloudService>(meadowCloudService);
 
+            Resolver.Services.Add<ICommandService>(updateService);
+
             Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
             if (UpdateSettings.Enabled)
             {

@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -7,6 +8,8 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -17,18 +20,18 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Meadow.Update")]
+[assembly: InternalsVisibleTo("Core.Unit.Tests")]
 
 namespace Meadow.Update;
 
 /// <summary>
 /// The default Meadow implementation of IUpdateService
 /// </summary>
-public class UpdateService : IUpdateService
+public class UpdateService : IUpdateService, ICommandService
 {
     /// <summary>
     /// Retry period the service will use to attempt network reconnection
@@ -126,6 +129,13 @@ public class UpdateService : IUpdateService
         MqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate((f) =>
         {
             Resolver.Log.Debug("MQTT message received");
+
+            if (f.ApplicationMessage.Topic.EndsWith($"/commands/{Resolver.Device.Information.UniqueID}", StringComparison.Ordinal))
+            {
+                Resolver.Log.Trace("Meadow command received");
+                ProcessPublishedCommand(f.ApplicationMessage);
+                return Task.CompletedTask;
+            }
 
             var json = Encoding.UTF8.GetString(f.ApplicationMessage.Payload);
 
@@ -237,7 +247,9 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                            .WithTcpServer(Config.UpdateServer, Config.UpdatePort);
+                            .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
+                            .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+                            .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
 
                         if (Config.UseAuthentication)
                         {
@@ -650,5 +662,98 @@ public class UpdateService : IUpdateService
         OnUpdateSuccess(this, updateInfo);
 
         State = UpdateState.Idle;
+    }
+
+    private readonly ConcurrentDictionary<string, (Type CommandType, Action<object> Action)> CommandSubscriptions = new();
+    private const string UntypedCommandTypeName = "<<<MEADOWCOMMAND>>>";
+
+    void ICommandService.Subscribe(Action<MeadowCommand> action)
+    {
+        CommandSubscriptions[UntypedCommandTypeName] = (CommandType: typeof(MeadowCommand), Action: x => action((MeadowCommand)x));
+        Resolver.Log.Trace($"Command service subscribed and listening and generic Meadow command. You may publish commands to Meadow.Cloud using any command name on your choosing.");
+    }
+
+    void ICommandService.Subscribe<T>(Action<T> action)
+    {
+        var commandTypeName = typeof(T).Name;
+        CommandSubscriptions[commandTypeName.ToUpperInvariant()] = (CommandType: typeof(T), Action: x => action((T)x));
+        Resolver.Log.Trace($"Command service subscribed to type '{commandTypeName}'. You may publish commands to Meadow.Cloud using '{commandTypeName}' as the command name (case insensitive).");
+    }
+
+    void ICommandService.Unsubscribe()
+    {
+        CommandSubscriptions.TryRemove(UntypedCommandTypeName, out _);
+        Resolver.Log.Trace($"Command service unsubscribed from the generic Meadow command listener.");
+    }
+
+    void ICommandService.Unsubscribe<T>()
+    {
+        var commandTypeName = typeof(T).Name;
+        CommandSubscriptions.TryRemove(commandTypeName.ToUpperInvariant(), out _);
+        Resolver.Log.Trace($"Command service unsubscribed from the '{commandTypeName}' Meadow command listener.");
+    }
+
+    internal void ProcessPublishedCommand(MqttApplicationMessage message)
+    {
+        if (message.UserProperties == null)
+        {
+            Resolver.Log.Error("Unable to process published command without a command name.");
+            return;
+        }
+
+        var properties = message.UserProperties.ToDictionary(x => x.Name.ToUpperInvariant(), x => x.Value);
+
+        if (!properties.TryGetValue("COMMANDNAME", out string commandName) ||
+            string.IsNullOrWhiteSpace(commandName))
+        {
+            Resolver.Log.Error("Unable to process published command without a command name.");
+            return;
+        }
+
+        var jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        // First attempt to run the untyped command subscription, Action<MeadowCommand>, if available.
+        if (CommandSubscriptions.TryGetValue(UntypedCommandTypeName, out (Type CommandType, Action<object> Action) value))
+        {
+            Resolver.Log.Trace($"Processing generic Meadow command with command name '{commandName}'...");
+
+            IReadOnlyDictionary<string, object>? arguments;
+            try
+            {
+                arguments = message.Payload != null
+                    ? JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(message.Payload, jsonSerializerOptions)
+                    : null;
+            }
+            catch (JsonException ex)
+            {
+                Resolver.Log.Error($"Unable to deserialize command arguments: {ex.Message}");
+                return;
+            }
+
+            var command = new MeadowCommand(commandName, arguments);
+            value.Action(command);
+        }
+
+        // Then attempt to run the typed command subscription, Action<T> where T : ICommand, new(),
+        // if available. Also prevent user from running the untyped command subscription.
+        if (CommandSubscriptions.TryGetValue(commandName.ToUpperInvariant(), out value))
+        {
+            Resolver.Log.Trace($"Processing Meadow command of type '{value.CommandType.Name}'...");
+
+            object command;
+            try
+            {
+                command = message.Payload != null
+                    ? JsonSerializer.Deserialize(message.Payload, value.CommandType, jsonSerializerOptions) ?? Activator.CreateInstance(value.CommandType)
+                    : Activator.CreateInstance(value.CommandType);
+            }
+            catch (JsonException ex)
+            {
+                Resolver.Log.Error($"Unable to deserialize command arguments: {ex.Message}");
+                return;
+            }
+
+            value.Action(command);
+        }
     }
 }
