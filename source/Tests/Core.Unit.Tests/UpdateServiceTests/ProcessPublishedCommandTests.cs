@@ -12,12 +12,12 @@ using Xunit;
 
 namespace Core.Unit.Tests.UpdateServiceTests
 {
-    public class CommandServiceTests : IDisposable
+    public class ProcessPublishedCommandTests : IDisposable
     {
         private readonly TestLogProvider _log = new();
         private readonly UpdateService _updateService = new("", null);
 
-        public CommandServiceTests()
+        public ProcessPublishedCommandTests()
         {
             Resolver.Services.GetOrCreate<Logger>();
             Resolver.Log.LogLevel = LogLevel.Trace;
@@ -378,46 +378,77 @@ namespace Core.Unit.Tests.UpdateServiceTests
             Assert.Contains(new LogMessage(LogLevel.Information, "Command action 2 was performed."), _log.LogMessages);
         }
 
-        public class TestCommand : IMeadowCommand
+        [Fact]
+        public void ProcessPublishedCommand_WithSubscribingToTypedSubscriptionTwiceInDifferentNamespaces_ShouldRunLastAction()
         {
-            public bool ArgProperty { get; set; }
-        }
+            // Arrange
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic("topic")
+                .WithUserProperty("commandName", "testCommand")
+                .Build();
 
-        public class TestCommandWithExtensionData : IMeadowCommand
+            ICommandService commandService = _updateService;
+            commandService.Subscribe<TestCommand>(cmd => Resolver.Log.Info($"Command action 1 was performed."));
+            commandService.Subscribe<AnotherNamespace.TestCommand>(cmd => Resolver.Log.Info($"Command action 2 was performed."));
+
+            // Act
+            _updateService.ProcessPublishedCommand(message);
+
+            // Assert
+            Assert.DoesNotContain(new LogMessage(LogLevel.Information, "Command action 1 was performed."), _log.LogMessages);
+            Assert.Contains(new LogMessage(LogLevel.Information, "Command action 2 was performed."), _log.LogMessages);
+        }        
+    }
+
+    public class TestCommand : IMeadowCommand
+    {
+        public bool ArgProperty { get; set; }
+    }
+
+    public class TestCommandWithExtensionData : IMeadowCommand
+    {
+        public bool ArgProperty { get; set; }
+
+        [JsonExtensionData]
+        public IDictionary<string, object> AdditionalData { get; set; }
+    }
+
+    public class TestLogProvider : ILogProvider
+    {
+        private bool _isEnabled = true;
+
+        public List<LogMessage> LogMessages { get; } = new List<LogMessage>();
+
+        public void Log(LogLevel level, string message)
         {
-            public bool ArgProperty { get; set; }
-
-            [JsonExtensionData]
-            public IDictionary<string, object> AdditionalData { get; set; }
-        }
-
-        public class TestLogProvider : ILogProvider
-        {
-            private bool _isEnabled = true;
-
-            public List<LogMessage> LogMessages { get; } = new List<LogMessage>();
-
-            public void Log(LogLevel level, string message)
+            if (!_isEnabled)
             {
-                if (!_isEnabled)
-                {
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(message))
-                {
-                    throw new ArgumentException($"'{nameof(message)}' cannot be null or whitespace.", nameof(message));
-                }
-
-                LogMessages.Add(new LogMessage(level, message));
+                return;
             }
 
-            public void Disable()
+            if (string.IsNullOrWhiteSpace(message))
             {
-                _isEnabled = false;
+                throw new ArgumentException($"'{nameof(message)}' cannot be null or whitespace.", nameof(message));
             }
+
+            LogMessages.Add(new LogMessage(level, message));
         }
 
-        public record LogMessage(LogLevel Level, string Message) { }
+        public void Disable()
+        {
+            _isEnabled = false;
+        }
+    }
+
+    public record LogMessage(LogLevel Level, string Message) { }
+}
+
+namespace Core.Unit.Tests.UpdateServiceTests.AnotherNamespace
+{
+    public class TestCommand : IMeadowCommand
+    {
+        public bool ArgProperty { get; set; }
+
+        public bool ArgPropertyTwo { get; set; }
     }
 }

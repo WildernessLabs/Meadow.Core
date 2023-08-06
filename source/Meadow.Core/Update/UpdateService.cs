@@ -24,7 +24,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Meadow.Update")]
-[assembly: InternalsVisibleTo("Core.Unit.Tests")]
 
 namespace Meadow.Update;
 
@@ -130,7 +129,7 @@ public class UpdateService : IUpdateService, ICommandService
         {
             Resolver.Log.Debug("MQTT message received");
 
-            if (f.ApplicationMessage.Topic.EndsWith($"/commands/{Resolver.Device.Information.UniqueID}", StringComparison.Ordinal))
+            if (f.ApplicationMessage.Topic.EndsWith($"/commands/{Resolver.Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
             {
                 Resolver.Log.Trace("Meadow command received");
                 ProcessPublishedCommand(f.ApplicationMessage);
@@ -670,27 +669,23 @@ public class UpdateService : IUpdateService, ICommandService
     void ICommandService.Subscribe(Action<MeadowCommand> action)
     {
         CommandSubscriptions[UntypedCommandTypeName] = (CommandType: typeof(MeadowCommand), Action: x => action((MeadowCommand)x));
-        Resolver.Log.Trace($"Command service subscribed and listening and generic Meadow command. You may publish commands to Meadow.Cloud using any command name on your choosing.");
     }
 
     void ICommandService.Subscribe<T>(Action<T> action)
     {
         var commandTypeName = typeof(T).Name;
         CommandSubscriptions[commandTypeName.ToUpperInvariant()] = (CommandType: typeof(T), Action: x => action((T)x));
-        Resolver.Log.Trace($"Command service subscribed to type '{commandTypeName}'. You may publish commands to Meadow.Cloud using '{commandTypeName}' as the command name (case insensitive).");
     }
 
     void ICommandService.Unsubscribe()
     {
         CommandSubscriptions.TryRemove(UntypedCommandTypeName, out _);
-        Resolver.Log.Trace($"Command service unsubscribed from the generic Meadow command listener.");
     }
 
     void ICommandService.Unsubscribe<T>()
     {
         var commandTypeName = typeof(T).Name;
         CommandSubscriptions.TryRemove(commandTypeName.ToUpperInvariant(), out _);
-        Resolver.Log.Trace($"Command service unsubscribed from the '{commandTypeName}' Meadow command listener.");
     }
 
     internal void ProcessPublishedCommand(MqttApplicationMessage message)
