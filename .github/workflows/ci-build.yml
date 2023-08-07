@@ -26,24 +26,12 @@ jobs:
       with:
         path: Meadow.Core # we have to put this in a sub-folder so we can pull Contracts/Units to a parent folder
        
-    - name: Determine Meadow.Contracts branch to use
-      id: pick_contracts_branch
-      shell: bash
-      env:
-        BRANCH: ${{ github.head_ref || github.ref }}
-      run: |
-        if git ls-remote --exit-code --heads https://github.com/WildernessLabs/Meadow.Contracts ${BRANCH}; then
-          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
-        else
-          echo "branch=develop" >> $GITHUB_OUTPUT
-        fi
-
     - name: Checkout Meadow.Contracts
       uses: actions/checkout@v3
       with:
         repository: WildernessLabs/Meadow.Contracts
         path: Meadow.Contracts
-        ref: ${{ steps.pick_contracts_branch.outputs.branch }}
+        ref: develop
 
     - name: Checkout Meadow.Units
       uses: actions/checkout@v3
