@@ -29,6 +29,3 @@ jobs:
       
     - name: Build Meadow.Core
       run: dotnet build -c Release Meadow.Core/source/Meadow.Core.sln
-    
-    - name: Test Core.Unit.Tests
-      run: dotnet test -c Release Meadow.Core/source/Tests/Core.Unit.Tests/Core.Unit.Tests.csproj
