@@ -11,10 +11,6 @@ jobs:
 
     runs-on: windows-latest
 
-    strategy:
-      matrix:
-        dotnet-version: ['3.1', '7.0.x']
-
     steps:
 
     - name: Checkout Meadow.Core
@@ -26,7 +22,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: 7.0.x
 
     - name: Workload Restore Meadow.Core
       run: dotnet workload restore Meadow.Core/source/Meadow.Core.sln
@@ -35,4 +31,4 @@ jobs:
       run: dotnet build -c Release Meadow.Core/source/Meadow.Core.sln
     
     - name: Test Core.Unit.Tests
-      run: dotnet test -c Release --no-build Meadow.Core/source/Tests/Core.Unit.Tests/Core.Unit.Tests.csproj
+      run: dotnet test -c Release Meadow.Core/source/Tests/Core.Unit.Tests/Core.Unit.Tests.csproj
