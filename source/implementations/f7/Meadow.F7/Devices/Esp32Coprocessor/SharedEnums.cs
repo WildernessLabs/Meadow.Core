@@ -494,6 +494,32 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         NetworkAtCmdEvent = 4,
 
+        /// CellFunction - NetworkErrorEvent
+        /// </summary>
+        NetworkErrorEvent = 2,
+    };
+
+    /// <summary>
+    /// Cell error 
+    /// </summary>
+    public enum CellError
+    {
+        /// <summary>
+        /// CellError - InvalidNetworkSettings
+        /// </summary>
+        InvalidNetworkSettings = 0,
+        /// <summary>
+        /// CellError - InvalidCellModule
+        /// </summary>
+        InvalidCellModule = 1,
+        /// <summary>
+        /// CellError - NetworkConnectionLost
+        /// </summary>
+        NetworkConnectionLost = 2,
+        /// <summary>
+        /// CellError - NetworkTimeout
+        /// </summary>
+        NetworkTimeout = 3,
     };
 
     /// <summary>
