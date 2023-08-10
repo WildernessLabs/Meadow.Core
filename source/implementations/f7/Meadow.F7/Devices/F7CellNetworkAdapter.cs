@@ -17,6 +17,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string _imei;
     private string _csq;
     private string _at_cmds_output;
+    private string _error_str;
 
     private static string ExtractValue(string input, string pattern)
     {
@@ -104,6 +105,11 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 ResetCellTempData();
 
                 RaiseNetworkDisconnected();
+                break;
+            case CellFunction.NetworkErrorEvent:
+                _error_str = GetError();
+
+                Resolver.Log.Error($"{_error_str}");
                 break;
             default:
                 Resolver.Log.Trace("Event type not found");
@@ -206,5 +212,46 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         return Core.Interop.Nuttx.MeadowCellNetworkScanner();
     }
+    
+    /// <summary>
+    /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
+    /// </summary>
+    private string ParseError(string input)
+    {
+        if (input !=null)
+        {
+            string pattern = @"\+CME ERROR: (.+)$";
+            Match match = Regex.Match(input, pattern);
 
+            if (match.Success && match.Groups.Count >= 2)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+        return "Undefined Cell error";
+    }
+
+    /// <summary>
+    /// Returns the error string, otherwise <b>Undefined error</b>
+    /// </summary>
+    private string GetError()
+    {
+        int errno = Core.Interop.Nuttx.meadow_get_cell_error();
+
+        CellError cellError = (CellError)errno;
+
+        switch(cellError)
+        {
+            case CellError.InvalidNetworkSettings:
+                return "Invalid cell settings. Please check your cell configuration file.";
+            case CellError.InvalidCellModule:
+                return "Invalid cell module. Please ensure you have configured the right module name.";
+            case CellError.NetworkConnectionLost:
+                return ParseError(_at_cmds_output);
+            case CellError.NetworkTimeout:
+                return "Timeout. Please check your pinout and wire connections to the module.";
+            default:
+                return "Undefined error";
+        }
+    }
 }
