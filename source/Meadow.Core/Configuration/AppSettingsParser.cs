@@ -198,6 +198,26 @@ internal static class AppSettingsParser
             case "MeadowCloud.DataHostname":
                 settings.MeadowCloudSettings.DataHostname = settingValue;
                 break;
+            case "HealthMetrics.Enabled":
+                if (bool.TryParse(settingValue, out bool mehm))
+                {
+                    settings.MeadowCloudSettings.EnableHealthMetrics = mehm;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
+                }
+                break;
+            case "HealthMetrics.Interval":
+                if (int.TryParse(settingValue, out int mhmi))
+                {
+                    settings.MeadowCloudSettings.HealthMetricsInterval = mhmi;
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse value '{settingValue}' to a int");
+                }
+                break;
             default:
                 if (!settings.Settings.ContainsKey(settingName))
                 {

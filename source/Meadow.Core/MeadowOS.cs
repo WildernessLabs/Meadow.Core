@@ -395,10 +395,23 @@ public static partial class MeadowOS
 
             Resolver.Services.Add<ICommandService>(updateService);
 
+            var healthReporter = new HealthReporter();
+            Resolver.Services.Add<IHealthReporter>(healthReporter);
+
             Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
             if (UpdateSettings.Enabled)
             {
                 updateService.Start();
+            }
+            
+            if (MeadowCloudSettings.EnableHealthMetrics)
+            {
+                Resolver.Log.Info($"Health Metrics enabled with interval: {MeadowCloudSettings.HealthMetricsInterval} minute(s).");
+                healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
+            }
+            else
+            {
+                Resolver.Log.Info($"Health Metrics disabled.");
             }
 
             return true;
