@@ -45,7 +45,7 @@ public class HealthReporter : IHealthReporter
                     // {"cpu", }, // this is available on the OS but no API for it yet.
                     // {"boot_count", } // a ctacke gem not yet available in OS.
                     { "cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
-                    { "memory", GC.GetTotalMemory(false) },
+                    { "memory_used", GC.GetTotalMemory(false) },
                     { "disk_space_used", usedDiskSpace },
                     { "battery_percentage", device.GetBatteryInfo().StateOfCharge }
                 },
