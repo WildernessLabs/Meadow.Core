@@ -21,10 +21,10 @@ namespace Meadow.Simulation.Unit.Tests
 
                         for (var i = 0; i < 10; i++)
                         {
-                            port.State = state;
+                            ((IDigitalOutputPort)port).State = state;
                             var read = sim.ReadPinState(pin);
 
-                            Assert.Equal(port.State, read);
+                            Assert.Equal(((IDigitalInputPort)port).State, read);
 
                             state = !state;
                         }
@@ -35,7 +35,7 @@ namespace Meadow.Simulation.Unit.Tests
                         {
                             sim.DrivePinState(pin, state);
 
-                            Assert.Equal(state, port.State);
+                            Assert.Equal(state, ((IDigitalInputPort)port).State);
 
                             state = !state;
                         }
@@ -106,7 +106,7 @@ namespace Meadow.Simulation.Unit.Tests
             {
                 if (pin.Supports<IDigitalChannelInfo>(p => p.InputCapable))
                 {
-                    var port = sim.CreateDigitalInputPort(pin, Hardware.InterruptMode.EdgeBoth);
+                    var port = sim.CreateDigitalInterruptPort(pin, Hardware.InterruptMode.EdgeBoth);
                     bool interruptReceived = false;
                     port.Changed += (b, a) =>
                     {

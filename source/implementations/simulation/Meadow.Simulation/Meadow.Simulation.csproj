@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Simulation</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
@@ -13,6 +13,7 @@
     <Version>0.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Nullable>enable</Nullable>
+	  <LangVersion>10</LangVersion>
     <Description>A simulation Environment for Wilderness Labs Meadow Platform</Description>
   </PropertyGroup>
   <ItemGroup>

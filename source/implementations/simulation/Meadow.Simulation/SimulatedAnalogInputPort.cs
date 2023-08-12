@@ -3,29 +3,51 @@ using Meadow.Units;
 using System;
 using System.Threading.Tasks;
 
-namespace Meadow.Simulation
+namespace Meadow.Simulation;
+
+public abstract class SimulatedAnalogInputPortBase : AnalogInputPortBase
 {
-    internal class SimulatedAnalogInputPort : AnalogInputPortBase
+    protected SimulatedAnalogInputPortBase(SimulatedPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage)
+        : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
     {
-        private SimulatedPin _pin;
+    }
 
-        public SimulatedAnalogInputPort(IPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage)
-            : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
-        {
-            _pin = pin as SimulatedPin;
-        }
+    public sealed override Voltage Voltage // shenanigans required because C# doesn't allow `new` and `overide` in the same sig
+    {
+        get { return VoltageImpl; }
+    }
 
-        public override Task<Voltage> Read()
-        {
-            return Task.FromResult(_pin.Voltage);
-        }
+    protected abstract Voltage VoltageImpl { get; }
+}
 
-        public override void StartUpdating(TimeSpan? updateInterval)
-        {
-        }
+public class SimulatedAnalogInputPort : SimulatedAnalogInputPortBase
+{
+    private SimulatedPin _pin;
 
-        public override void StopUpdating()
-        {
-        }
+    public SimulatedAnalogInputPort(SimulatedPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage)
+        : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
+    {
+        _pin = pin;
+    }
+
+    public new Voltage Voltage
+    {
+        get => _pin.Voltage;
+        set => _pin.Voltage = value;
+    }
+
+    protected override Voltage VoltageImpl => Voltage;
+
+    public override Task<Voltage> Read()
+    {
+        return Task.FromResult(_pin.Voltage);
+    }
+
+    public override void StartUpdating(TimeSpan? updateInterval)
+    {
+    }
+
+    public override void StopUpdating()
+    {
     }
 }
