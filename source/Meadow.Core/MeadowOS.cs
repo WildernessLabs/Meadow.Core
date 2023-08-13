@@ -22,11 +22,20 @@ public static partial class MeadowOS
     //==== properties
     internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
-    private static IApp App { get; set; }
-    private static ILifecycleSettings LifecycleSettings { get; set; }
-    private static IUpdateSettings UpdateSettings { get; set; }
-    private static IMeadowCloudSettings MeadowCloudSettings { get; set; }
+    private static IApp App { get; set; } = default!;
+    private static ILifecycleSettings LifecycleSettings { get; set; } = default!;
+    private static IUpdateSettings UpdateSettings { get; set; } = default!;
+    private static IMeadowCloudSettings MeadowCloudSettings { get; set; } = default!;
+
+    /// <summary>
+    /// The cancellation CancellationTokenSource used to signal the application to shut down
+    /// </summary>
+    /// <remarks>This is used by the UpdateService</remarks>
     public static CancellationTokenSource AppAbort = new();
+
+    /// <summary>
+    /// The value of the processor clock register when `Main` was entered
+    /// </summary>
     public static int StartupTick { get; set; }
 
     /// <summary>
@@ -211,7 +220,7 @@ public static partial class MeadowOS
     {
         Resolver.Log.Trace($"Looking for app assembly...");
 
-        Assembly appAssembly;
+        Assembly? appAssembly;
 
         if (_startedDirectly)
         {
@@ -226,7 +235,7 @@ public static partial class MeadowOS
         }
 
         // === LOCAL METHOD ===
-        Assembly? FindByPath(string[] namesToCheck)
+        static Assembly? FindByPath(string[] namesToCheck)
         {
             var root = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -314,7 +323,7 @@ public static partial class MeadowOS
             }
 
             // local method to walk down the object graph to find the IMeadowDevice concrete type
-            Type FindDeviceType(Type type)
+            static Type FindDeviceType(Type type)
             {
                 if (type.IsGenericType)
                 {

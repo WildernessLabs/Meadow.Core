@@ -26,7 +26,8 @@ public class DigitalOutputPort : DigitalOutputPortBase
             IOController.SetDiscrete(base.Pin, _state);
         }
     }
-    protected bool _state;
+
+    private bool _state;
 
     /// <summary>
     /// Creates a new DigitalOutputPort from a pin.
