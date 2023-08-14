@@ -61,10 +61,12 @@ namespace Meadow.Simulation
 
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Meadow.Units.Voltage voltageReference)
         {
-            var dc = pin.SupportedChannels.FirstOrDefault(i => i is IAnalogChannelInfo) as AnalogChannelInfo;
+            var dc = pin.SupportedChannels?.FirstOrDefault(i => i is IAnalogChannelInfo) as AnalogChannelInfo;
             if (dc != null)
             {
-                return new SimulatedAnalogInputPort(pin, dc, sampleCount, sampleInterval, voltageReference);
+                return new SimulatedAnalogInputPort(
+                    pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"),
+                    dc, sampleCount, sampleInterval, voltageReference);
             }
 
             throw new NotSupportedException();
@@ -72,7 +74,7 @@ namespace Meadow.Simulation
 
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
-            var dc = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
+            var dc = pin.SupportedChannels?.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dc != null)
             {
                 return new SimulatedBiDirectionalPort(pin, dc, initialState, resistorMode, initialDirection);
@@ -88,10 +90,12 @@ namespace Meadow.Simulation
 
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
         {
-            var dci = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
+            var dci = pin.SupportedChannels?.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dci != null)
             {
-                return new SimulatedDigitalInputPort(pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"), dci);
+                return new SimulatedDigitalInputPort(
+                    pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"),
+                    dci);
             }
 
             throw new NotSupportedException();
@@ -99,7 +103,7 @@ namespace Meadow.Simulation
 
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
-            var dco = pin.SupportedChannels.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
+            var dco = pin.SupportedChannels?.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
             if (dco != null)
             {
                 var p = pin as SimulatedPin;

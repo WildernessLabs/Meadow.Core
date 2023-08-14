@@ -5,7 +5,7 @@ namespace Meadow.Simulation
 {
     internal class SimulatedDigitalInputPort : DigitalInputPortBase
     {
-        private SimulatedPin _pin;
+        private SimulatedPin SimPin => Pin as SimulatedPin ?? throw new System.Exception("Pin is not a SimulatedPin");
 
         public SimulatedDigitalInputPort(SimulatedPin pin, IDigitalChannelInfo channel)
             : base(pin, channel)
@@ -14,12 +14,12 @@ namespace Meadow.Simulation
 
         internal void SetVoltage(Voltage voltage)
         {
-            if (voltage == _pin.Voltage) return;
+            if (voltage == SimPin.Voltage) return;
 
-            _pin.Voltage = voltage;
+            SimPin.Voltage = voltage;
         }
 
-        public override bool State { get => _pin.Voltage >= SimulationEnvironment.ActiveVoltage; }
+        public override bool State { get => SimPin.Voltage >= SimulationEnvironment.ActiveVoltage; }
 
         public override ResistorMode Resistor { get; set; }
     }
