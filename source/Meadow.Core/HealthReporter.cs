@@ -9,15 +9,22 @@ using Meadow.Cloud;
 
 namespace Meadow;
 
+/// <summary>
+/// Logic responsible for reporting device health metrics to Meadow.Cloud.
+/// </summary>
 public class HealthReporter : IHealthReporter
 {
     static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-
+    
+    /// <summary>
+    /// Starts the health reporter based on the desired interval.
+    /// </summary>
     /// <param name="interval">In minutes</param>
     public void Start(int interval)
     {
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
+        timer.AutoReset = true;
         timer.Start();
     }
 
