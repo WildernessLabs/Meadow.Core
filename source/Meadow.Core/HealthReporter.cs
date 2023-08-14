@@ -49,8 +49,6 @@ public class HealthReporter : IHealthReporter
                 EventId = 10,
                 Measurements = new Dictionary<string, object>()
                 {
-                    // {"cpu", }, // this is available on the OS but no API for it yet.
-                    // {"boot_count", } // a ctacke gem not yet available in OS.
                     { "cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
                     { "memory_used", GC.GetTotalMemory(false) },
                     { "disk_space_used", usedDiskSpace },
