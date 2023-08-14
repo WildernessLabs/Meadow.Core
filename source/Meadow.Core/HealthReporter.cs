@@ -46,7 +46,7 @@ public class HealthReporter : IHealthReporter
             await service!.SendEvent(new CloudEvent()
             {
                 Description = "device.health",
-                EventId = 0,
+                EventId = 10,
                 Measurements = new Dictionary<string, object>()
                 {
                     // {"cpu", }, // this is available on the OS but no API for it yet.
