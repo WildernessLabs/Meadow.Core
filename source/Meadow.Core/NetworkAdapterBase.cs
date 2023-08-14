@@ -11,21 +11,10 @@ namespace Meadow;
 /// </summary>
 public abstract class NetworkAdapterBase : INetworkAdapter
 {
-    private NetworkConnectionHandler _connected = delegate { };
     /// <summary>
     /// Raised when the device connects to a network.
     /// </summary>
-    public event NetworkConnectionHandler NetworkConnected
-    {
-        add
-        {
-            _connected += value;
-        }
-        remove
-        {
-            _connected -= value;
-        }
-    }
+    public event NetworkConnectionHandler NetworkConnected = default!;
 
     /// <summary>
     /// Raised when the device disconnects from a network.
@@ -83,7 +72,7 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <param name="args"></param>
     public void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
     {
-        _connected?.Invoke(this, args);
+        NetworkConnected?.Invoke(this, args);
     }
 
     /// <summary>

@@ -28,7 +28,7 @@
         {
             executionContext = Thread.CurrentThread.ExecutionContext;
 
-            Device = MeadowOS.CurrentDevice as D; // 'D' is guaranteed to be initialized and the same type
+            Device = MeadowOS.CurrentDevice as D ?? throw new ArgumentException($"Current device is not {typeof(D).Name}"); // 'D' is guaranteed to be initialized and the same type
             Abort = MeadowOS.AppAbort.Token;
 
             Resolver.Services.Add<IApp>(this);
