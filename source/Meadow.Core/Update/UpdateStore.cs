@@ -165,10 +165,13 @@ public class UpdateStore : IEnumerable<UpdateInfo>
             di.Create();
         }
 
-        var fi = new FileInfo(Path.Combine(dest, $"{updateID}.zip"));
+        var filePath = Path.Combine(dest, $"{updateID}.zip");
+        var fi = new FileInfo(filePath);
         if (fi.Exists)
         {
-            fi.Delete();
+            // Continue the download, instead of discarding the downloaded bytes
+            Resolver.Log.Trace($"Resuming download from existing file: {filePath}. Appending to continue.");
+            return fi.Open(FileMode.Append, FileAccess.Write);
         }
 
         return fi.Create();
