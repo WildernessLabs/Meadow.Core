@@ -47,10 +47,10 @@ public class UpdateService : IUpdateService
     public const int RetryDelayMilliseconds = 1000;
 
     /// <summary>
-    /// Expiration authentication token period in minutes.
+    /// Auth token expiration period in minutes.
     /// TODO: Replace this hardcoded value with one retrieved from the Meadow Cloud.
     /// </summary>
-    public const int ExpirationTokenPeriod = 60;
+    public const int TokenExpirationPeriod = 60;
 
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
@@ -202,11 +202,11 @@ public class UpdateService : IUpdateService
     
     /// <summary>
     /// Method to determine if the authentication is required based on whether the time since 
-    /// the last authentication exceeds the expiration token period (in minutes).
+    /// the last authentication exceeds the token expiration period (in minutes).
     /// </summary>
     private bool ShouldAuthenticate()
     {
-        return (DateTime.Now - _lastAuthenticationTime).TotalMinutes >= ExpirationTokenPeriod;
+        return (DateTime.Now - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
     }
 
     private async void UpdateStateMachine()
