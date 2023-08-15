@@ -47,7 +47,7 @@ public class UpdateService : IUpdateService
     public const int RetryDelayMilliseconds = 1000;
 
     /// <summary>
-    /// Expiration authentication token period in minutes
+    /// Expiration authentication token period in minutes.
     /// TODO: Replace this hardcoded value with one retrieved from the Meadow Cloud.
     /// </summary>
     public const int ExpirationTokenPeriod = 60;
@@ -439,6 +439,8 @@ public class UpdateService : IUpdateService
                         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
                     }
 
+                    // Configure the HTTP range header to indicate resumption of partial download, starting from 
+                    // the 'totalBytesDownloaded' byte position and extending to the end of the content.
                     httpClient.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
 
                     using (var stream = await httpClient.GetStreamAsync(destination))
@@ -508,7 +510,7 @@ public class UpdateService : IUpdateService
                 // TODO: raise some event?
                 Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
 
-                Resolver.Log.Warn($"Retrying attempt {retryCount + 1} of {MaxDownloadRetries} in {RetryDelayMilliseconds} milliseconds...");
+                Resolver.Log.Info($"Retrying attempt {retryCount + 1} of {MaxDownloadRetries} in {RetryDelayMilliseconds} milliseconds...");
                 await Task.Delay(RetryDelayMilliseconds);
             }
         }
