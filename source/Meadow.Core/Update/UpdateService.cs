@@ -37,6 +37,23 @@ public class UpdateService : IUpdateService, ICommandService
     /// </summary>
     public const int NetworkRetryTimeoutSeconds = 15;
 
+    /// <summary>
+    /// Specifies the maximum number of download attempts before giving up.
+    /// </summary>
+    public const int MaxDownloadRetries = 10;
+    
+    /// <summary>
+    /// Period the service will wait between download attempts in 
+    /// case of failure.
+    /// </summary>
+    public const int RetryDelayMilliseconds = 1000;
+
+    /// <summary>
+    /// Auth token expiration period in minutes.
+    /// TODO: Replace this hardcoded value with one retrieved from the Meadow Cloud.
+    /// </summary>
+    public const int TokenExpirationPeriod = 60;
+
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
 
@@ -57,6 +74,7 @@ public class UpdateService : IUpdateService, ICommandService
     private UpdateState _state;
     private bool _stopService = false;
     private string? _jwt = null;
+    private DateTime _lastAuthenticationTime = DateTime.MinValue;
 
     private IUpdateSettings Config { get; }
     private IMqttClient MqttClient { get; set; } = default!;
@@ -190,6 +208,15 @@ public class UpdateService : IUpdateService, ICommandService
 
         return _jwt != null;
     }
+    
+    /// <summary>
+    /// Method to determine if the authentication is required based on whether the time since 
+    /// the last authentication exceeds the token expiration period (in minutes).
+    /// </summary>
+    private bool ShouldAuthenticate()
+    {
+        return (DateTime.Now - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
+    }
 
     private async void UpdateStateMachine()
     {
@@ -209,7 +236,7 @@ public class UpdateService : IUpdateService, ICommandService
             switch (State)
             {
                 case UpdateState.Disconnected:
-                    if (Config.UseAuthentication)
+                    if (Config.UseAuthentication && ShouldAuthenticate())
                     {
                         State = UpdateState.Authenticating;
                     }
@@ -223,6 +250,8 @@ public class UpdateService : IUpdateService, ICommandService
                     {
                         if (await AuthenticateWithServer())
                         {
+                            // Update the last authentication time when successfully authenticated
+                            _lastAuthenticationTime = DateTime.Now;
                             State = UpdateState.Connecting;
                         }
                         else
@@ -406,75 +435,98 @@ public class UpdateService : IUpdateService, ICommandService
         Resolver.Log.Trace($"Attempting to retrieve {destination}");
         var sw = Stopwatch.StartNew();
 
-        try
+        long totalBytesDownloaded = 0;
+        var downloadFinished = false;
+
+        for (int retryCount = 0; retryCount < MaxDownloadRetries && !downloadFinished; retryCount++)
         {
-            // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
-            using (var httpClient = new HttpClient())
+            try
             {
-                if (Config.UseAuthentication)
+                // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
+                using (var httpClient = new HttpClient())
                 {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
-                }
-
-                using (var stream = await httpClient.GetStreamAsync(destination))
-                {
-                    using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                    if (Config.UseAuthentication)
                     {
-                        Resolver.Log.Trace($"Copying update to {fileStream.Name}");
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                    }
 
-                        await stream.CopyToAsync(fileStream, 4096);
+                    // Configure the HTTP range header to indicate resumption of partial download, starting from 
+                    // the 'totalBytesDownloaded' byte position and extending to the end of the content.
+                    httpClient.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
+
+                    using (var stream = await httpClient.GetStreamAsync(destination))
+                    {
+                        using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                        {
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+
+                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                totalBytesDownloaded += bytesRead;
+
+                                Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                            }
+                        }
                     }
                 }
-            }
 
-            sw.Stop();
+                sw.Stop();
 
-            var path = Store.GetUpdateArchivePath(message.ID);
-            var fi = new FileInfo(path);
+                var path = Store.GetUpdateArchivePath(message.ID);
+                var fi = new FileInfo(path);
 
-            if (sw.Elapsed.Seconds > 0)
-            {
-                Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0} bps)");
-            }
-            else
-            {
-                // don't divide by 0
-                Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec");
-            }
-
-            var hash = Store.GetFileHash(fi);
-
-            if (!string.IsNullOrWhiteSpace(message.DownloadHash))
-            {
-                if (hash != message.DownloadHash)
+                if (sw.Elapsed.Seconds > 0)
                 {
-                    Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
-                    // TODO: what do we do? Retry? Ignore?
+                    Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0} bps)");
                 }
                 else
                 {
-                    Resolver.Log.Trace("Update package hash matched");
+                    // don't divide by 0
+                    Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec");
                 }
+
+                downloadFinished = true;
+
+                var hash = Store.GetFileHash(fi);
+
+                if (!string.IsNullOrWhiteSpace(message.DownloadHash))
+                {
+                    if (hash != message.DownloadHash)
+                    {
+                        Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
+                        // TODO: what do we do? Retry? Ignore?
+                    }
+                    else
+                    {
+                        Resolver.Log.Trace("Update package hash matched");
+                    }
+                }
+                else
+                {
+                    Resolver.Log.Warn("Downloaded Updated was not Hashed by server!");
+                    // TODO: what do we do?
+                }
+
+                OnUpdateRetrieved(this, message);
+                Store.SetRetrieved(message);
+
+                State = UpdateState.Idle;
             }
-            else
+            catch (Exception ex)
             {
-                Resolver.Log.Warn("Downloaded Updated was not Hashed by server!");
-                // TODO: what do we do?
+                sw.Stop();
+
+                // TODO: raise some event?
+                Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
+
+                Resolver.Log.Info($"Retrying attempt {retryCount + 1} of {MaxDownloadRetries} in {RetryDelayMilliseconds} milliseconds...");
+                await Task.Delay(RetryDelayMilliseconds);
             }
-
-            OnUpdateRetrieved(this, message);
-            Store.SetRetrieved(message);
-
-            State = UpdateState.Idle;
         }
-        catch (Exception ex)
-        {
-            sw.Stop();
 
-            // TODO: raise some event?
-            Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
-            State = UpdateState.Idle;
-        }
+        State = UpdateState.Idle;
     }
 
     private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
