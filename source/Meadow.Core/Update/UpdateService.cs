@@ -73,6 +73,7 @@ public class UpdateService : IUpdateService, ICommandService
 
     private UpdateState _state;
     private bool _stopService = false;
+    private bool _downloadInProgress = false;
     private string? _jwt = null;
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
 
@@ -324,50 +325,58 @@ public class UpdateService : IUpdateService, ICommandService
                     }
                     break;
                 case UpdateState.Connected:
-                    State = UpdateState.Idle;
-                    try
+                    if (!_downloadInProgress)
                     {
-                        JsonWebTokenPayload? jwtPayload = null;
-                        if (Config.UseAuthentication)
+                        State = UpdateState.Idle;
+                        try
                         {
-                            if (string.IsNullOrWhiteSpace(_jwt))
+                            JsonWebTokenPayload? jwtPayload = null;
+                            if (Config.UseAuthentication)
                             {
-                                throw new InvalidOperationException("Update service authentication is enabled but no JWT is available");
+                                if (string.IsNullOrWhiteSpace(_jwt))
+                                {
+                                    throw new InvalidOperationException("Update service authentication is enabled but no JWT is available");
+                                }
+
+                                jwtPayload = GetJsonWebTokenPayload(_jwt);
                             }
 
-                            jwtPayload = GetJsonWebTokenPayload(_jwt);
+                            // the config RootTopic can have multiple semicolon-delimited topics
+                            var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach (var topic in topics)
+                            {
+                                string topicName = topic;
+
+                                // look for macro-substitutions
+                                if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
+                                {
+                                    topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
+                                }
+
+                                if (topic.Contains("{ID}"))
+                                {
+                                    topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
+                                }
+
+                                Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
+                                await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
+                            }
                         }
-
-                        // the config RootTopic can have multiple semicolon-delimited topics
-                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
-
-                        foreach (var topic in topics)
+                        catch (Exception ex)
                         {
-                            string topicName = topic;
+                            Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
 
-                            // look for macro-substitutions
-                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
-                            {
-                                topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
-                            }
+                            // if subscribing fails, then we need to disconnect from the server
+                            await MqttClient.DisconnectAsync();
 
-                            if (topic.Contains("{ID}"))
-                            {
-                                topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
-                            }
-
-                            Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
-                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
+                            State = UpdateState.Disconnected;
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
-
-                        // if subscribing fails, then we need to disconnect from the server
-                        await MqttClient.DisconnectAsync();
-
-                        State = UpdateState.Disconnected;
+                        Resolver.Log.Debug($"Resuming download after reconnection...");
+                        State = UpdateState.DownloadingFile;
                     }
                     break;
                 case UpdateState.Idle:
@@ -436,9 +445,9 @@ public class UpdateService : IUpdateService, ICommandService
         var sw = Stopwatch.StartNew();
 
         long totalBytesDownloaded = 0;
-        var downloadFinished = false;
+        _downloadInProgress = true;
 
-        for (int retryCount = 0; retryCount < MaxDownloadRetries && !downloadFinished; retryCount++)
+        for (int retryCount = 0; retryCount < MaxDownloadRetries && _downloadInProgress; retryCount++)
         {
             try
             {
@@ -487,7 +496,7 @@ public class UpdateService : IUpdateService, ICommandService
                     Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec");
                 }
 
-                downloadFinished = true;
+                _downloadInProgress = false;
 
                 var hash = Store.GetFileHash(fi);
 
@@ -527,6 +536,7 @@ public class UpdateService : IUpdateService, ICommandService
         }
 
         State = UpdateState.Idle;
+        _downloadInProgress = false;
     }
 
     private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
