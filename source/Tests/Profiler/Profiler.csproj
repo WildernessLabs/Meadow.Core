@@ -11,17 +11,13 @@
     <AssemblyName>App</AssemblyName>
     <Configurations>Release;Debug</Configurations>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
-
 </Project>

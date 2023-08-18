@@ -1,32 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <LangVersion>10.0</LangVersion>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <AssemblyName>Meadow.Avalonia</AssemblyName>
-	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
-	  <Authors>Wilderness Labs, Inc</Authors>
-	  <Company>Wilderness Labs, Inc</Company>
-	  <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/Meadow.Core/</PackageProjectUrl>
-	  <PackageId>Meadow.Avalonia</PackageId>
-	  <PackageIcon>icon.png</PackageIcon>
-	  <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
-	  <PackageTags>Meadow,Meadow.Avalonia,Avalonia</PackageTags>
-	  <Version>0.9.54</Version>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	  <Description>Utility library for aiding in using Wilderness Labs' Meadow stack in an Avalonia application</Description>
+    <AssemblyName>Meadow.Avalonia</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <Company>Wilderness Labs, Inc</Company>
+    <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/Meadow.Core/</PackageProjectUrl>
+    <PackageId>Meadow.Avalonia</PackageId>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+    <PackageTags>Meadow,Meadow.Avalonia,Avalonia</PackageTags>
+    <Version>0.9.54</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Utility library for aiding in using Wilderness Labs' Meadow stack in an Avalonia application</Description>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.18" />
   </ItemGroup>
-
   <ItemGroup>
-	  <None Include="..\..\icon.png" Pack="true" PackagePath="" />
-	  <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
+    <None Include="..\..\icon.png" Pack="true" PackagePath="" />
+    <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
-
 </Project>

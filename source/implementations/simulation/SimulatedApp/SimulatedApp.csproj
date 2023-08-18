@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <Company>Wilderness Labs, Inc</Company>
     <Authors>Wilderness Labs, Inc</Authors>
@@ -10,15 +9,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	  <AssemblyName>App</AssemblyName>
+    <AssemblyName>App</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Meadow.Modbus" Version="0.29.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Meadow.Simulation\Meadow.Simulation.csproj" />
   </ItemGroup>
-
 </Project>

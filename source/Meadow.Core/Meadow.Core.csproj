@@ -1,31 +1,31 @@
 <Project Sdk="Meadow.Sdk/1.1.0">
-	<PropertyGroup>
+  <PropertyGroup>
     <Authors>Wilderness Labs, Inc</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-		<TargetFramework>netstandard2.1</TargetFramework>
-		<OutputType>Exe</OutputType>
-		<AssemblyName>Meadow</AssemblyName>
-		<Company>Wilderness Labs, Inc</Company>
-		<PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
-		<PackageId>Meadow</PackageId>
-		<PackageIcon>icon.png</PackageIcon>
-		<RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
-		<PackageTags>Meadow</PackageTags>
-		<Version>0.23.0</Version>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<RootNamespace>Meadow</RootNamespace>
-		<Nullable>enable</Nullable>
-		<Description>Core .NET libraries for Wilderness Labs Meadow</Description>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Meadow</AssemblyName>
+    <Company>Wilderness Labs, Inc</Company>
+    <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+    <PackageId>Meadow</PackageId>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+    <PackageTags>Meadow</PackageTags>
+    <Version>0.23.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Meadow</RootNamespace>
+    <Nullable>enable</Nullable>
+    <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
     <LangVersion>10.0</LangVersion>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
-	<ItemGroup>
-		<None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
     <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
     <ProjectReference Include="..\..\..\Meadow.Modbus\src\Meadow.Modbus\Meadow.Modbus.csproj" />
     <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-		<PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
-	</ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
+  </ItemGroup>
 </Project>
