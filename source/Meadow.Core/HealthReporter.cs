@@ -15,7 +15,7 @@ namespace Meadow;
 public class HealthReporter : IHealthReporter
 {
     static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-    
+
     /// <summary>
     /// Starts the health reporter based on the desired interval.
     /// </summary>
@@ -43,7 +43,7 @@ public class HealthReporter : IHealthReporter
             DirectoryInfo di = new DirectoryInfo("/meadow0");
             var usedDiskSpace = DirSize(di);
 
-            await service!.SendEvent(new CloudEvent()
+            var ce = new CloudEvent()
             {
                 Description = "device.health",
                 EventId = 10,
@@ -51,11 +51,18 @@ public class HealthReporter : IHealthReporter
                 {
                     { "cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
                     { "memory_used", GC.GetTotalMemory(false) },
-                    { "disk_space_used", usedDiskSpace },
-                    { "battery_percentage", device.GetBatteryInfo().StateOfCharge }
+                    { "disk_space_used", usedDiskSpace }
                 },
                 Timestamp = DateTime.UtcNow
-            });
+            };
+            
+            var batteryInfo = device.GetBatteryInfo();
+            if (batteryInfo != null)
+            {
+                ce.Measurements.Add("battery_percentage", batteryInfo.StateOfCharge);
+            }
+
+            await service!.SendEvent(ce);
             Resolver.Log.Trace($"health metrics sent");
         }
         finally

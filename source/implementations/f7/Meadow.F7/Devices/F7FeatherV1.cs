@@ -45,7 +45,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <returns>A BatteryInfo instance</returns>
         /// <exception cref="Exception"></exception>
-        public override BatteryInfo GetBatteryInfo()
+        public override BatteryInfo? GetBatteryInfo()
         {
             if (Coprocessor != null)
             {

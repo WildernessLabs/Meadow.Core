@@ -62,7 +62,7 @@ public partial class F7FeatherV2 : F7FeatherBase
     /// Gets a BatteryInfo instance for the current state of the platform
     /// </summary>
     /// <returns>A BatteryInfo instance</returns>
-    public override BatteryInfo GetBatteryInfo()
+    public override BatteryInfo? GetBatteryInfo()
     {
         return new BatteryInfo
         {
