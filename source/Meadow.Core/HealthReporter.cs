@@ -6,8 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Meadow.Cloud;
-using Meadow.Gateway.WiFi;
-using Meadow.Hardware;
 
 namespace Meadow;
 
