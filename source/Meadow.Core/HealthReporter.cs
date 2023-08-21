@@ -24,7 +24,13 @@ public class HealthReporter : IHealthReporter
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
-        timer.Start();
+
+        Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
+        {
+            Resolver.Log.Trace($"starting health metrics timer");
+            await Send();
+            timer.Start();
+        };
     }
 
     /// <inheritdoc/>
