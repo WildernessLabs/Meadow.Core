@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Meadow.Cloud;
+using Meadow.Gateway.WiFi;
+using Meadow.Hardware;
 
 namespace Meadow;
 
@@ -15,11 +17,8 @@ namespace Meadow;
 public class HealthReporter : IHealthReporter
 {
     static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-
-    /// <summary>
-    /// Starts the health reporter based on the desired interval.
-    /// </summary>
-    /// <param name="interval">In minutes</param>
+    
+    /// <inheritdoc/>
     public void Start(int interval)
     {
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
@@ -28,7 +27,8 @@ public class HealthReporter : IHealthReporter
         timer.Start();
     }
 
-    private async Task TimerOnElapsed(object sender, ElapsedEventArgs e)
+    /// <inheritdoc/>
+    public async Task Send()
     {
         var connected = Resolver.Device.NetworkAdapters.Any(a => a.IsConnected);
 
@@ -69,6 +69,11 @@ public class HealthReporter : IHealthReporter
         {
             semaphoreSlim.Release();
         }
+    }
+    
+    private async Task TimerOnElapsed(object sender, ElapsedEventArgs e)
+    {
+        await Send();
     }
 
     private long DirSize(DirectoryInfo d)
