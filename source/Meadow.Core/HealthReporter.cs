@@ -28,8 +28,10 @@ public class HealthReporter : IHealthReporter
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             Resolver.Log.Trace($"starting health metrics timer");
-            await Send();
             timer.Start();
+            
+            // send the first health metric
+            await Send();
         };
     }
 
