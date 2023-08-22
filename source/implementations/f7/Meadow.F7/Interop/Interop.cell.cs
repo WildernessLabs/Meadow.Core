@@ -30,6 +30,13 @@ internal static partial class Interop
             List<CellNetwork> cellNetworks = new List<CellNetwork>();
             MatchCollection matches = Regex.Matches(input, pattern);
 
+            // If no +CME ERROR is encountered and no network outputs are present,
+            // it indicates that the scanner has reached the Cell connection timeout
+            if (matches.Count == 0)
+            {
+                throw new System.TimeoutException("Timeout reached during cell network scanning.");
+            }
+
             foreach (Match match in matches)
             {
                 int status = int.Parse(match.Groups[1].Value);
@@ -84,6 +91,7 @@ internal static partial class Interop
 
             try
             {
+                Resolver.Log.Info("Scanning cell networks...");
                 var len = meadow_cell_scanner(buffer);
                 if (len > 0)
                 {
@@ -95,6 +103,11 @@ internal static partial class Interop
                 {
                     throw new System.IO.IOException("No available networks found, please ensure that your device is in scanning mode.");
                 }
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"No available networks found: {ex.Message}");
+                return Array.Empty<CellNetwork>();
             }
             finally
             {
