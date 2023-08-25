@@ -1,19 +1,22 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Simulation</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
     <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
     <PackageId>Meadow.Simulation</PackageId>
-	<PackageIcon>icon.png</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
     <Version>0.1.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Nullable>enable</Nullable>
-	  <LangVersion>10</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <Description>A simulation Environment for Wilderness Labs Meadow Platform</Description>
   </PropertyGroup>
   <ItemGroup>

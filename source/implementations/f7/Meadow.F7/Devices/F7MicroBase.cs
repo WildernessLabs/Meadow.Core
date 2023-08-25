@@ -46,7 +46,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// Gets the current Battery information
     /// </summary>
     /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
-    public abstract BatteryInfo GetBatteryInfo();
+    public abstract BatteryInfo? GetBatteryInfo();
 
     //==== internals
     protected NetworkAdapterCollection networkAdapters;
