@@ -1,3 +1,4 @@
+using Meadow.Cloud;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Meadow.Cloud;
 
 namespace Meadow;
 
@@ -14,21 +14,27 @@ namespace Meadow;
 /// </summary>
 public class HealthReporter : IHealthReporter
 {
-    static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-    
-    /// <summary>
-    /// Starts the health reporter based on the desired interval.
-    /// </summary>
-    /// <param name="interval">In minutes</param>
+    private static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+
+    /// <inheritdoc/>
     public void Start(int interval)
     {
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
-        timer.Start();
+
+        Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
+        {
+            Resolver.Log.Trace($"starting health metrics timer");
+            timer.Start();
+
+            // send the first health metric
+            await Send();
+        };
     }
 
-    private async Task TimerOnElapsed(object sender, ElapsedEventArgs e)
+    /// <inheritdoc/>
+    public async Task Send()
     {
         var connected = Resolver.Device.NetworkAdapters.Any(a => a.IsConnected);
 
@@ -40,28 +46,49 @@ public class HealthReporter : IHealthReporter
 
             var service = Resolver.Services.Get<IMeadowCloudService>();
             var device = Resolver.Device;
-            DirectoryInfo di = new DirectoryInfo("/meadow0");
+
+            DirectoryInfo di = new DirectoryInfo(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot);
+
             var usedDiskSpace = DirSize(di);
 
-            await service!.SendEvent(new CloudEvent()
+            var ce = new CloudEvent()
             {
                 Description = "device.health",
                 EventId = 10,
                 Measurements = new Dictionary<string, object>()
                 {
-                    { "cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
-                    { "memory_used", GC.GetTotalMemory(false) },
-                    { "disk_space_used", usedDiskSpace },
-                    { "battery_percentage", device.GetBatteryInfo().StateOfCharge }
+                    { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
+                    { "health.memory_used", GC.GetTotalMemory(false) },
+                    { "health.disk_space_used", usedDiskSpace },
+                    { "info.os_version", device.Information.OSVersion },
+
                 },
-                Timestamp = DateTime.UtcNow
-            });
+                Timestamp = DateTimeOffset.UtcNow
+            };
+
+            var batteryInfo = device.GetBatteryInfo();
+            if (batteryInfo != null)
+            {
+                ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
+            }
+
+            if (!string.IsNullOrEmpty(device.Information.CoprocessorOSVersion))
+            {
+                ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
+            }
+
+            await service!.SendEvent(ce);
             Resolver.Log.Trace($"health metrics sent");
         }
         finally
         {
             semaphoreSlim.Release();
         }
+    }
+
+    private async Task TimerOnElapsed(object sender, ElapsedEventArgs e)
+    {
+        await Send();
     }
 
     private long DirSize(DirectoryInfo d)

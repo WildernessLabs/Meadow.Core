@@ -129,9 +129,9 @@ namespace Meadow.Devices
             return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted, false);
         }
 
-        public override BatteryInfo GetBatteryInfo()
+        public override BatteryInfo? GetBatteryInfo()
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }
