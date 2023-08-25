@@ -55,9 +55,11 @@ public class HealthReporter : IHealthReporter
                 EventId = 10,
                 Measurements = new Dictionary<string, object>()
                 {
-                    { "cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
-                    { "memory_used", GC.GetTotalMemory(false) },
-                    { "disk_space_used", usedDiskSpace }
+                    { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
+                    { "health.memory_used", GC.GetTotalMemory(false) },
+                    { "health.disk_space_used", usedDiskSpace },
+                    { "info.os_version", device.Information.OSVersion },
+                    
                 },
                 Timestamp = DateTime.UtcNow
             };
@@ -65,9 +67,14 @@ public class HealthReporter : IHealthReporter
             var batteryInfo = device.GetBatteryInfo();
             if (batteryInfo != null)
             {
-                ce.Measurements.Add("battery_percentage", batteryInfo.StateOfCharge);
+                ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
             }
 
+            if (!string.IsNullOrEmpty(device.Information.CoprocessorOSVersion))
+            {
+                ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
+            }
+            
             await service!.SendEvent(ce);
             Resolver.Log.Trace($"health metrics sent");
         }
