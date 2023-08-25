@@ -232,9 +232,31 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
+        public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode)
+        {
+            return CreateDigitalInterruptPort(
+                pin,
+                interruptMode,
+                ResistorMode.Disabled,
+                TimeSpan.Zero,
+                TimeSpan.Zero);
+        }
+
         public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
             throw new NotImplementedException();
+        }
+
+        public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin)
+        {
+            return CreateBiDirectionalInterruptPort(
+                pin,
+                false,
+                InterruptMode.EdgeRising,
+                ResistorMode.InternalPullDown,
+                PortDirectionType.Input,
+                TimeSpan.Zero,
+                TimeSpan.Zero);
         }
 
         public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
@@ -242,7 +264,7 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState)
+        public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false)
         {
             throw new NotImplementedException();
         }
