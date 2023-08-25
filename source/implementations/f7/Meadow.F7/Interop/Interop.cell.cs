@@ -19,6 +19,9 @@ internal static partial class Interop
         [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern int meadow_cell_scanner(IntPtr buf);
 
+        [DllImport(LIBRARY_NAME, SetLastError = true)]
+        public static extern void meadow_cell_change_state(int s);
+
         private static List<CellNetwork> Parse(string input)
         {
             if (input.Contains("+CME ERROR"))

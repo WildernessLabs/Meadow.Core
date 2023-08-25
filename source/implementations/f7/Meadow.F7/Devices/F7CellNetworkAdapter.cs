@@ -5,6 +5,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 namespace Meadow.Devices;
 using Meadow.Networking;
 
@@ -17,6 +18,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string _imei;
     private string _csq;
     private string _at_cmds_output;
+    private bool _at_cmd_done = false;
+    private int _at_timeout;
 
     private static string ExtractValue(string input, string pattern)
     {
@@ -104,6 +107,11 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 ResetCellTempData();
 
                 RaiseNetworkDisconnected();
+                break;
+            case CellFunction.NetworkAtCmdEvent:
+                Resolver.Log.Trace("Cell at cmd event triggered!");
+
+                UpdateAtCmdsOutput();
                 break;
             default:
                 Resolver.Log.Trace("Event type not found");
@@ -206,5 +214,64 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         return Core.Interop.Nuttx.MeadowCellNetworkScanner();
     }
+    
+    /// <summary>
+    /// Set the cell state
+    /// </summary>
+    /// <param name="CellState">State of the cell.</param>
+    private static void CellSetState (CellNetworkState CellState)
+    {
+        int state = 0;
+        switch (CellState)
+        {
+            case CellNetworkState.Resumed:
+                state = 0;
+                break;
+            case CellNetworkState.Paused:
+                state |= 1 << 0;
+                break;
+            case CellNetworkState.TrackingGPSLocation:
+                state |= 1 << 1;
+                break;
+            case CellNetworkState.FetchingSignalQuality:
+                state |= 1 << 2;
+                break;    
+            case CellNetworkState.ScanningNetworks:
+                state |= 1 << 3;
+                break;
+            default:
+                state |= 1 << 0;
+                break;
+        }
+        Core.Interop.Nuttx.meadow_cell_change_state(state);
+    }
 
+    /// <summary>
+    /// Return the the cell signal quality<b>CSQ<\b> if _at_cmds_ouput is not null, otherwise <b>99</b>
+    /// </summary>
+    public double GetSignalQuality()
+    {
+        string csqPattern = @"\+CSQ:\s+(\d+),\d+";
+        string csq;
+
+        CellSetState(CellNetworkState.FetchingSignalQuality);
+
+        Thread.Sleep(TimeSpan.FromMilliseconds(500));
+
+        CellSetState(CellNetworkState.Resumed);
+
+        if (_at_cmds_output == null)
+        {
+            Resolver.Log.Error("AT commands output not found!");
+            return 99;
+        }
+
+        csq = ExtractValue(_at_cmds_output, csqPattern);
+        if (csq == null)
+        {
+            return 99;
+        }
+
+        return Convert.ToDouble(csq);
+    }
 }
