@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Meadow.Simulation
+namespace Meadow.Simulation;
+
+public class SimulationState
 {
-    public class SimulationState
-    {
-        public Dictionary<string, double> PinStates { get; set; } = new Dictionary<string, double>();
-    }
+    public Dictionary<string, double> PinStates { get; set; } = new Dictionary<string, double>();
 }

@@ -3,24 +3,9 @@ using Meadow.Units;
 
 namespace Meadow.Simulation;
 
-public abstract class SimulatedDigitalInputPortBase : DigitalInputPortBase
+internal class SimulatedDigitalInputPort : SimulatedDigitalInputPortBase
 {
-    protected SimulatedDigitalInputPortBase(SimulatedPin pin, IDigitalChannelInfo channel)
-        : base(pin, channel)
-    {
-    }
-
-    public sealed override bool State // shenanigans required because C# doesn't allow `new` and `overide` in the same sig
-    {
-        get { return StateImpl; }
-    }
-
-    protected abstract bool StateImpl { get; }
-}
-
-public class SimulatedDigitalInputPort : SimulatedDigitalInputPortBase
-{
-    private SimulatedPin SimPin => Pin as SimulatedPin ?? throw new System.Exception("Pin is no a SimulatedPin");
+    private SimulatedPin SimPin => Pin as SimulatedPin ?? throw new System.Exception("Pin is not a SimulatedPin");
 
     public SimulatedDigitalInputPort(SimulatedPin pin, IDigitalChannelInfo channel)
         : base(pin, channel)
@@ -34,15 +19,12 @@ public class SimulatedDigitalInputPort : SimulatedDigitalInputPortBase
         SimPin.Voltage = voltage;
     }
 
+    protected override bool StateImpl => State;
+
     public new bool State
     {
         get => SimPin.Voltage >= SimulationEnvironment.ActiveVoltage;
-        set => SimPin.Voltage = value ? new Voltage(SimulationEnvironment.ActiveVoltage) : new Voltage(SimulationEnvironment.InactiveVoltage);
-    }
-
-    protected override bool StateImpl
-    {
-        get => State;
+        set => SimPin.Voltage = value ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage;
     }
 
     public override ResistorMode Resistor { get; set; }
