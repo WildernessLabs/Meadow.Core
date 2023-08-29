@@ -18,6 +18,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
+    <PackageReference Include="Meadow" Version="*" />
   </ItemGroup>
 </Project>
