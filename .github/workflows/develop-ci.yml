@@ -2,10 +2,8 @@ name: Develop Build
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-  push:
-    branches: [ develop ]
   pull_request:
+  push:
     branches: [ develop ]
 
 jobs:
@@ -14,6 +12,35 @@ jobs:
     runs-on: windows-latest
 
     steps:
+
+    - name: Checkout Meadow.Logging
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Logging
+        path: Meadow.Logging
+        ref: develop
+
+    - name: Checkout Meadow.Units
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Units
+        path: Meadow.Units
+        ref: develop
+
+    - name: Checkout Meadow.Contracts
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Contracts
+        path: Meadow.Contracts
+        ref: develop
+
+    - name: Checkout Meadow.Modbus
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Modbus
+        path: Meadow.Modbus
+        ref: develop        
+
     - name: Checkout MQTTnet fork
       uses: actions/checkout@v3
       with:
@@ -24,35 +51,7 @@ jobs:
     - name: Checkout Meadow.Core
       uses: actions/checkout@v3
       with:
-        path: Meadow.Core # we have to put this in a sub-folder so we can pull Contracts/Units to a parent folder
-       
-    - name: Checkout Meadow.Contracts
-      uses: actions/checkout@v3
-      with:
-        repository: WildernessLabs/Meadow.Contracts
-        path: Meadow.Contracts
-        ref: develop
-
-    - name: Checkout Meadow.Units
-      uses: actions/checkout@v3
-      with:
-        repository: WildernessLabs/Meadow.Units
-        path: Meadow.Units
-        ref: develop
-
-    - name: Checkout Meadow.Logging
-      uses: actions/checkout@v3
-      with:
-        repository: WildernessLabs/Meadow.Logging
-        path: Meadow.Logging
-        ref: develop
-
-    - name: Checkout Meadow.Modbus
-      uses: actions/checkout@v3
-      with:
-        repository: WildernessLabs/Meadow.Modbus
-        path: Meadow.Modbus
-        ref: develop
+        path: Meadow.Core
         
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v1
@@ -60,8 +59,11 @@ jobs:
         dotnet-version:
           7.0.x
           
-    - name: apply required VS workloads
+    - name: Workload Restore Meadow.Core
       run: dotnet workload restore Meadow.Core/source/Meadow.Core.sln
       
     - name: Build Meadow.Core
       run: dotnet build -c Release Meadow.Core/source/Meadow.Core.sln
+    
+    - name: Test Core.Unit.Tests
+      run: dotnet test -c Release --no-build Meadow.Core/source/Tests/Core.Unit.Tests/Core.Unit.Tests.csproj

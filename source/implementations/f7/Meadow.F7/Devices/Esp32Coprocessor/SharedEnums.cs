@@ -216,7 +216,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Esp32Interfaces - WiredEthernet
         /// </summary>
-        WiredEthernet = 6
+        WiredEthernet = 6,
+        /// <summary>
+        /// Esp32Interfaces - Cell
+        /// </summary>
+        Cell = 7
     };
 
     /// <summary>
@@ -470,6 +474,21 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// BluetoothFunction - ClientWriteRequestEvent
         /// </summary>
         ClientWriteRequestEvent = 4
+    };
+
+    /// <summary>
+    /// Cell functions available on the ESP32
+    /// </summary>
+    public enum CellFunction
+    {
+        /// <summary>
+        /// CellFunction - NetworkConnectedEvent
+        /// </summary>
+        NetworkConnectedEvent = 0,
+        /// <summary>
+        /// CellFunction - NetworkDisconnectedEvent
+        /// </summary>
+        NetworkDisconnectedEvent = 1,
     };
 
     /// <summary>

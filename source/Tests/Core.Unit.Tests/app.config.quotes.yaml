@@ -1,0 +1,5 @@
+﻿MyApp:
+  NetName0: NoQuotes
+  NetName1: "SingleQuotes"
+  NetName3: "Quotes with spaces"
+  NetName4: "value \"contains\" quotes"

@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -7,6 +8,8 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -17,7 +20,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,12 +30,29 @@ namespace Meadow.Update;
 /// <summary>
 /// The default Meadow implementation of IUpdateService
 /// </summary>
-public class UpdateService : IUpdateService
+public class UpdateService : IUpdateService, ICommandService
 {
     /// <summary>
     /// Retry period the service will use to attempt network reconnection
     /// </summary>
     public const int NetworkRetryTimeoutSeconds = 15;
+
+    /// <summary>
+    /// Specifies the maximum number of download attempts before giving up.
+    /// </summary>
+    public const int MaxDownloadRetries = 10;
+    
+    /// <summary>
+    /// Period the service will wait between download attempts in 
+    /// case of failure.
+    /// </summary>
+    public const int RetryDelayMilliseconds = 1000;
+
+    /// <summary>
+    /// Auth token expiration period in minutes.
+    /// TODO: Replace this hardcoded value with one retrieved from the Meadow Cloud.
+    /// </summary>
+    public const int TokenExpirationPeriod = 60;
 
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
@@ -54,7 +73,9 @@ public class UpdateService : IUpdateService
 
     private UpdateState _state;
     private bool _stopService = false;
+    private bool _downloadInProgress = false;
     private string? _jwt = null;
+    private DateTime _lastAuthenticationTime = DateTime.MinValue;
 
     private IUpdateSettings Config { get; }
     private IMqttClient MqttClient { get; set; } = default!;
@@ -127,6 +148,13 @@ public class UpdateService : IUpdateService
         {
             Resolver.Log.Debug("MQTT message received");
 
+            if (f.ApplicationMessage.Topic.EndsWith($"/commands/{Resolver.Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
+            {
+                Resolver.Log.Trace("Meadow command received");
+                ProcessPublishedCommand(f.ApplicationMessage);
+                return Task.CompletedTask;
+            }
+
             var json = Encoding.UTF8.GetString(f.ApplicationMessage.Payload);
 
             var opts = new JsonSerializerOptions
@@ -181,6 +209,15 @@ public class UpdateService : IUpdateService
 
         return _jwt != null;
     }
+    
+    /// <summary>
+    /// Method to determine if the authentication is required based on whether the time since 
+    /// the last authentication exceeds the token expiration period (in minutes).
+    /// </summary>
+    private bool ShouldAuthenticate()
+    {
+        return (DateTime.Now - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
+    }
 
     private async void UpdateStateMachine()
     {
@@ -200,7 +237,7 @@ public class UpdateService : IUpdateService
             switch (State)
             {
                 case UpdateState.Disconnected:
-                    if (Config.UseAuthentication)
+                    if (Config.UseAuthentication && ShouldAuthenticate())
                     {
                         State = UpdateState.Authenticating;
                     }
@@ -214,6 +251,8 @@ public class UpdateService : IUpdateService
                     {
                         if (await AuthenticateWithServer())
                         {
+                            // Update the last authentication time when successfully authenticated
+                            _lastAuthenticationTime = DateTime.Now;
                             State = UpdateState.Connecting;
                         }
                         else
@@ -237,7 +276,9 @@ public class UpdateService : IUpdateService
                     {
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
-                            .WithTcpServer(Config.UpdateServer, Config.UpdatePort);
+                            .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
+                            .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+                            .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
 
                         if (Config.UseAuthentication)
                         {
@@ -284,50 +325,58 @@ public class UpdateService : IUpdateService
                     }
                     break;
                 case UpdateState.Connected:
-                    State = UpdateState.Idle;
-                    try
+                    if (!_downloadInProgress)
                     {
-                        JsonWebTokenPayload? jwtPayload = null;
-                        if (Config.UseAuthentication)
+                        State = UpdateState.Idle;
+                        try
                         {
-                            if (string.IsNullOrWhiteSpace(_jwt))
+                            JsonWebTokenPayload? jwtPayload = null;
+                            if (Config.UseAuthentication)
                             {
-                                throw new InvalidOperationException("Update service authentication is enabled but no JWT is available");
+                                if (string.IsNullOrWhiteSpace(_jwt))
+                                {
+                                    throw new InvalidOperationException("Update service authentication is enabled but no JWT is available");
+                                }
+
+                                jwtPayload = GetJsonWebTokenPayload(_jwt);
                             }
 
-                            jwtPayload = GetJsonWebTokenPayload(_jwt);
+                            // the config RootTopic can have multiple semicolon-delimited topics
+                            var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach (var topic in topics)
+                            {
+                                string topicName = topic;
+
+                                // look for macro-substitutions
+                                if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
+                                {
+                                    topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
+                                }
+
+                                if (topic.Contains("{ID}"))
+                                {
+                                    topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
+                                }
+
+                                Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
+                                await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
+                            }
                         }
-
-                        // the config RootTopic can have multiple semicolon-delimited topics
-                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
-
-                        foreach (var topic in topics)
+                        catch (Exception ex)
                         {
-                            string topicName = topic;
+                            Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
 
-                            // look for macro-substitutions
-                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
-                            {
-                                topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
-                            }
+                            // if subscribing fails, then we need to disconnect from the server
+                            await MqttClient.DisconnectAsync();
 
-                            if (topic.Contains("{ID}"))
-                            {
-                                topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
-                            }
-
-                            Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
-                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
+                            State = UpdateState.Disconnected;
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
-
-                        // if subscribing fails, then we need to disconnect from the server
-                        await MqttClient.DisconnectAsync();
-
-                        State = UpdateState.Disconnected;
+                        Resolver.Log.Debug($"Resuming download after reconnection...");
+                        State = UpdateState.DownloadingFile;
                     }
                     break;
                 case UpdateState.Idle:
@@ -395,75 +444,99 @@ public class UpdateService : IUpdateService
         Resolver.Log.Trace($"Attempting to retrieve {destination}");
         var sw = Stopwatch.StartNew();
 
-        try
+        long totalBytesDownloaded = 0;
+        _downloadInProgress = true;
+
+        for (int retryCount = 0; retryCount < MaxDownloadRetries && _downloadInProgress; retryCount++)
         {
-            // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
-            using (var httpClient = new HttpClient())
+            try
             {
-                if (Config.UseAuthentication)
+                // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
+                using (var httpClient = new HttpClient())
                 {
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
-                }
-
-                using (var stream = await httpClient.GetStreamAsync(destination))
-                {
-                    using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                    if (Config.UseAuthentication)
                     {
-                        Resolver.Log.Trace($"Copying update to {fileStream.Name}");
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                    }
 
-                        await stream.CopyToAsync(fileStream, 4096);
+                    // Configure the HTTP range header to indicate resumption of partial download, starting from 
+                    // the 'totalBytesDownloaded' byte position and extending to the end of the content.
+                    httpClient.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
+
+                    using (var stream = await httpClient.GetStreamAsync(destination))
+                    {
+                        using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                        {
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+
+                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                totalBytesDownloaded += bytesRead;
+
+                                Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                            }
+                        }
                     }
                 }
-            }
 
-            sw.Stop();
+                sw.Stop();
 
-            var path = Store.GetUpdateArchivePath(message.ID);
-            var fi = new FileInfo(path);
+                var path = Store.GetUpdateArchivePath(message.ID);
+                var fi = new FileInfo(path);
 
-            if (sw.Elapsed.Seconds > 0)
-            {
-                Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0} bps)");
-            }
-            else
-            {
-                // don't divide by 0
-                Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec");
-            }
-
-            var hash = Store.GetFileHash(fi);
-
-            if (!string.IsNullOrWhiteSpace(message.DownloadHash))
-            {
-                if (hash != message.DownloadHash)
+                if (sw.Elapsed.Seconds > 0)
                 {
-                    Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
-                    // TODO: what do we do? Retry? Ignore?
+                    Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec ({fi.Length / sw.Elapsed.Seconds:0} bps)");
                 }
                 else
                 {
-                    Resolver.Log.Trace("Update package hash matched");
+                    // don't divide by 0
+                    Resolver.Log.Info($"Retrieved {fi.Length} bytes in {sw.Elapsed.TotalSeconds:0} sec");
                 }
+
+                _downloadInProgress = false;
+
+                var hash = Store.GetFileHash(fi);
+
+                if (!string.IsNullOrWhiteSpace(message.DownloadHash))
+                {
+                    if (hash != message.DownloadHash)
+                    {
+                        Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
+                        // TODO: what do we do? Retry? Ignore?
+                    }
+                    else
+                    {
+                        Resolver.Log.Trace("Update package hash matched");
+                    }
+                }
+                else
+                {
+                    Resolver.Log.Warn("Downloaded Updated was not Hashed by server!");
+                    // TODO: what do we do?
+                }
+
+                OnUpdateRetrieved(this, message);
+                Store.SetRetrieved(message);
+
+                State = UpdateState.Idle;
             }
-            else
+            catch (Exception ex)
             {
-                Resolver.Log.Warn("Downloaded Updated was not Hashed by server!");
-                // TODO: what do we do?
+                sw.Stop();
+
+                // TODO: raise some event?
+                Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
+
+                Resolver.Log.Info($"Retrying attempt {retryCount + 1} of {MaxDownloadRetries} in {RetryDelayMilliseconds} milliseconds...");
+                await Task.Delay(RetryDelayMilliseconds);
             }
-
-            OnUpdateRetrieved(this, message);
-            Store.SetRetrieved(message);
-
-            State = UpdateState.Idle;
         }
-        catch (Exception ex)
-        {
-            sw.Stop();
 
-            // TODO: raise some event?
-            Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
-            State = UpdateState.Idle;
-        }
+        State = UpdateState.Idle;
+        _downloadInProgress = false;
     }
 
     private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
@@ -650,5 +723,94 @@ public class UpdateService : IUpdateService
         OnUpdateSuccess(this, updateInfo);
 
         State = UpdateState.Idle;
+    }
+
+    private readonly ConcurrentDictionary<string, (Type CommandType, Action<object> Action)> CommandSubscriptions = new();
+    private const string UntypedCommandTypeName = "<<<MEADOWCOMMAND>>>";
+
+    void ICommandService.Subscribe(Action<MeadowCommand> action)
+    {
+        CommandSubscriptions[UntypedCommandTypeName] = (CommandType: typeof(MeadowCommand), Action: x => action((MeadowCommand)x));
+    }
+
+    void ICommandService.Subscribe<T>(Action<T> action)
+    {
+        var commandTypeName = typeof(T).Name;
+        CommandSubscriptions[commandTypeName.ToUpperInvariant()] = (CommandType: typeof(T), Action: x => action((T)x));
+    }
+
+    void ICommandService.Unsubscribe()
+    {
+        CommandSubscriptions.TryRemove(UntypedCommandTypeName, out _);
+    }
+
+    void ICommandService.Unsubscribe<T>()
+    {
+        var commandTypeName = typeof(T).Name;
+        CommandSubscriptions.TryRemove(commandTypeName.ToUpperInvariant(), out _);
+    }
+
+    internal void ProcessPublishedCommand(MqttApplicationMessage message)
+    {
+        if (message.UserProperties == null)
+        {
+            Resolver.Log.Error("Unable to process published command without a command name.");
+            return;
+        }
+
+        var properties = message.UserProperties.ToDictionary(x => x.Name.ToUpperInvariant(), x => x.Value);
+
+        if (!properties.TryGetValue("COMMANDNAME", out string commandName) ||
+            string.IsNullOrWhiteSpace(commandName))
+        {
+            Resolver.Log.Error("Unable to process published command without a command name.");
+            return;
+        }
+
+        var jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+
+        // First attempt to run the untyped command subscription, Action<MeadowCommand>, if available.
+        if (CommandSubscriptions.TryGetValue(UntypedCommandTypeName, out (Type CommandType, Action<object> Action) value))
+        {
+            Resolver.Log.Trace($"Processing generic Meadow command with command name '{commandName}'...");
+
+            IReadOnlyDictionary<string, object>? arguments;
+            try
+            {
+                arguments = message.Payload != null
+                    ? JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(message.Payload, jsonSerializerOptions)
+                    : null;
+            }
+            catch (JsonException ex)
+            {
+                Resolver.Log.Error($"Unable to deserialize command arguments: {ex.Message}");
+                return;
+            }
+
+            var command = new MeadowCommand(commandName, arguments);
+            value.Action(command);
+        }
+
+        // Then attempt to run the typed command subscription, Action<T> where T : ICommand, new(),
+        // if available. Also prevent user from running the untyped command subscription.
+        if (CommandSubscriptions.TryGetValue(commandName.ToUpperInvariant(), out value))
+        {
+            Resolver.Log.Trace($"Processing Meadow command of type '{value.CommandType.Name}'...");
+
+            object command;
+            try
+            {
+                command = message.Payload != null
+                    ? JsonSerializer.Deserialize(message.Payload, value.CommandType, jsonSerializerOptions) ?? Activator.CreateInstance(value.CommandType)
+                    : Activator.CreateInstance(value.CommandType);
+            }
+            catch (JsonException ex)
+            {
+                Resolver.Log.Error($"Unable to deserialize command arguments: {ex.Message}");
+                return;
+            }
+
+            value.Action(command);
+        }
     }
 }

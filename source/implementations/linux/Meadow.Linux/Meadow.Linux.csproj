@@ -16,8 +16,11 @@
     <Description>Linux .NET libraries for Wilderness Labs Meadow</Description>
   </PropertyGroup>
   <PropertyGroup>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>10</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
@@ -25,6 +28,6 @@
     <PackageReference Include="Meadow" Version="*" />
   </ItemGroup>
   <ItemGroup>
- 	<None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+   <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>

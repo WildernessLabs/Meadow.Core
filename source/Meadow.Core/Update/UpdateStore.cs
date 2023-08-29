@@ -12,8 +12,8 @@ public class UpdateStore : IEnumerable<UpdateInfo>
 {
     private const string UpdateInfoFileName = "info.json";
 
-    private List<UpdateMessage> _updates = new List<UpdateMessage>();
-    private DirectoryInfo _storeDirectory;
+    private readonly List<UpdateMessage> _updates = new();
+    private readonly DirectoryInfo _storeDirectory;
 
     internal UpdateStore(string dataDirectory)
     {
@@ -124,6 +124,9 @@ public class UpdateStore : IEnumerable<UpdateInfo>
         File.WriteAllText(dest, json);
     }
 
+    /// <summary>
+    /// Deletes all local update archives and information
+    /// </summary>
     public void Clear()
     {
         _updates.Clear();
@@ -143,6 +146,10 @@ public class UpdateStore : IEnumerable<UpdateInfo>
         return message != null;
     }
 
+    /// <summary>
+    /// Gets the full path to the provided update archive 
+    /// </summary>
+    /// <param name="updateID">The ID of the archive of interest</param>
     public string? GetUpdateArchivePath(string updateID)
     {
         var dest = Path.Combine(_storeDirectory.FullName, updateID);
@@ -165,15 +172,22 @@ public class UpdateStore : IEnumerable<UpdateInfo>
             di.Create();
         }
 
-        var fi = new FileInfo(Path.Combine(dest, $"{updateID}.zip"));
+        var filePath = Path.Combine(dest, $"{updateID}.zip");
+        var fi = new FileInfo(filePath);
         if (fi.Exists)
         {
-            fi.Delete();
+            // Continue the download, instead of discarding the downloaded bytes
+            Resolver.Log.Trace($"Resuming download from existing file: {filePath}. Appending to continue.");
+            return fi.Open(FileMode.Append, FileAccess.Write);
         }
 
         return fi.Create();
     }
 
+    /// <summary>
+    /// Calculates the SHA256 hash of a file
+    /// </summary>
+    /// <param name="file">The file to hash</param>
     public string GetFileHash(FileInfo file)
     {
         using (var sha = SHA256.Create())
@@ -203,6 +217,7 @@ public class UpdateStore : IEnumerable<UpdateInfo>
         SaveOrUpdateMessage(message);
     }
 
+    /// <inheritdoc/>
     public IEnumerator<UpdateInfo> GetEnumerator()
     {
         return _updates.GetEnumerator();

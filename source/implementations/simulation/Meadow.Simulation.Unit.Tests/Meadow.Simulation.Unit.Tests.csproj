@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Company>Wilderness Labs, Inc</Company>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
-
+    <LangVersion>10.0</LangVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meadow.Simulation" Version="0.*" />
+    <PackageReference Include="Meadow.Simulation" Version="*" />
   </ItemGroup>
 
 </Project>

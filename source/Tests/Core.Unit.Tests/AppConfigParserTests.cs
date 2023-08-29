@@ -43,5 +43,28 @@ namespace Core.Unit.Tests
 
             var s = AppSettingsParser.Parse(yml);
         }
+
+        [Fact]
+        public void ParseFileWithQuotes()
+        {
+            var yml = File.ReadAllText("app.config.quotes.yaml");
+
+            var s = AppSettingsParser.Parse(yml);
+
+            Assert.Equal("NoQuotes", s.Settings["MyApp.NetName0"]);
+            Assert.Equal("SingleQuotes", s.Settings["MyApp.NetName1"]);
+            Assert.Equal("Quotes with spaces", s.Settings["MyApp.NetName3"]);
+            Assert.Equal("value \"contains\" quotes", s.Settings["MyApp.NetName4"]);
+        }
+
+        [Fact]
+        public void ParseEnvizorFile()
+        {
+            var yml = File.ReadAllText("app.config.envizor.yaml");
+
+            var s = AppSettingsParser.Parse(yml);
+
+            // no error means pass
+        }
     }
 }

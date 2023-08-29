@@ -12,10 +12,14 @@ namespace Meadow.Hardware
         private PortDirectionType _currentDirection;
         private TimeSpan _debounceDuration;
         private TimeSpan _glitchDuration;
+
+        /// <summary>
+        /// Gets or sets the port's IOController
+        /// </summary>
         protected IMeadowIOController IOController { get; }
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
-        // Direction change
+        /// <inheritdoc/>
         public override PortDirectionType Direction
         {
             get => _currentDirection;
@@ -147,11 +151,15 @@ namespace Meadow.Hardware
             return new BiDirectionalInterruptPort(pin, ioController, chan, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType);
         }
 
+        /// <summary>
+        /// Finalizes the Port instance
+        /// </summary>
         ~BiDirectionalInterruptPort()
         {
             Dispose(false);
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             // TODO: we should consider moving this logic to the finalizer
@@ -171,6 +179,7 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <inheritdoc/>
         public override bool State
         {
             get
@@ -186,6 +195,7 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <inheritdoc/>
         public override TimeSpan DebounceDuration
         {
             get => _debounceDuration;
@@ -198,6 +208,7 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <inheritdoc/>
         public override TimeSpan GlitchDuration
         {
             get => _glitchDuration;
