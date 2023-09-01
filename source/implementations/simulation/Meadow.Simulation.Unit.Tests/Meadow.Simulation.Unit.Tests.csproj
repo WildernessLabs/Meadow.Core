@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meadow.Simulation" Version="*" />
+    <ProjectReference Include="..\Meadow.Simulation\Meadow.Simulation.csproj" />
   </ItemGroup>
 
 </Project>

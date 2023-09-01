@@ -8,6 +8,9 @@ using System.Text.Json;
 
 namespace Meadow.Update;
 
+/// <summary>
+/// A local store for holding information abaout available and applied Updates
+/// </summary>
 public class UpdateStore : IEnumerable<UpdateInfo>
 {
     private const string UpdateInfoFileName = "info.json";
