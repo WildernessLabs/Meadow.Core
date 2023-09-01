@@ -23,6 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\icon.png" Pack="true" PackagePath="" />
-    <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
+    <PackageReference Include="Meadow" Version="*" />
   </ItemGroup>
 </Project>

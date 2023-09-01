@@ -15,6 +15,6 @@
     <PackageReference Include="Meadow.Modbus" Version="0.29.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Meadow.Simulation\Meadow.Simulation.csproj" />
+    <PackageReference Include="Meadow.Simulation" Version="*" />
   </ItemGroup>
 </Project>
