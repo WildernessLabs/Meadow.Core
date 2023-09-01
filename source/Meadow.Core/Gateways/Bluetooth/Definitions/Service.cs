@@ -1,5 +1,8 @@
 ﻿namespace Meadow.Gateways.Bluetooth
 {
+    /// <summary>
+    /// Provides access to a device Bluetooth capabilities
+    /// </summary>
     public class Service : IService
     {
         public ushort Handle { get; set; }
