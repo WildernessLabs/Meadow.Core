@@ -18,9 +18,10 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string _imei;
     private string _csq;
     private string _at_cmds_output;
-    private bool _at_cmd_done = false;
-    private int _at_timeout;
 
+    /// <summary>
+    /// Extract values from an <b>input</b> string based on a regex <b>pattern</b>.
+    /// </summary>
     private static string ExtractValue(string input, string pattern)
     {
         Match match = Regex.Match(input, pattern);
@@ -273,5 +274,33 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
 
         return Convert.ToDouble(csq);
+    }
+
+    /// <summary>
+    /// Return the GPS location NMEA sentence if <b>_at_cmds_ouput<\b> is not null, otherwise an empty string.
+    /// </summary>
+    public string GetGpsLocation()
+    {
+        Resolver.Log.Trace("Retrieving GPS location... It might take 2-3 minutes and temporary disconnect you from the cellular network.");
+        _at_cmds_output = string.Empty;
+
+        CellSetState(CellNetworkState.TrackingGPSLocation);
+
+        var timeout = 300; // TODO: Remove this hardcoded value
+        while (_at_cmds_output == string.Empty && timeout > 0)
+        {
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+            timeout--;
+        }
+
+        CellSetState(CellNetworkState.Resumed);
+        
+        if (_at_cmds_output == null)
+        {
+            Resolver.Log.Error("AT commands output not found!");
+            return string.Empty;
+        }
+
+        return _at_cmds_output;
     }
 }
