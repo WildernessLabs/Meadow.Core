@@ -18,8 +18,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string _imei;
     private string _csq;
     private string _at_cmds_output;
-    private bool _at_cmd_done = false;
-    private int _at_timeout;
 
     private static string ExtractValue(string input, string pattern)
     {
@@ -218,7 +216,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         return Core.Interop.Nuttx.MeadowCellNetworkScanner();
     }
-    
+
     /// <summary>
     /// Set the cell state
     /// </summary>
@@ -251,16 +249,24 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
-    /// Return the the cell signal quality<b>CSQ<\b> if _at_cmds_ouput is not null, otherwise <b>99</b>
+    /// Get current signal quality
     /// </summary>
-    public double GetSignalQuality()
+    /// <param name="timeout">Timeout to check signal quality.</param>
+    /// <return>Cell signal quality</return>
+    public double GetSignalQuality(int timeout = 10)
     {
         string csqPattern = @"\+CSQ:\s+(\d+),\d+";
         string csq;
+        _at_cmds_output = string.Empty;
 
         CellSetState(CellNetworkState.FetchingSignalQuality);
 
-        Thread.Sleep(TimeSpan.FromMilliseconds(500));
+        while (timeout > 0)
+        {
+            if(_at_cmds_output != string.Empty) break;
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+            timeout --;
+        }
 
         CellSetState(CellNetworkState.Resumed);
 
@@ -277,5 +283,32 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
 
         return Convert.ToDouble(csq);
+    }
+
+    /// <summary>
+    /// Scan available networks, 
+    /// this method is used without entering the "Scan Mode"
+    /// </summary>
+    /// <param name="timeout">Scan timeout.</param>
+    /// <returns>A list of CellNetworks</returns>
+    public CellNetwork[] ScanNetwork(int timeout = 30)
+    {
+        CellSetState(CellNetworkState.ScanningNetworks);
+        _at_cmds_output = string.Empty;
+
+        while (timeout > 0)
+        {
+            if(_at_cmds_output != string.Empty) break;
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+            timeout --;
+        }
+
+        CellSetState(CellNetworkState.Resumed);
+
+        if (_at_cmds_output == null)
+        {
+            throw new System.IO.IOException("No available networks");
+        }
+        return Core.Interop.Nuttx.Parse(_at_cmds_output).ToArray();
     }
 }
