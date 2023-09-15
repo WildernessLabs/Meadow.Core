@@ -27,6 +27,7 @@ namespace Meadow.Devices
             }
         }
 
+        /// <inheritdoc/>
         public override IPin GetPin(string pinName)
         {
             return Pins.AllPins.FirstOrDefault(p => p.Name == pinName || p.Key.ToString() == p.Name);
@@ -60,6 +61,7 @@ namespace Meadow.Devices
             return CreateI2cBus(pinClock, pinData, busSpeed);
         }
 
+        /// <inheritdoc/>
         protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
         {
             if (clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C3_SCL.Name)
@@ -81,6 +83,7 @@ namespace Meadow.Devices
         /// <value>The pins.</value>
         public IF7CoreComputePinout Pins { get; }
 
+        /// <inheritdoc/>
         public override ISpiBus CreateSpiBus(
             Units.Frequency speed,
             int busNumber = 3
@@ -97,6 +100,7 @@ namespace Meadow.Devices
             throw new Exception("Unsupported SPI bus number");
         }
 
+        /// <inheritdoc/>
         protected override int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo)
         {
             // we're only looking at clock pin.  
@@ -120,6 +124,7 @@ namespace Meadow.Devices
             return -1;
         }
 
+        /// <inheritdoc/>
         public override IPwmPort CreatePwmPort(
             IPin pin,
             Frequency frequency,
@@ -129,6 +134,7 @@ namespace Meadow.Devices
             return PwmPort.From(pin, this.IoController, frequency, dutyCycle, inverted, false);
         }
 
+        /// <inheritdoc/>
         public override BatteryInfo? GetBatteryInfo()
         {
             return null;
