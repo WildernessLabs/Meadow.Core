@@ -101,9 +101,11 @@ public class WindowsSerialPort : ISerialPort, IDisposable
         return _port.Read(buffer, offset, count);
     }
 
-    public int ReadAll(byte[] buffer)
+    public byte[] ReadAll()
     {
-        return _port.Read(buffer, 0, _port.BytesToRead);
+        var buffer = new byte[_port.BytesToRead];
+        _port.Read(buffer, 0, buffer.Length);
+        return buffer;
     }
 
     public int ReadByte()

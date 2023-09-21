@@ -467,44 +467,27 @@ namespace Meadow.Hardware
         }
 
 
-        public int ReadAll(byte[] buffer)
-        {
-            return ReadAll(buffer, 0);
-        }
-
         /// <summary>
         /// Reads the entire serial port buffer into an array of bytes. Before
         /// calling, make sure that your buffer is large enough by checking
         /// `BytesToRead` property. If your buffer isn't large enough, this will
         /// leave bytes in the serial port buffer.
         /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public int ReadAll(byte[] buffer, int index)
+        public byte[] ReadAll()
         {
             // checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
-            if (buffer == null) { throw new ArgumentNullException(); }
-            if (index < 0) { throw new ArgumentException("Invalid index"); }
 
-            if (_readBuffer == null) return 0;
+            var buffer = new byte[_readBuffer.Count];
 
             // capture the count
             int readCount = _readBuffer.Count;
 
-            // check to see if there's room for the whole thing, if not, we're
-            // only going to read as much as we can.
-            if (readCount + index > buffer.Length)
-            {
-                readCount = buffer.Length - index;
-            }
-
             // empty the serial data into the user's buffer
-            _readBuffer.Remove(readCount).CopyTo(buffer, index);
+            _readBuffer.Remove(readCount).CopyTo(buffer, 0);
 
             // return the count read
-            return readCount;
+            return buffer;
         }
 
 
