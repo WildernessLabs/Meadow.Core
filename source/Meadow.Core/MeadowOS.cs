@@ -352,8 +352,9 @@ public static partial class MeadowOS
                 CurrentDevice = device;
                 Resolver.Services.Add<IMeadowDevice>(CurrentDevice);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Resolver.Log.Trace($"Creating instance failure : {ex.Message}");
                 return false;
             }
 
