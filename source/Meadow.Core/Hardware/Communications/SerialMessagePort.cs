@@ -120,8 +120,7 @@
         {
             if (e.EventType == SerialDataType.Chars)
             {
-                byte[] data = new byte[classicSerialPort.BytesToRead];
-                classicSerialPort.ReadAll(data);
+                var data = classicSerialPort.ReadAll();
                 Process(data);
             }
         }
