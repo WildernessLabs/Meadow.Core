@@ -489,6 +489,11 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// CellFunction - NetworkDisconnectedEvent
         /// </summary>
         NetworkDisconnectedEvent = 1,
+        /// <summary>
+        /// CellFunction - NetworkAtCmdEvent
+        /// </summary>
+        NetworkAtCmdEvent = 4,
+
     };
 
     /// <summary>
