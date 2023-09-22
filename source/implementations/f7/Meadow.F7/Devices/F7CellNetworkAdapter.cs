@@ -66,6 +66,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
     }
 
+    /// <inheritdoc/>
+    public override string Name => "Cell PPP";
+    
     public F7CellNetworkAdapter(Esp32Coprocessor esp32)
         : base(System.Net.NetworkInformation.NetworkInterfaceType.Ppp)
     {
@@ -96,6 +99,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 UpdateAtCmdsOutput();
 
+                this.Refresh();
                 RaiseNetworkConnected(args);
                 break;
             case CellFunction.NetworkDisconnectedEvent:
