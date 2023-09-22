@@ -10,6 +10,7 @@ namespace Meadow.Devices
     {
         internal static class FileSystem
         {
+            /// <exception cref="NativeException"></exception>
             public static string[] EnumDirectory(string root)
             {
                 var cmd = new Core.Interop.Nuttx.UpdEnumDirCmd();

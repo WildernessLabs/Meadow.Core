@@ -9,10 +9,15 @@ namespace Meadow.Devices
     {
         private const int ADCPrecisionBits = 12;
 
+        /// <summary>
+        /// Defines the pinout for the Meadow F7 Core Compute v2 module.
+        /// </summary>
         public partial class Pinout : IF7CoreComputePinout
         {
+            /// <inheritdoc/>
             public IPinController Controller { get; set; }
 
+            /// <inheritdoc/>
             public IList<IPin> AllPins { get; }
 
             internal Pinout()

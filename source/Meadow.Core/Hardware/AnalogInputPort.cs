@@ -81,6 +81,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
     /// <param name="sampleCount">The number of ADC readings to average for a single sample</param>
     /// <param name="sampleInterval">The time between readings used for calculating the average for a sample</param>
     /// <param name="referenceVoltage">The ADCs reference voltage</param>
+    /// <exception cref="PortInUseException"></exception>
     protected AnalogInputPort(
                 IPin pin, IMeadowIOController ioController, IAnalogChannelInfo channel,
                 int sampleCount, TimeSpan sampleInterval,

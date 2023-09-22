@@ -413,6 +413,12 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// <param name="token">Cancellation token for the connection attempt</param>
     /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
     /// <returns>The connection result</returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="NotSupportedException"></exception>
+    /// <exception cref="TimeoutException"></exception>
+    /// <exception cref="NetworkException"></exception>
+    /// <exception cref="NetworkNotFoundException"></exception>
+    /// <exception cref="NetworkAuthenticationException"></exception>
     public async Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
     {
         switch (CurrentState)

@@ -142,7 +142,7 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Gets or sets the standard number of stopbits per byte.
+        /// Gets or sets the standard number of stop bits per byte.
         /// </summary>
         public StopBits StopBits
         {
@@ -243,6 +243,10 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Returns a string that represents the current <see cref="SerialPortBase"/>.
+        /// </summary>
+        /// <returns>A string that represents the current <see cref="SerialPortBase"/>.</returns>
         public override string ToString()
         {
             char p;
