@@ -496,7 +496,7 @@ namespace Meadow.Hardware
         // is currently in the buffer.
         //
         // Ultimately, I don't believe this is practically possible with the
-        // expected mecanics of the SerialPort.
+        // expected mechanics of the SerialPort.
         //
         // The issue is that in order to continue to read, we have two options,
         // 1) either sleep/spin in a loop that keeps checking the buffer to see
@@ -509,10 +509,10 @@ namespace Meadow.Hardware
         // out data in the buffer, causing the `Read` call to be useless. The only
         // way to do this would be to cancel any notifications of `DataReceived`
         // while this call was still executing. That's doable, but I think it
-        // adds a lot more complexity to the archtiecture, and makes for a bad
+        // adds a lot more complexity to the architecture, and makes for a bad
         // API experience. As such, I think we need to restrict `Read()` to
         // data that is in the buffer. If they want an modern async model, they
-        // should probalby use the SerialMessagePort
+        // should probably use the SerialMessagePort
         //
         // in any case, i'm preserving this (untested) code below, in case we
         // might someday make a wrapper to SerialPort that is properly async.

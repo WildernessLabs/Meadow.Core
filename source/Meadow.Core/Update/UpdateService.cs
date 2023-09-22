@@ -50,7 +50,7 @@ public class UpdateService : IUpdateService, ICommandService
 
     /// <summary>
     /// Auth token expiration period in minutes.
-    /// TODO: Replace this hardcoded value with one retrieved from the Meadow Cloud.
+    /// TODO: Replace this hard-coded value with one retrieved from the Meadow Cloud.
     /// </summary>
     public const int TokenExpirationPeriod = 60;
 

@@ -58,17 +58,17 @@ namespace Meadow.Gateways.Bluetooth
         public CharacteristicWriteType WriteType { get; set; }
 
         /// <summary>
-        /// Indicates wheter the characteristic can be read or not.
+        /// Indicates whether the characteristic can be read or not.
         /// </summary>
         public bool CanRead { get; set; }
 
         /// <summary>
-        /// Indicates wheter the characteristic can be written or not.
+        /// Indicates whether the characteristic can be written or not.
         /// </summary>
         public bool CanWrite { get; set; }
 
         /// <summary>
-        /// Indicates wheter the characteristic supports notify or not.
+        /// Indicates whether the characteristic supports notify or not.
         /// </summary>
         public bool CanUpdate { get; set; }
 

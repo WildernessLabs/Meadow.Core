@@ -107,7 +107,7 @@ public abstract class App<D> : IApp, IAsyncDisposable
     public static CancellationToken Abort { get; protected set; }
 
     /// <summary>
-    /// Virtual method provided for App implemenmtations to clean up resources on Disposal
+    /// Virtual method provided for App implementations to clean up resources on Disposal
     /// </summary>
     public virtual ValueTask DisposeAsync() { return new ValueTask(Task.CompletedTask); }
 }

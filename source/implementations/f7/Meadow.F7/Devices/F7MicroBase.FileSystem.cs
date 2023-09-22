@@ -14,7 +14,7 @@ namespace Meadow.Devices
             {
                 var cmd = new Core.Interop.Nuttx.UpdEnumDirCmd();
 
-                // Dev Note: marshalling for mono/nuttx is....interesting.  
+                // Dev Note: marshaling for mono/nuttx is....interesting.  
                 // Couldn't get a simple string /stringbuilder to marshal, so here we are
                 var buffer1 = Encoding.ASCII.GetBytes(root);
                 var buffer2 = new byte[2048];

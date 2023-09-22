@@ -47,7 +47,7 @@ namespace Meadow.Gateways.Bluetooth
             new KnownService("TI SensorTag Infrared Thermometer", Guid.ParseExact("f000aa00-0451-4000-b000-000000000000", "d")),
             new KnownService("TI SensorTag Accelerometer", Guid.ParseExact("f000aa10-0451-4000-b000-000000000000", "d")),
             new KnownService("TI SensorTag Humidity", Guid.ParseExact("f000aa20-0451-4000-b000-000000000000", "d")),
-            new KnownService("TI SensorTag Magnometer", Guid.ParseExact("f000aa30-0451-4000-b000-000000000000", "d")),
+            new KnownService("TI SensorTag Magnetometer", Guid.ParseExact("f000aa30-0451-4000-b000-000000000000", "d")),
             new KnownService("TI SensorTag Barometer", Guid.ParseExact("f000aa40-0451-4000-b000-000000000000", "d")),
             new KnownService("TI SensorTag Gyroscope", Guid.ParseExact("f000aa50-0451-4000-b000-000000000000", "d")),
             new KnownService("TI SensorTag Test", Guid.ParseExact("f000aa60-0451-4000-b000-000000000000", "d")),

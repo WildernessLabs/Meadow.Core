@@ -18,7 +18,7 @@ namespace Meadow.Hardware;
 //    ReadVoltage();
 //    ```
 //
-//  * User needs to take contuinous voltage readings. Most likely getting
+//  * User needs to take continuous voltage readings. Most likely getting
 //    oversampled readings each time for accuracy.
 //
 //    ```
@@ -30,7 +30,7 @@ namespace Meadow.Hardware;
 //    ```
 //
 //  * User wants to take continuous voltage readings and wants to be notified
-//    //TODO: think through some notifcation configuration
+//    //TODO: think through some notification configuration
 //    ```
 //    analogPort.VoltageChanged += (float newVoltage){ /*do something*/ };
 
@@ -47,7 +47,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
     /// </summary>
     public static readonly TimeSpan DefaultSampleInterval = TimeSpan.FromMilliseconds(40);
     /// <summary>
-    /// The default reference votlage for the Input (3.3V)
+    /// The default reference voltage for the Input (3.3V)
     /// </summary>
     public static readonly Voltage DefaultReferenceVoltage = new Voltage(3.3, Voltage.UnitType.Volts);
 
@@ -73,7 +73,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
     protected Voltage? PreviousVoltageReading { get; set; }
 
     /// <summary>
-    /// Creates an AnalogInputPort given the povided parameters
+    /// Creates an AnalogInputPort given the provided parameters
     /// </summary>
     /// <param name="pin">The IPin to use for the input port</param>
     /// <param name="ioController">The IMeadowIOController for the pin</param>
@@ -104,7 +104,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
     }
 
     /// <summary>
-    /// Creates an AnalogInputPort given the povided parameters
+    /// Creates an AnalogInputPort given the provided parameters
     /// </summary>
     /// <param name="pin"></param>
     /// <param name="ioController"></param>
@@ -119,7 +119,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
     }
 
     /// <summary>
-    /// Creates an AnalogInputPort given the povided parameters
+    /// Creates an AnalogInputPort given the provided parameters
     /// </summary>
     /// <param name="pin"></param>
     /// <param name="ioController"></param>
