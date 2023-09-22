@@ -500,7 +500,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     };
 
     /// <summary>
-    /// Cell error 
+    /// Enumeration representing possible cell-related errors.
     /// </summary>
     public enum CellError
     {
