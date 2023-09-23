@@ -27,7 +27,7 @@ public static partial class MeadowOS
         public static string RuntimeVersion => CurrentDevice.PlatformOS.RuntimeVersion;
 
         /// <summary>
-        /// Should the system reboot if an unhandled exception is encounted in the user application?
+        /// Should the system reboot if an unhandled exception is encountered in the user application?
         /// </summary>
         public static bool RebootOnUnhandledException => CurrentDevice.PlatformOS.RebootOnUnhandledException;
 

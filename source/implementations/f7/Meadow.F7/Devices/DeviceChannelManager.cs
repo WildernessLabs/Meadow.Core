@@ -45,7 +45,7 @@ namespace Meadow.Hardware
         /// to see if a pin/channel is already in use.
         /// </summary>
         // NOTE: this method makes me long for F#. Oh pattern matching :D
-        // TODO: should also check to see if that particular pin has the capapbility it's asking for? we can address later.
+        // TODO: should also check to see if that particular pin has the capability it's asking for? we can address later.
         public Tuple<bool, string> ReservePin(IPin pin, ChannelConfigurationType configType)
         {
             Output.WriteLineIf(ShowDebug, "+ReservePin");

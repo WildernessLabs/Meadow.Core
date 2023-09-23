@@ -11,7 +11,7 @@ namespace Meadow.Devices
     /// A wrapped around the Meadow Generic Platform Driver
     /// </summary>
     /// <remarks>
-    /// There is one and only one instance of this driver, and it lives effectivly whenever the app is up, so it's
+    /// There is one and only one instance of this driver, and it lives effectively whenever the app is up, so it's
     /// used as a static singleton
     /// </remarks>
     internal static class UPD

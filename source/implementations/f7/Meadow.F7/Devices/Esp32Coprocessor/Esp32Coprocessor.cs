@@ -93,7 +93,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     }
 
     /// <summary>
-    /// Send a luetooth command and its payload to the ESP32.
+    /// Send a bluetooth command and its payload to the ESP32.
     /// </summary>
     /// <param name="function">Command to be sent.</param>
     /// <param name="block">Is this a blocking command?</param>

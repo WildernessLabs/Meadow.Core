@@ -191,7 +191,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
             _debounceDuration = value;
 
             // Update in F7
-            // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
+            // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interrupt
             this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, TimeSpan.Zero, TimeSpan.Zero);
             this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
         }
@@ -211,7 +211,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
             _glitchDuration = value;
 
             // Update in F7
-            // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interupt
+            // we have to disconnect the interrupt and reconnect, otherwise we'll get an error for an already-wired interrupt
             this.IOController.WireInterrupt(Pin, InterruptMode.None, _resistorMode, TimeSpan.Zero, TimeSpan.Zero);
             this.IOController.WireInterrupt(Pin, InterruptMode, _resistorMode, _debounceDuration, _glitchDuration);
         }

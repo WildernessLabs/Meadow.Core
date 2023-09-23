@@ -11,7 +11,7 @@ namespace Meadow.Gateways.Bluetooth
     public enum CharacteristicPropertyType
     {
         /// <summary>
-        /// Characteristic value can be broadcasted.
+        /// Characteristic value can be broadcast.
         /// </summary>
         Broadcast = 1,
 
@@ -31,12 +31,12 @@ namespace Meadow.Gateways.Bluetooth
         Write = 8,
 
         /// <summary>
-        /// Characteristic can notify value changes without acknowledgement.
+        /// Characteristic can notify value changes without acknowledgment.
         /// </summary>
         Notify = 16,
 
         /// <summary>
-        ///Characteristic can indicate value changes with acknowledgement.
+        ///Characteristic can indicate value changes with acknowledgment.
         /// </summary>
         Indicate = 32,
 
@@ -50,7 +50,7 @@ namespace Meadow.Gateways.Bluetooth
         /// </summary>
         ExtendedProperties = 128,
 
-        // TODO: move these to seperate enum
+        // TODO: move these to separate enum
         NotifyEncryptionRequired = 256, //0x100
 
         IndicateEncryptionRequired = 512, //0x200

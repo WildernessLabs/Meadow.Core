@@ -45,7 +45,7 @@
         public int DataBits { get => classicSerialPort.DataBits; set => classicSerialPort.DataBits = value; }
 
         /// <summary>
-        /// Gets or sets the standard number of stopbits per byte.
+        /// Gets or sets the standard number of stop bits per byte.
         /// </summary>
         public StopBits StopBits { get => classicSerialPort.StopBits; set => classicSerialPort.StopBits = value; }
 
@@ -75,7 +75,7 @@
         /// <param name="commsPort">The serial port to use.</param>
         /// <param name="suffixDelimiter">A `byte[]` of the delimiter(s) that
         /// denote the end of the message.</param>
-        /// <param name="preserveDelimiter">Whether or not to preseve the
+        /// <param name="preserveDelimiter">Whether or not to preserve the
         /// delimiter tokens when passing the message to subscribers.</param>
         protected SerialMessagePort(
             ISerialPort commsPort,
@@ -96,7 +96,7 @@
         /// delimiter, to be parsed out of the incoming data.</param>
         /// <param name="prefixDelimiter">A `byte[]` of the delimiter(s) that
         /// denote the beginning of the message.</param>
-        /// <param name="preserveDelimiter">Whether or not to preseve the
+        /// <param name="preserveDelimiter">Whether or not to preserve the
         /// delimiter tokens when passing the message to subscribers.</param>
         protected SerialMessagePort(
             ISerialPort commsPort,

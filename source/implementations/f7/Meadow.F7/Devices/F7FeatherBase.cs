@@ -28,7 +28,7 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Retrives the IPin for the given pin name
+        /// Retrieves the IPin for the given pin name
         /// </summary>
         /// <param name="pinName"></param>
         /// <returns></returns>
@@ -48,7 +48,7 @@ namespace Meadow.Devices
         /// component. Used for a dirty dirty hack.
         /// </summary>
         /// <param name="pin"></param>
-        /// <returns>whether or no the pin belons to the onboard LED</returns>
+        /// <returns>whether or no the pin belong to the onboard LED</returns>
         protected bool IsOnboardLed(IPin pin)
         {
             // HACK NOTE: can't compare directly here, so we're comparing the name.

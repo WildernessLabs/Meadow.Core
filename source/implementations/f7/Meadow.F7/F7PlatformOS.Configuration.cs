@@ -55,7 +55,7 @@ public partial class F7PlatformOS
     public string RuntimeVersion => GetString(ConfigurationValues.MonoVersion);
 
     /// <summary>
-    /// Should the system reboot if an unhandled exception is encounted in the user application?
+    /// Should the system reboot if an unhandled exception is encountered in the user application?
     /// </summary>
     public bool RebootOnUnhandledException => GetBoolean(ConfigurationValues.RebootOnUnhandledException);
 

@@ -3,10 +3,6 @@ using System.Linq;
 
 namespace Meadow.Hardware;
 
-/// <summary>
-/// Represents a port that is capable of reading and writing digital input
-/// and output.
-/// </summary>
 public class BiDirectionalPort : BiDirectionalPortBase
 {
     private PortDirectionType _currentDirection;
@@ -17,7 +13,7 @@ public class BiDirectionalPort : BiDirectionalPortBase
     protected IMeadowIOController IOController { get; }
     protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
-    // Direction change
+    /// <inheritdoc/>
     public override PortDirectionType Direction
     {
         get => _currentDirection;

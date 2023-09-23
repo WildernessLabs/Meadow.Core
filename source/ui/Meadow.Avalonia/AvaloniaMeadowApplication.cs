@@ -28,7 +28,7 @@ namespace Meadow.UI
         /// Invokes an action on the main (UI) thread
         /// </summary>
         /// <param name="action">The action to invoke</param>
-        /// <param name="state">Optional state information to pass as a paramter to the Action</param>
+        /// <param name="state">Optional state information to pass as a parameter to the Action</param>
         public void InvokeOnMainThread(Action<object?> action, object? state = null)
         {
             Dispatcher.UIThread.Post(() => action(state));
