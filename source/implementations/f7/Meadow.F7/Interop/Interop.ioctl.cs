@@ -112,7 +112,7 @@ namespace Meadow.Core
             public static extern int cfsetspeed(ref Termios termiosp, int speed);
 
             /// <summary>
-            /// Configures the Universal Platofrm Driver to set PWM APB clock.
+            /// Configures the Universal Platform Driver to set PWM APB clock.
             /// </summary>
             /// <returns>0 on success, otherwise an error code</returns>
             /// <param name="fd">Driver handle</param>

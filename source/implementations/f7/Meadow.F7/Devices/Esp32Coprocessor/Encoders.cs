@@ -146,7 +146,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
-        ///     Take four bytes from the buffer and encode them as a 32-bit unsiged integer.
+        ///     Take four bytes from the buffer and encode them as a 32-bit unsigned integer.
         ///     Note that the data should be encoded as LSB first.
         /// </summary>
         /// <param name="buffer">Buffer holding the 32-bit value to decode.</param>

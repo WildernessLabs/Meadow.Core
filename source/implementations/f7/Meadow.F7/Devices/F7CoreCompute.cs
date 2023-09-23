@@ -18,7 +18,7 @@ namespace Meadow.Devices
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
 
-            // because we cant use new Pinout(this) in the cass to the base ('this' doesn't exist at that point and the compiler denies usage)
+            // because we cant use new Pinout(this) in the cast to the base ('this' doesn't exist at that point and the compiler denies usage)
             Pins.Controller = this;
         }
 

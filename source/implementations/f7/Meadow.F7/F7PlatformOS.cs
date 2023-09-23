@@ -88,7 +88,7 @@ public partial class F7PlatformOS : IPlatformOS
     }
 
     /// <summary>
-    /// Retrieves the current processor usage (as a percentage in teh range of 0-100)
+    /// Retrieves the current processor usage (as a percentage in the range of 0-100)
     /// </summary>
     public int ProcessorLoad()
     {
