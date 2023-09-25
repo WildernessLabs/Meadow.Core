@@ -221,7 +221,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         return Core.Interop.Nuttx.MeadowCellNetworkScanner();
     }
-    
+
     /// <summary>
     /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
     /// </summary>
