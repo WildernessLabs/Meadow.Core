@@ -19,6 +19,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string _imei;
     private string _csq;
     private string _at_cmds_output;
+    private string _error_str;
 
     /// <summary>
     /// Extract values from an <b>input</b> string based on a regex <b>pattern</b>
@@ -222,6 +223,24 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
+    /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
+    /// </summary>
+    private string ParseError(string input)
+    {
+        if (input != null)
+        {
+            string pattern = @"\+CME ERROR: (.+)$";
+            Match match = Regex.Match(input, pattern);
+
+            if (match.Success && match.Groups.Count >= 2)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+        return "Undefined Cell error";
+    }
+
+    /// <summary>
     /// Set the cell state
     /// </summary>
     /// <param name="CellState">State of the cell.</param>
@@ -323,40 +342,63 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         return Core.Interop.Nuttx.Parse(_at_cmds_output).ToArray();
     }
 
-        /// <summary>
-        /// Execute GNSS-related AT commands and retrieve combined output, including NMEA sentences.
-        /// </summary>
-        /// <param name="resultTypes">An array of supported GNSS result types for data processing.</param>
-        /// <returns>A string containing combined output from GNSS-related AT commands, including NMEA sentences.</returns>
-        public string FetchGnssAtCmdsOutput(IGnssResult[] resultTypes, int timeout = 300)
+    /// <summary>
+    /// Execute GNSS-related AT commands and retrieve combined output, including NMEA sentences.
+    /// </summary>
+    /// <param name="resultTypes">An array of supported GNSS result types for data processing.</param>
+    /// <returns>A string containing combined output from GNSS-related AT commands, including NMEA sentences.</returns>
+    public string FetchGnssAtCmdsOutput(IGnssResult[] resultTypes, int timeout = 300)
+    {
+        Resolver.Log.Trace("Retrieving GPS location... It might take 3-5 minutes and temporary disconnect you from the cellular network.");
+        _at_cmds_output = string.Empty;
+
+        // TODO: Take into consideration the GNSS result types
+        CellSetState(CellNetworkState.TrackingGPSLocation);
+
+        while (timeout > 0)
         {
-            Resolver.Log.Trace("Retrieving GPS location... It might take 3-5 minutes and temporary disconnect you from the cellular network.");
-            _at_cmds_output = string.Empty;
-
-            // TODO: Take into consideration the GNSS result types
-            CellSetState(CellNetworkState.TrackingGPSLocation);
-
-            while (timeout > 0)
+            if (_at_cmds_output != string.Empty)
             {
-                if (_at_cmds_output != string.Empty)
-                {
-                    break;
-                }
-                
-                Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-                timeout --;
+                break;
             }
 
-            var gnssAtCmdsOutput = _at_cmds_output;
-
-            CellSetState(CellNetworkState.Resumed);
-            
-            if (gnssAtCmdsOutput == null)
-            {
-                Resolver.Log.Error("AT commands output not found!");
-                return string.Empty;
-            }
-
-            return gnssAtCmdsOutput;
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+            timeout --;
         }
+
+        var gnssAtCmdsOutput = _at_cmds_output;
+
+        CellSetState(CellNetworkState.Resumed);
+        
+        if (gnssAtCmdsOutput == null)
+        {
+            Resolver.Log.Error("AT commands output not found!");
+            return string.Empty;
+        }
+        return gnssAtCmdsOutput;
+    }
+
+    /// <summary>
+    /// Returns the error string, otherwise <b>Undefined error</b>
+    /// </summary>
+    private string GetError()
+    {
+        int errno = Core.Interop.Nuttx.meadow_get_cell_error();
+
+        CellError cellError = (CellError)errno;
+
+        switch(cellError)
+        {
+            case CellError.InvalidNetworkSettings:
+                return "Invalid cell settings. Please check your cell configuration file.";
+            case CellError.InvalidCellModule:
+                return "Invalid cell module. Please ensure you have configured the right module name.";
+            case CellError.NetworkConnectionLost:
+                return ParseError(_at_cmds_output);
+            case CellError.NetworkTimeout:
+                return "Timeout. Please check your pinout and wire connections to the module.";
+            default:
+                return "Undefined error";
+        }
+    }
 }
