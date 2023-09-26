@@ -11,7 +11,7 @@ public static class RuntimeInformation
     private static MeadowPlatform? _platform;
 
     /// <summary>
-    /// Convenince method to check the current platform
+    /// Convenience method to check the current platform
     /// </summary>
     /// <param name="platform">The MeadowPlatform to check against</param>
     public static bool IsPlatform(MeadowPlatform platform)

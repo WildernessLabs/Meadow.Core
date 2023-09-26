@@ -142,7 +142,7 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Gets or sets the standard number of stopbits per byte.
+        /// Gets or sets the standard number of stop bits per byte.
         /// </summary>
         public StopBits StopBits
         {
@@ -243,6 +243,10 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Returns a string that represents the current <see cref="SerialPortBase"/>.
+        /// </summary>
+        /// <returns>A string that represents the current <see cref="SerialPortBase"/>.</returns>
         public override string ToString()
         {
             char p;
@@ -467,44 +471,27 @@ namespace Meadow.Hardware
         }
 
 
-        public int ReadAll(byte[] buffer)
-        {
-            return ReadAll(buffer, 0);
-        }
-
         /// <summary>
         /// Reads the entire serial port buffer into an array of bytes. Before
         /// calling, make sure that your buffer is large enough by checking
         /// `BytesToRead` property. If your buffer isn't large enough, this will
         /// leave bytes in the serial port buffer.
         /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        public int ReadAll(byte[] buffer, int index)
+        public byte[] ReadAll()
         {
             // checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
-            if (buffer == null) { throw new ArgumentNullException(); }
-            if (index < 0) { throw new ArgumentException("Invalid index"); }
 
-            if (_readBuffer == null) return 0;
+            var buffer = new byte[_readBuffer.Count];
 
             // capture the count
             int readCount = _readBuffer.Count;
 
-            // check to see if there's room for the whole thing, if not, we're
-            // only going to read as much as we can.
-            if (readCount + index > buffer.Length)
-            {
-                readCount = buffer.Length - index;
-            }
-
             // empty the serial data into the user's buffer
-            _readBuffer.Remove(readCount).CopyTo(buffer, index);
+            _readBuffer.Remove(readCount).CopyTo(buffer, 0);
 
             // return the count read
-            return readCount;
+            return buffer;
         }
 
 
@@ -513,7 +500,7 @@ namespace Meadow.Hardware
         // is currently in the buffer.
         //
         // Ultimately, I don't believe this is practically possible with the
-        // expected mecanics of the SerialPort.
+        // expected mechanics of the SerialPort.
         //
         // The issue is that in order to continue to read, we have two options,
         // 1) either sleep/spin in a loop that keeps checking the buffer to see
@@ -526,10 +513,10 @@ namespace Meadow.Hardware
         // out data in the buffer, causing the `Read` call to be useless. The only
         // way to do this would be to cancel any notifications of `DataReceived`
         // while this call was still executing. That's doable, but I think it
-        // adds a lot more complexity to the archtiecture, and makes for a bad
+        // adds a lot more complexity to the architecture, and makes for a bad
         // API experience. As such, I think we need to restrict `Read()` to
         // data that is in the buffer. If they want an modern async model, they
-        // should probalby use the SerialMessagePort
+        // should probably use the SerialMessagePort
         //
         // in any case, i'm preserving this (untested) code below, in case we
         // might someday make a wrapper to SerialPort that is properly async.

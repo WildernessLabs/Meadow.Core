@@ -78,4 +78,20 @@ public partial class F7PlatformOS : IPlatformOS
 
         Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
     }
+
+    /// <summary>
+    /// Retrieves memory allocation statistics from the OS
+    /// </summary>
+    public AllocationInfo GetMemoryAllocationInfo()
+    {
+        return Core.Interop.Nuttx.mallinfo();
+    }
+
+    /// <summary>
+    /// Retrieves the current processor usage (as a percentage in the range of 0-100)
+    /// </summary>
+    public int ProcessorLoad()
+    {
+        return 100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value();
+    }
 }

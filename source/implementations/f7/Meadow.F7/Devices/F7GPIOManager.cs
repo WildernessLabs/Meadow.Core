@@ -78,6 +78,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pin">Pin.</param>
         /// <param name="value">If set to <c>true</c> value.</param>
+        /// <exception cref="NativeException"></exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void IMeadowIOController.SetDiscrete(IPin pin, bool value)
         {

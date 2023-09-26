@@ -1,38 +1,37 @@
 ﻿using Meadow.Hardware;
 using System;
 
-namespace Meadow.Simulation
+namespace Meadow.Simulation;
+
+internal class SimulatedBiDirectionalPort : BiDirectionalPortBase
 {
-    internal class SimulatedBiDirectionalPort : BiDirectionalPortBase
+    private SimulatedPin _pin;
+
+    public SimulatedBiDirectionalPort(IPin pin, IDigitalChannelInfo channel, bool initialState, ResistorMode resistorMode, PortDirectionType initialDirection, OutputType initialOutputType = OutputType.PushPull)
+        : base(pin, channel, initialState, resistorMode, initialDirection, initialOutputType)
     {
-        private SimulatedPin _pin;
+        _pin = pin as SimulatedPin;
+        Direction = initialDirection;
 
-        public SimulatedBiDirectionalPort(IPin pin, IDigitalChannelInfo channel, bool initialState, ResistorMode resistorMode, PortDirectionType initialDirection, OutputType initialOutputType = OutputType.PushPull)
-            : base(pin, channel, initialState, resistorMode, initialDirection, initialOutputType)
+        if (initialState)
         {
-            _pin = pin as SimulatedPin;
-            Direction = initialDirection;
-
-            if (initialState)
-            {
-                State = InitialState;
-            }
+            State = InitialState;
         }
+    }
 
-        public override bool State
+    public override bool State
+    {
+        get => _pin.Voltage >= SimulationEnvironment.ActiveVoltage;
+        set
         {
-            get => _pin.Voltage >= SimulationEnvironment.ActiveVoltage;
-            set
-            {
-                if (Direction == PortDirectionType.Input) throw new Exception("Port currently set as Input");
-                _pin.Voltage = value ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage;
-            }
+            if (Direction == PortDirectionType.Input) throw new Exception("Port currently set as Input");
+            _pin.Voltage = value ? SimulationEnvironment.ActiveVoltage : SimulationEnvironment.InactiveVoltage;
         }
+    }
 
-        public override PortDirectionType Direction { get; set; }
+    public override PortDirectionType Direction { get; set; }
 
-        protected override void Dispose(bool disposing)
-        {
-        }
+    protected override void Dispose(bool disposing)
+    {
     }
 }

@@ -188,12 +188,16 @@ public static partial class MeadowOS
     {
         IAppSettings settings;
 
-        if (File.Exists("/meadow0/app.config.yaml"))
+        var configPath = Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "app.config.yaml");
+
+        if (File.Exists(configPath))
         {
             Console.WriteLine($"Parsing app.config.yaml...");
 
-            // testing shows this takes ~375ms (7/20/23)
-            var yml = File.ReadAllText("/meadow0/app.config.yaml");
+            // testing shows this takes ~375ms (7/20/23) on F7
+            var yml = File.ReadAllText(configPath);
 
             // testing shows this takes ~1100ms (7/20/23)
             settings = AppSettingsParser.Parse(yml);
@@ -348,8 +352,9 @@ public static partial class MeadowOS
                 CurrentDevice = device;
                 Resolver.Services.Add<IMeadowDevice>(CurrentDevice);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Resolver.Log.Trace($"Creating instance failure : {ex.Message}");
                 return false;
             }
 
@@ -412,7 +417,7 @@ public static partial class MeadowOS
             {
                 updateService.Start();
             }
-            
+
             if (MeadowCloudSettings.EnableHealthMetrics)
             {
                 Resolver.Log.Info($"Health Metrics enabled with interval: {MeadowCloudSettings.HealthMetricsInterval} minute(s).");

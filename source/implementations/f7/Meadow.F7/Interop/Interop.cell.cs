@@ -19,7 +19,13 @@ internal static partial class Interop
         [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern int meadow_cell_scanner(IntPtr buf);
 
-        private static List<CellNetwork> Parse(string input)
+        [DllImport(LIBRARY_NAME, SetLastError = true)]
+        public static extern void meadow_cell_change_state(int s);
+
+        [DllImport(LIBRARY_NAME, SetLastError = true)]
+        public static extern int meadow_get_cell_error();
+
+        public static List<CellNetwork> Parse(string input)
         {
             if (input.Contains("+CME ERROR"))
             {
@@ -29,6 +35,13 @@ internal static partial class Interop
             string pattern = @"\((\d+),""([^""]+)"",""([^""]+)"",""([^""]+)""(?:,(\d+))?\)";
             List<CellNetwork> cellNetworks = new List<CellNetwork>();
             MatchCollection matches = Regex.Matches(input, pattern);
+
+            // If no +CME ERROR is encountered and no network outputs are present,
+            // it indicates that the scanner has reached the Cell connection timeout
+            if (matches.Count == 0)
+            {
+                throw new System.TimeoutException("Timeout reached during cell network scanning.");
+            }
 
             foreach (Match match in matches)
             {
@@ -84,6 +97,7 @@ internal static partial class Interop
 
             try
             {
+                Resolver.Log.Info("Scanning cell networks...");
                 var len = meadow_cell_scanner(buffer);
                 if (len > 0)
                 {
@@ -95,6 +109,11 @@ internal static partial class Interop
                 {
                     throw new System.IO.IOException("No available networks found, please ensure that your device is in scanning mode.");
                 }
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"No available networks found: {ex.Message}");
+                return Array.Empty<CellNetwork>();
             }
             finally
             {

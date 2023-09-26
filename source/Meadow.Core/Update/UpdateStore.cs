@@ -8,6 +8,9 @@ using System.Text.Json;
 
 namespace Meadow.Update;
 
+/// <summary>
+/// A local store for holding information about available and applied Updates
+/// </summary>
 public class UpdateStore : IEnumerable<UpdateInfo>
 {
     private const string UpdateInfoFileName = "info.json";
@@ -77,7 +80,7 @@ public class UpdateStore : IEnumerable<UpdateInfo>
                 {
                     info.Retrieved = false;
 
-                    // has this update already been retieved?  double check, don't just believe the info
+                    // has this update already been retrieved?  double check, don't just believe the info
                     // we have valid info, have we downloaded?
                     if (zipInfo != null)
                     {

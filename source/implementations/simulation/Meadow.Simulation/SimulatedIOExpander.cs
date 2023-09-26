@@ -6,15 +6,26 @@ using System.Linq;
 
 namespace Meadow.Simulation;
 
+/// <summary>
+/// A simulated IO Expnader that provides digital inputs, outputs and analog inputs
+/// </summary>
 public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputController
 {
     private readonly SimulatedPin[] _pins;
 
+    /// <summary>
+    /// Gets a specific pin from the expander
+    /// </summary>
+    /// <param name="index">The 0-based index of the pin to retrieve</param>
     public IPin GetPin(int index)
     {
         return _pins[index];
     }
 
+    /// <summary>
+    /// Creates a SimulatedIOExpander with the specified number of pins
+    /// </summary>
+    /// <param name="pinCount">The number of pins the expander will support</param>
     public SimulatedIOExpander(int pinCount)
     {
         _pins = new SimulatedPin[pinCount];
@@ -29,6 +40,7 @@ public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputCo
         }
     }
 
+    /// <inheritdoc/>
     public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         return new SimulatedAnalogInputPort(
@@ -39,6 +51,7 @@ public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputCo
             voltageReference);
     }
 
+    /// <inheritdoc/>
     public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
     {
         return new SimulatedDigitalInputPort(
@@ -46,6 +59,7 @@ public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputCo
             (IDigitalChannelInfo)pin.SupportedChannels.First(c => c is IDigitalChannelInfo));
     }
 
+    /// <inheritdoc/>
     public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
     {
         return new SimulatedDigitalOutputPort(
