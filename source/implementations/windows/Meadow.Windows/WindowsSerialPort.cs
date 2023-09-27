@@ -29,7 +29,7 @@ public class WindowsSerialPort : ISerialPort, IDisposable
 
         if (name == null)
         {
-            throw new ArgumentException($"Cannot find a serial port iwth a name matching '{portName.SystemName}' or '{portName.FriendlyName}'");
+            throw new ArgumentException($"Cannot find a serial port with a name matching '{portName.SystemName}' or '{portName.FriendlyName}'");
         }
 
         _port = new SerialPort(name, baudRate, (System.IO.Ports.Parity)parity, dataBits, (System.IO.Ports.StopBits)stopBits);

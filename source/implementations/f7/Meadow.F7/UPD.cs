@@ -369,7 +369,7 @@ namespace Meadow.Devices
 
             public static bool Start(IPwmChannelInfo pwmChannelInfo, uint frequency, float dutyCycle)
             {
-                // just make ssure we've been initialized
+                // just make sure we've been initialized
                 if (!Setup(pwmChannelInfo.Timer))
                 {
                     return false;

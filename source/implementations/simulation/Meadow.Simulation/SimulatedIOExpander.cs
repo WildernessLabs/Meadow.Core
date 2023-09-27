@@ -7,7 +7,7 @@ using System.Linq;
 namespace Meadow.Simulation;
 
 /// <summary>
-/// A simulated IO Expnader that provides digital inputs, outputs and analog inputs
+/// A simulated IO Expander that provides digital inputs, outputs and analog inputs
 /// </summary>
 public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputController
 {

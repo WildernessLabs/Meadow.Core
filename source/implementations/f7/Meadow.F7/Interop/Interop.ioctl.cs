@@ -20,7 +20,7 @@ namespace Meadow.Core
             /// Reads an input
             /// </summary>
             /// <returns>The ioctl.</returns>
-            /// <param name="fd">Fd.</param>
+            /// <param name="fd">Driver handle.</param>
             /// <param name="request">Request.</param>
             /// <param name="pinDesignator">Pin designator.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
@@ -30,7 +30,7 @@ namespace Meadow.Core
             /// Writes a Discrete Output
             /// </summary>
             /// <returns>The ioctl.</returns>
-            /// <param name="fd">Fd.</param>
+            /// <param name="fd">Driver handle.</param>
             /// <param name="request">Request.</param>
             /// <param name="pinState">Pin state.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
@@ -42,7 +42,7 @@ namespace Meadow.Core
             /// <returns>0 on success, otherwise an error code</returns>
             /// <param name="fd">Driver handle</param>
             /// <param name="request">UPD Ioctl function constant</param>
-            /// <param name="registerValue">A RegisterValue struct to use as either the value soure (for writes) or sink (for reads)</param>
+            /// <param name="registerValue">A RegisterValue struct to use as either the value source (for writes) or sink (for reads)</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdRegisterValue registerValue);
 
@@ -125,7 +125,7 @@ namespace Meadow.Core
             /// Configures a pin
             /// </summary>
             /// <returns>The ioctl.</returns>
-            /// <param name="fd">Fd.</param>
+            /// <param name="fd">Driver handle.</param>
             /// <param name="request">Request.</param>
             /// <param name="configFlags">Config flags.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
