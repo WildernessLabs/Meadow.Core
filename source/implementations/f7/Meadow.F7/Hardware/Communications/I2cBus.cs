@@ -44,7 +44,7 @@ namespace Meadow.Hardware
             BusSpeed = busSpeed;
 
 #if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            // ensure this is off in release (in case a dev sets it to true and forgets during check-in
             _showI2cDebug = false;
 #endif
         }

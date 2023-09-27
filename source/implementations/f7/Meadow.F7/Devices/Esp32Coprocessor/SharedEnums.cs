@@ -1436,7 +1436,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         Overflow = 139,
         /// <summary>
-        /// Esp32ErrorCodes - Cancelled
+        /// Esp32ErrorCodes - Canceled
         /// </summary>
         Cancelled = 140,
         /// <summary>

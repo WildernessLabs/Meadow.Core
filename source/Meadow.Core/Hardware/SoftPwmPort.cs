@@ -70,7 +70,7 @@ namespace Meadow.Hardware
                 offTimeMilliseconds = CalculateOffTimeMillis();
             }
         }
-        Frequency frequency = new Frequency(1.0, Units.Frequency.UnitType.Hertz); // in the case it doesn't get set before dutycycle, initialize to 1
+        Frequency frequency = new Frequency(1.0, Units.Frequency.UnitType.Hertz); // in the case it doesn't get set before duty cycle, initialize to 1
 
         /// <summary>
         /// Channel info for PWM port

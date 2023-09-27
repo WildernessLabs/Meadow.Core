@@ -38,7 +38,6 @@ namespace Meadow.Gateways.Bluetooth
         public string ToJson()
         {
             // serialize to JSON, but without pulling in a JSON lib dependency
-            // serialize to JSON, but without pulling in a JSON lib dependency
             var json = $@"{{
                         ""uuid"":10498,
                         ""permission"":{(int)Permissions},
