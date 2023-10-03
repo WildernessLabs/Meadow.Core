@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices;
@@ -18,6 +19,8 @@ public partial class F7GPIOManager : IMeadowIOController
     private Thread? _ist;
     private List<int> _interruptGroupsInUse = new();
     private bool _firstInterrupt = true;
+
+    private IPin _nullPin = new NullPin();
 
     /// <summary>
     /// Hooks up the provided pin to the underlying OS interrupt handling
@@ -176,8 +179,6 @@ public partial class F7GPIOManager : IMeadowIOController
     private void InterruptServiceThreadProc(object o)
     {
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
-        Output.WriteLineIf((DebugFeatures & (DebugFeature.GpioDetail | DebugFeature.Interrupts)) != 0,
-            $"IST Started reading queue {queue.ToInt32():X}");
 
         // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
         // the debounced state of the GPIO
@@ -188,37 +189,40 @@ public partial class F7GPIOManager : IMeadowIOController
             if (_firstInterrupt)
             {
                 // DEV NOTE: this is to force the interp pipeline top build at least some of the call stack and improve the response of first-interrupt results
-                Interrupt?.Invoke(new NullPin(), false);
+                Interrupt?.Invoke(_nullPin, false);
                 _firstInterrupt = false;
             }
 
             int priority = 0;
-            try
-            {
-                var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
 
-                // byte 1 contains the port and pin, byte 2 contains the stable state.
-                if (result >= 0)
+            var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+
+            // byte 1 contains the port and pin, byte 2 contains the stable state.
+            if (result >= 0)
+            {
+                var irq = rx_buffer[0];
+                bool state = rx_buffer[1] != 0;
+                var port = irq >> 4;
+                var pin = irq & 0xf;
+                IPin ipin;
+
+
+                lock (_interruptPins)   //FIXME: If this is supposed to keep modifications from
+                                        //happening on the array, lock()'s are needed at those points also
                 {
-                    var irq = rx_buffer[0];
-                    bool state = rx_buffer[1] != 0;
-                    var port = irq >> 4;
-                    var pin = irq & 0xf;
-
-                    lock (_interruptPins)
-                    {
-                        var ipin = _interruptPins[port, pin];
-                        if (ipin != null)
-                        {
-                            Interrupt?.Invoke(ipin, state);
-                        }
-                    }
+                    ipin = _interruptPins[port, pin];
+                    if (ipin == null)
+                        continue;
                 }
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"IST: {ex.Message}");
-                Thread.Sleep(5000);
+
+                try
+                {
+                    Interrupt?.Invoke(ipin, state);
+                }
+                catch (Exception ex)
+                {
+                    Thread.Sleep(5000);
+                }
             }
         }
     }
