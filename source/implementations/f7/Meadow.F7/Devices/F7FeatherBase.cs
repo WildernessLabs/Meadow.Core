@@ -48,7 +48,7 @@ namespace Meadow.Devices
         /// component. Used for a dirty dirty hack.
         /// </summary>
         /// <param name="pin"></param>
-        /// <returns>whether or no the pin belong to the onboard LED</returns>
+        /// <returns>whether or not the pin belong to the onboard LED</returns>
         protected bool IsOnboardLed(IPin pin)
         {
             // HACK NOTE: can't compare directly here, so we're comparing the name.
@@ -74,8 +74,8 @@ namespace Meadow.Devices
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
-        /// <param name="busSpeed">The bus speed desired</param>
         /// <param name="busNumber">The hardware bus number</param>
+        /// <param name="busSpeed">The bus speed desired</param>
         /// <returns>An instance of an I2cBus</returns>
         public override II2cBus CreateI2cBus(
             int busNumber = 1,
@@ -86,11 +86,11 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
+        /// Creates an SPI bus instance for the default Meadow F7 pins and the requested bus speed
         /// </summary>
         /// <param name="speed">The bus speed desired</param>
         /// <param name="busNumber">The hardware bus number</param>
-        /// <returns>An instance of an I2cBus</returns>
+        /// <returns>An instance of an SpiBus</returns>
         public override ISpiBus CreateSpiBus(
             Units.Frequency speed,
             int busNumber = 3
