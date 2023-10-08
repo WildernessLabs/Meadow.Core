@@ -18,9 +18,6 @@ namespace Meadow.Hardware
         private IMeadowIOController IOController { get; }
         internal int BusNumber { get; set; } = 1;
 
-        public void Dispose()
-        {
-        }
 
         /// <summary>
         /// Bus Clock speed
@@ -225,6 +222,11 @@ namespace Meadow.Hardware
                 default:
                     throw new NativeException($"Communication error.  Error code {(int)ec}");
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
         }
     }
 }
