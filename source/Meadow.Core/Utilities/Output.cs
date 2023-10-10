@@ -1,9 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// Provides utility methods for outputting debug information.
+    /// </summary>
     public static class Output
     {
         /// <summary>
@@ -11,6 +13,11 @@ namespace Meadow.Devices
         /// </summary>
         private const string HEXADECIMAL_BUFFER_HEADER = "             0    1    2    3    4    5    6    7    8    9    a    b    c    d    e    f";
 
+        /// <summary>
+        /// Writes the specified string to the log if the test condition is true (conditional debug output).
+        /// </summary>
+        /// <param name="test">The condition to test.</param>
+        /// <param name="value">The value to write to the log.</param>
         [Conditional("DEBUG")]
         public static void WriteIf(bool test, string value)
         {
@@ -20,6 +27,11 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Writes the specified string followed by a line terminator to the log if the test condition is true (conditional debug output).
+        /// </summary>
+        /// <param name="test">The condition to test.</param>
+        /// <param name="value">The value to write to the log.</param>
         [Conditional("DEBUG")]
         public static void WriteLineIf(bool test, string value)
         {
@@ -29,12 +41,20 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Writes the specified string to the log (conditional debug output).
+        /// </summary>
+        /// <param name="value">The value to write to the log.</param>
         [Conditional("DEBUG")]
         public static void Write(string value)
         {
             Resolver.Log.Info(value);
         }
 
+        /// <summary>
+        /// Writes the specified string followed by a line terminator to the log (conditional debug output).
+        /// </summary>
+        /// <param name="value">The value to write to the log.</param>
         [Conditional("DEBUG")]
         public static void WriteLine(string value)
         {
@@ -101,7 +121,7 @@ namespace Meadow.Devices
         /// <returns>Hexadecimal representation of the unsigned short.</returns>
         private static string Hexadecimal(int i)
         {
-            return Hexadecimal((uint) i);
+            return Hexadecimal((uint)i);
         }
 
         /// <summary>

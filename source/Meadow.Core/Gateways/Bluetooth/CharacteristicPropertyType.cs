@@ -51,8 +51,14 @@ namespace Meadow.Gateways.Bluetooth
         ExtendedProperties = 128,
 
         // TODO: move these to separate enum
+        /// <summary>
+        /// Characteristic notifies of required encryption
+        /// </summary>
         NotifyEncryptionRequired = 256, //0x100
 
+        /// <summary>
+        /// Indicates that encryption is required
+        /// </summary>
         IndicateEncryptionRequired = 512, //0x200
     }
 }

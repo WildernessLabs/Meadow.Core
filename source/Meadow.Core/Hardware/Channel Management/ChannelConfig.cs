@@ -1,10 +1,17 @@
-﻿namespace Meadow.Hardware
+﻿namespace Meadow.Hardware;
+
+/// <summary>
+/// Represents a configuration for a hardware channel.
+/// </summary>
+public class ChannelConfig
 {
-    public class ChannelConfig
-    {
-        public ChannelState State { get; set; }
-        public ChannelConfigurationType Config { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the state of the channel.
+    /// </summary>
+    public ChannelState State { get; set; }
 
+    /// <summary>
+    /// Gets or sets the configuration type of the channel.
+    /// </summary>
+    public ChannelConfigurationType Config { get; set; }
 }
-
