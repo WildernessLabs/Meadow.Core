@@ -15,13 +15,29 @@ namespace Meadow.Hardware
     {
         private IntPtr _driverHandle = IntPtr.Zero;
         private CircularBuffer<byte>? _readBuffer;
-        protected Thread? _readThread;
-        protected int _baudRate;
-        protected object _accessLock = new object();
-        private Parity _parity;
         private int _dataBits;
         private StopBits _stopBits;
 
+        /// <summary>
+        /// Thread responsible for reading from the serial port.
+        /// </summary>
+        protected Thread? _readThread;
+
+        /// <summary>
+        /// The baud rate for the serial port.
+        /// </summary>
+        protected int _baudRate;
+
+        /// <summary>
+        /// Lock object for thread synchronization when accessing critical sections of code.
+        /// </summary>
+        protected object _accessLock = new object(); private Parity _parity;
+
+        /// <summary>
+        /// Sets the hardware port settings for the specified handle.
+        /// This method is intended to configure the hardware settings of the serial port.
+        /// </summary>
+        /// <param name="handle">The handle to the hardware port.</param>
         protected abstract void SetHardwarePortSettings(IntPtr handle);
         /// <summary>
         /// Override this method to open a hardware (OS) serial port
@@ -266,6 +282,9 @@ namespace Meadow.Hardware
             return $"{PortName}: {BaudRate},{DataBits},{p},{(StopBits == StopBits.Two ? 2 : 1)}";
         }
 
+        /// <summary>
+        /// Releases the resources used by the <see cref="SerialPortBase"/>.
+        /// </summary>
         public void Dispose()
         {
             Close();
@@ -482,13 +501,13 @@ namespace Meadow.Hardware
             // checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
 
-            var buffer = new byte[_readBuffer.Count];
+            var buffer = new byte[_readBuffer!.Count];
 
             // capture the count
-            int readCount = _readBuffer.Count;
+            int readCount = _readBuffer!.Count;
 
             // empty the serial data into the user's buffer
-            _readBuffer.Remove(readCount).CopyTo(buffer, 0);
+            _readBuffer!.Remove(readCount).CopyTo(buffer, 0);
 
             // return the count read
             return buffer;

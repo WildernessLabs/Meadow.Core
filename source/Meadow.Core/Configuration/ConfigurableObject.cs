@@ -4,32 +4,60 @@ using System.Runtime.CompilerServices;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents a configurable object.
+/// </summary>
 public abstract class ConfigurableObject
 {
-    private string m_parentname;
+    /// <summary>
+    /// The default JSON file name for configuration.
+    /// </summary>
+    public const string DefaultJsonFileName = "app.config.json";
+
+    /// <summary>
+    /// The default YAML file name for configuration.
+    /// </summary>
+    public const string DefaultYamlFileName = "app.config.yaml";
+
+    private string m_parentname = default!;
     private bool m_isArrayElement = false;
 
-    protected IConfiguration? ConfigurationRoot { get; private set; }
-    protected string ConfigurationRootPath { get; }
+    private string PathTypeName { get; }
 
+    /// <summary>
+    /// Gets or sets the configuration root.
+    /// </summary>
+    protected IConfiguration? ConfigurationRoot { get; private set; } = default!;
+
+    /// <summary>
+    /// Gets the configuration root path.
+    /// </summary>
+    protected string ConfigurationRootPath { get; } = default!;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConfigurableObject"/> class.
+    /// </summary>
     protected ConfigurableObject()
     {
         PathTypeName = this.GetType().Name.Replace("Settings", string.Empty);
         SetConfigRoot();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConfigurableObject"/> class with a parent object.
+    /// </summary>
+    /// <param name="parent">The parent object.</param>
     protected ConfigurableObject(object? parent)
     {
         PathTypeName = this.GetType().Name.Replace("Settings", string.Empty);
 
         if (parent != null)
         {
-            if (parent is ConfigurableObject)
+            if (parent is ConfigurableObject p)
             {
-                var p = parent as ConfigurableObject;
-                if (!string.IsNullOrEmpty(p.m_parentname))
+                if (!string.IsNullOrEmpty(p!.m_parentname))
                 {
-                    m_parentname = $"{p.m_parentname}:{parent.GetType().Name}";
+                    m_parentname = $"{p!.m_parentname}:{parent.GetType().Name}";
                 }
                 else
                 {
@@ -49,6 +77,11 @@ public abstract class ConfigurableObject
         SetConfigRoot();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConfigurableObject"/> class with a parent object and a configuration root path.
+    /// </summary>
+    /// <param name="parent">The parent object.</param>
+    /// <param name="configRootPath">The configuration root path.</param>
     protected ConfigurableObject(object? parent, string? configRootPath)
         : this(parent)
     {
@@ -66,9 +99,6 @@ public abstract class ConfigurableObject
             }
         }
     }
-
-    public const string DefaultJsonFileName = "app.config.json";
-    public const string DefaultYamlFileName = "app.config.yaml";
 
     private void SetConfigRoot()
     {
@@ -94,6 +124,13 @@ public abstract class ConfigurableObject
         }
     }
 
+
+    /// <summary>
+    /// Gets the configured float value for the specified name.
+    /// </summary>
+    /// <param name="name">The name of the configuration value.</param>
+    /// <param name="defaultValue">The default value to return if the configuration value is not found or is invalid.</param>
+    /// <returns>The configured float value.</returns>
     public float GetConfiguredFloat([CallerMemberName] string? name = null, float defaultValue = 0f)
     {
         if (string.IsNullOrWhiteSpace(name)) return defaultValue;
@@ -109,6 +146,12 @@ public abstract class ConfigurableObject
         }
     }
 
+    /// <summary>
+    /// Gets the configured boolean value for the specified name.
+    /// </summary>
+    /// <param name="name">The name of the configuration value.</param>
+    /// <param name="defaultValue">The default value to return if the configuration value is not found or is invalid.</param>
+    /// <returns>The configured boolean value.</returns>
     public bool GetConfiguredBool([CallerMemberName] string? name = null, bool defaultValue = false)
     {
         if (string.IsNullOrWhiteSpace(name)) return defaultValue;
@@ -124,6 +167,12 @@ public abstract class ConfigurableObject
         }
     }
 
+    /// <summary>
+    /// Gets the configured integer value for the specified name.
+    /// </summary>
+    /// <param name="name">The name of the configuration value.</param>
+    /// <param name="defaultValue">The default value to return if the configuration value is not found or is invalid.</param>
+    /// <returns>The configured integer value.</returns>
     public int GetConfiguredInt([CallerMemberName] string? name = null, int defaultValue = 0)
     {
         if (string.IsNullOrWhiteSpace(name)) return defaultValue;
@@ -139,6 +188,12 @@ public abstract class ConfigurableObject
         }
     }
 
+    /// <summary>
+    /// Gets the configured string value for the specified name.
+    /// </summary>
+    /// <param name="name">The name of the configuration value.</param>
+    /// <param name="defaultValue">The default value to return if the configuration value is not found or is invalid.</param>
+    /// <returns>The configured string value.</returns>
     public string GetConfiguredString([CallerMemberName] string? name = null, string defaultValue = "")
     {
         if (string.IsNullOrWhiteSpace(name)) return defaultValue;
@@ -154,8 +209,11 @@ public abstract class ConfigurableObject
         }
     }
 
-    private string PathTypeName { get; }
-
+    /// <summary>
+    /// Gets the configured value for the specified name.
+    /// </summary>
+    /// <param name="name">The name of the configuration value.</param>
+    /// <returns>The configured value as a string, or null if not found.</returns>
     public string? GetConfiguredValue([CallerMemberName] string? name = null)
     {
         if (name == null) throw new ArgumentNullException(nameof(name));

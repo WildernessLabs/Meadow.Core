@@ -49,8 +49,18 @@
         /// </summary>
         public StopBits StopBits { get => classicSerialPort.StopBits; set => classicSerialPort.StopBits = value; }
 
+        /// <summary>
+        /// The underlying classic serial port used for communication.
+        /// </summary>
         protected ISerialPort classicSerialPort;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SerialMessagePort"/> using the specified parameters for suffix-based message processing.
+        /// </summary>
+        /// <param name="commsPort">The underlying serial port.</param>
+        /// <param name="suffixDelimiter">The suffix delimiter for message termination.</param>
+        /// <param name="preserveDelimiter">Flag indicating whether to preserve the delimiter in the received message.</param>
+        /// <returns>A new instance of <see cref="SerialMessagePort"/>.</returns>
         public static SerialMessagePort From(
             ISerialPort commsPort,
             byte[] suffixDelimiter,
@@ -59,6 +69,14 @@
             return new SerialMessagePort(commsPort, suffixDelimiter, preserveDelimiter);
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="SerialMessagePort"/> using the specified parameters for prefix-based message processing.
+        /// </summary>
+        /// <param name="commsPort">The underlying serial port.</param>
+        /// <param name="prefixDelimiter">The prefix delimiter for message parsing.</param>
+        /// <param name="preserveDelimiter">Flag indicating whether to preserve the delimiter in the received message.</param>
+        /// <param name="messageLength">The expected message length (excluding the prefix delimiter).</param>
+        /// <returns>A new instance of <see cref="SerialMessagePort"/>.</returns>
         public static SerialMessagePort From(
             ISerialPort commsPort,
             byte[] prefixDelimiter,
