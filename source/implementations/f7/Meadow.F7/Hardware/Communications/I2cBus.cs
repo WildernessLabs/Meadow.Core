@@ -103,7 +103,7 @@ namespace Meadow.Hardware
             {
                 fixed (byte* pData = readBuffer)
                 {
-                    var command = new Nuttx.UpdI2CCommand()
+                    var command = new Nuttx.UpdI2cCommand()
                     {
                         Address = peripheralAddress,
                         Frequency = (int)BusSpeed,
@@ -117,7 +117,7 @@ namespace Meadow.Hardware
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
                     if (result != 0)
                     {
-                        DecipherI2CError(UPD.GetLastError());
+                        DecipherI2cError(UPD.GetLastError());
                     }
                 }
             }
@@ -143,7 +143,7 @@ namespace Meadow.Hardware
             {
                 fixed (byte* pData = data)
                 {
-                    var command = new Nuttx.UpdI2CCommand()
+                    var command = new Nuttx.UpdI2cCommand()
                     {
                         Address = peripheralAddress,
                         Frequency = (int)this.BusSpeed,
@@ -157,7 +157,7 @@ namespace Meadow.Hardware
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
                     if (result != 0)
                     {
-                        DecipherI2CError(UPD.GetLastError());
+                        DecipherI2cError(UPD.GetLastError());
                     }
                 }
             }
@@ -182,7 +182,7 @@ namespace Meadow.Hardware
                 fixed (byte* pWrite = writeBuffer)
                 fixed (byte* pRead = readBuffer)
                 {
-                    var command = new Nuttx.UpdI2CCommand()
+                    var command = new Nuttx.UpdI2cCommand()
                     {
                         Address = peripheralAddress,
                         Frequency = (int)BusSpeed,
@@ -197,7 +197,7 @@ namespace Meadow.Hardware
 
                     if (result != 0)
                     {
-                        DecipherI2CError(UPD.GetLastError());
+                        DecipherI2cError(UPD.GetLastError());
                     }
                 }
             }
@@ -207,7 +207,7 @@ namespace Meadow.Hardware
             }
         }
 
-        private void DecipherI2CError(Nuttx.ErrorCode ec)
+        private void DecipherI2cError(Nuttx.ErrorCode ec)
         {
             switch (ec)
             {

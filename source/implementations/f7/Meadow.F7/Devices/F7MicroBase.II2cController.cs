@@ -19,7 +19,7 @@ namespace Meadow.Devices
         /// <param name="clock">The I2C clock pin</param>
         /// <param name="data">The I2C data pin</param>
         /// <returns></returns>
-        protected abstract int GetI2CBusNumberForPins(IPin clock, IPin data);
+        protected abstract int GetI2cBusNumberForPins(IPin clock, IPin data);
 
         /// <summary>
         /// Creates an I2C bus instance for the requested pins and bus speed
@@ -49,7 +49,7 @@ namespace Meadow.Devices
         )
         {
             var bus = I2cBus.From(IoController, clock, data, busSpeed);
-            bus.BusNumber = GetI2CBusNumberForPins(clock, data);
+            bus.BusNumber = GetI2cBusNumberForPins(clock, data);
             return bus;
         }
     }

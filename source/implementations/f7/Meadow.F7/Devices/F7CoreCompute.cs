@@ -22,7 +22,7 @@ namespace Meadow.Devices
             Pins.Controller = this;
         }
 
-        protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
+        protected override int GetI2cBusNumberForPins(IPin clock, IPin data)
         {
             if (clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL.Name)
             {

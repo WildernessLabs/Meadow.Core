@@ -203,7 +203,7 @@ namespace Meadow.Core
                 public uint GlitchDuration;
             }
 
-            public struct UpdI2CCommand
+            public struct UpdI2cCommand
             {
                 public int Address;
                 public int Frequency;
