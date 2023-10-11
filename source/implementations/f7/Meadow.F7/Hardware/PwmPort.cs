@@ -71,7 +71,7 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// When <b>true</b> Duty Cycle is "percentage of time spent low" rather than high.
+        /// When <c>true</c> Duty Cycle is "percentage of time spent low" rather than high.
         /// </summary>
         public override bool Inverted
         {
@@ -174,7 +174,7 @@ namespace Meadow.Hardware
 
 
         /// <summary>
-        /// Returns <b>true</b> if the PWM is currently running, otherwise <b>false</b>
+        /// Returns <c>true</c> if the PWM is currently running, otherwise <c>false</c>
         /// </summary>
         public override bool State
         {

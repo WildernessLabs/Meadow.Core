@@ -8,7 +8,7 @@ using Meadow.Devices.Esp32.MessagePayloads;
 namespace Meadow.Devices
 {
     /// <summary>
-    /// A wrapped around the Meadow Generic Platform Driver
+    /// A wrapper around the Meadow Generic Platform Driver
     /// </summary>
     /// <remarks>
     /// There is one and only one instance of this driver, and it lives effectively whenever the app is up, so it's

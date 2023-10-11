@@ -127,7 +127,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
-    /// Returns <b>true</b> if the adapter is connected, otherwise <b>false</b>
+    /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
     /// </summary>
     public override bool IsConnected
     {

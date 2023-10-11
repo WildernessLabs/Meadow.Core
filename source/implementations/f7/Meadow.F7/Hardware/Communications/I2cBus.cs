@@ -25,7 +25,7 @@ namespace Meadow.Hardware
         public I2cBusSpeed BusSpeed { get; set; }
 
         /// <summary>
-        /// Default constructor for the I2CBus class.  This is private to prevent the
+        /// Default constructor for the I2cBus class.  This is private to prevent the
         /// developer from calling it.
         /// </summary>
         private I2cBus(

@@ -92,7 +92,8 @@ namespace Meadow
             }
         }
 
-        public void RegisterForSleep(ISleepAwarePeripheral peripheral)
+		/// <inheritdoc/>
+		public void RegisterForSleep(ISleepAwarePeripheral peripheral)
         {
             lock (_sleepAwarePeripherals)
             {
