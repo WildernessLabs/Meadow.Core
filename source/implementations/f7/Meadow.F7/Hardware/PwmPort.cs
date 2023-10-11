@@ -147,7 +147,7 @@ namespace Meadow.Hardware
             get => DutyCycle * Period;
             set
             {
-                if (value > Period) throw new ArgumentOutOfRangeException("Duration must be less than Period");
+                if (value > Period) throw new ArgumentOutOfRangeException(nameof(Duration), "Duration must be less than or equal to Period");
                 // clamp
                 if (value < 0) { value = 0; }
 

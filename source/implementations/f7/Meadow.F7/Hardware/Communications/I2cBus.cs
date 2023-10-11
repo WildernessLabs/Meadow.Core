@@ -76,7 +76,7 @@ namespace Meadow.Hardware
             var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (dataChannel == null || dataChannel.ChannelFunction != I2cChannelFunctionType.Data)
             {
-                throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
+                throw new Exception($"Pin {data.Name} does not have I2C Data capabilities");
             }
             var success = true;
 

@@ -28,7 +28,7 @@ public partial class F7FeatherV2 : F7FeatherBase
     {
         if (this.Information.Platform != MeadowPlatform.F7FeatherV2)
         {
-            var message = $"Application is defined as F7FeatherV2, but running hardware is {this.Information.Platform}";
+            var message = $"Application is defined as {nameof(F7FeatherV2)}, but running hardware is {this.Information.Platform}";
             Resolver.Log.Error(message);
             throw new UnsupportedPlatformException(this.Information.Platform, message);
         }

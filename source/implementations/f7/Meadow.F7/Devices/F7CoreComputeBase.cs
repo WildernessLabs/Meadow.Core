@@ -95,9 +95,9 @@ namespace Meadow.Devices
                     return CreateSpiBus(Pins.SPI3_SCK, Pins.SPI3_COPI, Pins.SPI3_CIPO, speed);
                 case 5:
                     return CreateSpiBus(Pins.SPI5_SCK, Pins.SPI5_COPI, Pins.SPI5_CIPO, speed);
+                default:
+                    throw new ArgumentException("Unsupported SPI bus number", nameof(busNumber));
             }
-
-            throw new Exception("Unsupported SPI bus number");
         }
 
         /// <inheritdoc/>

@@ -211,7 +211,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         {
             if ((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
             {
-                throw new ArgumentOutOfRangeException($"{nameof(ScanPeriod)} should be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
+                throw new ArgumentOutOfRangeException(nameof(ScanPeriod), ScanPeriod, $"must be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
             }
             _scanPeriod = value;
         }

@@ -47,11 +47,11 @@ namespace Meadow
 
             if (seconds <= 0)
             {
-                throw new ArgumentOutOfRangeException("duration must be > 0 seconds");
+                throw new ArgumentOutOfRangeException(nameof(duration), duration, "duration must be > 0 seconds");
             }
             if (seconds > 0xffff)
             {
-                throw new ArgumentOutOfRangeException("duration must be < 0xffff seconds");
+                throw new ArgumentOutOfRangeException(nameof(duration), duration, "duration must be <= 0xffff seconds");
             }
 
             var cmd = new UpdSleepCommand

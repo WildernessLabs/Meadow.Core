@@ -302,7 +302,7 @@ namespace Meadow.Hardware
         {
             if (bitsPerWord < 4 || bitsPerWord > 16)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(bitsPerWord), bitsPerWord, null);
             }
             var command = new Nuttx.UpdSPIBitsCommand()
             {
