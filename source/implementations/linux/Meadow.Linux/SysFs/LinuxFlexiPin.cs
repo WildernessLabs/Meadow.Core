@@ -11,11 +11,11 @@ namespace Meadow
         /// <summary>
         /// The pin's sysfs GPIO number
         /// </summary>
-        public int SysFsGpio { get; }
+        public int SysFsGpio { get; internal set; }
         /// <summary>
         /// The chip name for the gpiod driver
         /// </summary>
-        public string GpiodChip { get; }
+        public string GpiodChip { get; internal set; }
         /// <summary>
         /// The pin offset for the gpiod driver
         /// </summary>
