@@ -19,6 +19,7 @@
     <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
     <LangVersion>10.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

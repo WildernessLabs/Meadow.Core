@@ -1,9 +1,14 @@
 ﻿using Meadow.Logging;
 
-namespace Meadow
+namespace Meadow;
+
+/// <summary>
+/// Represents the interface for log level settings.
+/// </summary>
+public interface ILogLevelSettings
 {
-    public interface ILogLevelSettings
-    {
-        LogLevel Default { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the default log level.
+    /// </summary>
+    LogLevel Default { get; set; }
 }
