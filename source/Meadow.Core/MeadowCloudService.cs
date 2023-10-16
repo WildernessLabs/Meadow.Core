@@ -113,15 +113,15 @@ public class MeadowCloudService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public async Task<bool> SendLog(CloudLog log)
+    public Task<bool> SendLog(CloudLog log)
     {
-        return await Send(log, "/api/logs");
+        return Send(log, "/api/logs");
     }
 
     /// <inheritdoc/>
-    public async Task<bool> SendEvent(CloudEvent cloudEvent)
+    public Task<bool> SendEvent(CloudEvent cloudEvent)
     {
-        return await Send(cloudEvent, "/api/events");
+        return Send(cloudEvent, "/api/events");
     }
 
     private async Task<bool> Send<T>(T item, string endpoint)
@@ -129,7 +129,7 @@ public class MeadowCloudService : IMeadowCloudService
         int attempt = 0;
         int maxRetries = 1;
         var result = false;
-        
+
     retry:
 
         if (CurrentJwt == null)
@@ -176,6 +176,7 @@ public class MeadowCloudService : IMeadowCloudService
             }
         }
 
+        //ToDo remove
         GC.Collect();
         return result;
     }
