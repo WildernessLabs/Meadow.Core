@@ -1,5 +1,6 @@
 ﻿using Meadow.Cloud;
 using Meadow.Logging;
+using Meadow.Peripherals.Sensors;
 using Meadow.Update;
 using System;
 using System.Collections.Generic;
@@ -87,6 +88,8 @@ public static partial class MeadowOS
         {
             ReportAppException(e, "Device (system) Initialization Failure");
         }
+
+        Resolver.Services.Add<ISensorService>(new SensorService());
 
         if (systemInitialized)
         {
