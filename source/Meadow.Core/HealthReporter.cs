@@ -14,7 +14,7 @@ namespace Meadow;
 /// </summary>
 public class HealthReporter : IHealthReporter
 {
-    private static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+    private static readonly SemaphoreSlim semaphoreSlim = new(1, 1);
 
     /// <inheritdoc/>
     public void Start(int interval)
@@ -47,7 +47,7 @@ public class HealthReporter : IHealthReporter
             var service = Resolver.Services.Get<IMeadowCloudService>();
             var device = Resolver.Device;
 
-            DirectoryInfo di = new DirectoryInfo(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot);
+            DirectoryInfo di = new(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot);
 
             var usedDiskSpace = DirSize(di);
 
@@ -86,9 +86,9 @@ public class HealthReporter : IHealthReporter
         }
     }
 
-    private async Task TimerOnElapsed(object sender, ElapsedEventArgs e)
+    private Task TimerOnElapsed(object sender, ElapsedEventArgs e)
     {
-        await Send();
+        return Send();
     }
 
     private long DirSize(DirectoryInfo d)
