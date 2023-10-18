@@ -87,11 +87,9 @@ public partial class F7PlatformOS : IPlatformOS
         return Core.Interop.Nuttx.mallinfo();
     }
 
-    /// <summary>
-    /// Retrieves the current processor usage (as a percentage in the range of 0-100)
-    /// </summary>
-    public int ProcessorLoad()
+    /// <inheritdoc/>
+    public int[] GetProcessorUtilization()
     {
-        return 100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value();
+        return new int[100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value()];
     }
 }
