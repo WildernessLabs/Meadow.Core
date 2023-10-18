@@ -7,6 +7,41 @@ namespace Meadow;
 
 public partial class F7PlatformOS : IPlatformOS
 {
+    private const long FeatherV1TotalFlash = 33_554_432; // 32MB
+    private const long FeatherV2TotalFlash = 33_554_432; // 32MB
+    private const long RuntimeAllocationSize = 3_145_728; // 3MB
+    private const long OtAAllocationSize = 2_097_152; // 2MB
+
+    /// <summary>
+    /// Meadow F7-specific storage information
+    /// </summary>
+    public class F7StorageInformation : StorageInformation
+    {
+        internal static F7StorageInformation Create(IMeadowDevice device)
+        {
+            long totalFlashAvailable;
+            if (device is F7FeatherV1)
+            {
+                totalFlashAvailable = FeatherV1TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
+            }
+            else
+            {
+                totalFlashAvailable = FeatherV2TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
+            }
+
+            var spaceConsumed = new DirectoryInfo("/meadow0")
+                .EnumerateFiles("*", SearchOption.AllDirectories)
+                .Sum(file => file.Length);
+
+            return new F7StorageInformation
+            {
+                Name = "Internal Flash",
+                Size = new Units.DigitalStorage(totalFlashAvailable),
+                SpaceAvailable = new Units.DigitalStorage(totalFlashAvailable - spaceConsumed)
+            };
+        }
+    }
+
     /// <summary>
     /// Meadow F7-specific storage information
     /// </summary>
