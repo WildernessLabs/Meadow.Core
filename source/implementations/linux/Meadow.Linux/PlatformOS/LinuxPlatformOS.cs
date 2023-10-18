@@ -212,4 +212,14 @@ public class LinuxPlatformOS : IPlatformOS
             }
         }
     }
+
+    public int[] GetProcessorUtilization()
+    {
+        throw new NotImplementedException();
+    }
+
+    public IStorageInformation[] GetStorageInformation()
+    {
+        throw new NotImplementedException();
+    }
 }

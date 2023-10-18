@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace Meadow.Core
+﻿namespace Meadow.Core
 {
     internal static partial class Interop
     {
