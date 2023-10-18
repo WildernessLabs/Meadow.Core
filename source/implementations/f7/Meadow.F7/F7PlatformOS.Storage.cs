@@ -7,6 +7,11 @@ namespace Meadow;
 
 public partial class F7PlatformOS : IPlatformOS
 {
+    private const long FeatherV1TotalFlash = 33_554_432; // 32MB
+    private const long FeatherV2TotalFlash = 33_554_432; // 32MB
+    private const long RuntimeAllocationSize = 3_145_728; // 3MB
+    private const long OtAAllocationSize = 2_097_152; // 2MB
+
     /// <summary>
     /// Meadow F7-specific storage information
     /// </summary>
@@ -17,20 +22,11 @@ public partial class F7PlatformOS : IPlatformOS
             long totalFlashAvailable;
             if (device is F7FeatherV1)
             {
-                totalFlashAvailable = 33_554_432 // 32MB
-                    - 3_145_728 // allocation for runtime
-                    - 2_097_152; // OtA
-
-                // 16_510_459_314_176.10
-                // 29_686_813_949_952.1MB
+                totalFlashAvailable = FeatherV1TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
             }
             else
             {
-                totalFlashAvailable = 67_108_864 // 64MB
-                    - 3_145_728 // allocation for runtime
-                    - 2_097_152; // OtA
-
-
+                totalFlashAvailable = FeatherV2TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
             }
 
             var spaceConsumed = new DirectoryInfo("/meadow0")
