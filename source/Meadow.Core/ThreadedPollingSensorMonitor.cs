@@ -12,9 +12,10 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
 {
     public event EventHandler<object> SampleAvailable = default!;
 
-    private readonly List<SensorMeta> _monitorList = new();
-    private Thread _sampleThread;
-    private bool _stopRequested = false;
+    private readonly List<SensorMeta> _metaList = new();
+    private readonly Thread _sampleThread;
+    private readonly Random _random = new();
+    private readonly TimeSpan PollPeriod = TimeSpan.FromSeconds(1);
 
     private class SensorMeta
     {
@@ -39,7 +40,7 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
 
     public void StartSampling(ISamplingSensor sensor)
     {
-        var existing = _monitorList.FirstOrDefault(s => s.Sensor.Equals(sensor));
+        var existing = _metaList.FirstOrDefault(s => s.Sensor.Equals(sensor));
 
         if (existing == null)
         {
@@ -49,13 +50,15 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
 
             if (readMethod != null)
             {
+                // wait a random period to attempt to spread the updates over time
+                var firstInterval = _random.Next(0, (int)(sensor.UpdateInterval.TotalSeconds + 1));
                 var meta = new SensorMeta(sensor, readMethod)
                 {
                     EnableReading = true,
-                    NextReading = sensor.UpdateInterval
+                    NextReading = TimeSpan.FromSeconds(firstInterval)
                 };
 
-                _monitorList.Add(meta);
+                _metaList.Add(meta);
             }
         }
         else
@@ -67,59 +70,57 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
 
     private async void SamplingThreadProc()
     {
-        while (!_stopRequested)
+        while (true)
         {
-            foreach (var monitor in _monitorList)
+            foreach (var meta in _metaList)
             {
                 // skip "disabled" (i.e. StopUpdating has been called) sensors
-                if (!monitor.EnableReading) continue;
+                if (!meta.EnableReading) continue;
 
                 // check for the reading due tiime (1s granularity for now)
-                var remaining = monitor.NextReading.Subtract(TimeSpan.FromSeconds(1));
+                var remaining = meta.NextReading.Subtract(TimeSpan.FromSeconds(1));
 
                 if (remaining.TotalSeconds <= 0)
                 {
                     // reset the next reading
-                    monitor.NextReading = monitor.Sensor.UpdateInterval;
+                    meta.NextReading = meta.Sensor.UpdateInterval;
 
                     // read the sensor
                     try
                     {
-                        var task = (Task)monitor.ReadMethod.Invoke(monitor.Sensor, null);
+                        var task = (Task)meta.ReadMethod.Invoke(meta.Sensor, null);
                         await task.ConfigureAwait(false);
 
-                        if (monitor.ResultProperty == null)
+                        if (meta.ResultProperty == null)
                         {
-                            monitor.ResultProperty = task.GetType().GetProperty("Result");
+                            meta.ResultProperty = task.GetType().GetProperty("Result");
                         }
 
-                        var value = monitor.ResultProperty.GetValue(task);
+                        var value = meta.ResultProperty.GetValue(task);
 
                         // raise an event - not ideal as all sensors get events for all other sensors
                         // fixing this requires eitehr exposing a "set" method, which I'd prefer be kept internal
                         // or using reflection to find a set method, which is fragile
-                        SampleAvailable?.Invoke(monitor.Sensor, value);
+                        SampleAvailable?.Invoke(meta.Sensor, value);
                     }
                     catch (Exception ex)
                     {
-                        Resolver.Log.Error($"Unhandled exception reading sensor type {monitor.Sensor.GetType().Name}: {ex.Message}");
+                        Resolver.Log.Error($"Unhandled exception reading sensor type {meta.Sensor.GetType().Name}: {ex.Message}");
                     }
                 }
                 else
                 {
-                    monitor.NextReading = remaining;
+                    meta.NextReading = remaining;
                 }
             }
 
-            Thread.Sleep(1000); // TODO: improve this algorithm
+            Thread.Sleep(PollPeriod); // TODO: improve this algorithm
         }
-
-        _stopRequested = false;
     }
 
     public void StopSampling(ISamplingSensor sensor)
     {
-        var existing = _monitorList.FirstOrDefault(s => s.Sensor.Equals(sensor));
+        var existing = _metaList.FirstOrDefault(s => s.Sensor.Equals(sensor));
 
         if (existing != null)
         {

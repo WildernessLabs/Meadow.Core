@@ -23,8 +23,6 @@ internal class SensorService : ISensorService
 
             s.StopUpdating();
 
-            Resolver.Log.Info($"Replacing monitor on {s.GetType().Name}");
-
             s.SensorMonitor = _pollMonitor;
 
             _pollMonitor.StartSampling(s);
