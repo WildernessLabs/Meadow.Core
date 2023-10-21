@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Core
 {
@@ -58,7 +57,7 @@ namespace Meadow.Core
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSleepCommand command);
-            
+
             /// <summary>
             /// Configures the Universal Platform Driver to catch GPIO interrupts
             /// </summary>

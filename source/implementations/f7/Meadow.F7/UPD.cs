@@ -3,7 +3,6 @@ using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using static Meadow.Core.Interop;
-using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Devices
 {
@@ -168,7 +167,7 @@ namespace Meadow.Devices
             }
             return result;
         }
-        
+
 
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdGpioInterruptConfiguration interruptConfig)
         {
@@ -274,7 +273,7 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Resolver.Log.Error($"ioctl {request} failed {err}");
-                return (int) err;
+                return (int)err;
             }
             return result;
         }
@@ -286,7 +285,7 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Resolver.Log.Error($"ioctl {request} failed {err}");
-                return (int) err;
+                return (int)err;
             }
             return result;
         }
@@ -298,7 +297,7 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Resolver.Log.Error($"ioctl {request} failed {err}");
-                return (int) err;
+                return (int)err;
             }
             return result;
         }
