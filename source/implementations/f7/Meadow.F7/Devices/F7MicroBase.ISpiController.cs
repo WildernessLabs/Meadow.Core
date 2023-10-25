@@ -12,12 +12,19 @@ namespace Meadow.Devices
         /// <param name="cipo"></param>
         /// <returns></returns>
         protected abstract int GetSpiBusNumberForPins(IPin clock, IPin copi, IPin cipo);
+
+        /// <summary>
+        /// Creates a SPI bus instance for the requested bus speed and bus number.
+        /// </summary>
+        /// <param name="speed">The bus speed (in kHz).</param>
+        /// <param name="busNumber">number of the bus to use.</param>
+        /// <returns>An instance of an <see cref="ISpiBus"/></returns>
         public abstract ISpiBus CreateSpiBus(Units.Frequency speed, int busNumber = 3);
 
         /// <summary>
-        /// Creates a SPI bus instance for the requested bus speed with the Meadow- default IPins for CLK, COPI and CIPO
+        /// Creates a SPI bus instance for the requested bus speed with the Meadow's default IPins for CLK, COPI and CIPO
         /// </summary>
-        /// <returns>An instance of an IISpiBus</returns>
+        /// <returns>An instance of an <see cref="ISpiBus"/></returns>
         public ISpiBus CreateSpiBus()
         {
             return CreateSpiBus(IMeadowDevice.DefaultSpiBusSpeed);
@@ -28,7 +35,7 @@ namespace Meadow.Devices
         /// </summary>
         /// <param name="pins">IPin instances used for (in this order) CLK, COPI, CIPO</param>
         /// <param name="speed">The bus speed (in kHz)</param>
-        /// <returns>An instance of an IISpiBus</returns>
+        /// <returns>An instance of an <see cref="ISpiBus"/></returns>
         public ISpiBus CreateSpiBus(
             IPin[] pins,
             Units.Frequency speed
@@ -37,6 +44,13 @@ namespace Meadow.Devices
             return CreateSpiBus(pins[0], pins[1], pins[2], speed);
         }
 
+        /// <summary>
+        /// Creates a SPI bus instance for the requested control pins and the default bus speed.
+        /// </summary>
+        /// <param name="clock">The IPin instance to use as the bus clock</param>
+        /// <param name="copi">The IPin instance to use for data transmit (controller out/peripheral in)</param>
+        /// <param name="cipo">The IPin instance to use for data receive (controller in/peripheral out)</param>
+        /// <returns>An instance of an <see cref="ISpiBus"/></returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin copi,
@@ -47,13 +61,13 @@ namespace Meadow.Devices
         }
 
         /// <summary>
-        /// Creates a SPI bus instance for the requested control pins and bus speed
+        /// Creates a SPI bus instance for the requested control pins and bus speed.
         /// </summary>
         /// <param name="clock">The IPin instance to use as the bus clock</param>
         /// <param name="copi">The IPin instance to use for data transmit (controller out/peripheral in)</param>
         /// <param name="cipo">The IPin instance to use for data receive (controller in/peripheral out)</param>
         /// <param name="speed">The bus speed</param>
-        /// <returns>An instance of an IISpiBus</returns>
+        /// <returns>An instance of an <see cref="ISpiBus"/></returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin copi,
@@ -74,7 +88,7 @@ namespace Meadow.Devices
         /// <param name="copi">The IPin instance to use for data transmit (controller out/peripheral in)</param>
         /// <param name="cipo">The IPin instance to use for data receive (controller in/peripheral out)</param>
         /// <param name="config">The bus clock configuration parameters</param>
-        /// <returns>An instance of an IISpiBus</returns>
+        /// <returns>An instance of an <see cref="ISpiBus"/></returns>
         public ISpiBus CreateSpiBus(
             IPin clock,
             IPin copi,

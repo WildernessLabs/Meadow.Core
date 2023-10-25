@@ -5,7 +5,7 @@ using System.Linq;
 namespace Meadow;
 
 
-public partial class F7PlatformOS : IPlatformOS
+public partial class F7PlatformOS
 {
     private const long FeatherV1TotalFlash = 33_554_432; // 32MB
     private const long FeatherV2TotalFlash = 33_554_432; // 32MB
@@ -45,7 +45,7 @@ public partial class F7PlatformOS : IPlatformOS
     /// <summary>
     /// Gets the file system information for the platform.
     /// </summary>
-    public Meadow.IPlatformOS.FileSystemInfo FileSystem { get; private set; } = default!;
+    public IPlatformOS.FileSystemInfo FileSystem { get; private set; } = default!;
 
     /// <inheritdoc/>
     public IStorageInformation[] GetStorageInformation()

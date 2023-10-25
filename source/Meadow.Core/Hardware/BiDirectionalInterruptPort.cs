@@ -107,7 +107,7 @@ namespace Meadow.Hardware
             }
             if (debounceDuration.TotalMilliseconds < 0.0 || debounceDuration.TotalMilliseconds > 1000.0)
             {
-                throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
+                throw new ArgumentOutOfRangeException(nameof(debounceDuration), debounceDuration, "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
             if (glitchDuration.TotalMilliseconds < 0.0 || glitchDuration.TotalMilliseconds > 1000.0)
             {

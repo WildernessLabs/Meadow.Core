@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Meadow;
 
-public partial class F7PlatformOS : IPlatformOS
+public partial class F7PlatformOS
 {
     /// <summary>
     /// The file name used for passing Platform OS messages to the Meadow stack
@@ -37,11 +37,11 @@ public partial class F7PlatformOS : IPlatformOS
             try
             {
                 var contents = File.ReadAllText(path);
-                var lines = contents.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var lines = contents.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var line in lines)
                 {
-                    var fields = line.Split(new char[] { '~' }, StringSplitOptions.RemoveEmptyEntries);
+                    var fields = line.Split('~', StringSplitOptions.RemoveEmptyEntries);
 
                     if (fields.Length == 3)
                     {
