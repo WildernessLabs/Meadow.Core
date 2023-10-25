@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Meadow;
 
-public partial class F7PlatformOS : IPlatformOS
+public partial class F7PlatformOS
 {
     /// <summary>
     /// The file name used for passing Platform OS messages to the Meadow stack

@@ -9,7 +9,7 @@ namespace Meadow
 {
     public partial class F7PlatformOS
     {
-        private List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
+        private readonly List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
 
         /// <summary>
         /// Event called before a software reset
@@ -72,7 +72,7 @@ namespace Meadow
             BeforeSleep?.Invoke();
 
             // This should suspend the processor and code should stop executing
-            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep, cmd);
+            UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
 
             // Stop execution while the device actually does it's thing
             Thread.Sleep(100);

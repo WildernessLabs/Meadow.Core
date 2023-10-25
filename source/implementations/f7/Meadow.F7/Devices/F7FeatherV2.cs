@@ -9,7 +9,7 @@ namespace Meadow.Devices;
 /// </summary>
 public partial class F7FeatherV2 : F7FeatherBase
 {
-    private Lazy<IAnalogInputPort?> _adc_bat;
+    private readonly Lazy<IAnalogInputPort?> _adc_bat;
 
     public F7FeatherV2()
         : base(new Pinout(),
@@ -18,17 +18,14 @@ public partial class F7FeatherV2 : F7FeatherBase
               new NetworkCapabilities(true, false),
               new StorageCapabilities(false))
     {
-        if (this.Information.Platform != MeadowPlatform.F7FeatherV2)
+        if (Information.Platform != MeadowPlatform.F7FeatherV2)
         {
-            var message = $"Application is defined as {nameof(F7FeatherV2)}, but running hardware is {this.Information.Platform}";
+            var message = $"Application is defined as {nameof(F7FeatherV2)}, but running hardware is {Information.Platform}";
             Resolver.Log.Error(message);
-            throw new UnsupportedPlatformException(this.Information.Platform, message);
+            throw new UnsupportedPlatformException(Information.Platform, message);
         }
 
-        _adc_bat = new Lazy<IAnalogInputPort?>(() =>
-        {
-            return this.CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT) ?? null;
-        });
+        _adc_bat = new Lazy<IAnalogInputPort?>(() => CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT));
 
         Pins.Controller = this;
     }
@@ -54,12 +51,12 @@ public partial class F7FeatherV2 : F7FeatherBase
     /// Gets a BatteryInfo instance for the current state of the platform
     /// </summary>
     /// <returns>A BatteryInfo instance</returns>
-    public override BatteryInfo? GetBatteryInfo()
+    public override BatteryInfo GetBatteryInfo()
     {
         return new BatteryInfo
         {
             // on V2 there is a voltage divider 2 x 499R and the voltage is taken from the center of the divider, effectively halving the input
-            Voltage = _adc_bat?.Value?.Voltage * 2
+            Voltage = _adc_bat.Value?.Voltage * 2
         };
     }
 }
