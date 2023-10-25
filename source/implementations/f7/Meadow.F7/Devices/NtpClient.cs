@@ -8,7 +8,7 @@ namespace Meadow
     public class NtpClient : INtpClient
     {
         /// <summary>
-        /// Returns <b>true</b> if the NTP Client is enabled
+        /// Returns <c>true</c> if the NTP Client is enabled
         /// </summary>
         public bool Enabled => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup);
 

@@ -45,7 +45,7 @@ namespace Meadow.Devices
                 prescale = STM32.IWDG_PR_DIV_256;
                 rlr = (uint)timeoutMs / 8;
             } else {
-                throw new ArgumentOutOfRangeException($"Timeout must be less than {4096 * 8}ms");
+                throw new ArgumentOutOfRangeException(nameof(timeoutMs), timeoutMs, $"must be less than {4096 * 8}ms");
             }
 
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000cccc);

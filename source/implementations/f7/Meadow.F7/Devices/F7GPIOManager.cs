@@ -18,7 +18,6 @@ namespace Meadow.Devices
         GpioDetail = 1 << 3,
         Interrupts = 1 << 4,
         PWM = 1 << 5
-
     }
 
     public partial class F7GPIOManager : IMeadowIOController
@@ -31,6 +30,8 @@ namespace Meadow.Devices
         private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
         internal DebugFeature DebugFeatures { get; set; }
+
+        /// <inheritdoc/>
         public IDeviceChannelManager DeviceChannelManager { get; }
 
         internal F7GPIOManager()
@@ -114,8 +115,8 @@ namespace Meadow.Devices
         /// <summary>
         /// Gets the value of a discrete (digital input)
         /// </summary>
-        /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
         /// <param name="pin">Pin.</param>
+        /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
         public bool GetDiscrete(IPin pin)
         {
             var designator = GetPortAndPin(pin);
@@ -227,6 +228,7 @@ namespace Meadow.Devices
 
             ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, stm32OutputType, initialState);
         }
+/// <inheritdoc/>
 
         public void ConfigureInput(
             IPin pin,
@@ -283,7 +285,8 @@ namespace Meadow.Devices
             return ConfigureGpio(port, pin, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, speed, type, false, InterruptMode.None, alternateFunction);
         }
 
-        public bool UnconfigureGpio(IPin pin)
+		/// <inheritdoc/>
+		public bool UnconfigureGpio(IPin pin)
         {
             var designator = GetPortAndPin(pin);
 

@@ -90,6 +90,6 @@ public partial class F7PlatformOS : IPlatformOS
     /// <inheritdoc/>
     public int[] GetProcessorUtilization()
     {
-        return new int[100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value()];
+        return new[] {100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value()};
     }
 }

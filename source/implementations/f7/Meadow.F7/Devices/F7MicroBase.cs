@@ -23,15 +23,20 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     public event EventHandler WiFiAdapterInitialized = delegate { };
 
     public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
+
     public ICoprocessor? Coprocessor { get; protected set; }
 
-    public DeviceCapabilities Capabilities { get; }
+	/// <inheritdoc/>
+	public DeviceCapabilities Capabilities { get; }
 
-    public IPlatformOS PlatformOS { get; protected set; }
+	/// <inheritdoc/>
+	public IPlatformOS PlatformOS { get; protected set; }
 
-    public IDeviceInformation Information { get; protected set; }
+	/// <inheritdoc/>
+	public IDeviceInformation Information { get; protected set; }
 
-    public INetworkAdapterCollection NetworkAdapters => networkAdapters;
+	/// <inheritdoc/>
+	public INetworkAdapterCollection NetworkAdapters => networkAdapters;
 
     /// <summary>
     /// Gets an IPin by name
@@ -40,6 +45,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <returns></returns>
     public abstract IPin GetPin(string pinName);
 
+    /// <inheritdoc/>
     public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
     /// <summary>

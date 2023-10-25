@@ -18,9 +18,6 @@ namespace Meadow.Hardware
         private IMeadowIOController IOController { get; }
         internal int BusNumber { get; set; } = 1;
 
-        public void Dispose()
-        {
-        }
 
         /// <summary>
         /// Bus Clock speed
@@ -28,7 +25,7 @@ namespace Meadow.Hardware
         public I2cBusSpeed BusSpeed { get; set; }
 
         /// <summary>
-        /// Default constructor for the I2CBus class.  This is private to prevent the
+        /// Default constructor for the I2cBus class.  This is private to prevent the
         /// developer from calling it.
         /// </summary>
         private I2cBus(
@@ -79,7 +76,7 @@ namespace Meadow.Hardware
             var dataChannel = data.SupportedChannels.OfType<II2cChannelInfo>().FirstOrDefault();
             if (dataChannel == null || dataChannel.ChannelFunction != I2cChannelFunctionType.Data)
             {
-                throw new Exception($"Pin {clock.Name} does not have I2C Data capabilities");
+                throw new Exception($"Pin {data.Name} does not have I2C Data capabilities");
             }
             var success = true;
 
@@ -106,7 +103,7 @@ namespace Meadow.Hardware
             {
                 fixed (byte* pData = readBuffer)
                 {
-                    var command = new Nuttx.UpdI2CCommand()
+                    var command = new Nuttx.UpdI2cCommand()
                     {
                         Address = peripheralAddress,
                         Frequency = (int)BusSpeed,
@@ -120,7 +117,7 @@ namespace Meadow.Hardware
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
                     if (result != 0)
                     {
-                        DecipherI2CError(UPD.GetLastError());
+                        DecipherI2cError(UPD.GetLastError());
                     }
                 }
             }
@@ -146,7 +143,7 @@ namespace Meadow.Hardware
             {
                 fixed (byte* pData = data)
                 {
-                    var command = new Nuttx.UpdI2CCommand()
+                    var command = new Nuttx.UpdI2cCommand()
                     {
                         Address = peripheralAddress,
                         Frequency = (int)this.BusSpeed,
@@ -160,7 +157,7 @@ namespace Meadow.Hardware
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.I2CData, ref command);
                     if (result != 0)
                     {
-                        DecipherI2CError(UPD.GetLastError());
+                        DecipherI2cError(UPD.GetLastError());
                     }
                 }
             }
@@ -185,7 +182,7 @@ namespace Meadow.Hardware
                 fixed (byte* pWrite = writeBuffer)
                 fixed (byte* pRead = readBuffer)
                 {
-                    var command = new Nuttx.UpdI2CCommand()
+                    var command = new Nuttx.UpdI2cCommand()
                     {
                         Address = peripheralAddress,
                         Frequency = (int)BusSpeed,
@@ -200,7 +197,7 @@ namespace Meadow.Hardware
 
                     if (result != 0)
                     {
-                        DecipherI2CError(UPD.GetLastError());
+                        DecipherI2cError(UPD.GetLastError());
                     }
                 }
             }
@@ -210,7 +207,7 @@ namespace Meadow.Hardware
             }
         }
 
-        private void DecipherI2CError(Nuttx.ErrorCode ec)
+        private void DecipherI2cError(Nuttx.ErrorCode ec)
         {
             switch (ec)
             {
@@ -225,6 +222,11 @@ namespace Meadow.Hardware
                 default:
                     throw new NativeException($"Communication error.  Error code {(int)ec}");
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
         }
     }
 }

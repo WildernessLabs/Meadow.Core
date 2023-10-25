@@ -13,7 +13,7 @@ namespace Meadow.Devices
         {
             if (this.Information.Platform != Hardware.MeadowPlatform.F7CoreComputeV2)
             {
-                var message = $"Application is defined as F7CoreComputeV2, but running hardware is {this.Information.Platform}";
+                var message = $"Application is defined as {nameof(F7CoreComputeV2)}, but running hardware is {this.Information.Platform}";
                 Resolver.Log.Error(message);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
@@ -22,7 +22,7 @@ namespace Meadow.Devices
             Pins.Controller = this;
         }
 
-        protected override int GetI2CBusNumberForPins(IPin clock, IPin data)
+        protected override int GetI2cBusNumberForPins(IPin clock, IPin data)
         {
             if (clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL.Name)
             {
