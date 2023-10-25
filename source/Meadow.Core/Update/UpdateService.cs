@@ -277,6 +277,10 @@ public class UpdateService : IUpdateService, ICommandService
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
                             .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
+                            .WithTls(tlsParameters =>
+                            {
+                                tlsParameters.UseTls = Config.UpdatePort == 8883;
+                            })
                             .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                             .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
 

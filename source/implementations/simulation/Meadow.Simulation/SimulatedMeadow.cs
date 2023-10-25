@@ -1,3 +1,4 @@
+using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Units;
@@ -9,8 +10,8 @@ namespace Meadow.Simulation
     public partial class SimulatedMeadow<TPinDefinitions> : ISimulatedDevice<TPinDefinitions>
         where TPinDefinitions : IPinDefinitions, new()
     {
-        private SimulationEngine<TPinDefinitions> _simulationEngine;
-        private IPlatformOS _platformOS;
+        private readonly SimulationEngine<TPinDefinitions> _simulationEngine;
+        private readonly IPlatformOS _platformOS;
 
         public event PowerTransitionHandler BeforeReset;
         public event PowerTransitionHandler BeforeSleep;
@@ -35,9 +36,13 @@ namespace Meadow.Simulation
         public IDeviceInformation Information { get; }
 
         public IPlatformOS PlatformOS => _platformOS;
-        public DeviceCapabilities Capabilities => throw new NotImplementedException();
+        public DeviceCapabilities Capabilities { get; private set; } = new DeviceCapabilities(
+                new AnalogCapabilities(false, null),
+                new NetworkCapabilities(false, true),
+                new StorageCapabilities(true)
+                );
 
-        public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
+        public INetworkAdapterCollection NetworkAdapters { get; private set; } = new NativeNetworkAdapterCollection();
 
         private void LaunchUI()
         {
