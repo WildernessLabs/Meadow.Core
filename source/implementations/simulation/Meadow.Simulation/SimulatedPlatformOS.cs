@@ -1,5 +1,9 @@
 ﻿using Meadow.Hardware;
 using Meadow.Units;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Crypto.Utilities;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -128,12 +132,32 @@ public class SimulatedPlatformOS : IPlatformOS
         throw new PlatformNotSupportedException();
     }
 
+    /// <inheritdoc/>
     public byte[] RsaDecrypt(byte[] encryptedValue)
     {
-        var rsa = RSA.Create();
+        var crypto = Resolver.Services.Get<ICryptographyService>();
+        if (crypto == null)
+        {
+            throw new Exception("No ICryptographyService found for decryption");
+        }
+
+        var privateKey = crypto.GetPrivateKeyInPemFormat();
+        using var pkReader = new StringReader(privateKey);
+        using var pemReader = new PemReader(pkReader);
+        var pemObject = pemReader.ReadPemObject();
+        var pkBlob = OpenSshPrivateKeyUtilities.ParsePrivateKeyBlob(pemObject.Content);
+
+        if (pkBlob is not RsaPrivateCrtKeyParameters rsaParams)
+        {
+            throw new NotImplementedException();
+        }
+
+        var rsa = DotNetUtilities.ToRSA(rsaParams);
+
         return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
     }
 
+    /// <inheritdoc/>
     public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
     {
         // Create an Aes object
@@ -147,12 +171,12 @@ public class SimulatedPlatformOS : IPlatformOS
             var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
             // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(encryptedValue))
-            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+            using (var msEncrypt = new MemoryStream(encryptedValue))
+            using (var csDecrypt = new CryptoStream(msEncrypt, decryptor, CryptoStreamMode.Read))
+            using (var msDecrypt = new MemoryStream())
             {
-                var buffer = new byte[csDecrypt.Length];
-                csDecrypt.Read(buffer, 0, buffer.Length);
-                return buffer;
+                csDecrypt.CopyTo(msDecrypt);
+                return msDecrypt.ToArray();
             }
         }
     }
