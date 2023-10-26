@@ -45,7 +45,7 @@ public class CryptographyService : ICryptographyService
         else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             // this will generate a PEM output *assuming* the key has already been created
-            var keygenOutput = ExecuteBashCommandLine("ssh-keygen -f id_rsa -e -m pem");
+            var keygenOutput = ExecuteBashCommandLine("ssh-keygen -f id_rsa.pub -e -m pem");
             if (!keygenOutput.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
             {
                 // probably no key generated
@@ -74,7 +74,8 @@ public class CryptographyService : ICryptographyService
     /// <inheritdoc/>
     public string? GetPrivateKeyInPemFormat()
     {
-        if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            || SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
 
@@ -94,10 +95,6 @@ public class CryptographyService : ICryptographyService
             }
         }
         else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            throw new PlatformNotSupportedException();
-        }
-        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             throw new PlatformNotSupportedException();
         }
