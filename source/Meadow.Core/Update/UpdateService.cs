@@ -41,7 +41,7 @@ public class UpdateService : IUpdateService, ICommandService
     /// Specifies the maximum number of download attempts before giving up.
     /// </summary>
     public const int MaxDownloadRetries = 10;
-
+    
     /// <summary>
     /// Period the service will wait between download attempts in 
     /// case of failure.
@@ -209,14 +209,14 @@ public class UpdateService : IUpdateService, ICommandService
 
         return _jwt != null;
     }
-
+    
     /// <summary>
     /// Method to determine if the authentication is required based on whether the time since 
     /// the last authentication exceeds the token expiration period (in minutes).
     /// </summary>
     private bool ShouldAuthenticate()
     {
-        return (DateTime.UtcNow - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
+        return (DateTime.Now - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
     }
 
     private async void UpdateStateMachine()
@@ -252,7 +252,7 @@ public class UpdateService : IUpdateService, ICommandService
                         if (await AuthenticateWithServer())
                         {
                             // Update the last authentication time when successfully authenticated
-                            _lastAuthenticationTime = DateTime.UtcNow;
+                            _lastAuthenticationTime = DateTime.Now;
                             State = UpdateState.Connecting;
                         }
                         else
