@@ -8,6 +8,9 @@ namespace Meadow;
 
 public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 {
+    /// <inheritdoc/>
+    public new event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
+
     private readonly List<IExternalStorage> _externalStorage = new();
     private readonly bool _sdSupported;
 
