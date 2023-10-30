@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices;
@@ -17,10 +16,10 @@ public partial class F7GPIOManager : IMeadowIOController
     public event InterruptHandler Interrupt = delegate { };
 
     private Thread? _ist;
-    private List<int> _interruptGroupsInUse = new();
+    private readonly List<int> _interruptGroupsInUse = new();
     private bool _firstInterrupt = true;
 
-    private IPin _nullPin = new NullPin();
+    private readonly IPin _nullPin = new NullPin();
 
     /// <summary>
     /// Hooks up the provided pin to the underlying OS interrupt handling
@@ -219,7 +218,7 @@ public partial class F7GPIOManager : IMeadowIOController
                 {
                     Interrupt?.Invoke(ipin, state);
                 }
-                catch (Exception ex)
+                catch
                 {
                     Thread.Sleep(5000);
                 }
