@@ -435,7 +435,8 @@ public class UpdateService : IUpdateService, ICommandService
         
         var destination = message.MpakDownloadUrl;
         
-        if (Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
+        if (!string.IsNullOrEmpty(message.OsVersion) 
+            && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
         {
             destination = message.MpakWithOsDownloadUrl;
         }
