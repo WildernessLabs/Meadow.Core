@@ -14,13 +14,13 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <summary>
     /// Event raised when a new network is connected
     /// </summary>
-    public event NetworkConnectionHandler NetworkConnected = delegate { };
+    public event NetworkConnectionHandler NetworkConnected = default!;
     /// <summary>
     /// Event raised when an existing network connection is disconnected
     /// </summary>
-    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
 
-    public event EventHandler WiFiAdapterInitialized = delegate { };
+    public event EventHandler WiFiAdapterInitialized = default!;
 
     public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
 
