@@ -13,7 +13,7 @@ public partial class F7GPIOManager : IMeadowIOController
     /// <summary>
     /// An event raised when an interrupt occurs
     /// </summary>
-    public event InterruptHandler Interrupt = delegate { };
+    public event InterruptHandler Interrupt = default!;
 
     private Thread? _ist;
     private readonly List<int> _interruptGroupsInUse = new();

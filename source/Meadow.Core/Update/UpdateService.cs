@@ -61,15 +61,15 @@ public class UpdateService : IUpdateService, ICommandService
     private string UpdateStoreDirectory { get; }
 
     /// <inheritdoc/>
-    public event EventHandler<UpdateState> OnStateChanged = delegate { };
+    public event EventHandler<UpdateState> OnStateChanged = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateAvailable = delegate { };
+    public event UpdateEventHandler OnUpdateAvailable = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateRetrieved = delegate { };
+    public event UpdateEventHandler OnUpdateRetrieved = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateSuccess = delegate { };
+    public event UpdateEventHandler OnUpdateSuccess = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateFailure = delegate { };
+    public event UpdateEventHandler OnUpdateFailure = default!;
 
     private UpdateState _state;
     private bool _stopService = false;

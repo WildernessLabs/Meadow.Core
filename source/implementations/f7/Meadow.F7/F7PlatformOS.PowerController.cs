@@ -14,15 +14,15 @@ namespace Meadow
         /// <summary>
         /// Event called before a software reset
         /// </summary>
-        public event PowerTransitionHandler BeforeReset = delegate { };
+        public event PowerTransitionHandler BeforeReset = default!;
         /// <summary>
         /// Event called before Sleep mode
         /// </summary>
-        public event PowerTransitionHandler BeforeSleep = delegate { };
+        public event PowerTransitionHandler BeforeSleep = default!;
         /// <summary>
         /// Event called after returning from Sleep mode
         /// </summary>
-        public event PowerTransitionHandler AfterWake = delegate { };
+        public event PowerTransitionHandler AfterWake = default!;
 
         /// <summary>
         /// Resets the device

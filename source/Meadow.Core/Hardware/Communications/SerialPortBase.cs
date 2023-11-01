@@ -112,12 +112,12 @@ namespace Meadow.Hardware
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
         /// </summary>
-        public event SerialDataReceivedEventHandler DataReceived = delegate { };
+        public event SerialDataReceivedEventHandler DataReceived = default!;
 
         /// <summary>
         /// Indicates that the internal data buffer has overrun and data has been lost.
         /// </summary>
-        public event EventHandler BufferOverrun = delegate { };
+        public event EventHandler BufferOverrun = default!;
 
         /// <summary>
         /// Gets the port name used for communications.

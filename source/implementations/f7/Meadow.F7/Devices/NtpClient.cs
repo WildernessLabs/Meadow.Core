@@ -28,7 +28,7 @@ namespace Meadow
         /// <summary>
         /// Event raised when the device clock is adjusted by NTP
         /// </summary>
-        public event TimeChangedEventHandler TimeChanged = delegate { };
+        public event TimeChangedEventHandler TimeChanged = default!;
 
         internal void RaiseTimeChanged()
         {

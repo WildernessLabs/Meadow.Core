@@ -26,8 +26,8 @@ public partial class Esp32Coprocessor : ICoprocessor
 
     private static readonly byte[] EmptyPayload = new byte[0];
 
-    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = delegate { };
-    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = delegate { };
+    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = default!;
+    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = default!;
 
     /// <summary>
     /// Possible debug levels.

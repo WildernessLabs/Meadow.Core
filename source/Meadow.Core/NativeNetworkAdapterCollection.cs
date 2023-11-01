@@ -12,9 +12,9 @@ namespace Meadow.Devices;
 public class NativeNetworkAdapterCollection : INetworkAdapterCollection
 {
     /// <inheritdoc/>
-    public event NetworkConnectionHandler NetworkConnected = delegate { };
+    public event NetworkConnectionHandler NetworkConnected = default!;
     /// <inheritdoc/>
-    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
 
     // DEV NOTE: This collection is not used in the F7 - it is used by Linux and Windows
     //           For F7 implementations, see the NetworkAdapterCollection class

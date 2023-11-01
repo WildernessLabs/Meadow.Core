@@ -114,8 +114,8 @@ public class Windows : IMeadowDevice
     // TODO: implement everything below here
 
 
-    public event NetworkConnectionHandler NetworkConnected = delegate { };
-    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+    public event NetworkConnectionHandler NetworkConnected = default!;
+    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
 
 
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)

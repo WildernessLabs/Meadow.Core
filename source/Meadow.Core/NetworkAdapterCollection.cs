@@ -11,9 +11,9 @@ namespace Meadow;
 public class NetworkAdapterCollection : INetworkAdapterCollection
 {
     /// <inheritdoc/>
-    public event NetworkConnectionHandler NetworkConnected = delegate { };
+    public event NetworkConnectionHandler NetworkConnected = default!;
     /// <inheritdoc/>
-    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
 
     private List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
 
