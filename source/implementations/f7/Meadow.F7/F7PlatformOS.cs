@@ -92,4 +92,52 @@ public partial class F7PlatformOS : IPlatformOS
     {
         return new[] {100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value()};
     }
+
+
+    /// <summary>
+    /// Enum representing different server certificate validation error returns.
+    /// </summary>
+    public enum ServerCertificateValidationError
+    {
+        InvalidMode = -1,
+        CannotChangeAfterInitialization = -2
+    }
+
+    /// <inheritdoc/>
+    public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
+    {
+        Resolver.Log.Trace($"Attempting to set the server certificate validation mode to {authmode}");
+
+        int authModeInt = (int)authmode;
+        if (authModeInt < 0 || authModeInt > Enum.GetNames(typeof(ServerCertificateValidationMode)).Length - 1)
+        {
+            string errorMessage = $"Invalid validation mode: {authModeInt}";
+            Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
+            throw new ArgumentException(errorMessage);
+        }
+        
+        int ret = Core.Interop.Nuttx.mono_mbedtls_set_server_cert_authmode(authModeInt);
+        if (ret == (int)ServerCertificateValidationError.InvalidMode)
+        {
+            string errorMessage = $"Invalid validation mode: {authModeInt}";
+            Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
+            throw new ArgumentException(errorMessage);
+        }
+        else if (ret == (int)ServerCertificateValidationError.CannotChangeAfterInitialization)
+        {
+            string errorMessage = $"The server certificate validation mode cannot be changed after the TLS initialization.";
+            Resolver.Log.Error(errorMessage);
+            throw new Exception(errorMessage);
+        }
+        else if (ret < 0)
+        {
+            string errorMessage = $"Error setting validation mode.";
+            Resolver.Log.Error(errorMessage);
+            throw new Exception(errorMessage); 
+        }
+
+        Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!");
+
+        return;
+    }
 }
