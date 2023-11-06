@@ -109,7 +109,7 @@ public partial class F7PlatformOS : IPlatformOS
         Resolver.Log.Trace($"Attempting to set the server certificate validation mode to {authmode}");
 
         int authModeInt = (int)authmode;
-        if (authModeInt < 0 || authModeInt > 2)
+        if (authModeInt < 0 || authModeInt > Enum.GetNames(typeof(ServerCertificateValidationMode)).Length - 1)
         {
             string errorMessage = $"Invalid validation mode: {authModeInt}";
             Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
