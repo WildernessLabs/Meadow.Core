@@ -7,7 +7,7 @@ namespace Meadow;
 
 public class Windows : IMeadowDevice
 {
-    private Lazy<NativeNetworkAdapterCollection> _networkAdapters;
+    private readonly Lazy<NativeNetworkAdapterCollection> _networkAdapters;
 
     public IPlatformOS PlatformOS { get; }
     public DeviceCapabilities Capabilities { get; private set; }
