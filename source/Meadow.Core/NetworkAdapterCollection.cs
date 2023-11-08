@@ -15,7 +15,7 @@ public class NetworkAdapterCollection : INetworkAdapterCollection
     /// <inheritdoc/>
     public event NetworkDisconnectionHandler NetworkDisconnected = default!;
 
-    private List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
+    private readonly List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
 
     /// <inheritdoc/>
     public int Count => _adapters.Count;
@@ -35,8 +35,8 @@ public class NetworkAdapterCollection : INetworkAdapterCollection
     {
         _adapters.Add(adapter);
 
-        adapter.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
-        adapter.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
+        adapter.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
+        adapter.NetworkDisconnected += (s) => NetworkDisconnected?.Invoke(s);
     }
 
     /// <summary>

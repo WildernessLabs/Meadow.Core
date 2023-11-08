@@ -22,12 +22,12 @@ namespace Meadow.Devices
 
     public partial class F7GPIOManager : IMeadowIOController
     {
-        private object _cacheLock = new object();
-        private IPin?[,] _interruptPins = new IPin?[16, 16];
+        private readonly object _cacheLock = new object();
+        private readonly IPin?[,] _interruptPins = new IPin?[16, 16];
 
         private bool DirectRegisterAccess { get; set; } = true;
 
-        private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
+        private readonly Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
         internal DebugFeature DebugFeatures { get; set; }
 
@@ -228,7 +228,7 @@ namespace Meadow.Devices
 
             ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, stm32OutputType, initialState);
         }
-/// <inheritdoc/>
+        /// <inheritdoc/>
 
         public void ConfigureInput(
             IPin pin,
@@ -285,8 +285,8 @@ namespace Meadow.Devices
             return ConfigureGpio(port, pin, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, speed, type, false, InterruptMode.None, alternateFunction);
         }
 
-		/// <inheritdoc/>
-		public bool UnconfigureGpio(IPin pin)
+        /// <inheritdoc/>
+        public bool UnconfigureGpio(IPin pin)
         {
             var designator = GetPortAndPin(pin);
 

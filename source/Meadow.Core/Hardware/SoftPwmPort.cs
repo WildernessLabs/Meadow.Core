@@ -193,9 +193,9 @@ namespace Meadow.Hardware
         private bool disposedValue = false; // To detect redundant calls
 
         /// <summary>
-        /// Dispose soft PWM 
+        /// Dispose of the object
         /// </summary>
-        /// <param name="disposing"></param>
+        /// <param name="disposing">Is disposing</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -208,9 +208,7 @@ namespace Meadow.Hardware
             }
         }
 
-        /// <summary>
-        /// Dispose soft pwm port
-        /// </summary>
+        ///<inheritdoc/>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

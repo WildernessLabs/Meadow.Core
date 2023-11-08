@@ -13,8 +13,7 @@ namespace Meadow
         public bool Enabled => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup);
 
         internal NtpClient()
-        {
-        }
+        { }
 
         /// <summary>
         /// Time period that the NTP client attempts to query the NTP time server(s)

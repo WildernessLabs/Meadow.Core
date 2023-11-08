@@ -522,7 +522,7 @@ public class UpdateService : IUpdateService, ICommandService
                     // TODO: what do we do?
                 }
 
-                OnUpdateRetrieved(this, message);
+                OnUpdateRetrieved?.Invoke(this, message);
                 Store.SetRetrieved(message);
 
                 State = UpdateState.Idle;
@@ -724,7 +724,7 @@ public class UpdateService : IUpdateService, ICommandService
 
         // TODO: these will never happen due to the above reset. need to be moved to "post update boot"
         Store.SetApplied(updateInfo);
-        OnUpdateSuccess(this, updateInfo);
+        OnUpdateSuccess?.Invoke(this, updateInfo);
 
         State = UpdateState.Idle;
     }
