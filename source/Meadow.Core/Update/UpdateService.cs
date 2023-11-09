@@ -431,7 +431,15 @@ public class UpdateService : IUpdateService, ICommandService
 
     private async Task DownloadProc(UpdateMessage message)
     {
+        Resolver.Log.Trace($"Device OS Version: {Resolver.Device.PlatformOS.OSVersion}, Update OS Version: {message.OsVersion}");
+        
         var destination = message.MpakDownloadUrl;
+        
+        if (!string.IsNullOrEmpty(message.OsVersion) 
+            && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
+        {
+            destination = message.MpakWithOsDownloadUrl;
+        }
 
         if (!destination.StartsWith("http"))
         {
