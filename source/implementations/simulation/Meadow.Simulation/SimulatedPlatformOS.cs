@@ -190,4 +190,9 @@ public class SimulatedPlatformOS : IPlatformOS
     {
         throw new NotImplementedException();
     }
+
+    public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
+    {
+        throw new NotImplementedException();
+    }
 }

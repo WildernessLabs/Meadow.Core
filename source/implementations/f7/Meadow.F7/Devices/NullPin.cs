@@ -5,7 +5,7 @@ namespace Meadow.Devices;
 
 internal class NullPin : IPin
 {
-    public IPinController Controller => default!;
+    public IPinController? Controller => default!;
     public IList<IChannelInfo>? SupportedChannels => null;
 
     public string Name => "NULL";

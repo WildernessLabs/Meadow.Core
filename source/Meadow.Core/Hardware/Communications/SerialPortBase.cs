@@ -31,7 +31,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Lock object for thread synchronization when accessing critical sections of code.
         /// </summary>
-        protected object _accessLock = new object(); 
+        protected object _accessLock = new();
 
         /// <summary>
         /// Sets the hardware port settings for the specified handle.
@@ -39,14 +39,14 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="handle">The handle to the hardware port.</param>
         protected abstract void SetHardwarePortSettings(IntPtr handle);
-        
+
         /// <summary>
         /// Override this method to open a hardware (OS) serial port
         /// </summary>
         /// <param name="portName">The name of the port</param>
         /// <returns>The resulting port handle</returns>
         protected abstract IntPtr OpenHardwarePort(string portName);
-        
+
         /// <summary>
         /// Override this method to close a hardware (OS) serial port
         /// </summary>
@@ -112,12 +112,12 @@ namespace Meadow.Hardware
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
         /// </summary>
-        public event SerialDataReceivedEventHandler DataReceived = delegate { };
+        public event SerialDataReceivedEventHandler DataReceived = default!;
 
         /// <summary>
         /// Indicates that the internal data buffer has overrun and data has been lost.
         /// </summary>
-        public event EventHandler BufferOverrun = delegate { };
+        public event EventHandler BufferOverrun = default!;
 
         /// <summary>
         /// Gets the port name used for communications.
@@ -265,14 +265,14 @@ namespace Meadow.Hardware
         /// <returns>A string that represents the current <see cref="SerialPortBase"/>.</returns>
         public override string ToString()
         {
-	        var p = Parity switch
-	        {
-		        Parity.Even => 'e',
-		        Parity.Odd => 'o',
-		        _ => 'n'
-	        };
+            var p = Parity switch
+            {
+                Parity.Even => 'e',
+                Parity.Odd => 'o',
+                _ => 'n'
+            };
 
-	        return $"{PortName}: {BaudRate},{DataBits},{p},{(StopBits == StopBits.Two ? 2 : 1)}";
+            return $"{PortName}: {BaudRate},{DataBits},{p},{(StopBits == StopBits.Two ? 2 : 1)}";
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace Meadow.Hardware
         /// </summary>
         public void ClearReceiveBuffer()
         {
-	        _readBuffer?.Clear();
+            _readBuffer?.Clear();
         }
 
         /// <summary>
@@ -362,8 +362,8 @@ namespace Meadow.Hardware
 
                 if (WriteTimeout.TotalMilliseconds > 0)
                 {
-                    writeTimeoutTimer = new Timer((o) => throw new TimeoutException("Write timeout"), 
-	                    null, (int)WriteTimeout.TotalMilliseconds, Timeout.Infinite);
+                    writeTimeoutTimer = new Timer((o) => throw new TimeoutException("Write timeout"),
+                        null, (int)WriteTimeout.TotalMilliseconds, Timeout.Infinite);
                 }
 
                 // we can only write 255 bytes at a time, so we loop 

@@ -61,15 +61,15 @@ public class UpdateService : IUpdateService, ICommandService
     private string UpdateStoreDirectory { get; }
 
     /// <inheritdoc/>
-    public event EventHandler<UpdateState> OnStateChanged = delegate { };
+    public event EventHandler<UpdateState> OnStateChanged = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateAvailable = delegate { };
+    public event UpdateEventHandler OnUpdateAvailable = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateRetrieved = delegate { };
+    public event UpdateEventHandler OnUpdateRetrieved = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateSuccess = delegate { };
+    public event UpdateEventHandler OnUpdateSuccess = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateFailure = delegate { };
+    public event UpdateEventHandler OnUpdateFailure = default!;
 
     private UpdateState _state;
     private bool _stopService = false;
@@ -431,7 +431,15 @@ public class UpdateService : IUpdateService, ICommandService
 
     private async Task DownloadProc(UpdateMessage message)
     {
+        Resolver.Log.Trace($"Device OS Version: {Resolver.Device.PlatformOS.OSVersion}, Update OS Version: {message.OsVersion}");
+        
         var destination = message.MpakDownloadUrl;
+        
+        if (!string.IsNullOrEmpty(message.OsVersion) 
+            && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
+        {
+            destination = message.MpakWithOsDownloadUrl;
+        }
 
         if (!destination.StartsWith("http"))
         {
@@ -522,7 +530,7 @@ public class UpdateService : IUpdateService, ICommandService
                     // TODO: what do we do?
                 }
 
-                OnUpdateRetrieved(this, message);
+                OnUpdateRetrieved?.Invoke(this, message);
                 Store.SetRetrieved(message);
 
                 State = UpdateState.Idle;
@@ -724,7 +732,7 @@ public class UpdateService : IUpdateService, ICommandService
 
         // TODO: these will never happen due to the above reset. need to be moved to "post update boot"
         Store.SetApplied(updateInfo);
-        OnUpdateSuccess(this, updateInfo);
+        OnUpdateSuccess?.Invoke(this, updateInfo);
 
         State = UpdateState.Idle;
     }

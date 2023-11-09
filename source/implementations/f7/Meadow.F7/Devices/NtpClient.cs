@@ -13,8 +13,7 @@ namespace Meadow
         public bool Enabled => F7PlatformOS.GetBoolean(IPlatformOS.ConfigurationValues.GetTimeAtStartup);
 
         internal NtpClient()
-        {
-        }
+        { }
 
         /// <summary>
         /// Time period that the NTP client attempts to query the NTP time server(s)
@@ -28,7 +27,7 @@ namespace Meadow
         /// <summary>
         /// Event raised when the device clock is adjusted by NTP
         /// </summary>
-        public event TimeChangedEventHandler TimeChanged = delegate { };
+        public event TimeChangedEventHandler TimeChanged = default!;
 
         internal void RaiseTimeChanged()
         {
