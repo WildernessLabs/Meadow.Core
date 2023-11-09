@@ -1,8 +1,8 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using static Meadow.F7PlatformOS;
 
 namespace Meadow;
 
@@ -11,26 +11,30 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
     /// <inheritdoc/>
     public new event ExternalStorageEventHandler ExternalStorageEvent = default!;
 
-    private readonly List<IExternalStorage> _externalStorage = new();
+    private readonly List<IStorageInformation> _drives = new();
+    private F7ExternalStorage? _sdCard = default;
+
     private readonly bool _sdSupported;
 
     /// <inheritdoc/>
-    public override IEnumerable<IExternalStorage> ExternalStorage => _externalStorage;
+    public override IEnumerable<IStorageInformation> Drives => _drives;
 
     /// <inheritdoc/>
     public override string FileSystemRoot => "/meadow0/";
 
     internal F7FileSystemInfo(StorageCapabilities capabilities, bool sdSupported)
     {
+        _drives.Add(F7StorageInformation.Create(Resolver.Device));
+
         _sdSupported = sdSupported;
 
         if (capabilities.HasSd && _sdSupported)
         {
             Resolver.Log.Trace("Device is SD Card Capable");
 
-            if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage store))
+            if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
-                _externalStorage.Add(store);
+                _drives.Add(_sdCard);
             }
 
             if (Resolver.Device is F7CoreComputeBase ccm)
@@ -51,27 +55,21 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 
     private void HandleInserted()
     {
-        if (_externalStorage.Count == 0)
+        if (_drives.Count == 0)
         {
-            if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out F7ExternalStorage? store))
+            if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
-                if (store != null)
-                {
-                    _externalStorage.Add(store);
-                    ExternalStorageEvent?.Invoke(store, ExternalStorageState.Inserted);
-                }
+                ExternalStorageEvent?.Invoke(_sdCard, ExternalStorageState.Inserted);
             }
         }
     }
 
     private void HandleRemoved()
     {
-        if (_externalStorage.Count > 0)
+        if (_sdCard != null)
         {
-            var store = _externalStorage.First();
-
-            _externalStorage.Clear();
-            ExternalStorageEvent?.Invoke(store, ExternalStorageState.Ejected);
+            ExternalStorageEvent?.Invoke(_sdCard, ExternalStorageState.Ejected);
+            _sdCard = null;
         }
     }
 

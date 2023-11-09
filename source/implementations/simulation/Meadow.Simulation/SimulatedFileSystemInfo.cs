@@ -6,8 +6,10 @@ namespace Meadow.Simulation;
 
 public class SimulatedFileSystemInfo : IPlatformOS.FileSystemInfo
 {
-    public override IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
+    /// <inheritdoc/>
+    public override IEnumerable<IStorageInformation> Drives => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public override string FileSystemRoot { get; }
 
     internal SimulatedFileSystemInfo()
