@@ -1,8 +1,5 @@
-﻿using System;
-using Meadow.Gateway.WiFi;
-using Meadow.Devices.Esp32.MessagePayloads;
-using Meadow.Gateways;
-using Meadow.Gateways.Exceptions;
+﻿using Meadow.Devices.Esp32.MessagePayloads;
+using System;
 
 namespace Meadow.Gateway.WiFi
 {
@@ -28,7 +25,7 @@ namespace Meadow.Gateway.WiFi
         public WiFiInterfaceStartedEventArgs(StatusCodes statusCode)
         {
             StatusCode = statusCode;
-            When = DateTime.Now;
+            When = DateTime.UtcNow;
         }
     }
 }
