@@ -6,6 +6,9 @@ using static Meadow.F7PlatformOS;
 
 namespace Meadow;
 
+/// <summary>
+/// Provides a STM32F7-specific file system implementation for the Meadow
+/// </summary>
 public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 {
     /// <inheritdoc/>

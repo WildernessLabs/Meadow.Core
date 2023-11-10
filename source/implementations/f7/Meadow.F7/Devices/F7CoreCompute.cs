@@ -2,8 +2,14 @@
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// Represents the Meadow F7CoreComputeV2 device
+    /// </summary>
     public partial class F7CoreComputeV2 : F7CoreComputeBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="F7CoreComputeV2"/> class
+        /// </summary>
         public F7CoreComputeV2()
             : base(new Pinout(),
                   new F7CoreComputeGpioManager(),
@@ -18,10 +24,16 @@ namespace Meadow.Devices
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
 
-            // because we cant use new Pinout(this) in the cast to the base ('this' doesn't exist at that point and the compiler denies usage)
+            // because we can't use new Pinout(this) in the cast to the base ('this' doesn't exist at that point and the compiler denies usage)
             Pins.Controller = this;
         }
 
+        /// <summary>
+        /// Gets the I2C bus number for the specified clock and data pins
+        /// </summary>
+        /// <param name="clock">The clock pin</param>
+        /// <param name="data">The data pin</param>
+        /// <returns>The I2C bus number, or -1 if the bus is unsupported</returns>
         protected override int GetI2cBusNumberForPins(IPin clock, IPin data)
         {
             if (clock.Name == (Pins as F7CoreComputeV2.Pinout)?.I2C1_SCL.Name)

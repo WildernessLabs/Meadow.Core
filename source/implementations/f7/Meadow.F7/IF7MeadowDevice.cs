@@ -7,7 +7,14 @@ namespace Meadow
     /// </summary>
     public interface IF7MeadowDevice : IMeadowDevice
     {
+        /// <summary>
+        /// The bluetooth adapter on the device
+        /// </summary>
         IBluetoothAdapter? BluetoothAdapter { get; }
+
+        /// <summary>
+        /// The Coprocessor on the device
+        /// </summary>
         ICoprocessor? Coprocessor { get; }
     }
 }
