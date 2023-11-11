@@ -65,8 +65,6 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
             pinNumbers[i] = GetPinIdentifier(pins[i].Key.ToString());
         }
 
-        Resolver.Log.Info($"pin numbers: {BitConverter.ToString(pinNumbers)}");
-
         _dataBuffer = new double[pins.Length];
 
         // pin the buffer
@@ -74,9 +72,7 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 
         try
         {
-            var result = Nuttx.meadow_adc_configure(pinNumbers, pins.Length, _bufferHandle.AddrOfPinnedObject());
-
-            Resolver.Log.Info($"config returned {result}");
+            Nuttx.meadow_adc_configure(pinNumbers, pins.Length, _bufferHandle.AddrOfPinnedObject());
         }
         catch (EntryPointNotFoundException)
         {
