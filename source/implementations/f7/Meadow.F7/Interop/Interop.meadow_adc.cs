@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Meadow.Core
 {
@@ -33,7 +34,7 @@ namespace Meadow.Core
 
             //int meadow_adc_configure(uint8_t gpioList[], uint32_t gpioCount, double* userDataBuf);
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int meadow_adc_configure(byte[] gpioList, int gpioCount, double[] userDataBuf);
+            public static extern int meadow_adc_configure(byte[] gpioList, int gpioCount, IntPtr userDataBuf);
 
             //int meadow_adc_read_values(void);
             [DllImport(LIBRARY_NAME, SetLastError = true)]
