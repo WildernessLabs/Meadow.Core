@@ -1,6 +1,7 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
 using System;
+using System.Runtime.InteropServices;
 using static Meadow.Core.Interop;
 
 namespace Meadow;
@@ -11,6 +12,10 @@ namespace Meadow;
 public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 {
     private readonly double[] _dataBuffer;
+    private GCHandle _bufferHandle;
+    private IPin[] _pins;
+    private IMeadowIOController _controller;
+
     /// <summary>
     /// Returns <b>True</b> if the array had been Disposed, otherwise false.
     /// </summary>
@@ -21,7 +26,10 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 
     internal F7AnalogInputArray(IMeadowIOController ioController, params IPin[] pins)
     {
-        foreach (var pin in pins)
+        _pins = pins;
+        _controller = ioController;
+
+        foreach (var pin in _pins)
         {
             // validate the pins
             if (pin.Controller is not F7FeatherBase)
@@ -36,6 +44,8 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 
             // reserve the pins
             ioController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.AnalogInput);
+
+            ioController.ConfigureAnalogInput(pin);
         }
 
         // initialize the ADC
@@ -57,9 +67,12 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 
         _dataBuffer = new double[pins.Length];
 
+        // pin the buffer
+        _bufferHandle = GCHandle.Alloc(_dataBuffer, GCHandleType.Pinned);
+
         try
         {
-            Nuttx.meadow_adc_configure(pinNumbers, pins.Length, _dataBuffer);
+            Nuttx.meadow_adc_configure(pinNumbers, pins.Length, _bufferHandle.AddrOfPinnedObject());
         }
         catch (EntryPointNotFoundException)
         {
@@ -78,7 +91,12 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
     /// <inheritdoc/>
     public void Refresh()
     {
-        Nuttx.meadow_adc_read_values();
+        var result = Nuttx.meadow_adc_read_values();
+
+        if (result < 0)
+        {
+            Resolver.Log.Info($"read returned {result}");
+        }
     }
 
     /// <inheritdoc/>
@@ -86,10 +104,21 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
     {
         if (!IsDisposed)
         {
-            Nuttx.meadow_adc_configure(Array.Empty<byte>(), 0, Array.Empty<double>());
+            Nuttx.meadow_adc_configure(Array.Empty<byte>(), 0, IntPtr.Zero);
+
+            if (_bufferHandle.IsAllocated)
+            {
+                _bufferHandle.Free();
+            }
+
+            // return pins to the available pool and reconfigure from analog to high-z inputs
+            foreach (var pin in _pins)
+            {
+                _controller.ConfigureInput(pin, ResistorMode.Disabled, InterruptMode.None, TimeSpan.Zero, TimeSpan.Zero);
+                _controller.DeviceChannelManager.ReleasePin(pin);
+            }
         }
     }
-
     /// <inheritdoc/>
     public void Dispose()
     {

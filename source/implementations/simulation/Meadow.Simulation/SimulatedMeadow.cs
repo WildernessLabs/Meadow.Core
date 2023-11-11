@@ -13,10 +13,15 @@ namespace Meadow.Simulation
         private readonly SimulationEngine<TPinDefinitions> _simulationEngine;
         private readonly IPlatformOS _platformOS;
 
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeReset;
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeSleep;
+        /// <inheritdoc/>
         public event PowerTransitionHandler AfterWake;
+        /// <inheritdoc/>
         public event NetworkConnectionHandler NetworkConnected;
+        /// <inheritdoc/>
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
         public Logger Logger { get; }
@@ -270,6 +275,11 @@ namespace Meadow.Simulation
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
         {
             throw new NotImplementedException();
         }

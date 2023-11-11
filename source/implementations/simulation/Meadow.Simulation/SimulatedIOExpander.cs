@@ -67,4 +67,9 @@ public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputCo
             (IDigitalChannelInfo)pin.SupportedChannels.First(c => c is IDigitalChannelInfo),
             initialState, initialOutputType);
     }
+
+    public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
+    {
+        throw new NotImplementedException();
+    }
 }

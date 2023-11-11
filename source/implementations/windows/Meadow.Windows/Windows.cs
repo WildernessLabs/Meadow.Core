@@ -178,4 +178,9 @@ public class Windows : IMeadowDevice
     {
         throw new NotImplementedException();
     }
+
+    public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
+    {
+        throw new NotImplementedException();
+    }
 }
