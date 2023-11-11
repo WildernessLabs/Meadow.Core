@@ -16,7 +16,7 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
+    <PackageReference Include="Meadow" Version="1.4.0.3" />
   </ItemGroup>
   <ItemGroup>
     <None Update="app.config.envizor.yaml">
