@@ -171,7 +171,7 @@ namespace Meadow.Hardware
             var settings = new Nuttx.Termios();
 
             // get the current settings           
-            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
+            Resolver.Log.Trace($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.tcgetattr(handle, ref settings);
             if (result != 0)
             {
@@ -257,7 +257,7 @@ namespace Meadow.Hardware
             // get the current settings
             var p = (IntPtr)(&settings);
 
-            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
+            Resolver.Log.Trace($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.ioctl(handle, TCGETS, p);
             if (result != 0)
             {
