@@ -222,14 +222,14 @@ namespace Meadow.Hardware
                     break;
             }
 
-            Resolver.Log.Debug($"  Setting port speed to {BaudRate}...");
+            Resolver.Log.Trace($"  Setting port speed to {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
             if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 ShowSettings(settings);
             }
 
-            Resolver.Log.Debug("Setting serial handle attributes...");
+            Resolver.Log.Trace("Setting serial handle attributes...");
             result = Nuttx.tcsetattr(handle, TCSANOW, ref settings);
 
             if (result != 0)
@@ -310,7 +310,7 @@ namespace Meadow.Hardware
 
             settings.c_speed = BaudRate;
 
-            Resolver.Log.Debug($"  Setting port settings at {BaudRate}...");
+            Resolver.Log.Trace($"  Setting port settings at {BaudRate}...");
             if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 ShowSettings(settings);
