@@ -154,11 +154,11 @@ namespace Meadow.Hardware
 
         private void ShowSettings(Nuttx.Termios settings)
         {
-            Resolver.Log.Debug($"  Speed: {settings.c_speed}");
-            Resolver.Log.Debug($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
-            Resolver.Log.Debug($"  OutputFlags:   {settings.c_oflag} (0x{settings.c_oflag:x})");
-            Resolver.Log.Debug($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
-            Resolver.Log.Debug($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
+            Resolver.Log.Trace($"  Speed: {settings.c_speed}");
+            Resolver.Log.Trace($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
+            Resolver.Log.Trace($"  Output Flags:  {settings.c_oflag} (0x{settings.c_oflag:x})");
+            Resolver.Log.Trace($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
+            Resolver.Log.Trace($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 ShowSettings(settings);
             }
@@ -224,7 +224,7 @@ namespace Meadow.Hardware
 
             Resolver.Log.Debug($"  Setting port speed to {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 ShowSettings(settings);
             }
@@ -237,7 +237,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 // get the settings again
                 result = Nuttx.tcgetattr(handle, ref settings);
@@ -265,7 +265,7 @@ namespace Meadow.Hardware
                 throw new NativeException(error.ToString());
             }
 
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 ShowSettings(settings);
             }
@@ -311,7 +311,7 @@ namespace Meadow.Hardware
             settings.c_speed = BaudRate;
 
             Resolver.Log.Debug($"  Setting port settings at {BaudRate}...");
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 ShowSettings(settings);
             }
@@ -322,7 +322,7 @@ namespace Meadow.Hardware
                 throw new NativeException(UPD.GetLastError().ToString());
             }
 
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
+            if (Resolver.Log.LogLevel <= Logging.LogLevel.Trace)
             {
                 // get the settings again
                 result = Nuttx.ioctl(handle, TCGETS, p);
