@@ -132,7 +132,10 @@ namespace Meadow.Hardware
         /// <exception cref="NativeException"></exception>
         protected override int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count)
         {
-            var result = Nuttx.read(handle, readBuffer, count);
+            int result;
+            do {
+                result = Nuttx.read(handle, readBuffer, count);
+            } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
             if (result < 0)
             {
