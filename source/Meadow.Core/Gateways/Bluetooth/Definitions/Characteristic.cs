@@ -8,12 +8,12 @@
         /// <summary>
         /// Occurs when the value of the characteristic is set.
         /// </summary>
-        public event CharacteristicValueSetHandler ValueSet = delegate { };
+        public event CharacteristicValueSetHandler ValueSet = default!;
 
         /// <summary>
         /// Occurs when the value of the server is set internally (used internally).
         /// </summary>
-        public event ServerValueChangedHandler ServerValueSet = delegate { }; // This is an internally used event.
+        public event ServerValueChangedHandler ServerValueSet = default!; // This is an internally used event.
 
         /// <summary>
         /// Gets or sets the handle of the characteristic definition.

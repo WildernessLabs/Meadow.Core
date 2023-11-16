@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
-
     /// <summary>
     /// Represents a port that is capable of serial (UART) communications.
     /// Preserved for legacy API compatibility. For a more modern approach, use
     /// `SerialMessagePort`.
     /// </summary>
-    public abstract class SerialPortBase : IDisposable, ISerialPort
+    public abstract class SerialPortBase : ISerialPort
     {
         private IntPtr _driverHandle = IntPtr.Zero;
         private CircularBuffer<byte>? _readBuffer;
         private int _dataBits;
         private StopBits _stopBits;
+        private Parity _parity;
 
         /// <summary>
         /// Thread responsible for reading from the serial port.
@@ -31,7 +31,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Lock object for thread synchronization when accessing critical sections of code.
         /// </summary>
-        protected object _accessLock = new object(); private Parity _parity;
+        protected object _accessLock = new();
 
         /// <summary>
         /// Sets the hardware port settings for the specified handle.
@@ -39,17 +39,20 @@ namespace Meadow.Hardware
         /// </summary>
         /// <param name="handle">The handle to the hardware port.</param>
         protected abstract void SetHardwarePortSettings(IntPtr handle);
+
         /// <summary>
         /// Override this method to open a hardware (OS) serial port
         /// </summary>
         /// <param name="portName">The name of the port</param>
         /// <returns>The resulting port handle</returns>
         protected abstract IntPtr OpenHardwarePort(string portName);
+
         /// <summary>
         /// Override this method to close a hardware (OS) serial port
         /// </summary>
         /// <param name="handle">The port handle</param>
         protected abstract void CloseHardwarePort(IntPtr handle);
+
         /// <summary>
         /// Override this method to write data to a hardware serial port
         /// </summary>
@@ -58,6 +61,7 @@ namespace Meadow.Hardware
         /// <param name="count">The number of bytes to write</param>
         /// <returns>The number of bytes actually written</returns>
         protected abstract int WriteHardwarePort(IntPtr handle, byte[] writeBuffer, int count);
+
         /// <summary>
         /// Override this method to read data from a hardware serial port
         /// </summary>
@@ -84,7 +88,6 @@ namespace Meadow.Hardware
         /// Default is `StopBits.One`.</param>
         /// <param name="readBufferSize">Size, in bytes, of the read buffer. Default
         /// is 1024.</param>
-        /// <returns></returns>
         protected SerialPortBase(
             SerialPortName portName,
             int baudRate,
@@ -93,8 +96,8 @@ namespace Meadow.Hardware
             StopBits stopBits = StopBits.One,
             int readBufferSize = 4096)
         {
-            if (baudRate <= 0) { throw new ArgumentOutOfRangeException("Invalid baud rate"); }
-            if (dataBits < 5 || dataBits > 8) { throw new ArgumentOutOfRangeException("Invalid dataBits"); }
+            if (baudRate <= 0) { throw new ArgumentOutOfRangeException(nameof(baudRate), baudRate, "Invalid baud rate"); }
+            if (dataBits is < 5 or > 8) { throw new ArgumentOutOfRangeException(nameof(dataBits), dataBits, "Invalid dataBits"); }
 
             PortName = portName.SystemName;
             BaudRate = baudRate;
@@ -109,21 +112,22 @@ namespace Meadow.Hardware
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.
         /// </summary>
-        public event SerialDataReceivedEventHandler DataReceived = delegate { };
+        public event SerialDataReceivedEventHandler DataReceived = default!;
 
         /// <summary>
         /// Indicates that the internal data buffer has overrun and data has been lost.
         /// </summary>
-        public event EventHandler BufferOverrun = delegate { };
+        public event EventHandler BufferOverrun = default!;
 
         /// <summary>
         /// Gets the port name used for communications.
         /// </summary>
         public string PortName { get; }
+
         /// <summary>
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
-        public bool IsOpen { get => _driverHandle != IntPtr.Zero; }
+        public bool IsOpen => _driverHandle != IntPtr.Zero;
 
         /// <summary>
         /// Gets or sets the parity-checking protocol.
@@ -134,7 +138,7 @@ namespace Meadow.Hardware
             set
             {
                 if (value == Parity) return;
-                if (IsOpen) throw new IOException($"You cannot change Parity on an Open port");
+                if (IsOpen) throw new IOException($"You cannot change {nameof(Parity)} on an Open port");
 
                 _parity = value;
             }
@@ -150,11 +154,10 @@ namespace Meadow.Hardware
             {
                 if (value == DataBits) return;
                 if (value < 5 || value > 8) throw new ArgumentOutOfRangeException();
-                if (IsOpen) throw new IOException($"You cannot change DataBits on an Open port");
+                if (IsOpen) throw new IOException($"You cannot change {nameof(DataBits)} on an Open port");
 
                 _dataBits = value;
             }
-
         }
 
         /// <summary>
@@ -166,7 +169,7 @@ namespace Meadow.Hardware
             set
             {
                 if (value == StopBits) return;
-                if (IsOpen) throw new IOException($"You cannot change StopBits on an Open port");
+                if (IsOpen) throw new IOException($"You cannot change {nameof(StopBits)} on an Open port");
 
                 _stopBits = value;
             }
@@ -187,10 +190,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets the number of bytes of data in the receive buffer.
         /// </summary>
-        public int BytesToRead
-        {
-            get => _readBuffer == null ? 0 : _readBuffer.Count;
-        }
+        public int BytesToRead => _readBuffer?.Count ?? 0;
 
         /// <summary>
         /// Gets or sets the serial baud rate.
@@ -202,7 +202,7 @@ namespace Meadow.Hardware
             {
                 if (value == BaudRate) return;
                 if (value <= 0) throw new ArgumentOutOfRangeException();
-                if (IsOpen) throw new IOException("You cannot change BaudRate on an Open port");
+                if (IsOpen) throw new IOException($"You cannot change {nameof(BaudRate)} on an Open port");
 
                 _baudRate = value;
             }
@@ -211,8 +211,8 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets an array of supported baud rates
         /// </summary>
-        /// <returns></returns>
         /// TODO: how about making this static?
+        /// TODO: Are higher rates not supported due to hardware?
         public int[] GetSupportedBaudRates()
         {
             return new int[]
@@ -235,7 +235,7 @@ namespace Meadow.Hardware
         /// </summary>
         public int ReceiveBufferSize
         {
-            get => _readBuffer == null ? 0 : _readBuffer.MaxElements;
+            get => _readBuffer?.MaxElements ?? 0;
             private set
             {
                 if (value == ReceiveBufferSize) { return; }
@@ -265,19 +265,12 @@ namespace Meadow.Hardware
         /// <returns>A string that represents the current <see cref="SerialPortBase"/>.</returns>
         public override string ToString()
         {
-            char p;
-            switch (Parity)
+            var p = Parity switch
             {
-                case Parity.Even:
-                    p = 'e';
-                    break;
-                case Parity.Odd:
-                    p = 'o';
-                    break;
-                default:
-                    p = 'n';
-                    break;
-            }
+                Parity.Even => 'e',
+                Parity.Odd => 'o',
+                _ => 'n'
+            };
 
             return $"{PortName}: {BaudRate},{DataBits},{p},{(StopBits == StopBits.Two ? 2 : 1)}";
         }
@@ -295,10 +288,7 @@ namespace Meadow.Hardware
         /// </summary>
         public void ClearReceiveBuffer()
         {
-            if (_readBuffer != null)
-            {
-                _readBuffer.Clear();
-            }
+            _readBuffer?.Clear();
         }
 
         /// <summary>
@@ -363,7 +353,6 @@ namespace Meadow.Hardware
             {
                 int currentIndex = index;
                 int totalBytesWritten = 0;
-                int result = 0;
                 int systemBufferMax = 255;
                 int maxCount = count > systemBufferMax ? systemBufferMax : count; //if it's > 255, limit it. 
                 int bytesToWriteThisLoop = maxCount;
@@ -373,10 +362,8 @@ namespace Meadow.Hardware
 
                 if (WriteTimeout.TotalMilliseconds > 0)
                 {
-                    writeTimeoutTimer = new Timer((o) =>
-                    {
-                        throw new TimeoutException("Write timeout");
-                    }, null, (int)WriteTimeout.TotalMilliseconds, Timeout.Infinite);
+                    writeTimeoutTimer = new Timer((o) => throw new TimeoutException("Write timeout"),
+                        null, (int)WriteTimeout.TotalMilliseconds, Timeout.Infinite);
                 }
 
                 // we can only write 255 bytes at a time, so we loop 
@@ -385,6 +372,7 @@ namespace Meadow.Hardware
                     while (totalBytesWritten < count)
                     {
                         // if there's an offset, we want to slice
+                        var result = 0;
                         if (currentIndex > 0)
                         {
                             Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
@@ -458,7 +446,7 @@ namespace Meadow.Hardware
                 }
                 catch (Exception ex)
                 {
-                    Resolver.Log.Error($"ReadThreadProc error: {ex.Message}");
+                    Resolver.Log.Error($"{nameof(ReadThreadProc)} error: {ex.Message}");
                 }
             }
         }
@@ -480,10 +468,7 @@ namespace Meadow.Hardware
         /// <returns>The byte, cast to an Int32, or -1 if the end of the stream has been read.</returns>
         public int ReadByte()
         {
-            if (!IsOpen)
-            {
-                throw new InvalidOperationException("Cannot read from a closed port");
-            }
+            if (!IsOpen) throw new InvalidOperationException("Cannot read from a closed port");
 
             if (_readBuffer == null || _readBuffer.Count == 0) return -1;
             return _readBuffer.Remove();
@@ -499,7 +484,7 @@ namespace Meadow.Hardware
         public byte[] ReadAll()
         {
             // checks
-            if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
+            if (!IsOpen) throw new InvalidOperationException("Cannot read from a closed port");
 
             var buffer = new byte[_readBuffer!.Count];
 
@@ -616,7 +601,7 @@ namespace Meadow.Hardware
 
             // all the checks
             if (!IsOpen) { throw new InvalidOperationException("Cannot read from a closed port"); }
-            if (buffer == null) { throw new ArgumentNullException(); }
+            if (buffer == null) { throw new ArgumentNullException(nameof(buffer)); }
             if (count > (buffer.Length - index)) { throw new ArgumentException("Count is larger than available buffer size"); }
             if (index < 0) { throw new ArgumentException("Invalid offset"); }
             if (count == 0) { return 0; }

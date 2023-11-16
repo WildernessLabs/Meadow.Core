@@ -7,7 +7,7 @@ using static Meadow.Core.Interop;
 namespace Meadow.Devices
 {
     /// <summary>
-    /// A wrapped around the Meadow Generic Platform Driver
+    /// A wrapper around the Meadow Generic Platform Driver
     /// </summary>
     /// <remarks>
     /// There is one and only one instance of this driver, and it lives effectively whenever the app is up, so it's
@@ -56,7 +56,7 @@ namespace Meadow.Devices
             Resolver.Log.Info($"\tRCC_DCKCFGR2: {dckcfg2:X8}");
         }
 
-        public static void DumpI2CRegisters()
+        public static void DumpI2cRegisters()
         {
             var cr1 = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET);
             var cr2 = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
@@ -181,7 +181,7 @@ namespace Meadow.Devices
             return result;
         }
 
-        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdI2CCommand i2cCommand)
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdI2cCommand i2cCommand)
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref i2cCommand);
 

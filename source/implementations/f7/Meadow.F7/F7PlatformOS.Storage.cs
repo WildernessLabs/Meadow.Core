@@ -1,11 +1,13 @@
 ﻿using Meadow.Devices;
 using System.IO;
 using System.Linq;
+using static Meadow.Core.Interop;
+using static Meadow.Core.Interop.Nuttx;
 
 namespace Meadow;
 
 
-public partial class F7PlatformOS : IPlatformOS
+public partial class F7PlatformOS
 {
     private const long FeatherV1TotalFlash = 33_554_432; // 32MB
     private const long FeatherV2TotalFlash = 33_554_432; // 32MB
@@ -19,25 +21,53 @@ public partial class F7PlatformOS : IPlatformOS
     {
         internal static F7StorageInformation Create(IMeadowDevice device)
         {
+            bool statfsSuccess;
             long totalFlashAvailable;
-            if (device is F7FeatherV1)
+            long totalFlashRemaining;
+
+            StatFs statFs = new();
+
+            try
             {
-                totalFlashAvailable = FeatherV1TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
+                // try to use statfs first
+                var result = Nuttx.statfs("/meadow0", ref statFs);
+
+                statfsSuccess = result >= 0;
+            }
+            catch
+            {
+                statfsSuccess = false;
+            }
+
+            if (statfsSuccess)
+            {
+                totalFlashAvailable = statFs.f_bsize * statFs.f_blocks;
+                totalFlashRemaining = statFs.f_bsize * statFs.f_bfree;
             }
             else
             {
-                totalFlashAvailable = FeatherV2TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
-            }
+                // if that fails (i.e. pre 1.5 meadow), do some calculations instead
+                if (device is F7FeatherV1)
+                {
+                    totalFlashAvailable = FeatherV1TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
+                }
+                else
+                {
+                    totalFlashAvailable = FeatherV2TotalFlash - RuntimeAllocationSize - OtAAllocationSize;
+                }
 
-            var spaceConsumed = new DirectoryInfo("/meadow0")
-                .EnumerateFiles("*", SearchOption.AllDirectories)
-                .Sum(file => file.Length);
+                var spaceConsumed = new DirectoryInfo("/meadow0")
+                    .EnumerateFiles("*", SearchOption.AllDirectories)
+                    .Sum(file => file.Length);
+
+                totalFlashRemaining = totalFlashAvailable - spaceConsumed;
+            }
 
             return new F7StorageInformation
             {
                 Name = "Internal Flash",
                 Size = new Units.DigitalStorage(totalFlashAvailable),
-                SpaceAvailable = new Units.DigitalStorage(totalFlashAvailable - spaceConsumed)
+                SpaceAvailable = new Units.DigitalStorage(totalFlashRemaining)
             };
         }
     }
@@ -45,16 +75,5 @@ public partial class F7PlatformOS : IPlatformOS
     /// <summary>
     /// Gets the file system information for the platform.
     /// </summary>
-    public Meadow.IPlatformOS.FileSystemInfo FileSystem { get; private set; } = default!;
-
-    /// <inheritdoc/>
-    public IStorageInformation[] GetStorageInformation()
-    {
-        // TODO: support external storage for MMC-enabled CCM devices
-
-        return new IStorageInformation[]
-            {
-                F7StorageInformation.Create(Resolver.Device)
-            };
-    }
+    public IPlatformOS.FileSystemInfo FileSystem { get; private set; } = default!;
 }

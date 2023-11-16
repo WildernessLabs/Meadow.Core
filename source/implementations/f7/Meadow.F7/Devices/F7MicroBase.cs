@@ -14,23 +14,38 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <summary>
     /// Event raised when a new network is connected
     /// </summary>
-    public event NetworkConnectionHandler NetworkConnected = delegate { };
+    public event NetworkConnectionHandler NetworkConnected = default!;
+
     /// <summary>
     /// Event raised when an existing network connection is disconnected
     /// </summary>
-    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
 
-    public event EventHandler WiFiAdapterInitialized = delegate { };
+    /// <summary>
+    /// Event raised when the WiFi adapter is initialized
+    /// </summary>
+    public event EventHandler WiFiAdapterInitialized = default!;
 
+    /// <summary>
+    /// The Bluetooth adapter
+    /// </summary>
     public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
+
+    /// <summary>
+    /// The coprocessor responsible for network and bluetooth communications
+    /// </summary>
     public ICoprocessor? Coprocessor { get; protected set; }
 
+    /// <inheritdoc/>
     public DeviceCapabilities Capabilities { get; }
 
+    /// <inheritdoc/>
     public IPlatformOS PlatformOS { get; protected set; }
 
+    /// <inheritdoc/>
     public IDeviceInformation Information { get; protected set; }
 
+    /// <inheritdoc/>
     public INetworkAdapterCollection NetworkAdapters => networkAdapters;
 
     /// <summary>
@@ -40,6 +55,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <returns></returns>
     public abstract IPin GetPin(string pinName);
 
+    /// <inheritdoc/>
     public abstract IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = IPwmOutputController.DefaultPwmDutyCycle, bool inverted = false);
 
     /// <summary>
@@ -77,8 +93,8 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
         Information = new F7DeviceInformation();
 
         networkAdapters = new NetworkAdapterCollection();
-        networkAdapters.NetworkConnected += (s, e) => NetworkConnected.Invoke(s, e);
-        networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected.Invoke(s);
+        networkAdapters.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
+        networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected?.Invoke(s);
     }
 
     /// <summary>

@@ -186,7 +186,7 @@ namespace Meadow.Core
             //typedef int      cc_t;      /* Used for terminal special characters */
             //#define NCCS      9
 
-            ///* The termios structure */
+            //* The termios structure */
 
             //struct termios
             //{

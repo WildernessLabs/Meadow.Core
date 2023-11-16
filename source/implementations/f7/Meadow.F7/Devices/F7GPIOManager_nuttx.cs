@@ -21,8 +21,13 @@ namespace Meadow.Devices
             public int AlternateFunctionNumber { get; set; }
         }
 
-        private List<GpioConfig> _currentConfigs = new List<GpioConfig>();
+        private readonly List<GpioConfig> _currentConfigs = new List<GpioConfig>();
 
+        /// <summary>
+        /// Reasserts the current configuration for the given pin
+        /// </summary>
+        /// <param name="pin">The pin</param>
+        /// <param name="validateInterruptGroup">Validate the interrupt group</param>
         public void ReassertConfig(IPin pin, bool validateInterruptGroup = true)
         {
             var designator = GetPortAndPin(pin);

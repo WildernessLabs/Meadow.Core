@@ -11,9 +11,9 @@ namespace Meadow;
 public class WindowsSerialPort : ISerialPort, IDisposable
 {
     /// <inheritdoc/>
-    public event Hardware.SerialDataReceivedEventHandler DataReceived = delegate { };
+    public event Hardware.SerialDataReceivedEventHandler DataReceived = default!;
     /// <inheritdoc/>
-    public event EventHandler BufferOverrun = delegate { };
+    public event EventHandler BufferOverrun = default!;
 
     private SerialPort _port;
 

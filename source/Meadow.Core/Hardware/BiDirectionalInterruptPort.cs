@@ -107,7 +107,7 @@ namespace Meadow.Hardware
             }
             if (debounceDuration.TotalMilliseconds < 0.0 || debounceDuration.TotalMilliseconds > 1000.0)
             {
-                throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
+                throw new ArgumentOutOfRangeException(nameof(debounceDuration), debounceDuration, "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
             if (glitchDuration.TotalMilliseconds < 0.0 || glitchDuration.TotalMilliseconds > 1000.0)
             {
@@ -275,7 +275,7 @@ namespace Meadow.Hardware
             if (pin == this.Pin)
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                this.LastEventTime = DateTime.Now;
+                this.LastEventTime = DateTime.UtcNow;
                 // BC 2021.05.21 b5.0: Changed this to the new result type.
                 // assuming that old state is just an inversion of the new state, yeah?
                 RaiseChangedAndNotify(new DigitalPortResult(new DigitalState(state, this.LastEventTime), new DigitalState(!state, capturedLastTime)));

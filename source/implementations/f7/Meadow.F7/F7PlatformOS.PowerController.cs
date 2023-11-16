@@ -9,20 +9,20 @@ namespace Meadow
 {
     public partial class F7PlatformOS
     {
-        private List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
+        private readonly List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
 
         /// <summary>
         /// Event called before a software reset
         /// </summary>
-        public event PowerTransitionHandler BeforeReset = delegate { };
+        public event PowerTransitionHandler BeforeReset = default!;
         /// <summary>
         /// Event called before Sleep mode
         /// </summary>
-        public event PowerTransitionHandler BeforeSleep = delegate { };
+        public event PowerTransitionHandler BeforeSleep = default!;
         /// <summary>
         /// Event called after returning from Sleep mode
         /// </summary>
-        public event PowerTransitionHandler AfterWake = delegate { };
+        public event PowerTransitionHandler AfterWake = default!;
 
         /// <summary>
         /// Resets the device
@@ -47,11 +47,11 @@ namespace Meadow
 
             if (seconds <= 0)
             {
-                throw new ArgumentOutOfRangeException("duration must be > 0 seconds");
+                throw new ArgumentOutOfRangeException(nameof(duration), duration, "duration must be > 0 seconds");
             }
             if (seconds > 0xffff)
             {
-                throw new ArgumentOutOfRangeException("duration must be < 0xffff seconds");
+                throw new ArgumentOutOfRangeException(nameof(duration), duration, "duration must be <= 0xffff seconds");
             }
 
             var cmd = new UpdSleepCommand
@@ -72,7 +72,7 @@ namespace Meadow
             BeforeSleep?.Invoke();
 
             // This should suspend the processor and code should stop executing
-            UPD.Ioctl(Nuttx.UpdIoctlFn.PowerSleep, cmd);
+            UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
 
             // Stop execution while the device actually does it's thing
             Thread.Sleep(100);
@@ -92,7 +92,8 @@ namespace Meadow
             }
         }
 
-        public void RegisterForSleep(ISleepAwarePeripheral peripheral)
+		/// <inheritdoc/>
+		public void RegisterForSleep(ISleepAwarePeripheral peripheral)
         {
             lock (_sleepAwarePeripherals)
             {
