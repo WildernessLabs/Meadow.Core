@@ -193,8 +193,11 @@ public partial class F7GPIOManager : IMeadowIOController
             }
 
             int priority = 0;
+            int result;
 
-            var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+            do {
+                result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+            } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
             // byte 1 contains the port and pin, byte 2 contains the stable state.
             if (result >= 0)
