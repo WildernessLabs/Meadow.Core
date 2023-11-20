@@ -90,7 +90,7 @@ public partial class F7PlatformOS : IPlatformOS
     /// <inheritdoc/>
     public int[] GetProcessorUtilization()
     {
-        return new[] {100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value()};
+        return new[] { 100 - Core.Interop.Nuttx.meadow_idle_monitor_get_value() };
     }
 
 
@@ -99,7 +99,13 @@ public partial class F7PlatformOS : IPlatformOS
     /// </summary>
     public enum ServerCertificateValidationError
     {
+        /// <summary>
+        /// Invalid mode
+        /// </summary>
         InvalidMode = -1,
+        /// <summary>
+        /// Cannot change after initialization
+        /// </summary>
         CannotChangeAfterInitialization = -2
     }
 
@@ -115,7 +121,7 @@ public partial class F7PlatformOS : IPlatformOS
             Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
             throw new ArgumentException(errorMessage);
         }
-        
+
         int ret = Core.Interop.Nuttx.mono_mbedtls_set_server_cert_authmode(authModeInt);
         if (ret == (int)ServerCertificateValidationError.InvalidMode)
         {
@@ -133,7 +139,7 @@ public partial class F7PlatformOS : IPlatformOS
         {
             string errorMessage = $"Error setting validation mode.";
             Resolver.Log.Error(errorMessage);
-            throw new Exception(errorMessage); 
+            throw new Exception(errorMessage);
         }
 
         Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!");

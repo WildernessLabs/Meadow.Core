@@ -7,7 +7,7 @@ namespace Meadow.Hardware
 {
     /// <summary>
     /// Represents a port that is capable of generating a Pulse-Width-Modulation
-    /// signal; which approximates an analog output via digital pulses.
+    /// signal - which approximates an analog output via digital pulses.
     /// </summary>
     public class PwmPort : PwmPortBase
     {
@@ -19,8 +19,24 @@ namespace Meadow.Hardware
         // dirty dirty hack
         internal bool IsOnboard { get; set; }
 
+        /// <summary>
+        /// The IO controller
+        /// </summary>
         protected IMeadowIOController IOController { get; set; }
+
+        /// <summary>
+        /// PWM Channel Info
+        /// </summary>
         protected IPwmChannelInfo PwmChannelInfo { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PwmPort"/> class.
+        /// </summary>
+        /// <param name="pin">The pin to which the PWM port is attached.</param>
+        /// <param name="ioController">The IO controller.</param>
+        /// <param name="channel">The PWM channel information.</param>
+        /// <param name="inverted">If set to <c>true</c>, duty cycle is "percentage of time spent low" rather than high.</param>
+        /// <param name="isOnboard">If set to <c>true</c>, the PWM port is onboard.</param>
 
         protected PwmPort(
             IPin pin,
@@ -201,6 +217,7 @@ namespace Meadow.Hardware
             _isRunning = false;
         }
 
+        ///<inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             Stop();

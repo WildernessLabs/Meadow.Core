@@ -12,8 +12,8 @@ namespace Meadow.Hardware
     /// </summary>
     public class I2cBus : II2cBus
     {
-        private bool _showI2cDebug = false;
-        private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
+        private readonly bool _showI2cDebug = false;
+        private readonly SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
 
         private IMeadowIOController IOController { get; }
         internal int BusNumber { get; set; } = 1;
@@ -87,14 +87,13 @@ namespace Meadow.Hardware
         }
 
         /// <summary>
-        /// Reads bytes from a peripheral.
+        /// Reads bytes from a peripheral
         /// </summary>
         /// <param name="peripheralAddress">The I2C Address to read</param>
+        /// <param name="readBuffer"></param>
         /// <remarks>
-        /// The number of bytes to be written will be determined by the length
-        /// of the byte array.
+        /// The number of bytes to be written will be determined by the length of the byte array
         /// </remarks>
-        /// <returns></returns>
         public unsafe void Read(byte peripheralAddress, Span<byte> readBuffer)
         {
             _busSemaphore.Wait();
