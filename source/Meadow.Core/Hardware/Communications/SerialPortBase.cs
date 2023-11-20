@@ -437,7 +437,7 @@ namespace Meadow.Hardware
                         }
 
                         // we *have* to yield to allow the receiver to process data or we'll just overrun
-                        Thread.Sleep(10);
+                        Thread.Sleep(200);
                     }
                     else
                     {
