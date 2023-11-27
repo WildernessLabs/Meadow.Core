@@ -132,7 +132,11 @@ namespace Meadow.Hardware
         /// <exception cref="NativeException"></exception>
         protected override int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count)
         {
-            var result = Nuttx.read(handle, readBuffer, count);
+            int result;
+            do
+            {
+                result = Nuttx.read(handle, readBuffer, count);
+            } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
             if (result < 0)
             {
@@ -152,15 +156,6 @@ namespace Meadow.Hardware
             return result;
         }
 
-        private void ShowSettings(Nuttx.Termios settings)
-        {
-            Resolver.Log.Debug($"  Speed: {settings.c_speed}");
-            Resolver.Log.Debug($"  Input Flags:   {settings.c_iflag} (0x{settings.c_iflag:x})");
-            Resolver.Log.Debug($"  OutputFlags:   {settings.c_oflag} (0x{settings.c_oflag:x})");
-            Resolver.Log.Debug($"  Control Flags: {settings.c_cflag} (0x{settings.c_cflag:x})");
-            Resolver.Log.Debug($"  Local Flags:   {settings.c_lflag} (0x{settings.c_lflag:x})");
-        }
-
         /// <summary>
         /// Calls the OS to set serial port settings (e.g. parity and stop bits)
         /// </summary>
@@ -171,17 +166,11 @@ namespace Meadow.Hardware
             var settings = new Nuttx.Termios();
 
             // get the current settings           
-            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.tcgetattr(handle, ref settings);
             if (result != 0)
             {
                 var error = UPD.GetLastError();
                 throw new NativeException(error.ToString());
-            }
-
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
-            {
-                ShowSettings(settings);
             }
 
             // clear stuff that should be off
@@ -222,14 +211,8 @@ namespace Meadow.Hardware
                     break;
             }
 
-            Resolver.Log.Debug($"  Setting port speed to {BaudRate}...");
             Nuttx.cfsetspeed(ref settings, BaudRate);
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
-            {
-                ShowSettings(settings);
-            }
 
-            Resolver.Log.Debug("Setting serial handle attributes...");
             result = Nuttx.tcsetattr(handle, TCSANOW, ref settings);
 
             if (result != 0)
@@ -246,7 +229,6 @@ namespace Meadow.Hardware
                     var error = UPD.GetLastError();
                     throw new NativeException(error.ToString());
                 }
-                ShowSettings(settings);
             }
         }
 
@@ -257,17 +239,11 @@ namespace Meadow.Hardware
             // get the current settings
             var p = (IntPtr)(&settings);
 
-            Resolver.Log.Debug($"  Getting port settings for driver handle {handle}...");
             var result = Nuttx.ioctl(handle, TCGETS, p);
             if (result != 0)
             {
                 var error = UPD.GetLastError();
                 throw new NativeException(error.ToString());
-            }
-
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
-            {
-                ShowSettings(settings);
             }
 
             // clear stuff that should be off
@@ -310,12 +286,6 @@ namespace Meadow.Hardware
 
             settings.c_speed = BaudRate;
 
-            Resolver.Log.Debug($"  Setting port settings at {BaudRate}...");
-            if (Resolver.Log.LogLevel <= Logging.LogLevel.Debug)
-            {
-                ShowSettings(settings);
-            }
-
             result = Nuttx.ioctl(handle, TCSETS, p);
             if (result != 0)
             {
@@ -331,7 +301,6 @@ namespace Meadow.Hardware
                     var error = UPD.GetLastError();
                     throw new NativeException(error.ToString());
                 }
-                ShowSettings(settings);
             }
         }
     }
