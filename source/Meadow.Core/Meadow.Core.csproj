@@ -19,12 +19,13 @@
     <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
     <LangVersion>10.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-    <PackageReference Include="Meadow.Contracts" Version="*" />
-    <PackageReference Include="Meadow.Modbus" Version="*" />
-    <PackageReference Include="Meadow.MQTT" Version="*" />
+    <PackageReference Include="Meadow.Contracts" Version="1.5.0" />
+    <PackageReference Include="Meadow.Modbus" Version="1.5.0" />
+	  <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
   </ItemGroup>

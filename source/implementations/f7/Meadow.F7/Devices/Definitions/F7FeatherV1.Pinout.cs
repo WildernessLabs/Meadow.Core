@@ -14,7 +14,7 @@ namespace Meadow.Devices
         public partial class Pinout : IF7FeatherPinout
         {
             /// <inheritdoc/>
-            public IPinController Controller { get; set; }
+            public IPinController? Controller { get; set; }
 
             internal Pinout()
             {
@@ -446,7 +446,10 @@ namespace Meadow.Devices
             );
 
             // TODO: let the interface handle this when we get to .NET Standard 2.1
+            /// <inheritdoc/>
             public IPin I2C_SDA => D07;
+
+            /// <inheritdoc/>
             public IPin I2C_SCL => D08;
 
 

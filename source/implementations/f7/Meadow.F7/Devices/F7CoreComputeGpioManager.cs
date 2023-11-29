@@ -9,10 +9,10 @@ namespace Meadow.Devices
         {
             base.Initialize(reservedPins);
 
-            ConfigureOutput(STM32.GpioPort.PortA, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortD, 5, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortA, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortC, 8, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureInput(STM32.GpioPort.PortA, 0);
+            ConfigureInput(STM32.GpioPort.PortD, 5);
+            ConfigureInput(STM32.GpioPort.PortA, 10);
+            ConfigureInput(STM32.GpioPort.PortC, 8);
         }
     }
 

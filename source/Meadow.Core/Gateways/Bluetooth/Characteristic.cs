@@ -15,7 +15,7 @@ namespace Meadow.Gateways.Bluetooth
         /// <summary>
         /// Event gets raised, when the device notifies a value change on this characteristic.
         /// </summary>
-        public event EventHandler<CharacteristicUpdatedEventArgs> ValueUpdated = delegate { };
+        public event EventHandler<CharacteristicUpdatedEventArgs> ValueUpdated = default!;
 
         /// <summary>
         /// Id of the characteristic.

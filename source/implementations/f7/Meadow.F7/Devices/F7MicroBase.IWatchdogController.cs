@@ -32,20 +32,29 @@ namespace Meadow.Devices
 
             var timeoutMs = (int)timeout.TotalMilliseconds;
 
-            if (timeoutMs < 4096) {
+            if (timeoutMs < 4096)
+            {
                 prescale = STM32.IWDG_PR_DIV_32;
                 rlr = (uint)timeoutMs;
-            } else if (timeoutMs < 4096 * 2) {
+            }
+            else if (timeoutMs < 4096 * 2)
+            {
                 prescale = STM32.IWDG_PR_DIV_64;
                 rlr = (uint)timeoutMs / 2;
-            } else if (timeoutMs < 4096 * 4) {
+            }
+            else if (timeoutMs < 4096 * 4)
+            {
                 prescale = STM32.IWDG_PR_DIV_128;
                 rlr = (uint)timeoutMs / 4;
-            } else if (timeoutMs < 4096 * 8) {
+            }
+            else if (timeoutMs < 4096 * 8)
+            {
                 prescale = STM32.IWDG_PR_DIV_256;
                 rlr = (uint)timeoutMs / 8;
-            } else {
-                throw new ArgumentOutOfRangeException($"Timeout must be less than {4096 * 8}ms");
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeoutMs), timeoutMs, $"must be less than {4096 * 8}ms");
             }
 
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000cccc);
@@ -54,6 +63,9 @@ namespace Meadow.Devices
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_RLR_OFFSET, rlr);
         }
 
+        /// <summary>
+        /// Resets the watchdog timer
+        /// </summary>
         public void WatchdogReset()
         {
             UPD.SetRegister(STM32.IWDG_BASE + STM32.IWDG_KR_OFFSET, 0x0000aaaa);

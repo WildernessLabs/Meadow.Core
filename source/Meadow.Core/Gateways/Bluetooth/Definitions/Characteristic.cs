@@ -1,26 +1,58 @@
-﻿
-using System;
-
-namespace Meadow.Gateways.Bluetooth
+﻿namespace Meadow.Gateways.Bluetooth
 {
+    /// <summary>
+    /// Represents a Bluetooth characteristic.
+    /// </summary>
     public abstract class Characteristic : ICharacteristic, IAttribute, IJsonSerializable
     {
-        public event CharacteristicValueSetHandler ValueSet = delegate { };
+        /// <summary>
+        /// Occurs when the value of the characteristic is set.
+        /// </summary>
+        public event CharacteristicValueSetHandler ValueSet = default!;
 
-        public event ServerValueChangedHandler ServerValueSet = delegate { }; // this is an internally used event.  
+        /// <summary>
+        /// Occurs when the value of the server is set internally (used internally).
+        /// </summary>
+        public event ServerValueChangedHandler ServerValueSet = default!; // This is an internally used event.
 
-        public abstract void HandleDataWrite(byte[] data);
-
-        public abstract void SetValue(object value);
-
+        /// <summary>
+        /// Gets or sets the handle of the characteristic definition.
+        /// </summary>
         public ushort DefinitionHandle { get; set; }
+
+        /// <summary>
+        /// Gets or sets the handle of the characteristic value.
+        /// </summary>
         public ushort ValueHandle { get; set; }
 
-        public string Name { get; } // only for user reference, not used in BLE anywhere
+        /// <summary>
+        /// Gets the name of the characteristic (for user reference).
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets the UUID of the characteristic.
+        /// </summary>
         public string Uuid { get; }
+
+        /// <summary>
+        /// Gets the permissions of the characteristic.
+        /// </summary>
         public CharacteristicPermission Permissions { get; }
+
+        /// <summary>
+        /// Gets the properties of the characteristic.
+        /// </summary>
         public CharacteristicProperty Properties { get; }
+
+        /// <summary>
+        /// Gets the maximum length of the characteristic value.
+        /// </summary>
         public int MaxLength { get; }
+
+        /// <summary>
+        /// Gets the descriptors associated with the characteristic.
+        /// </summary>
         public IDescriptor[] Descriptors { get; }
 
         internal Characteristic(string name, string uuid, CharacteristicPermission permissions, CharacteristicProperty properties, int maxLength, params Descriptor[] descriptors)
@@ -33,11 +65,27 @@ namespace Meadow.Gateways.Bluetooth
             Descriptors = descriptors;
         }
 
+        /// <summary>
+        /// Handles data write for the characteristic.
+        /// </summary>
+        /// <param name="data">The data to be written.</param>
+        public abstract void HandleDataWrite(byte[] data);
+
+        /// <summary>
+        /// Sets the value of the characteristic.
+        /// </summary>
+        /// <param name="value">The value to be set.</param>
+        public abstract void SetValue(object value);
+
         internal void SendValueToAdapter(byte[] data)
         {
             ServerValueSet?.Invoke(this, data);
         }
 
+        /// <summary>
+        /// Raises the <see cref="ValueSet"/> event, indicating that the value of the characteristic has been set.
+        /// </summary>
+        /// <param name="data">The data associated with the value set event.</param>
         protected void RaiseValueSet(object data)
         {
             ValueSet?.Invoke(this, data);

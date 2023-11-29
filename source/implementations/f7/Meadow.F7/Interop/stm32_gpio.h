@@ -164,7 +164,7 @@
 
 /* If the pin is a GPIO digital output, then this identifies the initial output value.
  * If the pin is an input, this bit is overloaded to provide the qualifier to
- * distinquish input pull-up and -down:
+ * distinguish input pull-up and -down:
  *
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
@@ -172,7 +172,7 @@
  * .... .... ...V .... ....
  */
 
-#define GPIO_OUTPUT_SET               (1 << 8)                   /* Bit 8: If output, inital value of output */
+#define GPIO_OUTPUT_SET               (1 << 8)                   /* Bit 8: If output, initial value of output */
 #define GPIO_OUTPUT_CLEAR             (0)
 
 /* External interrupt selection (GPIO inputs only):
@@ -282,7 +282,7 @@ int stm32_configgpio(uint32_t cfgset);
  *   into default HiZ state (and possibly mark it's unused) and unlock it whether
  *   it was previously selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
+ *   This is a safety function and prevents hardware from shocks, as unexpected
  *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
  *   operate in PWM mode could produce excessive on-board currents and trigger
  *   over-current/alarm function.

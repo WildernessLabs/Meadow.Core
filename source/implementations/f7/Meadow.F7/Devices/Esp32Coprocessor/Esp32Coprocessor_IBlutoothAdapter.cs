@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Meadow.Devices.Esp32.MessagePayloads;
+using Meadow.Gateways;
+using Meadow.Gateways.Bluetooth;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Meadow.Devices.Esp32.MessagePayloads;
-using Meadow.Gateways;
-using Meadow.Gateways.Bluetooth;
-using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
 {
@@ -19,13 +18,18 @@ namespace Meadow.Devices
             return "Meadow BLE";
         }
 
+        /// <summary>
+        /// Starts the Bluetooth server using the specified definition.
+        /// </summary>
+        /// <param name="definition">The Bluetooth definition to use.</param>
+        /// <returns>True if the Bluetooth server started successfully, false otherwise.</returns>
         public bool StartBluetoothServer(IDefinition definition)
         {
             if (definition == null)
             {
                 throw new ArgumentException("Invalid definition");
             }
-            if(_definition != null)
+            if (_definition != null)
             {
                 throw new Exception("Stack already initialized");
             }
@@ -33,9 +37,9 @@ namespace Meadow.Devices
             _definition = definition;
 
             // wire up the server write events
-            foreach(var s in _definition.Services)
+            foreach (var s in _definition.Services)
             {
-                foreach(var c in s.Characteristics)
+                foreach (var c in s.Characteristics)
                 {
                     c.ServerValueSet += OnServerValueSet;
                 }
@@ -79,7 +83,7 @@ namespace Meadow.Devices
 
         private void OnServerValueSet(ICharacteristic c, byte[] valueBytes)
         {
-            if(c.ValueHandle == 0)
+            if (c.ValueHandle == 0)
             {
                 // we don't yet have a handle for this, can't set a value
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Cannot write characteristic value without a handle.");
@@ -103,7 +107,7 @@ namespace Meadow.Devices
 
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Result: {result}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Output.WriteLine($"Result: {ex.Message}");
             }
@@ -156,7 +160,7 @@ namespace Meadow.Devices
             var handles = new ushort[count];
             var index = 6; // skip over the count *and* the uint length
 
-            for(int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 handles[i] = BitConverter.ToUInt16(resultBuffer, index);
                 index += 2;
@@ -186,7 +190,7 @@ namespace Meadow.Devices
                     Array.Copy(payload, 6, value, 0, value.Length);
                     Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"BLE Data Write to Handle 0x{handle:x4}: {BitConverter.ToString(value)}");
 
-                    if(_handleToCharacteristicMap.ContainsKey(handle))
+                    if (_handleToCharacteristicMap.ContainsKey(handle))
                     {
                         _handleToCharacteristicMap[handle].HandleDataWrite(value);
                     }

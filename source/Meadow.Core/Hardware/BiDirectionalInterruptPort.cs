@@ -17,6 +17,9 @@ namespace Meadow.Hardware
         /// Gets or sets the port's IOController
         /// </summary>
         protected IMeadowIOController IOController { get; }
+        /// <summary>
+        /// Gets or sets the last event time for the port.
+        /// </summary>
         protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         /// <inheritdoc/>
@@ -41,6 +44,16 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Protected constructor for creating a <see cref="BiDirectionalInterruptPort"/> with default debounce and glitch durations.
+        /// </summary>
+        /// <param name="pin">The pin associated with the bi-directional interrupt port.</param>
+        /// <param name="channel">The digital channel information.</param>
+        /// <param name="gpioController">The Meadow I/O controller.</param>
+        /// <param name="initialState">The initial state of the port.</param>
+        /// <param name="interruptMode">The interrupt mode for the port.</param>
+        /// <param name="resistorMode">The resistor mode for the port.</param>
+        /// <param name="initialDirection">The initial direction of the port.</param>
         protected BiDirectionalInterruptPort(
             IPin pin,
             IDigitalChannelInfo channel,
@@ -53,6 +66,19 @@ namespace Meadow.Hardware
         {
         }
 
+        /// <summary>
+        /// Protected constructor for creating a <see cref="BiDirectionalInterruptPort"/>.
+        /// </summary>
+        /// <param name="pin">The pin associated with the bi-directional interrupt port.</param>
+        /// <param name="gpioController">The Meadow I/O controller.</param>
+        /// <param name="channel">The digital channel information.</param>
+        /// <param name="initialState">The initial state of the port.</param>
+        /// <param name="interruptMode">The interrupt mode for the port.</param>
+        /// <param name="resistorMode">The resistor mode for the port.</param>
+        /// <param name="initialDirection">The initial direction of the port.</param>
+        /// <param name="debounceDuration">The debounce duration for the port.</param>
+        /// <param name="glitchDuration">The glitch duration for the port.</param>
+        /// <param name="outputType">The output type for the port.</param>
         protected BiDirectionalInterruptPort(
             IPin pin,
             IMeadowIOController gpioController,
@@ -81,7 +107,7 @@ namespace Meadow.Hardware
             }
             if (debounceDuration.TotalMilliseconds < 0.0 || debounceDuration.TotalMilliseconds > 1000.0)
             {
-                throw new ArgumentOutOfRangeException(nameof(debounceDuration), "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
+                throw new ArgumentOutOfRangeException(nameof(debounceDuration), debounceDuration, "Unable to create an input port, because debounceDuration is out of range (0.1-1000.0)");
             }
             if (glitchDuration.TotalMilliseconds < 0.0 || glitchDuration.TotalMilliseconds > 1000.0)
             {
@@ -119,6 +145,16 @@ namespace Meadow.Hardware
             }
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="BiDirectionalInterruptPort"/> with default debounce and glitch durations.
+        /// </summary>
+        /// <param name="pin">The pin associated with the bi-directional interrupt port.</param>
+        /// <param name="ioController">The Meadow I/O controller.</param>
+        /// <param name="initialState">The initial state of the port.</param>
+        /// <param name="interruptMode">The interrupt mode for the port.</param>
+        /// <param name="resistorMode">The resistor mode for the port.</param>
+        /// <param name="initialDirection">The initial direction of the port.</param>
+        /// <returns>A new instance of <see cref="BiDirectionalInterruptPort"/>.</returns>
         public static BiDirectionalInterruptPort From(
             IPin pin,
             IMeadowIOController ioController,
@@ -131,6 +167,19 @@ namespace Meadow.Hardware
             return From(pin, ioController, initialState, interruptMode, resistorMode, initialDirection, TimeSpan.Zero, TimeSpan.Zero, OutputType.PushPull);
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="BiDirectionalInterruptPort"/>.
+        /// </summary>
+        /// <param name="pin">The pin associated with the bi-directional interrupt port.</param>
+        /// <param name="ioController">The Meadow I/O controller.</param>
+        /// <param name="initialState">The initial state of the port.</param>
+        /// <param name="interruptMode">The interrupt mode for the port.</param>
+        /// <param name="resistorMode">The resistor mode for the port.</param>
+        /// <param name="initialDirection">The initial direction of the port.</param>
+        /// <param name="debounceDuration">The debounce duration for the port.</param>
+        /// <param name="glitchDuration">The glitch duration for the port.</param>
+        /// <param name="outputType">The output type for the port.</param>
+        /// <returns>A new instance of <see cref="BiDirectionalInterruptPort"/>.</returns>
         public static BiDirectionalInterruptPort From(
             IPin pin,
             IMeadowIOController ioController,

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices;
@@ -14,13 +13,13 @@ public partial class F7GPIOManager : IMeadowIOController
     /// <summary>
     /// An event raised when an interrupt occurs
     /// </summary>
-    public event InterruptHandler Interrupt = delegate { };
+    public event InterruptHandler Interrupt = default!;
 
     private Thread? _ist;
-    private List<int> _interruptGroupsInUse = new();
+    private readonly List<int> _interruptGroupsInUse = new();
     private bool _firstInterrupt = true;
 
-    private IPin _nullPin = new NullPin();
+    private readonly IPin _nullPin = new NullPin();
 
     /// <summary>
     /// Hooks up the provided pin to the underlying OS interrupt handling
@@ -194,8 +193,11 @@ public partial class F7GPIOManager : IMeadowIOController
             }
 
             int priority = 0;
+            int result;
 
-            var result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+            do {
+                result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
+            } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
             // byte 1 contains the port and pin, byte 2 contains the stable state.
             if (result >= 0)
@@ -219,7 +221,7 @@ public partial class F7GPIOManager : IMeadowIOController
                 {
                     Interrupt?.Invoke(ipin, state);
                 }
-                catch (Exception ex)
+                catch
                 {
                     Thread.Sleep(5000);
                 }

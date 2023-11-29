@@ -41,7 +41,7 @@ public class UpdateService : IUpdateService, ICommandService
     /// Specifies the maximum number of download attempts before giving up.
     /// </summary>
     public const int MaxDownloadRetries = 10;
-    
+
     /// <summary>
     /// Period the service will wait between download attempts in 
     /// case of failure.
@@ -61,15 +61,15 @@ public class UpdateService : IUpdateService, ICommandService
     private string UpdateStoreDirectory { get; }
 
     /// <inheritdoc/>
-    public event EventHandler<UpdateState> OnStateChanged = delegate { };
+    public event EventHandler<UpdateState> OnStateChanged = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateAvailable = delegate { };
+    public event UpdateEventHandler OnUpdateAvailable = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateRetrieved = delegate { };
+    public event UpdateEventHandler OnUpdateRetrieved = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateSuccess = delegate { };
+    public event UpdateEventHandler OnUpdateSuccess = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateFailure = delegate { };
+    public event UpdateEventHandler OnUpdateFailure = default!;
 
     private UpdateState _state;
     private bool _stopService = false;
@@ -209,14 +209,14 @@ public class UpdateService : IUpdateService, ICommandService
 
         return _jwt != null;
     }
-    
+
     /// <summary>
     /// Method to determine if the authentication is required based on whether the time since 
     /// the last authentication exceeds the token expiration period (in minutes).
     /// </summary>
     private bool ShouldAuthenticate()
     {
-        return (DateTime.Now - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
+        return (DateTime.UtcNow - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
     }
 
     private async void UpdateStateMachine()
@@ -252,7 +252,7 @@ public class UpdateService : IUpdateService, ICommandService
                         if (await AuthenticateWithServer())
                         {
                             // Update the last authentication time when successfully authenticated
-                            _lastAuthenticationTime = DateTime.Now;
+                            _lastAuthenticationTime = DateTime.UtcNow;
                             State = UpdateState.Connecting;
                         }
                         else
@@ -277,6 +277,10 @@ public class UpdateService : IUpdateService, ICommandService
                         Resolver.Log.Debug("Creating MQTT client options");
                         var builder = new MqttClientOptionsBuilder()
                             .WithTcpServer(Config.UpdateServer, Config.UpdatePort)
+                            .WithTls(tlsParameters =>
+                            {
+                                tlsParameters.UseTls = Config.UpdatePort == 8883;
+                            })
                             .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                             .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
 
@@ -427,7 +431,15 @@ public class UpdateService : IUpdateService, ICommandService
 
     private async Task DownloadProc(UpdateMessage message)
     {
+        Resolver.Log.Trace($"Device OS Version: {Resolver.Device.PlatformOS.OSVersion}, Update OS Version: {message.OsVersion}");
+        
         var destination = message.MpakDownloadUrl;
+        
+        if (!string.IsNullOrEmpty(message.OsVersion) 
+            && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
+        {
+            destination = message.MpakWithOsDownloadUrl;
+        }
 
         if (!destination.StartsWith("http"))
         {
@@ -518,7 +530,7 @@ public class UpdateService : IUpdateService, ICommandService
                     // TODO: what do we do?
                 }
 
-                OnUpdateRetrieved(this, message);
+                OnUpdateRetrieved?.Invoke(this, message);
                 Store.SetRetrieved(message);
 
                 State = UpdateState.Idle;
@@ -720,7 +732,7 @@ public class UpdateService : IUpdateService, ICommandService
 
         // TODO: these will never happen due to the above reset. need to be moved to "post update boot"
         Store.SetApplied(updateInfo);
-        OnUpdateSuccess(this, updateInfo);
+        OnUpdateSuccess?.Invoke(this, updateInfo);
 
         State = UpdateState.Idle;
     }

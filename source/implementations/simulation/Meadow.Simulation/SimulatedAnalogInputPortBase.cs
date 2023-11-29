@@ -25,7 +25,7 @@ public abstract class SimulatedAnalogInputPortBase : AnalogInputPortBase
     /// <summary>
     /// Gets the port's voltage as implemented by VoltageImpl
     /// </summary>
-    public sealed override Voltage Voltage // shenanigans required because C# doesn't allow `new` and `overide` in the same sig
+    public sealed override Voltage Voltage // shenanigans required because C# doesn't allow `new` and `override` in the same sig
     {
         get { return VoltageImpl; }
     }

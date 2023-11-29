@@ -2,7 +2,7 @@
 
 namespace Meadow;
 
-public partial class F7PlatformOS : IPlatformOS
+public partial class F7PlatformOS
 {
     /// <summary>
     /// Performs RSA decryption of a value using the Meadow device certificate.

@@ -3,12 +3,11 @@ using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using static Meadow.Core.Interop;
-using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Devices
 {
     /// <summary>
-    /// A wrapped around the Meadow Generic Platform Driver
+    /// A wrapper around the Meadow Generic Platform Driver
     /// </summary>
     /// <remarks>
     /// There is one and only one instance of this driver, and it lives effectively whenever the app is up, so it's
@@ -57,7 +56,7 @@ namespace Meadow.Devices
             Resolver.Log.Info($"\tRCC_DCKCFGR2: {dckcfg2:X8}");
         }
 
-        public static void DumpI2CRegisters()
+        public static void DumpI2cRegisters()
         {
             var cr1 = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR1_OFFSET);
             var cr2 = UPD.GetRegister(STM32.MEADOW_I2C1_BASE + STM32.I2C_CR2_OFFSET);
@@ -168,7 +167,7 @@ namespace Meadow.Devices
             }
             return result;
         }
-        
+
 
         public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdGpioInterruptConfiguration interruptConfig)
         {
@@ -182,7 +181,7 @@ namespace Meadow.Devices
             return result;
         }
 
-        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdI2CCommand i2cCommand)
+        public static int Ioctl(Nuttx.UpdIoctlFn request, ref Nuttx.UpdI2cCommand i2cCommand)
         {
             var result = Nuttx.ioctl(DriverHandle, request, ref i2cCommand);
 
@@ -274,7 +273,7 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Resolver.Log.Error($"ioctl {request} failed {err}");
-                return (int) err;
+                return (int)err;
             }
             return result;
         }
@@ -286,7 +285,7 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Resolver.Log.Error($"ioctl {request} failed {err}");
-                return (int) err;
+                return (int)err;
             }
             return result;
         }
@@ -298,7 +297,7 @@ namespace Meadow.Devices
             {
                 var err = GetLastError();
                 Resolver.Log.Error($"ioctl {request} failed {err}");
-                return (int) err;
+                return (int)err;
             }
             return result;
         }
@@ -369,7 +368,7 @@ namespace Meadow.Devices
 
             public static bool Start(IPwmChannelInfo pwmChannelInfo, uint frequency, float dutyCycle)
             {
-                // just make ssure we've been initialized
+                // just make sure we've been initialized
                 if (!Setup(pwmChannelInfo.Timer))
                 {
                     return false;

@@ -156,4 +156,19 @@ public class SimulatedPlatformOS : IPlatformOS
             }
         }
     }
+
+    public int[] GetProcessorUtilization()
+    {
+        throw new NotImplementedException();
+    }
+
+    public IStorageInformation[] GetStorageInformation()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
+    {
+        throw new NotImplementedException();
+    }
 }

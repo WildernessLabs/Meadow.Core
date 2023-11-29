@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace Meadow.Hardware;
 
+/// <summary>
+/// Represents a bi-directional port.
+/// </summary>
 public class BiDirectionalPort : BiDirectionalPortBase
 {
     private PortDirectionType _currentDirection;
@@ -11,6 +14,9 @@ public class BiDirectionalPort : BiDirectionalPortBase
     /// Gets or sets the port's IOController
     /// </summary>
     protected IMeadowIOController IOController { get; }
+    /// <summary>
+    /// Gets or sets the last event time for the port.
+    /// </summary>
     protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
     /// <inheritdoc/>
@@ -33,6 +39,16 @@ public class BiDirectionalPort : BiDirectionalPortBase
         }
     }
 
+    /// <summary>
+    /// Protected constructor for creating a <see cref="BiDirectionalPort"/>.
+    /// </summary>
+    /// <param name="pin">The pin associated with the bi-directional port.</param>
+    /// <param name="gpioController">The Meadow I/O controller.</param>
+    /// <param name="channel">The digital channel information.</param>
+    /// <param name="initialState">The initial state of the port.</param>
+    /// <param name="resistorMode">The resistor mode for the port (default is <see cref="ResistorMode.Disabled"/>).</param>
+    /// <param name="initialDirection">The initial direction of the port (default is <see cref="PortDirectionType.Input"/>).</param>
+    /// <param name="outputType">The output type for the port (default is <see cref="OutputType.PushPull"/>).</param>
     protected BiDirectionalPort(
         IPin pin,
         IMeadowIOController gpioController,
@@ -61,6 +77,15 @@ public class BiDirectionalPort : BiDirectionalPortBase
         }
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="BiDirectionalPort"/> with the specified parameters.
+    /// </summary>
+    /// <param name="pin">The pin associated with the bi-directional port.</param>
+    /// <param name="ioController">The Meadow I/O controller.</param>
+    /// <param name="initialState">The initial state of the port.</param>
+    /// <param name="resistorMode">The resistor mode for the port.</param>
+    /// <param name="initialDirection">The initial direction of the port.</param>
+    /// <returns>A new instance of <see cref="BiDirectionalPort"/>.</returns>
     public static BiDirectionalPort From(
         IPin pin,
         IMeadowIOController ioController,
@@ -72,6 +97,16 @@ public class BiDirectionalPort : BiDirectionalPortBase
         return From(pin, ioController, initialState, resistorMode, initialDirection);
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="BiDirectionalPort"/> with the specified parameters.
+    /// </summary>
+    /// <param name="pin">The pin associated with the bi-directional port.</param>
+    /// <param name="ioController">The Meadow I/O controller.</param>
+    /// <param name="initialState">The initial state of the port.</param>
+    /// <param name="resistorMode">The resistor mode for the port.</param>
+    /// <param name="initialDirection">The initial direction of the port.</param>
+    /// <param name="outputType">The output type for the port.</param>
+    /// <returns>A new instance of <see cref="BiDirectionalPort"/>.</returns>
     public static BiDirectionalPort From(
         IPin pin,
         IMeadowIOController ioController,
@@ -116,6 +151,7 @@ public class BiDirectionalPort : BiDirectionalPortBase
         }
     }
 
+    /// <inheritdoc/>
     public override bool State
     {
         get

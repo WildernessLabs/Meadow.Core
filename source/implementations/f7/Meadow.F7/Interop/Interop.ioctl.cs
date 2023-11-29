@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Meadow.Devices.Esp32.MessagePayloads;
 
 namespace Meadow.Core
 {
@@ -20,7 +19,7 @@ namespace Meadow.Core
             /// Reads an input
             /// </summary>
             /// <returns>The ioctl.</returns>
-            /// <param name="fd">Fd.</param>
+            /// <param name="fd">Driver handle.</param>
             /// <param name="request">Request.</param>
             /// <param name="pinDesignator">Pin designator.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
@@ -30,7 +29,7 @@ namespace Meadow.Core
             /// Writes a Discrete Output
             /// </summary>
             /// <returns>The ioctl.</returns>
-            /// <param name="fd">Fd.</param>
+            /// <param name="fd">Driver handle.</param>
             /// <param name="request">Request.</param>
             /// <param name="pinState">Pin state.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
@@ -42,7 +41,7 @@ namespace Meadow.Core
             /// <returns>0 on success, otherwise an error code</returns>
             /// <param name="fd">Driver handle</param>
             /// <param name="request">UPD Ioctl function constant</param>
-            /// <param name="registerValue">A RegisterValue struct to use as either the value soure (for writes) or sink (for reads)</param>
+            /// <param name="registerValue">A RegisterValue struct to use as either the value source (for writes) or sink (for reads)</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdRegisterValue registerValue);
 
@@ -58,7 +57,7 @@ namespace Meadow.Core
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSleepCommand command);
-            
+
             /// <summary>
             /// Configures the Universal Platform Driver to catch GPIO interrupts
             /// </summary>
@@ -70,7 +69,7 @@ namespace Meadow.Core
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdGpioInterruptConfiguration interruptConfig);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdI2CCommand i2cCommand);
+            public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdI2cCommand i2cCommand);
 
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int ioctl(IntPtr fd, UpdIoctlFn request, ref Nuttx.UpdSPIDataCommand spiCommand);
@@ -125,7 +124,7 @@ namespace Meadow.Core
             /// Configures a pin
             /// </summary>
             /// <returns>The ioctl.</returns>
-            /// <param name="fd">Fd.</param>
+            /// <param name="fd">Driver handle.</param>
             /// <param name="request">Request.</param>
             /// <param name="configFlags">Config flags.</param>
             [DllImport(LIBRARY_NAME, SetLastError = true)]
