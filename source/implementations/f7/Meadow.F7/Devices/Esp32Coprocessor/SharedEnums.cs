@@ -13,8 +13,6 @@
 //      *************************** WARNING ***************************
 //
 
-using System;
-
 namespace Meadow.Devices.Esp32.MessagePayloads
 {
     /// <summary>
@@ -493,7 +491,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// CellFunction - NetworkAtCmdEvent
         /// </summary>
         NetworkAtCmdEvent = 4,
-
+        /// <summary>
         /// CellFunction - NetworkErrorEvent
         /// </summary>
         NetworkErrorEvent = 2,
@@ -1436,7 +1434,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         Overflow = 139,
         /// <summary>
-        /// Esp32ErrorCodes - Cancelled
+        /// Esp32ErrorCodes - Canceled
         /// </summary>
         Cancelled = 140,
         /// <summary>

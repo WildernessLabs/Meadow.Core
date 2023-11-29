@@ -20,6 +20,16 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
 
     private DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
+    /// <summary>
+    /// Protected constructor for creating a <see cref="DigitalInterruptPort"/>.
+    /// </summary>
+    /// <param name="pin">The pin associated with the digital interrupt port.</param>
+    /// <param name="ioController">The Meadow I/O controller.</param>
+    /// <param name="channel">The digital channel information.</param>
+    /// <param name="interruptMode">The interrupt mode for the port.</param>
+    /// <param name="resistorMode">The resistor mode for the port.</param>
+    /// <param name="debounceDuration">The debounce duration for the port.</param>
+    /// <param name="glitchDuration">The glitch duration for the port.</param>
     protected DigitalInterruptPort(
         IPin pin,
         IMeadowIOController ioController,

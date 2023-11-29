@@ -18,10 +18,15 @@ namespace Meadow
         private Gpiod _gpiod = null!;
         private Lazy<NativeNetworkAdapterCollection> _networkAdapters;
 
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeReset;
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeSleep;
+        /// <inheritdoc/>
         public event PowerTransitionHandler AfterWake;
+        /// <inheritdoc/>
         public event NetworkConnectionHandler NetworkConnected;
+        /// <inheritdoc/>
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
         public TPinout Pins { get; }
@@ -317,6 +322,11 @@ namespace Meadow
         }
 
         public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
         {
             throw new NotImplementedException();
         }

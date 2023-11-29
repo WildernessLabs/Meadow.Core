@@ -19,11 +19,11 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <summary>
     /// Raised when the device disconnects from a network.
     /// </summary>
-    public event NetworkDisconnectionHandler NetworkDisconnected = delegate { };
+    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
     /// <summary>
     /// Raised when a network error occurs
     /// </summary>
-    public event NetworkErrorHandler NetworkError = delegate { };
+    public event NetworkErrorHandler NetworkError = default!;
 
     private NetworkInterface? nativeInterface = default!;
 

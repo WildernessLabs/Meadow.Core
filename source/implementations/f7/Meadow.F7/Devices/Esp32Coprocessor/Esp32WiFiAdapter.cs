@@ -211,7 +211,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         {
             if ((value < MinimumScanPeriod) || (value > MaximumScanPeriod))
             {
-                throw new ArgumentOutOfRangeException($"{nameof(ScanPeriod)} should be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
+                throw new ArgumentOutOfRangeException(nameof(ScanPeriod), ScanPeriod, $"must be between {MinimumScanPeriod} and {MaximumScanPeriod} (inclusive).");
             }
             _scanPeriod = value;
         }
@@ -278,6 +278,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
                 break;
             case WiFiFunction.NetworkDisconnectedEvent:
+                RaiseWiFiDisconnected(statusCode, payload);
                 CurrentState = NetworkState.Disconnected;
                 break;
             case WiFiFunction.NtpUpdateEvent:
@@ -683,8 +684,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
     {
         ClearNetworkDetails();
-        _isConnected = false;
-
         var e = new WiFiDisconnectEventArgs(statusCode);
         RaiseNetworkDisconnected();
     }
@@ -735,7 +734,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 case NetworkState.Disconnecting:
                     break;
                 case NetworkState.Disconnected:
-                    RaiseNetworkDisconnected();
+                    _isConnected = false;
                     break;
                 case NetworkState.Error:
                     break;

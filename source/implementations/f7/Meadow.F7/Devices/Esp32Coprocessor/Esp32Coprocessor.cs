@@ -26,8 +26,8 @@ public partial class Esp32Coprocessor : ICoprocessor
 
     private static readonly byte[] EmptyPayload = new byte[0];
 
-    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = delegate { };
-    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = delegate { };
+    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = default!;
+    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = default!;
 
     /// <summary>
     /// Possible debug levels.
@@ -248,7 +248,11 @@ public partial class Esp32Coprocessor : ICoprocessor
             try
             {
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
-                int result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                int result;
+                do {
+                    result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
+
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event received.");
                 if (result >= 0)
                 {

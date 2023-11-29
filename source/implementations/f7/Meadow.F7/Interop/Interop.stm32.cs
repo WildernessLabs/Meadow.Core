@@ -66,7 +66,7 @@ namespace Meadow.Core
             public const int ADC_CR1_AWDCH_SHIFT = (1 << 0);
 
             public const int ADC_CR2_NON_RESERVED_MASK = 0x3f7f0f03;
-            public const int ADC_CR2_SWSTART = (1 << 30); // starts regulare conversion.  ADON must be 1 otherwise it is ignored
+            public const int ADC_CR2_SWSTART = (1 << 30); // starts regular conversion.  ADON must be 1 otherwise it is ignored
             public const int ADC_CR2_EOCS = (1 << 10); // set EOC (end of conversion) bit
             public const int ADC_CR2_CONT = (1 << 1);
             public const int ADC_CR2_ADON = (1 << 0);

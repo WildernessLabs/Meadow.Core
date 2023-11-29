@@ -1,3 +1,4 @@
+using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Units;
@@ -9,13 +10,18 @@ namespace Meadow.Simulation
     public partial class SimulatedMeadow<TPinDefinitions> : ISimulatedDevice<TPinDefinitions>
         where TPinDefinitions : IPinDefinitions, new()
     {
-        private SimulationEngine<TPinDefinitions> _simulationEngine;
-        private IPlatformOS _platformOS;
+        private readonly SimulationEngine<TPinDefinitions> _simulationEngine;
+        private readonly IPlatformOS _platformOS;
 
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeReset;
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeSleep;
+        /// <inheritdoc/>
         public event PowerTransitionHandler AfterWake;
+        /// <inheritdoc/>
         public event NetworkConnectionHandler NetworkConnected;
+        /// <inheritdoc/>
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
         public Logger Logger { get; }
@@ -35,9 +41,13 @@ namespace Meadow.Simulation
         public IDeviceInformation Information { get; }
 
         public IPlatformOS PlatformOS => _platformOS;
-        public DeviceCapabilities Capabilities => throw new NotImplementedException();
+        public DeviceCapabilities Capabilities { get; private set; } = new DeviceCapabilities(
+                new AnalogCapabilities(false, null),
+                new NetworkCapabilities(false, true),
+                new StorageCapabilities(true)
+                );
 
-        public INetworkAdapterCollection NetworkAdapters => throw new NotImplementedException();
+        public INetworkAdapterCollection NetworkAdapters { get; private set; } = new NativeNetworkAdapterCollection();
 
         private void LaunchUI()
         {
@@ -265,6 +275,11 @@ namespace Meadow.Simulation
         }
 
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
         {
             throw new NotImplementedException();
         }

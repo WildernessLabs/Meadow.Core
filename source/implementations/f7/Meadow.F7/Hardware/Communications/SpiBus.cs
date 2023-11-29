@@ -26,7 +26,7 @@ namespace Meadow.Hardware
         protected SpiBus()
         {
 #if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and fogets during check-in
+            // ensure this is off in release (in case a dev sets it to true and forgets during check-in
             _showSpiDebug = false;
 #endif
         }
@@ -302,7 +302,7 @@ namespace Meadow.Hardware
         {
             if (bitsPerWord < 4 || bitsPerWord > 16)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(bitsPerWord), bitsPerWord, null);
             }
             var command = new Nuttx.UpdSPIBitsCommand()
             {

@@ -70,7 +70,7 @@ namespace Meadow.Hardware
                 offTimeMilliseconds = CalculateOffTimeMillis();
             }
         }
-        Frequency frequency = new Frequency(1.0, Units.Frequency.UnitType.Hertz); // in the case it doesn't get set before dutycycle, initialize to 1
+        Frequency frequency = new Frequency(1.0, Units.Frequency.UnitType.Hertz); // in the case it doesn't get set before duty cycle, initialize to 1
 
         /// <summary>
         /// Channel info for PWM port
@@ -193,9 +193,9 @@ namespace Meadow.Hardware
         private bool disposedValue = false; // To detect redundant calls
 
         /// <summary>
-        /// Dispose soft PWM 
+        /// Dispose of the object
         /// </summary>
-        /// <param name="disposing"></param>
+        /// <param name="disposing">Is disposing</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -208,9 +208,7 @@ namespace Meadow.Hardware
             }
         }
 
-        /// <summary>
-        /// Dispose soft pwm port
-        /// </summary>
+        ///<inheritdoc/>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.

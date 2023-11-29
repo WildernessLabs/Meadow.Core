@@ -18,19 +18,20 @@ namespace Meadow.Devices
         GpioDetail = 1 << 3,
         Interrupts = 1 << 4,
         PWM = 1 << 5
-
     }
 
     public partial class F7GPIOManager : IMeadowIOController
     {
-        private object _cacheLock = new object();
-        private IPin?[,] _interruptPins = new IPin?[16, 16];
+        private readonly object _cacheLock = new object();
+        private readonly IPin?[,] _interruptPins = new IPin?[16, 16];
 
         private bool DirectRegisterAccess { get; set; } = true;
 
-        private Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
+        private readonly Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
 
         internal DebugFeature DebugFeatures { get; set; }
+
+        /// <inheritdoc/>
         public IDeviceChannelManager DeviceChannelManager { get; }
 
         internal F7GPIOManager()
@@ -55,22 +56,21 @@ namespace Meadow.Devices
             {
                 UPD.DumpClockRegisters();
             }
-
             // these are the "unallocated" pins on the meadow
-            ConfigureOutput(STM32.GpioPort.PortI, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortH, 13, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortC, 6, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortB, 8, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortB, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortC, 7, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortB, 0, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortB, 1, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortH, 10, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortC, 9, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortB, 14, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortB, 15, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortG, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
-            ConfigureOutput(STM32.GpioPort.PortE, 3, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, false);
+            ConfigureInput(STM32.GpioPort.PortI, 9);
+            ConfigureInput(STM32.GpioPort.PortH, 13);
+            ConfigureInput(STM32.GpioPort.PortC, 6);
+            ConfigureInput(STM32.GpioPort.PortB, 8);
+            ConfigureInput(STM32.GpioPort.PortB, 9);
+            ConfigureInput(STM32.GpioPort.PortC, 7);
+            ConfigureInput(STM32.GpioPort.PortB, 0);
+            ConfigureInput(STM32.GpioPort.PortB, 1);
+            ConfigureInput(STM32.GpioPort.PortH, 10);
+            ConfigureInput(STM32.GpioPort.PortC, 9);
+            ConfigureInput(STM32.GpioPort.PortB, 14);
+            ConfigureInput(STM32.GpioPort.PortB, 15);
+            ConfigureInput(STM32.GpioPort.PortG, 3);
+            ConfigureInput(STM32.GpioPort.PortE, 3);
         }
 
         /// <summary>
@@ -115,8 +115,8 @@ namespace Meadow.Devices
         /// <summary>
         /// Gets the value of a discrete (digital input)
         /// </summary>
-        /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
         /// <param name="pin">Pin.</param>
+        /// <returns><c>true</c>, if discrete was gotten, <c>false</c> otherwise.</returns>
         public bool GetDiscrete(IPin pin)
         {
             var designator = GetPortAndPin(pin);
@@ -228,6 +228,7 @@ namespace Meadow.Devices
 
             ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, stm32OutputType, initialState);
         }
+        /// <inheritdoc/>
 
         public void ConfigureInput(
             IPin pin,
@@ -269,6 +270,11 @@ namespace Meadow.Devices
             return ConfigureGpio(pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None, TimeSpan.Zero, TimeSpan.Zero, true, true);
         }
 
+        internal bool ConfigureInput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor = STM32.ResistorMode.Float)
+        {
+            return ConfigureGpio(port, pin, STM32.GpioMode.Input, resistor, STM32.GPIOSpeed.Speed_2MHz, STM32.OutputType.PushPull, false, InterruptMode.None);
+        }
+
         internal bool ConfigureOutput(STM32.GpioPort port, int pin, STM32.ResistorMode resistor, STM32.GPIOSpeed speed, STM32.OutputType type, bool initialState)
         {
             return ConfigureGpio(port, pin, STM32.GpioMode.Output, resistor, speed, type, initialState, InterruptMode.None);
@@ -279,6 +285,7 @@ namespace Meadow.Devices
             return ConfigureGpio(port, pin, STM32.GpioMode.AlternateFunction, STM32.ResistorMode.Float, speed, type, false, InterruptMode.None, alternateFunction);
         }
 
+        /// <inheritdoc/>
         public bool UnconfigureGpio(IPin pin)
         {
             var designator = GetPortAndPin(pin);

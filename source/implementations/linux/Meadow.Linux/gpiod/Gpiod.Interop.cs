@@ -64,17 +64,17 @@ namespace Meadow
             public enum line_request
             {
                 GPIOD_LINE_REQUEST_DIRECTION_AS_IS = 1,
-                /**< Request the line(s), but don't change current direction. */
+                /*Request the line(s), but don't change current direction. */
                 GPIOD_LINE_REQUEST_DIRECTION_INPUT,
-                /**< Request the line(s) for reading the GPIO line state. */
+                /*Request the line(s) for reading the GPIO line state. */
                 GPIOD_LINE_REQUEST_DIRECTION_OUTPUT,
-                /**< Request the line(s) for setting the GPIO line state. */
+                /*Request the line(s) for setting the GPIO line state. */
                 GPIOD_LINE_REQUEST_EVENT_FALLING_EDGE,
-                /**< Only watch falling edge events. */
+                /*Only watch falling edge events. */
                 GPIOD_LINE_REQUEST_EVENT_RISING_EDGE,
-                /**< Only watch rising edge events. */
+                /*Only watch rising edge events. */
                 GPIOD_LINE_REQUEST_EVENT_BOTH_EDGES,
-                /**< Monitor both types of events. */
+                /*Monitor both types of events. */
             }
 
             [Flags]
@@ -82,33 +82,33 @@ namespace Meadow
             {
                 None = 0,
                 GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN = 1 << 0,
-                /**< The line is an open-drain port. */
+                /*The line is an open-drain port. */
                 GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE = 1 << 1,
-                /**< The line is an open-source port. */
+                /*The line is an open-source port. */
                 GPIOD_LINE_REQUEST_FLAG_ACTIVE_LOW = 1 << 2,
-                /**< The active state of the line is low (high is the default). */
+                /*The active state of the line is low (high is the default). */
                 GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE = 1 << 3,
-                /**< The line has neither either pull-up nor pull-down resistor. */
+                /*The line has neither either pull-up nor pull-down resistor. */
                 GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN = 1 << 4,
-                /**< The line has pull-down resistor enabled. */
+                /*The line has pull-down resistor enabled. */
                 GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP = 1 << 5,
-                /**< The line has pull-up resistor enabled. */
+                /*The line has pull-up resistor enabled. */
             }
 
             public enum line_direction
             {
                 GPIOD_LINE_DIRECTION_INPUT = 1,
-                /**< Direction is input - we're reading the state of a GPIO line. */
+                /*Direction is input - we're reading the state of a GPIO line. */
                 GPIOD_LINE_DIRECTION_OUTPUT,
-                /**< Direction is output - we're driving the GPIO line. */
+                /*Direction is output - we're driving the GPIO line. */
             };
 
             public enum line_active_state
             {
                 GPIOD_LINE_ACTIVE_STATE_HIGH = 1,
-                /**< The active state of a GPIO is active-high. */
+                /*The active state of a GPIO is active-high. */
                 GPIOD_LINE_ACTIVE_STATE_LOW,
-                /**< The active state of a GPIO is active-low. */
+                /*The active state of a GPIO is active-low. */
             };
 
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -162,33 +162,33 @@ namespace Meadow
             internal enum gpiod_event_type
             {
                 GPIOD_LINE_EVENT_RISING_EDGE = 1,
-                /**< Rising edge event. */
+                /*Rising edge event. */
                 GPIOD_LINE_EVENT_FALLING_EDGE,
-                /**< Falling edge event. */
+                /*Falling edge event. */
             }
 
             internal struct gpiod_line_request_config
             {
                 public string consumer;
-                /**< Name of the consumer. */
+                /*Name of the consumer. */
                 public int request_type;
-                /**< Request type. */
+                /*Request type. */
                 public int flags;
-                /**< Other configuration flags. */
+                /*Other configuration flags. */
             };
 
             internal struct gpiod_line_event
             {
                 public timespec ts;
-                /**< Best estimate of time of event occurrence. */
+                /*Best estimate of time of event occurrence. */
                 public gpiod_event_type event_type;
-                /**< Type of the event that occurred. */
+                /*Type of the event that occurred. */
             };
 
             private const string LIB_GPIOD = "libgpiod.so.2";
 
             // struct gpiod_chip *gpiod_chip_open_by_name(const char *name)
-            [DllImport(LIB_GPIOD, SetLastError = true, CharSet=CharSet.Ansi)]
+            [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
             public static extern IntPtr gpiod_chip_open_by_name([MarshalAs(UnmanagedType.LPStr)] string name);
 
             // struct gpiod_chip *gpiod_chip_open_by_number(unsigned int num) GPIOD_API;
@@ -366,7 +366,7 @@ namespace Meadow
              */
             // int gpiod_line_request_rising_edge_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)]  string consumer, line_request_flags flags);
+            public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
 
             /**
              * @brief Request falling edge event notifications on a single line.

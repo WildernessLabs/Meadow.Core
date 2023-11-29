@@ -15,7 +15,7 @@ namespace Meadow.Devices
         public partial class Pinout : IF7CoreComputePinout
         {
             /// <inheritdoc/>
-            public IPinController Controller { get; set; }
+            public IPinController? Controller { get; set; }
 
             /// <inheritdoc/>
             public IList<IPin> AllPins { get; }

@@ -18,7 +18,7 @@ public class NativeNetworkAdapterCollection : INetworkAdapterCollection
 
     // DEV NOTE: This collection is not used in the F7 - it is used by Linux and Windows
     //           For F7 implementations, see the NetworkAdapterCollection class
-    private List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
+    private readonly List<INetworkAdapter> _adapters = new List<INetworkAdapter>();
 
     /// <summary>
     /// Gets an INetworkAdapter from the collection at a specified index
