@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
@@ -419,25 +418,15 @@ namespace Meadow.Hardware
                     {
                         _readBuffer?.Append(readBuffer, 0, result);
 
-                        if (DataReceived != null)
+                        try
                         {
-                            // put on a worker thread, else if the handler goes into some wait, we'll never process data
-                            Task.Run(() =>
-                            {
-                                try
-                                {
-                                    DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
-                                }
-                                catch (Exception ex)
-                                {
-                                    // if the event handler throws, we don't want this to die
-                                    Resolver.Log.Error($"Serial event handler threw: {ex.Message}");
-                                }
-                            });
+                            DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialDataType.Chars));
                         }
-
-                        // we *have* to yield to allow the receiver to process data or we'll just overrun
-                        Thread.Sleep(10);
+                        catch (Exception ex)
+                        {
+                            // if the event handler throws, we don't want this to die
+                            Resolver.Log.Error($"Serial event handler threw: {ex.Message}");
+                        }
                     }
                     else
                     {

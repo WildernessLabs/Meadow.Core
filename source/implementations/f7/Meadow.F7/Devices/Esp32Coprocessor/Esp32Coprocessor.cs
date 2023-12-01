@@ -248,7 +248,11 @@ public partial class Esp32Coprocessor : ICoprocessor
             try
             {
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
-                int result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                int result;
+                do {
+                    result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
+
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event received.");
                 if (result >= 0)
                 {
