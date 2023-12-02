@@ -16,6 +16,9 @@ namespace Meadow;
 /// </summary>
 public class MeadowCloudService : IMeadowCloudService
 {
+    /// <inheritdoc/>
+    public event EventHandler<string> ServiceError = default!;
+
     /// <summary>
     /// Creates a MeadowCloudService
     /// </summary>
@@ -36,6 +39,8 @@ public class MeadowCloudService : IMeadowCloudService
     /// <inheritdoc/>
     public async Task<bool> Authenticate()
     {
+        string errorMessage;
+
         using (var client = new HttpClient())
         {
             client.Timeout = new TimeSpan(0, 15, 0);
@@ -78,34 +83,62 @@ public class MeadowCloudService : IMeadowCloudService
                 {
                     // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
                     // TODO: add platform and OS checking for this?
-                    Resolver.Log.Error($"RSA decrypt failure. This device likely needs to be reprovisioned.");
+                    errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
+                    Resolver.Log.Error(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
+                    CurrentJwt = null;
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"RSA decrypt failure: {ex.Message}";
+                    Resolver.Log.Error(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
                     CurrentJwt = null;
                     return false;
                 }
 
                 // then need to call method to AES decrypt the EncryptedToken with IV
-                var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
-                var ivBytes = Convert.FromBase64String(payload.Iv);
-                var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
 
-                CurrentJwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
+                try
+                {
+                    var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
+                    var ivBytes = Convert.FromBase64String(payload.Iv);
+                    var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
 
-                // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
+                    CurrentJwt = Encoding.UTF8.GetString(decryptedToken);
 
-                Resolver.Log.Debug($"auth token successfully received");
-                return true;
+                    // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
+                    CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
+
+                    Resolver.Log.Debug($"auth token successfully received");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"AES decrypt failure: {ex.Message}";
+                    Resolver.Log.Error(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
+                    CurrentJwt = null;
+                    return false;
+                }
             }
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 // device is likely not provisioned?
-                Resolver.Log.Warn($"Update service returned 'Not Found': this device has likely not been provisioned");
+                errorMessage = $"Update service returned 'Not Found': this device has likely not been provisioned";
             }
             else
             {
-                Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
+                errorMessage = $"Update service login returned {response.StatusCode}: {responseContent}";
             }
+
+            Resolver.Log.Warn(errorMessage);
+            ServiceError?.Invoke(this, errorMessage);
 
             CurrentJwt = null;
             return false;
@@ -129,6 +162,7 @@ public class MeadowCloudService : IMeadowCloudService
         int attempt = 0;
         int maxRetries = 1;
         var result = false;
+        string errorMessage;
 
     retry:
 
@@ -165,13 +199,21 @@ public class MeadowCloudService : IMeadowCloudService
                 }
                 else
                 {
-                    Resolver.Log.Debug($"Unauthorized, exceeded {maxRetries} retry attempt(s)");
+                    errorMessage = $"Unauthorized, exceeded {maxRetries} retry attempt(s)";
+                    Resolver.Log.Warn(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
                     result = false;
                 }
             }
             else
             {
-                Resolver.Log.Debug($"send cloud log failed");
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                errorMessage = $"Cloud send failed. Reponse was '{responseContent}'";
+                Resolver.Log.Warn(errorMessage);
+                ServiceError?.Invoke(this, errorMessage);
+
                 result = false;
             }
         }

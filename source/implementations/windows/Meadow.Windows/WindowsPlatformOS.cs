@@ -2,10 +2,12 @@
 using Meadow.Units;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace Meadow;
 
@@ -141,9 +143,84 @@ public class WindowsPlatformOS : IPlatformOS
         throw new NotImplementedException();
     }
 
+    private string GetPublicKey()
+    {
+        var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+        if (!sshFolder.Exists)
+        {
+            throw new Exception("SSH folder not found");
+        }
+        else
+        {
+            var pkFile = Path.Combine(sshFolder.FullName, "id_rsa.pub");
+            if (!File.Exists(pkFile))
+            {
+                throw new Exception("Public key not found");
+            }
+
+            var pkFileContent = File.ReadAllText(pkFile);
+            if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                // need to convert
+                pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+            }
+
+            return pkFileContent;
+        }
+    }
+
+    private string GetPrivateKey()
+    {
+        var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+        if (!sshFolder.Exists)
+        {
+            throw new Exception("SSH folder not found");
+        }
+        else
+        {
+            var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
+            if (!File.Exists(pkFile))
+            {
+                throw new Exception("Private key not found");
+            }
+
+            var pkFileContent = File.ReadAllText(pkFile);
+            if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                // need to convert
+                pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+            }
+
+            return pkFileContent;
+        }
+    }
+
+    private string ExecuteWindowsCommandLine(string command, string args)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = args,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+    }
+
     public byte[] RsaDecrypt(byte[] encryptedValue)
     {
-        var rsa = RSA.Create();
+        using var rsa = RSA.Create();
+
+        rsa.ImportFromPem(GetPrivateKey());
+
         return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
     }
 
@@ -151,23 +228,21 @@ public class WindowsPlatformOS : IPlatformOS
     {
         // Create an Aes object
         // with the specified key and IV.
-        using (Aes aesAlg = Aes.Create())
-        {
-            aesAlg.Key = key;
-            aesAlg.IV = iv;
+        using Aes aesAlg = Aes.Create();
+        aesAlg.Key = key;
+        aesAlg.IV = iv;
 
-            // Create a decryptor to perform the stream transform.
-            var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+        // Create a decryptor to perform the stream transform.
+        var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-            // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(encryptedValue))
-            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-            {
-                var buffer = new byte[csDecrypt.Length];
-                csDecrypt.Read(buffer, 0, buffer.Length);
-                return buffer;
-            }
-        }
+        // Create the streams used for decryption.
+        using var msDecrypt = new MemoryStream(encryptedValue);
+        using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+        using var srDecrypt = new StreamReader(csDecrypt);
+
+        var plain = srDecrypt.ReadToEnd();
+
+        return Encoding.UTF8.GetBytes(plain);
     }
 
     public int[] GetProcessorUtilization()
