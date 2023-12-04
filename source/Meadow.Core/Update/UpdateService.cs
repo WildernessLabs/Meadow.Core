@@ -223,7 +223,15 @@ public class UpdateService : IUpdateService, ICommandService
     {
         _stopService = false;
 
-        Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+        // we need to wait for the network stack to come up on the F7 platforms
+        switch (Resolver.Device.Information.Platform)
+        {
+            case MeadowPlatform.F7FeatherV1:
+            case MeadowPlatform.F7FeatherV2:
+            case MeadowPlatform.F7CoreComputeV2:
+                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                break;
+        }
 
         Initialize();
 
@@ -432,10 +440,10 @@ public class UpdateService : IUpdateService, ICommandService
     private async Task DownloadProc(UpdateMessage message)
     {
         Resolver.Log.Trace($"Device OS Version: {Resolver.Device.PlatformOS.OSVersion}, Update OS Version: {message.OsVersion}");
-        
+
         var destination = message.MpakDownloadUrl;
-        
-        if (!string.IsNullOrEmpty(message.OsVersion) 
+
+        if (!string.IsNullOrEmpty(message.OsVersion)
             && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
         {
             destination = message.MpakWithOsDownloadUrl;
