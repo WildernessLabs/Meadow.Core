@@ -1,15 +1,11 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.InteropServices;
-using SRI = System.Runtime.InteropServices;
+﻿using SRI = System.Runtime.InteropServices;
 
 namespace Meadow;
 
 /// <summary>
 /// An implementation of the ICryptographyService interface
 /// </summary>
-public class CryptographyService : ICryptographyService
+public class CryptographyService
 {
     /// <inheritdoc/>
     public string? GetPublicKeyInPemFormat()
@@ -71,6 +67,7 @@ public class CryptographyService : ICryptographyService
         }
     }
 
+    /*
     /// <inheritdoc/>
     public string? GetPrivateKeyInPemFormat()
     {
@@ -91,7 +88,14 @@ public class CryptographyService : ICryptographyService
                     throw new Exception("Private key not found");
                 }
 
-                return File.ReadAllText(pkFile);
+                var pkFileContent = File.ReadAllText(pkFile);
+                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    // need to convert
+                    pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+                }
+
+                return pkFileContent;
             }
         }
         else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -103,6 +107,7 @@ public class CryptographyService : ICryptographyService
             throw new PlatformNotSupportedException();
         }
     }
+    */
 
     private string ExecuteBashCommandLine(string command)
     {
@@ -138,5 +143,37 @@ public class CryptographyService : ICryptographyService
         process?.WaitForExit();
 
         return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+    }
+
+    /// <inheritdoc/>
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
+    {
+        using var rsa = RSA.Create();
+
+        rsa.ImportFromPem(privateKeyPem);
+
+        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+    }
+
+    /// <inheritdoc/>
+    public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
+    {
+        // Create an Aes object
+        // with the specified key and IV.
+        using Aes aesAlg = Aes.Create();
+        aesAlg.Key = key;
+        aesAlg.IV = iv;
+
+        // Create a decryptor to perform the stream transform.
+        var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+        // Create the streams used for decryption.
+        using var msDecrypt = new MemoryStream(encryptedValue);
+        using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+        using var srDecrypt = new StreamReader(csDecrypt);
+
+        var plain = srDecrypt.ReadToEnd();
+
+        return Encoding.UTF8.GetBytes(plain);
     }
 }

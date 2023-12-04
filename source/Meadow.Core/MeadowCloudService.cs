@@ -1,13 +1,17 @@
 using Meadow.Cloud;
 using Meadow.Update;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SRI = System.Runtime.InteropServices;
 
 namespace Meadow;
 
@@ -77,7 +81,13 @@ public class MeadowCloudService : IMeadowCloudService
                 byte[]? decryptedKey;
                 try
                 {
-                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
+                    var privateKey = GetPrivateKeyInPemFormat();
+                    if (privateKey == null)
+                    {
+                        return false;
+                    }
+
+                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes, privateKey);
                 }
                 catch (OverflowException)
                 {
@@ -101,7 +111,6 @@ public class MeadowCloudService : IMeadowCloudService
                 }
 
                 // then need to call method to AES decrypt the EncryptedToken with IV
-
                 try
                 {
                     var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
@@ -221,5 +230,83 @@ public class MeadowCloudService : IMeadowCloudService
         //ToDo remove
         GC.Collect();
         return result;
+    }
+
+    /// <inheritdoc/>
+    public string? GetPrivateKeyInPemFormat()
+    {
+        if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            || SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+            if (!sshFolder.Exists)
+            {
+                Resolver.Log.Error("SSH folder not found");
+                return null;
+            }
+            else
+            {
+                var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
+                if (!File.Exists(pkFile))
+                {
+                    Resolver.Log.Error("Private key not found");
+                    return null;
+                }
+
+                var pkFileContent = File.ReadAllText(pkFile);
+                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    // need to convert
+                    pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+                }
+
+                return pkFileContent;
+            }
+        }
+        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            throw new PlatformNotSupportedException();
+        }
+        else
+        {
+            throw new PlatformNotSupportedException();
+        }
+    }
+
+    private string ExecuteBashCommandLine(string command)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = "/bin/bash",
+            Arguments = $"-c \"{command}\"",
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+    }
+
+    private string ExecuteWindowsCommandLine(string command, string args)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = args,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
     }
 }

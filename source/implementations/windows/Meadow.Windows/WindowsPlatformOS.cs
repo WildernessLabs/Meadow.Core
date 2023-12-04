@@ -51,6 +51,7 @@ public class WindowsPlatformOS : IPlatformOS
     /// </summary>
     public string[]? LaunchArguments { get; private set; }
 
+    /// <inheritdoc/>
     public IPlatformOS.FileSystemInfo FileSystem { get; }
 
     /// <summary>
@@ -85,65 +86,8 @@ public class WindowsPlatformOS : IPlatformOS
         .ToArray();
     }
 
-    public Temperature GetCpuTemperature()
-    {
-        throw new PlatformNotSupportedException();
-    }
-
-    /// <summary>
-    /// Sets the platform OS clock
-    /// </summary>
-    /// <param name="dateTime"></param>
-    public void SetClock(DateTime dateTime)
-    {
-        throw new PlatformNotSupportedException();
-    }
-
-
-
-
-
-
-
-
-    // TODO: implement everything below here
-
-    public string ReservedPins => string.Empty;
-    public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
-    public INtpClient NtpClient => throw new NotImplementedException();
-    public bool RebootOnUnhandledException => throw new NotImplementedException();
-    public uint InitializationTimeout => throw new NotImplementedException();
-    public bool AutomaticallyStartNetwork => throw new NotImplementedException();
-    public IPlatformOS.NetworkConnectionType SelectedNetwork => throw new NotImplementedException();
-    public bool SdStorageSupported => throw new NotImplementedException();
-
-    public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
-    {
-        throw new NotImplementedException();
-    }
-
-
-    public void RegisterForSleep(ISleepAwarePeripheral peripheral)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Reset()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Sleep(TimeSpan duration)
-    {
-        throw new NotImplementedException();
-    }
-
-    private string GetPublicKey()
+    /// <inheritdoc/>
+    public string GetPublicKeyInPemFormat()
     {
         var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
 
@@ -161,33 +105,6 @@ public class WindowsPlatformOS : IPlatformOS
 
             var pkFileContent = File.ReadAllText(pkFile);
             if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
-            {
-                // need to convert
-                pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
-            }
-
-            return pkFileContent;
-        }
-    }
-
-    private string GetPrivateKey()
-    {
-        var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
-
-        if (!sshFolder.Exists)
-        {
-            throw new Exception("SSH folder not found");
-        }
-        else
-        {
-            var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
-            if (!File.Exists(pkFile))
-            {
-                throw new Exception("Private key not found");
-            }
-
-            var pkFileContent = File.ReadAllText(pkFile);
-            if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
             {
                 // need to convert
                 pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
@@ -215,15 +132,17 @@ public class WindowsPlatformOS : IPlatformOS
         return process?.StandardOutput.ReadToEnd() ?? string.Empty;
     }
 
-    public byte[] RsaDecrypt(byte[] encryptedValue)
+    /// <inheritdoc/>
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
     {
         using var rsa = RSA.Create();
 
-        rsa.ImportFromPem(GetPrivateKey());
+        rsa.ImportFromPem(privateKeyPem);
 
         return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
     }
 
+    /// <inheritdoc/>
     public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
     {
         // Create an Aes object
@@ -243,6 +162,64 @@ public class WindowsPlatformOS : IPlatformOS
         var plain = srDecrypt.ReadToEnd();
 
         return Encoding.UTF8.GetBytes(plain);
+    }
+
+
+
+
+
+
+
+
+    // TODO: implement everything below here
+
+    public string ReservedPins => string.Empty;
+    public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
+    public INtpClient NtpClient => throw new NotImplementedException();
+    public bool RebootOnUnhandledException => throw new NotImplementedException();
+    public uint InitializationTimeout => throw new NotImplementedException();
+    public bool AutomaticallyStartNetwork => throw new NotImplementedException();
+    public IPlatformOS.NetworkConnectionType SelectedNetwork => throw new NotImplementedException();
+    public bool SdStorageSupported => throw new NotImplementedException();
+
+    public Temperature GetCpuTemperature()
+    {
+        throw new PlatformNotSupportedException();
+    }
+
+    /// <summary>
+    /// Sets the platform OS clock
+    /// </summary>
+    /// <param name="dateTime"></param>
+    public void SetClock(DateTime dateTime)
+    {
+        throw new PlatformNotSupportedException();
+    }
+
+    public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
+    {
+        throw new NotImplementedException();
+    }
+
+
+    public void RegisterForSleep(ISleepAwarePeripheral peripheral)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Reset()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Sleep(TimeSpan duration)
+    {
+        throw new NotImplementedException();
     }
 
     public int[] GetProcessorUtilization()

@@ -427,8 +427,6 @@ public static partial class MeadowOS
 
             Resolver.Services.Add<ICommandService>(updateService);
 
-            Resolver.Services.Add<ICryptographyService>(new CryptographyService());
-
             var healthReporter = new HealthReporter();
             Resolver.Services.Add<IHealthReporter>(healthReporter);
 
