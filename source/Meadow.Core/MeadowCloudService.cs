@@ -190,7 +190,21 @@ public class MeadowCloudService : IMeadowCloudService
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Resolver.Log.Debug($"making cloud log httprequest with json: {json}");
-            var response = await client.PostAsync($"{endpoint}", content);
+
+            HttpResponseMessage response;
+
+            try
+            {
+                response = await client.PostAsync($"{endpoint}", content);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message}";
+                Resolver.Log.Warn(errorMessage);
+                ServiceError?.Invoke(this, errorMessage);
+
+                return false;
+            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -235,8 +249,7 @@ public class MeadowCloudService : IMeadowCloudService
     /// <inheritdoc/>
     public string? GetPrivateKeyInPemFormat()
     {
-        if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            || SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
 
@@ -257,12 +270,46 @@ public class MeadowCloudService : IMeadowCloudService
                 var pkFileContent = File.ReadAllText(pkFile);
                 if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
                 {
-                    // need to convert
                     pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
                 }
 
                 return pkFileContent;
             }
+        }
+        else if(SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+            if (!sshFolder.Exists)
+            {
+                Resolver.Log.Error("SSH folder not found");
+                return null;
+            }
+            else
+            {
+                var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
+                if (!File.Exists(pkFile))
+                {
+                    Resolver.Log.Error("Private key not found");
+                    return null;
+                }
+
+                var pkFileContent = File.ReadAllText(pkFile);
+                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    // DEV NOTE:  this is not ideal.  On the Mac, we *convert* the private key from OpenSSH to our desired format in place.
+                    //            we *overwrite* the existing key file this way (we'll make a backup first).  Calling ssh-keyget always yields the
+                    //            public key, even when called on the private key as input
+                    File.Copy(pkFile, $"{pkFile}.bak");
+
+                    ExecuteBashCommandLine($"ssh-keygen -p -m pem -N '' -f {pkFile}");
+
+                    pkFileContent = File.ReadAllText(pkFile);
+                }
+
+                return pkFileContent;
+            }
+
         }
         else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
