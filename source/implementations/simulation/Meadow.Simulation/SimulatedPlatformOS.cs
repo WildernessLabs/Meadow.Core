@@ -1,9 +1,5 @@
 ﻿using Meadow.Hardware;
 using Meadow.Units;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto.Utilities;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -135,26 +131,7 @@ public class SimulatedPlatformOS : IPlatformOS
     /// <inheritdoc/>
     public byte[] RsaDecrypt(byte[] encryptedValue)
     {
-        var crypto = Resolver.Services.Get<ICryptographyService>();
-        if (crypto == null)
-        {
-            throw new Exception("No ICryptographyService found for decryption");
-        }
-
-        var privateKey = crypto.GetPrivateKeyInPemFormat();
-        using var pkReader = new StringReader(privateKey);
-        using var pemReader = new PemReader(pkReader);
-        var pemObject = pemReader.ReadPemObject();
-        var pkBlob = OpenSshPrivateKeyUtilities.ParsePrivateKeyBlob(pemObject.Content);
-
-        if (pkBlob is not RsaPrivateCrtKeyParameters rsaParams)
-        {
-            throw new NotImplementedException();
-        }
-
-        var rsa = DotNetUtilities.ToRSA(rsaParams);
-
-        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+        throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
@@ -192,6 +169,16 @@ public class SimulatedPlatformOS : IPlatformOS
     }
 
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string? GetPublicKeyInPemFormat()
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
     {
         throw new NotImplementedException();
     }
