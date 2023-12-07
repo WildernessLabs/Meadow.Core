@@ -16,6 +16,9 @@ namespace Meadow;
 /// </summary>
 public class MeadowCloudService : IMeadowCloudService
 {
+    /// <inheritdoc/>
+    public event EventHandler<string> ServiceError = default!;
+
     /// <summary>
     /// Creates a MeadowCloudService
     /// </summary>
