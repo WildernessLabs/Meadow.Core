@@ -276,8 +276,10 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="timeout">Timeout to check signal quality.</param>
     /// <returns>A decimal number (0-31) representing the Cell Signal Quality (CSQ), or 99 if unavailable.</returns>
-    public double GetSignalQuality(int timeout = 30)
+    public double GetSignalQuality(int timeout)
     {
+        Resolver.Log.Trace("Fetching cellular signal quality... It might take a few minutes and temporary disconnect you from the cellular network.");
+
         string csqPattern = @"\+CSQ:\s+(\d+),\d+";
         _at_cmds_output = string.Empty;
 
@@ -316,8 +318,10 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="timeout">The scan timeout duration in seconds.</param>
     /// <returns>An array of CellNetwork objects representing available networks.</returns>
-    public CellNetwork[] ScanForAvailableNetworks(int timeout = 180)
+    public CellNetwork[] ScanForAvailableNetworks(int timeout)
     {
+        Resolver.Log.Trace("Scanning for available cellular networks... It might take a few minutes and temporary disconnect you from the cellular network.");
+
         CellSetState(CellNetworkState.ScanningNetworks);
         _at_cmds_output = string.Empty;
 
@@ -347,9 +351,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="resultTypes">An array of supported GNSS result types for data processing.</param>
     /// <returns>A string containing combined output from GNSS-related AT commands, including NMEA sentences.</returns>
-    public string FetchGnssAtCmdsOutput(IGnssResult[] resultTypes, int timeout = 300)
+    public string FetchGnssAtCmdsOutput(IGnssResult[] resultTypes, int timeout)
     {
-        Resolver.Log.Trace("Retrieving GPS location... It might take 3-5 minutes and temporary disconnect you from the cellular network.");
+        Resolver.Log.Trace("Retrieving GPS location... It might take a few minutes and temporary disconnect you from the cellular network.");
         _at_cmds_output = string.Empty;
 
         // TODO: Take into consideration the GNSS result types
