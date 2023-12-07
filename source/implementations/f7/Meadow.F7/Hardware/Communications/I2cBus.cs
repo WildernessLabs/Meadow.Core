@@ -12,8 +12,7 @@ namespace Meadow.Hardware
     /// </summary>
     public class I2cBus : II2cBus
     {
-        private readonly bool _showI2cDebug = false;
-        private readonly SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _busSemaphore = new(1, 1);
 
         private IMeadowIOController IOController { get; }
         internal int BusNumber { get; set; } = 1;
@@ -25,25 +24,14 @@ namespace Meadow.Hardware
         public I2cBusSpeed BusSpeed { get; set; }
 
         /// <summary>
-        /// Default constructor for the I2cBus class.  This is private to prevent the
-        /// developer from calling it.
+        /// Default constructor for the I2cBus class. This is private to prevent the developer from calling it.
         /// </summary>
         private I2cBus(
             IMeadowIOController ioController,
-            IPin clock,
-            II2cChannelInfo clockChannel,
-            IPin data,
-            II2cChannelInfo dataChannel,
-            I2cBusSpeed busSpeed,
-            ushort transactionTimeout = 100)
+            I2cBusSpeed busSpeed)
         {
             IOController = ioController;
             BusSpeed = busSpeed;
-
-#if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and forgets during check-in
-            _showI2cDebug = false;
-#endif
         }
 
         private void Disable()
@@ -83,7 +71,7 @@ namespace Meadow.Hardware
             success &= ioController.DeviceChannelManager.ReservePin(clock, ChannelConfigurationType.I2C).Item1;
             success &= ioController.DeviceChannelManager.ReservePin(data, ChannelConfigurationType.I2C).Item1;
 
-            return new I2cBus(ioController, clock, clockChannel, data, dataChannel, busSpeed, transactionTimeout);
+            return new I2cBus(ioController, busSpeed);
         }
 
         /// <summary>
@@ -208,19 +196,14 @@ namespace Meadow.Hardware
 
         private void DecipherI2cError(Nuttx.ErrorCode ec)
         {
-            switch (ec)
+            throw ec switch
             {
-                case (Nuttx.ErrorCode)125:
-                    throw new NativeException("Communication error.  Verify address and that SCL and SDA are not reversed.");
-                case (Nuttx.ErrorCode)116:
-                    throw new NativeException("Communication error.  Verify device is powered and that SCL is Connected.");
-                case (Nuttx.ErrorCode)112:
-                    throw new NativeException("Communication error.  No device found at requested address.");
-                case Nuttx.ErrorCode.TryAgain:
-                    throw new NativeException("Communication error.  Verify SDA Is Connected.");
-                default:
-                    throw new NativeException($"Communication error.  Error code {(int)ec}");
-            }
+                (Nuttx.ErrorCode)125 => new NativeException("Communication error. Verify address and that SCL and SDA are not reversed."),
+                (Nuttx.ErrorCode)116 => new NativeException("Communication error. Verify device is powered and that SCL is Connected."),
+                (Nuttx.ErrorCode)112 => new NativeException("Communication error. No device found at requested address."),
+                Nuttx.ErrorCode.TryAgain => new NativeException("Communication error. Verify SDA Is Connected."),
+                _ => new NativeException($"Communication error.  Error code {(int)ec}"),
+            };
         }
 
         /// <inheritdoc/>

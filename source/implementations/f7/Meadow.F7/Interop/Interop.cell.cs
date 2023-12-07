@@ -97,7 +97,7 @@ internal static partial class Interop
 
             try
             {
-                Resolver.Log.Info("Scanning cell networks...");
+                Resolver.Log.Info("Scanning cell networks, it might take a few minutes...");
                 var len = meadow_cell_scanner(buffer);
                 if (len > 0)
                 {
