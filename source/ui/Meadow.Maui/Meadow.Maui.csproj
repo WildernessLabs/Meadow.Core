@@ -25,6 +25,6 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\icon.png" Pack="true" PackagePath="" />
-    <PackageReference Include="Meadow.Windows" Version="1.5.0" />
+    <PackageReference Include="Meadow.Windows" Version="1.6.0" />
   </ItemGroup>
 </Project>
