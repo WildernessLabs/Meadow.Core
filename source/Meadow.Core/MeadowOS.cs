@@ -54,17 +54,17 @@ public static partial class MeadowOS
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
-    public static async Task Start(string[]? args)
+    public static Task Start(string[]? args)
     {
-        await Start(args, null);
+        return Start(args, null);
     }
 
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
-    public static async Task Start(IApp app, string[]? args = null)
+    public static Task Start(IApp app, string[]? args = null)
     {
-        await Start(args, app);
+        return Start(args, app);
     }
 
     /// <summary>
@@ -220,7 +220,7 @@ public static partial class MeadowOS
         return settings.Settings;
     }
 
-    private static Type FindAppType()
+    private static Type FindAppType(string? root)
     {
         Resolver.Log.Trace($"Looking for app assembly...");
 
@@ -229,7 +229,7 @@ public static partial class MeadowOS
         if (_startedDirectly)
         {
             // support app.exe or app.dll
-            appAssembly = FindByPath(new string[] { "App.dll", "App.exe", "app.dll", "app.exe" });
+            appAssembly = FindByPath(new string[] { "App.dll", "App.exe", "app.dll", "app.exe" }, root);
 
             if (appAssembly == null) throw new Exception("No 'App' assembly found.  Expected either App.exe or App.dll");
         }
@@ -239,9 +239,12 @@ public static partial class MeadowOS
         }
 
         // === LOCAL METHOD ===
-        static Assembly? FindByPath(string[] namesToCheck)
+        static Assembly? FindByPath(string[] namesToCheck, string? root = null)
         {
-            var root = AppDomain.CurrentDomain.BaseDirectory;
+            if (root == null)
+            {
+                root = AppDomain.CurrentDomain.BaseDirectory;
+            }
 
             foreach (var name in namesToCheck)
             {
@@ -314,6 +317,21 @@ public static partial class MeadowOS
 
             Type appType;
 
+            // is there an override arg for "root"?
+            string? root = null;
+            if (args != null)
+            {
+                for (var i = 0; i < args.Length; i++)
+                {
+                    if (args[i] == "--root" && args.Length > i)
+                    {
+                        root = args[i + 1];
+                        _startedDirectly = true;
+                        break;
+                    }
+                }
+            }
+
             if (app != null)
             {
                 appType = app.GetType();
@@ -321,7 +339,7 @@ public static partial class MeadowOS
             }
             else
             {
-                appType = FindAppType();
+                appType = FindAppType(root);
                 Resolver.Log.Trace($"App is type {appType.Name}");
                 Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
             }

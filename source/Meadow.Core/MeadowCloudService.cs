@@ -1,13 +1,17 @@
 using Meadow.Cloud;
 using Meadow.Update;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SRI = System.Runtime.InteropServices;
 
 namespace Meadow;
 
@@ -39,6 +43,8 @@ public class MeadowCloudService : IMeadowCloudService
     /// <inheritdoc/>
     public async Task<bool> Authenticate()
     {
+        string errorMessage;
+
         using (var client = new HttpClient())
         {
             client.Timeout = new TimeSpan(0, 15, 0);
@@ -75,40 +81,73 @@ public class MeadowCloudService : IMeadowCloudService
                 byte[]? decryptedKey;
                 try
                 {
-                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes);
+                    var privateKey = GetPrivateKeyInPemFormat();
+                    if (privateKey == null)
+                    {
+                        return false;
+                    }
+
+                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes, privateKey);
                 }
                 catch (OverflowException)
                 {
                     // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
                     // TODO: add platform and OS checking for this?
-                    Resolver.Log.Error($"RSA decrypt failure. This device likely needs to be reprovisioned.");
+                    errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
+                    Resolver.Log.Error(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
+                    CurrentJwt = null;
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"RSA decrypt failure: {ex.Message}";
+                    Resolver.Log.Error(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
                     CurrentJwt = null;
                     return false;
                 }
 
                 // then need to call method to AES decrypt the EncryptedToken with IV
-                var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
-                var ivBytes = Convert.FromBase64String(payload.Iv);
-                var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
+                try
+                {
+                    var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
+                    var ivBytes = Convert.FromBase64String(payload.Iv);
+                    var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
 
-                CurrentJwt = System.Text.Encoding.UTF8.GetString(decryptedToken);
+                    CurrentJwt = Encoding.UTF8.GetString(decryptedToken);
 
-                // trim and "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
+                    // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
+                    CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
 
-                Resolver.Log.Debug($"auth token successfully received");
-                return true;
+                    Resolver.Log.Debug($"auth token successfully received");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    errorMessage = $"AES decrypt failure: {ex.Message}";
+                    Resolver.Log.Error(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
+                    CurrentJwt = null;
+                    return false;
+                }
             }
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 // device is likely not provisioned?
-                Resolver.Log.Warn($"Update service returned 'Not Found': this device has likely not been provisioned");
+                errorMessage = $"Update service returned 'Not Found': this device has likely not been provisioned";
             }
             else
             {
-                Resolver.Log.Warn($"Update service login returned {response.StatusCode}: {responseContent}");
+                errorMessage = $"Update service login returned {response.StatusCode}: {responseContent}";
             }
+
+            Resolver.Log.Warn(errorMessage);
+            ServiceError?.Invoke(this, errorMessage);
 
             CurrentJwt = null;
             return false;
@@ -132,6 +171,7 @@ public class MeadowCloudService : IMeadowCloudService
         int attempt = 0;
         int maxRetries = 1;
         var result = false;
+        string errorMessage;
 
     retry:
 
@@ -150,7 +190,21 @@ public class MeadowCloudService : IMeadowCloudService
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Resolver.Log.Debug($"making cloud log httprequest with json: {json}");
-            var response = await client.PostAsync($"{endpoint}", content);
+
+            HttpResponseMessage response;
+
+            try
+            {
+                response = await client.PostAsync($"{endpoint}", content);
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message}";
+                Resolver.Log.Warn(errorMessage);
+                ServiceError?.Invoke(this, errorMessage);
+
+                return false;
+            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -168,13 +222,21 @@ public class MeadowCloudService : IMeadowCloudService
                 }
                 else
                 {
-                    Resolver.Log.Debug($"Unauthorized, exceeded {maxRetries} retry attempt(s)");
+                    errorMessage = $"Unauthorized, exceeded {maxRetries} retry attempt(s)";
+                    Resolver.Log.Warn(errorMessage);
+                    ServiceError?.Invoke(this, errorMessage);
+
                     result = false;
                 }
             }
             else
             {
-                Resolver.Log.Debug($"send cloud log failed");
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                errorMessage = $"Cloud send failed. Reponse was '{responseContent}'";
+                Resolver.Log.Warn(errorMessage);
+                ServiceError?.Invoke(this, errorMessage);
+
                 result = false;
             }
         }
@@ -182,5 +244,116 @@ public class MeadowCloudService : IMeadowCloudService
         //ToDo remove
         GC.Collect();
         return result;
+    }
+
+    /// <inheritdoc/>
+    public string? GetPrivateKeyInPemFormat()
+    {
+        if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+            if (!sshFolder.Exists)
+            {
+                Resolver.Log.Error("SSH folder not found");
+                return null;
+            }
+            else
+            {
+                var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
+                if (!File.Exists(pkFile))
+                {
+                    Resolver.Log.Error("Private key not found");
+                    return null;
+                }
+
+                var pkFileContent = File.ReadAllText(pkFile);
+                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+                }
+
+                return pkFileContent;
+            }
+        }
+        else if(SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+            if (!sshFolder.Exists)
+            {
+                Resolver.Log.Error("SSH folder not found");
+                return null;
+            }
+            else
+            {
+                var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
+                if (!File.Exists(pkFile))
+                {
+                    Resolver.Log.Error("Private key not found");
+                    return null;
+                }
+
+                var pkFileContent = File.ReadAllText(pkFile);
+                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
+                {
+                    // DEV NOTE:  this is not ideal.  On the Mac, we *convert* the private key from OpenSSH to our desired format in place.
+                    //            we *overwrite* the existing key file this way (we'll make a backup first).  Calling ssh-keyget always yields the
+                    //            public key, even when called on the private key as input
+                    File.Copy(pkFile, $"{pkFile}.bak");
+
+                    ExecuteBashCommandLine($"ssh-keygen -p -m pem -N '' -f {pkFile}");
+
+                    pkFileContent = File.ReadAllText(pkFile);
+                }
+
+                return pkFileContent;
+            }
+
+        }
+        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            throw new PlatformNotSupportedException();
+        }
+        else
+        {
+            throw new PlatformNotSupportedException();
+        }
+    }
+
+    private string ExecuteBashCommandLine(string command)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = "/bin/bash",
+            Arguments = $"-c \"{command}\"",
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+    }
+
+    private string ExecuteWindowsCommandLine(string command, string args)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = args,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
     }
 }

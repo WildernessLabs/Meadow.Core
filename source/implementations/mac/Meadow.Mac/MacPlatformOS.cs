@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Meadow;
 
-public class WindowsPlatformOS : IPlatformOS
+public class MacPlatformOS : IPlatformOS
 {
     /// <summary>
     /// Event raised before a software reset
@@ -57,12 +57,12 @@ public class WindowsPlatformOS : IPlatformOS
     /// <summary>
     /// Default constructor for the WindowsPlatformOS object.
     /// </summary>
-    internal WindowsPlatformOS()
-    {
+    internal MacPlatformOS()
+    {        
         OSVersion = Environment.OSVersion.ToString();
         OSBuildDate = "Unknown";
         RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
-        FileSystem = new WindowsFileSystemInfo();
+        FileSystem = new MacFileSystemInfo();
     }
 
     /// <summary>

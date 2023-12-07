@@ -1,30 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <AssemblyName>Meadow.Simulation</AssemblyName>
+    <AssemblyName>Meadow.Mac</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
     <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
-    <PackageId>Meadow.Simulation</PackageId>
+    <PackageId>Meadow.Mac</PackageId>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.94.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Nullable>enable</Nullable>
-    <LangVersion>10.0</LangVersion>
-    <Description>A simulation Environment for Wilderness Labs Meadow Platform</Description>
+    <Description>An implementation of the Meadow software stack for Apple Macintosh targets</Description>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
     <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
