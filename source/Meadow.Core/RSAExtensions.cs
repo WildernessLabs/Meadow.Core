@@ -5,17 +5,29 @@ using System.Security.Cryptography;
 namespace Meadow;
 
 /// <summary>
-/// 
+/// Extension methods for the RSA obect
 /// </summary>
 /// <remarks>
 /// Because Core is built against netstandard 2.1, we don't have access to ImportFromPem and have to implement it ourselves
 /// </remarks>
-internal static class RSAExtensions
+public static class RSAExtensions
 {
-    public enum RsaPublicKeyFormat
+    /// <summary>
+    /// The format of an encryption key
+    /// </summary>
+    public enum KeyFormat
     {
+        /// <summary>
+        /// An RSA public key
+        /// </summary>
         RsaPublicKey,
+        /// <summary>
+        /// An RSA Private Key
+        /// </summary>
         RsaPrivateKey,
+        /// <summary>
+        /// A Subject Public Key
+        /// </summary>
         SubjectPublicKeyInfo
     }
 
@@ -26,21 +38,26 @@ internal static class RSAExtensions
     private const string SubjectPublicKeyInfoPemHeader = "-----BEGIN PUBLIC KEY-----";
     private const string SubjectPublicKeyInfoPemFooter = "-----END PUBLIC KEY-----";
 
-#if !(NET5_0 || NET5_0_OR_GREATER)
-    //
-    // Add missing method.
-    //
+    /// <summary>
+    /// Imports RSA key parameters from a PEM file
+    /// </summary>
+    /// <param name="key">The key on which to apply the parameters</param>
+    /// <param name="source">the PEM file contents</param>
     public static void ImportFromPem(
       this RSA key,
       string source)
       => ImportFromPem(key, source, out var _);
 
-#endif
-
+    /// <summary>
+    /// Imports RSA key parameters from a PEM file
+    /// </summary>
+    /// <param name="key">The key on which to apply the parameters</param>
+    /// <param name="source">the PEM file contents</param>
+    /// <param name="format">The detected format of the PEM data</param>
     public static void ImportFromPem(
       this RSA key,
       string source,
-      out RsaPublicKeyFormat format)
+      out KeyFormat format)
     {
         source = source.Trim();
 
@@ -50,17 +67,17 @@ internal static class RSAExtensions
         if (source.StartsWith(SubjectPublicKeyInfoPemHeader) &&
             source.EndsWith(SubjectPublicKeyInfoPemFooter))
         {
-            format = RsaPublicKeyFormat.SubjectPublicKeyInfo;
+            format = KeyFormat.SubjectPublicKeyInfo;
         }
         else if (source.StartsWith(RsaPublickeyPemHeader) &&
                  source.EndsWith(RsaPublickeyPemFooter))
         {
-            format = RsaPublicKeyFormat.RsaPublicKey;
+            format = KeyFormat.RsaPublicKey;
         }
         else if (source.StartsWith(RsaPrivatekeyPemHeader) &&
                  source.EndsWith(RsaPrivatekeyPemFooter))
         {
-            format = RsaPublicKeyFormat.RsaPrivateKey;
+            format = KeyFormat.RsaPrivateKey;
         }
         else
         {
@@ -75,11 +92,11 @@ internal static class RSAExtensions
             .Split('\n')
             .Select(s => s.Trim())
             .Where(line => !line.StartsWith("-----"))));
-        if (format == RsaPublicKeyFormat.RsaPublicKey)
+        if (format == KeyFormat.RsaPublicKey)
         {
             key.ImportRSAPublicKey(der, out var _);
         }
-        else if (format == RsaPublicKeyFormat.RsaPrivateKey)
+        else if (format == KeyFormat.RsaPrivateKey)
         {
             key.ImportRSAPrivateKey(der, out var _);
         }

@@ -58,7 +58,7 @@ public class MacPlatformOS : IPlatformOS
     /// Default constructor for the WindowsPlatformOS object.
     /// </summary>
     internal MacPlatformOS()
-    {        
+    {
         OSVersion = Environment.OSVersion.ToString();
         OSBuildDate = "Unknown";
         RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
@@ -107,20 +107,21 @@ public class MacPlatformOS : IPlatformOS
             if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
             {
                 // need to convert
-                pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+                pkFileContent = ExecuteBashCommandLine($"ssh-keygen -e -m pem -f {pkFile}");
             }
 
             return pkFileContent;
         }
     }
 
-    private string ExecuteWindowsCommandLine(string command, string args)
+    private string ExecuteBashCommandLine(string command)
     {
         var psi = new ProcessStartInfo()
         {
-            FileName = command,
-            Arguments = args,
+            FileName = "/bin/bash",
+            Arguments = $"-c \"{command}\"",
             RedirectStandardOutput = true,
+            RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true
         };
@@ -129,7 +130,10 @@ public class MacPlatformOS : IPlatformOS
 
         process?.WaitForExit();
 
-        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+        var stdout = process?.StandardOutput.ReadToEnd() ?? string.Empty;
+        var stderr = process?.StandardError.ReadToEnd() ?? string.Empty;
+
+        return stdout;
     }
 
     /// <inheritdoc/>

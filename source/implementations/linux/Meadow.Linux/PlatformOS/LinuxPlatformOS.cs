@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 
 namespace Meadow;
@@ -184,35 +185,6 @@ public class LinuxPlatformOS : IPlatformOS
         throw new PlatformNotSupportedException();
     }
 
-    public byte[] RsaDecrypt(byte[] encryptedValue)
-    {
-        var rsa = RSA.Create();
-        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
-    }
-
-    public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
-    {
-        // Create an Aes object
-        // with the specified key and IV.
-        using (Aes aesAlg = Aes.Create())
-        {
-            aesAlg.Key = key;
-            aesAlg.IV = iv;
-
-            // Create a decryptor to perform the stream transform.
-            var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-            // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(encryptedValue))
-            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-            {
-                var buffer = new byte[csDecrypt.Length];
-                csDecrypt.Read(buffer, 0, buffer.Length);
-                return buffer;
-            }
-        }
-    }
-
     public int[] GetProcessorUtilization()
     {
         throw new NotImplementedException();
@@ -228,13 +200,91 @@ public class LinuxPlatformOS : IPlatformOS
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public string? GetPublicKeyInPemFormat()
     {
-        throw new NotImplementedException();
+        var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+        if (!sshFolder.Exists)
+        {
+            throw new Exception("SSH folder not found");
+        }
+        else
+        {
+            var pkFile = Path.Combine(sshFolder.FullName, "id_rsa.pub");
+            if (!File.Exists(pkFile))
+            {
+                throw new Exception("Public key not found");
+            }
+
+            Resolver.Log.Info($"Getting public key from {pkFile}");
+
+            var pkFileContent = File.ReadAllText(pkFile);
+            if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                // need to convert
+                pkFileContent = ExecuteBashCommandLine($"ssh-keygen -e -m pem -f {pkFile}");
+            }
+
+            return pkFileContent;
+        }
     }
 
+    private string ExecuteBashCommandLine(string command)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = "/bin/bash",
+            Arguments = $"-c \"{command}\"",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        var stdout = process?.StandardOutput.ReadToEnd() ?? string.Empty;
+        var stderr = process?.StandardError.ReadToEnd() ?? string.Empty;
+
+        return stdout;
+    }
+
+    /// <inheritdoc/>
     public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
     {
-        throw new NotImplementedException();
+        using var rsa = RSA.Create();
+
+        Resolver.Log.Info("RsaDecrypt...");
+
+        rsa.ImportFromPem(privateKeyPem);
+
+        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+    }
+
+    /// <inheritdoc/>
+    public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
+    {
+        // Create an Aes object
+        // with the specified key and IV.
+        using Aes aesAlg = Aes.Create();
+        aesAlg.Key = key;
+        aesAlg.IV = iv;
+
+        // Create a decryptor to perform the stream transform.
+        var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+        // Create the streams used for decryption.
+        using var msDecrypt = new MemoryStream(encryptedValue);
+        using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+        using var srDecrypt = new StreamReader(csDecrypt);
+
+        var plain = srDecrypt.ReadToEnd();
+
+        Resolver.Log.Info("AesDecrypt...");
+
+        return Encoding.UTF8.GetBytes(plain);
     }
 }

@@ -2,7 +2,6 @@ using Meadow.Cloud;
 using Meadow.Update;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,7 +17,7 @@ namespace Meadow;
 /// <summary>
 /// Encapsulates logic for communicating with Meadow.Cloud
 /// </summary>
-public class MeadowCloudService : IMeadowCloudService
+public partial class MeadowCloudService : IMeadowCloudService
 {
     /// <inheritdoc/>
     public event EventHandler<string> ServiceError = default!;
@@ -246,74 +245,20 @@ public class MeadowCloudService : IMeadowCloudService
         return result;
     }
 
-    /// <inheritdoc/>
-    public string? GetPrivateKeyInPemFormat()
+    private string? GetPrivateKeyInPemFormat()
     {
+        // DEV NOTE: I don't want to expose a "GetPrivateKey()" method in an interface, or anything non-private. That's why this is like it is
         if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
-
-            if (!sshFolder.Exists)
-            {
-                Resolver.Log.Error("SSH folder not found");
-                return null;
-            }
-            else
-            {
-                var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
-                if (!File.Exists(pkFile))
-                {
-                    Resolver.Log.Error("Private key not found");
-                    return null;
-                }
-
-                var pkFileContent = File.ReadAllText(pkFile);
-                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
-                {
-                    pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
-                }
-
-                return pkFileContent;
-            }
+            return GetWindowsPrivateKeyInPemFormat();
         }
-        else if(SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
-
-            if (!sshFolder.Exists)
-            {
-                Resolver.Log.Error("SSH folder not found");
-                return null;
-            }
-            else
-            {
-                var pkFile = Path.Combine(sshFolder.FullName, "id_rsa");
-                if (!File.Exists(pkFile))
-                {
-                    Resolver.Log.Error("Private key not found");
-                    return null;
-                }
-
-                var pkFileContent = File.ReadAllText(pkFile);
-                if (!pkFileContent.Contains("BEGIN RSA PRIVATE KEY", StringComparison.OrdinalIgnoreCase))
-                {
-                    // DEV NOTE:  this is not ideal.  On the Mac, we *convert* the private key from OpenSSH to our desired format in place.
-                    //            we *overwrite* the existing key file this way (we'll make a backup first).  Calling ssh-keyget always yields the
-                    //            public key, even when called on the private key as input
-                    File.Copy(pkFile, $"{pkFile}.bak");
-
-                    ExecuteBashCommandLine($"ssh-keygen -p -m pem -N '' -f {pkFile}");
-
-                    pkFileContent = File.ReadAllText(pkFile);
-                }
-
-                return pkFileContent;
-            }
-
+            return GetMacPrivateKeyInPemFormat();
         }
         else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            throw new PlatformNotSupportedException();
+            return GetLinuxPrivateKeyInPemFormat();
         }
         else
         {
@@ -327,24 +272,6 @@ public class MeadowCloudService : IMeadowCloudService
         {
             FileName = "/bin/bash",
             Arguments = $"-c \"{command}\"",
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = Process.Start(psi);
-
-        process?.WaitForExit();
-
-        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
-    }
-
-    private string ExecuteWindowsCommandLine(string command, string args)
-    {
-        var psi = new ProcessStartInfo()
-        {
-            FileName = command,
-            Arguments = args,
             RedirectStandardOutput = true,
             UseShellExecute = false,
             CreateNoWindow = true
