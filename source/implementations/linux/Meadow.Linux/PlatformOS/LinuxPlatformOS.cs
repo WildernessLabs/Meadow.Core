@@ -227,4 +227,14 @@ public class LinuxPlatformOS : IPlatformOS
     {
         throw new NotImplementedException();
     }
+
+    public string? GetPublicKeyInPemFormat()
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -22,7 +22,11 @@
       <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="CryptographyService.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+    <None Include="CryptographyService.cs" />
 	  <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
 	  <ProjectReference Include="..\..\..\Meadow.Modbus\src\Meadow.Modbus\Meadow.Modbus.csproj" />
 	  <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
