@@ -1,4 +1,5 @@
 using Meadow.Cloud;
+using Meadow.Hardware;
 using Meadow.Update;
 using System;
 using System.Diagnostics;
@@ -47,7 +48,7 @@ public class MeadowCloudService : IMeadowCloudService
 
         using (var client = new HttpClient())
         {
-            client.Timeout = new TimeSpan(0, 15, 0);
+            client.Timeout = TimeSpan.FromSeconds(15); // TODO: make this configurable
 
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -55,102 +56,114 @@ public class MeadowCloudService : IMeadowCloudService
             var endpoint = $"{Settings.Hostname}/api/devices/login";
             Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
-            var response = await client.PostAsync(endpoint, content);
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                Resolver.Log.Debug($"authentication successful. extracting token");
-                var opts = new JsonSerializerOptions
+                var response = await client.PostAsync(endpoint, content);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
                 {
-                    PropertyNameCaseInsensitive = true,
-                };
-
-                var payload = JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent, opts);
-
-                if (payload == null)
-                {
-                    Resolver.Log.Warn($"invalid auth payload");
-                    CurrentJwt = null;
-                    return false;
-                }
-
-                Resolver.Log.Debug($"decrypting auth payload");
-                var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
-
-                byte[]? decryptedKey;
-                try
-                {
-                    var privateKey = GetPrivateKeyInPemFormat();
-                    if (privateKey == null)
+                    Resolver.Log.Debug($"authentication successful. extracting token");
+                    var opts = new JsonSerializerOptions
                     {
+                        PropertyNameCaseInsensitive = true,
+                    };
+
+                    var payload = JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent, opts);
+
+                    if (payload == null)
+                    {
+                        Resolver.Log.Warn($"invalid auth payload");
+                        CurrentJwt = null;
                         return false;
                     }
 
-                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes, privateKey);
+                    Resolver.Log.Debug($"decrypting auth payload");
+                    var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
+
+                    byte[]? decryptedKey;
+                    try
+                    {
+                        var privateKey = GetPrivateKeyInPemFormat();
+                        if (privateKey == null)
+                        {
+                            return false;
+                        }
+
+                        decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes, privateKey);
+                    }
+                    catch (OverflowException)
+                    {
+                        // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
+                        // TODO: add platform and OS checking for this?
+                        errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
+                        Resolver.Log.Error(errorMessage);
+                        ServiceError?.Invoke(this, errorMessage);
+
+                        CurrentJwt = null;
+                        return false;
+                    }
+                    catch (Exception ex)
+                    {
+                        errorMessage = $"RSA decrypt failure: {ex.Message}";
+                        Resolver.Log.Error(errorMessage);
+                        ServiceError?.Invoke(this, errorMessage);
+
+                        CurrentJwt = null;
+                        return false;
+                    }
+
+                    // then need to call method to AES decrypt the EncryptedToken with IV
+                    try
+                    {
+                        var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
+                        var ivBytes = Convert.FromBase64String(payload.Iv);
+                        var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
+
+                        CurrentJwt = Encoding.UTF8.GetString(decryptedToken);
+
+                        // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
+                        CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
+
+                        Resolver.Log.Debug($"auth token successfully received");
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        errorMessage = $"AES decrypt failure: {ex.Message}";
+                        Resolver.Log.Error(errorMessage);
+                        ServiceError?.Invoke(this, errorMessage);
+
+                        CurrentJwt = null;
+                        return false;
+                    }
                 }
-                catch (OverflowException)
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
-                    // TODO: add platform and OS checking for this?
-                    errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
-                    Resolver.Log.Error(errorMessage);
-                    ServiceError?.Invoke(this, errorMessage);
-
-                    CurrentJwt = null;
-                    return false;
+                    // device is likely not provisioned?
+                    errorMessage = $"Update service returned 'Not Found': this device has likely not been provisioned";
                 }
-                catch (Exception ex)
+                else
                 {
-                    errorMessage = $"RSA decrypt failure: {ex.Message}";
-                    Resolver.Log.Error(errorMessage);
-                    ServiceError?.Invoke(this, errorMessage);
-
-                    CurrentJwt = null;
-                    return false;
+                    errorMessage = $"Update service login returned {response.StatusCode}: {responseContent}";
                 }
 
-                // then need to call method to AES decrypt the EncryptedToken with IV
-                try
-                {
-                    var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
-                    var ivBytes = Convert.FromBase64String(payload.Iv);
-                    var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
+                Resolver.Log.Warn(errorMessage);
+                ServiceError?.Invoke(this, errorMessage);
 
-                    CurrentJwt = Encoding.UTF8.GetString(decryptedToken);
-
-                    // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                    CurrentJwt = Regex.Replace(CurrentJwt, @"[^\w\.@-]", "");
-
-                    Resolver.Log.Debug($"auth token successfully received");
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    errorMessage = $"AES decrypt failure: {ex.Message}";
-                    Resolver.Log.Error(errorMessage);
-                    ServiceError?.Invoke(this, errorMessage);
-
-                    CurrentJwt = null;
-                    return false;
-                }
+                CurrentJwt = null;
+                return false;
             }
-
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (Exception ex)
             {
-                // device is likely not provisioned?
-                errorMessage = $"Update service returned 'Not Found': this device has likely not been provisioned";
-            }
-            else
-            {
-                errorMessage = $"Update service login returned {response.StatusCode}: {responseContent}";
-            }
+                errorMessage = $"Exception authenticating with Meadow.Cloud: {ex.Message}";
+                Resolver.Log.Warn(errorMessage);
+                ServiceError?.Invoke(this, errorMessage);
 
-            Resolver.Log.Warn(errorMessage);
-            ServiceError?.Invoke(this, errorMessage);
-
-            CurrentJwt = null;
-            return false;
+                CurrentJwt = null;
+                return false;
+            }
         }
     }
 
@@ -325,7 +338,15 @@ public class MeadowCloudService : IMeadowCloudService
         }
         else
         {
-            throw new PlatformNotSupportedException();
+            // we're on an F7 (probably)
+            return Resolver.Device.Information.Platform switch
+            {
+                // F7 Private Keys are baked in - we have no API to extract yet
+                MeadowPlatform.F7FeatherV1 => "F7 PRIVATE KEY",
+                MeadowPlatform.F7FeatherV2 => "F7 PRIVATE KEY",
+                MeadowPlatform.F7CoreComputeV2 => "F7 PRIVATE KEY",
+                _ => throw new PlatformNotSupportedException()
+            };
         }
     }
 
