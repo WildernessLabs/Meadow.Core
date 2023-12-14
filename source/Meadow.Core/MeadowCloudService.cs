@@ -176,7 +176,14 @@ public partial class MeadowCloudService : IMeadowCloudService
 
         if (CurrentJwt == null)
         {
-            await Authenticate();
+            if (!await Authenticate())
+            {
+                errorMessage = $"Cloud auth failed before sending";
+                ServiceError?.Invoke(this, errorMessage);
+                Resolver.Log.Warn(errorMessage);
+                // TODO: should we retry after this?
+                return false;
+            }
         }
 
         using (HttpClient client = new HttpClient())
@@ -207,7 +214,7 @@ public partial class MeadowCloudService : IMeadowCloudService
 
             if (response.IsSuccessStatusCode)
             {
-                Resolver.Log.Debug("cloud log success");
+                Resolver.Log.Debug("cloud send success");
                 result = true;
             }
             else if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -216,6 +223,7 @@ public partial class MeadowCloudService : IMeadowCloudService
                 {
                     attempt++;
                     Resolver.Log.Debug($"Unauthorized, re-authenticating");
+                    // by setting this to null and retrying, Authenticate will get called
                     CurrentJwt = null;
                     goto retry;
                 }
