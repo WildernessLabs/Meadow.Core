@@ -41,12 +41,12 @@ public class MeadowCloudService : IMeadowCloudService
             client.Timeout = new TimeSpan(0, 15, 0);
 
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var endpoint = $"{Settings.Hostname}/api/devices/login";
             Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
-            var response = await client.PostAsync(endpoint, content);
+            using var response = await client.PostAsync(endpoint, content);
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
@@ -144,10 +144,10 @@ public class MeadowCloudService : IMeadowCloudService
 
             var serializeOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             var json = JsonSerializer.Serialize(item, serializeOptions);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             Resolver.Log.Debug($"making cloud log httprequest with json: {json}");
-            var response = await client.PostAsync($"{endpoint}", content);
+            using var response = await client.PostAsync($"{endpoint}", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -177,7 +177,7 @@ public class MeadowCloudService : IMeadowCloudService
         }
 
         //ToDo remove
-        GC.Collect();
+        //GC.Collect();
         return result;
     }
 }
