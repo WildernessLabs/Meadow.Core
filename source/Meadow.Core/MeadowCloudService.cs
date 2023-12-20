@@ -21,6 +21,8 @@ namespace Meadow;
 /// </summary>
 public class MeadowCloudService : IMeadowCloudService
 {
+    private const int AuthTimeoutSeconds = 120;
+
     /// <inheritdoc/>
     public event EventHandler<string> ServiceError = default!;
 
@@ -48,7 +50,7 @@ public class MeadowCloudService : IMeadowCloudService
 
         using (var client = new HttpClient())
         {
-            client.Timeout = TimeSpan.FromSeconds(15); // TODO: make this configurable
+            client.Timeout = TimeSpan.FromSeconds(AuthTimeoutSeconds); // TODO: make this configurable
 
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
