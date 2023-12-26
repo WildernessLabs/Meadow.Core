@@ -237,4 +237,9 @@ public class LinuxPlatformOS : IPlatformOS
     {
         throw new NotImplementedException();
     }
+
+    public void Sleep(IPin interruptPin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
+    {
+        throw new NotImplementedException();
+    }
 }
