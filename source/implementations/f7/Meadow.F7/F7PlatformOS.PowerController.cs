@@ -62,7 +62,7 @@ namespace Meadow
                 SecondsToSleep = seconds
             };
 
-            Resolver.Log.Trace($"Device sleeping for {duration.TotalSeconds}...");
+            Resolver.Log.Trace($"Device sleeping for {duration.TotalSeconds}s...");
 
             DoSleepNotifications();
 
@@ -73,8 +73,6 @@ namespace Meadow
             Thread.Sleep(100);
 
             // TODO: see how long this actually takes
-
-            Resolver.Log.Trace($"Device wake");
 
             DoWakeNotifications(WakeSource.Timer);
         }
@@ -120,7 +118,7 @@ namespace Meadow
         }
 
         /// <inheritdoc/>
-        public void SleepUntilInterrupt(
+        public void Sleep(
             IPin interruptPin,
             InterruptMode interruptMode,
             ResistorMode resistorMode = ResistorMode.Disabled)
@@ -141,9 +139,6 @@ namespace Meadow
             {
                 SecondsToSleep = MaxSleepSeconds
             };
-
-            Resolver.Log.Trace($"Device sleeping until interrupt...");
-
             DoSleepNotifications();
 
             // This suspends the processor and code stops executing
@@ -153,7 +148,8 @@ namespace Meadow
             // EXECUTION HALTS ON THIS SLEEP CALL UNTIL WAKE
             Thread.Sleep(100);
 
-            Resolver.Log.Trace($"Device wake");
+            var b = Resolver.Services.Get<IDigitalOutputPort>();
+            b!.State = true;
 
             if (existingConfig != null)
             {
