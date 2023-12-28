@@ -90,6 +90,18 @@ public partial class F7GPIOManager : IMeadowIOController
                 break;
         }
 
+        // make sure pin is configured as an input
+        ConfigureGpio(
+            designator.port,
+            designator.pin,
+            STM32.GpioMode.Input,
+            rm,
+            STM32.GPIOSpeed.Speed_2MHz,
+            STM32.OutputType.OpenDrain,
+            false,
+            InterruptMode.None);
+
+        // now use a GPD driver call to enable it as an interrupt wake source
         var cfg = new Nuttx.UpdGpioInterruptConfiguration()
         {
             InterruptConfig = Nuttx.InterruptConfig.Enable,
