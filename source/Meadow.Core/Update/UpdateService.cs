@@ -431,6 +431,12 @@ public class UpdateService : IUpdateService, ICommandService
             throw new ArgumentException($"Cannot find update with ID {updateInfo.ID}");
         }
 
+        // check if we need to re-authenticate with the server before starting download. 
+        if (ShouldAuthenticate())
+        {
+            AuthenticateWithServer().Wait();
+        }
+
         if (message != null)
         {
             Task.Run(() => DownloadProc(message));
