@@ -9,7 +9,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
-    <Version>0.31.0</Version>
+    <Version>1.6.0.1</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
