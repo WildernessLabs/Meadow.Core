@@ -104,7 +104,7 @@ public partial class F7GPIOManager : IMeadowIOController
         // now use a GPD driver call to enable it as an interrupt wake source
         var cfg = new Nuttx.UpdGpioInterruptConfiguration()
         {
-            InterruptConfig = Nuttx.InterruptConfig.Enable,
+            InterruptConfig = Nuttx.InterruptConfig.Wake,
             Port = (uint)designator.port,
             Pin = (uint)designator.pin,
             RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),

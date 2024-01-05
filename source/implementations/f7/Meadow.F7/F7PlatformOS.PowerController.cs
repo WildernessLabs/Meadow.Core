@@ -148,9 +148,6 @@ namespace Meadow
             // EXECUTION HALTS ON THIS SLEEP CALL UNTIL WAKE
             Thread.Sleep(100);
 
-            var b = Resolver.Services.Get<IDigitalOutputPort>();
-            b!.State = true;
-
             if (existingConfig != null)
             {
                 var existingInterruptMode = InterruptMode.None;
