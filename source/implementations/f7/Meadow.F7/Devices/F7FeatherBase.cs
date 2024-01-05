@@ -20,7 +20,7 @@ public abstract partial class F7FeatherBase : F7MicroBase, IF7FeatherMeadowDevic
     /// <param name="storageCapabilities">The storage capabilities.</param>
     protected F7FeatherBase(
         IF7FeatherPinout pins,
-        IMeadowIOController ioController,
+        F7GPIOManager ioController,
         AnalogCapabilities analogCapabilities,
         NetworkCapabilities networkCapabilities,
         StorageCapabilities storageCapabilities)
@@ -132,11 +132,11 @@ public abstract partial class F7FeatherBase : F7MicroBase, IF7FeatherMeadowDevic
         // For the F7 meadow it's enough to know and any attempt to use other pins will get caught by other sanity checks
         // HACK NOTE: can't compare directly here, so we're comparing the name.
         // might be able to cast and compare?
-        if (clock.Name == (Pins as IF7FeatherPinout)?.ESP_CLK.Name)
+        if (clock.Name == Pins?.ESP_CLK.Name)
         {
             return 2;
         }
-        else if (clock.Name == (Pins as IF7FeatherPinout)?.SCK.Name)
+        else if (clock.Name == Pins?.SCK.Name)
         {
             return 3;
         }

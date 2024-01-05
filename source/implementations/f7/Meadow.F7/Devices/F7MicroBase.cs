@@ -79,7 +79,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <param name="networkCapabilities"></param>
     /// <param name="storageCapabilities"></param>
     public F7MicroBase(
-        IMeadowIOController ioController,
+        F7GPIOManager ioController,
         AnalogCapabilities analogCapabilities,
         NetworkCapabilities networkCapabilities,
         StorageCapabilities storageCapabilities)
@@ -88,7 +88,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
 
         Capabilities = new DeviceCapabilities(analogCapabilities, networkCapabilities, storageCapabilities);
 
-        PlatformOS = new F7PlatformOS();
+        PlatformOS = new F7PlatformOS(ioController);
 
         Information = new F7DeviceInformation();
 

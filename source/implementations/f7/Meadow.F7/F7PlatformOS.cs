@@ -10,6 +10,8 @@ namespace Meadow;
 /// </summary>
 public partial class F7PlatformOS : IPlatformOS
 {
+    private readonly F7GPIOManager _ioController;
+
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
     /// </summary>
@@ -23,8 +25,10 @@ public partial class F7PlatformOS : IPlatformOS
     /// <summary>
     /// Default constructor for the F7PlatformOS object.
     /// </summary>
-    internal F7PlatformOS()
+    internal F7PlatformOS(F7GPIOManager ioController)
     {
+        _ioController = ioController;
+
         NtpClient = new NtpClient();
         Resolver.Services.Add(NtpClient);
     }

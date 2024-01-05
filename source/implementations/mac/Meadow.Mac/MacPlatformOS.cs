@@ -58,7 +58,7 @@ public class MacPlatformOS : IPlatformOS
     /// Default constructor for the WindowsPlatformOS object.
     /// </summary>
     internal MacPlatformOS()
-    {        
+    {
         OSVersion = Environment.OSVersion.ToString();
         OSBuildDate = "Unknown";
         RuntimeVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
@@ -233,6 +233,11 @@ public class MacPlatformOS : IPlatformOS
     }
 
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Sleep(IPin interruptPin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
     {
         throw new NotImplementedException();
     }

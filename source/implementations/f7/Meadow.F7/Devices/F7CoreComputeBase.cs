@@ -12,7 +12,7 @@ namespace Meadow.Devices
     {
         protected F7CoreComputeBase(
             IF7CoreComputePinout pins,
-            IMeadowIOController ioController,
+            F7GPIOManager ioController,
             AnalogCapabilities analogCapabilities,
             NetworkCapabilities networkCapabilities,
             StorageCapabilities storageCapabilities)
