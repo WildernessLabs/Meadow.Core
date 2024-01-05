@@ -19,7 +19,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow,Meadow.Maui,MAUI</PackageTags>
-    <Version>0.9.54</Version>
+    <Version>1.6.0.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Utility library for aiding in using Wilderness Labs' Meadow stack in a MAUI application</Description>
   </PropertyGroup>
