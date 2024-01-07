@@ -117,6 +117,22 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     }
 
     /// <summary>
+    /// DNS Addresses of the network adapter.
+    /// </summary>
+    public IPAddressCollection DnsAddresses
+    {
+        get
+        {
+            if (nativeInterface == null)
+            {
+                throw new InvalidOperationException("Native interface is null.");
+            }
+            
+            return (nativeInterface?.GetIPProperties()?.DnsAddresses!) ?? throw new InvalidOperationException("DNS addresses could not be retrieved.");
+        }
+    }
+
+    /// <summary>
     /// Subnet mask of the adapter.
     /// </summary>
     public IPAddress SubnetMask
