@@ -74,7 +74,7 @@ namespace Meadow
             }
             catch
             {
-                Resolver.Log.Warn("Platform does not support gpiod");
+                Resolver.Log.Warn("Platform does not support gpiod. Will use sysfs.");
             }
         }
 
@@ -209,7 +209,12 @@ namespace Meadow
 
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
         {
-            return new SpiBus(0, (SpiBus.SpiMode)mode, speed);
+            return CreateSpiBus(0, mode, speed);
+        }
+
+        public ISpiBus CreateSpiBus(int busNumber, SpiClockConfiguration.Mode mode, Units.Frequency speed)
+        {
+            return new SpiBus(busNumber, (SpiBus.SpiMode)mode, speed);
         }
 
         // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
