@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Version>1.7.0</Version>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -14,15 +15,13 @@
     <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
-    <Version>0.94.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Nullable>enable</Nullable>
     <Description>An implementation of the Meadow software stack for Windows targets</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="Meadow" Version="1.6.0" />
+    <PackageReference Include="Meadow" Version="1.7.0" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

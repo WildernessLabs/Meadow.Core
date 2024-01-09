@@ -44,9 +44,31 @@ public abstract partial class F7MicroBase
         IPin pin,
         int sampleCount = 5)
     {
-        return AnalogInputPort.From(
-            pin, this.IoController,
-            sampleCount);
+        return CreateAnalogInputPort(
+            pin,
+            sampleCount,
+            AnalogInputPort.DefaultSampleInterval,
+            AnalogInputPort.DefaultReferenceVoltage);
+    }
+
+    /// <summary>
+    /// Creates an `IAnalogInputPort` on the given pin. 
+    /// </summary>
+    /// <param name="pin">The analog input capable `IPin` on which to create the input port.</param>
+    /// <param name="sampleCount">Number of samples to take per reading. If > `1` then the port will
+    /// take multiple readings and These are automatically averaged to
+    /// reduce noise, a process known as _oversampling_.</param>
+    /// <param name="sampleInterval">Duration in between samples when oversampling</param>
+    public IAnalogInputPort CreateAnalogInputPort(
+        IPin pin,
+        int sampleCount,
+        TimeSpan sampleInterval)
+    {
+        return CreateAnalogInputPort(
+            pin,
+            sampleCount,
+            sampleInterval,
+            AnalogInputPort.DefaultReferenceVoltage);
     }
 
     /// <inheritdoc/>

@@ -227,4 +227,19 @@ public class LinuxPlatformOS : IPlatformOS
     {
         throw new NotImplementedException();
     }
+
+    public string? GetPublicKeyInPemFormat()
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Sleep(IPin interruptPin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
+    {
+        throw new NotImplementedException();
+    }
 }
