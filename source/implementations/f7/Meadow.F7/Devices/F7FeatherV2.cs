@@ -25,7 +25,7 @@ public partial class F7FeatherV2 : F7FeatherBase
             throw new UnsupportedPlatformException(Information.Platform, message);
         }
 
-        _adc_bat = new Lazy<IAnalogInputPort?>(() => CreateAnalogInputPort((Pins as F7FeatherV2.Pinout).BAT));
+        _adc_bat = new Lazy<IAnalogInputPort?>(() => CreateAnalogInputPort((Pins as F7FeatherV2.Pinout)!.BAT));
 
         Pins.Controller = this;
     }

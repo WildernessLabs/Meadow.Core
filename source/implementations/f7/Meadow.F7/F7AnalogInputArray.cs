@@ -76,7 +76,7 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
         }
         catch (EntryPointNotFoundException)
         {
-            throw new PlatformNotSupportedException("The current OS version on this device does not support high-speed ADCs. You must use a newer version (1.5 or later)");
+            throw new PlatformNotSupportedException("The current OS version on this device does not support high-speed ADCs. You must use a newer version (1.6 or later)");
         }
     }
 

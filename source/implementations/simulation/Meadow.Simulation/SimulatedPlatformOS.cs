@@ -128,12 +128,13 @@ public class SimulatedPlatformOS : IPlatformOS
         throw new PlatformNotSupportedException();
     }
 
+    /// <inheritdoc/>
     public byte[] RsaDecrypt(byte[] encryptedValue)
     {
-        var rsa = RSA.Create();
-        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+        throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
     {
         // Create an Aes object
@@ -147,12 +148,12 @@ public class SimulatedPlatformOS : IPlatformOS
             var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
             // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(encryptedValue))
-            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+            using (var msEncrypt = new MemoryStream(encryptedValue))
+            using (var csDecrypt = new CryptoStream(msEncrypt, decryptor, CryptoStreamMode.Read))
+            using (var msDecrypt = new MemoryStream())
             {
-                var buffer = new byte[csDecrypt.Length];
-                csDecrypt.Read(buffer, 0, buffer.Length);
-                return buffer;
+                csDecrypt.CopyTo(msDecrypt);
+                return msDecrypt.ToArray();
             }
         }
     }
@@ -168,6 +169,21 @@ public class SimulatedPlatformOS : IPlatformOS
     }
 
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public string? GetPublicKeyInPemFormat()
+    {
+        throw new NotImplementedException();
+    }
+
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Sleep(IPin interruptPin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
     {
         throw new NotImplementedException();
     }

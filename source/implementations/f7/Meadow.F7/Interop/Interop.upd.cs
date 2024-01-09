@@ -191,11 +191,18 @@ namespace Meadow.Core
                 public uint SetBits;
             }
 
+            public enum InterruptConfig : uint
+            {
+                Disable = 0,
+                Enable = 1,
+                Wake = 2
+            }
+
             public struct UpdGpioInterruptConfiguration
             {
                 public uint Port;
                 public uint Pin;
-                public uint Enable;
+                public InterruptConfig InterruptConfig;
                 public uint RisingEdge;
                 public uint FallingEdge;
                 public STM32.ResistorMode ResistorMode;

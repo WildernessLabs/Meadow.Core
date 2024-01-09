@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Version>1.7.0</Version>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <LangVersion>10.0</LangVersion>
     <TargetFramework>net6.0</TargetFramework>
@@ -14,7 +15,6 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow,Meadow.Avalonia,Avalonia</PackageTags>
-    <Version>0.9.54</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Utility library for aiding in using Wilderness Labs' Meadow stack in an Avalonia application</Description>
   </PropertyGroup>
@@ -23,6 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\icon.png" Pack="true" PackagePath="" />
-    <PackageReference Include="Meadow" Version="1.6.0" />
+    <PackageReference Include="Meadow" Version="1.7.0" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using static Meadow.Core.Interop;
+using static Meadow.Core.Interop.Nuttx;
 
 namespace Meadow.Devices;
 
@@ -46,6 +47,78 @@ public partial class F7GPIOManager : IMeadowIOController
         else
         {
             DisconnectInterrupt((int)designator.port, designator.pin);
+            lock (_configuredInterrupts)
+            {
+                if (_configuredInterrupts.ContainsKey(pin))
+                {
+                    _configuredInterrupts.Remove(pin);
+                }
+            }
+        }
+    }
+
+    private Dictionary<IPin, Nuttx.UpdGpioInterruptConfiguration> _configuredInterrupts = new();
+
+    internal UpdGpioInterruptConfiguration? GetConfiguredInterruptMode(IPin pin)
+    {
+        lock (_configuredInterrupts)
+        {
+            if (_configuredInterrupts.ContainsKey(pin))
+            {
+                return _configuredInterrupts[pin];
+            }
+            return null;
+        }
+    }
+
+    internal void ConfigureWakeInterrupt(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode)
+    {
+        var designator = GetPortAndPin(pin);
+
+        // STM resistor mode and Meadow resistor mode are inverted
+        STM32.ResistorMode rm;
+        switch (resistorMode)
+        {
+            case ResistorMode.InternalPullUp:
+                rm = STM32.ResistorMode.PullUp;
+                break;
+            case ResistorMode.InternalPullDown:
+                rm = STM32.ResistorMode.PullDown;
+                break;
+            default:
+                rm = STM32.ResistorMode.Float;
+                break;
+        }
+
+        // make sure pin is configured as an input
+        ConfigureGpio(
+            designator.port,
+            designator.pin,
+            STM32.GpioMode.Input,
+            rm,
+            STM32.GPIOSpeed.Speed_2MHz,
+            STM32.OutputType.OpenDrain,
+            false,
+            InterruptMode.None);
+
+        // now use a GPD driver call to enable it as an interrupt wake source
+        var cfg = new Nuttx.UpdGpioInterruptConfiguration()
+        {
+            InterruptConfig = Nuttx.InterruptConfig.Wake,
+            Port = (uint)designator.port,
+            Pin = (uint)designator.pin,
+            RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
+            FallingEdge = (uint)(interruptMode == InterruptMode.EdgeFalling || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
+            ResistorMode = rm,
+            DebounceDuration = 0,
+            GlitchDuration = 0
+        };
+
+        Thread.Sleep(10);
+        var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
+        if (result != 0)
+        {
+            Resolver.Log.Error($"Failed to connect wake interrupt: {UPD.GetLastError()}");
         }
     }
 
@@ -91,7 +164,7 @@ public partial class F7GPIOManager : IMeadowIOController
 
         var cfg = new Nuttx.UpdGpioInterruptConfiguration()
         {
-            Enable = 1,
+            InterruptConfig = Nuttx.InterruptConfig.Enable,
             Port = (uint)portNumber,
             Pin = (uint)pinNumber,
             RisingEdge = (uint)(interruptMode == InterruptMode.EdgeRising || interruptMode == InterruptMode.EdgeBoth ? 1 : 0),
@@ -130,6 +203,13 @@ public partial class F7GPIOManager : IMeadowIOController
         }
         else
         {
+            lock (_configuredInterrupts)
+            {
+                if (!_configuredInterrupts.ContainsKey(pin))
+                {
+                    _configuredInterrupts.Add(pin, cfg);
+                }
+            }
             _interruptPins[portNumber, pinNumber] = pin;
         }
     }
@@ -142,7 +222,7 @@ public partial class F7GPIOManager : IMeadowIOController
 
             var cfg = new Interop.Nuttx.UpdGpioInterruptConfiguration()
             {
-                Enable = 0,   // Disable
+                InterruptConfig = Nuttx.InterruptConfig.Disable,
                 Port = (uint)portNumber,
                 Pin = (uint)pinNumber,
                 RisingEdge = 0,
@@ -195,7 +275,8 @@ public partial class F7GPIOManager : IMeadowIOController
             int priority = 0;
             int result;
 
-            do {
+            do
+            {
                 result = Interop.Nuttx.mq_receive(queue, rx_buffer, rx_buffer.Length, ref priority);
             } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 

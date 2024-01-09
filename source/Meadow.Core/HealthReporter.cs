@@ -77,8 +77,10 @@ public class HealthReporter : IHealthReporter
                 ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
             }
 
-            await service!.SendEvent(ce);
-            Resolver.Log.Trace($"health metrics sent");
+            if (await service!.SendEvent(ce))
+            {
+                Resolver.Log.Trace($"health metrics sent");
+            }
         }
         finally
         {
