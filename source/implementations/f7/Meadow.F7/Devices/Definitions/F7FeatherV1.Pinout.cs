@@ -377,6 +377,8 @@ namespace Meadow.Devices
             // even though they are on the interface
 
             // ESP_MOSI
+            /// <inheritdoc/>
+
             public /*internal*/ IPin ESP_COPI => new Pin(
                 Controller,
                 "ESP_MOSI", "PI3",
@@ -386,6 +388,8 @@ namespace Meadow.Devices
                 }
             );
             // ESP_MISO
+            /// <inheritdoc/>
+
             public /*internal*/ IPin ESP_CIPO => new Pin(
                 Controller,
                 "ESP_MISO", "PI2",
@@ -395,6 +399,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_CLK
+            /// <inheritdoc/>
             public /*internal*/ IPin ESP_CLK => new Pin(
                 Controller,
                 "ESP_CLK", "PD3",
@@ -404,6 +409,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_CS
+            /// <inheritdoc/>
             public /*internal*/ IPin ESP_CS => new Pin(
                 Controller,
                 "ESP_CS", "PI0",
@@ -413,6 +419,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_BOOT
+            /// <inheritdoc/>
             public /*internal*/ IPin ESP_BOOT => new Pin(
                 Controller,
                 "ESP_BOOT", "PI10",
@@ -421,6 +428,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_RST
+            /// <inheritdoc/>
             public /*internal*/ IPin ESP_RST => new Pin(
                 Controller,
                 "ESP_RST", "PF7",
@@ -429,6 +437,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_UART_RX
+            /// <inheritdoc/>
             public /*internal*/ IPin ESP_UART_RX => new Pin(
                 Controller,
                 "ESP_UART_RX", "PD2",
@@ -437,6 +446,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_UART_TX
+            /// <inheritdoc/>
             public /*internal*/ IPin ESP_UART_TX => new Pin(
                 Controller,
                 "ESP_UART_TX", "PB13",
@@ -452,7 +462,10 @@ namespace Meadow.Devices
             /// <inheritdoc/>
             public IPin I2C_SCL => D08;
 
-
+            /// <summary>
+            /// Get an enumeration of all pins
+            /// </summary>
+            /// <returns>The enumerator of type IPin</returns>
             public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }

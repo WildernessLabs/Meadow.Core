@@ -212,11 +212,13 @@ namespace Meadow.Devices
             }
         }
 
+        /// <inheritdoc/>
         public void ConfigureOutput(IPin pin, bool initialState)
         {
             ConfigureOutput(pin, STM32.ResistorMode.Float, STM32.GPIOSpeed.Speed_50MHz, STM32.OutputType.PushPull, initialState);
         }
 
+        /// <inheritdoc/>
         public void ConfigureOutput(IPin pin, bool initialState, OutputType initialOutputType)
         {
             // translate output type from Meadow to STM32
@@ -422,23 +424,20 @@ namespace Meadow.Devices
             return true;
         }
 
-        // Called from ResistorProperty
+        /// <summary>
+        /// Set the resistor mode for pin
+        /// </summary>
+        /// <param name="pin">The pin to configure</param>
+        /// <param name="mode">The resistor mode</param>
         public void SetResistorMode(IPin pin, ResistorMode mode)
         {
             var designator = GetPortAndPin(pin);
-            STM32.ResistorMode setting;
-            switch (mode)
+            var setting = mode switch
             {
-                case ResistorMode.InternalPullDown:
-                    setting = STM32.ResistorMode.PullDown;
-                    break;
-                case ResistorMode.InternalPullUp:
-                    setting = STM32.ResistorMode.PullUp;
-                    break;
-                default:
-                    setting = STM32.ResistorMode.Float;
-                    break;
-            }
+                ResistorMode.InternalPullDown => STM32.ResistorMode.PullDown,
+                ResistorMode.InternalPullUp => STM32.ResistorMode.PullUp,
+                _ => STM32.ResistorMode.Float,
+            };
             SetResistorMode(designator.address, designator.pin, setting);
         }
 

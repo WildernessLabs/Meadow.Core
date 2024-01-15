@@ -7,11 +7,16 @@ namespace Meadow.Devices
 {
     public partial class F7GPIOManager : IMeadowIOController
     {
-        private bool _debuggingADC = false;
+        private readonly bool _debuggingADC = false;
         private bool _initialized = false;
 
         private const int DefaultAdcTimeoutMs = 200;
 
+        /// <summary>
+        /// Configure the specified pin for analog input
+        /// </summary>
+        /// <param name="pin">The pin</param>
+        /// <exception cref="NotSupportedException"></exception>
         public void ConfigureAnalogInput(IPin pin)
         {
             if (!_initialized)

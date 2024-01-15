@@ -35,8 +35,8 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// Lock object to make sure the events and the methods do not try to access
     /// properties simultaneously.
     /// </summary>
-    private object _lock = new object();
-    private Esp32Coprocessor _esp32;
+    private readonly object _lock = new object();
+    private readonly Esp32Coprocessor _esp32;
 
     public Esp32WiFiAdapter(Esp32Coprocessor esp32)
         : base(NetworkInterfaceType.Wireless80211)
