@@ -401,18 +401,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         CellError cellError = (CellError)errno;
 
-        switch (cellError)
+        return cellError switch
         {
-            case CellError.InvalidNetworkSettings:
-                return "Invalid cell settings. Please check your cell configuration file.";
-            case CellError.InvalidCellModule:
-                return "Invalid cell module. Please ensure you have configured the right module name.";
-            case CellError.NetworkConnectionLost:
-                return ParseError(_at_cmds_output);
-            case CellError.NetworkTimeout:
-                return "Timeout. Please check your pinout and wire connections to the module.";
-            default:
-                return "Undefined error";
-        }
+            CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
+            CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the right module name.",
+            CellError.NetworkConnectionLost => ParseError(_at_cmds_output),
+            CellError.NetworkTimeout => "Timeout. Please check your pinout and wire connections to the module.",
+            _ => "Undefined error",
+        };
     }
 }

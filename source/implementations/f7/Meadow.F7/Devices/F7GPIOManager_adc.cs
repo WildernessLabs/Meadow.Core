@@ -199,7 +199,7 @@ namespace Meadow.Devices
             // voltage=(double)data/4095*3.3;
             // celsius = (voltage - 0.76) / 0.0025 + 25;
             var voltage = adc / 4095d * 3.3d;
-            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Units.Temperature.UnitType.Celsius); ;
+            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Temperature.UnitType.Celsius); ;
 
             // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
             //i.e. temp = 80d / (double)(*0x1FFF7A2E - *0x1FFF7A2C) * (adc - (double)*0x1FFF7A2C) + 30d;
@@ -207,28 +207,22 @@ namespace Meadow.Devices
             return temperature;
         }
 
+        /// <summary>
+        /// Get the value from an analog pin
+        /// </summary>
+        /// <param name="pin">The pin</param>
+        /// <returns>The value as an int</returns>
+        /// <exception cref="NotSupportedException"></exception>
         public int GetAnalogValue(IPin pin)
         {
             var designator = GetPortAndPin(pin);
-
-            int channel;
-
-            switch (designator.port)
+            var channel = designator.port switch
             {
-                case STM32.GpioPort.PortA:
-                    channel = designator.pin;
-                    break;
-                case STM32.GpioPort.PortB:
-                    channel = designator.pin + 8;
-                    break;
-                case STM32.GpioPort.PortC:
-                    // PC0-3 have additional functions of ADC1_IN10 - 13 (see manual 'DS11532 Rev 7' (STM32F777xx STM32F778Ax STM32F779xx), Table 11, pg 69)
-                    channel = designator.pin + 10;
-                    break;
-                default:
-                    throw new NotSupportedException($"ADC on {pin.Key.ToString()} unknown or unsupported");
-            }
-
+                STM32.GpioPort.PortA => designator.pin,
+                STM32.GpioPort.PortB => designator.pin + 8,
+                STM32.GpioPort.PortC => designator.pin + 10,// PC0-3 have additional functions of ADC1_IN10 - 13 (see manual 'DS11532 Rev 7' (STM32F777xx STM32F778Ax STM32F779xx), Table 11, pg 69)
+                _ => throw new NotSupportedException($"ADC on {pin.Key} unknown or unsupported"),
+            };
             return GetAnalogValue(channel);
         }
 
