@@ -378,7 +378,6 @@ namespace Meadow.Devices
 
             // ESP_MOSI
             /// <inheritdoc/>
-
             public /*internal*/ IPin ESP_COPI => new Pin(
                 Controller,
                 "ESP_MOSI", "PI3",
@@ -389,7 +388,6 @@ namespace Meadow.Devices
             );
             // ESP_MISO
             /// <inheritdoc/>
-
             public /*internal*/ IPin ESP_CIPO => new Pin(
                 Controller,
                 "ESP_MISO", "PI2",
