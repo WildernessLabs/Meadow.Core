@@ -20,9 +20,12 @@ namespace Meadow.Devices
         PWM = 1 << 5
     }
 
+    /// <summary>
+    /// Represents a GPIO controller for a Meadow F7
+    /// </summary>
     public partial class F7GPIOManager : IMeadowIOController
     {
-        private readonly object _cacheLock = new object();
+        private readonly object _cacheLock = new();
         private readonly IPin?[,] _interruptPins = new IPin?[16, 16];
 
         private bool DirectRegisterAccess { get; set; } = true;

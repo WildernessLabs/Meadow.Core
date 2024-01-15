@@ -168,6 +168,10 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Get the temperature of the STM32F7
+        /// </summary>
+        /// <returns>The temperaturw</returns>
         public Temperature GetTemperature()
         {
             if (!_initialized)
