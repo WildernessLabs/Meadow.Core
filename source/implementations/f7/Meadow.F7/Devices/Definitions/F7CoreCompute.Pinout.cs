@@ -37,7 +37,7 @@ namespace Meadow.Devices
             }
 
             // ==== DISCRETES ====
-
+            /// <inheritdoc/>
             public IPin PA0 => new Pin(
                 Controller,
                 "PA0", "PA0",
@@ -47,6 +47,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA1_ETH_REF_CLK => new Pin(
                 Controller,
                 "PA1", "PA1",
@@ -55,6 +56,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA2_ETH_MDIO => new Pin(
                 Controller,
                 "PA2", "PA2",
@@ -63,6 +65,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA3 => new Pin(
                 Controller,
                 "PA3", "PA3",
@@ -72,6 +75,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA4 => new Pin(
                 Controller,
                 "PA4", "PA4",
@@ -81,6 +85,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA5 => new Pin(
                 Controller,
                 "PA5", "PA5",
@@ -90,6 +95,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA7_ETH_CRS_DV => new Pin(
                 Controller,
                 "PA7", "PA7",
@@ -98,6 +104,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA9 => new Pin(
                 Controller,
                 "PA9", "PA9",
@@ -106,6 +113,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA10 => new Pin(
                 Controller,
                 "PA10", "PA10",
@@ -114,6 +122,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA13 => new Pin(
                 Controller,
                 "PA13", "PA13",
@@ -122,6 +131,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA14 => new Pin(
                 Controller,
                 "PA14", "PA14",
@@ -130,6 +140,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PA15 => new Pin(
                 Controller,
                 "PA15", "PA15",
@@ -138,6 +149,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB0 => new Pin(
                 Controller,
                 "PB0", "PB0",
@@ -147,6 +159,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB1 => new Pin(
                 Controller,
                 "PB1", "PB1",
@@ -156,6 +169,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB3 => new Pin(
                 Controller,
                 "PB3", "PB3",
@@ -164,6 +178,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB4 => new Pin(
                 Controller,
                 "PB4", "PB4",
@@ -173,6 +188,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB5 => new Pin(
                 Controller,
                 "PB5", "PB5",
@@ -182,6 +198,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB6 => new Pin(
                 Controller,
                 "PB6", "PB6",
@@ -192,6 +209,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB7 => new Pin(
                 Controller,
                 "PB7", "PB7",
@@ -202,6 +220,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB8 => new Pin(
                 Controller,
                 "PB8", "PB8",
@@ -211,6 +230,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB9 => new Pin(
                 Controller,
                 "PB9", "PB9",
@@ -220,6 +240,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB11_ETH_TX_EN => new Pin(
                 Controller,
                 "PB11", "PB11",
@@ -228,6 +249,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB12 => new Pin(
                 Controller,
                 "PB12", "PB12",
@@ -236,6 +258,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB13 => new Pin(
                 Controller,
                 "PB13", "PB13",
@@ -244,6 +267,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB14 => new Pin(
                 Controller,
                 "PB14", "PB14",
@@ -254,6 +278,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PB15 => new Pin(
                 Controller,
                 "PB15", "PB15",
@@ -264,6 +289,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC0 => new Pin(
                 Controller,
                 "PC0", "PC0",
@@ -273,6 +299,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC1_ETH_MDC => new Pin(
                 Controller,
                 "PC1", "PC1",
@@ -281,6 +308,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC2 => new Pin(
                 Controller,
                 "PC2", "PC2",
@@ -289,6 +317,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC4_ETH_RXD0 => new Pin(
                 Controller,
                 "PC4", "PC4",
@@ -297,6 +326,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC5_ETH_RXD1 => new Pin(
                 Controller,
                 "PC5", "PC5",
@@ -305,6 +335,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC6 => new Pin(
                 Controller,
                 "PC6", "PC6",
@@ -314,6 +345,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC7 => new Pin(
                 Controller,
                 "PC7", "PC7",
@@ -323,6 +355,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC8 => new Pin(
                 Controller,
                 "PC8", "PC8",
@@ -331,6 +364,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC9 => new Pin(
                 Controller,
                 "PC9", "PC9",
@@ -340,6 +374,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC10 => new Pin(
                 Controller,
                 "PC10", "PC10",
@@ -349,6 +384,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PC11 => new Pin(
                 Controller,
                 "PC11", "PC11",
@@ -358,6 +394,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PD5 => new Pin(
                 Controller,
                 "PD5", "PD5",
@@ -366,6 +403,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PD6_SDMMC_CLK => new Pin(
                 Controller,
                 "PD6", "PD6",
@@ -374,6 +412,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PD7_SDMMC_CMD => new Pin(
                 Controller,
                 "PD7", "PD7",
@@ -382,6 +421,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PF8 => new Pin(
                 Controller,
                 "PF8", "PF8",
@@ -391,6 +431,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PF9 => new Pin(
                 Controller,
                 "PF9", "PF9",
@@ -400,6 +441,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG6_SDMMC_IN_L => new Pin(
                 Controller,
                 "PG6", "PG6",
@@ -408,6 +450,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG9_SDMMC_D0 => new Pin(
                 Controller,
                 "PG9", "PG9",
@@ -416,6 +459,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG10_SDMMC_D1 => new Pin(
                 Controller,
                 "PG10", "PG10",
@@ -424,6 +468,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG11_SDMMC_D2 => new Pin(
                 Controller,
                 "PG11", "PG11",
@@ -432,6 +477,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG12_SDMMC_D3 => new Pin(
                 Controller,
                 "PG12", "PG12",
@@ -440,6 +486,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG13_ETH_TXD0 => new Pin(
                 Controller,
                 "PG13", "PG13",
@@ -448,6 +495,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PG14_ETH_TXD1 => new Pin(
                 Controller,
                 "PG14", "PG14",
@@ -456,6 +504,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH6 => new Pin(
                 Controller,
                 "PH6", "PH6",
@@ -465,6 +514,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH7 => new Pin(
                 Controller,
                 "PH7", "PH7",
@@ -474,6 +524,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH8 => new Pin(
                 Controller,
                 "PH8", "PH8",
@@ -483,6 +534,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH10 => new Pin(
                 Controller,
                 "PH10", "PH10",
@@ -492,6 +544,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH12 => new Pin(
                 Controller,
                 "PH12", "PH12",
@@ -500,6 +553,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH13 => new Pin(
                 Controller,
                 "PH13", "PH13",
@@ -508,6 +562,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PH14_ETH_IRQ => new Pin(
                 Controller,
                 "PH14", "PH14",
@@ -516,6 +571,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PI9 => new Pin(
                 Controller,
                 "PI9", "PI9",
@@ -525,6 +581,7 @@ namespace Meadow.Devices
                 }
             );
 
+            /// <inheritdoc/>
             public IPin PI11 => new Pin(
                 Controller,
                 "PI11", "PI11",
@@ -534,52 +591,93 @@ namespace Meadow.Devices
             );
 
             // ==== ALIASES ====
+            /// <inheritdoc/>
             public IPin I2C1_SDA => D07;
+            /// <inheritdoc/>
             public IPin I2C1_SCL => D08;
+            /// <inheritdoc/>
             public IPin I2C3_SDA => PH7;
+            /// <inheritdoc/>
             public IPin I2C3_SCL => PH8;
 
+            /// <inheritdoc/>
             public IPin SCK => SPI3_SCK;
+            /// <inheritdoc/>
             public IPin COPI => SPI3_COPI;
+            /// <inheritdoc/>
             public IPin CIPO => SPI3_CIPO;
 
+            /// <inheritdoc/>
             public IPin SPI3_COPI => PB5;
+            /// <inheritdoc/>
             public IPin SPI3_SCK => PC10;
+            /// <inheritdoc/>
             public IPin SPI3_CIPO => PC11;
-
+            /// <inheritdoc/>
             public IPin SPI5_CIPO => PF8;
+            /// <inheritdoc/>
             public IPin SPI5_SCK => PH6;
+            /// <inheritdoc/>
             public IPin SPI5_COPI => PF9;
-
+            /// <inheritdoc/>
             public IPin A00 => PA4;
+            /// <inheritdoc/>
             public IPin A01 => PA5;
+            /// <inheritdoc/>
             public IPin A02 => PA3;
+            /// <inheritdoc/>
             public IPin A03 => PB0;
+            /// <inheritdoc/>
             public IPin A04 => PB1;
+            /// <inheritdoc/>
             public IPin A05 => PC0;
-
+            /// <inheritdoc/>
             public IPin D00 => PI9;
+            /// <inheritdoc/>
             public IPin D01 => PH13;
+            /// <inheritdoc/>
             public IPin D02 => PH10;
+            /// <inheritdoc/>
             public IPin D03 => PB8;
+            /// <inheritdoc/>
             public IPin D04 => PB9;
+            /// <inheritdoc/>
             public IPin D05 => PB4;
+            /// <inheritdoc/>
             public IPin D06 => PB13;
+            /// <inheritdoc/>
             public IPin D07 => PB7;
+            /// <inheritdoc/>
             public IPin D08 => PB6;
+            /// <inheritdoc/>
             public IPin D09 => PC6;
+            /// <inheritdoc/>
             public IPin D10 => PC7;
+            /// <inheritdoc/>
             public IPin D11 => PC9;
+            /// <inheritdoc/>
             public IPin D12 => PB14;
+            /// <inheritdoc/>
             public IPin D13 => PB15;
+            /// <inheritdoc/>
             public IPin D14 => PB12;
+            /// <inheritdoc/>
             public IPin D15 => PG12_SDMMC_D3;
+            /// <inheritdoc/>
             public IPin D16 => PI11;
+            /// <inheritdoc/>
             public IPin D17 => PD5;
+            /// <inheritdoc/>
             public IPin D18 => PA10;
+            /// <inheritdoc/>
             public IPin D19 => PC8;
+            /// <inheritdoc/>
             public IPin D20 => PA0; // BLINKY on dev board
 
+            /// <summary>
+            /// Get an enumeration of all pins
+            /// </summary>
+            /// <returns>The enumerator of type IPin</returns>
             public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }

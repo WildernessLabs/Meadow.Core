@@ -16,23 +16,27 @@ using Meadow.Peripherals.Sensors.Location.Gnss;
 internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
     private readonly Esp32Coprocessor _esp32;
-    private string _imei;
-    private string _csq;
-    private string _at_cmds_output;
-    private string _error_str;
+    private string? _imei;
+    private string? _csq;
+    private string? _at_cmds_output;
 
     /// <summary>
     /// Extract values from an <b>input</b> string based on a regex <b>pattern</b>
     /// </summary>
-    private static string ExtractValue(string input, string pattern)
+    private static string ExtractValue(string? input, string pattern)
     {
+        if (input == null)
+        {
+            return string.Empty;
+        }
+
         Match match = Regex.Match(input, pattern);
         if (match.Success)
         {
             return match.Groups[1].Value;
         }
 
-        return null;
+        return string.Empty;
     }
 
     /// <summary>
@@ -74,7 +78,11 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
     /// <inheritdoc/>
     public override string Name => "Cell PPP";
-    
+
+    /// <summary>
+    /// Create a new instance of the F7CellNetworkAdapter class
+    /// </summary>
+    /// <param name="esp32">The ESP32 coprocessor</param>
     public F7CellNetworkAdapter(Esp32Coprocessor esp32)
         : base(System.Net.NetworkInformation.NetworkInterfaceType.Ppp)
     {
@@ -244,7 +252,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// Set the cell state
     /// </summary>
     /// <param name="CellState">State of the cell.</param>
-    private static void CellSetState (CellNetworkState CellState)
+    private static void CellSetState(CellNetworkState CellState)
     {
         int state = 0;
         switch (CellState)
@@ -260,7 +268,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 break;
             case CellNetworkState.FetchingSignalQuality:
                 state |= 1 << 2;
-                break;    
+                break;
             case CellNetworkState.ScanningNetworks:
                 state |= 1 << 3;
                 break;
@@ -291,9 +299,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             {
                 break;
             }
-            
+
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout --;
+            timeout--;
         }
 
         CellSetState(CellNetworkState.Resumed);
@@ -333,7 +341,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             }
 
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout --;
+            timeout--;
         }
 
         CellSetState(CellNetworkState.Resumed);
@@ -350,6 +358,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// Execute GNSS-related AT commands and retrieve combined output, including NMEA sentences.
     /// </summary>
     /// <param name="resultTypes">An array of supported GNSS result types for data processing.</param>
+    /// <param name="timeout">The timeout in milliseconds</param>
     /// <returns>A string containing combined output from GNSS-related AT commands, including NMEA sentences.</returns>
     public string FetchGnssAtCmdsOutput(IGnssResult[] resultTypes, int timeout)
     {
@@ -359,6 +368,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         // TODO: Take into consideration the GNSS result types
         CellSetState(CellNetworkState.TrackingGPSLocation);
 
+        //ToDo: switch to TimeSpan
         while (timeout > 0)
         {
             if (_at_cmds_output != string.Empty)
@@ -367,13 +377,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             }
 
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout --;
+            timeout--;
         }
 
         var gnssAtCmdsOutput = _at_cmds_output;
 
         CellSetState(CellNetworkState.Resumed);
-        
+
         if (gnssAtCmdsOutput == null)
         {
             Resolver.Log.Error("AT commands output not found!");
@@ -391,18 +401,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         CellError cellError = (CellError)errno;
 
-        switch(cellError)
+        return cellError switch
         {
-            case CellError.InvalidNetworkSettings:
-                return "Invalid cell settings. Please check your cell configuration file.";
-            case CellError.InvalidCellModule:
-                return "Invalid cell module. Please ensure you have configured the right module name.";
-            case CellError.NetworkConnectionLost:
-                return ParseError(_at_cmds_output);
-            case CellError.NetworkTimeout:
-                return "Timeout. Please check your pinout and wire connections to the module.";
-            default:
-                return "Undefined error";
-        }
+            CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
+            CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the right module name.",
+            CellError.NetworkConnectionLost => ParseError(_at_cmds_output),
+            CellError.NetworkTimeout => "Timeout. Please check your pinout and wire connections to the module.",
+            _ => "Undefined error",
+        };
     }
 }
