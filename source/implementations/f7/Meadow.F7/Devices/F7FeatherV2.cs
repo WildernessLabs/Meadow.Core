@@ -11,6 +11,10 @@ public partial class F7FeatherV2 : F7FeatherBase
 {
     private readonly Lazy<IAnalogInputPort?> _adc_bat;
 
+    /// <summary>
+    /// Create a new F7FeatherV2 instance
+    /// </summary>
+    /// <exception cref="UnsupportedPlatformException">Throw if platform isn't F7FeatherV2</exception>
     public F7FeatherV2()
         : base(new Pinout(),
               new F7FeatherGpioManager(),
@@ -33,8 +37,8 @@ public partial class F7FeatherV2 : F7FeatherBase
     /// <summary>
     /// Retrieves the hardware bus number for the provided pins
     /// </summary>
-    /// <param name="clock"></param>
-    /// <param name="data"></param>
+    /// <param name="clock">Clock pin</param>
+    /// <param name="data">Data pin</param>
     /// <returns></returns>
     protected override int GetI2cBusNumberForPins(IPin clock, IPin data)
     {

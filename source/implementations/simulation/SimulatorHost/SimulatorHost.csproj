@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Meadow.Simulation" Version="1.7.0" />
+    <PackageReference Include="Meadow.Simulation" Version="1.8.0" />
   </ItemGroup>
 
 </Project>

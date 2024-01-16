@@ -65,9 +65,24 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     public abstract BatteryInfo? GetBatteryInfo();
 
     //==== internals
+    /// <summary>
+    /// The collection of network adapters
+    /// </summary>
     protected NetworkAdapterCollection networkAdapters;
+
+    /// <summary>
+    /// The ESP32 coprocessor used for WiFi and Bluetooth
+    /// </summary>
     protected Esp32Coprocessor? esp32;
+
+    /// <summary>
+    /// Lock for initializing the coprocessor
+    /// </summary>
     protected object coprocInitLock = new object();
+
+    /// <summary>
+    /// The IO controller for the device
+    /// </summary>
     protected IMeadowIOController IoController { get; }
 
     //==== constructors

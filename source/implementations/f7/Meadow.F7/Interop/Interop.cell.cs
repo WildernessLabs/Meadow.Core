@@ -25,7 +25,7 @@ internal static partial class Interop
         [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern int meadow_get_cell_error();
 
-        public static List<CellNetwork> Parse(string input)
+        public static List<CellNetwork>? Parse(string input)
         {
             if (input.Contains("+CME ERROR"))
             {
@@ -54,22 +54,13 @@ internal static partial class Interop
 
                 if (int.TryParse(match.Groups[5].Value, out int modeValue))
                 {
-                    switch (modeValue)
+                    mode = modeValue switch
                     {
-                        case 0:
-                            mode = CellNetworkMode.GSM;
-                            break;
-                        case 7:
-                        case 8:
-                            mode = CellNetworkMode.CAT_M1;
-                            break;
-                        case 9:
-                            mode = CellNetworkMode.NB_IoT;
-                            break;
-                        default:
-                            mode = CellNetworkMode.GSM;
-                            break;
-                    }
+                        0 => CellNetworkMode.GSM,
+                        7 or 8 => CellNetworkMode.CAT_M1,
+                        9 => CellNetworkMode.NB_IoT,
+                        _ => CellNetworkMode.GSM,
+                    };
                 }
                 else
                 {

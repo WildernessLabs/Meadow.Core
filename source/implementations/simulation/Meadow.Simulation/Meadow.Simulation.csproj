@@ -24,6 +24,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="Meadow" Version="1.7.0" />
+    <PackageReference Include="Meadow" Version="1.8.0" />
   </ItemGroup>
 </Project>
