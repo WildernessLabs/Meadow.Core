@@ -3,6 +3,9 @@ using static Meadow.IPlatformOS;
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// Represents the device information for the Meadow F7
+    /// </summary>
     public class F7DeviceInformation : IDeviceInformation
     {
         /// <summary>

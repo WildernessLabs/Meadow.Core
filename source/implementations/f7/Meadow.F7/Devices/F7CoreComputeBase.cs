@@ -10,6 +10,14 @@ namespace Meadow.Devices
     /// </summary>
     public abstract partial class F7CoreComputeBase : F7MicroBase, IF7CoreComputeMeadowDevice
     {
+        /// <summary>
+        /// Create a new F7CoreComputeBase instance
+        /// </summary>
+        /// <param name="pins">The pins</param>
+        /// <param name="ioController">The io controller</param>
+        /// <param name="analogCapabilities">Analog pin capabilties</param>
+        /// <param name="networkCapabilities">Network capabilities</param>
+        /// <param name="storageCapabilities">Storage capabilities</param>
         protected F7CoreComputeBase(
             IF7CoreComputePinout pins,
             F7GPIOManager ioController,

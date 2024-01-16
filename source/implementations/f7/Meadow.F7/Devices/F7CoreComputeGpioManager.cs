@@ -2,6 +2,9 @@
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// Represents Meadow F7 Core Compute GPIO pin manager
+    /// </summary>
     public class F7CoreComputeGpioManager : F7GPIOManager
     {
         /// <inheritdoc/>

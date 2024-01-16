@@ -2,6 +2,9 @@
 
 namespace Meadow.Devices
 {
+    /// <summary>
+    /// Represents a Feathe F7 GPIO manager
+    /// </summary>
     public class F7FeatherGpioManager : F7GPIOManager
     {
         /// <inheritdoc/>

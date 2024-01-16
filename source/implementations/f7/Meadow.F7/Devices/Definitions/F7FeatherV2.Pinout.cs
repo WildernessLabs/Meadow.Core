@@ -415,6 +415,7 @@ namespace Meadow.Devices
             // even though they are on the interface
 
             // ESP_MOSI
+            /// <inheritdoc/>
             public IPin ESP_COPI => new Pin(
                 Controller,
                 "ESP_MOSI", "PI3",
@@ -424,6 +425,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_MISO
+            /// <inheritdoc/>
             public IPin ESP_CIPO => new Pin(
                 Controller,
                 "ESP_MISO", "PI2",
@@ -433,6 +435,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_CLK
+            /// <inheritdoc/>
             public IPin ESP_CLK => new Pin(
                 Controller,
                 "ESP_CLK", "PD3",
@@ -442,6 +445,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_CS
+            /// <inheritdoc/>
             public IPin ESP_CS => new Pin(
                 Controller,
                 "ESP_CS", "PI0",
@@ -451,6 +455,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_BOOT
+            /// <inheritdoc/>
             public IPin ESP_BOOT => new Pin(
                 Controller,
                 "ESP_BOOT", "PI10",
@@ -459,6 +464,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_RST
+            /// <inheritdoc/>
             public IPin ESP_RST => new Pin(
                 Controller,
                 "ESP_RST", "PF7",
@@ -467,6 +473,7 @@ namespace Meadow.Devices
                 }
             );
             // ESP_UART_RX
+            /// <inheritdoc/>
             public IPin ESP_UART_RX => new Pin(
                 Controller,
                 "ESP_UART_RX", "PD2",
@@ -476,6 +483,7 @@ namespace Meadow.Devices
             );
             // NOTE: This changed in v2
             // ESP_UART_TX
+            /// <inheritdoc/>
             public IPin ESP_UART_TX => new Pin(
                 Controller,
                 "ESP_UART_TX", "PC12",
