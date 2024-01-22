@@ -24,10 +24,8 @@ public class LinuxPlatformOS : IPlatformOS
     /// Event raised before Sleep mode
     /// </summary>
     public event PowerTransitionHandler BeforeSleep = delegate { };
-    /// <summary>
-    /// Event raised after returning from Sleep mode
-    /// </summary>
-    public event PowerTransitionHandler AfterWake = delegate { };
+    /// <inheritdoc/>
+    public event EventHandler<WakeSource>? AfterWake = null;
     /// <summary>
     /// Event raised when an external storage device event occurs.
     /// </summary>

@@ -21,10 +21,8 @@ public class WindowsPlatformOS : IPlatformOS
     /// Event raised before Sleep mode
     /// </summary>
     public event PowerTransitionHandler BeforeSleep = default!;
-    /// <summary>
-    /// Event raised after returning from Sleep mode
-    /// </summary>
-    public event PowerTransitionHandler AfterWake = default!;
+    /// <inheritdoc/>
+    public event EventHandler<WakeSource>? AfterWake = null;
     /// <summary>
     /// Event raised when an external storage device event occurs.
     /// </summary>

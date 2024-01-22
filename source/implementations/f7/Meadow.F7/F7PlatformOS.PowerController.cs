@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -12,25 +13,19 @@ namespace Meadow
     {
         private readonly List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
 
-        /// <summary>
-        /// Event called before a software reset
-        /// </summary>
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeReset = default!;
-        /// <summary>
-        /// Event called before Sleep mode
-        /// </summary>
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeSleep = default!;
-        /// <summary>
-        /// Event called after returning from Sleep mode
-        /// </summary>
-        public event PowerTransitionHandler AfterWake = default!;
+        /// <inheritdoc/>
+        public event EventHandler<WakeSource> AfterWake = default!;
 
         /// <summary>
         /// Resets the device
         /// </summary>
         public void Reset()
         {
-            Resolver.Log.Trace("Resetting device...");
+            Resolver.Log.Trace("Resetting device...", Logger.MessageGroup.Core);
 
             BeforeReset?.Invoke();
 
@@ -62,8 +57,6 @@ namespace Meadow
                 SecondsToSleep = seconds
             };
 
-            Resolver.Log.Trace($"Device sleeping for {duration.TotalSeconds}s...");
-
             DoSleepNotifications();
 
             // This should suspend the processor and code should stop executing
@@ -92,7 +85,7 @@ namespace Meadow
 
         private void DoWakeNotifications(WakeSource source)
         {
-            AfterWake?.Invoke();
+            AfterWake?.Invoke(this, source);
 
             lock (_sleepAwarePeripherals)
             {
@@ -142,11 +135,14 @@ namespace Meadow
             DoSleepNotifications();
 
             // This suspends the processor and code stops executing
-            UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
+            var result = UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
 
             // Stop app execution while the OS actually does it's thing
             // EXECUTION HALTS ON THIS SLEEP CALL UNTIL WAKE
             Thread.Sleep(100);
+
+            // sleeping invalidates the UPD driver handle
+            UPD.ReOpen();
 
             if (existingConfig != null)
             {
@@ -184,7 +180,9 @@ namespace Meadow
                     TimeSpan.FromMilliseconds(existingConfig.Value.GlitchDuration / 10d));
             }
 
-            DoWakeNotifications(WakeSource.Interrupt); // this isn't necessarily true. TODO: determine why we woke
+            var source = UPD.GetLastWakeSource();
+
+            DoWakeNotifications(source);
         }
     }
 }

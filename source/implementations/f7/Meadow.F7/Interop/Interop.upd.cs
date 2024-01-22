@@ -371,7 +371,7 @@ namespace Meadow.Core
                 if (result != 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Resolver.Log.Info($"GetRegister failed: {errno}");
+                    Resolver.Log.Info($"GetRegister failed. ioctl returned{result} lasterr={errno}");
                     value = (uint)result;
                     return false;
                 }
