@@ -397,7 +397,7 @@ namespace Core.Unit.Tests.UpdateServiceTests
             // Assert
             Assert.DoesNotContain(new LogMessage(LogLevel.Information, "Command action 1 was performed."), _log.LogMessages);
             Assert.Contains(new LogMessage(LogLevel.Information, "Command action 2 was performed."), _log.LogMessages);
-        }        
+        }
     }
 
     public class TestCommand : IMeadowCommand
@@ -419,7 +419,7 @@ namespace Core.Unit.Tests.UpdateServiceTests
 
         public List<LogMessage> LogMessages { get; } = new List<LogMessage>();
 
-        public void Log(LogLevel level, string message)
+        public void Log(LogLevel level, string message, string? _)
         {
             if (!_isEnabled)
             {

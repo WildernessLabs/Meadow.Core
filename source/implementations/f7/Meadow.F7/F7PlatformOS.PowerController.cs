@@ -13,18 +13,12 @@ namespace Meadow
     {
         private readonly List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
 
-        /// <summary>
-        /// Event called before a software reset
-        /// </summary>
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeReset = default!;
-        /// <summary>
-        /// Event called before Sleep mode
-        /// </summary>
+        /// <inheritdoc/>
         public event PowerTransitionHandler BeforeSleep = default!;
-        /// <summary>
-        /// Event called after returning from Sleep mode
-        /// </summary>
-        public event PowerTransitionHandler AfterWake = default!;
+        /// <inheritdoc/>
+        public event EventHandler<WakeSource> AfterWake = default!;
 
         /// <summary>
         /// Resets the device
@@ -91,7 +85,7 @@ namespace Meadow
 
         private void DoWakeNotifications(WakeSource source)
         {
-            AfterWake?.Invoke();
+            AfterWake?.Invoke(this, source);
 
             lock (_sleepAwarePeripherals)
             {
