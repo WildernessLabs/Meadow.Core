@@ -1,5 +1,6 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -30,7 +31,7 @@ namespace Meadow
         /// </summary>
         public void Reset()
         {
-            Resolver.Log.Trace("Resetting device...");
+            Resolver.Log.Trace("Resetting device...", Logger.MessageGroup.Core);
 
             BeforeReset?.Invoke();
 
@@ -61,8 +62,6 @@ namespace Meadow
             {
                 SecondsToSleep = seconds
             };
-
-            Resolver.Log.Trace($"Device sleeping for {duration.TotalSeconds}s...");
 
             DoSleepNotifications();
 
@@ -142,11 +141,14 @@ namespace Meadow
             DoSleepNotifications();
 
             // This suspends the processor and code stops executing
-            UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
+            var result = UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
 
             // Stop app execution while the OS actually does it's thing
             // EXECUTION HALTS ON THIS SLEEP CALL UNTIL WAKE
             Thread.Sleep(100);
+
+            // sleeping invalidates the UPD driver handle
+            UPD.ReOpen();
 
             if (existingConfig != null)
             {
@@ -184,7 +186,9 @@ namespace Meadow
                     TimeSpan.FromMilliseconds(existingConfig.Value.GlitchDuration / 10d));
             }
 
-            DoWakeNotifications(WakeSource.Interrupt); // this isn't necessarily true. TODO: determine why we woke
+            var source = UPD.GetLastWakeSource();
+
+            DoWakeNotifications(source);
         }
     }
 }
