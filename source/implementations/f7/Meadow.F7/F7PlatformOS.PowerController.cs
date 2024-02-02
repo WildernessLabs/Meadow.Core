@@ -116,7 +116,7 @@ namespace Meadow
             InterruptMode interruptMode,
             ResistorMode resistorMode = ResistorMode.Disabled)
         {
-            // TODO: if the device is already using the interrupt port, we need to record that to re-enable on wake
+            // if the device is already using the interrupt port, we need to record that to re-enable on wake
             var existingConfig = _ioController.GetConfiguredInterruptMode(interruptPin);
 
             if (existingConfig != null)
@@ -132,10 +132,15 @@ namespace Meadow
             {
                 SecondsToSleep = MaxSleepSeconds
             };
+
             DoSleepNotifications();
 
             // This suspends the processor and code stops executing
             var result = UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
+            if (result != 0)
+            {
+                Resolver.Log.Error($"IOCTL to Sleep returned {result}");
+            }
 
             // Stop app execution while the OS actually does it's thing
             // EXECUTION HALTS ON THIS SLEEP CALL UNTIL WAKE
