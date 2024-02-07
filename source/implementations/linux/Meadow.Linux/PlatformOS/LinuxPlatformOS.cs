@@ -56,6 +56,7 @@ public class LinuxPlatformOS : IPlatformOS
 
     public INtpClient NtpClient { get; private set; }
     public IPlatformOS.FileSystemInfo FileSystem { get; }
+    public string[] NtpServers => throw new NotImplementedException();
 
     internal LinuxPlatformOS()
     {

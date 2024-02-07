@@ -179,6 +179,7 @@ public class MacPlatformOS : IPlatformOS
     public bool AutomaticallyStartNetwork => throw new NotImplementedException();
     public IPlatformOS.NetworkConnectionType SelectedNetwork => throw new NotImplementedException();
     public bool SdStorageSupported => throw new NotImplementedException();
+    public string[] NtpServers => throw new NotImplementedException();
 
     public Temperature GetCpuTemperature()
     {

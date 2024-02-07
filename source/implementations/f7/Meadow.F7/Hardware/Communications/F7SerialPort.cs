@@ -156,6 +156,7 @@ namespace Meadow.Hardware
             return result;
         }
 
+
         /// <summary>
         /// Calls the OS to set serial port settings (e.g. parity and stop bits)
         /// </summary>

@@ -186,4 +186,7 @@ public class SimulatedPlatformOS : IPlatformOS
     {
         throw new NotImplementedException();
     }
+
+    public string[] NtpServers => throw new NotImplementedException();
+
 }
