@@ -21,7 +21,7 @@ public class Mac : IMeadowDevice
             new NativeNetworkAdapterCollection());
     }
 
-    public void Initialize()
+    public void Initialize(MeadowPlatform detectedPlatform)
     {
         // TODO: populate actual capabilities
         Capabilities = new DeviceCapabilities(

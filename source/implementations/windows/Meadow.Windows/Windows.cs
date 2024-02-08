@@ -21,7 +21,8 @@ public class Windows : IMeadowDevice
             new NativeNetworkAdapterCollection());
     }
 
-    public void Initialize()
+    /// <inheritdoc/>
+    public void Initialize(MeadowPlatform detectedPlatform)
     {
         // TODO: populate actual capabilities
         Capabilities = new DeviceCapabilities(

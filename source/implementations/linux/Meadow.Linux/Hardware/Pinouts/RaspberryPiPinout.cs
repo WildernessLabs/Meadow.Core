@@ -1,14 +1,17 @@
 ﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Meadow.Pinouts
 {
-    public class RaspberryPi : IPinDefinitions
+    public class RaspberryPiPinout : IPinDefinitions
     {
+        /// <inheritdoc/>
         public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        /// <inheritdoc/>
         public IList<IPin> AllPins => new List<IPin>
         {
             GPIO2, GPIO3, GPIO4, GPIO17, GPIO18, GPIO27, GPIO22, GPIO23,
@@ -16,9 +19,19 @@ namespace Meadow.Pinouts
             GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21
         };
 
+        /// <summary>
+        /// Retrieves a pin from <see cref="AllPins"/> by Name or Key
+        /// </summary>
+        public IPin this[string name]
+        {
+            get => AllPins.FirstOrDefault(p =>
+                string.Compare(p.Name, name, true) == 0
+                || string.Compare($"{p.Key}", name, true) == 0);
+        }
+
         public IPinController Controller { get; set; } = default!;
 
-        public RaspberryPi()
+        public RaspberryPiPinout()
         {
         }
 

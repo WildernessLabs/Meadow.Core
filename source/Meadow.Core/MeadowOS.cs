@@ -1,4 +1,5 @@
 ﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Peripherals.Sensors;
 using Meadow.Update;
@@ -7,9 +8,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-
+using RTI = System.Runtime.InteropServices.RuntimeInformation;
 namespace Meadow;
 
 /// <summary>
@@ -223,7 +225,7 @@ public static partial class MeadowOS
         return settings.Settings;
     }
 
-    private static Type FindAppType(string? root)
+    private static Type[] FindAppType(string? root)
     {
         Resolver.Log.Trace($"Looking for app assembly...");
 
@@ -271,21 +273,144 @@ public static partial class MeadowOS
 
         Resolver.Log.Trace($"Looking for IApp...");
         var searchType = typeof(IApp);
-        Type? appType = null;
+        var resultList = new List<Type>();
         foreach (var type in appAssembly.GetTypes())
         {
             if (searchType.IsAssignableFrom(type) && !type.IsAbstract)
             {
-                appType = type;
-                break;
+                resultList.Add(type);
             }
         }
 
-        if (appType is null)
+        return resultList.ToArray();
+    }
+
+    private static MeadowPlatform DetectPlatform()
+    {
+        if (RTI.IsOSPlatform(OSPlatform.Windows))
         {
-            throw new Exception("App not found. Looking for 'MeadowApp.MeadowApp' type");
+            return MeadowPlatform.Windows;
         }
-        return appType;
+        else if (RTI.IsOSPlatform(OSPlatform.OSX))
+        {
+            return MeadowPlatform.OSX;
+        }
+        else if (RTI.IsOSPlatform(OSPlatform.Linux))
+        {
+            // could be an embedded linux, could be desktop
+            // how do we determine?  ARM v Other?
+            return RTI.ProcessArchitecture switch
+            {
+                Architecture.Arm => MeadowPlatform.EmbeddedLinux,
+                Architecture.Arm64 => MeadowPlatform.EmbeddedLinux,
+                _ => MeadowPlatform.DesktopLinux
+            };
+        }
+        return MeadowPlatform.Unknown;
+    }
+
+    private static Type FindDeviceTypeParameter(Type type)
+    {
+        if (type.IsGenericType)
+        {
+            var dt = type.GetGenericArguments().FirstOrDefault(a => typeof(IMeadowDevice).IsAssignableFrom(a));
+            if (dt != null) return dt;
+        }
+
+        return FindDeviceTypeParameter(type.BaseType);
+    }
+
+    private static (Type appType, Type deviceType)? FindAppForPlatform(MeadowPlatform platform)
+    {
+        var allApps = FindAppType(null);
+
+        if (allApps.Length == 0)
+        {
+            throw new Exception("Cannot find an IApp implementation");
+        }
+
+        //        var t = FindDeviceTypeParameter(allApps[0]);
+
+        // find an IApp that matches our target platform
+        switch (platform)
+        {
+            case MeadowPlatform.Windows:
+                // look for Desktop or Windows
+                // (wish C# supported static properties on an interface, they type could then tell what platforms it supports)
+                (Type, Type)? windowsTypeTuple = null;
+
+                foreach (var app in allApps)
+                {
+                    var devicetype = FindDeviceTypeParameter(app);
+
+                    if (devicetype.FullName == "Meadow.Desktop")
+                    {
+                        return (app, devicetype);
+                    }
+                    else if (devicetype.FullName == "Meadow.Windows")
+                    {
+                        // keep a ref in case Desktop isn't found
+                        windowsTypeTuple = (app, devicetype);
+                    }
+                }
+
+                if (windowsTypeTuple != null)
+                {
+                    return windowsTypeTuple;
+                }
+
+                throw new Exception("Cannot find an IApp that targets Desktop or Windows");
+            case MeadowPlatform.OSX:
+                (Type, Type)? macTypeTuple = null;
+
+                foreach (var app in allApps)
+                {
+                    var devicetype = FindDeviceTypeParameter(app);
+
+                    if (devicetype.FullName == "Meadow.Desktop")
+                    {
+                        return (app, devicetype);
+                    }
+                    else if (devicetype.FullName == "Meadow.Mac")
+                    {
+                        // keep a ref in case Desktop isn't found
+                        macTypeTuple = (app, devicetype);
+                    }
+                }
+
+                if (macTypeTuple != null)
+                {
+                    return macTypeTuple;
+                }
+
+                throw new Exception("Cannot find an IApp that targets Desktop or Mac");
+            case MeadowPlatform.DesktopLinux:
+                (Type, Type)? linuxTypeTuple = null;
+
+                foreach (var app in allApps)
+                {
+                    var devicetype = FindDeviceTypeParameter(app);
+
+                    if (devicetype.FullName == "Meadow.Desktop")
+                    {
+                        return (app, devicetype);
+                    }
+                    else if (devicetype.FullName == "Meadow.Linux")
+                    {
+                        // keep a ref in case Desktop isn't found
+                        linuxTypeTuple = (app, devicetype);
+                    }
+                }
+
+                if (linuxTypeTuple != null)
+                {
+                    return linuxTypeTuple;
+                }
+
+                throw new Exception("Cannot find an IApp that targets Desktop or Linux");
+            default:
+                throw new Exception($"Cannot find an IApp that targets platform '{platform}'");
+        }
     }
 
     private static bool Initialize(string[]? args, IApp? app)
@@ -307,6 +432,11 @@ public static partial class MeadowOS
             return false;
         }
 
+        /////////////////////////////////////////
+        var platform = DetectPlatform();
+        var app4 = FindAppForPlatform(platform);
+        /////////////////////////////////////////
+
         try
         {
             //capture unhandled exceptions
@@ -318,7 +448,7 @@ public static partial class MeadowOS
             var b4 = Environment.TickCount;
             var et = Environment.TickCount - b4;
 
-            Type appType;
+            Type appType = app4!.Value.appType;
 
             // is there an override arg for "root"?
             string? root = null;
@@ -335,31 +465,31 @@ public static partial class MeadowOS
                 }
             }
 
-            if (app != null)
-            {
-                appType = app.GetType();
-                Resolver.Log.Trace($"App is type {appType.Name}");
-            }
-            else
-            {
-                appType = FindAppType(root);
-                Resolver.Log.Trace($"App is type {appType.Name}");
-                Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
-            }
+            //if (app != null)
+            //{
+            //    appType = app.GetType();
+            //    Resolver.Log.Trace($"App is type {appType.Name}");
+            //}
+            //else
+            //{
+            //    appType = FindAppType(root).First();
+            //    Resolver.Log.Trace($"App is type {appType.Name}");
+            //    Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
+            //}
 
             // local method to walk down the object graph to find the IMeadowDevice concrete type
-            static Type FindDeviceType(Type type)
-            {
-                if (type.IsGenericType)
-                {
-                    var dt = type.GetGenericArguments().FirstOrDefault(a => typeof(IMeadowDevice).IsAssignableFrom(a));
-                    if (dt != null) return dt;
-                }
+            //static Type FindDeviceType(Type type)
+            //{
+            //    if (type.IsGenericType)
+            //    {
+            //        var dt = type.GetGenericArguments().FirstOrDefault(a => typeof(IMeadowDevice).IsAssignableFrom(a));
+            //        if (dt != null) return dt;
+            //    }
 
-                return FindDeviceType(type.BaseType);
-            }
+            //    return FindDeviceType(type.BaseType);
+            //}
 
-            var deviceType = FindDeviceType(appType);
+            var deviceType = app4!.Value.deviceType; // FindDeviceType(appType);
 
             try
             {
@@ -380,7 +510,7 @@ public static partial class MeadowOS
             }
 
             Resolver.Log.Trace($"Device Initialize starting...");
-            CurrentDevice.Initialize();
+            CurrentDevice.Initialize(platform);
             Resolver.Log.Trace($"PlatformOS Initialize starting...");
             CurrentDevice.PlatformOS.Initialize(CurrentDevice.Capabilities, args); // initialize the devices' platform OS
 
