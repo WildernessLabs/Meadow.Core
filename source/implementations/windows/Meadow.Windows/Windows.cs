@@ -1,11 +1,12 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 
 namespace Meadow;
 
-public class Windows : IMeadowDevice
+public class Windows : IMeadowDevice, IPixelDisplayProvider
 {
     private readonly Lazy<NativeNetworkAdapterCollection> _networkAdapters;
 
@@ -32,6 +33,15 @@ public class Windows : IMeadowDevice
 
         // TODO: populate this with appropriate data
         Information = new WindowsDeviceInformation();
+    }
+
+    public IPixelDisplay CreateDisplay(int? width, int? height)
+    {
+#if WINDOWS
+        return new Meadow.Foundation.Displays.WinFormsDisplay(width ?? 320, height ?? 240);
+#else
+        throw new NotSupportedException();
+#endif
     }
 
     public II2cBus CreateI2cBus(int busNumber = 0)

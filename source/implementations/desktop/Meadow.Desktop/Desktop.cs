@@ -1,5 +1,5 @@
-﻿using Meadow.Foundation.Graphics;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
+using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 
@@ -17,7 +17,9 @@ public class Desktop : IMeadowDevice
     {
         _implementation = detectedPlatform switch
         {
+#if WINDOWS
             MeadowPlatform.Windows => new Windows(),
+#endif
             MeadowPlatform.OSX => new Mac(),
             MeadowPlatform.DesktopLinux => new Linux(),
 
@@ -25,6 +27,11 @@ public class Desktop : IMeadowDevice
         };
 
         _implementation.Initialize(detectedPlatform);
+
+        if (_implementation is IPixelDisplayProvider displayProvider)
+        {
+            Display = displayProvider.CreateDisplay();
+        }
     }
 
     public IPlatformOS PlatformOS => _implementation.PlatformOS;
@@ -32,7 +39,7 @@ public class Desktop : IMeadowDevice
     public DeviceCapabilities Capabilities => _implementation.Capabilities;
     public INetworkAdapterCollection NetworkAdapters => _implementation.NetworkAdapters;
 
-    public IGraphicsDisplay Display { get; }
+    public IPixelDisplay Display { get; private set; }
 
     /////////////////////////////////////////////////
     /////////////////////////////////////////////////

@@ -1,11 +1,15 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 
 namespace Meadow
 {
     public class Linux : IMeadowDevice
+#if NET7_0
+        , IPixelDisplayProvider
+#endif
     {
         private SysFsGpioDriver _sysfs = null!;
         private Gpiod _gpiod = null!;
@@ -50,6 +54,12 @@ namespace Meadow
                 );
         }
 
+#if NET7_0
+        public IPixelDisplay CreateDisplay(int? width = null, int? height = null)
+        {
+            return new Meadow.Foundation.Displays.GtkDisplay(width  ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
+        }
+#endif
         /// <inheritdoc/>
         public virtual void Initialize(MeadowPlatform detectedPlatform)
         {

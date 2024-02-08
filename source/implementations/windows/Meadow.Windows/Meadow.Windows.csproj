@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Version>1.7.0</Version>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <LangVersion>10.0</LangVersion>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFrameworks>net7.0-windows;net7.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Windows</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
@@ -18,11 +18,15 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>An implementation of the Meadow software stack for Windows targets</Description>
   </PropertyGroup>
-  <ItemGroup>
+    
+    <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
     <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
-  </ItemGroup>
+        <ProjectReference 
+            Condition=" '$(TargetFramework)' == 'net7.0-windows'"
+            Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.WinForms\Driver\Displays.WinForms.csproj" />
+    </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
