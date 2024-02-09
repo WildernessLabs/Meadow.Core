@@ -414,9 +414,22 @@ public static partial class MeadowOS
 
                 throw new Exception("Cannot find an IApp that targets Desktop or Linux");
             case MeadowPlatform.EmbeddedLinux:
+                // TODO: improve this by finding a way to specifically differentiate Linux ARM
+                foreach (var app in allApps)
+                {
+                    var devicetype = FindDeviceTypeParameter(app);
 
-                // can we determine the platform
-                throw new Exception("Cannot find an IApp that targets ARM Linux");
+                    switch (devicetype.FullName)
+                    {
+                        case "Meadow.RaspberryPi":
+                        case "Meadow.JetsonNano":
+                        case "Meadow.JetsonXavierAgx":
+                        case "Meadow.SnickerdoodleBlack":
+                            return (app, devicetype);
+                    }
+                }
+
+                throw new Exception("Cannot find an IApp that targets a supported ARM Linux");
             case MeadowPlatform.Unknown:
                 // look for the first F7 app type (no way to determine it before creating the device implementation yet)
                 foreach (var app in allApps)
@@ -457,10 +470,11 @@ public static partial class MeadowOS
             return false;
         }
 
-        /////////////////////////////////////////
         var platform = DetectPlatform();
-        var app4 = FindAppForPlatform(platform);
-        /////////////////////////////////////////
+        var appTypes = FindAppForPlatform(platform);
+
+        Type appType = appTypes!.Value.appType;
+        var deviceType = appTypes!.Value.deviceType;
 
         try
         {
@@ -472,8 +486,6 @@ public static partial class MeadowOS
             // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
             var b4 = Environment.TickCount;
             var et = Environment.TickCount - b4;
-
-            Type appType = app4!.Value.appType;
 
             // is there an override arg for "root"?
             string? root = null;
@@ -489,32 +501,6 @@ public static partial class MeadowOS
                     }
                 }
             }
-
-            //if (app != null)
-            //{
-            //    appType = app.GetType();
-            //    Resolver.Log.Trace($"App is type {appType.Name}");
-            //}
-            //else
-            //{
-            //    appType = FindAppType(root).First();
-            //    Resolver.Log.Trace($"App is type {appType.Name}");
-            //    Resolver.Log.Trace($"Finding '{appType.Name}' took {et}ms");
-            //}
-
-            // local method to walk down the object graph to find the IMeadowDevice concrete type
-            //static Type FindDeviceType(Type type)
-            //{
-            //    if (type.IsGenericType)
-            //    {
-            //        var dt = type.GetGenericArguments().FirstOrDefault(a => typeof(IMeadowDevice).IsAssignableFrom(a));
-            //        if (dt != null) return dt;
-            //    }
-
-            //    return FindDeviceType(type.BaseType);
-            //}
-
-            var deviceType = app4!.Value.deviceType; // FindDeviceType(appType);
 
             try
             {
