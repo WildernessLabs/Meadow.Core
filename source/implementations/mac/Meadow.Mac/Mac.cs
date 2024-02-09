@@ -1,11 +1,12 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
+using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 
 namespace Meadow;
 
-public class Mac : IMeadowDevice
+public class Mac : IMeadowDevice, IPixelDisplayProvider
 {
     private readonly Lazy<NativeNetworkAdapterCollection> _networkAdapters;
 
@@ -21,7 +22,7 @@ public class Mac : IMeadowDevice
             new NativeNetworkAdapterCollection());
     }
 
-    public void Initialize()
+    public void Initialize(MeadowPlatform detectedPlatform)
     {
         // TODO: populate actual capabilities
         Capabilities = new DeviceCapabilities(
@@ -31,6 +32,11 @@ public class Mac : IMeadowDevice
 
         // TODO: populate this with appropriate data
         Information = new MacDeviceInformation();
+    }
+
+    public IPixelDisplay CreateDisplay(int? width = null, int? height = null)
+    {
+        return new Meadow.Foundation.Displays.GtkDisplay(width ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
     }
 
     public II2cBus CreateI2cBus(int busNumber = 0)

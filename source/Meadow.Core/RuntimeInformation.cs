@@ -26,7 +26,7 @@ public static class RuntimeInformation
             }
             else
             {
-                _platform = MeadowPlatform.MeadowForLinux;
+                _platform = MeadowPlatform.EmbeddedLinux;
             }
         }
 

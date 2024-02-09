@@ -115,7 +115,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <summary>
     /// Initializes the F7Micro platform hardware
     /// </summary>
-    public void Initialize()
+    public void Initialize(MeadowPlatform detectedPlatform)
     {
         var reservedPins = PlatformOS.ReservedPins?.ToUpper().Split(';', StringSplitOptions.RemoveEmptyEntries) ?? null;
         IoController.Initialize(reservedPins);

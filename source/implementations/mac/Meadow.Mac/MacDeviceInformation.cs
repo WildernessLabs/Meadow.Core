@@ -6,24 +6,34 @@ namespace Meadow
 {
     public class MacDeviceInformation : IDeviceInformation
     {
+        /// <inheritdoc/>
         public string DeviceName { get; set; }
+        /// <inheritdoc/>
         public string Model { get; }
-        public MeadowPlatform Platform => MeadowPlatform.Windows;
+        /// <inheritdoc/>
+        public MeadowPlatform Platform => MeadowPlatform.OSX;
+        /// <inheritdoc/>
         public string ProcessorType { get; }
+        /// <inheritdoc/>
         public string ProcessorSerialNumber => "Unknown";
+        /// <inheritdoc/>
         public string UniqueID { get; }
+        /// <inheritdoc/>
         public string CoprocessorType => "None";
+        /// <inheritdoc/>
         public string? CoprocessorOSVersion => null;
+        /// <inheritdoc/>
         public string OSVersion => Environment.OSVersion.ToString();
 
         internal MacDeviceInformation()
         {
             DeviceName = Environment.MachineName;
             Model = $"{Environment.OSVersion.Platform} {Environment.OSVersion.Version.ToString(2)}";
-            var cpu = ExecuteBashCommandLine("sysctl - n machdep.cpu.brand_string");
+            var cpu = ExecuteBashCommandLine("sysctl -n machdep.cpu.brand_string");
             ProcessorType = cpu.Trim();
             var mac_id = ExecuteBashCommandLine("ioreg -l | grep IOPlatformSerialNumber | sed 's/.*= //' | sed 's/\\\"//g'");
             UniqueID = mac_id.Trim();
+            // sysctl -n machdep.cpu.brand_string
         }
 
         private string ExecuteBashCommandLine(string command)

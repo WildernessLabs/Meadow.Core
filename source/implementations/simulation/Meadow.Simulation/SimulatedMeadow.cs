@@ -178,7 +178,7 @@ namespace Meadow.Simulation
             throw new NotImplementedException();
         }
 
-        public void Initialize()
+        public void Initialize(MeadowPlatform detectedPlatform)
         {
         }
 

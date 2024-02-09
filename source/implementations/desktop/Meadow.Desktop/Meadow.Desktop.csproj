@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
+    <TargetFrameworks>net7.0;net7.0-windows</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Meadow.Desktop</AssemblyName>
+      
+  </PropertyGroup>
+    
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+    <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
+    <ProjectReference Include="..\..\linux\Meadow.Linux\Meadow.Linux.csproj" />
+    <ProjectReference Include="..\..\mac\Meadow.Mac\Meadow.Mac.csproj" />
+      <ProjectReference
+          Condition=" '$(TargetFramework)' == 'net7.0-windows'"
+          Include="..\..\windows\Meadow.Windows\Meadow.Windows.csproj" />
+  </ItemGroup>
+</Project>
