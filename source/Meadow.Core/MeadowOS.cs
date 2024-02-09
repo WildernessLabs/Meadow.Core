@@ -287,6 +287,8 @@ public static partial class MeadowOS
 
     private static MeadowPlatform DetectPlatform()
     {
+        Resolver.Log.Info($"*** platform is {RTI.FrameworkDescription}");
+
         if (RTI.IsOSPlatform(OSPlatform.Windows))
         {
             return MeadowPlatform.Windows;
@@ -306,6 +308,11 @@ public static partial class MeadowOS
                 _ => MeadowPlatform.DesktopLinux
             };
         }
+        else if (Directory.Exists("/meadow0"))
+        {
+            // we're an F7 - but with the current OS we can't tell exctly what type of F7
+        }
+
         return MeadowPlatform.Unknown;
     }
 
@@ -328,8 +335,6 @@ public static partial class MeadowOS
         {
             throw new Exception("Cannot find an IApp implementation");
         }
-
-        //        var t = FindDeviceTypeParameter(allApps[0]);
 
         // find an IApp that matches our target platform
         switch (platform)
@@ -408,6 +413,26 @@ public static partial class MeadowOS
                 }
 
                 throw new Exception("Cannot find an IApp that targets Desktop or Linux");
+            case MeadowPlatform.EmbeddedLinux:
+
+                // can we determine the platform
+                throw new Exception("Cannot find an IApp that targets ARM Linux");
+            case MeadowPlatform.Unknown:
+                // look for the first F7 app type (no way to determine it before creating the device implementation yet)
+                foreach (var app in allApps)
+                {
+                    var devicetype = FindDeviceTypeParameter(app);
+
+                    switch (devicetype.FullName)
+                    {
+                        case "Meadow.Devices.F7FeatherV1":
+                        case "Meadow.Devices.F7FeatherV2":
+                        case "Meadow.Devices.F7CoreComputeV2":
+                            return (app, devicetype);
+                    }
+                }
+
+                throw new Exception("Cannot find an IApp that targets a Meadow F7 device");
             default:
                 throw new Exception($"Cannot find an IApp that targets platform '{platform}'");
         }
