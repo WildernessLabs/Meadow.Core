@@ -498,6 +498,21 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     };
 
     /// <summary>
+    /// Ethernet functions available on the ESP32
+    /// </summary>
+    public enum EthernetFunction
+    {
+        /// <summary>
+        /// EthernetFunction - NetworkConnectedEvent
+        /// </summary>
+        NetworkConnectedEvent = 36,
+        /// <summary>
+        /// EthernetFunction - NetworkDisconnectedEvent
+        /// </summary>
+        NetworkDisconnectedEvent = 37,
+    };
+
+    /// <summary>
     /// Enumeration representing possible cell-related errors.
     /// </summary>
     public enum CellError
