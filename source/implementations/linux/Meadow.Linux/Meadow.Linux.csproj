@@ -25,9 +25,7 @@
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
-    <ProjectReference 
-        Condition=" '$(TargetFramework)' == 'net7.0'"
-        Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj" />
+    <ProjectReference Condition=" '$(TargetFramework)' == 'net7.0'" Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
