@@ -166,6 +166,11 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                         Resolver.Log.Info($"Device is configured to use Cell for the network interface");
                         networkAdapters.Add(new F7CellNetworkAdapter(esp32));
                     }
+                    else if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
+                    {
+                        Resolver.Log.Info($"Device is configured to use Ethernet for the network interface");
+                        networkAdapters.Add(new F7EthernetNetworkAdapter(esp32));
+                    }
                 }
                 catch (Exception e)
                 {
