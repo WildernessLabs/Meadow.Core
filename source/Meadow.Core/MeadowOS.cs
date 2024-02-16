@@ -246,10 +246,7 @@ public static partial class MeadowOS
         // === LOCAL METHOD ===
         static Assembly? FindByPath(string[] namesToCheck, string? root = null)
         {
-            if (root == null)
-            {
-                root = AppDomain.CurrentDomain.BaseDirectory;
-            }
+            root ??= AppDomain.CurrentDomain.BaseDirectory;
 
             foreach (var name in namesToCheck)
             {
@@ -431,21 +428,49 @@ public static partial class MeadowOS
 
                 throw new Exception("Cannot find an IApp that targets a supported ARM Linux");
             case MeadowPlatform.Unknown:
+                Interop.HardwareVersion hw = Interop.HardwareVersion.Unknown;
+                try
+                {
+                    hw = Interop.Nuttx.meadow_os_hardware_version();
+                }
+                catch (Exception)
+                {
+                    // OS is probably too old to provide this, so just go with the first F7* implementation
+                }
+
                 // look for the first F7 app type (no way to determine it before creating the device implementation yet)
                 foreach (var app in allApps)
                 {
                     var devicetype = FindDeviceTypeParameter(app);
 
-                    switch (devicetype.FullName)
+                    switch (hw)
                     {
-                        case "Meadow.Devices.F7FeatherV1":
-                        case "Meadow.Devices.F7FeatherV2":
-                        case "Meadow.Devices.F7CoreComputeV2":
+                        case Interop.HardwareVersion.Unknown:
                             return (app, devicetype);
+                        case Interop.HardwareVersion.F7FeatherV1:
+                            if (devicetype.FullName == "Meadow.Devices.F7FeatherV1")
+                            {
+                                return (app, devicetype);
+                            }
+                            break;
+                        case Interop.HardwareVersion.F7FeatherV2:
+                            if (devicetype.FullName == "Meadow.Devices.F7FeatherV2")
+                            {
+                                return (app, devicetype);
+                            }
+                            break;
+                        case Interop.HardwareVersion.F7CoreComputeV2:
+                            if (devicetype.FullName == "Meadow.Devices.F7CoreComputeV2")
+                            {
+                                return (app, devicetype);
+                            }
+                            break;
                     }
+                    break;
+
                 }
 
-                throw new Exception("Cannot find an IApp that targets a Meadow F7 device");
+                throw new Exception($"Cannot find an IApp that targets a {(hw == Interop.HardwareVersion.Unknown ? "Meadow F7" : hw)} device");
             default:
                 throw new Exception($"Cannot find an IApp that targets platform '{platform}'");
         }
@@ -693,4 +718,24 @@ public static partial class MeadowOS
         Shutdown();
     }
 
+}
+
+internal static partial class Interop
+{
+    public enum HardwareVersion
+    {
+        //#define MEADOW_F7_HW_VERSION_NUMB_F7V1 (1)
+        //#define MEADOW_F7_HW_VERSION_NUMB_F7V2 (2)
+        //#define MEADOW_F7_HW_VERSION_NUMB_CCMV2 (3)
+        Unknown = 0,
+        F7FeatherV1 = 1,
+        F7FeatherV2 = 2,
+        F7CoreComputeV2 = 3,
+    }
+
+    public static partial class Nuttx
+    {
+        [DllImport("nuttx")]
+        public static extern HardwareVersion meadow_os_hardware_version();
+    }
 }
