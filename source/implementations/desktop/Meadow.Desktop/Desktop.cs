@@ -34,11 +34,14 @@ public class Desktop : IMeadowDevice
     {
         _implementation = detectedPlatform switch
         {
-#if WINDOWS
-            MeadowPlatform.Windows => new Windows(),
-#endif
             MeadowPlatform.OSX => new Mac(),
             MeadowPlatform.DesktopLinux => new Linux(),
+#if WINDOWS
+            MeadowPlatform.Windows => new Windows(),
+#else
+            MeadowPlatform.Windows =>
+            throw new Exception("You must run with a net8.0-windows target framework"),
+#endif
 
             _ => throw new ArgumentException($"Desktop cannot run on {detectedPlatform}"),
         };
