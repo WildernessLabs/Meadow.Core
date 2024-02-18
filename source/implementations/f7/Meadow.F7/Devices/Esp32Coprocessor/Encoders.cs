@@ -836,11 +836,23 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             DisconnectEventData disconnectEventData = new MessagePayloads.DisconnectEventData();
 
+            for (int index = 0; (buffer[index + offset] != 0) && (index < (33 - 1)); index++)
+            {
+                disconnectEventData.Ssid += Convert.ToChar(buffer[index + offset]);
+            }
+            offset += (int) 33;
+            disconnectEventData.SsidLength = buffer[offset];
+            offset += 1;
+            disconnectEventData.Bssid = new byte[6];
+            Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
+            offset += (int) 6;
+            disconnectEventData.Rssi = buffer[offset];
+            offset += 1;
             disconnectEventData.Retrying = buffer[offset];
             offset += 1;
             disconnectEventData.RetriesRemaining = ExtractInt32(buffer, offset);
             offset += 4;
-            disconnectEventData.Reason = ExtractUInt32(buffer, offset);
+            disconnectEventData.Reason = buffer [offset];
             return(disconnectEventData);
         }
 

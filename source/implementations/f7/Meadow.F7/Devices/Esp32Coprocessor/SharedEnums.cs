@@ -448,6 +448,49 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     };
 
     /// <summary>
+    /// WiFi Disconnected Reason avilable on the ESP32
+    /// </summary>
+    public enum WiFiDisconnectedReason
+    {
+        /// <summary>
+        /// WiFiDisconnectedReason - Unspecified
+        /// </summary>
+        Unspecified = 1,
+        /// <summary>
+        /// WiFiDisconnectedReason - AuthenticatedLeave
+        /// </summary>
+        AuthenticatedLeave = 3,
+        /// <summary>
+        /// WiFiDisconnectedReason - AssociatedExpire
+        /// </summary>
+        AssociatedExpire = 4,
+        /// <summary>
+        /// WiFiDisconnectedReason - AssociatedTooMany
+        /// </summary>
+        AssociatedTooMany = 5,
+        /// <summary>
+        /// WiFiDisconnectedReason - AssociatedLeave
+        /// </summary>
+        AssociatedLeave = 8,
+        /// <summary>
+        /// WiFiDisconnectedReason - FourWayHandshakeTimenout
+        /// </summary>
+        FourWayHandshakeTimenout = 15,
+        /// <summary>
+        /// WiFiDisconnectedReason - BandWidtNotEnogh
+        /// </summary>
+        BandWidtNotEnogh = 33,
+        /// <summary>
+        /// WiFiDisconnectedReason - BeaconTimeout
+        /// </summary>
+        BeaconTimeout = 200,
+        /// <summary>
+        /// WiFiDisconnectedReason - AccessPointNotFound
+        /// </summary>
+        AccessPointNotFound = 201,
+    };
+
+    /// <summary>
     /// Bluetooth functions available on the ESP32
     /// </summary>
     public enum BluetoothFunction

@@ -236,6 +236,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public UInt32 Reason;
     };
 
+
     /// <summary>
     /// Structure to hold NodeConnectionChangeEventData data.
     /// </summary>
@@ -257,6 +258,22 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     public struct DisconnectEventData
     {
         /// <summary>
+        /// Ssid element.
+        /// </summary>
+        public string Ssid;
+        /// <summary>
+        /// SsidLength element.
+        /// </summary>
+        public Byte SsidLength;
+        /// <summary>
+        /// Bssid element.
+        /// </summary>
+        public Byte []Bssid;
+         /// <summary>
+        /// Rssi element.
+        /// </summary>
+        public Byte Rssi;
+        /// <summary>
         /// Retrying element.
         /// </summary>
         public Byte Retrying;
@@ -267,7 +284,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Reason element.
         /// </summary>
-        public UInt32 Reason;
+        public Byte Reason;
     };
 
     /// <summary>
