@@ -274,14 +274,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         public Byte Rssi;
         /// <summary>
-        /// Retrying element.
-        /// </summary>
-        public Byte Retrying;
-        /// <summary>
-        /// RetriesRemaining element.
-        /// </summary>
-        public Int32 RetriesRemaining;
-        /// <summary>
         /// Reason element.
         /// </summary>
         public Byte Reason;
