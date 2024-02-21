@@ -466,8 +466,6 @@ public static partial class MeadowOS
                             }
                             break;
                     }
-                    break;
-
                 }
 
                 throw new Exception($"Cannot find an IApp that targets a {(hw == Interop.HardwareVersion.Unknown ? "Meadow F7" : hw)} device");
@@ -495,6 +493,10 @@ public static partial class MeadowOS
             return false;
         }
 
+        //capture unhandled exceptions
+        AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
+
+        var settings = LoadSettings();
         var platform = DetectPlatform();
         var appTypes = FindAppForPlatform(platform);
 
@@ -503,11 +505,6 @@ public static partial class MeadowOS
 
         try
         {
-            //capture unhandled exceptions
-            AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
-
-            var settings = LoadSettings();
-
             // Initialize strongly-typed hardware access - setup the interface module specified in the App signature
             var b4 = Environment.TickCount;
             var et = Environment.TickCount - b4;
