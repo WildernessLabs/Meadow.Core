@@ -284,8 +284,6 @@ public static partial class MeadowOS
 
     private static MeadowPlatform DetectPlatform()
     {
-        Resolver.Log.Info($"*** platform is {RTI.FrameworkDescription}");
-
         if (RTI.IsOSPlatform(OSPlatform.Windows))
         {
             return MeadowPlatform.Windows;
