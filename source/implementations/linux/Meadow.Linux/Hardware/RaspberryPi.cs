@@ -28,8 +28,10 @@ namespace Meadow
 
             Pins = new RaspberryPiPinout(
                 IsRaspberryPi5 ?
-                RaspberryPiPinout.GpiodChipPi5 :
-                RaspberryPiPinout.GpiodChipPi4);
+                    RaspberryPiPinout.GpiodChipPi5 :
+                    RaspberryPiPinout.GpiodChipPi4,
+                IsRaspberryPi5 ? 53 : 0
+                );
 
             Pins.Controller = this;
 
