@@ -68,10 +68,11 @@ namespace Meadow
             try
             {
                 _gpiod = new Gpiod(Resolver.Log);
+                Resolver.Log.Info("Platform will use gpiod for GPIO");
             }
             catch
             {
-                Resolver.Log.Warn("Platform does not support gpiod. Sysfs will be used for GPIO");
+                Resolver.Log.Info("Platform does not support gpiod. Sysfs will be used for GPIO");
             }
         }
 
@@ -124,10 +125,12 @@ namespace Meadow
         {
             if (_gpiod != null)
             {
+                Resolver.Log.Info("GPIOD");
                 return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
             }
             else
             {
+                Resolver.Log.Info("SYSFS");
                 return new SysFsDigitalOutputPort(_sysfs, pin, initialState);
             }
         }
