@@ -842,12 +842,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 disconnectEventData.Ssid += Convert.ToChar(buffer[index + offset]);
             }
-            offset += (int) 33;
+            offset += 33;
             disconnectEventData.SsidLength = buffer[offset];
             offset += 1;
             disconnectEventData.Bssid = new byte[6];
             Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
-            offset += (int) 6;
+            offset += 6;
             disconnectEventData.Rssi = buffer[offset];
             offset += 1;
             disconnectEventData.Reason = buffer [offset];

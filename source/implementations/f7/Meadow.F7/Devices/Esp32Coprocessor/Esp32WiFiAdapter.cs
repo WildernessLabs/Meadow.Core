@@ -685,11 +685,11 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     {
         ClearNetworkDetails();
         DisconnectEventData disconnectEventData = Encoders.ExtractDisconnectEventData(payload, 0);
-        Console.Write($"Disconnect Event, Reason {disconnectEventData.Reason}");
         string reason = DisconnectReason(disconnectEventData);
-    
-        RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(reason));
-
+        lock (_lock)
+        {
+            RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(reason));
+        }
     }
 
     private string DisconnectReason(DisconnectEventData eventData)
@@ -757,6 +757,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     break;
                 case NetworkState.Disconnected:
                     _isConnected = false;
+                    // RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(_disconnect_reason));
                     break;
                 case NetworkState.Error:
                     break;
