@@ -54,7 +54,7 @@ public class Desktop : IMeadowDevice
         }
 
         _implementation.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
-        _implementation.NetworkDisconnected += (s) => NetworkDisconnected?.Invoke(s);
+        _implementation.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
     }
 
     /// <inheritdoc/>
