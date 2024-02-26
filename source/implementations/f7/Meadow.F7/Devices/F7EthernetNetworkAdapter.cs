@@ -71,7 +71,7 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
             case EthernetFunction.NetworkDisconnectedEvent:
                 Resolver.Log.Trace("Ethernet disconnected event triggered!");
 
-                RaiseNetworkDisconnected();
+                RaiseNetworkDisconnected(null);
                 
                 _isConnected = false;
                 break;
