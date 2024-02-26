@@ -757,7 +757,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     break;
                 case NetworkState.Disconnected:
                     _isConnected = false;
-                    // RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(_disconnect_reason));
                     break;
                 case NetworkState.Error:
                     break;
