@@ -2,6 +2,8 @@
 using Meadow.Devices;
 using Meadow.Devices.Esp32.MessagePayloads;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using static Meadow.IPlatformOS;
@@ -10,6 +12,62 @@ namespace Meadow;
 
 public partial class F7PlatformOS
 {
+    private string[]? _ntpServers;
+
+    /// <inheritdoc/>
+    public string[] NtpServers
+    {
+        get
+        {
+            if (_ntpServers == null)
+            {
+                var list = new List<string>();
+
+                // The ESP provides no way to get these, so we have to manually parse
+                // not using a YAML parser as this is faster
+                var path = Path.Combine(FileSystem.FileSystemRoot, "meadow.config.yaml");
+                if (File.Exists(path))
+                {
+
+
+                    using var reader = File.OpenText(
+                        Path.Combine(FileSystem.FileSystemRoot, "meadow.config.yaml"));
+
+                    // find the 'NtpServers:' line
+                    string line;
+
+                    while (true)
+                    {
+                        line = reader.ReadLine();
+                        if (line.Contains("NtpServers:")) break;
+
+                        if (reader.EndOfStream)
+                        {
+                            return Array.Empty<string>();
+                        }
+                    }
+
+                    while (true)
+                    {
+                        line = reader.ReadLine().Trim();
+                        if (line.Length > 0 && line[0] == '-')
+                        {
+                            list.Add(line[2..]);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                _ntpServers = list.ToArray();
+            }
+
+            return _ntpServers;
+        }
+    }
+
     /// <summary>
     /// Gets the specified platform configuration value
     /// </summary>

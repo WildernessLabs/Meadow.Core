@@ -28,6 +28,8 @@ public partial class Esp32Coprocessor : ICoprocessor
 
     internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = default!;
     internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = default!;
+    internal event EventHandler<(EthernetFunction fn, StatusCodes status, byte[] data)> EthernetMessageReceived = default!;
+
 
     /// <summary>
     /// Possible debug levels.
@@ -275,7 +277,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                         switch ((Esp32Interfaces)eventData.Interface)
                         {
                             case Esp32Interfaces.WiredEthernet:
-                                // Implement
+                                EthernetMessageReceived?.Invoke(this, ((EthernetFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
                                 break;
                             case Esp32Interfaces.WiFi:
                                 WiFiMessageReceived?.Invoke(this, ((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));

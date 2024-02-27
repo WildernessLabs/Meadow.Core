@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -9,5 +10,10 @@ namespace Meadow
         public TimeSpan PollPeriod { get; set; }
 
         public event TimeChangedEventHandler TimeChanged;
+
+        public Task<bool> Synchronize(string? ntpServer = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

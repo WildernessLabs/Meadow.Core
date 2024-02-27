@@ -1,10 +1,11 @@
 ﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Meadow.Pinouts
 {
-    public class JetsonNano : IPinDefinitions
+    public class JetsonNanoPinout : IPinDefinitions
     {
         public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -15,9 +16,19 @@ namespace Meadow.Pinouts
             I2C_1_SDA, I2C_1_SCL,
         };
 
-        public IPinController Controller { get; set; }
+        /// <summary>
+        /// Retrieves a pin from <see cref="AllPins"/> by Name or Key
+        /// </summary>
+        public IPin this[string name]
+        {
+            get => AllPins.FirstOrDefault(p =>
+                string.Compare(p.Name, name, true) == 0
+                || string.Compare($"{p.Key}", name, true) == 0);
+        }
 
-        public JetsonNano()
+        public virtual IPinController Controller { get; set; }
+
+        public JetsonNanoPinout()
         {
         }
 

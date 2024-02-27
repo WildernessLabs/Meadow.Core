@@ -32,8 +32,6 @@ internal class SensorService : ISensorService
     public IEnumerable<ISensor> GetSensorsWithData<TUnit>()
         where TUnit : struct
     {
-        //        var list = new List<ISensor>();
-
         foreach (var sensor in _sensors)
         {
             var typeToCheck = sensor.GetType();
@@ -79,6 +77,11 @@ internal class SensorService : ISensorService
 
                 _pollMonitor.StartSampling(s);
             }
+        }
+
+        if (sensor is ISleepAwarePeripheral sp)
+        {
+            Resolver.Device.PlatformOS.RegisterForSleep(sp);
         }
 
         lock (_sensors)

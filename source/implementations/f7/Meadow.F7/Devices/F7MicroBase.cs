@@ -109,13 +109,13 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
 
         networkAdapters = new NetworkAdapterCollection();
         networkAdapters.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
-        networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected?.Invoke(s);
+        networkAdapters.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
     }
 
     /// <summary>
     /// Initializes the F7Micro platform hardware
     /// </summary>
-    public void Initialize()
+    public void Initialize(MeadowPlatform detectedPlatform)
     {
         var reservedPins = PlatformOS.ReservedPins?.ToUpper().Split(';', StringSplitOptions.RemoveEmptyEntries) ?? null;
         IoController.Initialize(reservedPins);
@@ -165,6 +165,11 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                     {
                         Resolver.Log.Info($"Device is configured to use Cell for the network interface");
                         networkAdapters.Add(new F7CellNetworkAdapter(esp32));
+                    }
+                    else if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
+                    {
+                        Resolver.Log.Info($"Device is configured to use Ethernet for the network interface");
+                        networkAdapters.Add(new F7EthernetNetworkAdapter(esp32));
                     }
                 }
                 catch (Exception e)

@@ -1,16 +1,11 @@
-﻿using Meadow.Hardware;
-using Meadow.Logging;
+﻿using Meadow.Logging;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Meadow
 {
     internal partial class Gpiod : IDisposable
     {
-        
+
         private class PinInfo
         {
             public int FileDescriptor { get; set; }
@@ -49,7 +44,7 @@ namespace Meadow
                             Logger.Debug(line.ToString());
                         }
                     }
-                } while(p != IntPtr.Zero);
+                } while (p != IntPtr.Zero);
             }
             finally
             {
@@ -94,7 +89,7 @@ namespace Meadow
                     // TODO: dispose managed state (managed objects)
                 }
 
-                foreach(var chip in Chips)
+                foreach (var chip in Chips)
                 {
                     chip.Dispose();
                 }
@@ -117,6 +112,20 @@ namespace Meadow
             }
 
             var line = Chips[pin.Chip].Lines[pin.Offset];
+
+            // TODO: check availability, check for other reservations
+
+            return line;
+        }
+
+        public LineInfo GetLine(LinuxFlexiPin pin)
+        {
+            if (!Chips.Contains(pin.GpiodChip))
+            {
+                throw new NativeException($"Unknown GPIO chip {pin.GpiodChip}");
+            }
+
+            var line = Chips[pin.GpiodChip].Lines[pin.GpiodOffset];
 
             // TODO: check availability, check for other reservations
 

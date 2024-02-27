@@ -1,10 +1,11 @@
 ﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Meadow.Pinouts
 {
-    public class JetsonXavierAGX : IPinDefinitions
+    public class JetsonXavierAGXPinout : IPinDefinitions
     {
         public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -36,9 +37,16 @@ namespace Meadow.Pinouts
             I2S_SDOUT
         };
 
+        public IPin this[string name]
+        {
+            get => AllPins.FirstOrDefault(p =>
+                string.Compare(p.Name, name, true) == 0
+                || string.Compare($"{p.Key}", name, true) == 0);
+        }
+
         public IPinController Controller { get; set; }
 
-        public JetsonXavierAGX()
+        public JetsonXavierAGXPinout()
         {
         }
 

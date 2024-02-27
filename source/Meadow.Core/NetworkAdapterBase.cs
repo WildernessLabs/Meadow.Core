@@ -78,9 +78,10 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <summary>
     /// Raises the <see cref="NetworkDisconnected"/> event
     /// </summary>
-    protected void RaiseNetworkDisconnected()
+    /// <param name="args"></param>
+    protected void RaiseNetworkDisconnected(NetworkDisconnectionEventArgs args)
     {
-        NetworkDisconnected?.Invoke(this);
+        NetworkDisconnected?.Invoke(this, args);
     }
 
     /// <summary>

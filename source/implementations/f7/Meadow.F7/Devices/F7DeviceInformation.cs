@@ -8,6 +8,15 @@ namespace Meadow.Devices
     /// </summary>
     public class F7DeviceInformation : IDeviceInformation
     {
+        private MeadowPlatform? _platform;
+        private string? _processor;
+        private string? _model;
+        private string? _processorSN;
+        private string? _uniqueID;
+        private string? _coprocesssorType;
+        private string? _coprocessorVersion;
+        private string? _osVersion;
+
         /// <summary>
         /// The current device name.
         /// </summary>
@@ -22,46 +31,46 @@ namespace Meadow.Devices
         /// Get the current model name.
         /// </summary>
         /// <returns>Model name.</returns>
-        public string Model => F7PlatformOS.GetString(ConfigurationValues.Model);
+        public string Model => _model ??= F7PlatformOS.GetString(ConfigurationValues.Model);
 
         /// <summary>
         /// Get the hardware revision.
         /// </summary>
-        public MeadowPlatform Platform => (MeadowPlatform)F7PlatformOS.GetUInt(ConfigurationValues.Product);
+        public MeadowPlatform Platform => _platform ??= (MeadowPlatform)F7PlatformOS.GetUInt(ConfigurationValues.Product);
 
         /// <summary>
         /// Get the processor type.
         /// </summary>
         /// <returns>Processor type.</returns>
-        public string ProcessorType => F7PlatformOS.GetString(ConfigurationValues.ProcessorType);
+        public string ProcessorType => _processor ??= F7PlatformOS.GetString(ConfigurationValues.ProcessorType);
 
         /// <summary>
         /// Get the serial number of the device.
         /// </summary>
         /// <returns>Serial number of the device.</returns>
-        public string ProcessorSerialNumber => F7PlatformOS.GetString(ConfigurationValues.SerialNumber);
+        public string ProcessorSerialNumber => _processorSN ??= F7PlatformOS.GetString(ConfigurationValues.SerialNumber);
 
         /// <summary>
         /// Gets the unique ID of the F7 microcontroller.
         /// </summary>
-        public string UniqueID => F7PlatformOS.GetString(ConfigurationValues.UniqueId);
+        public string UniqueID => _uniqueID ??= F7PlatformOS.GetString(ConfigurationValues.UniqueId);
 
         /// <summary>
         /// Get the coprocessor type.
         /// </summary>
         /// <returns>Coprocessor type.</returns>
-        public string CoprocessorType => F7PlatformOS.GetString(ConfigurationValues.CoprocessorType);
+        public string CoprocessorType => _coprocesssorType ??= F7PlatformOS.GetString(ConfigurationValues.CoprocessorType);
 
         /// <summary>
         /// Get the version of the firmware flashed to the coprocessor.
         /// </summary>
         /// <returns>Coprocessor firmware version..</returns>
-        public string CoprocessorOSVersion => F7PlatformOS.GetString(ConfigurationValues.CoprocessorFirmwareVersion);
+        public string CoprocessorOSVersion => _coprocessorVersion ??= F7PlatformOS.GetString(ConfigurationValues.CoprocessorFirmwareVersion);
 
         /// <summary>
         /// Get the version of the firmware flashed to the microcontroller.
         /// </summary>
-        public string OSVersion => F7PlatformOS.GetString(ConfigurationValues.OsVersion);
+        public string OSVersion => _osVersion ??= F7PlatformOS.GetString(ConfigurationValues.OsVersion);
 
         //TODO: what about coprocessor build date
     }

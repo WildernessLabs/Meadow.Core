@@ -811,18 +811,20 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //
             //  Calculate the amount of memory needed.
             //
-            length += 9;
+            length += 42;
 
             //
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            buffer[offset] = disconnectEventData.Retrying;
+            buffer[offset] = disconnectEventData.SsidLength;
             offset += 1;
-            EncodeInt32(disconnectEventData.RetriesRemaining, buffer, offset);
-            offset += 4;
-            EncodeUInt32(disconnectEventData.Reason, buffer, offset);
+            Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
+            offset += (int) 6;
+            buffer[offset] = disconnectEventData.Rssi;
+            offset += 1;
+            buffer[offset] = disconnectEventData.Reason;
             return(buffer);
         }
 
@@ -836,11 +838,19 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             DisconnectEventData disconnectEventData = new MessagePayloads.DisconnectEventData();
 
-            disconnectEventData.Retrying = buffer[offset];
+            for (int index = 0; (buffer[index + offset] != 0) && (index < (33 - 1)); index++)
+            {
+                disconnectEventData.Ssid += Convert.ToChar(buffer[index + offset]);
+            }
+            offset += 33;
+            disconnectEventData.SsidLength = buffer[offset];
             offset += 1;
-            disconnectEventData.RetriesRemaining = ExtractInt32(buffer, offset);
-            offset += 4;
-            disconnectEventData.Reason = ExtractUInt32(buffer, offset);
+            disconnectEventData.Bssid = new byte[6];
+            Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
+            offset += 6;
+            disconnectEventData.Rssi = buffer[offset];
+            offset += 1;
+            disconnectEventData.Reason = buffer [offset];
             return(disconnectEventData);
         }
 
@@ -851,7 +861,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded DisconnectEventData object.</returns>
         public static int EncodedDisconnectEventDataBufferSize(MessagePayloads.DisconnectEventData disconnectEventData)
         {
-            return(9);
+            return(42);
         }
 
         /// <summary>

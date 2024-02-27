@@ -1,18 +1,15 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
-using Meadow.Pinouts;
+using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
-using System.Linq;
 
 namespace Meadow
 {
-    /// <summary>
-    /// Represents an instance of Meadow as a generic Linux process
-    /// </summary>
-    /// <typeparam name="TPinout"></typeparam>
-    public class Linux<TPinout> : IMeadowDevice
-        where TPinout : IPinDefinitions, new()
+    public class Linux : IMeadowDevice
+#if NET7_0
+        , IPixelDisplayProvider
+#endif
     {
         private SysFsGpioDriver _sysfs = null!;
         private Gpiod _gpiod = null!;
@@ -29,33 +26,26 @@ namespace Meadow
         /// <inheritdoc/>
         public event NetworkDisconnectionHandler NetworkDisconnected;
 
-        public TPinout Pins { get; }
-        public DeviceCapabilities Capabilities { get; }
-        public IPlatformOS PlatformOS { get; }
-        public IDeviceInformation Information { get; }
-        public INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
+        /// <inheritdoc/>
+        public virtual DeviceCapabilities Capabilities { get; }
+        /// <inheritdoc/>
+        public virtual IPlatformOS PlatformOS { get; }
+        /// <inheritdoc/>
+        public virtual IDeviceInformation Information { get; }
+        /// <inheritdoc/>
+        public virtual INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
 
         /// <summary>
         /// Creates the Meadow on Linux infrastructure instance
         /// </summary>
         public Linux()
         {
-            if (typeof(TPinout) == typeof(JetsonNano) || typeof(TPinout) == typeof(JetsonXavierAGX))
-            {
-                PlatformOS = new JetsonPlatformOS();
-            }
-            else
-            {
-                PlatformOS = new LinuxPlatformOS();
-            }
+            PlatformOS = new LinuxPlatformOS();
 
             _networkAdapters = new Lazy<NativeNetworkAdapterCollection>(
                 new NativeNetworkAdapterCollection());
 
             Information = new LinuxDeviceInfo();
-
-            Pins = new TPinout();
-            Pins.Controller = this;
 
             Capabilities = new DeviceCapabilities(
                 new AnalogCapabilities(false, null),
@@ -64,115 +54,94 @@ namespace Meadow
                 );
         }
 
-        public void Initialize()
+#if NET7_0
+        public IPixelDisplay CreateDisplay(int? width = null, int? height = null)
+        {
+            return new Meadow.Foundation.Displays.GtkDisplay(width  ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
+        }
+#endif
+        /// <inheritdoc/>
+        public virtual void Initialize(MeadowPlatform detectedPlatform)
         {
             _sysfs = new SysFsGpioDriver();
 
             try
             {
                 _gpiod = new Gpiod(Resolver.Log);
+                Resolver.Log.Info("Platform will use gpiod for GPIO");
             }
             catch
             {
-                Resolver.Log.Warn("Platform does not support gpiod");
+                Resolver.Log.Info("Platform does not support gpiod. Sysfs will be used for GPIO");
             }
         }
 
-        public IPin GetPin(string pinName)
+        /// <inheritdoc/>
+        public virtual IPin GetPin(string pinName)
         {
-            return Pins.AllPins.First(p => string.Compare(p.Name, pinName) == 0);
+            throw new PlatformNotSupportedException("This platform has no IPins");
         }
 
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(int busNumber = 1)
         {
             return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
         }
 
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(int busNumber, I2cBusSpeed busSpeed)
         {
             return new I2CBus(busNumber, busSpeed);
         }
 
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(IPin[] pins, I2cBusSpeed busSpeed)
         {
             return CreateI2cBus(pins[0], pins[1], busSpeed);
         }
 
-        public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
-        {
-            // TODO: implement this based on channel caps (this is platform specific right now)
-
-            if (Pins is JetsonNano)
-            {
-                if (clock == Pins["PIN05"] && data == Pins["PIN03"])
-                {
-                    return new I2CBus(1, busSpeed);
-                }
-                else if (clock == Pins["PIN28"] && data == Pins["PIN27"])
-                {
-                    return new I2CBus(0, busSpeed);
-                }
-            }
-            if (Pins is JetsonXavierAGX)
-            {
-                if (clock == Pins["I2C_GP2_CLK"] && data == Pins["I2C_GP2_DAT"])
-                {
-                    return new I2CBus(1, busSpeed);
-                }
-                else if (clock == Pins["I2C_GP5_CLK"] && data == Pins["I2C_GP5_DAT"])
-                {
-                    return new I2CBus(8, busSpeed);
-                }
-            }
-            else if (Pins is RaspberryPi)
-            {
-                if (clock == Pins["PIN05"] && data == Pins["PIN03"])
-                {
-                    return new I2CBus(1, busSpeed);
-                }
-            }
-            else if (Pins is SnickerdoodleBlack)
-            {
-                return new KrtklI2CBus(busSpeed);
-            }
-
-            throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");
-        }
-
+        /// <inheritdoc/>
         public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         {
             var classicPort = CreateSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
             return SerialMessagePort.From(classicPort, suffixDelimiter, preserveDelimiter);
         }
 
+        /// <inheritdoc/>
         public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         {
             var classicPort = CreateSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
             return SerialMessagePort.From(classicPort, prefixDelimiter, preserveDelimiter, messageLength);
         }
 
+        /// <inheritdoc/>
         public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
         {
             return new LinuxSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
+        /// <inheritdoc/>
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
             if (_gpiod != null)
             {
+                Resolver.Log.Info("GPIOD");
                 return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
             }
             else
             {
+                Resolver.Log.Info("SYSFS");
                 return new SysFsDigitalOutputPort(_sysfs, pin, initialState);
             }
         }
 
+        /// <inheritdoc/>
         public IDigitalInputPort CreateDigitalInputPort(IPin pin)
         {
             return CreateDigitalInputPort(pin, ResistorMode.Disabled);
         }
 
+        /// <inheritdoc/>
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
         {
             if (_gpiod != null)
@@ -185,6 +154,7 @@ namespace Meadow
             }
         }
 
+        /// <inheritdoc/>
         public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
         {
             if (_gpiod != null)
@@ -197,39 +167,51 @@ namespace Meadow
             }
         }
 
+        /// <inheritdoc/>
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
         {
             return CreateSpiBus(clock, mosi, miso, config.SpiMode, config.Speed);
         }
 
+        /// <inheritdoc/>
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, Units.Frequency speed)
         {
             return CreateSpiBus(clock, mosi, miso, SpiClockConfiguration.Mode.Mode0, speed);
         }
 
-        public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
+        /// <inheritdoc/>
+        public virtual ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
         {
             return new SpiBus(0, (SpiBus.SpiMode)mode, speed);
         }
 
-        // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
-
+        /// <inheritdoc/>
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, float voltageReference = 3.3F)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
         }
 
+        /// <inheritdoc/>
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
         }
+
+        /// <inheritdoc/>
+        public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
+        {
+            throw new PlatformNotSupportedException("This platform does not support PWMs.  Use an IO Extender.");
+        }
+
+        /// <inheritdoc/>
+        public virtual II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
+        {
+            throw new PlatformNotSupportedException("This platform has no II2CBusses.  Use an IO Extender.");
+        }
+
+        // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
 
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, double debounceDuration = 0, double glitchDuration = 0, OutputType output = OutputType.PushPull)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
         {
             throw new NotImplementedException();
         }
