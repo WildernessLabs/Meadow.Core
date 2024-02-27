@@ -262,6 +262,8 @@ public partial class F7GPIOManager : IMeadowIOController
         // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
         // the debounced state of the GPIO
         var rx_buffer = new byte[2];
+        bool lockTaken = false;
+        int lockvar = 0;
 
         while (true)
         {
@@ -289,22 +291,28 @@ public partial class F7GPIOManager : IMeadowIOController
                 var pin = irq & 0xf;
                 IPin ipin;
 
-
-                lock (_interruptPins)   //FIXME: If this is supposed to keep modifications from
-                                        //happening on the array, lock()'s are needed at those points also
+                do
                 {
-                    ipin = _interruptPins[port, pin];
-                    if (ipin == null)
-                        continue;
-                }
+                    int existingState = Interlocked.CompareExchange(ref lockvar, 1, 0);
+                    if (0 == existingState)
+                    {
+                        break;
+                    }
+                } while (true);
 
                 try
                 {
+                    ipin = _interruptPins[port, pin];
+                    if (ipin == null)
+                    {
+                        continue;
+                    }
+
                     Interrupt?.Invoke(ipin, state);
                 }
-                catch
+                finally
                 {
-                    Thread.Sleep(5000);
+                    Interlocked.Exchange(ref lockvar, 0);
                 }
             }
         }

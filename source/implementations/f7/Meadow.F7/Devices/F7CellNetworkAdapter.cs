@@ -121,7 +121,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 ResetCellTempData();
 
-                RaiseNetworkDisconnected();
+                RaiseNetworkDisconnected(null);
                 break;
             case CellFunction.NetworkAtCmdEvent:
                 Resolver.Log.Trace("Cell at cmd event triggered!");

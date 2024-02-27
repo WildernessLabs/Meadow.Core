@@ -60,7 +60,7 @@ public partial class F7FeatherV2 : F7FeatherBase
         return new BatteryInfo
         {
             // on V2 there is a voltage divider 2 x 499R and the voltage is taken from the center of the divider, effectively halving the input
-            Voltage = _adc_bat.Value?.Voltage * 2
+            Voltage = _adc_bat.Value?.Read().Result * 2
         };
     }
 }

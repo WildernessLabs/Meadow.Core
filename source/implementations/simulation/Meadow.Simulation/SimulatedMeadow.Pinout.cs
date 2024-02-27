@@ -68,6 +68,13 @@ public partial class SimulatedPinout : IPinDefinitions
         ));
     }
 
+    public IPin this[string name]
+    {
+        get => AllPins.FirstOrDefault(p =>
+            string.Compare(p.Name, name, true) == 0
+            || string.Compare($"{p.Key}", name, true) == 0);
+    }
+
     public IList<IPin> AllPins => _pins.Values.Cast<IPin>().ToList();
 
     public IPin LED0 => _pins["LED0"];

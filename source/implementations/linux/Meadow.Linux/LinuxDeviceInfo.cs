@@ -1,40 +1,90 @@
 ﻿using Meadow.Hardware;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using RTI = System.Runtime.InteropServices.RuntimeInformation;
 
 namespace Meadow;
 
 public class LinuxDeviceInfo : IDeviceInformation
 {
+    private Dictionary<string, string> _osInfo = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <inheritdoc/>
     public string DeviceName { get; set; }
-    public MeadowPlatform Platform => MeadowPlatform.MeadowForLinux;
+    /// <inheritdoc/>
+    public MeadowPlatform Platform { get; }
+    /// <inheritdoc/>
     public string UniqueID { get; private set; }
+    /// <inheritdoc/>
+    public string Model => _osInfo["PRETTY_NAME"];
+    /// <inheritdoc/>
+    public string OSVersion => _osInfo["VERSION"];
+    /// <inheritdoc/>
+    public string ProcessorType { get; private set; }
+    /// <inheritdoc/>
+    public string ProcessorSerialNumber => "Unknown";
+    /// <inheritdoc/>
+    public string CoprocessorType => "None";
+    /// <inheritdoc/>
+    public string? CoprocessorOSVersion => null;
 
     internal LinuxDeviceInfo()
     {
+        Platform = RTI.ProcessArchitecture switch
+        {
+            Architecture.Arm => MeadowPlatform.EmbeddedLinux,
+            Architecture.Arm64 => MeadowPlatform.EmbeddedLinux,
+            _ => MeadowPlatform.DesktopLinux
+        };
+
         // unique id is at /var/lib/dbus/machine-id
         UniqueID = File.ReadAllText("/var/lib/dbus/machine-id").Trim();
         DeviceName = File.ReadAllText("/etc/hostname").Trim();
 
-        ParseLsb();
+        GetOsInfo();
+        GetCpuInfo();
     }
 
-    private void ParseLsb()
+    private void GetOsInfo()
     {
-        // TODO:
-
-        // /etc/os-release
+        var content = File.ReadAllText("/etc/os-release");
+        var lines = content.Split('\n');
+        foreach (var line in lines)
+        {
+            var items = line.Split('=', StringSplitOptions.RemoveEmptyEntries);
+            if (items.Length == 2)
+            {
+                _osInfo.Add(
+                    items[0].Trim(),
+                    items[1].Replace("\"", string.Empty).Trim());
+            }
+        }
     }
 
-    public string Model => "[TBD]";
+    private void GetCpuInfo()
+    {
+        using var reader = File.OpenText("/proc/cpuinfo");
 
-    public string ProcessorType => "[TBD]";
+        var done = false;
 
-    public string ProcessorSerialNumber => "[TBD]";
+        while (!reader.EndOfStream)
+        {
+            var line = reader.ReadLine();
+            var items = line.Split(':', StringSplitOptions.RemoveEmptyEntries);
+            if (items.Length == 2)
+            {
+                switch (items[0].Trim())
+                {
+                    case "model name":
+                        ProcessorType = items[1].Trim();
+                        done = true;
+                        break;
+                }
+            }
 
-    public string CoprocessorType => "[TBD]";
-
-    public string? CoprocessorOSVersion => "[TBD]";
-
-    public string OSVersion => throw new NotImplementedException();
+            if (done) break;
+        }
+    }
 }

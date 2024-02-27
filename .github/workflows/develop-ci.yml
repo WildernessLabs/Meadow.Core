@@ -41,6 +41,13 @@ jobs:
         path: Meadow.Modbus
         ref: develop        
 
+    - name: Checkout Meadow.Foundation
+      uses: actions/checkout@v3
+      with:
+        repository: WildernessLabs/Meadow.Foundation
+        path: Meadow.Foundation
+        ref: develop        
+        
     - name: Checkout MQTTnet fork
       uses: actions/checkout@v3
       with:
@@ -54,7 +61,7 @@ jobs:
         path: Meadow.Core
         
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version:
           7.0.x

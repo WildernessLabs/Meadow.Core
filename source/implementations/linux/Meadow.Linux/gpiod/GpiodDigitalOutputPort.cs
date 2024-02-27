@@ -3,7 +3,6 @@ using System;
 
 namespace Meadow
 {
-
     public class GpiodDigitalOutputPort : IDigitalOutputPort
     {
         public bool InitialState { get; private set; }
@@ -25,6 +24,11 @@ namespace Meadow
             if (pin is GpiodPin { } gp)
             {
                 Line = Driver.GetLine(gp);
+                Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_OUTPUT);
+            }
+            else if (pin is LinuxFlexiPin { } fp)
+            {
+                Line = Driver.GetLine(fp);
                 Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_OUTPUT);
             }
             else
