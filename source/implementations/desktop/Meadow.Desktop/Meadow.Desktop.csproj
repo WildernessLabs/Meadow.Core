@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.8.0</Version>
+    <Version>1.9.0</Version>
     <Company>Wilderness Labs, Inc</Company>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
