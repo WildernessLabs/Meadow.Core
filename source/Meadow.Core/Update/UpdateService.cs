@@ -65,6 +65,8 @@ public class UpdateService : IUpdateService, ICommandService
     /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateAvailable = default!;
     /// <inheritdoc/>
+    public event UpdateEventHandler OnUpdateProgress = default!;
+    /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateRetrieved = default!;
     /// <inheritdoc/>
     public event UpdateEventHandler OnUpdateSuccess = default!;
@@ -495,6 +497,9 @@ public class UpdateService : IUpdateService, ICommandService
                                 await fileStream.WriteAsync(buffer, 0, bytesRead);
                                 totalBytesDownloaded += bytesRead;
 
+                                message.DownloadProgress = totalBytesDownloaded;
+
+                                OnUpdateProgress?.Invoke(this, message);
                                 Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
                             }
                         }

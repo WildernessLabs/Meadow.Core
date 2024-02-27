@@ -36,7 +36,7 @@ public class NetworkAdapterCollection : INetworkAdapterCollection
         _adapters.Add(adapter);
 
         adapter.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
-        adapter.NetworkDisconnected += (s) => NetworkDisconnected?.Invoke(s);
+        adapter.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
     }
 
     /// <summary>

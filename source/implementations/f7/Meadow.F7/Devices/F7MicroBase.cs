@@ -109,7 +109,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
 
         networkAdapters = new NetworkAdapterCollection();
         networkAdapters.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
-        networkAdapters.NetworkDisconnected += (s) => NetworkDisconnected?.Invoke(s);
+        networkAdapters.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
     }
 
     /// <summary>
