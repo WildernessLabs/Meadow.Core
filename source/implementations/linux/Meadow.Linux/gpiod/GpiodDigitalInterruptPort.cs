@@ -31,9 +31,20 @@ namespace Meadow
 
             line_request_flags flags = line_request_flags.None;
 
+            LineInfo? li = null;
+
             if (pin is GpiodPin { } gp)
             {
-                Line = Driver.GetLine(gp);
+                li = Driver.GetLine(gp);
+            }
+            else if (pin is LinuxFlexiPin { } lp)
+            {
+                li = Driver.GetLine(lp);
+            }
+
+            if (li != null)
+            {
+                Line = li;
                 switch (resistorMode)
                 {
                     case ResistorMode.InternalPullUp:
