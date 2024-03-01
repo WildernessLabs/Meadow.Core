@@ -84,7 +84,7 @@ namespace Meadow
         {
             var state = e.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE ? true : false;
 
-            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, Environment.TickCount) }); // TODO: convert event time?
+            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
         }
 
         protected override void Dispose(bool disposing)
