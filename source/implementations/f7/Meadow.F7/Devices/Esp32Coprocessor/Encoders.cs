@@ -836,21 +836,42 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>DisconnectEventData object.</returns>
         public static MessagePayloads.DisconnectEventData ExtractDisconnectEventData(byte[] buffer, int offset)
         {
-            DisconnectEventData disconnectEventData = new MessagePayloads.DisconnectEventData();
-
-            for (int index = 0; (buffer[index + offset] != 0) && (index < (33 - 1)); index++)
+            DisconnectEventData disconnectEventData = new DisconnectEventData
             {
-                disconnectEventData.Ssid += Convert.ToChar(buffer[index + offset]);
+                Reason = (byte)WiFiDisconnectedReason.Unspecified
+            };
+            if (buffer.Length == 0 || offset > buffer.Length)
+            {
+                return (disconnectEventData); 
             }
-            offset += 33;
-            disconnectEventData.SsidLength = buffer[offset];
-            offset += 1;
-            disconnectEventData.Bssid = new byte[6];
-            Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
-            offset += 6;
-            disconnectEventData.Rssi = buffer[offset];
-            offset += 1;
-            disconnectEventData.Reason = buffer [offset];
+            try
+            {
+                for (int index = 0; (buffer[index + offset] != 0) && (index < (33 - 1)); index++)
+                {
+                    disconnectEventData.Ssid += Convert.ToChar(buffer[index + offset]);
+                }
+                offset += 33;
+                disconnectEventData.SsidLength = buffer[offset];
+                offset += 1;
+                disconnectEventData.Bssid = new byte[6];
+                Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
+                offset += 6;
+                disconnectEventData.Rssi = buffer[offset];
+                offset += 1;
+                disconnectEventData.Reason = buffer[offset];
+            }
+            catch (Exception e)
+            {
+                // Uncomment when debugging. Don't use Log.Error as that may call a network logger.
+                // Console.WriteLine(e);
+                
+                // Create new object to discard partial data that may have been added before exception.
+                disconnectEventData = new DisconnectEventData
+                {
+                    Reason = (byte)WiFiDisconnectedReason.Unspecified
+                };
+            }
+
             return(disconnectEventData);
         }
 
