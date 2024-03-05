@@ -187,6 +187,16 @@ public static partial class MeadowOS
             Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
             Resolver.Log.Error(e.InnerException.StackTrace);
         }
+
+        try
+        {
+            using var file = System.IO.File.CreateText(Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"));
+            file.Write(e.ToString());
+        }
+        catch
+        {
+            // we're already in an error condition - nothing we can really do about this
+        }
     }
 
     private static Dictionary<string, string> LoadSettings()
@@ -712,7 +722,6 @@ public static partial class MeadowOS
         // final shutdown - which really is just an infinite Sleep()
         Shutdown();
     }
-
 }
 
 internal static partial class Interop
