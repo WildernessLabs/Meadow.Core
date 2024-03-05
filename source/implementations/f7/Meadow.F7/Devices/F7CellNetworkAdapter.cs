@@ -180,9 +180,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
-    /// Returns the cell signal quality <b>CSQ</b> at the connection time, if the device is connected, otherwise an empty string
+    /// Returns the cell signal quality <b>CSQ</b> at the connection time, if the device is connected, otherwise 99
     /// </summary>
-    public string Csq
+    public int Csq
     {
         get
         {
@@ -200,7 +200,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 }
             }
 
-            return _csq ?? string.Empty;
+            return int.Parse(_csq ?? "99");
         }
     }
 
@@ -284,7 +284,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="timeout">Timeout to check signal quality.</param>
     /// <returns>A decimal number (0-31) representing the Cell Signal Quality (CSQ), or 99 if unavailable.</returns>
-    public double GetSignalQuality(int timeout)
+    public int GetSignalQuality(int timeout)
     {
         Resolver.Log.Trace("Fetching cellular signal quality... It might take a few minutes and temporary disconnect you from the cellular network.");
 
@@ -313,12 +313,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
 
         var csq = ExtractValue(_at_cmds_output, csqPattern);
-        if (csq == null)
-        {
-            return 99;
-        }
-
-        return Convert.ToDouble(csq);
+        return int.Parse(csq ?? "99");
     }
 
     /// <summary>
