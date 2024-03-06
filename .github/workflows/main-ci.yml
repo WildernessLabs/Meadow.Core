@@ -18,12 +18,16 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: Meadow.Core
-        ref: main
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 7.0.x
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 8.0.x
 
     - name: Workload Restore Meadow.Core
       run: dotnet workload restore Meadow.Core/source/Meadow.Core.sln
