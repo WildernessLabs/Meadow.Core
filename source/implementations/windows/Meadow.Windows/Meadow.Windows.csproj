@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <LangVersion>10.0</LangVersion>
-    <TargetFrameworks>net7.0-windows;net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0-windows;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Windows</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
@@ -23,7 +23,7 @@
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
     <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
-    <ProjectReference Condition=" '$(TargetFramework)' == 'net7.0-windows'" Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.WinForms\Driver\Displays.WinForms.csproj" />
+    <ProjectReference Condition=" '$(TargetFramework)' == 'net8.0-windows'" Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.WinForms\Driver\Displays.WinForms.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

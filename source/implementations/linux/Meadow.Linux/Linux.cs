@@ -7,7 +7,7 @@ using System;
 namespace Meadow
 {
     public class Linux : IMeadowDevice
-#if NET7_0
+#if NET8_0
         , IPixelDisplayProvider
 #endif
     {
@@ -54,7 +54,7 @@ namespace Meadow
                 );
         }
 
-#if NET7_0
+#if NET8_0
         public IPixelDisplay CreateDisplay(int? width = null, int? height = null)
         {
             return new Meadow.Foundation.Displays.GtkDisplay(width  ?? 320, height ?? 240, ColorMode.Format16bppRgb565);

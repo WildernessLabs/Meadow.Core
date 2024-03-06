@@ -1,7 +1,7 @@
 <Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
     <Version>1.9.0</Version>
-    <TargetFrameworks>netstandard2.1;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AssemblyName>Meadow.Linux</AssemblyName>   
     <Company>Wilderness Labs, Inc</Company>
@@ -25,7 +25,7 @@
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
-    <ProjectReference Condition=" '$(TargetFramework)' == 'net7.0'" Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj" />
+    <ProjectReference Condition=" '$(TargetFramework)' == 'net8.0'" Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
