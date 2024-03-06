@@ -12,13 +12,13 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
     private TimeSpan _debounceDuration;
     private TimeSpan _glitchDuration;
     private DigitalPortResult _interruptResult = new DigitalPortResult();
-    private DigitalState _newState = new DigitalState(false, -1);
-    private DigitalState _oldState = new DigitalState(false, -1);
+    private DigitalState _newState = new DigitalState(false, DateTime.MinValue);
+    private DigitalState _oldState = new DigitalState(false, DateTime.MinValue);
 
     /// <inheritdoc/>
     protected IMeadowIOController IOController { get; set; }
 
-    private int LastEventTime { get; set; } = -1;
+    private DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
     /// <summary>
     /// Protected constructor for creating a <see cref="DigitalInterruptPort"/>.
@@ -135,10 +135,10 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
             {
                 // this is all to prevent new-ing up (and thereby preventing GC stuff)
                 _oldState.Time = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                _newState.Time = this.LastEventTime = Environment.TickCount;
+                _newState.Time = this.LastEventTime = DateTime.Now;
                 _oldState.State = !state;
                 _newState.State = state;
-                _interruptResult.Old = (LastEventTime == -1) ? null : _oldState;
+                _interruptResult.Old = (LastEventTime == DateTime.MinValue) ? null : _oldState;
                 _interruptResult.New = _newState;
             }
             RaiseChangedAndNotify(_interruptResult);
