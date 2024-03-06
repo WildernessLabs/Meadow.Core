@@ -3,6 +3,7 @@ name: Develop Build
 on:
   workflow_dispatch:
   pull_request:
+    branches: [ develop ]
   push:
     branches: [ develop ]
 
@@ -64,7 +65,7 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version:
-          7.0.x
+          8.0.x
           
     - name: Workload Restore Meadow.Core
       run: dotnet workload restore Meadow.Core/source/Meadow.Core.sln
