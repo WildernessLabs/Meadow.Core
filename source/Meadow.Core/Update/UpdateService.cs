@@ -816,18 +816,29 @@ public class UpdateService : IUpdateService, ICommandService
             value.Action(command);
         }
 
-        // Then attempt to run the typed command subscription, Action<T> where T : ICommand, new(),
-        // if available. Also prevent user from running the untyped command subscription.
+        (Type commandType, Action<object> action)? subscription = null;
+
         if (CommandSubscriptions.TryGetValue(commandName.ToUpperInvariant(), out value))
         {
-            Resolver.Log.Trace($"Processing Meadow command of type '{value.CommandType.Name}'...");
+            subscription = value;
+        }
+        else if (CommandSubscriptions.TryGetValue($"{commandName.ToUpperInvariant()}COMMAND", out value))
+        {
+            subscription = value;
+        }
+
+        // Then attempt to run the typed command subscription, Action<T> where T : ICommand, new(),
+        // if available. Also prevent user from running the untyped command subscription.
+        if (subscription != null)
+        {
+            Resolver.Log.Trace($"Processing Meadow command of type '{subscription.Value.commandType.Name}'...");
 
             object command;
             try
             {
                 command = message.Payload != null
-                    ? JsonSerializer.Deserialize(message.Payload, value.CommandType, jsonSerializerOptions) ?? Activator.CreateInstance(value.CommandType)
-                    : Activator.CreateInstance(value.CommandType);
+                    ? JsonSerializer.Deserialize(message.Payload, value.CommandType, jsonSerializerOptions) ?? Activator.CreateInstance(subscription.Value.commandType)
+                    : Activator.CreateInstance(subscription.Value.commandType);
             }
             catch (JsonException ex)
             {
@@ -835,7 +846,7 @@ public class UpdateService : IUpdateService, ICommandService
                 return;
             }
 
-            value.Action(command);
+            subscription.Value.action.Invoke(command);
         }
     }
 }
