@@ -118,6 +118,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 break;
             case CellFunction.NetworkDisconnectedEvent:
                 Resolver.Log.Trace("Cell disconnected event triggered!");
+                
+                Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
 
                 ResetCellTempData();
 
@@ -237,21 +239,22 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
     /// <summary>
     /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
-    /// </summary>
-    private string ParseError(string input)
+        /// </summary>
+    private string ParseCellConnectionError(string input)
     {
         if (input != null)
         {
-            string pattern = @"\+CME ERROR: (.+)$";
+            string pattern = @"\+CME ERROR:\s*(.+)";
             Match match = Regex.Match(input, pattern);
 
             if (match.Success && match.Groups.Count >= 2)
             {
-                return match.Groups[1].Value;
+                return match.Groups[1].Value.Trim();
             }
         }
-        return "Undefined Cell error";
+        return string.Empty;
     }
+
 
     /// <summary>
     /// Gets the error message corresponding to the current cell connection error code.
@@ -261,17 +264,24 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         int errno = Core.Interop.Nuttx.meadow_get_cell_error();
 
+        var logInfoMessage = AtCmdsOutput.Length > 1 // To avoid logging potential residual data from UART
+            ? $"You can also look at the AT commands logs for extra information: {AtCmdsOutput}"
+            : "";
+
         CellError cellError = (CellError)errno;
+        var cellErrorMessage = ParseCellConnectionError(_at_cmds_output);
 
         return cellError switch
         {
             CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
             CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the correct module name.",
-            CellError.NetworkConnectionLost => $"Cellular connection lost: {ParseError(_at_cmds_output)}. Please consult the cell module datasheet to know more about it.",
-            CellError.NetworkTimeout => AtCmdsOutput.Length > 0
-            ? $"Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured. You can also look at the raw connection logs for more information: {AtCmdsOutput}"
-            : "Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured.",
-            _ => "An undefined error occurred. Please consult the troubleshooting section of the cellular documentation for more information.",
+            CellError.NetworkConnectionLost => !string.IsNullOrEmpty(cellErrorMessage)
+                ? $"Cellular connection lost, please check your antenna and signal coverage, error: {cellErrorMessage}, consult the cell module datasheet to know more about that."
+                : $"Cellular connection lost, please check your antenna and signal coverage. {logInfoMessage}",
+            CellError.NetworkTimeout => !string.IsNullOrEmpty(cellErrorMessage)
+                ? $"Timeout occurred while attempting to connect, error: {cellErrorMessage}. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured."
+                : $"Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured. {logInfoMessage}",
+            _ => $"An undefined error occurred. Please consult the troubleshooting section of the cellular documentation for more information. {logInfoMessage}",
         };
     }
     
