@@ -128,6 +128,11 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 UpdateAtCmdsOutput();
                 break;
+            case CellFunction.NetworkErrorEvent:
+                Resolver.Log.Trace("Cell error event triggered!");
+
+                Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
+                break;
             default:
                 Resolver.Log.Trace("Event type not found");
                 break;
@@ -248,6 +253,28 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         return "Undefined Cell error";
     }
 
+    /// <summary>
+    /// Gets the error message corresponding to the current cell connection error code.
+    /// If the error code is not recognized, returns "Undefined error".
+    /// </summary>
+    private string GetCellConnectionError()
+    {
+        int errno = Core.Interop.Nuttx.meadow_get_cell_error();
+
+        CellError cellError = (CellError)errno;
+
+        return cellError switch
+        {
+            CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
+            CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the correct module name.",
+            CellError.NetworkConnectionLost => $"Cellular connection lost: {ParseError(_at_cmds_output)}. Please consult the cell module datasheet to know more about it.",
+            CellError.NetworkTimeout => AtCmdsOutput.Length > 0
+            ? $"Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured. You can also look at the raw connection logs for more information: {AtCmdsOutput}"
+            : "Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured.",
+            _ => "An undefined error occurred. Please consult the troubleshooting section of the cellular documentation for more information.",
+        };
+    }
+    
     /// <summary>
     /// Set the cell state
     /// </summary>
@@ -390,24 +417,5 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             return string.Empty;
         }
         return gnssAtCmdsOutput;
-    }
-
-    /// <summary>
-    /// Returns the error string, otherwise <b>Undefined error</b>
-    /// </summary>
-    private string GetError()
-    {
-        int errno = Core.Interop.Nuttx.meadow_get_cell_error();
-
-        CellError cellError = (CellError)errno;
-
-        return cellError switch
-        {
-            CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
-            CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the right module name.",
-            CellError.NetworkConnectionLost => ParseError(_at_cmds_output),
-            CellError.NetworkTimeout => "Timeout. Please check your pinout and wire connections to the module.",
-            _ => "Undefined error",
-        };
     }
 }
