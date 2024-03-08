@@ -1,6 +1,7 @@
 ﻿using Meadow.Cloud;
 using Meadow.Hardware;
 using MQTTnet;
+using MQTTnet.Adapter;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
@@ -218,7 +219,7 @@ public class UpdateService : IUpdateService, ICommandService
     /// </summary>
     private bool ShouldAuthenticate()
     {
-        return (DateTime.UtcNow - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
+        return ClientOptions == null || (DateTime.UtcNow - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod;
     }
 
     private async void UpdateStateMachine()
@@ -316,6 +317,19 @@ public class UpdateService : IUpdateService, ICommandService
                             State = UpdateState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Config.CloudConnectRetrySeconds));
+                        }
+                        catch (MqttConnectingFailedException cfe)
+                        {
+                            Resolver.Log.Debug($"MQTT Connection failed: {cfe.Message}:{cfe.ResultCode}");
+                            State = UpdateState.Disconnected;
+                            switch (cfe.ResultCode)
+                            {
+                                case MqttClientConnectResultCode.NotAuthorized:
+                                case MqttClientConnectResultCode.BadUserNameOrPassword:
+                                    // force re-auth
+                                    ClientOptions = null;
+                                    break;
+                            }
                         }
                         catch (MqttCommunicationException e)
                         {
