@@ -444,6 +444,10 @@ public static partial class MeadowOS
                     switch (hw)
                     {
                         case Interop.HardwareVersion.Unknown:
+                            if (allApps.Length > 1)
+                            {
+                                Resolver.Log.Warn("Multi-targeting of F7 devices is only supported on OS 1.9 and later");
+                            }
                             return (app, devicetype);
                         case Interop.HardwareVersion.F7FeatherV1:
                             if (devicetype.FullName == "Meadow.Devices.F7FeatherV1")
