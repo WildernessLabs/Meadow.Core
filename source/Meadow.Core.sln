@@ -56,6 +56,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Desktop", "implement
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Foundation.Core", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj", "{0D11769B-C1D3-4602-8A6E-1CCF5DC07EE7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Displays.WinForms", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.WinForms\Driver\Displays.WinForms.csproj", "{4F108CFF-F50F-4006-A7CA-03126409CDD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Graphics.MicroGraphics", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Graphics.MicroGraphics\Driver\Graphics.MicroGraphics.csproj", "{68AC7BA0-0425-4100-91DB-A157B9D9F679}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Displays.Gtk", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj", "{8F9EBC55-E70A-4C55-95C5-8B75480103DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
@@ -180,6 +186,27 @@ Global
 		{0D11769B-C1D3-4602-8A6E-1CCF5DC07EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D11769B-C1D3-4602-8A6E-1CCF5DC07EE7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D11769B-C1D3-4602-8A6E-1CCF5DC07EE7}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Core|Any CPU.Deploy.0 = Debug|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -207,6 +234,9 @@ Global
 		{915AC564-3365-4D75-9F85-210A1428C8C9} = {CC469899-D08C-417C-A908-C052CA155BEC}
 		{FAAB5C33-D500-4414-B83C-605CCD08598C} = {915AC564-3365-4D75-9F85-210A1428C8C9}
 		{0D11769B-C1D3-4602-8A6E-1CCF5DC07EE7} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
+		{4F108CFF-F50F-4006-A7CA-03126409CDD8} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
+		{68AC7BA0-0425-4100-91DB-A157B9D9F679} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
+		{8F9EBC55-E70A-4C55-95C5-8B75480103DA} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}
