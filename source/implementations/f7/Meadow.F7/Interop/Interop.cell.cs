@@ -17,15 +17,12 @@ internal static partial class Interop
         public static extern int meadow_get_cell_at_cmds_output(IntPtr buf);
 
         [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern int meadow_cell_scanner(IntPtr buf);
-
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern void meadow_cell_change_state(int s);
 
         [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern int meadow_get_cell_error();
 
-        public static List<CellNetwork>? Parse(string input)
+        public static List<CellNetwork>? ParseCellNetworkScannerOutput(string input)
         {
             if (input.Contains("+CME ERROR"))
             {
@@ -80,36 +77,6 @@ internal static partial class Interop
             }
 
             return cellNetworks;
-        }
-
-        public static unsafe CellNetwork[] MeadowCellNetworkScanner()
-        {
-            var buffer = Marshal.AllocHGlobal(1024);
-
-            try
-            {
-                Resolver.Log.Info("Scanning cell networks, it might take a few minutes...");
-                var len = meadow_cell_scanner(buffer);
-                if (len > 0)
-                {
-                    var data = Encoding.UTF8.GetString((byte*)buffer.ToPointer(), len);
-
-                    return Parse(data).ToArray();
-                }
-                else
-                {
-                    throw new System.IO.IOException("No available networks found, please ensure that your device is in scanning mode.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"No available networks found: {ex.Message}");
-                return Array.Empty<CellNetwork>();
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buffer);
-            }
         }
     }
 }

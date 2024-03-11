@@ -21,6 +21,11 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _at_cmds_output;
 
     /// <summary>
+    /// Represents a signal strength value that indicates no signal or an extremely weak signal.
+    /// </summary>
+    public const int NoSignal = -9999;
+
+    /// <summary>
     /// Extract values from an <b>input</b> string based on a regex <b>pattern</b>
     /// </summary>
     private static string ExtractValue(string? input, string pattern)
@@ -37,6 +42,20 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
 
         return string.Empty;
+    }
+
+    /// <summary>
+    /// Converts CSQ (Cellular Signal Quality) to dBm.
+    /// CSQ is a value from 0 to 31, where 99 indicates no signal or unknown signal strength.
+    /// </summary>
+    /// <param name="csq">The CSQ value to convert.</param>
+    /// <returns>The signal strength in dBm, or <b>NoSignal</b> if CSQ is 99 (no signal).</returns>
+    private int ConvertCsqToDbm(int csq) {
+        if (csq == 99) {
+            return NoSignal; // No signal or unknown signal strength
+        } else {
+            return -113 + 2 * csq;
+        }
     }
 
     /// <summary>
@@ -187,7 +206,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
-    /// Returns the cell signal quality <b>CSQ</b> at the connection time, if the device is connected, otherwise 99
+    /// Returns the cell signal quality <b>CSQ</b> in dBm at the connection time, if the device is connected, otherwise returns <b>NoSignal</b>
     /// </summary>
     public int Csq
     {
@@ -207,7 +226,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 }
             }
 
-            return int.Parse(_csq ?? "99");
+            var csqValue = int.Parse(_csq ?? "99");
+            return ConvertCsqToDbm(csqValue);
         }
     }
 
@@ -234,12 +254,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     public CellNetwork[] OfflineNetworkScan()
     {
-        return Core.Interop.Nuttx.MeadowCellNetworkScanner();
+        Resolver.Log.Error("OfflineNetworkScan method has been deprecated! Please consult the cellular docs to learn how to use the network scanner");
+        return Array.Empty<CellNetwork>();
     }
 
     /// <summary>
     /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
-        /// </summary>
+    /// </summary>
     private string ParseCellConnectionError(string input)
     {
         if (input != null)
@@ -277,7 +298,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the correct module name.",
             CellError.NetworkConnectionLost => !string.IsNullOrEmpty(cellErrorMessage)
                 ? $"Cellular connection lost, please check your antenna and signal coverage, error: {cellErrorMessage}, consult the cell module datasheet to know more about that."
-                : $"Cellular connection lost, please check your antenna and signal coverage. {logInfoMessage}",
+                : $"Cellular connection lost, please check your antenna and signal coverage.",
             CellError.NetworkTimeout => !string.IsNullOrEmpty(cellErrorMessage)
                 ? $"Timeout occurred while attempting to connect, error: {cellErrorMessage}. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured."
                 : $"Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured. {logInfoMessage}",
@@ -320,7 +341,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// Get current signal quality
     /// </summary>
     /// <param name="timeout">Timeout to check signal quality.</param>
-    /// <returns>A decimal number (0-31) representing the Cell Signal Quality (CSQ), or 99 if unavailable.</returns>
+    /// <returns>A number representing the Cell Signal Quality (CSQ) in dBm, or <b>NoSignal</b> if unavailable.</returns>
     public int GetSignalQuality(int timeout)
     {
         Resolver.Log.Trace("Fetching cellular signal quality... It might take a few minutes and temporary disconnect you from the cellular network.");
@@ -346,11 +367,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         if (_at_cmds_output == null)
         {
             Resolver.Log.Error("AT commands output not found!");
-            return 99;
+            return NoSignal;
         }
 
-        var csq = ExtractValue(_at_cmds_output, csqPattern);
-        return int.Parse(csq ?? "99");
+        var csqValueStr = ExtractValue(_at_cmds_output, csqPattern);
+        int csqValue = String.IsNullOrEmpty(csqValueStr) ? 99 : int.Parse(csqValueStr);
+        return ConvertCsqToDbm(csqValue);
     }
 
     /// <summary>
@@ -383,7 +405,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             throw new System.IO.IOException("No available networks");
         }
 
-        return Core.Interop.Nuttx.Parse(_at_cmds_output).ToArray();
+        return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output).ToArray();
     }
 
     /// <summary>
