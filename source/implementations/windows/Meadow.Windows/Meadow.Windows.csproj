@@ -17,6 +17,8 @@
     <PackageTags>Meadow</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>An implementation of the Meadow software stack for Windows targets</Description>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
     
   <ItemGroup>

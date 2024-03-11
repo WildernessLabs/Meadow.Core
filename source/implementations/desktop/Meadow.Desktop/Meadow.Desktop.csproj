@@ -9,7 +9,7 @@
     <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Desktop</AssemblyName>
-      
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>          
   </PropertyGroup>
     
   <ItemGroup>
