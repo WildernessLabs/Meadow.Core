@@ -57,8 +57,8 @@ internal static partial class Interop
                     mode = modeValue switch
                     {
                         0 => CellNetworkMode.GSM,
-                        7 or 8 => CellNetworkMode.CAT_M1,
-                        9 => CellNetworkMode.NB_IoT,
+                        7 or 8 => CellNetworkMode.CATM1,
+                        9 => CellNetworkMode.NBIOT,
                         _ => CellNetworkMode.GSM,
                     };
                 }
