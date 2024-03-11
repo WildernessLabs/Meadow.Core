@@ -597,6 +597,11 @@ public static partial class MeadowOS
 
             App = app;
 
+            var cloudConnectionService = new MeadowCloudConnectionService();
+            cloudConnectionService.Start();
+            var commandService = new MeadowCloudCommandService(cloudConnectionService);
+
+            /*
             var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
             Resolver.Services.Add<IUpdateService>(updateService);
 
@@ -623,6 +628,7 @@ public static partial class MeadowOS
             {
                 Resolver.Log.Info($"Health Metrics disabled.");
             }
+            */
 
             return true;
         }
