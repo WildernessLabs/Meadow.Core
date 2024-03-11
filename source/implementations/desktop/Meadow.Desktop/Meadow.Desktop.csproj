@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <LangVersion>10.0</LangVersion>
-    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Desktop</AssemblyName>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>          
@@ -18,6 +18,5 @@
     <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
     <ProjectReference Include="..\..\linux\Meadow.Linux\Meadow.Linux.csproj" />
     <ProjectReference Include="..\..\mac\Meadow.Mac\Meadow.Mac.csproj" />
-    <ProjectReference Condition=" '$(TargetFramework)' == 'net8.0-windows'" Include="..\..\windows\Meadow.Windows\Meadow.Windows.csproj" />
   </ItemGroup>
 </Project>
