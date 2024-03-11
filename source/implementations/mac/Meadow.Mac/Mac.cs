@@ -36,7 +36,14 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
 
     public IPixelDisplay CreateDisplay(int? width = null, int? height = null)
     {
-        return new Meadow.Foundation.Displays.GtkDisplay(width ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
+        try
+        {
+            return new Meadow.Foundation.Displays.GtkDisplay(width ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
+        }
+        catch (DllNotFoundException ex)
+        {
+            throw new Exception("GTK Does not appear to be installed. Use brew to install GTK. See the Meadow.Desktop documentation for details.", ex);
+        }
     }
 
     public II2cBus CreateI2cBus(int busNumber = 0)
