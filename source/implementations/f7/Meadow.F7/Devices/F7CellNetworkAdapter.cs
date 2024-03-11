@@ -70,6 +70,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
     /// <summary>
     /// Get the cell module AT commands output <b>AtCmdsOutput</b> at the connection time, and then cache it.
+    /// Avoid calling this method during operations such as scanning networks or fetching signal quality to prevent interference with ongoing processes.
     /// </summary>
     private void UpdateAtCmdsOutput()
     {
@@ -233,6 +234,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
     /// <summary>
     /// Returns the cell module AT commands output <b>AtCmdsOutput</b> if the device tried to connect at least once, otherwise an empty string
+    /// Avoid calling this method during operations such as scanning networks or fetching signal quality to prevent interference with ongoing processes.
     /// </summary>
     public string AtCmdsOutput
     {
@@ -285,8 +287,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         int errno = Core.Interop.Nuttx.meadow_get_cell_error();
 
-        var logInfoMessage = AtCmdsOutput.Length > 1 // To avoid logging potential residual data from UART
-            ? $"You can also look at the AT commands logs for extra information: {AtCmdsOutput}"
+        var logInfoMessage = _at_cmds_output?.Length > 1 // To avoid logging potential residual data from UART
+            ? $"You can also look at the AT commands logs for extra information: {_at_cmds_output}"
             : "";
 
         CellError cellError = (CellError)errno;
@@ -353,6 +355,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         while (timeout > 0)
         {
+            // Ensure that the _at_cmds_output is not updated by another method while waiting for the signal quality value
             if (_at_cmds_output != string.Empty)
             {
                 break;
@@ -389,6 +392,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         while (timeout > 0)
         {
+            // Ensure that the _at_cmds_output is not updated by another method while waiting for the cell network's output
             if (_at_cmds_output != string.Empty)
             {
                 break;
@@ -425,6 +429,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         //ToDo: switch to TimeSpan
         while (timeout > 0)
         {
+            // Ensure that the _at_cmds_output is not updated by another method while waiting for the GNSS fixes
             if (_at_cmds_output != string.Empty)
             {
                 break;
