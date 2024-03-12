@@ -598,9 +598,11 @@ public static partial class MeadowOS
             App = app;
 
             var cloudConnectionService = new MeadowCloudConnectionService();
-            cloudConnectionService.Start();
+            Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
             var commandService = new MeadowCloudCommandService(cloudConnectionService);
+            Resolver.Services.Add<ICommandService>(commandService);
 
+            cloudConnectionService.Start();
             /*
             var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
             Resolver.Services.Add<IUpdateService>(updateService);

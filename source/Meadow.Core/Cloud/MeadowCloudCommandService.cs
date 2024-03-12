@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace Meadow;
 
-internal class MeadowCloudCommandService
+internal class MeadowCloudCommandService : ICommandService
 {
     private const string UntypedCommandTypeName = "<<<MEADOWCOMMAND>>>";
 
@@ -26,7 +26,7 @@ internal class MeadowCloudCommandService
     {
         if (e.Topic.EndsWith($"/commands/{Resolver.Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
         {
-            Resolver.Log.Info("Meadow command received", "Cloud");
+            Resolver.Log.Info("Meadow command received", "cloud");
             ProcessPublishedCommand(e);
         }
     }
@@ -36,7 +36,7 @@ internal class MeadowCloudCommandService
         _commandSubscriptions[UntypedCommandTypeName] = (CommandType: typeof(MeadowCommand), Action: x => action((MeadowCommand)x));
     }
 
-    public void Subscribe<T>(Action<T> action)
+    void ICommandService.Subscribe<T>(Action<T> action)
     {
         var commandTypeName = typeof(T).Name;
         _commandSubscriptions[commandTypeName.ToUpperInvariant()] = (CommandType: typeof(T), Action: x => action((T)x));
@@ -47,7 +47,7 @@ internal class MeadowCloudCommandService
         _commandSubscriptions.TryRemove(UntypedCommandTypeName, out _);
     }
 
-    public void Unsubscribe<T>()
+    void ICommandService.Unsubscribe<T>()
     {
         var commandTypeName = typeof(T).Name;
         _commandSubscriptions.TryRemove(commandTypeName.ToUpperInvariant(), out _);
@@ -75,7 +75,7 @@ internal class MeadowCloudCommandService
         // First attempt to run the untyped command subscription, Action<MeadowCommand>, if available.
         if (_commandSubscriptions.TryGetValue(UntypedCommandTypeName, out (Type CommandType, Action<object> Action) value))
         {
-            Resolver.Log.Trace($"Processing generic Meadow command with command name '{commandName}'...");
+            Resolver.Log.Trace($"Processing generic Meadow command with command name '{commandName}'...", "cloud");
 
             IReadOnlyDictionary<string, object>? arguments;
             try
@@ -109,7 +109,7 @@ internal class MeadowCloudCommandService
         // if available. Also prevent user from running the untyped command subscription.
         if (subscription != null)
         {
-            Resolver.Log.Trace($"Processing Meadow command of type '{subscription.Value.commandType.Name}'...");
+            Resolver.Log.Trace($"Processing Meadow command of type '{subscription.Value.commandType.Name}'...", "cloud");
 
             object command;
             try

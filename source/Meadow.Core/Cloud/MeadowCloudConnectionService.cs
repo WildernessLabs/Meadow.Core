@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using Meadow.Update;
 using MQTTnet;
 using MQTTnet.Client;
@@ -11,7 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -23,10 +26,13 @@ using SRI = System.Runtime.InteropServices;
 
 namespace Meadow;
 
-internal class MeadowCloudConnectionService
+internal class MeadowCloudConnectionService : IMeadowCloudService
 {
     public event EventHandler<string>? ConnectionError;
-    public event EventHandler<MqttApplicationMessage>? MqttMessageReceived;
+    public event EventHandler<CloudConnectionState>? ConnectionStateChanged;
+
+    internal event EventHandler<MqttApplicationMessage>? MqttMessageReceived;
+
     /// <summary>
     /// Retry period the service will use to attempt network reconnection
     /// </summary>
@@ -42,23 +48,39 @@ internal class MeadowCloudConnectionService
     private string _mqttServer = "mqtt.meadowcloud.co"; // TODO: get from config
     private int _mqttPort = 8883; // TODO: get from config
     private const int _authTimeoutSeconds = 120; // TODO: get from config
-    private string _cloudAuthHostname = "https://www.meadowcloud.co";
+    private string _cloudAuthHostname = "https://www.meadowcloud.co";// TODO: get from config
+    private string _cloudDataHostname = "https://collector.meadowcloud.co";// TODO: get from config
 
     private List<string> _subscriptionTopics = new();
-    private bool _stopService = false;
+    private bool _stopService = true;
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
     private string? _jwt = null;
-
-    public CloudConnectionState State { get; private set; } = CloudConnectionState.Unknown;
+    private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
+    private Thread? _stateMachineThread;
 
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
 
+    internal MeadowCloudConnectionService()
+    {
+    }
+
+    public CloudConnectionState ConnectionState
+    {
+        get => _connectionState;
+        private set
+        {
+            if (value == ConnectionState) return;
+            _connectionState = value;
+            ConnectionStateChanged?.Invoke(this, ConnectionState);
+        }
+    }
+
     public void AddSubscription(string topic)
     {
         // pause the state machine
-        var previousState = State;
-        State = CloudConnectionState.Paused;
+        var previousState = ConnectionState;
+        ConnectionState = CloudConnectionState.Paused;
 
         Task.Run(async () =>
         {
@@ -73,10 +95,10 @@ internal class MeadowCloudConnectionService
 
             if (previousState == CloudConnectionState.Connected)
             {
-                State = CloudConnectionState.Subscribing;
+                ConnectionState = CloudConnectionState.Subscribing;
             }
 
-            State = previousState;
+            ConnectionState = previousState;
         });
     }
 
@@ -94,10 +116,12 @@ internal class MeadowCloudConnectionService
     /// </summary>
     public void Start()
     {
-        if (State == CloudConnectionState.Unknown)
+        Resolver.Log.Info($"Start state: {ConnectionState}");
+
+        if (_stateMachineThread == null)
         {
-            new Thread(() => UpdateStateMachine())
-                .Start();
+            _stateMachineThread = new Thread(() => UpdateStateMachine());
+            _stateMachineThread.Start();
         }
     }
 
@@ -109,14 +133,14 @@ internal class MeadowCloudConnectionService
         MqttClient.ConnectedHandler = new MqttClientConnectedHandlerDelegate((f) =>
         {
             Resolver.Log.Debug("MQTT connected");
-            State = CloudConnectionState.Subscribing;
+            ConnectionState = CloudConnectionState.Subscribing;
             return Task.CompletedTask;
         });
 
         MqttClient.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate((f) =>
         {
             Resolver.Log.Debug("MQTT disconnected");
-            State = CloudConnectionState.Disconnected;
+            ConnectionState = CloudConnectionState.Disconnected;
             return Task.CompletedTask;
         });
 
@@ -130,6 +154,8 @@ internal class MeadowCloudConnectionService
 
     private async void UpdateStateMachine()
     {
+        Resolver.Log.Info($"UpdateStateMachine 1");
+
         _stopService = false;
 
         // we need to wait for the network stack to come up on the F7 platforms
@@ -142,27 +168,27 @@ internal class MeadowCloudConnectionService
                 break;
         }
 
+        Resolver.Log.Info($"UpdateStateMachine 2");
+
         Initialize();
 
-        State = CloudConnectionState.Disconnected;
+        ConnectionState = CloudConnectionState.Disconnected;
 
         var nic = Resolver.Device?.NetworkAdapters?.Primary<INetworkAdapter>();
 
         // update state machine
         while (!_stopService)
         {
-            Resolver.Log.Info($"Cloud Connection State: {State}");
-
-            switch (State)
+            switch (ConnectionState)
             {
                 case CloudConnectionState.Disconnected:
                     if (ShouldAuthenticate())
                     {
-                        State = CloudConnectionState.Authenticating;
+                        ConnectionState = CloudConnectionState.Authenticating;
                     }
                     else
                     {
-                        State = CloudConnectionState.Connecting;
+                        ConnectionState = CloudConnectionState.Connecting;
                     }
                     break;
                 case CloudConnectionState.Authenticating:
@@ -172,7 +198,7 @@ internal class MeadowCloudConnectionService
                         {
                             // Update the last authentication time when successfully authenticated
                             _lastAuthenticationTime = DateTime.UtcNow;
-                            State = CloudConnectionState.Connecting;
+                            ConnectionState = CloudConnectionState.Connecting;
                         }
                         else
                         {
@@ -193,7 +219,7 @@ internal class MeadowCloudConnectionService
                 case CloudConnectionState.Connecting:
                     if (ClientOptions == null)
                     {
-                        Resolver.Log.Debug("Creating MQTT client options");
+                        Resolver.Log.Debug("Creating MQTT client options", "cloud");
                         var builder = new MqttClientOptionsBuilder()
                             .WithTcpServer(_mqttServer, _mqttPort)
                             .WithTls(tlsParameters =>
@@ -222,21 +248,21 @@ internal class MeadowCloudConnectionService
                         catch (MqttCommunicationTimedOutException)
                         {
                             Resolver.Log.Debug("Timeout connecting to Update Service");
-                            State = CloudConnectionState.Disconnected;
+                            ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
                         }
                         catch (MqttCommunicationException e)
                         {
                             Resolver.Log.Debug($"MQTT Error connecting to Update Service: {e.Message}");
-                            State = CloudConnectionState.Disconnected;
+                            ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
                         }
                         catch (Exception ex)
                         {
                             Resolver.Log.Error($"Error connecting to Update Service: {ex.Message}");
-                            State = CloudConnectionState.Disconnected;
+                            ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
                         }
@@ -282,7 +308,7 @@ internal class MeadowCloudConnectionService
                             Resolver.Log.Debug($"Update service subscribing to '{topicName}'");
                             await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
                         }
-                        State = CloudConnectionState.Connected;
+                        ConnectionState = CloudConnectionState.Connected;
                     }
                     catch (Exception ex)
                     {
@@ -291,7 +317,7 @@ internal class MeadowCloudConnectionService
                         // if subscribing fails, then we need to disconnect from the server
                         await MqttClient.DisconnectAsync();
 
-                        State = CloudConnectionState.Disconnected;
+                        ConnectionState = CloudConnectionState.Disconnected;
                     }
                     break;
                 case CloudConnectionState.Connected:
@@ -300,7 +326,8 @@ internal class MeadowCloudConnectionService
             }
         }
 
-        State = CloudConnectionState.Unknown;
+        ConnectionState = CloudConnectionState.Unknown;
+        _stateMachineThread = null;
     }
 
     private JsonWebTokenPayload GetJsonWebTokenPayload(string jwt)
@@ -472,6 +499,100 @@ internal class MeadowCloudConnectionService
                 return false;
             }
         }
+    }
+
+    /// <inheritdoc/>
+    public Task<bool> SendLog(CloudLog log)
+    {
+        return Send(log, "/api/logs");
+    }
+
+    /// <inheritdoc/>
+    public Task<bool> SendEvent(CloudEvent cloudEvent)
+    {
+        return Send(cloudEvent, "/api/events");
+    }
+
+    private async Task<bool> Send<T>(T item, string endpoint)
+    {
+        int attempt = 0;
+        int maxRetries = 1;
+        string errorMessage;
+
+        using HttpClient client = new HttpClient();
+
+    retry:
+        if (ConnectionState != CloudConnectionState.Connected)
+        {
+            // TODO: store and forward!
+            return false;
+        }
+
+        client.BaseAddress = new Uri(_cloudDataHostname);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+
+        var serializeOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        var json = JsonSerializer.Serialize(item, serializeOptions);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        Resolver.Log.Debug($"making cloud log httprequest with json: {json}");
+
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await client.PostAsync($"{endpoint}", content);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message}";
+            Resolver.Log.Warn(errorMessage);
+            //                ServiceError?.Invoke(this, errorMessage);
+
+            return false;
+        }
+
+        bool result;
+        if (response.IsSuccessStatusCode)
+        {
+            Resolver.Log.Debug("cloud send success");
+            result = true;
+        }
+        else if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            if (attempt < maxRetries)
+            {
+                attempt++;
+                Resolver.Log.Debug($"Unauthorized, re-authenticating");
+                // by setting this to null and retrying, Authenticate will get called
+                ClientOptions = null;
+                _jwt = null;
+                goto retry;
+            }
+            else
+            {
+                errorMessage = $"Unauthorized, exceeded {maxRetries} retry attempt(s)";
+                Resolver.Log.Warn(errorMessage);
+                //                    ServiceError?.Invoke(this, errorMessage);
+
+                result = false;
+            }
+        }
+        else
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            errorMessage = $"Cloud send failed. Reponse was '{responseContent}'";
+            Resolver.Log.Warn(errorMessage);
+            //                ServiceError?.Invoke(this, errorMessage);
+
+            result = false;
+        }
+
+        //ToDo remove
+        GC.Collect();
+
+        return result;
     }
 
     /// <inheritdoc/>

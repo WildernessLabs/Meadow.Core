@@ -21,6 +21,9 @@ namespace Meadow;
 /// </summary>
 public class MeadowCloudService : IMeadowCloudService
 {
+    /// <inheritdoc/>
+    public event EventHandler<CloudConnectionState>? ConnectionStateChanged = default!;
+
     private const int AuthTimeoutSeconds = 120;
 
     /// <inheritdoc/>
@@ -44,8 +47,12 @@ public class MeadowCloudService : IMeadowCloudService
     public string? CurrentJwt { get; protected set; }
 
     /// <inheritdoc/>
+    public CloudConnectionState ConnectionState => throw new NotImplementedException();
+
+    /// <inheritdoc/>
     public async Task<bool> Authenticate()
     {
+        ConnectionStateChanged?.Invoke(this, CloudConnectionState.Unknown);
         string errorMessage;
 
         using (var client = new HttpClient())

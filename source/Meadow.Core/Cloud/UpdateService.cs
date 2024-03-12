@@ -205,10 +205,11 @@ public class UpdateService : IUpdateService, ICommandService
     {
         var meadowCloudService = Resolver.MeadowCloudService;
 
-        if (await meadowCloudService.Authenticate())
+        //        if (await meadowCloudService.Authenticate())
         {
-            _jwt = meadowCloudService.CurrentJwt;
+            //            _jwt = meadowCloudService.CurrentJwt;
         }
+        await Task.Delay(1);
 
         return _jwt != null;
     }
