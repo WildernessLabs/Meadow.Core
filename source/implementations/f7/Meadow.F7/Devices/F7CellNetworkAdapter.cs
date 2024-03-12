@@ -19,6 +19,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _imei;
     private string? _csq;
     private string? _at_cmds_output;
+    private static CellNetworkState _cell_state;
 
     /// <summary>
     /// Represents a signal strength value that indicates no signal or an extremely weak signal.
@@ -70,7 +71,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
     /// <summary>
     /// Get the cell module AT commands output <b>AtCmdsOutput</b> at the connection time, and then cache it.
-    /// Avoid calling this method during operations such as scanning networks or fetching signal quality to prevent interference with ongoing processes.
     /// </summary>
     private void UpdateAtCmdsOutput()
     {
@@ -149,6 +149,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 Resolver.Log.Trace("Cell at cmd event triggered!");
 
                 UpdateAtCmdsOutput();
+                
+                CellSetState(CellNetworkState.Resumed);
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
@@ -234,7 +236,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
     /// <summary>
     /// Returns the cell module AT commands output <b>AtCmdsOutput</b> if the device tried to connect at least once, otherwise an empty string
-    /// Avoid calling this method during operations such as scanning networks or fetching signal quality to prevent interference with ongoing processes.
     /// </summary>
     public string AtCmdsOutput
     {
@@ -336,6 +337,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 state |= 1 << 0;
                 break;
         }
+        _cell_state = CellState;
         Core.Interop.Nuttx.meadow_cell_change_state(state);
     }
 
@@ -353,28 +355,26 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         CellSetState(CellNetworkState.FetchingSignalQuality);
 
-        while (timeout > 0)
+        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
-            // Ensure that the _at_cmds_output is not updated by another method while waiting for the signal quality value
-            if (_at_cmds_output != string.Empty)
-            {
-                break;
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             timeout--;
         }
 
-        CellSetState(CellNetworkState.Resumed);
+        // Resume cell if the timeout was reached
+        if (timeout == 0)
+        {
+            CellSetState(CellNetworkState.Resumed);
+        }
 
-        if (_at_cmds_output == null)
+        if (string.IsNullOrEmpty(_at_cmds_output))
         {
             Resolver.Log.Error("AT commands output not found!");
             return NoSignal;
         }
 
         var csqValueStr = ExtractValue(_at_cmds_output, csqPattern);
-        int csqValue = String.IsNullOrEmpty(csqValueStr) ? 99 : int.Parse(csqValueStr);
+        int csqValue = string.IsNullOrEmpty(csqValueStr) ? 99 : int.Parse(csqValueStr);
         return ConvertCsqToDbm(csqValue);
     }
 
@@ -390,21 +390,19 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         CellSetState(CellNetworkState.ScanningNetworks);
         _at_cmds_output = string.Empty;
 
-        while (timeout > 0)
+        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
-            // Ensure that the _at_cmds_output is not updated by another method while waiting for the cell network's output
-            if (_at_cmds_output != string.Empty)
-            {
-                break;
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             timeout--;
         }
 
-        CellSetState(CellNetworkState.Resumed);
+        // Resume cell if the timeout was reached
+        if (timeout == 0)
+        {
+            CellSetState(CellNetworkState.Resumed);
+        }
 
-        if (_at_cmds_output == null)
+        if (string.IsNullOrEmpty(_at_cmds_output))
         {
             throw new System.IO.IOException("No available networks");
         }
@@ -427,23 +425,21 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         CellSetState(CellNetworkState.TrackingGPSLocation);
 
         //ToDo: switch to TimeSpan
-        while (timeout > 0)
+        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
-            // Ensure that the _at_cmds_output is not updated by another method while waiting for the GNSS fixes
-            if (_at_cmds_output != string.Empty)
-            {
-                break;
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             timeout--;
         }
 
+        // Resume cell if the timeout was reached
+        if (timeout == 0)
+        {
+            CellSetState(CellNetworkState.Resumed);
+        }
+
         var gnssAtCmdsOutput = _at_cmds_output;
 
-        CellSetState(CellNetworkState.Resumed);
-
-        if (gnssAtCmdsOutput == null)
+        if (string.IsNullOrEmpty(gnssAtCmdsOutput))
         {
             Resolver.Log.Error("AT commands output not found!");
             return string.Empty;
