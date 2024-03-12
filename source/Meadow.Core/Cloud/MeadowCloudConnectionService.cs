@@ -53,6 +53,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     private List<string> _subscriptionTopics = new();
     private bool _stopService = true;
+    private bool _firstConection = true;
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
     private string? _jwt = null;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
@@ -321,6 +322,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     break;
                 case CloudConnectionState.Connected:
+                    if (_firstConection)
+                    {
+                        if (SendCrashReports())
+                        {
+                            _firstConection = false;
+                        }
+                    }
                     Thread.Sleep(1000);
                     break;
             }
@@ -328,6 +336,11 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         ConnectionState = CloudConnectionState.Unknown;
         _stateMachineThread = null;
+    }
+
+    internal AuthenticationHeaderValue CreateAuthenticationHeaderValue()
+    {
+        return new AuthenticationHeaderValue("Bearer", _jwt);
     }
 
     private JsonWebTokenPayload GetJsonWebTokenPayload(string jwt)
@@ -498,6 +511,28 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 _jwt = null;
                 return false;
             }
+        }
+    }
+
+    private bool SendCrashReports()
+    {
+        try
+        {
+            var fi = new FileInfo(Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"));
+            if (fi.Exists)
+            {
+                Resolver.Log.Info("Sending crash report to Meadow.Cloud...");
+                var data = File.ReadAllText(fi.FullName);
+                (this as IMeadowCloudService).SendLog("fatal", "device crashed", data);
+                fi.Delete();
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
+            return false;
         }
     }
 

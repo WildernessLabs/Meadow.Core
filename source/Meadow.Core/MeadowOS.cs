@@ -107,10 +107,7 @@ public static partial class MeadowOS
                 Resolver.Log.Trace("Running App");
                 await App.Run();
 
-                while (!AppAbort.IsCancellationRequested)
-                {
-                    await Task.Delay(500);
-                }
+                AppAbort.Token.WaitHandle.WaitOne();
 
                 // the user's app has exited, which is almost certainly not intended
                 Resolver.Log.Warn("AppAbort cancellation has been requested");
@@ -508,6 +505,9 @@ public static partial class MeadowOS
         //capture unhandled exceptions
         AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
 
+        // TODO: allow user injection of this
+        Resolver.Services.Add<IJsonSerializer>(new MicroJsonSerializer());
+
         var settings = LoadSettings();
         var platform = DetectPlatform();
         var appTypes = FindAppForPlatform(platform);
@@ -601,6 +601,8 @@ public static partial class MeadowOS
             Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
             var commandService = new MeadowCloudCommandService(cloudConnectionService);
             Resolver.Services.Add<ICommandService>(commandService);
+            var updateService = new MeadowCloudUpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, cloudConnectionService);
+            Resolver.Services.Add<IUpdateService>(updateService);
 
             cloudConnectionService.Start();
             /*
@@ -641,12 +643,23 @@ public static partial class MeadowOS
         }
     }
 
+    private static ManualResetEvent _forceTerminate = new ManualResetEvent(false);
+
+    /// <summary>
+    /// Cancel the meadow OS application Run call and allow the process to exit
+    /// </summary>
+    public static void TerminateRun()
+    {
+        AppAbort.Cancel();
+        _forceTerminate.Set();
+    }
+
     private static void Shutdown()
     {
         // stop the update service
         if (Resolver.Services.Get<IUpdateService>() is { } updateService)
         {
-            updateService.Shutdown();
+            updateService.Stop();
         }
 
         // schedule a device restart if possible and if the user hasn't disabled it
@@ -657,7 +670,7 @@ public static partial class MeadowOS
         Resolver.Log.Debug("Shutdown");
 
         // just put the Main thread to sleep (don't exit) because we want the Update service to still be able to work
-        Thread.Sleep(Timeout.Infinite);
+        _forceTerminate.WaitOne();
     }
 
     /// <summary>
@@ -715,6 +728,8 @@ public static partial class MeadowOS
                 Thread.Sleep(restart * 1000);
 
                 CurrentDevice.PlatformOS.Reset();
+
+                AppAbort.Cancel();
             }
             else
             {

@@ -62,17 +62,17 @@ public class UpdateService : IUpdateService, ICommandService
     private string UpdateStoreDirectory { get; }
 
     /// <inheritdoc/>
-    public event EventHandler<UpdateState> OnStateChanged = default!;
+    public event EventHandler<UpdateState> StateChanged = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateAvailable = default!;
+    public event UpdateEventHandler UpdateAvailable = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateProgress = default!;
+    public event UpdateEventHandler UpdateProgress = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateRetrieved = default!;
+    public event UpdateEventHandler UpdateRetrieved = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateSuccess = default!;
+    public event UpdateEventHandler UpdateSuccess = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler OnUpdateFailure = default!;
+    public event UpdateEventHandler UpdateFailure = default!;
 
     private UpdateState _state;
     private bool _stopService = false;
@@ -96,7 +96,7 @@ public class UpdateService : IUpdateService, ICommandService
     }
 
     /// <inheritdoc/>
-    public void Shutdown()
+    public void Stop()
     {
         _stopService = true;
     }
@@ -110,7 +110,7 @@ public class UpdateService : IUpdateService, ICommandService
             if (value == State) return;
 
             _state = value;
-            OnStateChanged?.Invoke(this, State);
+            StateChanged?.Invoke(this, State);
             Resolver.Log.Trace($"Updater State -> {State}");
         }
     }
@@ -182,7 +182,7 @@ public class UpdateService : IUpdateService, ICommandService
                     {
                         Resolver.Log.Trace($"Update {info.ID} is known but not retrieved");
 
-                        OnUpdateAvailable?.Invoke(this, info);
+                        UpdateAvailable?.Invoke(this, info);
                     }
                     else
                     {
@@ -192,7 +192,7 @@ public class UpdateService : IUpdateService, ICommandService
                 else
                 {
                     Store.Add(info);
-                    OnUpdateAvailable?.Invoke(this, info);
+                    UpdateAvailable?.Invoke(this, info);
                 }
 
             }
@@ -514,7 +514,7 @@ public class UpdateService : IUpdateService, ICommandService
 
                                 message.DownloadProgress = totalBytesDownloaded;
 
-                                OnUpdateProgress?.Invoke(this, message);
+                                UpdateProgress?.Invoke(this, message);
                                 Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
                             }
                         }
@@ -558,7 +558,7 @@ public class UpdateService : IUpdateService, ICommandService
                     // TODO: what do we do?
                 }
 
-                OnUpdateRetrieved?.Invoke(this, message);
+                UpdateRetrieved?.Invoke(this, message);
                 Store.SetRetrieved(message);
 
                 State = UpdateState.Idle;
@@ -694,7 +694,7 @@ public class UpdateService : IUpdateService, ICommandService
 
         if (sourcePath == null)
         {
-            OnUpdateFailure?.Invoke(this, updateInfo);
+            UpdateFailure?.Invoke(this, updateInfo);
             throw new ArgumentException($"Cannot find update with ID {updateInfo.ID}");
         }
 
@@ -725,7 +725,7 @@ public class UpdateService : IUpdateService, ICommandService
         catch (Exception ex)
         {
             Resolver.Log.Error($"Failed to extract update package: {ex.Message}");
-            OnUpdateFailure?.Invoke(this, updateInfo);
+            UpdateFailure?.Invoke(this, updateInfo);
             throw ex;
         }
 
@@ -737,7 +737,7 @@ public class UpdateService : IUpdateService, ICommandService
         if (!updateValid)
         {
             Resolver.Log.Warn($"Update {updateInfo.ID} contains no valid Update data");
-            OnUpdateFailure?.Invoke(this, updateInfo);
+            UpdateFailure?.Invoke(this, updateInfo);
             return;
         }
 
@@ -760,7 +760,7 @@ public class UpdateService : IUpdateService, ICommandService
 
         // TODO: these will never happen due to the above reset. need to be moved to "post update boot"
         Store.SetApplied(updateInfo);
-        OnUpdateSuccess?.Invoke(this, updateInfo);
+        UpdateSuccess?.Invoke(this, updateInfo);
 
         State = UpdateState.Idle;
     }
