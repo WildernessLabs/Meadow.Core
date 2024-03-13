@@ -1,7 +1,6 @@
 ﻿using Meadow;
 using Meadow.Cloud;
 using Meadow.Logging;
-using Meadow.Update;
 using MQTTnet;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ namespace Core.Unit.Tests.UpdateServiceTests
     public class ProcessPublishedCommandTests : IDisposable
     {
         private readonly TestLogProvider _log = new();
-        private readonly UpdateService _updateService = new("", null);
+        private readonly MeadowCloudCommandService _updateService = new(null);
 
         public ProcessPublishedCommandTests()
         {
