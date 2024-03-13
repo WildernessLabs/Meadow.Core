@@ -66,7 +66,7 @@ public class UpdateService : IUpdateService, ICommandService
     /// <inheritdoc/>
     public event UpdateEventHandler UpdateAvailable = default!;
     /// <inheritdoc/>
-    public event UpdateEventHandler UpdateProgress = default!;
+    public event UpdateEventHandler RetrieveProgress = default!;
     /// <inheritdoc/>
     public event UpdateEventHandler UpdateRetrieved = default!;
     /// <inheritdoc/>
@@ -514,7 +514,7 @@ public class UpdateService : IUpdateService, ICommandService
 
                                 message.DownloadProgress = totalBytesDownloaded;
 
-                                UpdateProgress?.Invoke(this, message);
+                                RetrieveProgress?.Invoke(this, message);
                                 Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
                             }
                         }

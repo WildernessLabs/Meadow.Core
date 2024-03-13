@@ -4,7 +4,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 
 namespace Meadow;
 
@@ -70,8 +69,6 @@ internal class MeadowCloudCommandService : ICommandService
             return;
         }
 
-        var jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
-
         // First attempt to run the untyped command subscription, Action<MeadowCommand>, if available.
         if (_commandSubscriptions.TryGetValue(UntypedCommandTypeName, out (Type CommandType, Action<object> Action) value))
         {
@@ -81,10 +78,10 @@ internal class MeadowCloudCommandService : ICommandService
             try
             {
                 arguments = message.Payload != null
-                    ? JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(message.Payload, jsonSerializerOptions)
+                    ? Resolver.JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(message.Payload)
                     : null;
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
                 Resolver.Log.Error($"Unable to deserialize command arguments: {ex.Message}");
                 return;
@@ -92,6 +89,7 @@ internal class MeadowCloudCommandService : ICommandService
 
             var command = new MeadowCommand(commandName, arguments);
             value.Action(command);
+            return;
         }
 
         (Type commandType, Action<object> action)? subscription = null;
@@ -115,10 +113,10 @@ internal class MeadowCloudCommandService : ICommandService
             try
             {
                 command = message.Payload != null
-                    ? JsonSerializer.Deserialize(message.Payload, value.CommandType, jsonSerializerOptions) ?? Activator.CreateInstance(subscription.Value.commandType)
+                    ? Resolver.JsonSerializer.Deserialize(message.Payload, value.CommandType) ?? Activator.CreateInstance(subscription.Value.commandType)
                     : Activator.CreateInstance(subscription.Value.commandType);
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
                 Resolver.Log.Error($"Unable to deserialize command arguments: {ex.Message}");
                 return;

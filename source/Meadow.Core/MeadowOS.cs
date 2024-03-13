@@ -27,7 +27,6 @@ public static partial class MeadowOS
 
     private static IApp App { get; set; } = default!;
     private static ILifecycleSettings LifecycleSettings { get; set; } = default!;
-    private static IUpdateSettings UpdateSettings { get; set; } = default!;
     private static IMeadowCloudSettings MeadowCloudSettings { get; set; } = default!;
 
     /// <summary>
@@ -226,7 +225,6 @@ public static partial class MeadowOS
         Resolver.Log.Info($"Log level: {settings.LoggingSettings.LogLevel.Default}");
 
         LifecycleSettings = settings.LifecycleSettings;
-        UpdateSettings = settings.UpdateSettings;
         MeadowCloudSettings = settings.MeadowCloudSettings;
 
         return settings.Settings;
@@ -597,14 +595,35 @@ public static partial class MeadowOS
 
             App = app;
 
-            var cloudConnectionService = new MeadowCloudConnectionService();
+            var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
             Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
             var commandService = new MeadowCloudCommandService(cloudConnectionService);
             Resolver.Services.Add<ICommandService>(commandService);
-            var updateService = new MeadowCloudUpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, cloudConnectionService);
+
+            var updateService = new MeadowCloudUpdateService(
+                CurrentDevice.PlatformOS.FileSystem.FileSystemRoot,
+                cloudConnectionService);
             Resolver.Services.Add<IUpdateService>(updateService);
 
-            cloudConnectionService.Start();
+            if (MeadowCloudSettings.Enabled && MeadowCloudSettings.EnableUpdateService)
+            {
+                updateService.Start();
+            }
+
+            var healthReporter = new HealthReporter();
+            Resolver.Services.Add<IHealthReporter>(healthReporter);
+            if (MeadowCloudSettings.Enabled && MeadowCloudSettings.EnableHealthMetrics)
+            {
+                healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
+            }
+
+            if (MeadowCloudSettings.Enabled)
+            {
+                cloudConnectionService.Start();
+            }
+
+
+
             /*
             var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
             Resolver.Services.Add<IUpdateService>(updateService);

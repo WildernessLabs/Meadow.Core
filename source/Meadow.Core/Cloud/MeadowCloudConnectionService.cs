@@ -43,13 +43,17 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     public const int TokenExpirationPeriod = 60;
 
-    private bool _useAuthentication = true; // TODO: get from config
+    internal IMeadowCloudSettings Settings { get; private set; }
+
+    /*
+    public bool UseAuthentication { get; private set; } = true; // TODO: get from config
     private int _cloudConnectRetrySeconds = 15; // TODO: get from config
     private string _mqttServer = "mqtt.meadowcloud.co"; // TODO: get from config
     private int _mqttPort = 8883; // TODO: get from config
     private const int _authTimeoutSeconds = 120; // TODO: get from config
     private string _cloudAuthHostname = "https://www.meadowcloud.co";// TODO: get from config
     private string _cloudDataHostname = "https://collector.meadowcloud.co";// TODO: get from config
+    */
 
     private List<string> _subscriptionTopics = new();
     private bool _stopService = true;
@@ -62,8 +66,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
 
-    internal MeadowCloudConnectionService()
+    internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
+        Settings = settings;
     }
 
     public CloudConnectionState ConnectionState
@@ -109,7 +114,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     private bool ShouldAuthenticate()
     {
-        return _useAuthentication && (ClientOptions == null || (DateTime.UtcNow - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod);
+        return Settings.UseAuthentication && (ClientOptions == null || (DateTime.UtcNow - _lastAuthenticationTime).TotalMinutes >= TokenExpirationPeriod);
     }
 
     /// <summary>
@@ -204,7 +209,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         else
                         {
                             Resolver.Log.Error("Failed to authenticate with Update Service");
-                            await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
+                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                     }
                     catch (Exception ae)
@@ -214,7 +219,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         {
                             Resolver.Log.Error($" Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
                         }
-                        await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
+                        await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                     }
                     break;
                 case CloudConnectionState.Connecting:
@@ -222,15 +227,15 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         Resolver.Log.Debug("Creating MQTT client options", "cloud");
                         var builder = new MqttClientOptionsBuilder()
-                            .WithTcpServer(_mqttServer, _mqttPort)
+                            .WithTcpServer(Settings.MqttHostname, Settings.MqttPort)
                             .WithTls(tlsParameters =>
                             {
-                                tlsParameters.UseTls = _mqttPort == 8883; // TODO: does this allow override?  Seems wrong
+                                tlsParameters.UseTls = Settings.MqttPort == 8883;
                             })
                             .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                             .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
 
-                        if (_useAuthentication)
+                        if (Settings.UseAuthentication)
                         {
                             Resolver.Log.Debug("Adding MQTT creds");
                             builder.WithCredentials(Resolver.Device?.Information.UniqueID.ToUpper(), _jwt);
@@ -251,21 +256,21 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             Resolver.Log.Debug("Timeout connecting to Update Service");
                             ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
+                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                         catch (MqttCommunicationException e)
                         {
                             Resolver.Log.Debug($"MQTT Error connecting to Update Service: {e.Message}");
                             ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
+                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                         catch (Exception ex)
                         {
                             Resolver.Log.Error($"Error connecting to Update Service: {ex.Message}");
                             ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(_cloudConnectRetrySeconds));
+                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                     }
                     else
@@ -278,7 +283,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     try
                     {
                         JsonWebTokenPayload? jwtPayload = null;
-                        if (_useAuthentication)
+                        if (Settings.UseAuthentication)
                         {
                             if (string.IsNullOrWhiteSpace(_jwt))
                             {
@@ -395,12 +400,12 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         using (var client = new HttpClient())
         {
-            client.Timeout = TimeSpan.FromSeconds(_authTimeoutSeconds);
+            client.Timeout = TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds);
 
             var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var endpoint = $"{_cloudAuthHostname}/api/devices/login";
+            var endpoint = $"{Settings.AuthHostname}/api/devices/login";
             Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...");
 
             try
@@ -563,7 +568,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             return false;
         }
 
-        client.BaseAddress = new Uri(_cloudDataHostname);
+        client.BaseAddress = new Uri(Settings.DataHostname);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
 
         var serializeOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };

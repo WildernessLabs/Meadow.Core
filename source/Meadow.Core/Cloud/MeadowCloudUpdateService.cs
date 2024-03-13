@@ -1,5 +1,4 @@
-﻿using Meadow.Hardware;
-using Meadow.Update;
+﻿using Meadow.Update;
 using MQTTnet;
 using System;
 using System.Diagnostics;
@@ -8,19 +7,21 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow;
 
 internal class MeadowCloudUpdateService : IUpdateService
 {
+    private const string PackageDirectoryOs = "os";
+    private const string PackageDirectoryApp = "app";
+    private const string PackageDirectoryFirmware = "firmware";
+
     public event EventHandler<UpdateState>? StateChanged;
     /// <inheritdoc/>
     public event UpdateEventHandler? UpdateAvailable;
     /// <inheritdoc/>
-    public event UpdateEventHandler? UpdateProgress;
+    public event UpdateEventHandler? RetrieveProgress;
     /// <inheritdoc/>
     public event UpdateEventHandler? UpdateRetrieved;
     /// <inheritdoc/>
@@ -45,10 +46,7 @@ internal class MeadowCloudUpdateService : IUpdateService
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
 
-    private bool _useAuthentication = true; // TODO: add config for this
-
     private readonly MeadowCloudConnectionService _connectionService;
-    private bool _stopService = false;
     private UpdateState _state;
     private bool _downloadInProgress;
 
@@ -66,16 +64,46 @@ internal class MeadowCloudUpdateService : IUpdateService
         _connectionService = connectionService;
         _connectionService.MqttMessageReceived += OnMqttMessageReceived;
         _connectionService.AddSubscription("{OID}/ota/{ID}");
+        _connectionService.ConnectionStateChanged += OnConnectionStateChanged;
+    }
+
+    private void OnConnectionStateChanged(object sender, CloudConnectionState e)
+    {
+        switch (e)
+        {
+            case CloudConnectionState.Unknown:
+            case CloudConnectionState.Disconnected:
+            case CloudConnectionState.Authenticating:
+            case CloudConnectionState.Connecting:
+            case CloudConnectionState.Subscribing:
+                if (State != UpdateState.UpdateInProgress)
+                {
+                    State = UpdateState.Disconnected;
+                }
+                break;
+            case CloudConnectionState.Connected:
+                if (_downloadInProgress)
+                {
+                    State = UpdateState.DownloadingFile;
+                }
+                else if (State != UpdateState.UpdateInProgress)
+                {
+                    State = UpdateState.Connected;
+                }
+                break;
+        }
     }
 
     private void OnMqttMessageReceived(object sender, MqttApplicationMessage e)
     {
+        if (!_isEnabled) return;
+
         if (e.Topic.EndsWith($"/ota/{Resolver.Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
         {
             Resolver.Log.Info("Meadow update message received", "cloud");
 
             var json = Encoding.UTF8.GetString(e.Payload);
-            var info = JsonSerializer.Deserialize<UpdateMessage>(json);
+            var info = Resolver.JsonSerializer.Deserialize<UpdateMessage>(json);
 
             if (info == null)
             {
@@ -122,80 +150,25 @@ internal class MeadowCloudUpdateService : IUpdateService
         }
     }
 
+    private bool _isEnabled = false;
+
     /// <summary>
     /// Starts the service if it is not already running
     /// </summary>
     public void Start()
     {
-        if (State == UpdateState.Dead)
-        {
-            // using Thread instead of a Task because of a bug (in the runtime or BCL)
-            new Thread(() => UpdateStateMachine())
-                .Start();
-        }
+        _isEnabled = true;
     }
 
     /// <inheritdoc/>
     public void Stop()
     {
-        _stopService = true;
-    }
-
-    private void UpdateStateMachine()
-    {
-        _stopService = false;
-
-        // we need to wait for the network stack to come up on the F7 platforms
-        switch (Resolver.Device.Information.Platform)
-        {
-            case MeadowPlatform.F7FeatherV1:
-            case MeadowPlatform.F7FeatherV2:
-            case MeadowPlatform.F7CoreComputeV2:
-                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
-                break;
-        }
-
-        State = UpdateState.Disconnected;
-
-        var nic = Resolver.Device?.NetworkAdapters?.Primary<INetworkAdapter>();
-
-        // update state machine
-        while (!_stopService)
-        {
-            switch (State)
-            {
-
-                case UpdateState.Connected:
-                    if (_downloadInProgress)
-                    {
-                        Resolver.Log.Debug($"Resuming download after reconnection...");
-                        State = UpdateState.DownloadingFile;
-                    }
-                    break;
-                case UpdateState.Idle:
-                case UpdateState.DownloadingFile:
-                case UpdateState.UpdateInProgress:
-                default:
-                    Thread.Sleep(1000);
-                    break;
-            }
-        }
-
-        State = UpdateState.Dead;
+        _isEnabled = false;
     }
 
     /// <inheritdoc/>
     public void ClearUpdates()
     {
-        switch (State)
-        {
-            case UpdateState.Dead:
-            case UpdateState.Idle:
-                break;
-            default:
-                throw new Exception("Cannot clear until Idle");
-        }
-
         Store.Clear();
     }
 
@@ -232,7 +205,7 @@ internal class MeadowCloudUpdateService : IUpdateService
 
         if (!destination.StartsWith("http"))
         {
-            if (_useAuthentication)
+            if (_connectionService.Settings.UseAuthentication)
             {
                 destination = $"https://{destination}";
             }
@@ -255,7 +228,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                 // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
                 using (var httpClient = new HttpClient())
                 {
-                    if (_useAuthentication)
+                    if (_connectionService.Settings.UseAuthentication)
                     {
                         httpClient.DefaultRequestHeaders.Authorization = _connectionService.CreateAuthenticationHeaderValue();
                     }
@@ -268,7 +241,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                     {
                         using (var fileStream = Store.GetUpdateFileStream(message.ID))
                         {
-                            byte[] buffer = new byte[4096];
+                            byte[] buffer = new byte[4096 * 64]; // TODO: make this configurable/platform dependent
                             int bytesRead;
 
                             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
@@ -278,7 +251,7 @@ internal class MeadowCloudUpdateService : IUpdateService
 
                                 message.DownloadProgress = totalBytesDownloaded;
 
-                                UpdateProgress?.Invoke(this, message);
+                                RetrieveProgress?.Invoke(this, message);
                                 Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
                             }
                         }
@@ -302,11 +275,11 @@ internal class MeadowCloudUpdateService : IUpdateService
 
                 _downloadInProgress = false;
 
-                var hash = Store.GetFileHash(fi);
+                var hash = await Store.GetFileHash(fi);
 
-                if (!string.IsNullOrWhiteSpace(message.DownloadHash))
+                if (!string.IsNullOrWhiteSpace(message.Crc))
                 {
-                    if (hash != message.DownloadHash)
+                    if (hash != message.Crc)
                     {
                         Resolver.Log.Warn("Downloaded Hash does not match expected Hash");
                         // TODO: what do we do? Retry? Ignore?
@@ -324,8 +297,6 @@ internal class MeadowCloudUpdateService : IUpdateService
 
                 UpdateRetrieved?.Invoke(this, message);
                 Store.SetRetrieved(message);
-
-                State = UpdateState.Idle;
             }
             catch (Exception ex)
             {
@@ -339,7 +310,8 @@ internal class MeadowCloudUpdateService : IUpdateService
             }
         }
 
-        State = UpdateState.Idle;
+        State = _connectionService.ConnectionState == CloudConnectionState.Connected ? UpdateState.Connected : UpdateState.Disconnected;
+
         _downloadInProgress = false;
     }
 
@@ -398,6 +370,9 @@ internal class MeadowCloudUpdateService : IUpdateService
         {
             Resolver.Log.Warn($"Update {updateInfo.ID} contains no valid Update data");
             UpdateFailure?.Invoke(this, updateInfo);
+
+            // TODO: should we delete the update or quarantine it?
+
             return;
         }
 
@@ -422,7 +397,7 @@ internal class MeadowCloudUpdateService : IUpdateService
         Store.SetApplied(updateInfo);
         UpdateSuccess?.Invoke(this, updateInfo);
 
-        State = UpdateState.Idle;
+        State = _connectionService.ConnectionState == CloudConnectionState.Connected ? UpdateState.Connected : UpdateState.Disconnected;
     }
 
     private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
@@ -445,7 +420,7 @@ internal class MeadowCloudUpdateService : IUpdateService
     private bool CurrentUpdateContainsAppUpdate()
     {
         var di = new DirectoryInfo(UpdateDirectory);
-        var appDir = di.GetDirectories("app").FirstOrDefault();
+        var appDir = di.GetDirectories(PackageDirectoryApp).FirstOrDefault();
         if (appDir == null)
         {
             return false;
@@ -458,14 +433,15 @@ internal class MeadowCloudUpdateService : IUpdateService
     private bool CurrentUpdateContainsOSUpdate()
     {
         var di = new DirectoryInfo(UpdateDirectory);
-        var osDir = di.GetDirectories("os").FirstOrDefault();
-        if (osDir == null)
+        var osDir = di.GetDirectories(PackageDirectoryOs).FirstOrDefault();
+        var firmwareDir = di.GetDirectories(PackageDirectoryFirmware).FirstOrDefault();
+        if (osDir == null && firmwareDir == null)
         {
             return false;
         }
 
         // make sure that some files exist
-        return osDir.GetFiles().Count() > 0;
+        return osDir?.GetFiles().Count() > 0 || firmwareDir?.GetFiles().Count() > 0;
     }
 
     private void DisplayTree(DirectoryInfo di)

@@ -19,12 +19,16 @@ public class HealthReporter : IHealthReporter
     /// <inheritdoc/>
     public void Start(int interval)
     {
+        Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).");
+
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
 
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
+            // TODO: what happens if we disconnect and reconnect?
+
             Resolver.Log.Trace($"starting health metrics timer");
             timer.Start();
 

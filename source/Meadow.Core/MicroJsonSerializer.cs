@@ -1,4 +1,5 @@
 ﻿using Meadow.Foundation.Serialization;
+using System;
 
 namespace Meadow;
 
@@ -11,6 +12,12 @@ public class MicroJsonSerializer : IJsonSerializer
     public T Deserialize<T>(string json)
     {
         return MicroJson.Deserialize<T>(json);
+    }
+
+    /// <inheritdoc/>
+    public object Deserialize(string json, Type type)
+    {
+        return MicroJson.Deserialize(json, type);
     }
 
     /// <inheritdoc/>
