@@ -622,37 +622,6 @@ public static partial class MeadowOS
                 cloudConnectionService.Start();
             }
 
-
-
-            /*
-            var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
-            Resolver.Services.Add<IUpdateService>(updateService);
-
-            var meadowCloudService = new MeadowCloudService(MeadowCloudSettings);
-            Resolver.Services.Add<IMeadowCloudService>(meadowCloudService);
-
-            Resolver.Services.Add<ICommandService>(updateService);
-
-            var healthReporter = new HealthReporter();
-            Resolver.Services.Add<IHealthReporter>(healthReporter);
-
-            Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
-            if (UpdateSettings.Enabled)
-            {
-                updateService.Start();
-            }
-
-            if (MeadowCloudSettings.EnableHealthMetrics)
-            {
-                Resolver.Log.Info($"Health Metrics enabled with interval: {MeadowCloudSettings.HealthMetricsInterval} minute(s).");
-                healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
-            }
-            else
-            {
-                Resolver.Log.Info($"Health Metrics disabled.");
-            }
-            */
-
             return true;
         }
         catch (Exception e)

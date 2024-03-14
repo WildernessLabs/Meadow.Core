@@ -208,13 +208,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         }
                         else
                         {
-                            Resolver.Log.Error("Failed to authenticate with Update Service");
+                            Resolver.Log.Error("Failed to authenticate with Meadow.Cloud");
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                     }
                     catch (Exception ae)
                     {
-                        Resolver.Log.Error($"Failed to authenticate with Update Service: {ae.Message}");
+                        Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud: {ae.Message}");
                         if (ae.InnerException != null)
                         {
                             Resolver.Log.Error($" Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
@@ -665,7 +665,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 return pkFileContent;
             }
         }
-        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+            || SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
 
@@ -699,10 +700,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 return pkFileContent;
             }
 
-        }
-        else if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            throw new PlatformNotSupportedException();
         }
         else
         {
