@@ -126,7 +126,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         if (_stateMachineThread == null)
         {
-            _stateMachineThread = new Thread(() => UpdateStateMachine());
+            _stateMachineThread = new Thread(() => ConnectionStateMachine());
             _stateMachineThread.Start();
         }
     }
@@ -158,10 +158,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         });
     }
 
-    private async void UpdateStateMachine()
+    private async void ConnectionStateMachine()
     {
-        Resolver.Log.Info($"UpdateStateMachine 1");
-
         _stopService = false;
 
         // we need to wait for the network stack to come up on the F7 platforms
@@ -173,8 +171,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                 break;
         }
-
-        Resolver.Log.Info($"UpdateStateMachine 2");
 
         Initialize();
 

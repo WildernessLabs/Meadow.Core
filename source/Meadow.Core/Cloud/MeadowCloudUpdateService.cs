@@ -102,8 +102,7 @@ internal class MeadowCloudUpdateService : IUpdateService
         {
             Resolver.Log.Info("Meadow update message received", "cloud");
 
-            var json = Encoding.UTF8.GetString(e.Payload);
-            var info = Resolver.JsonSerializer.Deserialize<UpdateMessage>(json);
+            var info = Resolver.JsonSerializer.Deserialize<UpdateMessage>(e.Payload);
 
             if (info == null)
             {

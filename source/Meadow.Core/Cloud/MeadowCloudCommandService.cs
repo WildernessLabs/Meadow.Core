@@ -108,7 +108,6 @@ internal class MeadowCloudCommandService : ICommandService
         if (subscription != null)
         {
             Resolver.Log.Trace($"Processing Meadow command of type '{subscription.Value.commandType.Name}'...", "cloud");
-
             object command;
             try
             {
