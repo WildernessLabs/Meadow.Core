@@ -2,9 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Hashing;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Meadow.Update;
 
@@ -188,16 +189,19 @@ public class UpdateStore : IEnumerable<UpdateInfo>
     }
 
     /// <summary>
-    /// Calculates the SHA256 hash of a file
+    /// Calculates the CRC32 hash of a file
     /// </summary>
     /// <param name="file">The file to hash</param>
-    public string GetFileHash(FileInfo file)
+    public async Task<string> GetFileHash(FileInfo file)
     {
-        using (var sha = SHA256.Create())
-        using (var stream = file.OpenRead())
-        {
-            return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "");
-        }
+        var crc32 = new Crc32();
+
+        using var fs = File.OpenRead(file.FullName);
+        await crc32.AppendAsync(fs);
+
+        var checkSum = crc32.GetCurrentHash();
+        Array.Reverse(checkSum); // make big endian
+        return BitConverter.ToString(checkSum).Replace("-", "").ToLower();
     }
 
     internal void SetRetrieved(UpdateMessage message)

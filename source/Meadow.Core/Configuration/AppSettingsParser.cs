@@ -137,86 +137,50 @@ internal static class AppSettingsParser
                 }
                 break;
             case "Logging.ShowTicks":
-                if (bool.TryParse(settingValue, out bool st))
-                {
-                    settings.LoggingSettings.ShowTicks = st;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
-                }
+                ParseBoolSetting(settingValue, (i) => settings.LoggingSettings.ShowTicks = i);
                 break;
-
             case "Lifecycle.RestartOnAppFailure":
             case "Lifecycle.ResetOnAppFailure": // legacy
-                if (bool.TryParse(settingValue, out bool r))
-                {
-                    settings.LifecycleSettings.RestartOnAppFailure = r;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
-                }
+                ParseBoolSetting(settingValue, (i) => settings.LifecycleSettings.RestartOnAppFailure = i);
                 break;
             case "Lifecycle.AppFailureRestartDelaySeconds":
-                if (int.TryParse(settingValue, out int rd))
-                {
-                    settings.LifecycleSettings.AppFailureRestartDelaySeconds = rd;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
-                }
+                ParseIntSetting(settingValue, (i) => settings.LifecycleSettings.AppFailureRestartDelaySeconds = i);
                 break;
-
-            case "Update.Enabled":
-                if (bool.TryParse(settingValue, out bool ue))
-                {
-                    settings.UpdateSettings.Enabled = ue;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
-                }
+            case "Update.Enabled": // legacy
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdateService = i);
                 break;
-            case "Update.UpdateServer":
-                settings.UpdateSettings.UpdateServer = settingValue;
-                break;
-            case "Update.UpdatePort":
-                if (int.TryParse(settingValue, out int up))
-                {
-                    settings.UpdateSettings.UpdatePort = up;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
-                }
+            case "MeadowCloud.Enabled":
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.Enabled = i);
                 break;
             case "MeadowCloud.Hostname":
-                settings.MeadowCloudSettings.Hostname = settingValue;
+                settings.MeadowCloudSettings.AuthHostname = settingValue;
                 break;
             case "MeadowCloud.DataHostname":
                 settings.MeadowCloudSettings.DataHostname = settingValue;
                 break;
+            case "MeadowCloud.MqttHostname":
+                settings.MeadowCloudSettings.MqttHostname = settingValue;
+                break;
+            case "MeadowCloud.MqttPort":
+                ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.MqttPort = i);
+                break;
+            case "MeadowCloud.ConnectRetrySeconds":
+                ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.ConnectRetrySeconds = i);
+                break;
+            case "MeadowCloud.AuthTimeoutSeconds":
+                ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.AuthTimeoutSeconds = i);
+                break;
+            case "MeadowCloud.UseAuthentication":
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.UseAuthentication = i);
+                break;
+            case "MeadowCloud.EnableUpdates":
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdateService = i);
+                break;
             case "HealthMetrics.Enabled":
-                if (bool.TryParse(settingValue, out bool mehm))
-                {
-                    settings.MeadowCloudSettings.EnableHealthMetrics = mehm;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to a bool");
-                }
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableHealthMetrics = i);
                 break;
             case "HealthMetrics.Interval":
-                if (int.TryParse(settingValue, out int mhmi))
-                {
-                    settings.MeadowCloudSettings.HealthMetricsInterval = mhmi;
-                }
-                else
-                {
-                    Console.WriteLine($"Unable to parse value '{settingValue}' to a int");
-                }
+                ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.HealthMetricsInterval = i);
                 break;
             default:
                 if (!settings.Settings.ContainsKey(settingName))
@@ -229,6 +193,30 @@ internal static class AppSettingsParser
                     settings.Settings.Add(settingName, settingValue);
                 }
                 break;
+        }
+    }
+
+    private static void ParseBoolSetting(string settingValue, Action<bool> setter)
+    {
+        if (bool.TryParse(settingValue, out bool val))
+        {
+            setter(val);
+        }
+        else
+        {
+            Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
+        }
+    }
+
+    private static void ParseIntSetting(string settingValue, Action<int> setter)
+    {
+        if (int.TryParse(settingValue, out int up))
+        {
+            setter(up);
+        }
+        else
+        {
+            Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
         }
     }
 }
