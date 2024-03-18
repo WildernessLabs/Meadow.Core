@@ -17,8 +17,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,16 +42,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     public const int TokenExpirationPeriod = 60;
 
     internal IMeadowCloudSettings Settings { get; private set; }
-
-    /*
-    public bool UseAuthentication { get; private set; } = true; // TODO: get from config
-    private int _cloudConnectRetrySeconds = 15; // TODO: get from config
-    private string _mqttServer = "mqtt.meadowcloud.co"; // TODO: get from config
-    private int _mqttPort = 8883; // TODO: get from config
-    private const int _authTimeoutSeconds = 120; // TODO: get from config
-    private string _cloudAuthHostname = "https://www.meadowcloud.co";// TODO: get from config
-    private string _cloudDataHostname = "https://collector.meadowcloud.co";// TODO: get from config
-    */
 
     private List<string> _subscriptionTopics = new();
     private bool _stopService = true;
@@ -297,9 +285,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             string topicName = topic;
 
                             // look for macro-substitutions
-                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OrganizationId))
+                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OId))
                             {
-                                topicName = topicName.Replace("{OID}", jwtPayload.OrganizationId);
+                                topicName = topicName.Replace("{OID}", jwtPayload.OId);
                             }
 
                             if (topic.Contains("{ID}"))
@@ -358,8 +346,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         var payloadJson = Base64UrlDecode(tokenParts[1]);
-        var payload = JsonSerializer.Deserialize<JsonWebTokenPayload>(payloadJson)
-            ?? throw new JsonException("Payload could not be deserialized from JWT argument.");
+        var payload = Resolver.JsonSerializer.Deserialize<JsonWebTokenPayload>(payloadJson)
+            ?? throw new Exception("Payload could not be deserialized from JWT argument.");
 
         return payload;
     }
@@ -386,8 +374,17 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     private class JsonWebTokenPayload
     {
-        [JsonPropertyName("oid")]
-        public string? OrganizationId { get; set; }
+        public string? OId { get; set; }
+    }
+
+    private class JsonIdPayload
+    {
+        public JsonIdPayload(string id)
+        {
+            Id = id;
+        }
+
+        public string Id { get; set; } = default!;
     }
 
     public async Task<bool> Authenticate()
@@ -398,7 +395,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         {
             client.Timeout = TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds);
 
-            var json = JsonSerializer.Serialize<dynamic>(new { id = Resolver.Device.Information.UniqueID.ToUpper() });
+            var json = Resolver.JsonSerializer.Serialize(new JsonIdPayload(Resolver.Device.Information.UniqueID.ToUpper()));
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var endpoint = $"{Settings.AuthHostname}/api/devices/login";
@@ -412,12 +409,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 if (response.IsSuccessStatusCode)
                 {
                     Resolver.Log.Debug($"authentication successful. extracting token");
-                    var opts = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    };
 
-                    var payload = JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent, opts);
+                    var payload = Resolver.JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent);
 
                     if (payload == null)
                     {
@@ -567,8 +560,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         client.BaseAddress = new Uri(Settings.DataHostname);
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
 
-        var serializeOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(item, serializeOptions);
+        var json = Resolver.JsonSerializer.Serialize(item!);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         Resolver.Log.Debug($"making cloud log httprequest with json: {json}");

@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Xunit;
 
 namespace Core.Unit.Tests.UpdateServiceTests
@@ -14,13 +13,22 @@ namespace Core.Unit.Tests.UpdateServiceTests
     public class ProcessPublishedCommandTests : IDisposable
     {
         private readonly TestLogProvider _log = new();
-        private readonly MeadowCloudCommandService _updateService = new(null);
+        private readonly MeadowCloudSettings _settings = new();
+        private readonly MeadowCloudConnectionService _connectionService;
+        private readonly MeadowCloudCommandService _updateService;
 
         public ProcessPublishedCommandTests()
         {
+            _connectionService = new(_settings);
+            _updateService = new(_connectionService);
+
             Resolver.Services.GetOrCreate<Logger>();
             Resolver.Log.LogLevel = LogLevel.Trace;
             Resolver.Log.AddProvider(_log);
+            if (Resolver.Services.Get<IJsonSerializer>() == null)
+            {
+                Resolver.Services.Add<IJsonSerializer>(new MicroJsonSerializer());
+            }
         }
 
         public void Dispose()
@@ -272,11 +280,22 @@ namespace Core.Unit.Tests.UpdateServiceTests
         [Fact]
         public void ProcessPublishCommand_WithTypedSubscriptionAndAdditionalData_ShouldRunAction()
         {
+            var data = new TestCommandWithExtensionData
+            {
+                ArgProperty = true,
+                AdditionalData = new Dictionary<string, object>
+                  {
+                      { "AnotherProperty", "anotherValue" }
+                  }
+            };
+
+            var payload = JsonSerializer.Serialize(data);
+
             // Arrange
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic("topic")
                 .WithUserProperty("commandName", "testCommandWithExtensionData")
-                .WithPayload(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new { ArgProperty = true, AnotherProperty = "anotherValue" })))
+                .WithPayload(Encoding.UTF8.GetBytes(payload))
                 .Build();
 
             ICommandService commandService = _updateService;
@@ -408,8 +427,7 @@ namespace Core.Unit.Tests.UpdateServiceTests
     {
         public bool ArgProperty { get; set; }
 
-        [JsonExtensionData]
-        public IDictionary<string, object> AdditionalData { get; set; }
+        public Dictionary<string, object> AdditionalData { get; set; }
     }
 
     public class TestLogProvider : ILogProvider

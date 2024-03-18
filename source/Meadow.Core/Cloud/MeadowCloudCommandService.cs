@@ -17,8 +17,11 @@ internal class MeadowCloudCommandService : ICommandService
     public MeadowCloudCommandService(MeadowCloudConnectionService connectionService)
     {
         _connectionService = connectionService;
-        _connectionService.MqttMessageReceived += OnMqttMessageReceived;
-        _connectionService.AddSubscription("{OID}/commands/{ID}");
+        if (connectionService != null)
+        {
+            _connectionService.MqttMessageReceived += OnMqttMessageReceived;
+            _connectionService.AddSubscription("{OID}/commands/{ID}");
+        }
     }
 
     private void OnMqttMessageReceived(object sender, MqttApplicationMessage e)
@@ -78,7 +81,7 @@ internal class MeadowCloudCommandService : ICommandService
             try
             {
                 arguments = message.Payload != null
-                    ? Resolver.JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(message.Payload)
+                    ? Resolver.JsonSerializer.Deserialize<Dictionary<string, object>>(message.Payload)
                     : null;
             }
             catch (Exception ex)
@@ -89,7 +92,6 @@ internal class MeadowCloudCommandService : ICommandService
 
             var command = new MeadowCommand(commandName, arguments);
             value.Action(command);
-            return;
         }
 
         (Type commandType, Action<object> action)? subscription = null;
