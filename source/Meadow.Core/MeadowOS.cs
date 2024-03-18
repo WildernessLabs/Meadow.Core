@@ -605,7 +605,7 @@ public static partial class MeadowOS
                 cloudConnectionService);
             Resolver.Services.Add<IUpdateService>(updateService);
 
-            if (MeadowCloudSettings.Enabled && MeadowCloudSettings.EnableUpdateService)
+            if (MeadowCloudSettings.Enabled && MeadowCloudSettings.EnableUpdates)
             {
                 updateService.Start();
             }
@@ -617,7 +617,7 @@ public static partial class MeadowOS
                 healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
             }
 
-            if (MeadowCloudSettings.Enabled || MeadowCloudSettings.EnableUpdateService)
+            if (MeadowCloudSettings.Enabled || MeadowCloudSettings.EnableUpdates)
             {
                 cloudConnectionService.Start();
             }

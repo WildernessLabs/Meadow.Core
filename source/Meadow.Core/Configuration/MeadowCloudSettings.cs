@@ -9,7 +9,7 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     public string AuthHostname { get; set; } = "https://www.meadowcloud.co";
     public string DataHostname { get; set; } = "https://collector.meadowcloud.co";
     public bool UseAuthentication { get; set; } = true;
-    public bool EnableUpdateService { get; set; } = false;
+    public bool EnableUpdates { get; set; } = false;
     public bool EnableHealthMetrics { get; set; } = false;
     public int HealthMetricsInterval { get; set; } = 60;
     public int MqttPort { get; set; } = 8883;
