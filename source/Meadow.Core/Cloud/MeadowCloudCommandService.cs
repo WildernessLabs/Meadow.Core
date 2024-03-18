@@ -78,7 +78,7 @@ internal class MeadowCloudCommandService : ICommandService
             try
             {
                 arguments = message.Payload != null
-                    ? Resolver.JsonSerializer.Deserialize<IReadOnlyDictionary<string, object>>(message.Payload)
+                    ? Resolver.JsonSerializer.Deserialize<Dictionary<string, object>>(message.Payload)
                     : null;
             }
             catch (Exception ex)

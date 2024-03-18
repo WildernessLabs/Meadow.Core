@@ -22,14 +22,12 @@
       <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Cloud\UpdateService.cs" />
     <Compile Remove="CryptographyService.cs" />
     <Compile Remove="MeadowCloudConnectionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
     <None Include="Cloud\MeadowCloudConnectionService.cs" />
-    <None Include="Cloud\UpdateService.cs" />
 	  <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
 	  <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\MicroJson.csproj" />
 	  <ProjectReference Include="..\..\..\Meadow.Modbus\src\Meadow.Modbus\Meadow.Modbus.csproj" />

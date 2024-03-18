@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Hashing;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Meadow.Update;
@@ -45,7 +44,7 @@ public class UpdateStore : IEnumerable<UpdateInfo>
                 try
                 {
                     var json = File.ReadAllText(infoFile.FullName);
-                    info = JsonSerializer.Deserialize<UpdateMessage>(json);
+                    info = Resolver.JsonSerializer.Deserialize<UpdateMessage>(json);
 
                     if (info == null)
                     {
@@ -110,7 +109,7 @@ public class UpdateStore : IEnumerable<UpdateInfo>
         var di = _storeDirectory.CreateSubdirectory(info.ID);
 
         // persist this update
-        var json = JsonSerializer.Serialize(info);
+        var json = Resolver.JsonSerializer.Serialize(info);
 
         var dest = Path.Combine(di.FullName, UpdateInfoFileName);
         File.WriteAllText(dest, json);
@@ -122,7 +121,7 @@ public class UpdateStore : IEnumerable<UpdateInfo>
         var di = _storeDirectory.CreateSubdirectory(info.ID);
 
         // persist this update
-        var json = JsonSerializer.Serialize(info);
+        var json = Resolver.JsonSerializer.Serialize(info);
 
         var dest = Path.Combine(di.FullName, UpdateInfoFileName);
         File.WriteAllText(dest, json);
