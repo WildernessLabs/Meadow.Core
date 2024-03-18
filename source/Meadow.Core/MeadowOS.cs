@@ -617,7 +617,7 @@ public static partial class MeadowOS
                 healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
             }
 
-            if (MeadowCloudSettings.Enabled)
+            if (MeadowCloudSettings.Enabled || MeadowCloudSettings.EnableUpdateService)
             {
                 cloudConnectionService.Start();
             }
