@@ -19,7 +19,8 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <summary>
     /// Raised when the device disconnects from a network.
     /// </summary>
-    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
+    public event NetworkDisconnectionHandler? NetworkDisconnected;
+
     /// <summary>
     /// Raised when a network error occurs
     /// </summary>
@@ -128,7 +129,7 @@ public abstract class NetworkAdapterBase : INetworkAdapter
             {
                 throw new InvalidOperationException("Native interface is null.");
             }
-            
+
             return (nativeInterface?.GetIPProperties()?.DnsAddresses!) ?? throw new InvalidOperationException("DNS addresses could not be retrieved.");
         }
     }

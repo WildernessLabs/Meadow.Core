@@ -701,30 +701,11 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
     {
         ClearNetworkDetails();
-        DisconnectEventData disconnectEventData = Encoders.ExtractDisconnectEventData(payload, 0);
-        string reason = DisconnectReason(disconnectEventData);
+        var disconnectEventData = Encoders.ExtractDisconnectEventData(payload, 0);
         lock (_lock)
         {
-            RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(reason));
+            RaiseNetworkDisconnected(new WiFiNetworkDisconnectionEventArgs((WiFiDisconnectedReason)disconnectEventData.Reason));
         }
-    }
-
-    private string DisconnectReason(DisconnectEventData eventData)
-    {
-       WiFiDisconnectedReason reason = (WiFiDisconnectedReason) eventData.Reason;
-
-        return reason switch
-        {
-            WiFiDisconnectedReason.Unspecified => "Internal Failed",
-            WiFiDisconnectedReason.AssociatedExpire => "Disconnect due inactivity",
-            WiFiDisconnectedReason.AssociatedTooMany => "Too many devices already connect to the Access Point",
-            WiFiDisconnectedReason.AssociatedLeave => "Disconnected manually by the user",
-            WiFiDisconnectedReason.FourWayHandshakeTimenout => "Wrong password. Please check your WiFi credentials",
-            WiFiDisconnectedReason.BandWidtNotEnogh => "Low signal quality from the Access Point",
-            WiFiDisconnectedReason.BeaconTimeout => "Close connection from Access Point",
-            WiFiDisconnectedReason.AccessPointNotFound=> "Access Point not found. Please check your WiFi credentials or may be out of range of the access point",
-            _  => $"Undefined Reason ({reason})",
-        };
     }
 
     /// <summary>
