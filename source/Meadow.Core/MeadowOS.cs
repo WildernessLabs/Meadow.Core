@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -595,6 +596,8 @@ public static partial class MeadowOS
 
             App = app;
 
+            Resolver.Services.Add<IMeadowHttpClientFactory>(new MeadowHttpClientFactory());
+            
             var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
             Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
             var commandService = new MeadowCloudCommandService(cloudConnectionService);

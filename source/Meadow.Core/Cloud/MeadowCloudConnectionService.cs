@@ -547,8 +547,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         int attempt = 0;
         int maxRetries = 1;
         string errorMessage;
-
-        using HttpClient client = new HttpClient();
+        
+        using var client = Resolver.Services.Get<IMeadowHttpClientFactory>()!.CreateClient();
 
     retry:
         if (ConnectionState != CloudConnectionState.Connected)
