@@ -147,12 +147,13 @@ internal static class AppSettingsParser
                 ParseIntSetting(settingValue, (i) => settings.LifecycleSettings.AppFailureRestartDelaySeconds = i);
                 break;
             case "Update.Enabled": // legacy
-                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdateService = i);
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdates = i);
                 break;
             case "MeadowCloud.Enabled":
                 ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.Enabled = i);
                 break;
             case "MeadowCloud.Hostname":
+            case "MeadowCloud.AuthHostname":
                 settings.MeadowCloudSettings.AuthHostname = settingValue;
                 break;
             case "MeadowCloud.DataHostname":
@@ -173,13 +174,16 @@ internal static class AppSettingsParser
             case "MeadowCloud.UseAuthentication":
                 ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.UseAuthentication = i);
                 break;
+            case "MeadowCloud.EnableUpdateService":
             case "MeadowCloud.EnableUpdates":
-                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdateService = i);
+                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdates = i);
                 break;
             case "HealthMetrics.Enabled":
+            case "MeadowCloud.EnableHealthMetrics":
                 ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableHealthMetrics = i);
                 break;
             case "HealthMetrics.Interval":
+            case "MeadowCloud.HealthMetricsInterval":
                 ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.HealthMetricsInterval = i);
                 break;
             default:
