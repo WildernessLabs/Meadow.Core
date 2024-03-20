@@ -95,7 +95,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             }
 
             ConnectionState = previousState;
-        });
+        }).RethrowUnhandledExceptions();
     }
 
     /// <summary>

@@ -274,7 +274,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     }
 
                     CurrentState = NetworkState.Connected;
-                });
+                }).RethrowUnhandledExceptions();
 
                 break;
             case WiFiFunction.NetworkDisconnectedEvent:
@@ -624,7 +624,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     CurrentState = NetworkState.Disconnected;
                 }
             }
-        });
+        }).RethrowUnhandledExceptions();
     }
 
     /// <summary>

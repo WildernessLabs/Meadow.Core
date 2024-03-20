@@ -294,7 +294,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                             default:
                                 throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
                         }
-                    });
+                    }).RethrowUnhandledExceptions();
                 }
                 else
                 {
