@@ -37,6 +37,8 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// </summary>
     private readonly object _lock = new object();
     private readonly Esp32Coprocessor _esp32;
+    private TimeSpan _scanPeriod = DefaultScanPeriod;
+    private bool _isConnected;
 
     public Esp32WiFiAdapter(Esp32Coprocessor esp32)
         : base(NetworkInterfaceType.Wireless80211)
@@ -216,8 +218,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             _scanPeriod = value;
         }
     }
-    private TimeSpan _scanPeriod = DefaultScanPeriod;
-    private bool _isConnected;
 
     /// <summary>
     /// Use the event data to work out which event to invoke and create any event args that will be consumed.
@@ -274,10 +274,11 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     }
 
                     CurrentState = NetworkState.Connected;
-                });
+                }).RethrowUnhandledExceptions();
 
                 break;
             case WiFiFunction.NetworkDisconnectedEvent:
+                _isConnected = false;
                 RaiseWiFiDisconnected(statusCode, payload);
                 CurrentState = NetworkState.Disconnected;
                 break;
@@ -414,12 +415,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// <param name="token">Cancellation token for the connection attempt</param>
     /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
     /// <returns>The connection result</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="NotSupportedException"></exception>
-    /// <exception cref="TimeoutException"></exception>
-    /// <exception cref="NetworkException"></exception>
-    /// <exception cref="NetworkNotFoundException"></exception>
-    /// <exception cref="NetworkAuthenticationException"></exception>
     public async Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
     {
         switch (CurrentState)
@@ -613,7 +608,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         }
 
         CurrentState = NetworkState.Connecting;
-        _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+        _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (int)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
 
         Task.Run(async () =>
         {
@@ -629,7 +624,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     CurrentState = NetworkState.Disconnected;
                 }
             }
-        });
+        }).RethrowUnhandledExceptions();
     }
 
     /// <summary>
@@ -748,6 +743,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     break;
                 case NetworkState.Connected:
                     Refresh();
+                    _isConnected = true;
                     var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
                     RaiseNetworkConnected(args);
                     break;

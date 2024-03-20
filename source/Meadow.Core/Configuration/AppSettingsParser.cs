@@ -146,9 +146,6 @@ internal static class AppSettingsParser
             case "Lifecycle.AppFailureRestartDelaySeconds":
                 ParseIntSetting(settingValue, (i) => settings.LifecycleSettings.AppFailureRestartDelaySeconds = i);
                 break;
-            case "Update.Enabled": // legacy
-                ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdates = i);
-                break;
             case "MeadowCloud.Enabled":
                 ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.Enabled = i);
                 break;
@@ -178,13 +175,13 @@ internal static class AppSettingsParser
             case "MeadowCloud.EnableUpdates":
                 ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableUpdates = i);
                 break;
-            case "HealthMetrics.Enabled":
+            case "HealthMetrics.Enabled": // legacy
             case "MeadowCloud.EnableHealthMetrics":
                 ParseBoolSetting(settingValue, (i) => settings.MeadowCloudSettings.EnableHealthMetrics = i);
                 break;
-            case "HealthMetrics.Interval":
-            case "MeadowCloud.HealthMetricsInterval":
-                ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.HealthMetricsInterval = i);
+            case "HealthMetrics.Interval": // legacy
+            case "MeadowCloud.HealthMetricsIntervalMinutes":
+                ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.HealthMetricsIntervalMinutes = i);
                 break;
             default:
                 if (!settings.Settings.ContainsKey(settingName))

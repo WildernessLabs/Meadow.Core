@@ -184,7 +184,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
             SamplingTokenSource = new CancellationTokenSource();
             CancellationToken ct = SamplingTokenSource.Token;
 
-            Task.Factory.StartNew(async () =>
+            Task.Run(async () =>
             {
                 // loop until we're supposed to stop
                 while (true)
@@ -213,7 +213,8 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
                     await Task.Delay(UpdateInterval);
                 }
 
-            }, SamplingTokenSource.Token);
+            }, SamplingTokenSource.Token)
+                .RethrowUnhandledExceptions(SamplingTokenSource.Token);
         }
     }
 
