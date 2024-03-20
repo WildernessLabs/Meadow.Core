@@ -587,6 +587,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         string errorMessage;
 
         using HttpClient client = new HttpClient();
+        client.BaseAddress = new Uri(Settings.DataHostname);
 
     retry:
         if (ConnectionState != CloudConnectionState.Connected)
@@ -595,8 +596,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             return false;
         }
 
-        client.BaseAddress = new Uri(Settings.DataHostname);
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+        if (Settings.UseAuthentication)
+        {
+            if (_jwt == null)
+            {
+                await Authenticate();
+            }
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+        }
 
         var json = Resolver.JsonSerializer.Serialize(item!);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
