@@ -346,9 +346,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     break;
                 case CloudConnectionState.Connected:
-                    var et = Environment.TickCount - _lastStateChange;
-
-                    Resolver.Log.Error($"Connecting took: {et} ms");
                     if (_firstConection)
                     {
                         if (SendCrashReports())
