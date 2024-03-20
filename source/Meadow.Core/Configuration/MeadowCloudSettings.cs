@@ -11,7 +11,7 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     public bool UseAuthentication { get; set; } = true;
     public bool EnableUpdates { get; set; } = false;
     public bool EnableHealthMetrics { get; set; } = false;
-    public int HealthMetricsInterval { get; set; } = 60;
+    public int HealthMetricsIntervalMinutes { get; set; } = 60;
     public int MqttPort { get; set; } = 8883;
     public int ConnectRetrySeconds { get; set; } = 15;
     public int AuthTimeoutSeconds { get; set; } = 120;

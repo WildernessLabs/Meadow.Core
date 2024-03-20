@@ -227,6 +227,16 @@ public static partial class MeadowOS
         LifecycleSettings = settings.LifecycleSettings;
         MeadowCloudSettings = settings.MeadowCloudSettings;
 
+        // cascade cloud enable
+        if (MeadowCloudSettings.EnableUpdates)
+        {
+            MeadowCloudSettings.Enabled = true;
+        }
+        if (MeadowCloudSettings.EnableHealthMetrics)
+        {
+            MeadowCloudSettings.Enabled = true;
+        }
+
         return settings.Settings;
     }
 
@@ -605,21 +615,37 @@ public static partial class MeadowOS
                 cloudConnectionService);
             Resolver.Services.Add<IUpdateService>(updateService);
 
-            if (MeadowCloudSettings.Enabled && MeadowCloudSettings.EnableUpdates)
+            if (MeadowCloudSettings.EnableUpdates)
             {
                 updateService.Start();
             }
 
             var healthReporter = new HealthReporter();
             Resolver.Services.Add<IHealthReporter>(healthReporter);
-            if (MeadowCloudSettings.Enabled && MeadowCloudSettings.EnableHealthMetrics)
+            if (MeadowCloudSettings.EnableHealthMetrics)
             {
-                healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
+                if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
+                {
+                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes);
+                }
+                else
+                {
+                    Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.");
+                }
             }
 
-            if (MeadowCloudSettings.Enabled || MeadowCloudSettings.EnableUpdates)
+            if (MeadowCloudSettings.Enabled
+                || MeadowCloudSettings.EnableUpdates
+                || MeadowCloudSettings.EnableHealthMetrics)
             {
+                Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}");
+                Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}");
+                Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}");
                 cloudConnectionService.Start();
+            }
+            else
+            {
+                Resolver.Log.Info("All cloud features are disabled.");
             }
 
             return true;
