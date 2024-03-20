@@ -16,7 +16,8 @@ namespace Meadow.Pinouts
         {
             GPIO2, GPIO3, GPIO4, GPIO17, GPIO18, GPIO27, GPIO22, GPIO23,
             GPIO24, GPIO10, GPIO9, GPIO25, GPIO11, GPIO8, GPIO7, GPIO5,
-            GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21
+            GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21,
+            ACT_LED
         };
 
         /// <summary>
@@ -44,6 +45,8 @@ namespace Meadow.Pinouts
             GpiodChipName = gpiodChipName;
             SysFsOffset = sysfsOffset;
         }
+
+        public IPin ACT_LED => new RaspberryPi.LedPin(Controller, "ACT", "ACT", null);
 
         public IPin GPIO2 => new LinuxFlexiPin(Controller, "GPIO2", "PIN03", 2 + SysFsOffset, GpiodChipName, 2);
         public IPin GPIO3 => new LinuxFlexiPin(Controller, "GPIO3", "PIN05", 3 + SysFsOffset, GpiodChipName, 3);
