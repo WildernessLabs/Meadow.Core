@@ -50,7 +50,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private string? _jwt = null;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
     private Thread? _stateMachineThread;
-    private int _lastStateChange;
 
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
@@ -66,7 +65,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         private set
         {
             if (value == ConnectionState) return;
-            _lastStateChange = Environment.TickCount;
             _connectionState = value;
             ConnectionStateChanged?.Invoke(this, ConnectionState);
         }
@@ -114,7 +112,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         if (_stateMachineThread == null)
         {
-            _stateMachineThread = new Thread(() => ConnectionStateMachine(null));
+            _stateMachineThread = new Thread(() => ConnectionStateMachine());
             _stateMachineThread.Start();
         }
     }
@@ -146,7 +144,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         });
     }
 
-    private async void ConnectionStateMachine(object? _)
+    private async void ConnectionStateMachine()
     {
         _stopService = false;
 
