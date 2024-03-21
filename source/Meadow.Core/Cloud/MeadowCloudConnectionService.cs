@@ -171,17 +171,17 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
         else
         {
-            Resolver.Log.Error($"Meadow.Cloud service will use the {nic.GetType().Name} network interface");
+            Resolver.Log.Debug($"Meadow.Cloud service will use the {nic.GetType().Name} network interface");
         }
 
         nic.NetworkDisconnected += (s, e) =>
         {
-            Resolver.Log.Error($"Meadow.Cloud detected network disconnect");
+            Resolver.Log.Debug($"Meadow.Cloud detected network disconnect");
             ConnectionState = CloudConnectionState.Disconnected;
         };
         nic.NetworkConnected += (s, e) =>
         {
-            Resolver.Log.Error($"Meadow.Cloud detected network connect");
+            Resolver.Log.Debug($"Meadow.Cloud detected network connect");
         };
 
         var stopwatch = new Stopwatch();
