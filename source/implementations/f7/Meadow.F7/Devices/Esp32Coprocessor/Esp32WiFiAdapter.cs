@@ -591,22 +591,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
         CurrentState = NetworkState.Connecting;
         _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (int)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
-
-        Task.Run(async () =>
-        {
-            var t = 0;
-            var timeout = MaximumRetryCount * 3500;
-
-            while (CurrentState == NetworkState.Connecting)
-            {
-                await Task.Delay(3500);
-                t += 3500;
-                if ((t > timeout))
-                {
-                    CurrentState = NetworkState.Disconnected;
-                }
-            }
-        }).RethrowUnhandledExceptions();
     }
 
     /// <summary>
