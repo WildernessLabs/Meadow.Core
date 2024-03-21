@@ -99,7 +99,10 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// </summary>
     protected void Refresh()
     {
-        nativeInterface = LoadAdapterInfo();
+        if (nativeInterface == null)
+        {
+            nativeInterface = LoadAdapterInfo();
+        }
     }
 
     /// <summary>
@@ -176,12 +179,9 @@ public abstract class NetworkAdapterBase : INetworkAdapter
             {
                 foreach (var intf in interfaces)
                 {
-                    var p = intf.GetIPProperties();
-
-                    MacAddress = intf.GetPhysicalAddress();
-
                     if (intf.NetworkInterfaceType == InterfaceType)
                     {
+                        MacAddress = intf.GetPhysicalAddress();
                         Resolver.Log.Trace($"Interface: {intf.Id}: {intf.Name} {intf.NetworkInterfaceType} {intf.OperationalStatus}");
                         return intf;
                     }
