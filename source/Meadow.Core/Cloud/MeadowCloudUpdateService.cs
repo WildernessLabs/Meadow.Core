@@ -95,10 +95,14 @@ internal class MeadowCloudUpdateService : IUpdateService
 
     private void OnMqttMessageReceived(object sender, MqttApplicationMessage e)
     {
-        if (!_isEnabled) return;
-
         if (e.Topic.EndsWith($"/ota/{Resolver.Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
         {
+            if (!_isEnabled)
+            {
+                Resolver.Log.Warn("Meadow update message received, but updates are currently disabled", "cloud");
+                return;
+            }
+
             Resolver.Log.Info("Meadow update message received", "cloud");
 
             var info = Resolver.JsonSerializer.Deserialize<UpdateMessage>(e.Payload);
