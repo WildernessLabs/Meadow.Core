@@ -38,7 +38,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     private readonly object _lock = new object();
     private readonly Esp32Coprocessor _esp32;
     private TimeSpan _scanPeriod = DefaultScanPeriod;
-    private bool _isConnected;
 
     public Esp32WiFiAdapter(Esp32Coprocessor esp32)
         : base(NetworkInterfaceType.Wireless80211)
@@ -53,7 +52,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         Bssid = System.Net.NetworkInformation.PhysicalAddress.None;
         _apMac = System.Net.NetworkInformation.PhysicalAddress.None;
 
-        _isConnected = false;
         ClearNetworkDetails();
         _antenna = AntennaType.NotKnown;
     }
@@ -61,7 +59,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// <summary>
     /// Record if the WiFi ESP32 is connected to an access point.
     /// </summary>
-    public override bool IsConnected { get => _isConnected; }
+    public override bool IsConnected { get => CurrentState == NetworkState.Connected; }
 
     /// <inheritdoc/>
     public override string Name => "ESP32 WiFi";
@@ -256,29 +254,13 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     Ssid = connectEventData.Ssid;
                     Bssid = new PhysicalAddress(connectEventData.Bssid);
                     Channel = channel;
-                    _isConnected = true;
                     _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
                 }
 
-                // testing has revealed that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
-                var t = 3000;
-
-                Task.Run(async () =>
-                {
-                    while (IpAddress.Equals(System.Net.IPAddress.Any) || IpAddress.Equals(System.Net.IPAddress.None))
-                    {
-                        await Task.Delay(500);
-                        this.Refresh();
-                        t -= 500;
-                        if (t < 0) break;
-                    }
-
-                    CurrentState = NetworkState.Connected;
-                }).RethrowUnhandledExceptions();
+                CurrentState = NetworkState.Connected;
 
                 break;
             case WiFiFunction.NetworkDisconnectedEvent:
-                _isConnected = false;
                 RaiseWiFiDisconnected(statusCode, payload);
                 CurrentState = NetworkState.Disconnected;
                 break;
@@ -609,22 +591,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
         CurrentState = NetworkState.Connecting;
         _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (int)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
-
-        Task.Run(async () =>
-        {
-            var t = 0;
-            var timeout = MaximumRetryCount * 3500;
-
-            while (CurrentState == NetworkState.Connecting)
-            {
-                await Task.Delay(3500);
-                t += 3500;
-                if ((t > timeout))
-                {
-                    CurrentState = NetworkState.Disconnected;
-                }
-            }
-        }).RethrowUnhandledExceptions();
     }
 
     /// <summary>
@@ -734,8 +700,9 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         set
         {
             if (value == _state) return;
-
             _state = value;
+
+            Resolver.Log.Trace($"WiFi adapter state changed to: {CurrentState}");
 
             switch (CurrentState)
             {
@@ -743,14 +710,12 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     break;
                 case NetworkState.Connected:
                     Refresh();
-                    _isConnected = true;
                     var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
                     RaiseNetworkConnected(args);
                     break;
                 case NetworkState.Disconnecting:
                     break;
                 case NetworkState.Disconnected:
-                    _isConnected = false;
                     break;
                 case NetworkState.Error:
                     break;
