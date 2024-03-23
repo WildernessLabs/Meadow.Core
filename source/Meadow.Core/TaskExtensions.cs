@@ -17,7 +17,10 @@ public static class TaskExtensions
     {
         task.ContinueWith((t, s) =>
         {
-            throw t.Exception;
+            if (t?.Exception != null)
+            {
+                throw t.Exception;
+            }
         }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
