@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow;
@@ -21,6 +22,9 @@ public static class TaskExtensions
             {
                 throw t.Exception;
             }
+
+            throw new Exception($"Task ID {t?.Id ?? 0} faulted (no additional info available)");
+
         }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
