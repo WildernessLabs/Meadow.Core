@@ -16,7 +16,7 @@ public static class TaskExtensions
     /// <remarks>Use this for unmonitored Tasks to bubble exceptions up to the AppDomain UnhandledExceptionHandler</remarks>
     public static void RethrowUnhandledExceptions(this Task task)
     {
-        task.ContinueWith((t, s) =>
+        task.ContinueWith(t =>
         {
             if (t?.Exception != null)
             {
