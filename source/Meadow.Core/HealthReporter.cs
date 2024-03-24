@@ -42,7 +42,11 @@ public class HealthReporter : IHealthReporter
     {
         var connected = Resolver.Device.NetworkAdapters.Any(a => a.IsConnected);
 
-        if (!connected) return;
+        if (!connected)
+        {
+            Resolver.Log.Trace("could not send health metric, connection unavailable.");
+            return;
+        }
 
         try
         {
@@ -84,6 +88,10 @@ public class HealthReporter : IHealthReporter
             if (await service!.SendEvent(ce))
             {
                 Resolver.Log.Trace($"health metrics sent");
+            }
+            else
+            {
+                Resolver.Log.Trace($"sending health metric failed");
             }
         }
         finally
