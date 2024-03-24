@@ -104,9 +104,11 @@ public static partial class MeadowOS
                 stepName = "App Run";
 
                 Resolver.Log.Trace("Running App");
-                await App.Run();
 
-                AppAbort.Token.WaitHandle.WaitOne();
+                var appTask = Task.Run(() => App.Run());
+                var abortTask = Task.Run(() => AppAbort.Token.WaitHandle.WaitOne());
+
+                Task.WaitAny(appTask, abortTask);
 
                 // the user's app has exited, which is almost certainly not intended
                 Resolver.Log.Warn("AppAbort cancellation has been requested");

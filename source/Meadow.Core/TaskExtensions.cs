@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace Meadow;
@@ -16,14 +15,18 @@ public static class TaskExtensions
     /// <remarks>Use this for unmonitored Tasks to bubble exceptions up to the AppDomain UnhandledExceptionHandler</remarks>
     public static void RethrowUnhandledExceptions(this Task task)
     {
-        task.ContinueWith((t, s) =>
+        task.ContinueWith(t =>
         {
+            var message = $"Task ID {t?.Id ?? 0} faulted";
+
             if (t?.Exception != null)
             {
-                throw t.Exception;
+                message += $": {t.Exception.Message}";
+                //throw t.Exception;
             }
 
-            throw new Exception($"Task ID {t?.Id ?? 0} faulted (no additional info available)");
+            Resolver.Log.Error(message);
+            MeadowOS.TerminateRun();
 
         }, TaskContinuationOptions.OnlyOnFaulted);
     }

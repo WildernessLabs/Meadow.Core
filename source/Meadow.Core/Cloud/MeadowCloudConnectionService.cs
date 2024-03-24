@@ -91,8 +91,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             {
                 ConnectionState = CloudConnectionState.Subscribing;
             }
-
-            ConnectionState = previousState;
+            else
+            {
+                ConnectionState = previousState;
+            }
         }).RethrowUnhandledExceptions();
     }
 
