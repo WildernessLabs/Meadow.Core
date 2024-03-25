@@ -119,6 +119,11 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
     }
 
+    public void Stop()
+    {
+        _stopService = true;
+    }
+
     private void Initialize()
     {
         var factory = new MqttFactory();
