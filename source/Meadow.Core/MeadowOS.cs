@@ -105,13 +105,19 @@ public static partial class MeadowOS
 
                 Resolver.Log.Trace("Running App");
 
-                var appTask = Task.Run(() => App.Run());
+                var appTask = App.Run();
                 var abortTask = Task.Run(() => AppAbort.Token.WaitHandle.WaitOne());
 
-                Task.WaitAny(appTask, abortTask);
-
-                // the user's app has exited, which is almost certainly not intended
-                Resolver.Log.Warn("AppAbort cancellation has been requested");
+                var completed = Task.WaitAny(appTask, abortTask);
+                switch (completed)
+                {
+                    case 0:
+                        Resolver.Log.Warn("App task has completed");
+                        break;
+                    case 1:
+                        Resolver.Log.Warn("AppAbort cancellation has been requested");
+                        break;
+                }
             }
             catch (Exception e)
             {
@@ -672,10 +678,12 @@ public static partial class MeadowOS
 
     private static void Shutdown()
     {
+        AppAbort.Cancel(true);
+
         // stop the update service
-        if (Resolver.Services.Get<IUpdateService>() is { } updateService)
+        if (Resolver.Services.Get<IMeadowCloudService>() is { } cloudService)
         {
-            updateService.Stop();
+            cloudService.Stop();
         }
 
         // schedule a device restart if possible and if the user hasn't disabled it
