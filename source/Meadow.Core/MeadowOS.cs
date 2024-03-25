@@ -105,19 +105,8 @@ public static partial class MeadowOS
 
                 Resolver.Log.Trace("Running App");
 
-                var appTask = App.Run();
-                var abortTask = Task.Run(() => AppAbort.Token.WaitHandle.WaitOne());
-
-                var completed = Task.WaitAny(appTask, abortTask);
-                switch (completed)
-                {
-                    case 0:
-                        Resolver.Log.Warn("App task has completed");
-                        break;
-                    case 1:
-                        Resolver.Log.Warn("AppAbort cancellation has been requested");
-                        break;
-                }
+                await App.Run();
+                AppAbort.Token.WaitHandle.WaitOne();
             }
             catch (Exception e)
             {
