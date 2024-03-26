@@ -16,7 +16,7 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="1.9.0" />
+    <PackageReference Include="Meadow" Version="1.10.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="app.config.envizor.yaml">

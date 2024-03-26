@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.7.0</Version>
+    <Version>1.9.0</Version>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -24,6 +24,6 @@
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="Meadow" Version="1.9.0" />
+    <PackageReference Include="Meadow" Version="1.10.0" />
   </ItemGroup>
 </Project>

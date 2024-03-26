@@ -37,6 +37,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// </summary>
     private readonly object _lock = new object();
     private readonly Esp32Coprocessor _esp32;
+    private TimeSpan _scanPeriod = DefaultScanPeriod;
 
     public Esp32WiFiAdapter(Esp32Coprocessor esp32)
         : base(NetworkInterfaceType.Wireless80211)
@@ -51,7 +52,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         Bssid = System.Net.NetworkInformation.PhysicalAddress.None;
         _apMac = System.Net.NetworkInformation.PhysicalAddress.None;
 
-        _isConnected = false;
         ClearNetworkDetails();
         _antenna = AntennaType.NotKnown;
     }
@@ -59,7 +59,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// <summary>
     /// Record if the WiFi ESP32 is connected to an access point.
     /// </summary>
-    public override bool IsConnected { get => _isConnected; }
+    public override bool IsConnected { get => CurrentState == NetworkState.Connected; }
 
     /// <inheritdoc/>
     public override string Name => "ESP32 WiFi";
@@ -216,8 +216,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             _scanPeriod = value;
         }
     }
-    private TimeSpan _scanPeriod = DefaultScanPeriod;
-    private bool _isConnected;
 
     /// <summary>
     /// Use the event data to work out which event to invoke and create any event args that will be consumed.
@@ -256,25 +254,10 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     Ssid = connectEventData.Ssid;
                     Bssid = new PhysicalAddress(connectEventData.Bssid);
                     Channel = channel;
-                    _isConnected = true;
                     _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
                 }
 
-                // testing has revealed that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
-                var t = 3000;
-
-                Task.Run(async () =>
-                {
-                    while (IpAddress.Equals(System.Net.IPAddress.Any) || IpAddress.Equals(System.Net.IPAddress.None))
-                    {
-                        await Task.Delay(500);
-                        this.Refresh();
-                        t -= 500;
-                        if (t < 0) break;
-                    }
-
-                    CurrentState = NetworkState.Connected;
-                });
+                CurrentState = NetworkState.Connected;
 
                 break;
             case WiFiFunction.NetworkDisconnectedEvent:
@@ -414,12 +397,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// <param name="token">Cancellation token for the connection attempt</param>
     /// <param name="reconnection">Determine if the adapter should automatically attempt to reconnect (see <see cref="ReconnectionType"/>) to the access point if it becomes disconnected for any reason.</param>
     /// <returns>The connection result</returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="NotSupportedException"></exception>
-    /// <exception cref="TimeoutException"></exception>
-    /// <exception cref="NetworkException"></exception>
-    /// <exception cref="NetworkNotFoundException"></exception>
-    /// <exception cref="NetworkAuthenticationException"></exception>
     public async Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
     {
         switch (CurrentState)
@@ -612,7 +589,8 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             throw new InvalidOperationException($"Already connected or connecting to an access point, current state {CurrentState}");
         }
 
-        _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+        CurrentState = NetworkState.Connecting;
+        _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (int)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
     }
 
     /// <summary>
@@ -684,30 +662,11 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     protected void RaiseWiFiDisconnected(StatusCodes statusCode, byte[] payload)
     {
         ClearNetworkDetails();
-        DisconnectEventData disconnectEventData = Encoders.ExtractDisconnectEventData(payload, 0);
-        string reason = DisconnectReason(disconnectEventData);
+        var disconnectEventData = Encoders.ExtractDisconnectEventData(payload, 0);
         lock (_lock)
         {
-            RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(reason));
+            RaiseNetworkDisconnected(new WiFiNetworkDisconnectionEventArgs((WiFiDisconnectedReason)disconnectEventData.Reason));
         }
-    }
-
-    private string DisconnectReason(DisconnectEventData eventData)
-    {
-       WiFiDisconnectedReason reason = (WiFiDisconnectedReason) eventData.Reason;
-
-        return reason switch
-        {
-            WiFiDisconnectedReason.Unspecified => "Internal Failed",
-            WiFiDisconnectedReason.AssociatedExpire => "Disconnect due inactivity",
-            WiFiDisconnectedReason.AssociatedTooMany => "Too many devices already connect to the Access Point",
-            WiFiDisconnectedReason.AssociatedLeave => "Disconnected manually by the user",
-            WiFiDisconnectedReason.FourWayHandshakeTimenout => "Wrong password. Please check your WiFi credentials",
-            WiFiDisconnectedReason.BandWidtNotEnogh => "Low signal quality from the Access Point",
-            WiFiDisconnectedReason.BeaconTimeout => "Close connection from Access Point",
-            WiFiDisconnectedReason.AccessPointNotFound=> "Access Point not found. Please check your WiFi credentials or may be out of range of the access point",
-            _  => $"Undefined Reason ({reason})",
-        };
     }
 
     /// <summary>
@@ -741,8 +700,9 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         set
         {
             if (value == _state) return;
-
             _state = value;
+
+            Resolver.Log.Trace($"WiFi adapter state changed to: {CurrentState}");
 
             switch (CurrentState)
             {
@@ -756,7 +716,6 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 case NetworkState.Disconnecting:
                     break;
                 case NetworkState.Disconnected:
-                    _isConnected = false;
                     break;
                 case NetworkState.Error:
                     break;

@@ -3,7 +3,6 @@ using Meadow.Hardware;
 using System;
 using System.Net;
 using System.Net.NetworkInformation;
-using Meadow.Networking;
 
 namespace Meadow.Devices;
 
@@ -64,16 +63,16 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
                 var args = new EthernetNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
 
                 this.Refresh();
+                _isConnected = true;
+
                 RaiseNetworkConnected(args);
 
-                _isConnected = true;
                 break;
             case EthernetFunction.NetworkDisconnectedEvent:
                 Resolver.Log.Trace("Ethernet disconnected event triggered!");
 
-                RaiseNetworkDisconnected(null);
-                
                 _isConnected = false;
+                RaiseNetworkDisconnected(null);
                 break;
             default:
                 Resolver.Log.Trace("Event type not found");

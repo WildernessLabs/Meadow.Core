@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.8.0</Version>
+    <Version>1.9.0</Version>
     <Company>Wilderness Labs, Inc</Company>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -15,9 +15,9 @@
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="Meadow.Foundation"  Version="1.9.0" />
-    <PackageReference Include="Meadow.Linux" Version="1.9.0" />
-    <PackageReference Include="Meadow.Mac" Version="1.9.0" />
-    <PackageReference Include="Meadow.Windows" Version="1.9.0" />
+    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
+    <PackageReference Include="Meadow.Linux" Version="1.10.0" />
+    <PackageReference Include="Meadow.Mac" Version="1.10.0" />
+    <PackageReference Include="Meadow.Windows" Version="1.10.0" />
   </ItemGroup>
 </Project>

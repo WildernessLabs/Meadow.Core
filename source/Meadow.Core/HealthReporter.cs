@@ -19,12 +19,16 @@ public class HealthReporter : IHealthReporter
     /// <inheritdoc/>
     public void Start(int interval)
     {
+        Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).");
+
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
 
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
+            // TODO: what happens if we disconnect and reconnect?
+
             Resolver.Log.Trace($"starting health metrics timer");
             timer.Start();
 
@@ -38,7 +42,11 @@ public class HealthReporter : IHealthReporter
     {
         var connected = Resolver.Device.NetworkAdapters.Any(a => a.IsConnected);
 
-        if (!connected) return;
+        if (!connected)
+        {
+            Resolver.Log.Trace("could not send health metric, connection unavailable.");
+            return;
+        }
 
         try
         {
@@ -80,6 +88,10 @@ public class HealthReporter : IHealthReporter
             if (await service!.SendEvent(ce))
             {
                 Resolver.Log.Trace($"health metrics sent");
+            }
+            else
+            {
+                Resolver.Log.Trace($"sending health metric failed");
             }
         }
         finally

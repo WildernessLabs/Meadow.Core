@@ -31,7 +31,7 @@ namespace Meadow
         /// <param name="gpiodChip">The chip name for the gpiod driver</param>
         /// <param name="gpiodOffset">The pin offset for the gpiod driver</param>
         /// <param name="supportedChannels">A list of supported channels</param>
-        public LinuxFlexiPin(IPinController controller, string name, object key, int sysfsGpio, string gpiodChip, int gpiodOffset, IList<IChannelInfo>? supportedChannels = null)
+        public LinuxFlexiPin(IPinController? controller, string name, object key, int sysfsGpio, string gpiodChip, int gpiodOffset, IList<IChannelInfo>? supportedChannels = null)
             : base(controller, name, key, supportedChannels)
         {
             SysFsGpio = sysfsGpio;
