@@ -1,5 +1,4 @@
 ﻿using Meadow.Cloud;
-using Meadow.Update;
 using System.Collections.Generic;
 
 namespace Meadow
@@ -17,10 +16,6 @@ namespace Meadow
         /// Gets the settings for the application lifecycle
         /// </summary>
         public ILifecycleSettings LifecycleSettings { get; }
-        /// <summary>
-        /// Gets the settings for the update service
-        /// </summary>
-        public IUpdateSettings UpdateSettings { get; }
         /// <summary>
         /// Gets the settings for Meadow.Cloud
         /// </summary>

@@ -72,7 +72,7 @@ namespace Meadow.Devices
                     // We wait for the BT stack to get created and then go get the handles
                     await Task.Delay(100);
                     UpdateDefinitionHandles();
-                });
+                }).RethrowUnhandledExceptions();
 
                 if (payloadGcHandle.IsAllocated)
                 {

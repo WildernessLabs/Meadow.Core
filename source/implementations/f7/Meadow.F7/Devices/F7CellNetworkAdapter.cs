@@ -19,6 +19,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _imei;
     private string? _csq;
     private string? _at_cmds_output;
+    private static CellNetworkState _cell_state;
+
+    /// <summary>
+    /// Represents a signal strength value that indicates no signal or an extremely weak signal.
+    /// </summary>
+    public const int NoSignal = -9999;
 
     /// <summary>
     /// Extract values from an <b>input</b> string based on a regex <b>pattern</b>
@@ -37,6 +43,20 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
 
         return string.Empty;
+    }
+
+    /// <summary>
+    /// Converts CSQ (Cellular Signal Quality) to dBm.
+    /// CSQ is a value from 0 to 31, where 99 indicates no signal or unknown signal strength.
+    /// </summary>
+    /// <param name="csq">The CSQ value to convert.</param>
+    /// <returns>The signal strength in dBm, or <b>NoSignal</b> if CSQ is 99 (no signal).</returns>
+    private int ConvertCsqToDbm(int csq) {
+        if (csq == 99) {
+            return NoSignal; // No signal or unknown signal strength
+        } else {
+            return -113 + 2 * csq;
+        }
     }
 
     /// <summary>
@@ -118,6 +138,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 break;
             case CellFunction.NetworkDisconnectedEvent:
                 Resolver.Log.Trace("Cell disconnected event triggered!");
+                
+                Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
 
                 ResetCellTempData();
 
@@ -127,6 +149,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 Resolver.Log.Trace("Cell at cmd event triggered!");
 
                 UpdateAtCmdsOutput();
+                
+                CellSetState(CellNetworkState.Resumed);
+                break;
+            case CellFunction.NetworkErrorEvent:
+                Resolver.Log.Trace("Cell error event triggered!");
+
+                Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
                 break;
             default:
                 Resolver.Log.Trace("Event type not found");
@@ -180,9 +209,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
-    /// Returns the cell signal quality <b>CSQ</b> at the connection time, if the device is connected, otherwise an empty string
+    /// Returns the cell signal quality <b>CSQ</b> in dBm at the connection time, if the device is connected, otherwise returns <b>NoSignal</b>
     /// </summary>
-    public string Csq
+    public int Csq
     {
         get
         {
@@ -200,7 +229,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 }
             }
 
-            return _csq ?? string.Empty;
+            var csqValue = int.Parse(_csq ?? "99");
+            return ConvertCsqToDbm(csqValue);
         }
     }
 
@@ -227,27 +257,58 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     public CellNetwork[] OfflineNetworkScan()
     {
-        return Core.Interop.Nuttx.MeadowCellNetworkScanner();
+        Resolver.Log.Error("OfflineNetworkScan method has been deprecated! Please consult the cellular docs to learn how to use the network scanner");
+        return Array.Empty<CellNetwork>();
     }
 
     /// <summary>
     /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
     /// </summary>
-    private string ParseError(string input)
+    private string ParseCellConnectionError(string input)
     {
         if (input != null)
         {
-            string pattern = @"\+CME ERROR: (.+)$";
+            string pattern = @"\+CME ERROR:\s*(.+)";
             Match match = Regex.Match(input, pattern);
 
             if (match.Success && match.Groups.Count >= 2)
             {
-                return match.Groups[1].Value;
+                return match.Groups[1].Value.Trim();
             }
         }
-        return "Undefined Cell error";
+        return string.Empty;
     }
 
+
+    /// <summary>
+    /// Gets the error message corresponding to the current cell connection error code.
+    /// If the error code is not recognized, returns "Undefined error".
+    /// </summary>
+    private string GetCellConnectionError()
+    {
+        int errno = Core.Interop.Nuttx.meadow_get_cell_error();
+
+        var logInfoMessage = _at_cmds_output?.Length > 1 // To avoid logging potential residual data from UART
+            ? $"You can also look at the AT commands logs for extra information: {_at_cmds_output}"
+            : "";
+
+        CellError cellError = (CellError)errno;
+        var cellErrorMessage = ParseCellConnectionError(_at_cmds_output);
+
+        return cellError switch
+        {
+            CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
+            CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the correct module name.",
+            CellError.NetworkConnectionLost => !string.IsNullOrEmpty(cellErrorMessage)
+                ? $"Cellular connection lost, please check your antenna and signal coverage, error: {cellErrorMessage}, consult the cell module datasheet to know more about that."
+                : $"Cellular connection lost, please check your antenna and signal coverage.",
+            CellError.NetworkTimeout => !string.IsNullOrEmpty(cellErrorMessage)
+                ? $"Timeout occurred while attempting to connect, error: {cellErrorMessage}. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured."
+                : $"Timeout occurred while attempting to connect. Please check if the hardware setup, the cellular settings, and the reserved pins are properly configured. {logInfoMessage}",
+            _ => $"An undefined error occurred. Please consult the troubleshooting section of the cellular documentation for more information. {logInfoMessage}",
+        };
+    }
+    
     /// <summary>
     /// Set the cell state
     /// </summary>
@@ -276,6 +337,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 state |= 1 << 0;
                 break;
         }
+        _cell_state = CellState;
         Core.Interop.Nuttx.meadow_cell_change_state(state);
     }
 
@@ -283,8 +345,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// Get current signal quality
     /// </summary>
     /// <param name="timeout">Timeout to check signal quality.</param>
-    /// <returns>A decimal number (0-31) representing the Cell Signal Quality (CSQ), or 99 if unavailable.</returns>
-    public double GetSignalQuality(int timeout)
+    /// <returns>A number representing the Cell Signal Quality (CSQ) in dBm, or <b>NoSignal</b> if unavailable.</returns>
+    public int GetSignalQuality(int timeout)
     {
         Resolver.Log.Trace("Fetching cellular signal quality... It might take a few minutes and temporary disconnect you from the cellular network.");
 
@@ -293,32 +355,27 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         CellSetState(CellNetworkState.FetchingSignalQuality);
 
-        while (timeout > 0)
+        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
-            if (_at_cmds_output != string.Empty)
-            {
-                break;
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             timeout--;
         }
 
-        CellSetState(CellNetworkState.Resumed);
+        // Resume cell if the timeout was reached
+        if (timeout == 0)
+        {
+            CellSetState(CellNetworkState.Resumed);
+        }
 
-        if (_at_cmds_output == null)
+        if (string.IsNullOrEmpty(_at_cmds_output))
         {
             Resolver.Log.Error("AT commands output not found!");
-            return 99;
+            return NoSignal;
         }
 
-        var csq = ExtractValue(_at_cmds_output, csqPattern);
-        if (csq == null)
-        {
-            return 99;
-        }
-
-        return Convert.ToDouble(csq);
+        var csqValueStr = ExtractValue(_at_cmds_output, csqPattern);
+        int csqValue = string.IsNullOrEmpty(csqValueStr) ? 99 : int.Parse(csqValueStr);
+        return ConvertCsqToDbm(csqValue);
     }
 
     /// <summary>
@@ -333,25 +390,24 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         CellSetState(CellNetworkState.ScanningNetworks);
         _at_cmds_output = string.Empty;
 
-        while (timeout > 0)
+        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
-            if (_at_cmds_output != string.Empty)
-            {
-                break;
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             timeout--;
         }
 
-        CellSetState(CellNetworkState.Resumed);
+        // Resume cell if the timeout was reached
+        if (timeout == 0)
+        {
+            CellSetState(CellNetworkState.Resumed);
+        }
 
-        if (_at_cmds_output == null)
+        if (string.IsNullOrEmpty(_at_cmds_output))
         {
             throw new System.IO.IOException("No available networks");
         }
 
-        return Core.Interop.Nuttx.Parse(_at_cmds_output).ToArray();
+        return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output).ToArray();
     }
 
     /// <summary>
@@ -369,45 +425,25 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         CellSetState(CellNetworkState.TrackingGPSLocation);
 
         //ToDo: switch to TimeSpan
-        while (timeout > 0)
+        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
-            if (_at_cmds_output != string.Empty)
-            {
-                break;
-            }
-
             Thread.Sleep(TimeSpan.FromMilliseconds(1000));
             timeout--;
         }
 
+        // Resume cell if the timeout was reached
+        if (timeout == 0)
+        {
+            CellSetState(CellNetworkState.Resumed);
+        }
+
         var gnssAtCmdsOutput = _at_cmds_output;
 
-        CellSetState(CellNetworkState.Resumed);
-
-        if (gnssAtCmdsOutput == null)
+        if (string.IsNullOrEmpty(gnssAtCmdsOutput))
         {
             Resolver.Log.Error("AT commands output not found!");
             return string.Empty;
         }
         return gnssAtCmdsOutput;
-    }
-
-    /// <summary>
-    /// Returns the error string, otherwise <b>Undefined error</b>
-    /// </summary>
-    private string GetError()
-    {
-        int errno = Core.Interop.Nuttx.meadow_get_cell_error();
-
-        CellError cellError = (CellError)errno;
-
-        return cellError switch
-        {
-            CellError.InvalidNetworkSettings => "Invalid cell settings. Please check your cell configuration file.",
-            CellError.InvalidCellModule => "Invalid cell module. Please ensure you have configured the right module name.",
-            CellError.NetworkConnectionLost => ParseError(_at_cmds_output),
-            CellError.NetworkTimeout => "Timeout. Please check your pinout and wire connections to the module.",
-            _ => "Undefined error",
-        };
     }
 }

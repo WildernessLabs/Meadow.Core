@@ -8,6 +8,9 @@ namespace Meadow.Core
         {
             [DllImport(LIBRARY_NAME, SetLastError = true)]
             public static extern int pwrmgmt_most_recent_wakeup_reason();
+
+            [DllImport(LIBRARY_NAME, SetLastError = true)]
+            public static extern int meadow_os_native_protocol_version();
         }
     }
 }

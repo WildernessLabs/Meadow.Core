@@ -19,7 +19,8 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// <summary>
     /// Raised when the device disconnects from a network.
     /// </summary>
-    public event NetworkDisconnectionHandler NetworkDisconnected = default!;
+    public event NetworkDisconnectionHandler? NetworkDisconnected;
+
     /// <summary>
     /// Raised when a network error occurs
     /// </summary>
@@ -98,7 +99,10 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// </summary>
     protected void Refresh()
     {
-        nativeInterface = LoadAdapterInfo();
+        if (nativeInterface == null)
+        {
+            nativeInterface = LoadAdapterInfo();
+        }
     }
 
     /// <summary>
@@ -128,7 +132,7 @@ public abstract class NetworkAdapterBase : INetworkAdapter
             {
                 throw new InvalidOperationException("Native interface is null.");
             }
-            
+
             return (nativeInterface?.GetIPProperties()?.DnsAddresses!) ?? throw new InvalidOperationException("DNS addresses could not be retrieved.");
         }
     }
@@ -175,12 +179,9 @@ public abstract class NetworkAdapterBase : INetworkAdapter
             {
                 foreach (var intf in interfaces)
                 {
-                    var p = intf.GetIPProperties();
-
-                    MacAddress = intf.GetPhysicalAddress();
-
                     if (intf.NetworkInterfaceType == InterfaceType)
                     {
+                        MacAddress = intf.GetPhysicalAddress();
                         Resolver.Log.Trace($"Interface: {intf.Id}: {intf.Name} {intf.NetworkInterfaceType} {intf.OperationalStatus}");
                         return intf;
                     }
