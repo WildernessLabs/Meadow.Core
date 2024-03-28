@@ -291,6 +291,9 @@ public partial class Esp32Coprocessor : ICoprocessor
                                 CellMessageReceived?.Invoke(this, ((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
                                 //InvokeEvent((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload);
                                 break;
+                            case Esp32Interfaces.System:
+                                Console.WriteLine($" ******************** Process system event {(SystemFunction) eventData.Function}, status code {(StatusCodes) eventData.StatusCode}.");
+                                break;
                             default:
                                 throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
                         }
