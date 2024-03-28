@@ -181,6 +181,14 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// Configuration contains one or more errors.
         /// </summary>
         InvalidConfigurationFile = 43,
+        /// <summary>
+        /// WiFi configuration contains one or more errors.
+        /// </summary>
+        InvalidWiFiConfigurationFile = 44,
+        /// <summary>
+        /// Cell configuration contains one or more errors.
+        /// </summary>
+        InvalidCellConfigurationFile = 45,
 };
 
     /// <summary>
