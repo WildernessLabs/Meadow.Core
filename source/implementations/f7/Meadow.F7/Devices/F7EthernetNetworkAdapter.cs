@@ -1,6 +1,5 @@
 ﻿using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Hardware;
-using System;
 using System.Net;
 using System.Net.NetworkInformation;
 
@@ -15,18 +14,6 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     private readonly Esp32Coprocessor _esp32;
     private bool _isConnected = false;
 
-    /// <summary>
-    /// Creates an instance of a F7EthernetNetworkAdapter
-    /// </summary>
-    /// <param name="ni">The associated native interface</param>
-    public F7EthernetNetworkAdapter(NetworkInterface ni)
-        : base(ni)
-    {
-        if (ni.NetworkInterfaceType != NetworkInterfaceType.Ethernet)
-        {
-            throw new ArgumentException();
-        }
-    }
 
     /// <inheritdoc/>
     public override string Name => "Ethernet";

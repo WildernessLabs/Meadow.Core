@@ -213,7 +213,19 @@ public class Linux : IMeadowDevice
         throw new PlatformNotSupportedException("This platform has no II2CBusses.  Use an IO Extender.");
     }
 
+    public BatteryInfo GetBatteryInfo()
+    {
+        return new BatteryInfo
+        {
+            Voltage = Voltage.Zero
+        };
+    }
+
+    // ----------------------------------------------
+    // ----------------------------------------------
     // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
+    // ----------------------------------------------
+    // ----------------------------------------------
 
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, double debounceDuration = 0, double glitchDuration = 0, OutputType output = OutputType.PushPull)
     {
@@ -241,11 +253,6 @@ public class Linux : IMeadowDevice
     }
 
     public void OnSleep()
-    {
-        throw new NotImplementedException();
-    }
-
-    public BatteryInfo GetBatteryInfo()
     {
         throw new NotImplementedException();
     }
