@@ -1,4 +1,5 @@
 using Meadow.Cloud;
+using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,15 +26,27 @@ public class HealthReporter : IHealthReporter
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
 
+        var anyAdapter = Resolver.Device.NetworkAdapters.Primary<INetworkAdapter>();
+
+        // if we're already connected, start the timer
+        if (anyAdapter != null && anyAdapter.IsConnected)
+        {
+            Resolver.Log.Trace($"starting health metrics timer");
+            timer.Start();
+        }
+
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
 
-            Resolver.Log.Trace($"starting health metrics timer");
-            timer.Start();
+            if (!timer.Enabled)
+            {
+                Resolver.Log.Trace($"starting health metrics timer");
+                timer.Start();
 
-            // send the first health metric
-            await Send();
+                // send the first health metric
+                await Send();
+            }
         };
     }
 
