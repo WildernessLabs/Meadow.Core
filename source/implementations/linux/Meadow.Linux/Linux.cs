@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
+using System.Diagnostics;
 
 namespace Meadow;
 
@@ -219,6 +220,24 @@ public class Linux : IMeadowDevice
         {
             Voltage = Voltage.Zero
         };
+    }
+
+    public static string ExecuteCommandLine(string command, string args)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = args,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
     }
 
     // ----------------------------------------------

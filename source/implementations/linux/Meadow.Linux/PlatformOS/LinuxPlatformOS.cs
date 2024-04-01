@@ -157,7 +157,7 @@ public class LinuxPlatformOS : IPlatformOS
     {
         // Create an Aes object
         // with the specified key and IV.
-        using Aes aesAlg = Aes.Create();
+        using var aesAlg = System.Security.Cryptography.Aes.Create();
         aesAlg.Key = key;
         aesAlg.IV = iv;
 
@@ -204,30 +204,23 @@ public class LinuxPlatformOS : IPlatformOS
             if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
             {
                 // need to convert
-                pkFileContent = ExecuteCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+                pkFileContent = Linux.ExecuteCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
             }
-
             return pkFileContent;
         }
     }
 
-    private string ExecuteCommandLine(string command, string args)
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
     {
-        var psi = new ProcessStartInfo()
-        {
-            FileName = command,
-            Arguments = args,
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
+        var drive = FileSystem.Drives.FirstOrDefault(d => d.Name == "/");
+        if (drive == null) return DigitalStorage.Zero;
 
-        using var process = Process.Start(psi);
+        Resolver.Log.Info($"SIZE={drive.Size}  AVAIL={drive.SpaceAvailable}");
 
-        process?.WaitForExit();
-
-        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+        return drive.Size - drive.SpaceAvailable;
     }
+
 
 
 

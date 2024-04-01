@@ -2,7 +2,6 @@ using Meadow.Cloud;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,6 +32,8 @@ public class HealthReporter : IHealthReporter
         {
             Resolver.Log.Trace($"starting health metrics timer");
             timer.Start();
+
+            Send().RethrowUnhandledExceptions();
         }
 
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
@@ -68,10 +69,6 @@ public class HealthReporter : IHealthReporter
             var service = Resolver.Services.Get<IMeadowCloudService>();
             var device = Resolver.Device;
 
-            DirectoryInfo di = new(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot);
-
-            var usedDiskSpace = DirSize(di);
-
             var ce = new CloudEvent()
             {
                 Description = "device.health",
@@ -80,7 +77,7 @@ public class HealthReporter : IHealthReporter
                 {
                     { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
                     { "health.memory_used", GC.GetTotalMemory(false) },
-                    { "health.disk_space_used", usedDiskSpace },
+                    { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
                     { "info.os_version", device.Information.OSVersion },
 
                 },
@@ -116,25 +113,5 @@ public class HealthReporter : IHealthReporter
     private Task TimerOnElapsed(object sender, ElapsedEventArgs e)
     {
         return Send();
-    }
-
-    private long DirSize(DirectoryInfo d)
-    {
-        long size = 0;
-        // Add file sizes.
-        FileInfo[] fis = d.GetFiles();
-        foreach (FileInfo fi in fis)
-        {
-            size += fi.Length;
-        }
-
-        // Add subdirectory sizes.
-        DirectoryInfo[] dis = d.GetDirectories();
-        foreach (DirectoryInfo di in dis)
-        {
-            size += DirSize(di);
-        }
-
-        return size;
     }
 }
