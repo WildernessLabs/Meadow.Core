@@ -187,6 +187,11 @@ public class SimulatedPlatformOS : IPlatformOS
         throw new NotImplementedException();
     }
 
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
+    {
+        throw new NotImplementedException();
+    }
+
     public string[] NtpServers => throw new NotImplementedException();
 
 }

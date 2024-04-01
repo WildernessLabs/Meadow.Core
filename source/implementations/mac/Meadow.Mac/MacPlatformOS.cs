@@ -240,4 +240,10 @@ public class MacPlatformOS : IPlatformOS
     {
         throw new NotImplementedException();
     }
+
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
+    {
+        throw new NotImplementedException();
+    }
 }
