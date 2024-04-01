@@ -628,7 +628,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
         catch (Exception ex)
         {
-            errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message}";
+            if (ex.InnerException != null)
+            {
+                errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message} (Inner exception: {ex.InnerException.Message})";
+            }
+            else
+            {
+                errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message}";
+            }
             Resolver.Log.Warn(errorMessage);
             //                ServiceError?.Invoke(this, errorMessage);
 
