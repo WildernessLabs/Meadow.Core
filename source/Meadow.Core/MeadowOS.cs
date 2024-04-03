@@ -623,7 +623,7 @@ public static partial class MeadowOS
             {
                 if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
                 {
-                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes);
+                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
                 }
                 else
                 {

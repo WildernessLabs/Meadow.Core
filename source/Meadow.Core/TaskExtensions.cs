@@ -22,6 +22,10 @@ public static class TaskExtensions
             if (t?.Exception != null)
             {
                 message += $": {t.Exception.Message}";
+                if (t.Exception.InnerException != null)
+                {
+                    message += $"{System.Environment.NewLine}Inner Exception: {t.Exception.InnerException.Message}";
+                }
                 //throw t.Exception;
             }
 
