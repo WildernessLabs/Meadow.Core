@@ -1,5 +1,6 @@
 using Meadow.Cloud;
 using Meadow.Hardware;
+using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ public class HealthReporter : IHealthReporter
     private static readonly SemaphoreSlim semaphoreSlim = new(1, 1);
 
     /// <inheritdoc/>
-    public void Start(int interval)
+    public async Task Start(int interval)
     {
         Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).");
 
@@ -33,9 +34,9 @@ public class HealthReporter : IHealthReporter
             Resolver.Log.Trace($"starting health metrics timer");
             timer.Start();
 
-            Send().RethrowUnhandledExceptions();
+            await Send();
         }
-
+        
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
@@ -95,14 +96,7 @@ public class HealthReporter : IHealthReporter
                 ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
             }
 
-            if (await service!.SendEvent(ce))
-            {
-                Resolver.Log.Trace($"health metrics sent");
-            }
-            else
-            {
-                Resolver.Log.Trace($"sending health metric failed");
-            }
+            await service!.SendEvent(ce);
         }
         finally
         {

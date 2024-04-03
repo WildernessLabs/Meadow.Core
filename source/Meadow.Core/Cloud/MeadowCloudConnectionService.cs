@@ -579,18 +579,18 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public Task<bool> SendLog(CloudLog log)
+    public Task SendLog(CloudLog log)
     {
         return Send(log, "/api/logs");
     }
 
     /// <inheritdoc/>
-    public Task<bool> SendEvent(CloudEvent cloudEvent)
+    public Task SendEvent(CloudEvent cloudEvent)
     {
         return Send(cloudEvent, "/api/events");
     }
 
-    private async Task<bool> Send<T>(T item, string endpoint)
+    private async Task Send<T>(T item, string endpoint)
     {
         int attempt = 0;
         int maxRetries = 1;
@@ -599,11 +599,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         using HttpClient client = new HttpClient();
         client.BaseAddress = new Uri(Settings.DataHostname);
 
+        var json = Resolver.JsonSerializer.Serialize(item!);
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
+        
     retry:
         if (ConnectionState != CloudConnectionState.Connected)
         {
             // TODO: store and forward!
-            return false;
+            return;
         }
 
         if (Settings.UseAuthentication)
@@ -615,74 +618,35 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
         }
 
-        var json = Resolver.JsonSerializer.Serialize(item!);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
 
-        Resolver.Log.Debug($"making cloud log httprequest with json: {json}", "cloud");
+        HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
 
-        HttpResponseMessage response;
-
-        try
-        {
-            response = await client.PostAsync($"{endpoint}", content);
-        }
-        catch (Exception ex)
-        {
-            if (ex.InnerException != null)
-            {
-                errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message} (Inner exception: {ex.InnerException.Message})";
-            }
-            else
-            {
-                errorMessage = $"Failed to send Meadow.Cloud data: {ex.Message}";
-            }
-            Resolver.Log.Warn(errorMessage);
-            //                ServiceError?.Invoke(this, errorMessage);
-
-            return false;
-        }
-
-        bool result;
         if (response.IsSuccessStatusCode)
         {
-            Resolver.Log.Debug("cloud send success");
-            result = true;
+            Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup:"cloud");
         }
         else if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             if (attempt < maxRetries)
             {
                 attempt++;
-                Resolver.Log.Debug($"Unauthorized, re-authenticating", "cloud");
+                Resolver.Log.Debug($"cloud request to {endpoint} unauthorized, re-authenticating", "cloud");
                 // by setting this to null and retrying, Authenticate will get called
                 ClientOptions = null;
                 _jwt = null;
                 goto retry;
             }
-            else
-            {
-                errorMessage = $"Unauthorized, exceeded {maxRetries} retry attempt(s)";
-                Resolver.Log.Warn(errorMessage);
-                //                    ServiceError?.Invoke(this, errorMessage);
-
-                result = false;
-            }
+            
+            errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+            throw new MeadowCloudException(errorMessage);
         }
         else
         {
             var responseContent = await response.Content.ReadAsStringAsync();
-
-            errorMessage = $"Cloud send failed. Reponse was '{responseContent}'";
-            Resolver.Log.Warn(errorMessage);
-            //                ServiceError?.Invoke(this, errorMessage);
-
-            result = false;
+            errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+            throw new MeadowCloudException(errorMessage);
         }
-
-        //ToDo remove
-        GC.Collect();
-
-        return result;
     }
 
     /// <inheritdoc/>
