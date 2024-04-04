@@ -216,8 +216,6 @@ public class LinuxPlatformOS : IPlatformOS
         var drive = FileSystem.Drives.FirstOrDefault(d => d.Name == "/");
         if (drive == null) return DigitalStorage.Zero;
 
-        Resolver.Log.Info($"SIZE={drive.Size}  AVAIL={drive.SpaceAvailable}");
-
         return drive.Size - drive.SpaceAvailable;
     }
 
