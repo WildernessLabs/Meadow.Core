@@ -545,7 +545,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 errorMessage = $"Exception authenticating with Meadow.Cloud @{endpoint}: {ex.Message}";
                 if (ex.InnerException != null)
                 {
-                    errorMessage += $"{Environment.NewLine}{ex.InnerException.Message}";
+                    errorMessage += $"{Environment.NewLine}Inner exception: {ex.InnerException.Message}";
                 }
                 Resolver.Log.Warn(errorMessage);
                 ConnectionError?.Invoke(this, errorMessage);
