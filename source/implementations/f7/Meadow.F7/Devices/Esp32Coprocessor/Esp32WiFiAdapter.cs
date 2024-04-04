@@ -546,6 +546,8 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 throw new NotSupportedException($"Disconnect can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
         }
 
+        CurrentState = NetworkState.Disconnecting;
+
         await Task.Run(async () =>
         {
             var request = new DisconnectFromAccessPointRequest()
@@ -716,6 +718,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 case NetworkState.Disconnecting:
                     break;
                 case NetworkState.Disconnected:
+                    Refresh();
                     break;
                 case NetworkState.Error:
                     break;
