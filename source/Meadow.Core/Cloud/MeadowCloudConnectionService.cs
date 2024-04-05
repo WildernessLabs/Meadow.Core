@@ -545,7 +545,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 errorMessage = $"Exception authenticating with Meadow.Cloud @{endpoint}: {ex.Message}";
                 if (ex.InnerException != null)
                 {
-                    errorMessage += $"{Environment.NewLine}Inner exception: {ex.InnerException.Message}";
+                    if (ex.InnerException is IOException && ex.InnerException.HResult == -2146232800 /*0x80131620*/)
+                    {
+                        errorMessage += $"{Environment.NewLine}Is your device clock correct? (UTC date is {DateTime.Now.ToShortDateString()})";
+                    }
+                    else
+                    {
+                        errorMessage += $"{Environment.NewLine}Inner exception: {ex.InnerException.Message}";
+                    }
                 }
                 Resolver.Log.Warn(errorMessage);
                 ConnectionError?.Invoke(this, errorMessage);
@@ -601,7 +608,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         var json = Resolver.JsonSerializer.Serialize(item!);
         using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        
+
     retry:
         if (ConnectionState != CloudConnectionState.Connected)
         {
@@ -624,7 +631,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         if (response.IsSuccessStatusCode)
         {
-            Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup:"cloud");
+            Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
         }
         else if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
@@ -637,7 +644,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 _jwt = null;
                 goto retry;
             }
-            
+
             errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
             throw new MeadowCloudException(errorMessage);
         }
