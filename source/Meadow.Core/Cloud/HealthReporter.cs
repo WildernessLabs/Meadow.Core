@@ -1,6 +1,5 @@
 using Meadow.Cloud;
 using Meadow.Hardware;
-using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +35,7 @@ public class HealthReporter : IHealthReporter
 
             await Send();
         }
-        
+
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
@@ -97,6 +96,10 @@ public class HealthReporter : IHealthReporter
             }
 
             await service!.SendEvent(ce);
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"HealthReporter unable to send data: {ex.Message}");
         }
         finally
         {
