@@ -1,10 +1,8 @@
 using Meadow.Cloud;
 using Meadow.Hardware;
-using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -15,8 +13,6 @@ namespace Meadow;
 /// </summary>
 public class HealthReporter : IHealthReporter
 {
-    private static readonly SemaphoreSlim semaphoreSlim = new(1, 1);
-
     /// <inheritdoc/>
     public async Task Start(int interval)
     {
@@ -62,46 +58,37 @@ public class HealthReporter : IHealthReporter
             Resolver.Log.Trace("could not send health metric, connection unavailable.");
             return;
         }
+        
+        var service = Resolver.Services.Get<IMeadowCloudService>();
+        var device = Resolver.Device;
 
-        try
+        var ce = new CloudEvent()
         {
-            await semaphoreSlim.WaitAsync();
-
-            var service = Resolver.Services.Get<IMeadowCloudService>();
-            var device = Resolver.Device;
-
-            var ce = new CloudEvent()
+            Description = "device.health",
+            EventId = 10,
+            Measurements = new Dictionary<string, object>()
             {
-                Description = "device.health",
-                EventId = 10,
-                Measurements = new Dictionary<string, object>()
-                {
-                    { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
-                    { "health.memory_used", GC.GetTotalMemory(false) },
-                    { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
-                    { "info.os_version", device.Information.OSVersion },
+                { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
+                { "health.memory_used", GC.GetTotalMemory(false) },
+                { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
+                { "info.os_version", device.Information.OSVersion },
 
-                },
-                Timestamp = DateTimeOffset.UtcNow
-            };
+            },
+            Timestamp = DateTimeOffset.UtcNow
+        };
 
-            var batteryInfo = device.GetBatteryInfo();
-            if (batteryInfo != null)
-            {
-                ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
-            }
-
-            if (!string.IsNullOrEmpty(device.Information.CoprocessorOSVersion))
-            {
-                ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
-            }
-
-            await service!.SendEvent(ce);
-        }
-        finally
+        var batteryInfo = device.GetBatteryInfo();
+        if (batteryInfo != null)
         {
-            semaphoreSlim.Release();
+            ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
         }
+
+        if (!string.IsNullOrEmpty(device.Information.CoprocessorOSVersion))
+        {
+            ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
+        }
+
+        await service!.SendEvent(ce);
     }
 
     private Task TimerOnElapsed(object sender, ElapsedEventArgs e)

@@ -597,62 +597,74 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         return Send(cloudEvent, "/api/events");
     }
 
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+    
     private async Task Send<T>(T item, string endpoint)
     {
-        int attempt = 0;
-        int maxRetries = 1;
-        string errorMessage;
-
-        using HttpClient client = new HttpClient();
-        client.BaseAddress = new Uri(Settings.DataHostname);
-
-        var json = Resolver.JsonSerializer.Serialize(item!);
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-    retry:
-        if (ConnectionState != CloudConnectionState.Connected)
+        try
         {
-            // TODO: store and forward!
-            return;
-        }
+            await _semaphoreSlim.WaitAsync();
+            
+            int attempt = 0;
+            int maxRetries = 1;
+            string errorMessage;
 
-        if (Settings.UseAuthentication)
-        {
-            if (_jwt == null)
+            using HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(Settings.DataHostname);
+
+            var json = Resolver.JsonSerializer.Serialize(item!);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            retry:
+            if (ConnectionState != CloudConnectionState.Connected)
             {
-                await Authenticate();
-            }
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
-        }
-
-        Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
-
-        HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
-
-        if (response.IsSuccessStatusCode)
-        {
-            Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
-        }
-        else if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            if (attempt < maxRetries)
-            {
-                attempt++;
-                Resolver.Log.Debug($"cloud request to {endpoint} unauthorized, re-authenticating", "cloud");
-                // by setting this to null and retrying, Authenticate will get called
-                ClientOptions = null;
-                _jwt = null;
-                goto retry;
+                // TODO: store and forward!
+                return;
             }
 
-            errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
-            throw new MeadowCloudException(errorMessage);
+            if (Settings.UseAuthentication)
+            {
+                if (_jwt == null)
+                {
+                    await Authenticate();
+                }
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+            }
+
+            Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
+
+            HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
+            }
+            else if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                if (attempt < maxRetries)
+                {
+                    attempt++;
+                    Resolver.Log.Debug($"cloud request to {endpoint} unauthorized, re-authenticating", "cloud");
+                    // by setting this to null and retrying, Authenticate will get called
+                    ClientOptions = null;
+                    _jwt = null;
+                    goto retry;
+                }
+
+                errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                throw new MeadowCloudException(errorMessage);
+            }
+            else
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                throw new MeadowCloudException(errorMessage);
+            }
         }
-        else
+        finally
         {
-            var responseContent = await response.Content.ReadAsStringAsync();
-            errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
-            throw new MeadowCloudException(errorMessage);
+            _semaphoreSlim.Release();
         }
     }
 
