@@ -637,23 +637,17 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
             Resolver.Log.Debug($"{response.StatusCode.ToString()}", messageGroup: "cloud");
             
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
             {
-                if (attempt < maxRetries)
-                {
-                    attempt++;
-                    Resolver.Log.Debug($"cloud request to {endpoint} unauthorized, re-authenticating", "cloud");
-                    // by setting this to null and retrying, Authenticate will get called
-                    ClientOptions = null;
-                    _jwt = null;
-                    client = new HttpClient();
-                    goto retry;
-                }
-
-                errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
-                throw new MeadowCloudException(errorMessage);
+                attempt++;
+                // by setting this to null and retrying, Authenticate will get called
+                ClientOptions = null;
+                _jwt = null;
+                client = new HttpClient();
+                goto retry;
             }
-            else if(!response.IsSuccessStatusCode)
+            
+            if(!response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
