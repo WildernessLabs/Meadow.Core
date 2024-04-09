@@ -9,8 +9,12 @@ namespace Meadow
         private int Gpio { get; set; } = -1;
         private SysFsGpioDriver Driver { get; }
         private ResistorMode _resistorMode = ResistorMode.Disabled;
+        private int? _lastInterrupt = null;
 
+        /// <inheritdoc/>
         public override bool State => Driver.GetValue(Gpio);
+        /// <inheritdoc/>
+        public override TimeSpan DebounceDuration { get; set; }
 
         internal SysFsDigitalInterruptPort(
             SysFsGpioDriver driver,
@@ -28,11 +32,9 @@ namespace Meadow
                 case ResistorMode.InternalPullDown:
                     throw new NotSupportedException("Internal Resistor Modes are not supported on the current OS");
             }
-            if (debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
-            {
-                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on the current OS");
-            }
 
+            DebounceDuration = debounceDuration;
+            GlitchDuration = glitchDuration;
             Driver = driver;
             Pin = pin;
             if (pin is SysFsPin { } sp)
@@ -67,9 +69,21 @@ namespace Meadow
         private void InterruptCallback()
         {
             // TODO: implement old/new
+
+            if (DebounceDuration.TotalMilliseconds > 0)
+            {
+                var now = Environment.TickCount;
+
+                if (_lastInterrupt != null &&
+                    now - _lastInterrupt < DebounceDuration.TotalMilliseconds) { return; }
+
+                _lastInterrupt = now;
+            }
+
             RaiseChangedAndNotify(new DigitalPortResult());
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (Gpio >= 0)
@@ -81,6 +95,7 @@ namespace Meadow
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc/>
         public override ResistorMode Resistor
         {
             get => _resistorMode;
@@ -95,16 +110,16 @@ namespace Meadow
             }
         }
 
-        public override TimeSpan DebounceDuration
-        {
-            get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
-        }
-
+        /// <inheritdoc/>
         public override TimeSpan GlitchDuration
         {
             get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
+            set
+            {
+                if (GlitchDuration == TimeSpan.Zero) { return; }
+
+                throw new NotSupportedException("Glitch filtering is not currently supported on this platform.");
+            }
         }
     }
 }
