@@ -643,6 +643,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 // by setting this to null and retrying, Authenticate will get called
                 ClientOptions = null;
                 _jwt = null;
+                client.Dispose();
                 client = new HttpClient();
                 goto retry;
             }
