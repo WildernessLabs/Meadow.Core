@@ -88,7 +88,14 @@ public class HealthReporter : IHealthReporter
             ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
         }
 
-        await service!.SendEvent(ce);
+        try
+        {
+            await service!.SendEvent(ce);
+        }
+        catch (MeadowCloudException ex)
+        {
+            Resolver.Log.Error($"sending health metrics failed: {ex.Message}");
+        }
     }
 
     private Task TimerOnElapsed(object sender, ElapsedEventArgs e)
