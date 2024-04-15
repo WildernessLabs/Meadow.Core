@@ -612,10 +612,11 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             var json = Resolver.JsonSerializer.Serialize(item!);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
-            client.BaseAddress = new Uri(Settings.DataHostname);
-
+            
         retry:
 
+            client.BaseAddress = new Uri(Settings.DataHostname);
+            
             if (ConnectionState != CloudConnectionState.Connected)
             {
                 // TODO: store and forward!
@@ -638,19 +639,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
             {
-                if (attempt < maxRetries)
-                {
-                    attempt++;
-                    Resolver.Log.Debug($"cloud request to {endpoint} unauthorized, re-authenticating", "cloud");
-                    // by setting this to null and retrying, Authenticate will get called
-                    ClientOptions = null;
-                    _jwt = null;
-                    goto retry;
-                }
-
-                errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
-                Resolver.Log.Debug(errorMessage);
-                throw new MeadowCloudException(errorMessage);
+                attempt++;
+                // by setting this to null and retrying, Authenticate will get called
+                ClientOptions = null;
+                _jwt = null;
+                client.Dispose();
+                client = new HttpClient();
+                goto retry;
             }
 
             if (!response.IsSuccessStatusCode)
