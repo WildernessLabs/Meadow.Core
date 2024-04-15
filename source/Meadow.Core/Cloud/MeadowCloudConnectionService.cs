@@ -26,7 +26,7 @@ namespace Meadow;
 
 internal class MeadowCloudConnectionService : IMeadowCloudService
 {
-    public event EventHandler<string>? ConnectionError;
+    public event EventHandler<Exception>? ErrorOccurred;
     public event EventHandler<CloudConnectionState>? ConnectionStateChanged;
 
     internal event EventHandler<MqttApplicationMessage>? MqttMessageReceived;
@@ -50,6 +50,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private string? _jwt = null;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
     private Thread? _stateMachineThread;
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
@@ -483,7 +484,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         // TODO: add platform and OS checking for this?
                         errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
                         Resolver.Log.Error(errorMessage);
-                        ConnectionError?.Invoke(this, errorMessage);
+                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
                         return false;
@@ -492,7 +493,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         errorMessage = $"RSA decrypt failure: {ex.Message}";
                         Resolver.Log.Error(errorMessage);
-                        ConnectionError?.Invoke(this, errorMessage);
+                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
                         return false;
@@ -517,7 +518,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         errorMessage = $"AES decrypt failure: {ex.Message}";
                         Resolver.Log.Error(errorMessage);
-                        ConnectionError?.Invoke(this, errorMessage);
+                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
                         return false;
@@ -535,7 +536,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 }
 
                 Resolver.Log.Warn(errorMessage);
-                ConnectionError?.Invoke(this, errorMessage);
+                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                 _jwt = null;
                 return false;
@@ -555,7 +556,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                 }
                 Resolver.Log.Warn(errorMessage);
-                ConnectionError?.Invoke(this, errorMessage);
+                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                 _jwt = null;
                 return false;
@@ -597,24 +598,23 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         return Send(cloudEvent, "/api/events");
     }
 
-    private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
-    
     private async Task Send<T>(T item, string endpoint)
     {
         HttpClient client = new HttpClient();
-        
+
         try
         {
             await _semaphoreSlim.WaitAsync();
-            
+
             int attempt = 0;
             int maxRetries = 1;
             string errorMessage;
-            
+
             var json = Resolver.JsonSerializer.Serialize(item!);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+        retry:
 
-            retry:
             client.BaseAddress = new Uri(Settings.DataHostname);
             
             if (ConnectionState != CloudConnectionState.Connected)
@@ -636,7 +636,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
             HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
             Resolver.Log.Debug($"{response.StatusCode.ToString()}", messageGroup: "cloud");
-            
+
             if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
             {
                 attempt++;
@@ -647,13 +647,18 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 client = new HttpClient();
                 goto retry;
             }
-            
-            if(!response.IsSuccessStatusCode)
+
+            if (!response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                Resolver.Log.Debug(errorMessage);
                 throw new MeadowCloudException(errorMessage);
             }
+        }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke(this, ex);
         }
         finally
         {
