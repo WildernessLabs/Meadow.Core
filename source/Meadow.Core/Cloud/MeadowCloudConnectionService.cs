@@ -26,7 +26,7 @@ namespace Meadow;
 
 internal class MeadowCloudConnectionService : IMeadowCloudService
 {
-    public event EventHandler<string>? ConnectionError;
+    public event EventHandler<Exception>? ErrorOccurred;
     public event EventHandler<CloudConnectionState>? ConnectionStateChanged;
 
     internal event EventHandler<MqttApplicationMessage>? MqttMessageReceived;
@@ -43,7 +43,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     internal IMeadowCloudSettings Settings { get; private set; }
 
-    private static readonly SemaphoreSlim semaphoreSlim = new(1, 1);
     private List<string> _subscriptionTopics = new();
     private bool _stopService = true;
     private bool _firstConection = true;
@@ -51,16 +50,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private string? _jwt = null;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
     private Thread? _stateMachineThread;
-    private readonly CloudDataQueue _dataQueue;
-    private Timer _storeAndForwardTimer;
+    private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
 
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
-        _dataQueue = new CloudDataQueue();
-        _storeAndForwardTimer = new Timer(DataForwarderProc, null, TimeSpan.FromMilliseconds(-1), TimeSpan.FromMilliseconds(-1));
     }
 
     public CloudConnectionState ConnectionState
@@ -72,48 +69,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             _connectionState = value;
             ConnectionStateChanged?.Invoke(this, ConnectionState);
         }
-    }
-
-    private async void DataForwarderProc(object _)
-    {
-        CloudDataQueue.DataInfo? info = null;
-
-        try
-        {
-            if (ConnectionState == CloudConnectionState.Connected)
-            {
-                // get the head item
-                info = _dataQueue.Peek();
-
-                if (info != null)
-                {
-                    // failed to send, leave the item in the queue
-                    if (await Send(info.Item, info.EndPoint))
-                    {
-
-                        // item was sent, remove from the queue and toss away
-                        _dataQueue.Dequeue();
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Resolver.Log.Warn($"Unable to forward Meadow Cloud record: {ex.Message}");
-        }
-
-        // schedule the next send
-        // TODO: make this configurable or more intelligent
-        TimeSpan nextSend;
-        if (_dataQueue.Count > 0 && ConnectionState == CloudConnectionState.Connected)
-        {
-            nextSend = TimeSpan.FromSeconds(1);
-        }
-        else
-        {
-            nextSend = TimeSpan.FromSeconds(60);
-        }
-        _storeAndForwardTimer.Change(nextSend, TimeSpan.FromMilliseconds(-1));
     }
 
     public void AddSubscription(string topic)
@@ -163,13 +118,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             _stateMachineThread = new Thread(() => ConnectionStateMachine());
             _stateMachineThread.Start();
         }
-
-        _storeAndForwardTimer.Change(TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
     }
 
     public void Stop()
     {
-        _storeAndForwardTimer.Change(TimeSpan.FromMilliseconds(-1), TimeSpan.FromMilliseconds(-1));
         _stopService = true;
     }
 
@@ -532,7 +484,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         // TODO: add platform and OS checking for this?
                         errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
                         Resolver.Log.Error(errorMessage);
-                        ConnectionError?.Invoke(this, errorMessage);
+                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
                         return false;
@@ -541,7 +493,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         errorMessage = $"RSA decrypt failure: {ex.Message}";
                         Resolver.Log.Error(errorMessage);
-                        ConnectionError?.Invoke(this, errorMessage);
+                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
                         return false;
@@ -566,7 +518,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         errorMessage = $"AES decrypt failure: {ex.Message}";
                         Resolver.Log.Error(errorMessage);
-                        ConnectionError?.Invoke(this, errorMessage);
+                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
                         return false;
@@ -584,7 +536,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 }
 
                 Resolver.Log.Warn(errorMessage);
-                ConnectionError?.Invoke(this, errorMessage);
+                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                 _jwt = null;
                 return false;
@@ -604,7 +556,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                 }
                 Resolver.Log.Warn(errorMessage);
-                ConnectionError?.Invoke(this, errorMessage);
+                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                 _jwt = null;
                 return false;
@@ -637,64 +589,54 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// <inheritdoc/>
     public Task SendLog(CloudLog log)
     {
-        // enqueue and trigger the timer - this will send any older data before this record
-        _dataQueue.Enqueue(log, "/api/logs");
-        _storeAndForwardTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
-        return Task.CompletedTask;
+        return Send(log, "/api/logs");
     }
 
     /// <inheritdoc/>
     public Task SendEvent(CloudEvent cloudEvent)
     {
-        // enqueue and trigger the timer - this will send any older data before this record
-        _dataQueue.Enqueue(cloudEvent, "/api/events");
-        _storeAndForwardTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
-        return Task.CompletedTask;
+        return Send(cloudEvent, "/api/events");
     }
 
-    private async Task<bool> Send<T>(T item, string endpoint)
+    private async Task Send<T>(T item, string endpoint)
     {
-        if (item == null) throw new ArgumentNullException(nameof(item));
-
-        if (ConnectionState != CloudConnectionState.Connected)
-        {
-            return false;
-        }
+        HttpClient client = new HttpClient();
 
         try
         {
-            await semaphoreSlim.WaitAsync();
+            await _semaphoreSlim.WaitAsync();
 
             int attempt = 0;
             int maxRetries = 1;
             string errorMessage;
 
-            using HttpClient client = new HttpClient();
+            var json = Resolver.JsonSerializer.Serialize(item!);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
             client.BaseAddress = new Uri(Settings.DataHostname);
 
-            var json = Resolver.JsonSerializer.Serialize(item);
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
         retry:
+
+            if (ConnectionState != CloudConnectionState.Connected)
+            {
+                // TODO: store and forward!
+                return;
+            }
+
             if (Settings.UseAuthentication)
             {
                 if (_jwt == null)
                 {
                     await Authenticate();
                 }
+
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
             }
 
             Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
-
             HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
+            Resolver.Log.Debug($"{response.StatusCode.ToString()}", messageGroup: "cloud");
 
-            if (response.IsSuccessStatusCode)
-            {
-                Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
-                return true;
-            }
-            else if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
             {
                 if (attempt < maxRetries)
                 {
@@ -706,21 +648,27 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     goto retry;
                 }
 
-                // TODO: should this just return false?
                 errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                Resolver.Log.Debug(errorMessage);
                 throw new MeadowCloudException(errorMessage);
             }
-            else
+
+            if (!response.IsSuccessStatusCode)
             {
-                // TODO: should this just return false?
                 var responseContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                Resolver.Log.Debug(errorMessage);
                 throw new MeadowCloudException(errorMessage);
             }
         }
+        catch (Exception ex)
+        {
+            ErrorOccurred?.Invoke(this, ex);
+        }
         finally
         {
-            semaphoreSlim.Release();
+            client.Dispose();
+            _semaphoreSlim.Release();
         }
     }
 

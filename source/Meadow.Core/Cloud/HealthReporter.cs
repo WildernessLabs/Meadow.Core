@@ -32,7 +32,7 @@ public class HealthReporter : IHealthReporter
 
             await Send();
         }
-
+        
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
@@ -58,7 +58,7 @@ public class HealthReporter : IHealthReporter
             Resolver.Log.Trace("could not send health metric, connection unavailable.");
             return;
         }
-
+        
         var service = Resolver.Services.Get<IMeadowCloudService>();
         var device = Resolver.Device;
 
@@ -67,13 +67,13 @@ public class HealthReporter : IHealthReporter
             Description = "device.health",
             EventId = 10,
             Measurements = new Dictionary<string, object>()
-                {
-                    { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
-                    { "health.memory_used", GC.GetTotalMemory(false) },
-                    { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
-                    { "info.os_version", device.Information.OSVersion },
+            {
+                { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
+                { "health.memory_used", GC.GetTotalMemory(false) },
+                { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
+                { "info.os_version", device.Information.OSVersion },
 
-                },
+            },
             Timestamp = DateTimeOffset.UtcNow
         };
 
@@ -88,7 +88,14 @@ public class HealthReporter : IHealthReporter
             ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
         }
 
-        await service!.SendEvent(ce);
+        try
+        {
+            await service!.SendEvent(ce);
+        }
+        catch (MeadowCloudException ex)
+        {
+            Resolver.Log.Error($"sending health metrics failed: {ex.Message}");
+        }
     }
 
     private Task TimerOnElapsed(object sender, ElapsedEventArgs e)
