@@ -671,13 +671,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             int attempt = 0;
             int maxRetries = 1;
             string errorMessage;
-
-            client.BaseAddress = new Uri(Settings.DataHostname);
-
+            
             var json = Resolver.JsonSerializer.Serialize(item);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         retry:
+            client.BaseAddress = new Uri(Settings.DataHostname);
+        
             if (Settings.UseAuthentication)
             {
                 if (_jwt == null)
