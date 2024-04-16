@@ -179,7 +179,75 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// StatusCodes - NotImplemented
         /// </summary>
-        NotImplemented = 39
+        NotImplemented = 39,
+        /// <summary>
+        /// File cannot be found on the file system.
+        /// </summary>
+        FileNotFound = 40,
+        /// <summary>
+        /// Thread pool on the ESP32 is full and the operation cannot be started.
+        /// </summary>
+        ThreadPooIsFull = 41,
+        /// <summary>
+        /// Coprocessor has restarted unexpectedly.
+        /// </summary>
+        UnexpectedCoprocessorRestart = 42,
+        /// <summary>
+        /// Invalid configuration file (meadow.config.yaml)
+        /// </summary>
+        InvalidConfigurationFile = 43,
+        /// <summary>
+        /// Invalid WiFi configuration file (wifi.config.yaml)
+        /// </summary>
+        InvalidWiFiConfigurationFile = 44,
+        /// <summary>
+        /// Invalid cell configuration file (cell.config.yaml)
+        /// </summary>
+        InvalidCellConfigurationFile = 45,
+        /// <summary>
+        /// ESP reset code is unknown.
+        /// </summary>
+        EspResetUnknown = 50,
+        /// <summary>
+        /// ESP power-on or EN line pulled low and released.
+        /// </summary>
+        EspResetPowerOn = 51,
+        /// <summary>
+        /// ESP reset using an external GPIO (n/a for the ESP32).
+        /// </summary>
+        EspResetExternalGpio = 52,
+        /// <summary>
+        /// esp_restart has used to reset the ESP32.
+        /// </summary>
+        EspResetSoftware = 53,
+        /// <summary>
+        /// ESP reset due to software exception or panic.
+        /// </summary>
+        EspResetPanic = 54,
+        /// <summary>
+        /// ESP reset due to interrupt watchdog.
+        /// </summary>
+        EspResetInterruptWatchdog = 55,
+        /// <summary>
+        /// ESP reset due to task watchdog.
+        /// </summary>
+        EspResetTaskWatchdog = 56,
+        /// <summary>
+        /// ESP reset due to watchdog other than task or interrupt watchdogs.
+        /// </summary>
+        EspResetOtherWatchdog = 57,
+        /// <summary>
+        /// ESP reset after exiting deep sleep.
+        /// </summary>
+        EspResetDeepSleep = 58,
+        /// <summary>
+        /// ESP hardware or software brownout reset.
+        /// </summary>
+        EspResetBrownout = 59,
+        /// <summary>
+        /// ESP reset over SDIO.
+        /// </summary>
+        EspResetSdio = 60,
     };
 
     /// <summary>
