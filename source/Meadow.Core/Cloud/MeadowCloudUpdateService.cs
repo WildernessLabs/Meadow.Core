@@ -148,7 +148,6 @@ internal class MeadowCloudUpdateService : IUpdateService
 
             _state = value;
             StateChanged?.Invoke(this, State);
-            Resolver.Log.Trace($"Updater State -> {State}");
         }
     }
 
