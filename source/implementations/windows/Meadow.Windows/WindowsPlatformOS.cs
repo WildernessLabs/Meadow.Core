@@ -162,6 +162,11 @@ public class WindowsPlatformOS : IPlatformOS
         return Encoding.UTF8.GetBytes(plain);
     }
 
+    /// <inheritdoc/>
+    public void Reset()
+    {
+        MeadowOS.TerminateRun();
+    }
 
 
 
@@ -186,6 +191,12 @@ public class WindowsPlatformOS : IPlatformOS
         throw new PlatformNotSupportedException();
     }
 
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Sets the platform OS clock
     /// </summary>
@@ -202,11 +213,6 @@ public class WindowsPlatformOS : IPlatformOS
 
 
     public void RegisterForSleep(ISleepAwarePeripheral peripheral)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Reset()
     {
         throw new NotImplementedException();
     }

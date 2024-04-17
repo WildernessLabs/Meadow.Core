@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.7.0</Version>
+    <Version>1.10.2</Version>
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -9,10 +9,9 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Mac</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
-    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+    <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
     <PackageId>Meadow.Mac</PackageId>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageIconUrl>https://github.com/WildernessLabs/Meadow.Foundation/blob/master/Source/icon.png?raw=true</PackageIconUrl>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -21,8 +20,8 @@
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Condition=" '$(TargetFramework)' == 'net7.0'" Include="Meadow.Foundation.Displays.Gtk" Version="1.9.0" />
-    <PackageReference Include="Meadow" Version="1.9.0" />
+    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj" />
+    <PackageReference Include="Meadow" Version="1.10.2" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

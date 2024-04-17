@@ -1,11 +1,12 @@
 <Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
-    <Version>1.7.0</Version>
-    <TargetFrameworks>netstandard2.1;net7.0</TargetFrameworks>
+    <Version>1.10.2</Version>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AssemblyName>Meadow.Linux</AssemblyName>   
     <Company>Wilderness Labs, Inc</Company>
-    <PackageProjectUrl>http://beta-developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
+    <Authors>Wilderness Labs, Inc</Authors>
+    <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
     <PackageId>Meadow.Linux</PackageId>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
@@ -14,9 +15,6 @@
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
     <Description>Linux .NET libraries for Wilderness Labs Meadow</Description>
-  </PropertyGroup>
-  <PropertyGroup>
-    <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -24,8 +22,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
-    <PackageReference Include="Meadow" Version="1.9.0" />
-    <PackageReference Condition=" '$(TargetFramework)' == 'net7.0'" Include="Meadow.Foundation.Displays.Gtk" Version="1.9.0" />
+    <PackageReference Include="Meadow" Version="1.10.2" />
+    <ProjectReference Condition=" '$(TargetFramework)' == 'net7.0'" Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Gtk\Driver\Displays.Gtk.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

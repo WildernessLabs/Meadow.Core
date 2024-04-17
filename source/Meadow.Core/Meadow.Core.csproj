@@ -1,6 +1,6 @@
 <Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
-    <Version>1.7.0</Version>
+    <Version>1.10.2</Version>
     <Authors>Wilderness Labs, Inc</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -23,13 +23,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="CryptographyService.cs" />
+    <Compile Remove="MeadowCloudConnectionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-    <PackageReference Include="Meadow.Contracts" Version="1.9.0" />
-    <PackageReference Include="Meadow.Modbus" Version="1.9.0" />
-    <PackageReference Include="Meadow.MQTT" Version="1.9.0" />
+    <None Include="Cloud\MeadowCloudConnectionService.cs" />
+    <PackageReference Include="Meadow.Contracts" Version="1.10.2" />
+	  <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
+    <PackageReference Include="Meadow.Modbus" Version="1.10.2" />
+    <PackageReference Include="Meadow.MQTT" Version="1.10.2" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+      <PackageReference Include="System.IO.Hashing" Version="7.0.0" />      
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
   </ItemGroup>
 </Project>

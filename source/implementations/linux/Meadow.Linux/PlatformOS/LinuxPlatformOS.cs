@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 
 namespace Meadow;
@@ -135,6 +136,93 @@ public class LinuxPlatformOS : IPlatformOS
         }
     }
 
+    /// <summary>
+    /// Sets the platform OS clock
+    /// </summary>
+    /// <param name="dateTime"></param>
+    public void SetClock(DateTime dateTime)
+    {
+        throw new PlatformNotSupportedException();
+    }
+
+    /// <inheritdoc/>
+    public byte[] RsaDecrypt(byte[] encryptedValue)
+    {
+        var rsa = RSA.Create();
+        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+    }
+
+    /// <inheritdoc/>
+    public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
+    {
+        // Create an Aes object
+        // with the specified key and IV.
+        using var aesAlg = System.Security.Cryptography.Aes.Create();
+        aesAlg.Key = key;
+        aesAlg.IV = iv;
+
+        // Create a decryptor to perform the stream transform.
+        var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+        // Create the streams used for decryption.
+        using var msDecrypt = new MemoryStream(encryptedValue);
+        using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+        using var srDecrypt = new StreamReader(csDecrypt);
+
+        var plain = srDecrypt.ReadToEnd();
+
+        return Encoding.UTF8.GetBytes(plain);
+    }
+
+    /// <inheritdoc/>
+    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
+    {
+        using var rsa = RSA.Create();
+
+        rsa.ImportFromPem(privateKeyPem);
+
+        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
+    }
+
+    public string? GetPublicKeyInPemFormat()
+    {
+        var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
+
+        if (!sshFolder.Exists)
+        {
+            throw new Exception("SSH folder not found");
+        }
+        else
+        {
+            var pkFile = Path.Combine(sshFolder.FullName, "id_rsa.pub");
+            if (!File.Exists(pkFile))
+            {
+                throw new Exception("Public key not found");
+            }
+
+            var pkFileContent = File.ReadAllText(pkFile);
+            if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                // need to convert
+                pkFileContent = Linux.ExecuteCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+            }
+            return pkFileContent;
+        }
+    }
+
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
+    {
+        var drive = FileSystem.Drives.FirstOrDefault(d => d.Name == "/");
+        if (drive == null) return DigitalStorage.Zero;
+
+        return drive.Size - drive.SpaceAvailable;
+    }
+
+
+
+
+
     public bool RebootOnUnhandledException => false;
 
     public uint InitializationTimeout => throw new NotImplementedException();
@@ -174,44 +262,6 @@ public class LinuxPlatformOS : IPlatformOS
 
     public string ReservedPins => string.Empty;
 
-    /// <summary>
-    /// Sets the platform OS clock
-    /// </summary>
-    /// <param name="dateTime"></param>
-    public void SetClock(DateTime dateTime)
-    {
-        throw new PlatformNotSupportedException();
-    }
-
-    public byte[] RsaDecrypt(byte[] encryptedValue)
-    {
-        var rsa = RSA.Create();
-        return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
-    }
-
-    public byte[] AesDecrypt(byte[] encryptedValue, byte[] key, byte[] iv)
-    {
-        // Create an Aes object
-        // with the specified key and IV.
-        using (Aes aesAlg = Aes.Create())
-        {
-            aesAlg.Key = key;
-            aesAlg.IV = iv;
-
-            // Create a decryptor to perform the stream transform.
-            var decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-            // Create the streams used for decryption.
-            using (var msDecrypt = new MemoryStream(encryptedValue))
-            using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-            {
-                var buffer = new byte[csDecrypt.Length];
-                csDecrypt.Read(buffer, 0, buffer.Length);
-                return buffer;
-            }
-        }
-    }
-
     public int[] GetProcessorUtilization()
     {
         throw new NotImplementedException();
@@ -223,16 +273,6 @@ public class LinuxPlatformOS : IPlatformOS
     }
 
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
-    {
-        throw new NotImplementedException();
-    }
-
-    public string? GetPublicKeyInPemFormat()
-    {
-        throw new NotImplementedException();
-    }
-
-    public byte[] RsaDecrypt(byte[] encryptedValue, string privateKeyPem)
     {
         throw new NotImplementedException();
     }
