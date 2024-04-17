@@ -615,24 +615,36 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     private bool SendCrashReports()
     {
-        try
-        {
-            var fi = new FileInfo(Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"));
-            if (fi.Exists)
+        var result = true;
+        var reportFiles = new string[]
             {
-                Resolver.Log.Info("Sending crash report to Meadow.Cloud...");
-                var data = File.ReadAllText(fi.FullName);
-                (this as IMeadowCloudService).SendLog("fatal", "device crashed", data);
-                fi.Delete();
-            }
+                Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"),
+                Path.Combine(MeadowOS.FileSystem.UserFileSystemRoot, "mono_error.txt")
+            };
 
-            return true;
-        }
-        catch (Exception ex)
+        foreach (var report in reportFiles)
         {
-            Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
-            return false;
+            try
+            {
+                var fi = new FileInfo(report);
+                if (fi.Exists)
+                {
+                    Resolver.Log.Info("Sending crash report to Meadow.Cloud...");
+                    var data = File.ReadAllText(fi.FullName);
+                    (this as IMeadowCloudService).SendLog("fatal", "device crashed", data);
+                    fi.Delete();
+                }
+
+                result &= true;
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
+                result &= false;
+            }
         }
+
+        return result;
     }
 
     /// <inheritdoc/>
