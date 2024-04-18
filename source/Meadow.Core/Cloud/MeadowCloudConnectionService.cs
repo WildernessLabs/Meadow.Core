@@ -616,31 +616,27 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private bool SendCrashReports()
     {
         var result = true;
-        var reportFiles = new string[]
-            {
-                Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"),
-                Path.Combine(MeadowOS.FileSystem.UserFileSystemRoot, "mono_error.txt")
-            };
 
-        foreach (var report in reportFiles)
+        var crashReporter = Resolver.Services.Get<CrashReporter>();
+        if (crashReporter != null)
         {
-            try
+            if (crashReporter.CrashDataAvailable)
             {
-                var fi = new FileInfo(report);
-                if (fi.Exists)
+
+                foreach (var report in crashReporter.GetCrashData())
                 {
-                    Resolver.Log.Info("Sending crash report to Meadow.Cloud...");
-                    var data = File.ReadAllText(fi.FullName);
-                    (this as IMeadowCloudService).SendLog("fatal", "device crashed", data);
-                    fi.Delete();
+                    try
+                    {
+                        (this as IMeadowCloudService).SendLog("fatal", "device crashed", report);
+                    }
+                    catch (Exception ex)
+                    {
+                        Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
+                        result &= false;
+                    }
                 }
 
-                result &= true;
-            }
-            catch (Exception ex)
-            {
-                Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
-                result &= false;
+                crashReporter.ClearCrashData();
             }
         }
 
@@ -683,13 +679,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             int attempt = 0;
             int maxRetries = 1;
             string errorMessage;
-            
+
             var json = Resolver.JsonSerializer.Serialize(item);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         retry:
             client.BaseAddress = new Uri(Settings.DataHostname);
-        
+
             if (Settings.UseAuthentication)
             {
                 if (_jwt == null)
@@ -730,6 +726,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
         catch (Exception ex)
         {
+            Resolver.Log.Debug($"exception sending cloud message: {ex.Message}");
             ErrorOccurred?.Invoke(this, ex);
             return false;
         }
