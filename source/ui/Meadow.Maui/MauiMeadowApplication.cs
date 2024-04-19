@@ -15,6 +15,9 @@
         }
 
         /// <inheritdoc/>
+        public virtual void OnBootFromCrash(IEnumerable<string> crashReports) { }
+
+        /// <inheritdoc/>
         public void InvokeOnMainThread(Action<object?> action, object? state = null)
         {
             MainThread.BeginInvokeOnMainThread(() => action(state));

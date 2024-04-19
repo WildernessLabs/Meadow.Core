@@ -57,6 +57,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
 
+    /// <inheritdoc/>
+    public bool IsEnabled { get; private set; }
+
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
@@ -163,6 +166,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         {
             _stateMachineThread = new Thread(() => ConnectionStateMachine());
             _stateMachineThread.Start();
+
+            IsEnabled = true;
         }
 
         _storeAndForwardTimer.Change(TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
@@ -172,6 +177,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         _stopService = true;
         _storeAndForwardTimer.Change(TimeSpan.FromMilliseconds(-1), TimeSpan.FromMilliseconds(-1));
+        IsEnabled = false;
     }
 
     private void Initialize()
