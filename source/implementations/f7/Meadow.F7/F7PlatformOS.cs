@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
@@ -12,6 +13,9 @@ namespace Meadow;
 public partial class F7PlatformOS : IPlatformOS
 {
     private readonly F7GPIOManager _ioController;
+
+    /// <inheritdoc/>
+    public event EventHandler<int>? OsException;
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -32,6 +36,11 @@ public partial class F7PlatformOS : IPlatformOS
 
         NtpClient = new NtpClient();
         Resolver.Services.Add(NtpClient);
+    }
+
+    internal void RaiseOsException(StatusCodes statusCode)
+    {
+        OsException?.Invoke(this, (int)statusCode);
     }
 
     /// <summary>

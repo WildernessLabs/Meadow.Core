@@ -141,6 +141,14 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                     BluetoothAdapter = esp32;
                     Coprocessor = esp32;
 
+                    esp32.SystemMessageReceived += (s, e) =>
+                    {
+                        (PlatformOS as F7PlatformOS)?.RaiseOsException(e.status);
+
+                        // TODO: some of these may necessitate restarting the device
+                        // TODO: if the app isn't listening to the event, should we log before reset?
+                    };
+
                     if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                     {
                         Resolver.Log.Info($"Device is configured to use WiFi for the network interface");

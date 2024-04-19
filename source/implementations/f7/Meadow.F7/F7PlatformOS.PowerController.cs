@@ -14,11 +14,11 @@ namespace Meadow
         private readonly List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
 
         /// <inheritdoc/>
-        public event PowerTransitionHandler BeforeReset = default!;
+        public event PowerTransitionHandler? BeforeReset = default!;
         /// <inheritdoc/>
-        public event PowerTransitionHandler BeforeSleep = default!;
+        public event PowerTransitionHandler? BeforeSleep = default!;
         /// <inheritdoc/>
-        public event EventHandler<WakeSource> AfterWake = default!;
+        public event EventHandler<WakeSource>? AfterWake = default!;
 
         /// <summary>
         /// Resets the device

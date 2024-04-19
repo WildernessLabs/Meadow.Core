@@ -21,6 +21,8 @@ public class SimulatedPlatformOS : IPlatformOS
     public event PowerTransitionHandler BeforeSleep = delegate { };
     /// <inheritdoc/>
     public event EventHandler<WakeSource>? AfterWake = null;
+    /// <inheritdoc/>
+    public event EventHandler<int>? OsException;
 
     /// <summary>
     /// Event raised when an external storage device event occurs.
