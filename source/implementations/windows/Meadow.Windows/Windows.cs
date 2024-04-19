@@ -35,7 +35,7 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
         Information = new WindowsDeviceInformation();
     }
 
-    public IPixelDisplay CreateDisplay(int? width, int? height)
+    public IResizablePixelDisplay CreateDisplay(int? width, int? height)
     {
 #if WINDOWS
         return new Meadow.Foundation.Displays.WinFormsDisplay(width ?? 320, height ?? 240);
