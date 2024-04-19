@@ -191,6 +191,12 @@ public class WindowsPlatformOS : IPlatformOS
         throw new PlatformNotSupportedException();
     }
 
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Sets the platform OS clock
     /// </summary>

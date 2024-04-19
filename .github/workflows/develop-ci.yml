@@ -53,7 +53,7 @@ jobs:
       with:
         repository: WildernessLabs/MQTTnet
         path: MQTTnet
-        ref: meadow
+        ref: develop
         
     - name: Checkout Meadow.Core
       uses: actions/checkout@v3

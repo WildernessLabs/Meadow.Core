@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
+using System.Diagnostics;
 
 namespace Meadow;
 
@@ -213,7 +214,37 @@ public class Linux : IMeadowDevice
         throw new PlatformNotSupportedException("This platform has no II2CBusses.  Use an IO Extender.");
     }
 
+    public BatteryInfo GetBatteryInfo()
+    {
+        return new BatteryInfo
+        {
+            Voltage = Voltage.Zero
+        };
+    }
+
+    public static string ExecuteCommandLine(string command, string args)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = args,
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
+    }
+
+    // ----------------------------------------------
+    // ----------------------------------------------
     // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----
+    // ----------------------------------------------
+    // ----------------------------------------------
 
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, double debounceDuration = 0, double glitchDuration = 0, OutputType output = OutputType.PushPull)
     {
@@ -241,11 +272,6 @@ public class Linux : IMeadowDevice
     }
 
     public void OnSleep()
-    {
-        throw new NotImplementedException();
-    }
-
-    public BatteryInfo GetBatteryInfo()
     {
         throw new NotImplementedException();
     }

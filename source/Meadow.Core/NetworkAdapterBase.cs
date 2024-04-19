@@ -99,10 +99,7 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     /// </summary>
     protected void Refresh()
     {
-        if (nativeInterface == null)
-        {
-            nativeInterface = LoadAdapterInfo();
-        }
+        nativeInterface = LoadAdapterInfo();
     }
 
     /// <summary>

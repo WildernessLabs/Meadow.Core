@@ -90,6 +90,23 @@ public static partial class MeadowOS
             ReportAppException(e, "Device (system) Initialization Failure");
         }
 
+        var crashReporter = new CrashReporter();
+        Resolver.Services.Add(crashReporter);
+
+        // check for any crash reports
+        if (crashReporter.CrashDataAvailable)
+        {
+            try
+            {
+                App.OnBootFromCrash(crashReporter.GetCrashData());
+            }
+            catch (Exception ex)
+            {
+                // if the app crashes in the crash report handler, we don't want to restart or we'll infinite loop!
+                Resolver.Log.Error($"Crash Report Handler error: {ex.Message}");
+            }
+        }
+
         Resolver.Services.Add<ISensorService>(new SensorService());
 
         if (systemInitialized)
@@ -623,7 +640,7 @@ public static partial class MeadowOS
             {
                 if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
                 {
-                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes);
+                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
                 }
                 else
                 {
