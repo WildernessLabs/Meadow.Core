@@ -34,7 +34,7 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
         Information = new MacDeviceInformation();
     }
 
-    public IPixelDisplay CreateDisplay(int? width = null, int? height = null)
+    public IResizablePixelDisplay CreateDisplay(int? width = null, int? height = null)
     {
         return new Meadow.Foundation.Displays.GtkDisplay(width ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
     }

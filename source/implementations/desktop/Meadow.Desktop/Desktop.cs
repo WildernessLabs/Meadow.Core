@@ -20,7 +20,7 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IPixelDisplay? Display { get; private set; }
+    public virtual IResizablePixelDisplay? Display { get; private set; }
 
     /// <summary>
     /// Initializes a new instance of the Desktop class.
