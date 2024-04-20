@@ -104,6 +104,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         catch (Exception ex)
         {
             Resolver.Log.Warn($"Unable to forward Meadow Cloud record: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Resolver.Log.Warn($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+            }
         }
 
         // schedule the next send
@@ -298,7 +302,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud: {ae.Message}");
                         if (ae.InnerException != null)
                         {
-                            Resolver.Log.Error($" Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
+                            Resolver.Log.Error($"Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
                         }
                         await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                     }
@@ -350,6 +354,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         catch (Exception ex)
                         {
                             Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
+                            if (ex.InnerException != null)
+                            {
+                                Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                            }
                             ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
@@ -403,7 +411,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     catch (Exception ex)
                     {
                         Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
-
+                        if (ex.InnerException != null)
+                        {
+                            Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                        }
                         // if subscribing fails, then we need to disconnect from the server
                         await MqttClient.DisconnectAsync();
 
@@ -548,6 +559,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         errorMessage = $"RSA decrypt failure: {ex.Message}";
                         Resolver.Log.Error(errorMessage);
+                        if (ex.InnerException != null)
+                        {
+                            Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                        }
                         ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
@@ -573,6 +588,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         errorMessage = $"AES decrypt failure: {ex.Message}";
                         Resolver.Log.Error(errorMessage);
+                        if (ex.InnerException != null)
+                        {
+                            Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                        }
                         ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
 
                         _jwt = null;
@@ -638,6 +657,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     catch (Exception ex)
                     {
                         Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
+                        if (ex.InnerException != null)
+                        {
+                            Resolver.Log.Warn($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                        }
                         result &= false;
                     }
                 }
@@ -733,6 +756,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         catch (Exception ex)
         {
             Resolver.Log.Debug($"exception sending cloud message: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                Resolver.Log.Debug($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+            }
             ErrorOccurred?.Invoke(this, ex);
             return false;
         }
