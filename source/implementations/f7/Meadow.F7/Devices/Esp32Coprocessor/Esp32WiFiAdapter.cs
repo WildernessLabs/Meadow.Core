@@ -246,23 +246,15 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         switch (eventId)
         {
             case WiFiFunction.NetworkConnectedEvent:
-                byte channel = 0;
-
-                ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
-                lock (_lock)
-                {
-                    Ssid = connectEventData.Ssid;
-                    Bssid = new PhysicalAddress(connectEventData.Bssid);
-                    Channel = channel;
-                    _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
-                }
-
+                RaiseConnectEvent(statusCode, payload);
                 CurrentState = NetworkState.Connected;
-
                 break;
             case WiFiFunction.NetworkDisconnectedEvent:
                 RaiseWiFiDisconnected(statusCode, payload);
                 CurrentState = NetworkState.Disconnected;
+                break;
+            case WiFiFunction.NetworkReconnectEvent:
+                CurrentState = NetworkState.Connecting;
                 break;
             case WiFiFunction.NtpUpdateEvent:
                 RaiseNtpTimeChangedEvent();
@@ -690,6 +682,26 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     protected void RaiseErrorEvent(StatusCodes statusCode)
     {
         RaiseNetworkError(new NetworkErrorEventArgs((uint)statusCode));
+    }
+
+    /// <summary>
+    /// Process the Connect event.
+    /// </summary>
+    protected void RaiseConnectEvent(StatusCodes statusCodes, byte[] payload)
+    {
+        if (payload.Length != 0)
+        {
+            byte channel = 0;
+
+            ConnectEventData connectEventData = Encoders.ExtractConnectEventData(payload, 0);
+            lock (_lock)
+            {
+                Ssid = connectEventData.Ssid;
+                Bssid = new PhysicalAddress(connectEventData.Bssid);
+                Channel = channel;
+                _authenticationType = (NetworkAuthenticationType)connectEventData.AuthenticationMode;
+            }
+        }
     }
 
     private NetworkState _state;

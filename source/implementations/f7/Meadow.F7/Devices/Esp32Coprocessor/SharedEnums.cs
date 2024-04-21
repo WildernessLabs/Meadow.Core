@@ -189,6 +189,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// Cell configuration contains one or more errors.
         /// </summary>
         InvalidCellConfigurationFile = 45,
+        /// <summary>
+        /// StatusCodes - ReconnectionFailed.
+        /// </summary>
+        ReconnectionFailed = 46,
 };
 
     /// <summary>
@@ -462,7 +466,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// WiFiFunction - NodeDisconnectedEvent
         /// </summary>
-        NodeDisconnectedEvent = 45
+        NodeDisconnectedEvent = 45,
+        
+        /// <summary>
+        /// WiFiFuction - NetworkReconnectEvent
+        /// <summary>
+        NetworkReconnectEvent = 46
     };
 
     /// <summary>
