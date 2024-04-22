@@ -667,7 +667,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         var disconnectEventData = Encoders.ExtractDisconnectEventData(payload, 0);
         lock (_lock)
         {
-            RaiseNetworkDisconnected(new WiFiNetworkDisconnectionEventArgs((WiFiDisconnectedReason)disconnectEventData.Reason));
+            RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs((NetworkDisconnectReason)disconnectEventData.Reason));
         }
     }
 
@@ -709,6 +709,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             switch (CurrentState)
             {
                 case NetworkState.Connecting:
+                    RaiseNetworkConnecting();
                     break;
                 case NetworkState.Connected:
                     Refresh();

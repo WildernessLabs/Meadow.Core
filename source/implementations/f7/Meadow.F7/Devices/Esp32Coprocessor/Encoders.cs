@@ -47,7 +47,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 result += 4;
             }
-            return (result);
+            return result;
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>32-bit CRC for the array of bytes.</returns>
         private static UInt32 Crc32(byte[] buffer)
         {
-            return (Crc32(buffer, 0, buffer.Length));
+            return Crc32(buffer, 0, buffer.Length);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 crc = ProgressiveCrc32(crc, data[index]);
             }
 
-            return (crc);
+            return crc;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 UInt32 mask = (UInt32)(-(crc & 0x01));
                 crc = (crc >> 1) ^ (0xedb88320 & mask);
             }
-            return (crc);
+            return crc;
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
 
             result = buffer[offset];
             result |= (UInt16)(buffer[offset + 1] << 8);
-            return (result);
+            return result;
         }
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result |= (UInt32)(buffer[offset + 1] << 8);
             result |= (UInt32)(buffer[offset + 2] << 16);
             result |= (UInt32)(buffer[offset + 3] << 24);
-            return (result);
+            return result;
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result |= buffer[offset + 1] << 8;
             result |= buffer[offset + 2] << 16;
             result |= buffer[offset + 3] << 24;
-            return (result);
+            return result;
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 result += (char)buffer[offset];
                 offset++;
             }
-            return (result);
+            return result;
         }
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt32(systemConfiguration.BuildHash, buffer, offset);
             offset += 4;
             EncodeString(systemConfiguration.BuildBranchName, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             systemConfiguration.BuildHash = ExtractUInt32(buffer, offset);
             offset += 4;
             systemConfiguration.BuildBranchName = ExtractString(buffer, offset);
-            return (systemConfiguration);
+            return systemConfiguration;
         }
 
         /// <summary>
@@ -379,7 +379,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result += systemConfiguration.DeviceName.Length;
             result += systemConfiguration.DefaultAccessPoint.Length;
             result += systemConfiguration.BuildBranchName.Length;
-            return (result + 54);
+            return result + 54;
         }
 
         /// <summary>
@@ -411,7 +411,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(configurationValue.Value, 0, buffer, offset, configurationValue.ValueLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -433,7 +433,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 configurationValue.Value = new byte[configurationValue.ValueLength];
                 Array.Copy(buffer, offset, configurationValue.Value, 0, configurationValue.ValueLength);
             }
-            return (configurationValue);
+            return configurationValue;
         }
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)configurationValue.ValueLength;
-            return (result + 8);
+            return result + 8;
         }
 
         /// <summary>
@@ -479,7 +479,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(errorEvent.ErrorData, 0, buffer, offset, errorEvent.ErrorDataLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -503,7 +503,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 errorEvent.ErrorData = new byte[errorEvent.ErrorDataLength];
                 Array.Copy(buffer, offset, errorEvent.ErrorData, 0, errorEvent.ErrorDataLength);
             }
-            return (errorEvent);
+            return errorEvent;
         }
 
         /// <summary>
@@ -515,7 +515,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)errorEvent.ErrorDataLength;
-            return (result + 9);
+            return result + 9;
         }
 
         /// <summary>
@@ -555,7 +555,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             buffer[offset] = accessPointInformation.Channel;
             offset += 1;
             buffer[offset] = accessPointInformation.Hidden;
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -583,7 +583,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             accessPointInformation.Channel = buffer[offset];
             offset += 1;
             accessPointInformation.Hidden = buffer[offset];
-            return (accessPointInformation);
+            return accessPointInformation;
         }
 
         /// <summary>
@@ -596,7 +596,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += accessPointInformation.NetworkName.Length;
             result += accessPointInformation.Password.Length;
-            return (result + 17);
+            return result + 17;
         }
 
         /// <summary>
@@ -620,7 +620,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = disconnectFromAccessPointRequest.TurnOffWiFiInterface;
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -634,7 +634,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             DisconnectFromAccessPointRequest disconnectFromAccessPointRequest = new MessagePayloads.DisconnectFromAccessPointRequest();
 
             disconnectFromAccessPointRequest.TurnOffWiFiInterface = buffer[offset];
-            return (disconnectFromAccessPointRequest);
+            return disconnectFromAccessPointRequest;
         }
 
         /// <summary>
@@ -644,7 +644,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded DisconnectFromAccessPointRequest object.</returns>
         public static int EncodedDisconnectFromAccessPointRequestBufferSize(MessagePayloads.DisconnectFromAccessPointRequest disconnectFromAccessPointRequest)
         {
-            return (1);
+            return 1;
         }
 
         /// <summary>
@@ -689,7 +689,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             buffer[offset] = connectEventData.AuthenticationMode;
             offset += 1;
             EncodeUInt32(connectEventData.Reason, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -721,7 +721,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             connectEventData.AuthenticationMode = buffer[offset];
             offset += 1;
             connectEventData.Reason = ExtractUInt32(buffer, offset);
-            return (connectEventData);
+            return connectEventData;
         }
 
         /// <summary>
@@ -731,7 +731,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded ConnectEventData object.</returns>
         public static int EncodedConnectEventDataBufferSize(MessagePayloads.ConnectEventData connectEventData)
         {
-            return (57);
+            return 57;
         }
 
         /// <summary>
@@ -758,7 +758,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt32(nodeConnectionChangeEventData.IpAddress, buffer, offset);
             offset += 4;
             Array.Copy(nodeConnectionChangeEventData.MacAddress, 0, buffer, offset, 6);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -775,7 +775,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             offset += 4;
             nodeConnectionChangeEventData.MacAddress = new byte[6];
             Array.Copy(buffer, offset, nodeConnectionChangeEventData.MacAddress, 0, 6);
-            return (nodeConnectionChangeEventData);
+            return nodeConnectionChangeEventData;
         }
 
         /// <summary>
@@ -785,7 +785,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded NodeConnectionChangeEventData object.</returns>
         public static int EncodedNodeConnectionChangeEventDataBufferSize(MessagePayloads.NodeConnectionChangeEventData nodeConnectionChangeEventData)
         {
-            return (10);
+            return 10;
         }
 
         /// <summary>
@@ -815,7 +815,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             buffer[offset] = disconnectEventData.Rssi;
             offset += 1;
             buffer[offset] = disconnectEventData.Reason;
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -843,7 +843,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 case 0:
                     return new DisconnectEventData
                     {
-                        Reason = (byte)WiFiDisconnectedReason.Unspecified
+                        Reason = (byte)NetworkDisconnectReason.Unspecified
                     };
                 default:
                     // implemented in Protocol 1+ (v 2.0+)
@@ -874,7 +874,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded DisconnectEventData object.</returns>
         public static int EncodedDisconnectEventDataBufferSize(MessagePayloads.DisconnectEventData disconnectEventData)
         {
-            return (42);
+            return 42;
         }
 
         /// <summary>
@@ -917,7 +917,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             buffer[offset] = accessPoint.AuthenticationMode;
             offset += 1;
             EncodeUInt32(accessPoint.Protocols, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -947,7 +947,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             accessPoint.AuthenticationMode = buffer[offset];
             offset += 1;
             accessPoint.Protocols = ExtractUInt32(buffer, offset);
-            return (accessPoint);
+            return accessPoint;
         }
 
         /// <summary>
@@ -957,7 +957,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded AccessPoint object.</returns>
         public static int EncodedAccessPointBufferSize(MessagePayloads.AccessPoint accessPoint)
         {
-            return (47);
+            return 47;
         }
 
         /// <summary>
@@ -989,7 +989,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(accessPointList.AccessPoints, 0, buffer, offset, accessPointList.AccessPointsLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1011,7 +1011,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 accessPointList.AccessPoints = new byte[accessPointList.AccessPointsLength];
                 Array.Copy(buffer, offset, accessPointList.AccessPoints, 0, accessPointList.AccessPointsLength);
             }
-            return (accessPointList);
+            return accessPointList;
         }
 
         /// <summary>
@@ -1023,7 +1023,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)accessPointList.AccessPointsLength;
-            return (result + 8);
+            return result + 8;
         }
 
         /// <summary>
@@ -1058,7 +1058,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             Array.Copy(sockAddr.Ip6Address, 0, buffer, offset, 16);
             offset += 16;
             EncodeUInt32(sockAddr.ScopeID, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1083,7 +1083,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             Array.Copy(buffer, offset, sockAddr.Ip6Address, 0, 16);
             offset += 16;
             sockAddr.ScopeID = ExtractUInt32(buffer, offset);
-            return (sockAddr);
+            return sockAddr;
         }
 
         /// <summary>
@@ -1093,7 +1093,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded SockAddr object.</returns>
         public static int EncodedSockAddrBufferSize(MessagePayloads.SockAddr sockAddr)
         {
-            return (31);
+            return 31;
         }
 
         /// <summary>
@@ -1135,12 +1135,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (addrInfo.AddrLength > 0)
             {
                 Array.Copy(addrInfo.Addr, 0, buffer, offset, addrInfo.AddrLength);
-                offset += (int)(addrInfo.AddrLength);
+                offset += (int)addrInfo.AddrLength;
             }
             EncodeString(addrInfo.CanonName, buffer, offset);
             offset += addrInfo.CanonName.Length + 1;
             EncodeUInt32(addrInfo.Next, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1176,7 +1176,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             addrInfo.CanonName = ExtractString(buffer, offset);
             offset += addrInfo.CanonName.Length + 1;
             addrInfo.Next = ExtractUInt32(buffer, offset);
-            return (addrInfo);
+            return addrInfo;
         }
 
         /// <summary>
@@ -1189,7 +1189,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += (int)addrInfo.AddrLength;
             result += addrInfo.CanonName.Length;
-            return (result + 33);
+            return result + 33;
         }
 
         /// <summary>
@@ -1224,7 +1224,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(getAddrInfoRequest.Hints, 0, buffer, offset, getAddrInfoRequest.HintsLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1248,7 +1248,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 getAddrInfoRequest.Hints = new byte[getAddrInfoRequest.HintsLength];
                 Array.Copy(buffer, offset, getAddrInfoRequest.Hints, 0, getAddrInfoRequest.HintsLength);
             }
-            return (getAddrInfoRequest);
+            return getAddrInfoRequest;
         }
 
         /// <summary>
@@ -1262,7 +1262,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             result += getAddrInfoRequest.NodeName.Length;
             result += getAddrInfoRequest.ServName.Length;
             result += (int)getAddrInfoRequest.HintsLength;
-            return (result + 6);
+            return result + 6;
         }
 
         /// <summary>
@@ -1294,7 +1294,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(getAddrInfoResponse.Res, 0, buffer, offset, getAddrInfoResponse.ResLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1316,7 +1316,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 getAddrInfoResponse.Res = new byte[getAddrInfoResponse.ResLength];
                 Array.Copy(buffer, offset, getAddrInfoResponse.Res, 0, getAddrInfoResponse.ResLength);
             }
-            return (getAddrInfoResponse);
+            return getAddrInfoResponse;
         }
 
         /// <summary>
@@ -1328,7 +1328,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)getAddrInfoResponse.ResLength;
-            return (result + 8);
+            return result + 8;
         }
 
         /// <summary>
@@ -1358,7 +1358,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(socketRequest.Type, buffer, offset);
             offset += 4;
             EncodeInt32(socketRequest.Protocol, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1378,7 +1378,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             socketRequest.Type = ExtractInt32(buffer, offset);
             offset += 4;
             socketRequest.Protocol = ExtractInt32(buffer, offset);
-            return (socketRequest);
+            return socketRequest;
         }
 
         /// <summary>
@@ -1388,7 +1388,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded SocketRequest object.</returns>
         public static int EncodedSocketRequestBufferSize(MessagePayloads.SocketRequest socketRequest)
         {
-            return (16);
+            return 16;
         }
 
         /// <summary>
@@ -1412,7 +1412,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(integerResponse.Result, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1426,7 +1426,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             IntegerResponse integerResponse = new MessagePayloads.IntegerResponse();
 
             integerResponse.Result = ExtractInt32(buffer, offset);
-            return (integerResponse);
+            return integerResponse;
         }
 
         /// <summary>
@@ -1436,7 +1436,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded IntegerResponse object.</returns>
         public static int EncodedIntegerResponseBufferSize(MessagePayloads.IntegerResponse integerResponse)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -1462,7 +1462,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(integerAndErrnoResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(integerAndErrnoResponse.ResponseErrno, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1478,7 +1478,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             integerAndErrnoResponse.Result = ExtractInt32(buffer, offset);
             offset += 4;
             integerAndErrnoResponse.ResponseErrno = ExtractInt32(buffer, offset);
-            return (integerAndErrnoResponse);
+            return integerAndErrnoResponse;
         }
 
         /// <summary>
@@ -1488,7 +1488,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded IntegerAndErrnoResponse object.</returns>
         public static int EncodedIntegerAndErrnoResponseBufferSize(MessagePayloads.IntegerAndErrnoResponse integerAndErrnoResponse)
         {
-            return (8);
+            return 8;
         }
 
         /// <summary>
@@ -1520,7 +1520,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(connectRequest.Addr, 0, buffer, offset, connectRequest.AddrLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1542,7 +1542,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 connectRequest.Addr = new byte[connectRequest.AddrLength];
                 Array.Copy(buffer, offset, connectRequest.Addr, 0, connectRequest.AddrLength);
             }
-            return (connectRequest);
+            return connectRequest;
         }
 
         /// <summary>
@@ -1554,7 +1554,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)connectRequest.AddrLength;
-            return (result + 8);
+            return result + 8;
         }
 
         /// <summary>
@@ -1578,7 +1578,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(freeAddrInfoRequest.AddrInfoAddress, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1592,7 +1592,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             FreeAddrInfoRequest freeAddrInfoRequest = new MessagePayloads.FreeAddrInfoRequest();
 
             freeAddrInfoRequest.AddrInfoAddress = ExtractUInt32(buffer, offset);
-            return (freeAddrInfoRequest);
+            return freeAddrInfoRequest;
         }
 
         /// <summary>
@@ -1602,7 +1602,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded FreeAddrInfoRequest object.</returns>
         public static int EncodedFreeAddrInfoRequestBufferSize(MessagePayloads.FreeAddrInfoRequest freeAddrInfoRequest)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -1628,7 +1628,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt32(timeVal.TvSec, buffer, offset);
             offset += 4;
             EncodeUInt32(timeVal.TvUsec, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1644,7 +1644,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             timeVal.TvSec = ExtractUInt32(buffer, offset);
             offset += 4;
             timeVal.TvUsec = ExtractUInt32(buffer, offset);
-            return (timeVal);
+            return timeVal;
         }
 
         /// <summary>
@@ -1654,7 +1654,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded TimeVal object.</returns>
         public static int EncodedTimeValBufferSize(MessagePayloads.TimeVal timeVal)
         {
-            return (8);
+            return 8;
         }
 
         /// <summary>
@@ -1689,10 +1689,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (setSockOptRequest.OptionValueLength > 0)
             {
                 Array.Copy(setSockOptRequest.OptionValue, 0, buffer, offset, setSockOptRequest.OptionValueLength);
-                offset += (int)(setSockOptRequest.OptionValueLength);
+                offset += (int)setSockOptRequest.OptionValueLength;
             }
             EncodeInt32(setSockOptRequest.OptionLen, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1720,7 +1720,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 offset += (int)setSockOptRequest.OptionValueLength;
             }
             setSockOptRequest.OptionLen = ExtractInt32(buffer, offset);
-            return (setSockOptRequest);
+            return setSockOptRequest;
         }
 
         /// <summary>
@@ -1732,7 +1732,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)setSockOptRequest.OptionValueLength;
-            return (result + 20);
+            return result + 20;
         }
 
         /// <summary>
@@ -1760,7 +1760,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(getSockOptRequest.Level, buffer, offset);
             offset += 4;
             EncodeInt32(getSockOptRequest.OptionName, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1778,7 +1778,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             getSockOptRequest.Level = ExtractInt32(buffer, offset);
             offset += 4;
             getSockOptRequest.OptionName = ExtractInt32(buffer, offset);
-            return (getSockOptRequest);
+            return getSockOptRequest;
         }
 
         /// <summary>
@@ -1788,7 +1788,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded GetSockOptRequest object.</returns>
         public static int EncodedGetSockOptRequestBufferSize(MessagePayloads.GetSockOptRequest getSockOptRequest)
         {
-            return (12);
+            return 12;
         }
 
         /// <summary>
@@ -1821,10 +1821,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (getSockOptResponse.OptionValueLength > 0)
             {
                 Array.Copy(getSockOptResponse.OptionValue, 0, buffer, offset, getSockOptResponse.OptionValueLength);
-                offset += (int)(getSockOptResponse.OptionValueLength);
+                offset += (int)getSockOptResponse.OptionValueLength;
             }
             EncodeInt32(getSockOptResponse.OptionLen, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1850,7 +1850,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 offset += (int)getSockOptResponse.OptionValueLength;
             }
             getSockOptResponse.OptionLen = ExtractInt32(buffer, offset);
-            return (getSockOptResponse);
+            return getSockOptResponse;
         }
 
         /// <summary>
@@ -1862,7 +1862,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)getSockOptResponse.OptionValueLength;
-            return (result + 16);
+            return result + 16;
         }
 
         /// <summary>
@@ -1888,7 +1888,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(linger.LOnOff, buffer, offset);
             offset += 4;
             EncodeInt32(linger.LLinger, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1904,7 +1904,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             linger.LOnOff = ExtractInt32(buffer, offset);
             offset += 4;
             linger.LLinger = ExtractInt32(buffer, offset);
-            return (linger);
+            return linger;
         }
 
         /// <summary>
@@ -1914,7 +1914,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded Linger object.</returns>
         public static int EncodedLingerBufferSize(MessagePayloads.Linger linger)
         {
-            return (8);
+            return 8;
         }
 
         /// <summary>
@@ -1945,10 +1945,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (writeRequest.BufferLength > 0)
             {
                 Array.Copy(writeRequest.Buffer, 0, buffer, offset, writeRequest.BufferLength);
-                offset += (int)(writeRequest.BufferLength);
+                offset += (int)writeRequest.BufferLength;
             }
             EncodeInt32(writeRequest.Count, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -1972,7 +1972,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 offset += (int)writeRequest.BufferLength;
             }
             writeRequest.Count = ExtractInt32(buffer, offset);
-            return (writeRequest);
+            return writeRequest;
         }
 
         /// <summary>
@@ -1984,7 +1984,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)writeRequest.BufferLength;
-            return (result + 12);
+            return result + 12;
         }
 
         /// <summary>
@@ -2010,7 +2010,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(readRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(readRequest.Count, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2026,7 +2026,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             readRequest.SocketHandle = ExtractInt32(buffer, offset);
             offset += 4;
             readRequest.Count = ExtractInt32(buffer, offset);
-            return (readRequest);
+            return readRequest;
         }
 
         /// <summary>
@@ -2036,7 +2036,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded ReadRequest object.</returns>
         public static int EncodedReadRequestBufferSize(MessagePayloads.ReadRequest readRequest)
         {
-            return (8);
+            return 8;
         }
 
         /// <summary>
@@ -2065,12 +2065,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (readResponse.BufferLength > 0)
             {
                 Array.Copy(readResponse.Buffer, 0, buffer, offset, readResponse.BufferLength);
-                offset += (int)(readResponse.BufferLength);
+                offset += (int)readResponse.BufferLength;
             }
             EncodeInt32(readResponse.ReadResponseResult, buffer, offset);
             offset += 4;
             EncodeInt32(readResponse.ReadResponseErrno, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2094,7 +2094,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             readResponse.ReadResponseResult = ExtractInt32(buffer, offset);
             offset += 4;
             readResponse.ReadResponseErrno = ExtractInt32(buffer, offset);
-            return (readResponse);
+            return readResponse;
         }
 
         /// <summary>
@@ -2106,7 +2106,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)readResponse.BufferLength;
-            return (result + 12);
+            return result + 12;
         }
 
         /// <summary>
@@ -2130,7 +2130,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(closeRequest.SocketHandle, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2144,7 +2144,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             CloseRequest closeRequest = new MessagePayloads.CloseRequest();
 
             closeRequest.SocketHandle = ExtractInt32(buffer, offset);
-            return (closeRequest);
+            return closeRequest;
         }
 
         /// <summary>
@@ -2154,7 +2154,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded CloseRequest object.</returns>
         public static int EncodedCloseRequestBufferSize(MessagePayloads.CloseRequest closeRequest)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -2178,7 +2178,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(getBatteryChargeLevelResponse.Level, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2192,7 +2192,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             GetBatteryChargeLevelResponse getBatteryChargeLevelResponse = new MessagePayloads.GetBatteryChargeLevelResponse();
 
             getBatteryChargeLevelResponse.Level = ExtractUInt32(buffer, offset);
-            return (getBatteryChargeLevelResponse);
+            return getBatteryChargeLevelResponse;
         }
 
         /// <summary>
@@ -2202,7 +2202,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded GetBatteryChargeLevelResponse object.</returns>
         public static int EncodedGetBatteryChargeLevelResponseBufferSize(MessagePayloads.GetBatteryChargeLevelResponse getBatteryChargeLevelResponse)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -2233,12 +2233,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (sendRequest.BufferLength > 0)
             {
                 Array.Copy(sendRequest.Buffer, 0, buffer, offset, sendRequest.BufferLength);
-                offset += (int)(sendRequest.BufferLength);
+                offset += (int)sendRequest.BufferLength;
             }
             EncodeInt32(sendRequest.Length, buffer, offset);
             offset += 4;
             EncodeInt32(sendRequest.Flags, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2264,7 +2264,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             sendRequest.Length = ExtractInt32(buffer, offset);
             offset += 4;
             sendRequest.Flags = ExtractInt32(buffer, offset);
-            return (sendRequest);
+            return sendRequest;
         }
 
         /// <summary>
@@ -2276,7 +2276,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)sendRequest.BufferLength;
-            return (result + 16);
+            return result + 16;
         }
 
         /// <summary>
@@ -2308,7 +2308,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (sendToRequest.BufferLength > 0)
             {
                 Array.Copy(sendToRequest.Buffer, 0, buffer, offset, sendToRequest.BufferLength);
-                offset += (int)(sendToRequest.BufferLength);
+                offset += (int)sendToRequest.BufferLength;
             }
             EncodeInt32(sendToRequest.Length, buffer, offset);
             offset += 4;
@@ -2320,7 +2320,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(sendToRequest.DestinationAddress, 0, buffer, offset, sendToRequest.DestinationAddressLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2354,7 +2354,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 sendToRequest.DestinationAddress = new byte[sendToRequest.DestinationAddressLength];
                 Array.Copy(buffer, offset, sendToRequest.DestinationAddress, 0, sendToRequest.DestinationAddressLength);
             }
-            return (sendToRequest);
+            return sendToRequest;
         }
 
         /// <summary>
@@ -2367,7 +2367,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += (int)sendToRequest.BufferLength;
             result += (int)sendToRequest.DestinationAddressLength;
-            return (result + 20);
+            return result + 20;
         }
 
         /// <summary>
@@ -2397,7 +2397,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(recvFromRequest.Flags, buffer, offset);
             offset += 4;
             EncodeInt32(recvFromRequest.GetSourceAddress, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2417,7 +2417,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             recvFromRequest.Flags = ExtractInt32(buffer, offset);
             offset += 4;
             recvFromRequest.GetSourceAddress = ExtractInt32(buffer, offset);
-            return (recvFromRequest);
+            return recvFromRequest;
         }
 
         /// <summary>
@@ -2427,7 +2427,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded RecvFromRequest object.</returns>
         public static int EncodedRecvFromRequestBufferSize(MessagePayloads.RecvFromRequest recvFromRequest)
         {
-            return (16);
+            return 16;
         }
 
         /// <summary>
@@ -2457,7 +2457,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (recvFromResponse.BufferLength > 0)
             {
                 Array.Copy(recvFromResponse.Buffer, 0, buffer, offset, recvFromResponse.BufferLength);
-                offset += (int)(recvFromResponse.BufferLength);
+                offset += (int)recvFromResponse.BufferLength;
             }
             EncodeInt32(recvFromResponse.Result, buffer, offset);
             offset += 4;
@@ -2468,10 +2468,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (recvFromResponse.SourceAddressLength > 0)
             {
                 Array.Copy(recvFromResponse.SourceAddress, 0, buffer, offset, recvFromResponse.SourceAddressLength);
-                offset += (int)(recvFromResponse.SourceAddressLength);
+                offset += (int)recvFromResponse.SourceAddressLength;
             }
             EncodeUInt32(recvFromResponse.SourceAddressLen, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2505,7 +2505,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 offset += (int)recvFromResponse.SourceAddressLength;
             }
             recvFromResponse.SourceAddressLen = ExtractUInt32(buffer, offset);
-            return (recvFromResponse);
+            return recvFromResponse;
         }
 
         /// <summary>
@@ -2518,7 +2518,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             int result = 0;
             result += (int)recvFromResponse.BufferLength;
             result += (int)recvFromResponse.SourceAddressLength;
-            return (result + 20);
+            return result + 20;
         }
 
         /// <summary>
@@ -2550,7 +2550,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(pollRequest.Setup, buffer, offset);
             offset += 4;
             EncodeUInt32(pollRequest.SetupMessageId, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2572,7 +2572,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             pollRequest.Setup = ExtractInt32(buffer, offset);
             offset += 4;
             pollRequest.SetupMessageId = ExtractUInt32(buffer, offset);
-            return (pollRequest);
+            return pollRequest;
         }
 
         /// <summary>
@@ -2582,7 +2582,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded PollRequest object.</returns>
         public static int EncodedPollRequestBufferSize(MessagePayloads.PollRequest pollRequest)
         {
-            return (18);
+            return 18;
         }
 
         /// <summary>
@@ -2610,7 +2610,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(pollResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(pollResponse.ResponseErrno, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2628,7 +2628,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             pollResponse.Result = ExtractInt32(buffer, offset);
             offset += 4;
             pollResponse.ResponseErrno = ExtractInt32(buffer, offset);
-            return (pollResponse);
+            return pollResponse;
         }
 
         /// <summary>
@@ -2638,7 +2638,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded PollResponse object.</returns>
         public static int EncodedPollResponseBufferSize(MessagePayloads.PollResponse pollResponse)
         {
-            return (10);
+            return 10;
         }
 
         /// <summary>
@@ -2670,7 +2670,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt16(interruptPollResponse.ReturnedEvents, buffer, offset);
             offset += 2;
             EncodeUInt32(interruptPollResponse.SetupMessageId, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2692,7 +2692,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             interruptPollResponse.ReturnedEvents = ExtractUInt16(buffer, offset);
             offset += 2;
             interruptPollResponse.SetupMessageId = ExtractUInt32(buffer, offset);
-            return (interruptPollResponse);
+            return interruptPollResponse;
         }
 
         /// <summary>
@@ -2702,7 +2702,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded InterruptPollResponse object.</returns>
         public static int EncodedInterruptPollResponseBufferSize(MessagePayloads.InterruptPollResponse interruptPollResponse)
         {
-            return (18);
+            return 18;
         }
 
         /// <summary>
@@ -2728,7 +2728,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeInt32(listenRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(listenRequest.BackLog, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2744,7 +2744,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             listenRequest.SocketHandle = ExtractInt32(buffer, offset);
             offset += 4;
             listenRequest.BackLog = ExtractInt32(buffer, offset);
-            return (listenRequest);
+            return listenRequest;
         }
 
         /// <summary>
@@ -2754,7 +2754,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded ListenRequest object.</returns>
         public static int EncodedListenRequestBufferSize(MessagePayloads.ListenRequest listenRequest)
         {
-            return (8);
+            return 8;
         }
 
         /// <summary>
@@ -2786,7 +2786,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(bindRequest.Addr, 0, buffer, offset, bindRequest.AddrLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2808,7 +2808,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 bindRequest.Addr = new byte[bindRequest.AddrLength];
                 Array.Copy(buffer, offset, bindRequest.Addr, 0, bindRequest.AddrLength);
             }
-            return (bindRequest);
+            return bindRequest;
         }
 
         /// <summary>
@@ -2820,7 +2820,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)bindRequest.AddrLength;
-            return (result + 8);
+            return result + 8;
         }
 
         /// <summary>
@@ -2844,7 +2844,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(acceptRequest.SocketHandle, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2858,7 +2858,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             AcceptRequest acceptRequest = new MessagePayloads.AcceptRequest();
 
             acceptRequest.SocketHandle = ExtractInt32(buffer, offset);
-            return (acceptRequest);
+            return acceptRequest;
         }
 
         /// <summary>
@@ -2868,7 +2868,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded AcceptRequest object.</returns>
         public static int EncodedAcceptRequestBufferSize(MessagePayloads.AcceptRequest acceptRequest)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -2897,12 +2897,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (acceptResponse.AddrLength > 0)
             {
                 Array.Copy(acceptResponse.Addr, 0, buffer, offset, acceptResponse.AddrLength);
-                offset += (int)(acceptResponse.AddrLength);
+                offset += (int)acceptResponse.AddrLength;
             }
             EncodeInt32(acceptResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(acceptResponse.ResponseErrno, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2926,7 +2926,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             acceptResponse.Result = ExtractInt32(buffer, offset);
             offset += 4;
             acceptResponse.ResponseErrno = ExtractInt32(buffer, offset);
-            return (acceptResponse);
+            return acceptResponse;
         }
 
         /// <summary>
@@ -2938,7 +2938,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)acceptResponse.AddrLength;
-            return (result + 12);
+            return result + 12;
         }
 
         /// <summary>
@@ -2962,7 +2962,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(ioctlRequest.Command, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -2976,7 +2976,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             IoctlRequest ioctlRequest = new MessagePayloads.IoctlRequest();
 
             ioctlRequest.Command = ExtractInt32(buffer, offset);
-            return (ioctlRequest);
+            return ioctlRequest;
         }
 
         /// <summary>
@@ -2986,7 +2986,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded IoctlRequest object.</returns>
         public static int EncodedIoctlRequestBufferSize(MessagePayloads.IoctlRequest ioctlRequest)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -3015,14 +3015,14 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (ioctlResponse.AddrLength > 0)
             {
                 Array.Copy(ioctlResponse.Addr, 0, buffer, offset, ioctlResponse.AddrLength);
-                offset += (int)(ioctlResponse.AddrLength);
+                offset += (int)ioctlResponse.AddrLength;
             }
             EncodeInt32(ioctlResponse.Flags, buffer, offset);
             offset += 4;
             EncodeInt32(ioctlResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(ioctlResponse.ResponseErrno, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3048,7 +3048,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             ioctlResponse.Result = ExtractInt32(buffer, offset);
             offset += 4;
             ioctlResponse.ResponseErrno = ExtractInt32(buffer, offset);
-            return (ioctlResponse);
+            return ioctlResponse;
         }
 
         /// <summary>
@@ -3060,7 +3060,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)ioctlResponse.AddrLength;
-            return (result + 16);
+            return result + 16;
         }
 
         /// <summary>
@@ -3084,7 +3084,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(getSockPeerNameRequest.SocketHandle, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3098,7 +3098,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             GetSockPeerNameRequest getSockPeerNameRequest = new MessagePayloads.GetSockPeerNameRequest();
 
             getSockPeerNameRequest.SocketHandle = ExtractInt32(buffer, offset);
-            return (getSockPeerNameRequest);
+            return getSockPeerNameRequest;
         }
 
         /// <summary>
@@ -3108,7 +3108,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded GetSockPeerNameRequest object.</returns>
         public static int EncodedGetSockPeerNameRequestBufferSize(MessagePayloads.GetSockPeerNameRequest getSockPeerNameRequest)
         {
-            return (4);
+            return 4;
         }
 
         /// <summary>
@@ -3137,12 +3137,12 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             if (getSockPeerNameResponse.AddrLength > 0)
             {
                 Array.Copy(getSockPeerNameResponse.Addr, 0, buffer, offset, getSockPeerNameResponse.AddrLength);
-                offset += (int)(getSockPeerNameResponse.AddrLength);
+                offset += (int)getSockPeerNameResponse.AddrLength;
             }
             EncodeInt32(getSockPeerNameResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(getSockPeerNameResponse.ResponseErrno, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3166,7 +3166,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             getSockPeerNameResponse.Result = ExtractInt32(buffer, offset);
             offset += 4;
             getSockPeerNameResponse.ResponseErrno = ExtractInt32(buffer, offset);
-            return (getSockPeerNameResponse);
+            return getSockPeerNameResponse;
         }
 
         /// <summary>
@@ -3178,7 +3178,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)getSockPeerNameResponse.AddrLength;
-            return (result + 12);
+            return result + 12;
         }
 
         /// <summary>
@@ -3208,7 +3208,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             EncodeUInt32(eventData.StatusCode, buffer, offset);
             offset += 4;
             EncodeUInt32(eventData.MessageId, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3228,7 +3228,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             eventData.StatusCode = ExtractUInt32(buffer, offset);
             offset += 4;
             eventData.MessageId = ExtractUInt32(buffer, offset);
-            return (eventData);
+            return eventData;
         }
 
         /// <summary>
@@ -3238,7 +3238,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded EventData object.</returns>
         public static int EncodedEventDataBufferSize(MessagePayloads.EventData eventData)
         {
-            return (13);
+            return 13;
         }
 
         /// <summary>
@@ -3270,7 +3270,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(eventDataPayload.Payload, 0, buffer, offset, eventDataPayload.PayloadLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3292,7 +3292,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 eventDataPayload.Payload = new byte[eventDataPayload.PayloadLength];
                 Array.Copy(buffer, offset, eventDataPayload.Payload, 0, eventDataPayload.PayloadLength);
             }
-            return (eventDataPayload);
+            return eventDataPayload;
         }
 
         /// <summary>
@@ -3304,7 +3304,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)eventDataPayload.PayloadLength;
-            return (result + 8);
+            return result + 8;
         }
 
         /// <summary>
@@ -3330,7 +3330,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             buffer[offset] = setAntennaRequest.Antenna;
             offset += 1;
             buffer[offset] = setAntennaRequest.Persist;
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3346,7 +3346,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             setAntennaRequest.Antenna = buffer[offset];
             offset += 1;
             setAntennaRequest.Persist = buffer[offset];
-            return (setAntennaRequest);
+            return setAntennaRequest;
         }
 
         /// <summary>
@@ -3356,7 +3356,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <returns>Number of bytes required to hold the encoded SetAntennaRequest object.</returns>
         public static int EncodedSetAntennaRequestBufferSize(MessagePayloads.SetAntennaRequest setAntennaRequest)
         {
-            return (2);
+            return 2;
         }
 
         /// <summary>
@@ -3380,7 +3380,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
             EncodeString(bTStackConfig.Config, buffer, offset);
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3394,7 +3394,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             BTStackConfig bTStackConfig = new MessagePayloads.BTStackConfig();
 
             bTStackConfig.Config = ExtractString(buffer, offset);
-            return (bTStackConfig);
+            return bTStackConfig;
         }
 
         /// <summary>
@@ -3406,7 +3406,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += bTStackConfig.Config.Length;
-            return (result + 1);
+            return result + 1;
         }
 
         /// <summary>
@@ -3438,7 +3438,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(bTDataWriteRequest.Data, 0, buffer, offset, bTDataWriteRequest.DataLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3460,7 +3460,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 bTDataWriteRequest.Data = new byte[bTDataWriteRequest.DataLength];
                 Array.Copy(buffer, offset, bTDataWriteRequest.Data, 0, bTDataWriteRequest.DataLength);
             }
-            return (bTDataWriteRequest);
+            return bTDataWriteRequest;
         }
 
         /// <summary>
@@ -3472,7 +3472,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)bTDataWriteRequest.DataLength;
-            return (result + 6);
+            return result + 6;
         }
 
         /// <summary>
@@ -3504,7 +3504,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(bTGetHandlesResponse.Handles, 0, buffer, offset, bTGetHandlesResponse.HandlesLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3526,7 +3526,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 bTGetHandlesResponse.Handles = new byte[bTGetHandlesResponse.HandlesLength];
                 Array.Copy(buffer, offset, bTGetHandlesResponse.Handles, 0, bTGetHandlesResponse.HandlesLength);
             }
-            return (bTGetHandlesResponse);
+            return bTGetHandlesResponse;
         }
 
         /// <summary>
@@ -3538,7 +3538,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)bTGetHandlesResponse.HandlesLength;
-            return (result + 6);
+            return result + 6;
         }
 
         /// <summary>
@@ -3570,7 +3570,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             {
                 Array.Copy(bTServerDataSet.SetData, 0, buffer, offset, bTServerDataSet.SetDataLength);
             }
-            return (buffer);
+            return buffer;
         }
 
         /// <summary>
@@ -3592,7 +3592,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
                 bTServerDataSet.SetData = new byte[bTServerDataSet.SetDataLength];
                 Array.Copy(buffer, offset, bTServerDataSet.SetData, 0, bTServerDataSet.SetDataLength);
             }
-            return (bTServerDataSet);
+            return bTServerDataSet;
         }
 
         /// <summary>
@@ -3604,7 +3604,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         {
             int result = 0;
             result += (int)bTServerDataSet.SetDataLength;
-            return (result + 6);
+            return result + 6;
         }
 
     }
