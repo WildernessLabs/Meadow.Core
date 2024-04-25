@@ -64,6 +64,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Displays.Gtk", "..\..\Meado
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization.MicroJson", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj", "{63C537CF-30A5-4F63-85FA-05BF5EBE2986}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Displays.Silk", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Silk\Driver\Displays.Silk.csproj", "{8FC0D17C-64A3-438D-B503-382B4FDF6425}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
@@ -215,6 +217,12 @@ Global
 		{63C537CF-30A5-4F63-85FA-05BF5EBE2986}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63C537CF-30A5-4F63-85FA-05BF5EBE2986}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63C537CF-30A5-4F63-85FA-05BF5EBE2986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -246,6 +254,7 @@ Global
 		{68AC7BA0-0425-4100-91DB-A157B9D9F679} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
 		{8F9EBC55-E70A-4C55-95C5-8B75480103DA} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
 		{63C537CF-30A5-4F63-85FA-05BF5EBE2986} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
+		{8FC0D17C-64A3-438D-B503-382B4FDF6425} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}
