@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Foundation.Displays;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
@@ -36,7 +37,7 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
 
     public IResizablePixelDisplay CreateDisplay(int? width = null, int? height = null)
     {
-        return new Meadow.Foundation.Displays.GtkDisplay(width ?? 320, height ?? 240, ColorMode.Format16bppRgb565);
+        return new SilkDisplay(width ?? 320, height ?? 240);
     }
 
     public II2cBus CreateI2cBus(int busNumber = 0)

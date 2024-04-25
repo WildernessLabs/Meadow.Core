@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Foundation.Displays;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
@@ -37,11 +38,7 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
 
     public IResizablePixelDisplay CreateDisplay(int? width, int? height)
     {
-#if WINDOWS
-        return new Meadow.Foundation.Displays.WinFormsDisplay(width ?? 320, height ?? 240);
-#else
-        throw new NotSupportedException();
-#endif
+        return new SilkDisplay(width ?? 320, height ?? 240);
     }
 
     public II2cBus CreateI2cBus(int busNumber = 0)
