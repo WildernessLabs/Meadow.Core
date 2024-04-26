@@ -15,7 +15,7 @@ public partial class F7PlatformOS : IPlatformOS
     private readonly F7GPIOManager _ioController;
 
     /// <inheritdoc/>
-    public event EventHandler<int>? OsException;
+    public event EventHandler<int>? MeadowSystemError;
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -40,7 +40,7 @@ public partial class F7PlatformOS : IPlatformOS
 
     internal void RaiseOsException(StatusCodes statusCode)
     {
-        OsException?.Invoke(this, (int)statusCode);
+        MeadowSystemError?.Invoke(this, (int)statusCode);
     }
 
     /// <summary>
