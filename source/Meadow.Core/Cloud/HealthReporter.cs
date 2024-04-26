@@ -105,12 +105,26 @@ public class HealthReporter : IHealthReporter
 
         foreach (var metric in _customMetrics)
         {
-            ce.Measurements.TryAdd(metric.Key, metric.Value.Invoke());
+            try
+            {
+                ce.Measurements.TryAdd(metric.Key, metric.Value.Invoke());
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+            }
         }
         
         foreach (var metric in _customMetricsAsync)
         {
-            ce.Measurements.TryAdd(metric.Key, await metric.Value.Invoke());
+            try
+            {
+                ce.Measurements.TryAdd(metric.Key, await metric.Value.Invoke());
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+            }
         }
         
         try
