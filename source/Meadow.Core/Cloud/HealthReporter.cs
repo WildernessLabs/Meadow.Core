@@ -13,6 +13,9 @@ namespace Meadow;
 /// </summary>
 public class HealthReporter : IHealthReporter
 {
+    private Dictionary<string, Func<object>> _customMetrics = new Dictionary<string, Func<object>>();
+    private Dictionary<string, Func<Task<object>>> _customMetricsAsync = new Dictionary<string, Func<Task<object>>>();
+    
     /// <inheritdoc/>
     public async Task Start(int interval)
     {
@@ -49,6 +52,18 @@ public class HealthReporter : IHealthReporter
     }
 
     /// <inheritdoc/>
+    public bool AddMetric(string name, Func<object> func)
+    {
+        return _customMetrics.TryAdd(name, func);
+    }
+    
+    /// <inheritdoc/>
+    public bool AddMetric(string name, Func<Task<object>> func)
+    {
+        return _customMetricsAsync.TryAdd(name, func);
+    }
+    
+    /// <inheritdoc/>
     public async Task Send()
     {
         var connected = Resolver.Device.NetworkAdapters.Any(a => a.IsConnected);
@@ -76,7 +91,7 @@ public class HealthReporter : IHealthReporter
             },
             Timestamp = DateTimeOffset.UtcNow
         };
-
+        
         var batteryInfo = device.GetBatteryInfo();
         if (batteryInfo != null)
         {
@@ -88,6 +103,30 @@ public class HealthReporter : IHealthReporter
             ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
         }
 
+        foreach (var metric in _customMetrics)
+        {
+            try
+            {
+                ce.Measurements.TryAdd(metric.Key, metric.Value.Invoke());
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+            }
+        }
+        
+        foreach (var metric in _customMetricsAsync)
+        {
+            try
+            {
+                ce.Measurements.TryAdd(metric.Key, await metric.Value.Invoke());
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+            }
+        }
+        
         try
         {
             await service!.SendEvent(ce);
