@@ -91,7 +91,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
     internal StatusCodes SendCommand(byte where, UInt32 function, bool block, byte[]? encodedResult)
     {
-        return (SendCommand(where, function, block, null, encodedResult));
+        return SendCommand(where, function, block, null, encodedResult);
     }
 
     /// <summary>
@@ -118,7 +118,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <param name="encodedRequest">Payload for the command to be executed by the ESP32.</param>
     /// <param name="encodedResult">4000 byte array to hold any data returned by the command.</param>
     /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
-    internal StatusCodes SendCommand(byte destination, UInt32 function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
+    internal StatusCodes SendCommand(byte destination, uint function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
     {
         var payloadGcHandle = default(GCHandle);
         var resultGcHandle = default(GCHandle);
@@ -251,7 +251,8 @@ public partial class Esp32Coprocessor : ICoprocessor
             {
                 Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
                 int result;
-                do {
+                do
+                {
                     result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
                 } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
@@ -290,10 +291,13 @@ public partial class Esp32Coprocessor : ICoprocessor
                                 CellMessageReceived?.Invoke(this, ((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
                                 //InvokeEvent((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload);
                                 break;
+                            case Esp32Interfaces.System:
+                                Console.WriteLine($" ******************** Process system event {(SystemFunction) eventData.Function}, status code {(StatusCodes) eventData.StatusCode}.");
+                                break;
                             default:
                                 throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
                         }
-                    });
+                    }).RethrowUnhandledExceptions();
                 }
                 else
                 {

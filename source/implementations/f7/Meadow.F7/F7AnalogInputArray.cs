@@ -32,9 +32,9 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
         foreach (var pin in _pins)
         {
             // validate the pins
-            if (pin.Controller is not F7FeatherBase)
+            if (pin.Controller is not F7MicroBase)
             {
-                throw new ArgumentException("Pins must be on the F7");
+                throw new ArgumentException("Pins must be on an F7 Micro");
             }
 
             if (!pin.Supports<IAnalogChannelInfo>(c => c.InputCapable))

@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 namespace Meadow;
 
 /// <summary>
-/// 
+/// Extensions for RSA capabilities
 /// </summary>
 /// <remarks>
 /// Because Core is built against netstandard 2.1, we don't have access to ImportFromPem and have to implement it ourselves

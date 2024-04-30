@@ -27,7 +27,6 @@ public static partial class MeadowOS
 
     private static IApp App { get; set; } = default!;
     private static ILifecycleSettings LifecycleSettings { get; set; } = default!;
-    private static IUpdateSettings UpdateSettings { get; set; } = default!;
     private static IMeadowCloudSettings MeadowCloudSettings { get; set; } = default!;
 
     /// <summary>
@@ -91,6 +90,23 @@ public static partial class MeadowOS
             ReportAppException(e, "Device (system) Initialization Failure");
         }
 
+        var crashReporter = new CrashReporter();
+        Resolver.Services.Add(crashReporter);
+
+        // check for any crash reports
+        if (crashReporter.CrashDataAvailable)
+        {
+            try
+            {
+                App.OnBootFromCrash(crashReporter.GetCrashData());
+            }
+            catch (Exception ex)
+            {
+                // if the app crashes in the crash report handler, we don't want to restart or we'll infinite loop!
+                Resolver.Log.Error($"Crash Report Handler error: {ex.Message}");
+            }
+        }
+
         Resolver.Services.Add<ISensorService>(new SensorService());
 
         if (systemInitialized)
@@ -105,15 +121,9 @@ public static partial class MeadowOS
                 stepName = "App Run";
 
                 Resolver.Log.Trace("Running App");
+
                 await App.Run();
-
-                while (!AppAbort.IsCancellationRequested)
-                {
-                    await Task.Delay(500);
-                }
-
-                // the user's app has exited, which is almost certainly not intended
-                Resolver.Log.Warn("AppAbort cancellation has been requested");
+                AppAbort.Token.WaitHandle.WaitOne();
             }
             catch (Exception e)
             {
@@ -187,6 +197,16 @@ public static partial class MeadowOS
             Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
             Resolver.Log.Error(e.InnerException.StackTrace);
         }
+
+        try
+        {
+            using var file = System.IO.File.CreateText(Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"));
+            file.Write(e.ToString());
+        }
+        catch
+        {
+            // we're already in an error condition - nothing we can really do about this
+        }
     }
 
     private static Dictionary<string, string> LoadSettings()
@@ -219,8 +239,17 @@ public static partial class MeadowOS
         Resolver.Log.Info($"Log level: {settings.LoggingSettings.LogLevel.Default}");
 
         LifecycleSettings = settings.LifecycleSettings;
-        UpdateSettings = settings.UpdateSettings;
         MeadowCloudSettings = settings.MeadowCloudSettings;
+
+        // cascade cloud enable
+        if (MeadowCloudSettings.EnableUpdates)
+        {
+            MeadowCloudSettings.Enabled = true;
+        }
+        if (MeadowCloudSettings.EnableHealthMetrics)
+        {
+            MeadowCloudSettings.Enabled = true;
+        }
 
         return settings.Settings;
     }
@@ -444,6 +473,10 @@ public static partial class MeadowOS
                     switch (hw)
                     {
                         case Interop.HardwareVersion.Unknown:
+                            if (allApps.Length > 1)
+                            {
+                                Resolver.Log.Warn("Multi-targeting of F7 devices is only supported on OS 1.9 and later");
+                            }
                             return (app, devicetype);
                         case Interop.HardwareVersion.F7FeatherV1:
                             if (devicetype.FullName == "Meadow.Devices.F7FeatherV1")
@@ -493,6 +526,9 @@ public static partial class MeadowOS
 
         //capture unhandled exceptions
         AppDomain.CurrentDomain.UnhandledException += StaticOnUnhandledException;
+
+        // TODO: allow user injection of this
+        Resolver.Services.Add<IJsonSerializer>(new MicroJsonSerializer());
 
         var settings = LoadSettings();
         var platform = DetectPlatform();
@@ -583,31 +619,47 @@ public static partial class MeadowOS
 
             App = app;
 
-            var updateService = new UpdateService(CurrentDevice.PlatformOS.FileSystem.FileSystemRoot, UpdateSettings);
+            var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
+            Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
+            var commandService = new MeadowCloudCommandService(cloudConnectionService);
+            Resolver.Services.Add<ICommandService>(commandService);
+
+            var updateService = new MeadowCloudUpdateService(
+                CurrentDevice.PlatformOS.FileSystem.FileSystemRoot,
+                cloudConnectionService);
             Resolver.Services.Add<IUpdateService>(updateService);
 
-            var meadowCloudService = new MeadowCloudService(MeadowCloudSettings);
-            Resolver.Services.Add<IMeadowCloudService>(meadowCloudService);
-
-            Resolver.Services.Add<ICommandService>(updateService);
-
-            var healthReporter = new HealthReporter();
-            Resolver.Services.Add<IHealthReporter>(healthReporter);
-
-            Resolver.Log.Info($"Update Service is {(UpdateSettings.Enabled ? "enabled" : "disabled")}.");
-            if (UpdateSettings.Enabled)
+            if (MeadowCloudSettings.EnableUpdates)
             {
                 updateService.Start();
             }
 
+            var healthReporter = new HealthReporter();
+            Resolver.Services.Add<IHealthReporter>(healthReporter);
             if (MeadowCloudSettings.EnableHealthMetrics)
             {
-                Resolver.Log.Info($"Health Metrics enabled with interval: {MeadowCloudSettings.HealthMetricsInterval} minute(s).");
-                healthReporter.Start(MeadowCloudSettings.HealthMetricsInterval);
+                if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
+                {
+                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
+                }
+                else
+                {
+                    Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.");
+                }
+            }
+
+            if (MeadowCloudSettings.Enabled
+                || MeadowCloudSettings.EnableUpdates
+                || MeadowCloudSettings.EnableHealthMetrics)
+            {
+                Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}");
+                Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}");
+                Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}");
+                cloudConnectionService.Start();
             }
             else
             {
-                Resolver.Log.Info($"Health Metrics disabled.");
+                Resolver.Log.Info("All cloud features are disabled.");
             }
 
             return true;
@@ -619,12 +671,25 @@ public static partial class MeadowOS
         }
     }
 
+    private static ManualResetEvent _forceTerminate = new ManualResetEvent(false);
+
+    /// <summary>
+    /// Cancel the meadow OS application Run call and allow the process to exit
+    /// </summary>
+    public static void TerminateRun()
+    {
+        AppAbort.Cancel();
+        _forceTerminate.Set();
+    }
+
     private static void Shutdown()
     {
+        AppAbort.Cancel(true);
+
         // stop the update service
-        if (Resolver.Services.Get<IUpdateService>() is { } updateService)
+        if (Resolver.Services.Get<IMeadowCloudService>() is { } cloudService)
         {
-            updateService.Shutdown();
+            cloudService.Stop();
         }
 
         // schedule a device restart if possible and if the user hasn't disabled it
@@ -635,7 +700,7 @@ public static partial class MeadowOS
         Resolver.Log.Debug("Shutdown");
 
         // just put the Main thread to sleep (don't exit) because we want the Update service to still be able to work
-        Thread.Sleep(Timeout.Infinite);
+        _forceTerminate.WaitOne();
     }
 
     /// <summary>
@@ -693,6 +758,8 @@ public static partial class MeadowOS
                 Thread.Sleep(restart * 1000);
 
                 CurrentDevice.PlatformOS.Reset();
+
+                AppAbort.Cancel();
             }
             else
             {
@@ -712,7 +779,6 @@ public static partial class MeadowOS
         // final shutdown - which really is just an infinite Sleep()
         Shutdown();
     }
-
 }
 
 internal static partial class Interop

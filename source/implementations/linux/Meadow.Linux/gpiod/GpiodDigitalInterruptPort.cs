@@ -8,8 +8,12 @@ namespace Meadow
     {
         private Gpiod Driver { get; }
         private LineInfo Line { get; }
+        private int? _lastInterrupt = null;
 
+        /// <inheritdoc/>
         public override bool State => Line.GetValue();
+        /// <inheritdoc/>
+        public override TimeSpan DebounceDuration { get; set; }
 
         internal GpiodDigitalInterruptPort(
             Gpiod driver,
@@ -21,19 +25,27 @@ namespace Meadow
             TimeSpan glitchDuration)
             : base(pin, channel, interruptMode)
         {
-            if (debounceDuration != TimeSpan.Zero || glitchDuration != TimeSpan.Zero)
-            {
-                throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
-            }
-
+            DebounceDuration = debounceDuration;
+            GlitchDuration = glitchDuration;
             Driver = driver;
             Pin = pin;
 
             line_request_flags flags = line_request_flags.None;
 
+            LineInfo? li = null;
+
             if (pin is GpiodPin { } gp)
             {
-                Line = Driver.GetLine(gp);
+                li = Driver.GetLine(gp);
+            }
+            else if (pin is LinuxFlexiPin { } lp)
+            {
+                li = Driver.GetLine(lp);
+            }
+
+            if (li != null)
+            {
+                Line = li;
                 switch (resistorMode)
                 {
                     case ResistorMode.InternalPullUp:
@@ -61,7 +73,6 @@ namespace Meadow
                         Line.RequestInput(flags);
                         break;
                 }
-
             }
             else
             {
@@ -71,33 +82,45 @@ namespace Meadow
 
         private void OnInterruptOccurred(LineInfo sender, gpiod_line_event e)
         {
+            if (DebounceDuration.TotalMilliseconds > 0)
+            {
+                var now = Environment.TickCount;
+
+                if (_lastInterrupt != null &&
+                    now - _lastInterrupt < DebounceDuration.TotalMilliseconds) { return; }
+
+                _lastInterrupt = now;
+            }
+
             var state = e.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE ? true : false;
 
-            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, Environment.TickCount) }); // TODO: convert event time?
+            this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             Line.Release();
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc/>
         public override ResistorMode Resistor
         {
             get => ResistorMode.Disabled;
             set => throw new NotSupportedException("Resistor Mode not supported on this platform");
         }
 
-        public override TimeSpan DebounceDuration
-        {
-            get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
-        }
-
+        /// <inheritdoc/>
         public override TimeSpan GlitchDuration
         {
             get => TimeSpan.Zero;
-            set => throw new NotSupportedException("Glitch filtering and debounce are not currently supported on this platform.");
+            set
+            {
+                if (GlitchDuration == TimeSpan.Zero) { return; }
+
+                throw new NotSupportedException("Glitch filtering is not currently supported on this platform.");
+            }
         }
     }
 }

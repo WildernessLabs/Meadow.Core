@@ -1,23 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.8.0</Version>
+    <Version>1.11.0</Version>
     <Company>Wilderness Labs, Inc</Company>
     <Authors>Wilderness Labs, Inc</Authors>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>10.0</LangVersion>
-    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Desktop</AssemblyName>
-      
+    <PackageId>Meadow.Desktop</PackageId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Cross-platform desktop .NET libraries for Wilderness Labs Meadow</Description>
+    <PackageIcon>icon.png</PackageIcon>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
     
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="7.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="Meadow.Foundation"  Version="1.9.0" />
-    <PackageReference Include="Meadow.Linux" Version="1.9.0" />
-    <PackageReference Include="Meadow.Mac" Version="1.9.0" />
-    <PackageReference Include="Meadow.Windows" Version="1.9.0" />
+    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Core\Meadow.Foundation.Core.csproj" />
+    <PackageReference Include="Meadow.Linux" Version="1.11.0" />
+    <PackageReference Include="Meadow.Mac" Version="1.11.0" />
+    <PackageReference Include="Meadow.Windows" Version="1.11.0" />
   </ItemGroup>
 </Project>

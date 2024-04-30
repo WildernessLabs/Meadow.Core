@@ -105,14 +105,14 @@ public class MacPlatformOS : IPlatformOS
             if (!pkFileContent.Contains("BEGIN RSA PUBLIC KEY", StringComparison.OrdinalIgnoreCase))
             {
                 // need to convert
-                pkFileContent = ExecuteWindowsCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
+                pkFileContent = ExecuteCommandLine("ssh-keygen", $"-e -m pem -f {pkFile}");
             }
 
             return pkFileContent;
         }
     }
 
-    private string ExecuteWindowsCommandLine(string command, string args)
+    private string ExecuteCommandLine(string command, string args)
     {
         var psi = new ProcessStartInfo()
         {
@@ -237,6 +237,12 @@ public class MacPlatformOS : IPlatformOS
     }
 
     public void Sleep(IPin interruptPin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
     {
         throw new NotImplementedException();
     }
