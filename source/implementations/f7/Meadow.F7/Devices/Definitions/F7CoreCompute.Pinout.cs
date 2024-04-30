@@ -31,7 +31,10 @@ namespace Meadow.Devices
                 {
                     if (pin != null)
                     {
-                        AllPins.Add(pin);
+                        if (!AllPins.Any(p => p.Name == pin.Name))
+                        {
+                            AllPins.Add(pin);
+                        }
                     }
                 }
             }

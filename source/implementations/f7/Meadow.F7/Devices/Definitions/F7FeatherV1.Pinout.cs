@@ -1,6 +1,7 @@
 ﻿using Meadow.Hardware;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Meadow.Devices
 {
@@ -18,20 +19,25 @@ namespace Meadow.Devices
 
             internal Pinout()
             {
+                AllPins = new List<IPin>();
+
+                foreach (var pin in this.GetType()
+                    .GetProperties()
+                    .Where(p => p.PropertyType is IPin)
+                    .Select(p => p.GetValue(this) as IPin))
+                {
+                    if (pin != null)
+                    {
+                        if (!AllPins.Any(p => p.Name == pin.Name))
+                        {
+                            AllPins.Add(pin);
+                        }
+                    }
+                }
             }
 
             /// <inheritdoc/>
-            public IList<IPin> AllPins => new List<IPin> {
-                // left header
-                A00, A01, A02, A03, A04, A05, SCK, COPI, CIPO, D00, D01, D02, D03, D04,
-                // right header
-                D05, D06, D07, D08, D09, D10, D11, D12, D13, D14, D15,
-                // Onboard LED
-                OnboardLedRed, OnboardLedGreen, OnboardLedBlue,
-                // ESP stuff TODO: Consider removing these from the `AllPins` list.
-                ESP_COPI, ESP_CIPO, ESP_CLK, ESP_CS, ESP_BOOT, ESP_RST, ESP_UART_RX, ESP_UART_TX,
-                I2C_SCL, I2C_SDA,
-            };
+            public IList<IPin> AllPins { get; }
 
             //==== LED
 

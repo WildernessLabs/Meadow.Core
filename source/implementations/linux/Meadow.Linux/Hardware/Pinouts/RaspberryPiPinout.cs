@@ -14,23 +14,37 @@ public class RaspberryPiPinout : IPinDefinitions
     public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    /// <inheritdoc/>
-    public IList<IPin> AllPins => new List<IPin>
+    internal RaspberryPiPinout()
     {
-        GPIO2, GPIO3, GPIO4, GPIO17, GPIO18, GPIO27, GPIO22, GPIO23,
-        GPIO24, GPIO10, GPIO9, GPIO25, GPIO11, GPIO8, GPIO7, GPIO5,
-        GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21,
-        ACT_LED
-    };
+        AllPins = new List<IPin>();
+
+        foreach (var pin in this.GetType()
+            .GetProperties()
+            .Where(p => p.PropertyType is IPin)
+            .Select(p => p.GetValue(this) as IPin))
+        {
+            if (pin != null)
+            {
+                if (!AllPins.Any(p => p.Name == pin.Name))
+                {
+                    AllPins.Add(pin);
+                }
+            }
+        }
+    }
+
+    /// <inheritdoc/>
+    public IList<IPin> AllPins { get; }
 
     /// <summary>
     /// Retrieves a pin from <see cref="AllPins"/> by Name or Key
     /// </summary>
-    public IPin? this[string name]
+    public IPin this[string name]
     {
         get => AllPins.FirstOrDefault(p =>
             string.Compare(p.Name, name, true) == 0
-            || string.Compare($"{p.Key}", name, true) == 0);
+            || string.Compare($"{p.Key}", name, true) == 0)
+            ?? throw new KeyNotFoundException();
     }
 
     internal const string GpiodChipPi4 = "gpiochip0";
