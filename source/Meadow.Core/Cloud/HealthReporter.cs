@@ -18,6 +18,17 @@ public class HealthReporter : IHealthReporter
     {
         Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).");
 
+        if (interval < 0)
+        {
+            throw new ArgumentException("HealthReporter interval must be a non-negative integer.");
+        }
+        
+        if (interval == 0)
+        {
+            // do not set the timer. metrics can be sent manually.
+            return;
+        }
+
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
@@ -32,7 +43,7 @@ public class HealthReporter : IHealthReporter
 
             await Send();
         }
-        
+
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
@@ -58,7 +69,7 @@ public class HealthReporter : IHealthReporter
             Resolver.Log.Trace("could not send health metric, connection unavailable.");
             return;
         }
-        
+
         var service = Resolver.Services.Get<IMeadowCloudService>();
         var device = Resolver.Device;
 
@@ -72,7 +83,6 @@ public class HealthReporter : IHealthReporter
                 { "health.memory_used", GC.GetTotalMemory(false) },
                 { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
                 { "info.os_version", device.Information.OSVersion },
-
             },
             Timestamp = DateTimeOffset.UtcNow
         };
