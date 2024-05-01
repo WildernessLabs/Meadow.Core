@@ -21,7 +21,7 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     public event NetworkDisconnectionHandler? NetworkDisconnected;
 
     /// <inheritdoc/>
-    public event NetworkStateHandler? ConnectFailed;
+    public event NetworkStateHandler? NetworkConnectFailed;
 
     /// <summary>
     /// Raised when a network error occurs
@@ -78,11 +78,11 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     }
 
     /// <summary>
-    /// Raises the <see cref="ConnectFailed"/> event
+    /// Raises the <see cref="NetworkConnectFailed"/> event
     /// </summary>
     protected void RaiseConnectFailed()
     {
-        ConnectFailed?.Invoke(this);
+        NetworkConnectFailed?.Invoke(this);
     }
 
     /// <summary>
