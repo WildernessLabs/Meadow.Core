@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.IO;
 
 namespace Meadow;
 
@@ -149,5 +150,35 @@ public partial class F7PlatformOS : IPlatformOS
         Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!");
 
         return;
+    }
+
+    /// <inheritdoc/>
+    public DigitalStorage GetPrimaryDiskSpaceInUse()
+    {
+        DirectoryInfo di = new(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot);
+
+        var usedDiskSpace = DirSize(di);
+
+        return new DigitalStorage(usedDiskSpace, DigitalStorage.UnitType.Bytes);
+    }
+
+    private long DirSize(DirectoryInfo d)
+    {
+        long size = 0;
+        // Add file sizes.
+        FileInfo[] fis = d.GetFiles();
+        foreach (FileInfo fi in fis)
+        {
+            size += fi.Length;
+        }
+
+        // Add subdirectory sizes.
+        DirectoryInfo[] dis = d.GetDirectories();
+        foreach (DirectoryInfo di in dis)
+        {
+            size += DirSize(di);
+        }
+
+        return size;
     }
 }

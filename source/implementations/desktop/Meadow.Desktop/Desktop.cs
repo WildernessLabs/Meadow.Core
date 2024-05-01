@@ -20,7 +20,7 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IPixelDisplay? Display { get; private set; }
+    public virtual IResizablePixelDisplay? Display { get; private set; }
 
     /// <summary>
     /// Initializes a new instance of the Desktop class.
@@ -36,13 +36,7 @@ public class Desktop : IMeadowDevice
         {
             MeadowPlatform.OSX => new Mac(),
             MeadowPlatform.DesktopLinux => new Linux(),
-#if WINDOWS
             MeadowPlatform.Windows => new Windows(),
-#else
-            MeadowPlatform.Windows =>
-            throw new Exception("You must run with a net8.0-windows target framework"),
-#endif
-
             _ => throw new ArgumentException($"Desktop cannot run on {detectedPlatform}"),
         };
 

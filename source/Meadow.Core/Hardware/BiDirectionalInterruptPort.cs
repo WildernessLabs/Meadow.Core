@@ -20,7 +20,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Gets or sets the last event time for the port.
         /// </summary>
-        protected int LastEventTime { get; set; } = -1;
+        protected DateTime LastEventTime { get; set; } = DateTime.MinValue;
 
         /// <inheritdoc/>
         public override PortDirectionType Direction
@@ -275,7 +275,7 @@ namespace Meadow.Hardware
             if (pin == this.Pin)
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                this.LastEventTime = Environment.TickCount;
+                this.LastEventTime = DateTime.Now;
                 // BC 2021.05.21 b5.0: Changed this to the new result type.
                 // assuming that old state is just an inversion of the new state, yeah?
                 RaiseChangedAndNotify(new DigitalPortResult(new DigitalState(state, this.LastEventTime), new DigitalState(!state, capturedLastTime)));

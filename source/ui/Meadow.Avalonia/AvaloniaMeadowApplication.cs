@@ -24,6 +24,9 @@ namespace Meadow.UI
         {
         }
 
+        /// <inheritdoc/>
+        public virtual void OnBootFromCrash(IEnumerable<string> crashReports) { }
+
         /// <summary>
         /// Invokes an action on the main (UI) thread
         /// </summary>

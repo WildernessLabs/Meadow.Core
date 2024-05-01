@@ -1,4 +1,5 @@
 ﻿using Meadow.Devices;
+using Meadow.Units;
 using System.IO;
 using System.Linq;
 using static Meadow.Core.Interop;
@@ -19,6 +20,11 @@ public partial class F7PlatformOS
     /// </summary>
     public class F7StorageInformation : StorageInformation
     {
+        private F7StorageInformation(string name, DigitalStorage size, DigitalStorage available)
+            : base(name, size, available)
+        {
+        }
+
         internal static F7StorageInformation Create(IMeadowDevice device)
         {
             bool statfsSuccess;
@@ -64,11 +70,11 @@ public partial class F7PlatformOS
             }
 
             return new F7StorageInformation
-            {
-                Name = "Internal Flash",
-                Size = new Units.DigitalStorage(totalFlashAvailable),
-                SpaceAvailable = new Units.DigitalStorage(totalFlashRemaining)
-            };
+                (
+                "Internal Flash",
+                new Units.DigitalStorage(totalFlashAvailable),
+                new Units.DigitalStorage(totalFlashRemaining)
+                );
         }
     }
 
