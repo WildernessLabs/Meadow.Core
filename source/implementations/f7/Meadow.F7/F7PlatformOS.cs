@@ -1,8 +1,8 @@
 ﻿using Meadow.Devices;
-using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Meadow;
@@ -14,8 +14,29 @@ public partial class F7PlatformOS : IPlatformOS
 {
     private readonly F7GPIOManager _ioController;
 
+    private readonly List<MeadowSystemErrorInfo> _systemErrorCache = new();
+    private EventHandler<MeadowSystemErrorInfo>? _systemError;
+
     /// <inheritdoc/>
-    public event EventHandler<int>? MeadowSystemError;
+    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError
+    {
+        add
+        {
+            _systemError += value;
+            lock (_systemErrorCache)
+            {
+                if (_systemErrorCache.Count > 0)
+                {
+                    Resolver.Log.Info("RAISING CACHED SYSTEM ERROR");
+                    foreach (var e in _systemErrorCache)
+                    {
+                        _systemError?.Invoke(this, e);
+                    }
+                }
+            }
+        }
+        remove => _systemError -= value;
+    }
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -38,9 +59,17 @@ public partial class F7PlatformOS : IPlatformOS
         Resolver.Services.Add(NtpClient);
     }
 
-    internal void RaiseOsException(StatusCodes statusCode)
+    internal void RaiseSystemErrorException(MeadowSystemErrorInfo errorInfo)
     {
-        MeadowSystemError?.Invoke(this, (int)statusCode);
+        if (_systemError == null)
+        {
+            Resolver.Log.Info("CACHING SYSTEM ERROR");
+            _systemErrorCache.Add(errorInfo);
+        }
+        else
+        {
+            _systemError?.Invoke(this, errorInfo);
+        }
     }
 
     /// <summary>
