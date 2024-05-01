@@ -65,6 +65,9 @@ namespace Meadow
             // Stop execution while the device actually does it's thing
             Thread.Sleep(100);
 
+            // sleeping invalidates the UPD driver handle
+            UPD.ReOpen();
+
             // TODO: see how long this actually takes
 
             DoWakeNotifications(WakeSource.Timer);

@@ -10,11 +10,27 @@ namespace Meadow.Pinouts
         public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public IList<IPin> AllPins => new List<IPin> {
-            I2C_2_SDA, I2C_2_SCL,
-            UART_2_TX, UART_2_RX,
-            I2C_1_SDA, I2C_1_SCL,
-        };
+        internal JetsonNanoPinout()
+        {
+            AllPins = new List<IPin>();
+
+            foreach (var pin in this.GetType()
+                .GetProperties()
+                .Where(p => p.PropertyType is IPin)
+                .Select(p => p.GetValue(this) as IPin))
+            {
+                if (pin != null)
+                {
+                    if (!AllPins.Any(p => p.Name == pin.Name))
+                    {
+                        AllPins.Add(pin);
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public IList<IPin> AllPins { get; }
 
         /// <summary>
         /// Retrieves a pin from <see cref="AllPins"/> by Name or Key
@@ -23,14 +39,11 @@ namespace Meadow.Pinouts
         {
             get => AllPins.FirstOrDefault(p =>
                 string.Compare(p.Name, name, true) == 0
-                || string.Compare($"{p.Key}", name, true) == 0);
+                || string.Compare($"{p.Key}", name, true) == 0)
+                ?? throw new KeyNotFoundException();
         }
 
         public virtual IPinController Controller { get; set; }
-
-        public JetsonNanoPinout()
-        {
-        }
 
         public IPin I2C_2_SDA => new Pin(Controller, "I2C_2_SDA", "PIN03", null);
         public IPin I2C_2_SCL => new Pin(Controller, "I2C_2_SCL", "PIN05", null);
