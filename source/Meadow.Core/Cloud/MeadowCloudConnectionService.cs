@@ -26,7 +26,10 @@ namespace Meadow;
 
 internal class MeadowCloudConnectionService : IMeadowCloudService
 {
+    /// <inheritdoc/>
     public event EventHandler<Exception>? ErrorOccurred;
+    
+    /// <inheritdoc/>
     public event EventHandler<CloudConnectionState>? ConnectionStateChanged;
 
     internal event EventHandler<MqttApplicationMessage>? MqttMessageReceived;
@@ -67,6 +70,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         _storeAndForwardTimer = new Timer(DataForwarderProc, null, TimeSpan.FromMilliseconds(-1), TimeSpan.FromMilliseconds(-1));
     }
 
+    /// <inheritdoc/>
     public CloudConnectionState ConnectionState
     {
         get => _connectionState;
@@ -77,6 +81,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             ConnectionStateChanged?.Invoke(this, ConnectionState);
         }
     }
+
+    /// <inheritdoc/>
+    public int QueueCount { get => _dataQueue.Count; } 
 
     private async void DataForwarderProc(object _)
     {
@@ -120,6 +127,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         _storeAndForwardTimer.Change(nextSend, TimeSpan.FromMilliseconds(-1));
     }
 
+    /// <inheritdoc/>
     public void AddSubscription(string topic)
     {
         // pause the state machine
@@ -173,6 +181,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         _storeAndForwardTimer.Change(TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
     }
 
+    /// <inheritdoc/>
     public void Stop()
     {
         _stopService = true;
@@ -487,6 +496,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         public string Id { get; set; } = default!;
     }
 
+    /// <inheritdoc/>
     public async Task<bool> Authenticate()
     {
         string errorMessage;
