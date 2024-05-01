@@ -11,15 +11,17 @@ namespace Meadow;
 /// </summary>
 public abstract class NetworkAdapterBase : INetworkAdapter
 {
-    /// <summary>
-    /// Raised when the device connects to a network.
-    /// </summary>
-    public event NetworkConnectionHandler NetworkConnected = default!;
+    /// <inheritdoc/>
+    public event NetworkStateHandler? NetworkConnecting;
 
-    /// <summary>
-    /// Raised when the device disconnects from a network.
-    /// </summary>
+    /// <inheritdoc/>
+    public event NetworkConnectionHandler? NetworkConnected;
+
+    /// <inheritdoc/>
     public event NetworkDisconnectionHandler? NetworkDisconnected;
+
+    /// <inheritdoc/>
+    public event NetworkStateHandler? NetworkConnectFailed;
 
     /// <summary>
     /// Raised when a network error occurs
@@ -68,10 +70,26 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     }
 
     /// <summary>
+    /// Raises the <see cref="NetworkConnecting"/> event
+    /// </summary>
+    protected void RaiseNetworkConnecting()
+    {
+        NetworkConnecting?.Invoke(this);
+    }
+
+    /// <summary>
+    /// Raises the <see cref="NetworkConnectFailed"/> event
+    /// </summary>
+    protected void RaiseConnectFailed()
+    {
+        NetworkConnectFailed?.Invoke(this);
+    }
+
+    /// <summary>
     /// Raises the <see cref="NetworkConnected"/> event
     /// </summary>
     /// <param name="args"></param>
-    public void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
+    protected void RaiseNetworkConnected<T>(T args) where T : NetworkConnectionEventArgs
     {
         NetworkConnected?.Invoke(this, args);
     }
