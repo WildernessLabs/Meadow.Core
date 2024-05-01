@@ -1,7 +1,5 @@
 ﻿using Meadow.Hardware;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Meadow.Devices
 {
@@ -12,32 +10,9 @@ namespace Meadow.Devices
         /// <summary>
         /// Defines the pinout for the Meadow F7 v1 device.
         /// </summary>
-        public partial class Pinout : IF7FeatherPinout
+        public partial class Pinout : PinDefinitionBase, IF7FeatherPinout
         {
-            /// <inheritdoc/>
-            public IPinController? Controller { get; set; }
-
-            internal Pinout()
-            {
-                AllPins = new List<IPin>();
-
-                foreach (var pin in this.GetType()
-                    .GetProperties()
-                    .Where(p => p.PropertyType is IPin)
-                    .Select(p => p.GetValue(this) as IPin))
-                {
-                    if (pin != null)
-                    {
-                        if (!AllPins.Any(p => p.Name == pin.Name))
-                        {
-                            AllPins.Add(pin);
-                        }
-                    }
-                }
-            }
-
-            /// <inheritdoc/>
-            public IList<IPin> AllPins { get; }
+            internal Pinout() { }
 
             //==== LED
 
@@ -465,13 +440,6 @@ namespace Meadow.Devices
 
             /// <inheritdoc/>
             public IPin I2C_SCL => D08;
-
-            /// <summary>
-            /// Get an enumeration of all pins
-            /// </summary>
-            /// <returns>The enumerator of type IPin</returns>
-            public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }

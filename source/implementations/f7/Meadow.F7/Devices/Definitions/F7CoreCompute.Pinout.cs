@@ -1,7 +1,5 @@
 ﻿using Meadow.Hardware;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Meadow.Devices
 {
@@ -12,32 +10,9 @@ namespace Meadow.Devices
         /// <summary>
         /// Defines the pinout for the Meadow F7 Core Compute v2 module.
         /// </summary>
-        public partial class Pinout : IF7CoreComputePinout
+        public partial class Pinout : PinDefinitionBase, IF7CoreComputePinout
         {
-            /// <inheritdoc/>
-            public IPinController? Controller { get; set; }
-
-            /// <inheritdoc/>
-            public IList<IPin> AllPins { get; }
-
-            internal Pinout()
-            {
-                AllPins = new List<IPin>();
-
-                foreach (var pin in this.GetType()
-                    .GetProperties()
-                    .Where(p => p.PropertyType is IPin)
-                    .Select(p => p.GetValue(this) as IPin))
-                {
-                    if (pin != null)
-                    {
-                        if (!AllPins.Any(p => p.Name == pin.Name))
-                        {
-                            AllPins.Add(pin);
-                        }
-                    }
-                }
-            }
+            internal Pinout() { }
 
             // ==== DISCRETES ====
             /// <inheritdoc/>
@@ -676,13 +651,6 @@ namespace Meadow.Devices
             public IPin D19 => PC8;
             /// <inheritdoc/>
             public IPin D20 => PA0; // BLINKY on dev board
-
-            /// <summary>
-            /// Get an enumeration of all pins
-            /// </summary>
-            /// <returns>The enumerator of type IPin</returns>
-            public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Meadow.Hardware;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Meadow.Devices
 {
@@ -11,32 +9,9 @@ namespace Meadow.Devices
         /// <summary>
         /// Defines the pinout for the Meadow F7 v2 device.
         /// </summary>
-        public partial class Pinout : IF7FeatherPinout
+        public partial class Pinout : PinDefinitionBase, IF7FeatherPinout
         {
-            /// <inheritdoc/>
-            public IPinController? Controller { get; set; }
-
-            internal Pinout()
-            {
-                AllPins = new List<IPin>();
-
-                foreach (var pin in this.GetType()
-                    .GetProperties()
-                    .Where(p => p.PropertyType is IPin)
-                    .Select(p => p.GetValue(this) as IPin))
-                {
-                    if (pin != null)
-                    {
-                        if (!AllPins.Any(p => p.Name == pin.Name))
-                        {
-                            AllPins.Add(pin);
-                        }
-                    }
-                }
-            }
-
-            /// <inheritdoc/>
-            public IList<IPin> AllPins { get; }
+            internal Pinout() { }
 
             //==== LED
 
@@ -52,6 +27,7 @@ namespace Meadow.Devices
                     new PwmChannelInfo("TIM2_CH1", 2, 1)
                 }
             );
+
             // OnboardLedGreen
             // TIM2_CH2, TIM5_CH2, USART2_RTS, UART4_RX, QUADSPI_BK1_IO3, SAI2_MCLK_B, ETH_MII_RX_CLK/ETH_R MII_REF_CLK, LCD_R2, EVENTOUT
             // ADC1_IN1, ADC2_IN1, ADC3_IN1
@@ -511,10 +487,6 @@ namespace Meadow.Devices
             public IPin I2C_SDA => D07;
             /// <inheritdoc/>
             public IPin I2C_SCL => D08;
-
-            /// <inheritdoc/>
-            public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }
