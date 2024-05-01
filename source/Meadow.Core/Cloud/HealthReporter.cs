@@ -13,10 +13,24 @@ namespace Meadow;
 /// </summary>
 public class HealthReporter : IHealthReporter
 {
+    private Dictionary<string, Func<object>> _customMetrics = new Dictionary<string, Func<object>>();
+    private Dictionary<string, Func<Task<object>>> _customMetricsAsync = new Dictionary<string, Func<Task<object>>>();
+    
     /// <inheritdoc/>
     public async Task Start(int interval)
     {
         Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).");
+
+        if (interval < 0)
+        {
+            throw new ArgumentException("HealthReporter interval must be a non-negative integer.");
+        }
+        
+        if (interval == 0)
+        {
+            // do not set the timer. metrics can be sent manually.
+            return;
+        }
 
         System.Timers.Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
@@ -32,7 +46,7 @@ public class HealthReporter : IHealthReporter
 
             await Send();
         }
-        
+
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
@@ -49,6 +63,18 @@ public class HealthReporter : IHealthReporter
     }
 
     /// <inheritdoc/>
+    public bool AddMetric(string name, Func<object> func)
+    {
+        return _customMetrics.TryAdd(name, func);
+    }
+    
+    /// <inheritdoc/>
+    public bool AddMetric(string name, Func<Task<object>> func)
+    {
+        return _customMetricsAsync.TryAdd(name, func);
+    }
+    
+    /// <inheritdoc/>
     public async Task Send()
     {
         var connected = Resolver.Device.NetworkAdapters.Any(a => a.IsConnected);
@@ -58,7 +84,7 @@ public class HealthReporter : IHealthReporter
             Resolver.Log.Trace("could not send health metric, connection unavailable.");
             return;
         }
-        
+
         var service = Resolver.Services.Get<IMeadowCloudService>();
         var device = Resolver.Device;
 
@@ -72,11 +98,10 @@ public class HealthReporter : IHealthReporter
                 { "health.memory_used", GC.GetTotalMemory(false) },
                 { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
                 { "info.os_version", device.Information.OSVersion },
-
             },
             Timestamp = DateTimeOffset.UtcNow
         };
-
+        
         var batteryInfo = device.GetBatteryInfo();
         if (batteryInfo != null)
         {
@@ -88,6 +113,30 @@ public class HealthReporter : IHealthReporter
             ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
         }
 
+        foreach (var metric in _customMetrics)
+        {
+            try
+            {
+                ce.Measurements.TryAdd(metric.Key, metric.Value.Invoke());
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+            }
+        }
+        
+        foreach (var metric in _customMetricsAsync)
+        {
+            try
+            {
+                ce.Measurements.TryAdd(metric.Key, await metric.Value.Invoke());
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+            }
+        }
+        
         try
         {
             await service!.SendEvent(ce);

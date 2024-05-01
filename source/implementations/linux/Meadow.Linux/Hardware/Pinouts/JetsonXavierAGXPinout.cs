@@ -10,45 +10,38 @@ namespace Meadow.Pinouts
         public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public IList<IPin> AllPins => new List<IPin> {
-            I2C_GP5_DAT,
-            I2C_GP5_CLK,
-            MCLK05,
-            UART1_RTS,
-            I2S2_CLK,
-            PWM01,
-            GPIO27_PWM2,
-            GPIO8_AO_DMIC_IN_DAT,
-            GPIO35_PWM3,
-            SPI1_MOSI,
-            SPI1_MISO,
-            GPIO17_40HEADER,
-            SPI1_SCLK,
-            SPI1_CS0,
-            SPI1_CS1,
-            CAN0_DIN,
-            CAN0_DOUT,
-            GPIO9_CAN1_GPIO0_DMIC_CLK,
-            CAN1_DOUT,
-            I2S_FS,
-            UART1_CTS,
-            CAN1_DIN,
-            I2S_SDIN,
-            I2S_SDOUT
-        };
+        internal JetsonXavierAGXPinout()
+        {
+            AllPins = new List<IPin>();
 
+            foreach (var pin in this.GetType()
+                .GetProperties()
+                .Where(p => p.PropertyType is IPin)
+                .Select(p => p.GetValue(this) as IPin))
+            {
+                if (pin != null)
+                {
+                    if (!AllPins.Any(p => p.Name == pin.Name))
+                    {
+                        AllPins.Add(pin);
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public IList<IPin> AllPins { get; }
+
+        /// <inheritdoc/>
         public IPin this[string name]
         {
             get => AllPins.FirstOrDefault(p =>
                 string.Compare(p.Name, name, true) == 0
-                || string.Compare($"{p.Key}", name, true) == 0);
+                || string.Compare($"{p.Key}", name, true) == 0)
+                ?? throw new KeyNotFoundException();
         }
 
         public IPinController Controller { get; set; }
-
-        public JetsonXavierAGXPinout()
-        {
-        }
 
         public IPin I2C_GP5_DAT => new Pin(Controller, "I2C_GP5_DAT", "PIN03", null);
         public IPin I2C_GP5_CLK => new Pin(Controller, "I2C_GP5_CLK", "PIN05", null);
