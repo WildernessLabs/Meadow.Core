@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Meadow;
@@ -12,6 +13,30 @@ namespace Meadow;
 public partial class F7PlatformOS : IPlatformOS
 {
     private readonly F7GPIOManager _ioController;
+
+    private readonly List<MeadowSystemErrorInfo> _systemErrorCache = new();
+    private EventHandler<MeadowSystemErrorInfo>? _systemError;
+
+    /// <inheritdoc/>
+    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError
+    {
+        add
+        {
+            _systemError += value;
+            lock (_systemErrorCache)
+            {
+                if (_systemErrorCache.Count > 0)
+                {
+                    foreach (var e in _systemErrorCache)
+                    {
+                        _systemError?.Invoke(this, e);
+                    }
+                    _systemErrorCache.Clear();
+                }
+            }
+        }
+        remove => _systemError -= value;
+    }
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -32,6 +57,18 @@ public partial class F7PlatformOS : IPlatformOS
 
         NtpClient = new NtpClient();
         Resolver.Services.Add(NtpClient);
+    }
+
+    internal void RaiseSystemErrorException(MeadowSystemErrorInfo errorInfo)
+    {
+        if (_systemError == null)
+        {
+            _systemErrorCache.Add(errorInfo);
+        }
+        else
+        {
+            _systemError?.Invoke(this, errorInfo);
+        }
     }
 
     /// <summary>

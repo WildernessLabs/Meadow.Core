@@ -1,4 +1,5 @@
-﻿using Meadow.Gateways;
+﻿using Meadow.Devices.Esp32.MessagePayloads;
+using Meadow.Gateways;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
@@ -140,6 +141,14 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                     this.esp32 = new Esp32Coprocessor();
                     BluetoothAdapter = esp32;
                     Coprocessor = esp32;
+
+                    esp32.SystemMessageReceived += (s, e) =>
+                    {
+                        (PlatformOS as F7PlatformOS)?.RaiseSystemErrorException(new Esp32SystemErrorInfo((int)e.fn, e.status));
+
+                        // TODO: some of these may necessitate restarting the device
+                        // TODO: if the app isn't listening to the event, should we log before reset?
+                    };
 
                     if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                     {

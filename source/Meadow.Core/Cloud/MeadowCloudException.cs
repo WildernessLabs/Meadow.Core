@@ -11,5 +11,6 @@ public class MeadowCloudException : Exception
     /// Initializes a new instance of the MeadowCloudException class with a specified error message.
     /// </summary>
     /// <param name="message"></param>
-    public MeadowCloudException(string message) : base(message) { }
+    /// <param name="innerException"></param>
+    public MeadowCloudException(string message, Exception? innerException) : base(message, innerException) { }
 }

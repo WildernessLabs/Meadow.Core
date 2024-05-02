@@ -199,7 +199,13 @@ namespace Meadow.Devices
             // voltage=(double)data/4095*3.3;
             // celsius = (voltage - 0.76) / 0.0025 + 25;
             var voltage = adc / 4095d * 3.3d;
-            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Temperature.UnitType.Celsius); ;
+            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Temperature.UnitType.Celsius);
+
+            if (temperature.Celsius < 0)
+            {
+                Resolver.Log.Warn($"CPU Temp of {temperature.Celsius}C is incorrect!");
+                Resolver.Log.Warn($"ADC reading: {adc}");
+            }
 
             // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
             //i.e. temp = 80d / (double)(*0x1FFF7A2E - *0x1FFF7A2C) * (adc - (double)*0x1FFF7A2C) + 30d;
