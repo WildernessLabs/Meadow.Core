@@ -32,7 +32,7 @@ public class LinuxPlatformOS : IPlatformOS
     /// </summary>
     public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
     /// <inheritdoc/>
-    public event EventHandler<int>? OsException;
+    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError;
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched

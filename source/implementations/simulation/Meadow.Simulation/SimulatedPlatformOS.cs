@@ -22,7 +22,7 @@ public class SimulatedPlatformOS : IPlatformOS
     /// <inheritdoc/>
     public event EventHandler<WakeSource>? AfterWake = null;
     /// <inheritdoc/>
-    public event EventHandler<int>? MeadowSystemError;
+    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError;
 
     /// <summary>
     /// Event raised when an external storage device event occurs.
