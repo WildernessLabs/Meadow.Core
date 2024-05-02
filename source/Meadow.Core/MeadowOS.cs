@@ -572,7 +572,14 @@ public static partial class MeadowOS
             }
             catch (Exception ex)
             {
-                Resolver.Log.Trace($"Creating instance failure : {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Resolver.Log.Error($"Creating App instance failure : {ex.Message}{Environment.NewLine}{ex.InnerException}");
+                }
+                else
+                {
+                    Resolver.Log.Error($"Creating App instance failure : {ex.Message}");
+                }
                 return false;
             }
 

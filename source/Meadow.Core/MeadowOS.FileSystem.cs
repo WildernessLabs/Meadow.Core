@@ -14,7 +14,7 @@ public static partial class MeadowOS
         /// </summary>
         public static string UserFileSystemRoot
         {
-            get => Resolver.Device.PlatformOS.FileSystem.FileSystemRoot ?? "/meadow0/";
+            get => Resolver.Device?.PlatformOS?.FileSystem?.FileSystemRoot ?? "/meadow0/";
         }
 
         /// <summary>
