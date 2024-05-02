@@ -28,7 +28,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 {
     /// <inheritdoc/>
     public event EventHandler<Exception>? ErrorOccurred;
-    
+
     /// <inheritdoc/>
     public event EventHandler<CloudConnectionState>? ConnectionStateChanged;
 
@@ -83,7 +83,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public int QueueCount { get => _dataQueue.Count; } 
+    public int QueueCount { get => _dataQueue.Count; }
 
     private async void DataForwarderProc(object _)
     {
@@ -110,11 +110,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
         catch (Exception ex)
         {
-            Resolver.Log.Warn($"Unable to forward Meadow Cloud record: {ex.Message}");
-            if (ex.InnerException != null)
-            {
-                Resolver.Log.Warn($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
-            }
+            LogAndRaiseOnErrorOccurredEvent("Unable to forward Meadow Cloud record", ex);
         }
 
         // schedule the next send
@@ -129,6 +125,22 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             nextSend = TimeSpan.FromSeconds(60);
         }
         _storeAndForwardTimer.Change(nextSend, TimeSpan.FromMilliseconds(-1));
+    }
+
+    private void LogAndRaiseOnErrorOccurredEvent(string message, Exception? ex = null)
+    {
+        if (ex != null)
+        {
+            message = $"{message}{Environment.NewLine}{ex.Message}";
+
+            if (ex.InnerException != null)
+            {
+                message = $"{message}{Environment.NewLine}{ex.InnerException.Message}";
+            }
+        }
+
+        Resolver.Log.Warn(message);
+        ErrorOccurred?.Invoke(this, new MeadowCloudException(message, ex));
     }
 
     /// <inheritdoc/>
@@ -558,22 +570,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     {
                         // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
                         // TODO: add platform and OS checking for this?
-                        errorMessage = $"RSA decrypt failure. This device likely needs to be reprovisioned.";
-                        Resolver.Log.Error(errorMessage);
-                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
+                        LogAndRaiseOnErrorOccurredEvent("RSA decrypt failure. This device likely needs to be reprovisioned.");
 
                         _jwt = null;
                         return false;
                     }
                     catch (Exception ex)
                     {
-                        errorMessage = $"RSA decrypt failure: {ex.Message}";
-                        Resolver.Log.Error(errorMessage);
-                        if (ex.InnerException != null)
-                        {
-                            Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
-                        }
-                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
+                        LogAndRaiseOnErrorOccurredEvent("RSA decrypt failure", ex);
 
                         _jwt = null;
                         return false;
@@ -596,13 +600,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     catch (Exception ex)
                     {
-                        errorMessage = $"AES decrypt failure: {ex.Message}";
-                        Resolver.Log.Error(errorMessage);
-                        if (ex.InnerException != null)
-                        {
-                            Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
-                        }
-                        ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
+                        LogAndRaiseOnErrorOccurredEvent("AES decrypt failure", ex);
 
                         _jwt = null;
                         return false;
@@ -619,28 +617,22 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}: {responseContent}";
                 }
 
-                Resolver.Log.Warn(errorMessage);
-                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
+                LogAndRaiseOnErrorOccurredEvent(errorMessage);
 
                 _jwt = null;
                 return false;
             }
             catch (Exception ex)
             {
-                errorMessage = $"Exception authenticating with Meadow.Cloud @{endpoint}: {ex.Message}";
+                errorMessage = $"Exception authenticating with Meadow.Cloud @{endpoint}";
                 if (ex.InnerException != null)
                 {
                     if (ex.InnerException is IOException && ex.InnerException.HResult == -2146232800 /*0x80131620*/)
                     {
                         errorMessage += $"{Environment.NewLine}Is your device clock correct? (UTC date is {DateTime.Now.ToShortDateString()})";
                     }
-                    else
-                    {
-                        errorMessage += $"{Environment.NewLine}Inner exception: {ex.InnerException.Message}";
-                    }
                 }
-                Resolver.Log.Warn(errorMessage);
-                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
+                LogAndRaiseOnErrorOccurredEvent(errorMessage, ex);
 
                 _jwt = null;
                 return false;
@@ -666,11 +658,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     catch (Exception ex)
                     {
-                        Resolver.Log.Warn($"Unable to send crash report: {ex.Message}");
-                        if (ex.InnerException != null)
-                        {
-                            Resolver.Log.Warn($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
-                        }
+                        LogAndRaiseOnErrorOccurredEvent("Unable to send crash report", ex);
                         result &= false;
                     }
                 }
@@ -753,8 +741,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
-                Resolver.Log.Debug(errorMessage);
-                ErrorOccurred?.Invoke(this, new MeadowCloudException(errorMessage));
+                LogAndRaiseOnErrorOccurredEvent(errorMessage);
                 return false;
             }
             else
@@ -765,12 +752,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
         catch (Exception ex)
         {
-            Resolver.Log.Debug($"exception sending cloud message: {ex.Message}");
-            if (ex.InnerException != null)
-            {
-                Resolver.Log.Debug($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
-            }
-            ErrorOccurred?.Invoke(this, ex);
+            LogAndRaiseOnErrorOccurredEvent("Exception sending cloud message", ex);
             return false;
         }
         finally
