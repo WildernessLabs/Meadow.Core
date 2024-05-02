@@ -132,10 +132,17 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         if (ex != null)
         {
             message = $"{message}{Environment.NewLine}{ex.Message}";
-
+            if (ex.HResult != 0)
+            {
+                message = $"{message}({ex.HResult})";
+            }
             if (ex.InnerException != null)
             {
                 message = $"{message}{Environment.NewLine}{ex.InnerException.Message}";
+                if (ex.InnerException.HResult != 0)
+                {
+                    message = $"{message}({ex.InnerException.HResult})";
+                }
             }
         }
 
