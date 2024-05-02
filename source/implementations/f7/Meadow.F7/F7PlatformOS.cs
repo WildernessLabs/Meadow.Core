@@ -27,11 +27,11 @@ public partial class F7PlatformOS : IPlatformOS
             {
                 if (_systemErrorCache.Count > 0)
                 {
-                    Resolver.Log.Info("RAISING CACHED SYSTEM ERROR");
                     foreach (var e in _systemErrorCache)
                     {
                         _systemError?.Invoke(this, e);
                     }
+                    _systemErrorCache.Clear();
                 }
             }
         }
@@ -63,7 +63,6 @@ public partial class F7PlatformOS : IPlatformOS
     {
         if (_systemError == null)
         {
-            Resolver.Log.Info("CACHING SYSTEM ERROR");
             _systemErrorCache.Add(errorInfo);
         }
         else
