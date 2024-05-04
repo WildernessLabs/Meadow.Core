@@ -27,7 +27,7 @@ public class CharacteristicString : Characteristic<string>
     /// <param name="data">The data to be written.</param>
     public override void HandleDataWrite(byte[] data)
     {
-        Resolver.Log.Info($"HandleDataWrite in {this.GetType().Name}");
+        Resolver.Log.Debug($"HandleDataWrite in {this.GetType().Name}");
 
         RaiseValueSet(Encoding.UTF8.GetString(data));
     }
