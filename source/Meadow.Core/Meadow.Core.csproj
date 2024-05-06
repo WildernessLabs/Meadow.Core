@@ -29,7 +29,7 @@
     <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
     <None Include="Cloud\MeadowCloudConnectionService.cs" />
     <PackageReference Include="Meadow.Contracts" Version="1.11.0" />
-	  <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
+      <PackageReference Include="Meadow.Foundation.Serialization.MicroJson" Version="1.11.0" />
     <PackageReference Include="Meadow.Modbus" Version="1.11.0" />
     <PackageReference Include="Meadow.MQTT" Version="1.11.0" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
