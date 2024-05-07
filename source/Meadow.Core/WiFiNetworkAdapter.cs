@@ -1,13 +1,17 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Gateway.WiFi;
+using Meadow.Hardware;
 using System;
+using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices;
 
 /// <summary>
 /// Represents WiFi network adapter
 /// </summary>
-public class WiFiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter
+public class WiFiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter, IWiFiNetworkAdapter
 {
     /// <summary>
     /// Creates an instance of a WiFiNetworkAdapter
@@ -32,6 +36,60 @@ public class WiFiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter
     /// Returns the current Antenna type
     /// </summary>
     public AntennaType CurrentAntenna => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public string? Ssid => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public PhysicalAddress Bssid => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public bool AutoConnect => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public bool AutoReconnect => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public string DefaultSsid => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public int Channel => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public Task ClearStoredAccessPointInformation()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public void ConnectToDefaultAccessPoint()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task Disconnect(bool turnOffWiFiInterface)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<IList<WifiNetwork>> Scan(CancellationToken token)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<IList<WifiNetwork>> Scan(TimeSpan timeout)
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// Sets the current antenna type used by the adapter

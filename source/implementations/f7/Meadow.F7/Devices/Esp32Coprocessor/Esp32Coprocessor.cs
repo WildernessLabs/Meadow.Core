@@ -126,8 +126,6 @@ public partial class Esp32Coprocessor : ICoprocessor
         StatusCodes result = StatusCodes.CompletedOk;
         try
         {
-            Resolver.Log.Trace($"Sending ESP command. destination:{destination}, function:{function}");
-
             var command = new Nuttx.UpdEsp32Command()
             {
                 Interface = destination,
@@ -161,7 +159,6 @@ public partial class Esp32Coprocessor : ICoprocessor
             if (updResult == 0)
             {
                 result = (StatusCodes)command.StatusCode;
-                Resolver.Log.Trace($"ESP Ioctl returned success: {result}");
             }
             else
             {

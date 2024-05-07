@@ -58,18 +58,39 @@ public class NativeNetworkAdapterCollection : INetworkAdapterCollection
 
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
-                switch (ni.NetworkInterfaceType)
+                if (ni.OperationalStatus == OperationalStatus.Up)
                 {
-                    case NetworkInterfaceType.Ethernet:
-                        _adapters.Add(new WiredNetworkAdapter(ni));
-                        break;
-                    case NetworkInterfaceType.Wireless80211:
-                        _adapters.Add(new WiFiNetworkAdapter(ni));
-                        break;
+                    switch (ni.NetworkInterfaceType)
+                    {
+                        case NetworkInterfaceType.Ethernet:
+                            _adapters.Add(GetWiredNetworkAdapter(ni));
+                            break;
+                        case NetworkInterfaceType.Wireless80211:
+                            _adapters.Add(GetWiFiNetworkAdapter(ni));
+                            break;
+                    }
                 }
             }
         }
 
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Creates an IWiredNetworkAdapter from a NetworkInterface 
+    /// </summary>
+    /// <param name="ni">The NetworkInterface for the adapter</param>
+    public virtual IWiredNetworkAdapter GetWiredNetworkAdapter(NetworkInterface ni)
+    {
+        return new WiredNetworkAdapter(ni);
+    }
+
+    /// <summary>
+    /// Creates an IWiFiNetworkAdapter from a NetworkInterface 
+    /// </summary>
+    /// <param name="ni">The NetworkInterface for the adapter</param>
+    public virtual IWiFiNetworkAdapter GetWiFiNetworkAdapter(NetworkInterface ni)
+    {
+        return new WiFiNetworkAdapter(ni);
     }
 }
