@@ -244,7 +244,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                     {
                         using (var fileStream = Store.GetUpdateFileStream(message.ID))
                         {
-                            byte[] buffer = new byte[4096 * 64]; // TODO: make this configurable/platform dependent
+                            byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
                             int bytesRead;
 
                             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
