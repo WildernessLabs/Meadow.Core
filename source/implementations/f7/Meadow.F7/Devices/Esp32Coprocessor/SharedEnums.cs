@@ -189,7 +189,52 @@ public enum StatusCodes
     /// Cell configuration contains one or more errors.
     /// </summary>
     InvalidCellConfigurationFile = 45,
-};
+
+    /// <summary>
+    /// ESP reset for unknown reason
+    /// </summary>
+    EspReset = 50,
+    /// <summary>
+    /// Power-on or EN line pulled low and released.
+    /// </summary>
+    EspResetPowerOn = 51,
+    /// <summary>
+    /// Reset using an external GPIO (n/a for the ESP32).
+    /// </summary>
+    EspResetExternalGpio = 52,
+    /// <summary>
+    /// `esp_restart` has used to reset the ESP32.
+    /// </summary>
+    EspResetSoftware = 53,
+    /// <summary>
+    /// Reset due to software exception or panic.
+    /// </summary>
+    EspResetPanic = 54,
+    /// <summary>
+    /// Reset due to interrupt watchdog.
+    /// </summary>
+    EspResetInterruptWatchdog = 55,
+    /// <summary>
+    /// Reset due to task watchdog.
+    /// </summary>
+    EspResetTaskWatchdog = 56,
+    /// <summary>
+    /// Reset due to watchdog other than task or interrupt watchdogs.
+    /// </summary>
+    EspResetOtherWatchdog = 57,
+    /// <summary>
+    /// Reset after exiting deep sleep.
+    /// </summary>
+    EspResetDeepSleep = 58,
+    /// <summary>
+    /// Hardware or software brownout reset.
+    /// </summary>
+    EspResetBrownout = 59,
+    /// <summary>
+    /// Reset over SDIO.
+    /// </summary>
+    EspResetSDIO = 60,
+}
 
 /// <summary>
 /// System interfaces available on the ESP32 for the various function calls.
