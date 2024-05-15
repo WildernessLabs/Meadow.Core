@@ -1,4 +1,6 @@
-﻿namespace Meadow.Devices.Esp32.MessagePayloads;
+﻿using System;
+
+namespace Meadow.Devices.Esp32.MessagePayloads;
 
 /// <summary>
 /// An ESP32-specific MeadowSystemErrorInfo
@@ -28,5 +30,17 @@ public class Esp32SystemErrorInfo : MeadowSystemErrorInfo
     {
         Function = function;
         StatusCode = statusCode;
+    }
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        var s = $"{this.GetType().Name} ({StatusCode}): {Message}";
+        if (Exception != null)
+        {
+            s += $"{Environment.NewLine}Inner: {Exception.GetType().Name}: {Exception.Message}";
+        }
+
+        return s;
     }
 }
