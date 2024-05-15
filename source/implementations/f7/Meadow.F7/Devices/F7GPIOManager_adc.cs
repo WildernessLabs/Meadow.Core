@@ -1,6 +1,7 @@
 ﻿using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Threading;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -171,7 +172,7 @@ namespace Meadow.Devices
         /// <summary>
         /// Get the temperature of the STM32F7
         /// </summary>
-        /// <returns>The temperaturw</returns>
+        /// <returns>The temperature</returns>
         public Temperature GetTemperature()
         {
             if (!_initialized)
@@ -180,37 +181,56 @@ namespace Meadow.Devices
                 _initialized = true;
             }
 
-            // read the CCR
-            var ccr = UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET);
+            var attempts = 0;
 
-            // disable the VBAT and enable the temp sensor
-            var tempCCR = (int)ccr;
-            tempCCR &= ~(1 << STM32.ADC_CCR_VBATE_SHIFT);
-            tempCCR |= 1 << STM32.ADC_CCR_TSVREFE_SHIFT;
-            UPD.SetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET, (uint)tempCCR);
-
-            // read channel 18
-            var adc = GetAnalogValue(18, 500);
-
-            // restore the CCR
-            UPD.SetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET, ccr);
-
-            // calculate the temp
-            // voltage=(double)data/4095*3.3;
-            // celsius = (voltage - 0.76) / 0.0025 + 25;
-            var voltage = adc / 4095d * 3.3d;
-            Temperature temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Temperature.UnitType.Celsius);
-
-            if (temperature.Celsius < 0)
+            while (true)
             {
-                Resolver.Log.Warn($"CPU Temp of {temperature.Celsius}C is incorrect!");
-                Resolver.Log.Warn($"ADC reading: {adc}");
+                try
+                {
+                    // read the CCR
+                    var ccr = UPD.GetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET);
+
+                    // disable the VBAT and enable the temp sensor
+                    var tempCCR = (int)ccr;
+                    tempCCR &= ~(1 << STM32.ADC_CCR_VBATE_SHIFT);
+                    tempCCR |= 1 << STM32.ADC_CCR_TSVREFE_SHIFT;
+                    UPD.SetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET, (uint)tempCCR);
+
+                    // read channel 18
+                    var adc = GetAnalogValue(18, 500);
+
+                    // restore the CCR
+                    UPD.SetRegister(STM32.MEADOW_ADC1_BASE + STM32.ADC_CCR_OFFSET, ccr);
+
+                    // calculate the temp
+                    // voltage=(double)data/4095*3.3;
+                    // celsius = (voltage - 0.76) / 0.0025 + 25;
+                    var voltage = adc / 4095d * 3.3d;
+                    var temperature = new Temperature((voltage - 0.76) / 0.0025 + 25, Temperature.UnitType.Celsius);
+
+                    if (temperature.Celsius < 0)
+                    {
+                        Resolver.Log.Warn($"CPU Temp of {temperature.Celsius}C is incorrect!");
+                        Resolver.Log.Warn($"ADC reading: {adc}");
+                    }
+
+                    // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
+                    //i.e. temp = 80d / (double)(*0x1FFF7A2E - *0x1FFF7A2C) * (adc - (double)*0x1FFF7A2C) + 30d;
+
+                    return temperature;
+                }
+                catch
+                {
+                    Resolver.Log.Warn($"CPU Temp read failure");
+
+                    if (attempts++ > 5)
+                    {
+                        return Temperature.AbsoluteZero;
+                    }
+
+                    Thread.Sleep(100);
+                }
             }
-
-            // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
-            //i.e. temp = 80d / (double)(*0x1FFF7A2E - *0x1FFF7A2C) * (adc - (double)*0x1FFF7A2C) + 30d;
-
-            return temperature;
         }
 
         /// <summary>
