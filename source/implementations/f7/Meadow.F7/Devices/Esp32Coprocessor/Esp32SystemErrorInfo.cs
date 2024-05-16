@@ -24,6 +24,7 @@ public class Esp32SystemErrorInfo : MeadowSystemErrorInfo
                 StatusCodes.InvalidConfigurationFile => "Invalid configuration file",
                 StatusCodes.InvalidWiFiConfigurationFile => "Invalid WiFi configuration file",
                 StatusCodes.InvalidCellConfigurationFile => "Invalid Cell configuration file",
+                StatusCodes.NetworkDeadlock => "Network deadlock detected. Device reboot is required to reconnect",
                 _ => "ESP32 Error"
             },
             SystemErrorNumber.CoprocessorError)
