@@ -189,7 +189,10 @@ public enum StatusCodes
     /// Cell configuration contains one or more errors.
     /// </summary>
     InvalidCellConfigurationFile = 45,
-
+    /// <summary>
+    /// Network deadlock detected.
+    /// </summary>
+    NetworkDeadlock = 46,
     /// <summary>
     /// ESP reset for unknown reason
     /// </summary>
