@@ -4,7 +4,6 @@ using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -142,13 +141,13 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
     {
         try
         {
-            return NetworkInterface.GetIsNetworkAvailable() &&
-                   NetworkInterface.GetAllNetworkInterfaces()
-                   .Any(ni => ni.OperationalStatus == OperationalStatus.Up &&
-                              (ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
-                               ni.NetworkInterfaceType != NetworkInterfaceType.Loopback));
+            using (var ping = new Ping())
+            {
+                var reply = ping.Send("8.8.8.8", 3000); // Timeout set to 3 seconds
+                return reply.Status == IPStatus.Success;
+            }
         }
-        catch (NetworkInformationException)
+        catch (PingException)
         {
             return false;
         }
