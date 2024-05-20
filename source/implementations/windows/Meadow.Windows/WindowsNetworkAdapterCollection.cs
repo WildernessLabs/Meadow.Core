@@ -4,6 +4,7 @@ using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -135,7 +136,23 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
 
     public AntennaType CurrentAntenna => throw new NotImplementedException();
 
-    public override bool IsConnected => throw new NotImplementedException();
+    public override bool IsConnected => IsInternetAvailable();
+
+    private bool IsInternetAvailable()
+    {
+        try
+        {
+            return NetworkInterface.GetIsNetworkAvailable() &&
+                   NetworkInterface.GetAllNetworkInterfaces()
+                   .Any(ni => ni.OperationalStatus == OperationalStatus.Up &&
+                              (ni.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                               ni.NetworkInterfaceType != NetworkInterfaceType.Loopback));
+        }
+        catch (NetworkInformationException)
+        {
+            return false;
+        }
+    }
 
     public Task ClearStoredAccessPointInformation()
     {
