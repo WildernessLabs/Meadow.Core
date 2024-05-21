@@ -87,15 +87,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     private async void DataForwarderProc(object _)
     {
-        CloudDataQueue.DataInfo? info = null;
+        if (_dataQueue.Count == 0) { return; }
 
         try
         {
             if (ConnectionState == CloudConnectionState.Connected)
             {
                 // get the head item
-                info = _dataQueue.Peek();
-
+                var info = _dataQueue.Peek();
                 if (info != null)
                 {
                     // failed to send, leave the item in the queue
@@ -457,6 +456,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             _firstConection = false;
                         }
                     }
+
+                    // trigger a send 
+                    _storeAndForwardTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+
                     Thread.Sleep(1000);
                     break;
             }
@@ -614,14 +617,18 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                 }
 
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                if (response.StatusCode == HttpStatusCode.NotFound)
                 {
                     // device is likely not provisioned?
                     errorMessage = $"Meadow.Cloud service returned 'Not Found': this device has likely not been provisioned";
                 }
-                else
+                else if (response.StatusCode == HttpStatusCode.InternalServerError)
                 {
                     errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}: {responseContent}";
+                }
+                else
+                {
+                    errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}";
                 }
 
                 LogAndRaiseOnErrorOccurredEvent(errorMessage);
@@ -747,7 +754,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             if (!response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
-                errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                }
+                else
+                {
+                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                }
                 LogAndRaiseOnErrorOccurredEvent(errorMessage);
                 return false;
             }
