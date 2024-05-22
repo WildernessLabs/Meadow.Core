@@ -4,6 +4,8 @@ using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Meadow;
 
@@ -164,10 +166,76 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Executes a shell command and returns its standard output as a string.
+    /// </summary>
+    /// <param name="command">The shell command to execute.</param>
+    /// <returns>The standard output of the command.</returns>
+    private static string ExecuteShellCommand(string command)
+    {
+        var processInfo = new ProcessStartInfo
+        {
+            FileName = "/bin/bash",
+            Arguments = "-c \"" + command + "\"",
+            RedirectStandardOutput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        var process = new Process { StartInfo = processInfo };
+        process.Start();
+
+        string output = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+
+        return output;
+    }
+
+    /// <summary>
+    /// Parses the output of a shell command to extract battery information.
+    /// </summary>
+    /// <param name="output">The output string from the shell command.</param>
+    /// <returns>A BatteryInfo object containing the parsed information.</returns>
+    private BatteryInfo ParseBatteryInfo(string output)
+    {
+        BatteryInfo batteryInfo = new BatteryInfo();
+
+        // Extract Voltage (assuming mV)
+        var voltageMatch = Regex.Match(output, "\"AppleRawBatteryVoltage\"\\s*=\\s*(\\d+)");
+        if (voltageMatch.Success)
+        {
+            double voltage = double.Parse(voltageMatch.Groups[1].Value) / 1000;
+            batteryInfo.Voltage = new Meadow.Units.Voltage(voltage);
+        }
+        
+        // Extract State of Charge
+        var socMatch = Regex.Match(output, "\"CurrentCapacity\"\\s*=\\s*(\\d+)");
+        if (socMatch.Success)
+        {
+            batteryInfo.StateOfCharge = int.Parse(socMatch.Groups[1].Value);
+        }
+
+        // Extract TimeToEmpty (assuming minutes)
+        var timeToEmptyMatch = Regex.Match(output, "\"TimeRemaining\"\\s*=\\s*(\\d+)");
+        if (timeToEmptyMatch.Success)
+        {
+            int timeToEmptyMinutes = int.Parse(timeToEmptyMatch.Groups[1].Value);
+            batteryInfo.TimeToEmpty = TimeSpan.FromMinutes(timeToEmptyMinutes);
+        }
+
+        return batteryInfo;
+    }
+
     /// <inheritdoc/>
     public BatteryInfo GetBatteryInfo()
     {
-        throw new NotImplementedException();
+        // ToDo: Check if this command is compatible in Intel-based macOS models
+        string command = "ioreg -r -c \"AppleSmartBattery\"";
+        string output = ExecuteShellCommand(command);
+
+        BatteryInfo batteryInfo = ParseBatteryInfo(output);
+
+        return batteryInfo;
     }
 
     /// <inheritdoc/>
