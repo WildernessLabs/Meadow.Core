@@ -12,6 +12,8 @@ namespace Meadow.Devices;
 /// </summary>
 public abstract partial class F7MicroBase : IF7MeadowDevice
 {
+    private F7ReliabilityService _reliabilityService;
+
     /// <summary>
     /// Event raised when a new network is connected
     /// </summary>
@@ -65,7 +67,6 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
     public abstract BatteryInfo? GetBatteryInfo();
 
-    //==== internals
     /// <summary>
     /// The collection of network adapters
     /// </summary>
@@ -144,9 +145,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
 
                     esp32.SystemMessageReceived += (s, e) =>
                     {
-                        (PlatformOS as F7PlatformOS)?.RaiseSystemErrorException(new Esp32SystemErrorInfo((int)e.fn, e.status));
-
-                        // TODO: some of these may necessitate restarting the device
+                        ReliabilityService?.OnMeadowSystemError(new Esp32SystemErrorInfo((int)e.fn, e.status));
                     };
 
                     if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
@@ -219,5 +218,11 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
         InterruptMode edge)
     {
         return new Counter(pin, edge);
+    }
+
+    /// <inheritdoc/>
+    public IReliabilityService? ReliabilityService
+    {
+        get => _reliabilityService ??= new F7ReliabilityService();
     }
 }

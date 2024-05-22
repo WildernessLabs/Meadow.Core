@@ -90,20 +90,22 @@ public static partial class MeadowOS
             ReportAppException(e, "Device (system) Initialization Failure");
         }
 
-        var crashReporter = new CrashReporter();
-        Resolver.Services.Add(crashReporter);
+        var reliabilityService = Resolver.Services.Get<IReliabilityService>();
 
-        // check for any crash reports
-        if (crashReporter.CrashDataAvailable)
+        if (reliabilityService != null)
         {
             try
             {
-                App.OnBootFromCrash(crashReporter.GetCrashData());
+                // check for any crash reports
+                if (reliabilityService.IsCrashDataAvailable)
+                {
+                    reliabilityService.OnBootFromCrash();
+                }
             }
             catch (Exception ex)
             {
                 // if the app crashes in the crash report handler, we don't want to restart or we'll infinite loop!
-                Resolver.Log.Error($"Crash Report Handler error: {ex.Message}");
+                Resolver.Log.Error($"IReliabilityService.HandleBootFromError error: {ex.Message}");
             }
         }
 
@@ -591,6 +593,19 @@ public static partial class MeadowOS
                     Resolver.Log.Error($"Creating App instance failure : {ex.Message}");
                 }
                 return false;
+            }
+
+            try
+            {
+                var reliabilityService = CurrentDevice.ReliabilityService;
+                if (reliabilityService != null)
+                {
+                    Resolver.Services.Add<IReliabilityService>(reliabilityService);
+                }
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Warn($"Failed to create IReliabilityService: {ex.Message}");
             }
 
             Resolver.Log.Trace($"Device Initialize starting...");

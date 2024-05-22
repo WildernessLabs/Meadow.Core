@@ -207,7 +207,7 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
             double voltage = double.Parse(voltageMatch.Groups[1].Value) / 1000;
             batteryInfo.Voltage = new Meadow.Units.Voltage(voltage);
         }
-        
+
         // Extract State of Charge
         var socMatch = Regex.Match(output, "\"CurrentCapacity\"\\s*=\\s*(\\d+)");
         if (socMatch.Success)

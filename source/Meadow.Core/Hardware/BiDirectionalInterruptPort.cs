@@ -10,6 +10,7 @@ namespace Meadow.Hardware
     public class BiDirectionalInterruptPort : BiDirectionalInterruptPortBase
     {
         private PortDirectionType _currentDirection;
+        private ResistorMode _resistorMode;
         private TimeSpan _debounceDuration;
         private TimeSpan _glitchDuration;
 
@@ -116,8 +117,12 @@ namespace Meadow.Hardware
 
             this.IOController = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
             this.IOController.Interrupt += OnInterrupt;
+            this._resistorMode = resistorMode;
+            _debounceDuration = debounceDuration;
+            _glitchDuration = glitchDuration;
 
             // attempt to reserve the pin - we'll reserve it as an input even though we use it for bi-directional
+
             var result = this.IOController.DeviceChannelManager.ReservePin(
                 this.Pin,
                 ChannelConfigurationType.DigitalInput);
@@ -130,6 +135,7 @@ namespace Meadow.Hardware
                 if (_currentDirection == PortDirectionType.Input)
                 {
                     // This call will ultimately result in Nuttx being called
+                    Resolver.Log.Info($"configure for interrupt: {interruptMode}");
                     this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode, debounceDuration, glitchDuration);
                 }
                 else
@@ -200,6 +206,20 @@ namespace Meadow.Hardware
             return new BiDirectionalInterruptPort(pin, ioController, chan, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType);
         }
 
+        /// <inheritdoc/>
+        public override ResistorMode Resistor
+        {
+            get => _resistorMode;
+            set
+            {
+                // since we're overriding a virtual, which actually gets called in the base ctor, we need to ignore that ctor call (the IO Controller will be null)
+                if ((IOController == null) || (value == Resistor)) return;
+
+                IOController.SetResistorMode(this.Pin, value);
+                _resistorMode = value;
+            }
+        }
+
         /// <summary>
         /// Finalizes the Port instance
         /// </summary>
@@ -234,7 +254,9 @@ namespace Meadow.Hardware
             get
             {
                 Direction = PortDirectionType.Input;
+                Resolver.Log.Info($"Reading state...");
                 var value = IOController.GetDiscrete(this.Pin);
+                Resolver.Log.Info($"state: {value}");
                 return InverseLogic ? !value : value;
             }
             set
@@ -272,6 +294,7 @@ namespace Meadow.Hardware
 
         private void OnInterrupt(IPin pin, bool state)
         {
+            Resolver.Log.Info($"interrupt!");
             if (pin == this.Pin)
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.

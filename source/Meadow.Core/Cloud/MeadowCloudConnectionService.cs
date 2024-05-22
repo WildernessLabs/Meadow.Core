@@ -658,13 +658,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         var result = true;
 
-        var crashReporter = Resolver.Services.Get<CrashReporter>();
-        if (crashReporter != null)
+        var reliabilityService = Resolver.Services.Get<IReliabilityService>();
+        if (reliabilityService != null)
         {
-            if (crashReporter.CrashDataAvailable)
+            if (reliabilityService.IsCrashDataAvailable)
             {
 
-                foreach (var report in crashReporter.GetCrashData())
+                foreach (var report in reliabilityService.GetCrashData())
                 {
                     try
                     {
@@ -677,7 +677,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                 }
 
-                crashReporter.ClearCrashData();
+                reliabilityService.ClearCrashData();
             }
         }
 
