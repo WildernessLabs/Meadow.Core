@@ -180,22 +180,32 @@ public static partial class MeadowOS
 
     private static void ReportAppException(Exception e, string? message = null)
     {
-        Resolver.Log.Error(message ?? " System Failure");
-        Resolver.Log.Error($" {e.GetType()}: {e.Message}");
-        Resolver.Log.Error(e.StackTrace);
-
-        if (e is AggregateException ae)
+        try
         {
-            foreach (var ex in ae.InnerExceptions)
+            Resolver.Log.Error(message ?? " System Failure");
+            Resolver.Log.Error($" {e.GetType()}: {e.Message}");
+            Resolver.Log.Error(e.StackTrace);
+
+            if (e is AggregateException ae)
             {
-                Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
-                Resolver.Log.Error(ex.StackTrace);
+                foreach (var ex in ae.InnerExceptions)
+                {
+                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
+                    Resolver.Log.Error(ex.StackTrace);
+                }
+            }
+            else if (e.InnerException != null)
+            {
+                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
+                Resolver.Log.Error(e.InnerException.StackTrace);
             }
         }
-        else if (e.InnerException != null)
+        catch
         {
-            Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
-            Resolver.Log.Error(e.InnerException.StackTrace);
+            // DEV NOTE (21 May, 2024):
+            // I've seen the Console.Writeline call end in a `System.IO.IOException: Write fault on path / [Unknown]` in testing
+            // this block is to protect against that crashing - but there's little we can do about it
+            // This code path is part of a shutdown, so the app should be restarting anyway
         }
 
         try
