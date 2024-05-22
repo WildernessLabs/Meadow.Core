@@ -183,9 +183,15 @@ public class MacPlatformOS : IPlatformOS
     public bool SdStorageSupported => throw new NotImplementedException();
     public string[] NtpServers => throw new NotImplementedException();
 
+    /// <summary>
+    /// Attempts to retrieve the CPU temperature on macOS. 
+    /// Due to limitations on macOS, this method cannot directly access the hardware sensor.
+    /// It currently returns AbsoluteZero to indicate the temperature is unavailable. 
+    /// </summary>
+    /// <returns>A Temperature object set to AbsoluteZero, indicating unavailable temperature.</returns>
     public Temperature GetCpuTemperature()
     {
-        throw new PlatformNotSupportedException();
+        return Temperature.AbsoluteZero;
     }
 
     /// <summary>
@@ -246,6 +252,18 @@ public class MacPlatformOS : IPlatformOS
     /// <inheritdoc/>
     public DigitalStorage GetPrimaryDiskSpaceInUse()
     {
-        throw new NotImplementedException();
+        var drives = System.IO.DriveInfo.GetDrives();
+
+        // Assuming the primary drive is fixed type
+        DriveInfo primaryDrive = drives.FirstOrDefault(drive => drive.DriveType == DriveType.Fixed);
+
+        if (primaryDrive != null)
+        {
+            long bytesAvailable = primaryDrive.TotalSize - primaryDrive.AvailableFreeSpace;
+            return new Units.DigitalStorage(bytesAvailable, Units.DigitalStorage.UnitType.Bytes);
+        }
+
+        /// If the primary drive is not found, it returns a Units.DigitalStorage object with 0 bytes.</returns>
+        return new Units.DigitalStorage(0, Units.DigitalStorage.UnitType.Bytes);
     }
 }
