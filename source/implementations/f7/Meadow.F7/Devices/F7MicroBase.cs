@@ -3,6 +3,7 @@ using Meadow.Gateways;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Threading;
 
 namespace Meadow.Devices;
 
@@ -165,7 +166,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                             }
                             else
                             {
-                                wifiAdapter.ConnectToDefaultAccessPoint();
+                                wifiAdapter.ConnectToDefaultAccessPoint(TimeSpan.FromSeconds(60), CancellationToken.None).Wait();
                             }
                         }
                     }

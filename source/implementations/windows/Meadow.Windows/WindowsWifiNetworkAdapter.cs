@@ -131,7 +131,7 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
     }
 
     /// <inheritdoc/>
-    public void ConnectToDefaultAccessPoint()
+    public Task ConnectToDefaultAccessPoint(TimeSpan timeout, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
