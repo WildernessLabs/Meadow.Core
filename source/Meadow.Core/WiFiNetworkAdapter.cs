@@ -62,13 +62,13 @@ public class WiFiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter, I
     }
 
     /// <inheritdoc/>
-    public Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
+    public Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken cancellationToken, ReconnectionType reconnection = ReconnectionType.Automatic)
     {
         throw new NotImplementedException();
     }
 
     /// <inheritdoc/>
-    public void ConnectToDefaultAccessPoint()
+    public Task ConnectToDefaultAccessPoint(TimeSpan timeout, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
