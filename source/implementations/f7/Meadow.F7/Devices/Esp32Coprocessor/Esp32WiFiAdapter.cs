@@ -482,35 +482,8 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 throw new NetworkException(ex.Message);
             }
 
-            token.ThrowIfCancellationRequested();
+            await WaitForConnectionToComplete(timeout, token);
 
-            var t = 0;
-
-            // wait for a state transition
-            while (CurrentState == NetworkState.Connecting)
-            {
-                await Task.Delay(500);
-                t += 500;
-                if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
-                {
-                    throw new TimeoutException();
-                }
-            }
-
-            if (CurrentState == NetworkState.Connected)
-            {
-                // testing has revealed that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
-                while (IpAddress.Equals(System.Net.IPAddress.Any))
-                {
-                    await Task.Delay(500);
-                    this.Refresh();
-                    t += 500;
-                    if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
-                    {
-                        throw new TimeoutException();
-                    }
-                }
-            }
         }, token);
 
         await connectTask;
@@ -518,6 +491,39 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         if (CurrentState == NetworkState.Error)
         {
             throw new Exception($"Connection error: {_lastStatus}");
+        }
+    }
+
+    private async Task WaitForConnectionToComplete(TimeSpan timeout, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+
+        var t = 0;
+
+        // wait for a state transition
+        while (CurrentState == NetworkState.Connecting)
+        {
+            await Task.Delay(500);
+            t += 500;
+            if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
+            {
+                throw new TimeoutException();
+            }
+        }
+
+        if (CurrentState == NetworkState.Connected)
+        {
+            // testing has revealed that just because we're connected, it doesn't mean we've propagated the IP to the network infrastructure
+            while (IpAddress.Equals(System.Net.IPAddress.Any))
+            {
+                await Task.Delay(500);
+                this.Refresh();
+                t += 500;
+                if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
+                {
+                    throw new TimeoutException();
+                }
+            }
         }
     }
 
@@ -560,18 +566,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
             // NOTE: 'result' here is only the result of the ioctl, *not* the result of the disconnection request
 
-            var t = 0;
-
-            // wait for a state transition
-            while (CurrentState == NetworkState.Disconnecting)
-            {
-                await Task.Delay(500);
-                t += 500;
-                if (t > TimeSpan.FromSeconds(30).TotalMilliseconds)
-                {
-                    throw new TimeoutException();
-                }
-            }
+            await WaitForDisconnectToComplete(CancellationToken.None);
         });
     }
 
@@ -579,20 +574,69 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// Connect to the default access point.
     /// </summary>
     /// <remarks>The access point credentials should be stored in the coprocessor memory.</remarks>
-    public void ConnectToDefaultAccessPoint()
+    public async Task ConnectToDefaultAccessPoint(TimeSpan timeout, CancellationToken cancellationToken)
     {
         if (Resolver.Device.PlatformOS.SelectedNetwork != IPlatformOS.NetworkConnectionType.WiFi)
         {
-            throw new NotSupportedException($"ConnectToDefaultAccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
+            throw new InvalidOperationException($"ConnectToDefaultAccessPoint can only be called when the platform is configured to use the WiFi network adapter.  It is currently configured for {Resolver.Device.PlatformOS.SelectedNetwork}");
         }
 
-        if ((CurrentState == NetworkState.Connected) || (CurrentState == NetworkState.Connecting))
+        if (string.IsNullOrWhiteSpace(DefaultSsid))
         {
-            throw new InvalidOperationException($"Already connected or connecting to an access point, current state {CurrentState}");
+            throw new InvalidOperationException($"ConnectToDefaultAccessPoint can only be called when a default SSID has been defined");
         }
 
-        CurrentState = NetworkState.Connecting;
-        _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (int)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+    checkState:
+        cancellationToken.ThrowIfCancellationRequested();
+
+        Resolver.Log.Info($"Current state: {CurrentState}");
+
+        switch (CurrentState)
+        {
+            case NetworkState.Connected:
+                throw new InvalidOperationException($"Already connected to an access point. Disconnect before requesting a new connection.");
+            case NetworkState.Connecting:
+                // already connecting, nothing to do but wait
+                break;
+            case NetworkState.Disconnecting:
+                await WaitForDisconnectToComplete(cancellationToken);
+                // because C# doesn't let us fall through
+                goto checkState;
+            default:
+                CurrentState = NetworkState.Connecting;
+                _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (int)WiFiFunction.ConnectToDefaultAccessPoint, false, null);
+                break;
+        }
+
+        var t = 0;
+
+        while (CurrentState == NetworkState.Connecting)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await Task.Delay(500);
+            t += 500;
+            if ((timeout.TotalMilliseconds > 0) && (t > timeout.TotalMilliseconds))
+            {
+                throw new TimeoutException();
+            }
+        }
+    }
+
+    private async Task WaitForDisconnectToComplete(CancellationToken cancellationToken)
+    {
+        var t = 0;
+
+        // wait for a state transition
+        while (CurrentState == NetworkState.Disconnecting)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await Task.Delay(500);
+            t += 500;
+            if (t > TimeSpan.FromSeconds(30).TotalMilliseconds)
+            {
+                throw new TimeoutException();
+            }
+        }
     }
 
     /// <summary>
