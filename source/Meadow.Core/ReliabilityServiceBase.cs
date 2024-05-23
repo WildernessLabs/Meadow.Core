@@ -57,10 +57,10 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     public ReliabilityServiceBase()
     {
         _reportFiles = new string[]
-            {
-                Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"),
-                Path.Combine(MeadowOS.FileSystem.UserFileSystemRoot, "crash", "mono_error.txt")
-            };
+        {
+            MeadowOS.FileSystem.AppCrashFile,
+            MeadowOS.FileSystem.RuntimeCrashFile
+        };
     }
 
     /// <inheritdoc/>

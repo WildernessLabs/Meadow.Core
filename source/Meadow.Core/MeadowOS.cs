@@ -212,7 +212,7 @@ public static partial class MeadowOS
 
         try
         {
-            using var file = System.IO.File.CreateText(Path.Combine(MeadowOS.FileSystem.DataDirectory, "meadow.error"));
+            using var file = File.CreateText(MeadowOS.FileSystem.AppCrashFile);
             file.Write(e.ToString());
         }
         catch
