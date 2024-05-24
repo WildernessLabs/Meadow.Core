@@ -19,6 +19,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _imei;
     private string? _csq;
     private string? _at_cmds_output;
+    private bool _is_connected;
     private static CellNetworkState _cell_state;
 
     /// <summary>
@@ -134,6 +135,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 UpdateAtCmdsOutput();
 
                 this.Refresh();
+                _is_connected = true;
                 RaiseNetworkConnected(args);
                 break;
             case CellFunction.NetworkDisconnectedEvent:
@@ -143,6 +145,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 ResetCellTempData();
 
+                _is_connected = false;
                 RaiseNetworkDisconnected(null);
                 break;
             case CellFunction.NetworkAtCmdEvent:
@@ -166,21 +169,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <summary>
     /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
     /// </summary>
-    public override bool IsConnected
-    {
-        get
-        {
-            try
-            {
-                return Core.Interop.Nuttx.meadow_cell_is_connected();
-            }
-            catch (Exception e)
-            {
-                Resolver.Log.Error($"Failed to read meadow_cell_is_connected(): {e.Message}");
-                return false;
-            }
-        }
-    }
+    public override bool IsConnected => _is_connected;
 
     /// <summary>
     /// Returns the cell module <b>IMEI</b> if the device has already been connected at least once, otherwise an empty string
@@ -315,6 +304,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <param name="CellState">State of the cell.</param>
     private static void CellSetState(CellNetworkState CellState)
     {
+        if (_cell_state == CellState)
+        {
+            Resolver.Log.Debug($"Cell state is already set to the desired state: {CellState}. No changes made.");
+            return;
+        }
+
         int state = 0;
         switch (CellState)
         {
