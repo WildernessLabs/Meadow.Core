@@ -721,55 +721,82 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             int maxRetries = 1;
             string errorMessage;
 
+            int count = 0;
             var json = Resolver.JsonSerializer.Serialize(item);
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         retry:
-            client.BaseAddress = new Uri(Settings.DataHostname);
-
-            if (Settings.UseAuthentication)
+            using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
             {
-                if (_jwt == null)
+                client.BaseAddress = new Uri(Settings.DataHostname);
+
+                if (Settings.UseAuthentication)
                 {
-                    await Authenticate();
+                    if (_jwt == null)
+                    {
+                        await Authenticate();
+                    }
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
                 }
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
-            }
 
-            Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
+                Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
 
-            HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
+                GC.Collect();
+    
+                var info = Resolver.Device.PlatformOS.GetMemoryAllocationInfo();
+                Console.WriteLine("Memory Allocation Information:");
+                Console.WriteLine($"  Arena: {info.Arena} bytes");
+                Console.WriteLine($"  Free Blocks: {info.FreeBlocks}");
+                Console.WriteLine($"  Largest Free Block: {info.LargestFreeBlock} bytes");
+                Console.WriteLine($"  Total Allocated: {info.TotalAllocated} bytes");
+                Console.WriteLine($"  Total Free: {info.TotalFree} bytes");
+                Console.WriteLine($"GC Total Memory: {GC.GetTotalMemory(false)} bytes");
+                
+                // Console.WriteLine("Memory Allocation Information:");
+                // Console.WriteLine($"  Arena: {info.Arena} bytes");
+                // Console.WriteLine($"  Free Blocks: {info.FreeBlocks}");
+                // Console.WriteLine($"  Largest Free Block: {info.LargestFreeBlock} bytes");
+                // Console.WriteLine($"  Total Allocated: {info.TotalAllocated} bytes");
+                // Console.WriteLine($"  Total Free: {info.TotalFree} bytes");
+            
+                // Console.WriteLine($"GC Total Memory: {GC.GetTotalMemory(false)}");
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
-            {
-                attempt++;
-                // by setting this to null and retrying, Authenticate will get called
-                ClientOptions = null;
-                _jwt = null;
-                client.Dispose();
-                client = new HttpClient();
-                goto retry;
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                using (HttpResponseMessage response = await client.PostAsync($"{endpoint}", content))
                 {
-                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
-                }
-                else
-                {
-                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
-                }
-                LogAndRaiseOnErrorOccurredEvent(errorMessage);
-                return false;
-            }
-            else
-            {
-                Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
-                return true;
-            }
+                    count++;
+                    if (count > 0)
+                        throw new Exception("Artificial Exception!!!!!");
+                    if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
+                    {
+                        attempt++;
+                        // by setting this to null and retrying, Authenticate will get called
+                        ClientOptions = null;
+                        _jwt = null;
+                        client.Dispose();
+                        client = new HttpClient();
+                        goto retry;
+                    }
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        if (response.StatusCode == HttpStatusCode.InternalServerError)
+                        {
+                            errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                        }
+                        else
+                        {
+                            errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                        }
+                        LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                        return false;
+                    }
+                    else
+                    {
+                        Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
+                        return true;
+                    }
+                } // response is disposed here
+            } // content is disposed here
         }
         catch (Exception ex)
         {
