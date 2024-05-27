@@ -17,10 +17,64 @@ internal static partial class Interop
         public static extern int meadow_get_cell_at_cmds_output(IntPtr buf);
 
         [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern void meadow_cell_change_state(int s);
+        public static extern int meadow_cell_change_state(int state, IntPtr data);
 
         [DllImport(LIBRARY_NAME, SetLastError = true)]
         public static extern int meadow_get_cell_error();
+
+        /// <summary>
+        /// Changes the state of the cell using the specified configuration object.
+        /// </summary>
+        /// <param name="state">The state of the cell.</param>
+        /// <param name="config">The configuration object for the cell state change.</param>
+        /// <returns>The result of the state change operation.</returns>
+        public static void ChangeCellState(int state, CellStateConfig config)
+        {
+            // Check if the config is null
+            IntPtr configPtr = IntPtr.Zero;
+            try
+            {
+                if (config != null)
+                {
+                    Resolver.Log.Trace($"Preparing to change cell state to {state} with config: {config}");
+
+                    int configSize = Marshal.SizeOf(config);
+                    configPtr = Marshal.AllocHGlobal(configSize);
+                    Marshal.StructureToPtr(config, configPtr, false);
+
+                    Resolver.Log.Trace($"State: {state}, Config Size: {configSize}, ConfigPtr: {configPtr}");
+                }
+                else
+                {
+                    Resolver.Log.Trace($"Preparing to change cell state to {state} with no config.");
+                }
+
+                int result = Core.Interop.Nuttx.meadow_cell_change_state(state, configPtr);
+
+                if (result != 0)
+                {
+                    Resolver.Log.Error($"Failed to change cellular state with error code: {result}");
+                    throw new Exception($"Failed to change cellular state with error code: {result}");
+                }
+                else
+                {
+                    Resolver.Log.Trace($"Successfully changed cellular state to {state}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Error changing cell state: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                if (configPtr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(configPtr);
+                    Resolver.Log.Trace($"Freed memory for configPtr: {configPtr}");
+                }
+            }
+        }
 
         public static List<CellNetwork>? ParseCellNetworkScannerOutput(string input)
         {

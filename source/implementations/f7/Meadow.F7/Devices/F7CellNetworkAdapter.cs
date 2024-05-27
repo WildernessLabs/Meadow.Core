@@ -133,7 +133,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 var args = new CellNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
 
                 UpdateAtCmdsOutput();
-
+                Console.WriteLine("NetworkConnectedEvent" + _at_cmds_output);
                 this.Refresh();
                 _is_connected = true;
                 RaiseNetworkConnected(args);
@@ -144,16 +144,23 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
 
                 ResetCellTempData();
+                Console.WriteLine("NetworkDisconnectedEvent" + _at_cmds_output);
 
                 _is_connected = false;
                 RaiseNetworkDisconnected(null);
                 break;
             case CellFunction.NetworkAtCmdEvent:
                 Resolver.Log.Trace("Cell at cmd event triggered!");
-
                 UpdateAtCmdsOutput();
-                
-                CellSetState(CellNetworkState.Resumed);
+                Console.WriteLine("NetworkAtCmdEvent" + _at_cmds_output);
+
+                if (_at_cmds_output.Length < 6)
+                {
+                    break;
+                }
+                Console.WriteLine("NetworkAtCmdEvent triggered!!" + _at_cmds_output.Length);
+
+                CellSetState(CellNetworkState.Resumed, null);
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
@@ -297,21 +304,21 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             _ => $"An undefined error occurred. Please consult the troubleshooting section of the cellular documentation for more information. {logInfoMessage}",
         };
     }
-    
+
     /// <summary>
-    /// Set the cell state
+    /// Sets the state of the cell network to the specified state.
     /// </summary>
-    /// <param name="CellState">State of the cell.</param>
-    private static void CellSetState(CellNetworkState CellState)
+    /// <param name="cellState">The desired state of the cell network.</param>
+    /// <param name="config">The configuration for the cell state change.</param>
+    private static void CellSetState(CellNetworkState cellState, CellStateConfig config)
     {
-        if (_cell_state == CellState)
+        if (_cell_state == cellState)
         {
-            Resolver.Log.Debug($"Cell state is already set to the desired state: {CellState}. No changes made.");
-            return;
+            Resolver.Log.Info($"Cell state is already set to the desired state: {cellState}. No changes made.");
         }
 
         int state = 0;
-        switch (CellState)
+        switch (cellState)
         {
             case CellNetworkState.Resumed:
                 state = 0;
@@ -332,8 +339,10 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 state |= 1 << 0;
                 break;
         }
-        _cell_state = CellState;
-        Core.Interop.Nuttx.meadow_cell_change_state(state);
+
+        Resolver.Log.Debug($"Changing cell state from {_cell_state} to {cellState}");
+        _cell_state = cellState;
+        Core.Interop.Nuttx.ChangeCellState(state, config);
     }
 
     /// <summary>
@@ -348,7 +357,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         string csqPattern = @"\+CSQ:\s+(\d+),\d+";
         _at_cmds_output = string.Empty;
 
-        CellSetState(CellNetworkState.FetchingSignalQuality);
+        CellSetState(CellNetworkState.FetchingSignalQuality, new SignalQualityConfig { timeout = timeout });
 
         while (_cell_state != CellNetworkState.Resumed && timeout > 0)
         {
@@ -359,12 +368,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         // Resume cell if the timeout was reached
         if (timeout == 0)
         {
-            CellSetState(CellNetworkState.Resumed);
+            CellSetState(CellNetworkState.Resumed, null);
         }
 
         if (string.IsNullOrEmpty(_at_cmds_output))
         {
-            Resolver.Log.Error("AT commands output not found!");
+            Resolver.Log.Error("Failed to retrieve signal quality. Check your setup or try increasing the timeout.");
             return NoSignal;
         }
 
@@ -382,7 +391,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     {
         Resolver.Log.Trace("Scanning for available cellular networks... It might take a few minutes and temporary disconnect you from the cellular network.");
 
-        CellSetState(CellNetworkState.ScanningNetworks);
+        CellSetState(CellNetworkState.ScanningNetworks, new ScanConfig { timeout = timeout });
         _at_cmds_output = string.Empty;
 
         while (_cell_state != CellNetworkState.Resumed && timeout > 0)
@@ -394,7 +403,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         // Resume cell if the timeout was reached
         if (timeout == 0)
         {
-            CellSetState(CellNetworkState.Resumed);
+            CellSetState(CellNetworkState.Resumed, null);
         }
 
         if (string.IsNullOrEmpty(_at_cmds_output))
@@ -403,6 +412,41 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         }
 
         return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output).ToArray();
+    }
+
+    public enum NmeaSentenceType
+    {
+        GSV = 1 << 0,
+        GGA = 1 << 1,
+        RMC = 1 << 2,
+        GSA = 1 << 3,
+        VTG = 1 << 4
+    }
+
+    public static int ConvertResultTypesToNmeaSentenceType(IGnssResult[] resultTypes)
+    {
+        int nmeaSentenceType = 0;
+        foreach (var resultType in resultTypes)
+        {
+            if (resultType is GnssPositionInfo)
+            {
+                nmeaSentenceType |= (int)NmeaSentenceType.RMC;
+                nmeaSentenceType |= (int)NmeaSentenceType.GGA;
+            }
+            else if (resultType is ActiveSatellites)
+            {
+                nmeaSentenceType |= (int)NmeaSentenceType.GSV;
+            }
+            else if (resultType is CourseOverGround)
+            {
+                nmeaSentenceType |= (int)NmeaSentenceType.VTG;
+            }
+            else if (resultType is SatellitesInView)
+            {
+                nmeaSentenceType |= (int)NmeaSentenceType.GSA;
+            }
+        }
+        return nmeaSentenceType;
     }
 
     /// <summary>
@@ -416,8 +460,19 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         Resolver.Log.Trace("Retrieving GPS location... It might take a few minutes and temporary disconnect you from the cellular network.");
         _at_cmds_output = string.Empty;
 
-        // TODO: Take into consideration the GNSS result types
-        CellSetState(CellNetworkState.TrackingGPSLocation);
+        if (resultTypes == null || resultTypes.Length == 0)
+        {
+            resultTypes = new IGnssResult[]
+            {
+                new GnssPositionInfo(),
+                new ActiveSatellites(),
+                new CourseOverGround(),
+                new SatellitesInView(new Satellite[0])
+            };
+        }
+
+        int nmeaSentenceType = ConvertResultTypesToNmeaSentenceType(resultTypes);
+        CellSetState(CellNetworkState.TrackingGPSLocation, new GpsConfig { timeout = timeout, nmea_types = nmeaSentenceType });
 
         //ToDo: switch to TimeSpan
         while (_cell_state != CellNetworkState.Resumed && timeout > 0)
@@ -429,14 +484,14 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         // Resume cell if the timeout was reached
         if (timeout == 0)
         {
-            CellSetState(CellNetworkState.Resumed);
+            CellSetState(CellNetworkState.Resumed, null);
         }
 
         var gnssAtCmdsOutput = _at_cmds_output;
 
         if (string.IsNullOrEmpty(gnssAtCmdsOutput))
         {
-            Resolver.Log.Error("AT commands output not found!");
+            Resolver.Log.Error("Failed to retrieve GNSS data. Check your setup or try increasing the timeout.");
             return string.Empty;
         }
         return gnssAtCmdsOutput;
