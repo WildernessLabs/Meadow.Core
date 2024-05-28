@@ -24,7 +24,7 @@ public class CharacteristicBool : Characteristic<bool>
     /// <param name="data">The data to be written.</param>
     public override void HandleDataWrite(byte[] data)
     {
-        Resolver.Log.Info($"HandleDataWrite in {this.GetType().Name}");
+        Resolver.Log.Debug($"HandleDataWrite in {this.GetType().Name}");
         RaiseValueSet(data[0] != 0);
     }
 

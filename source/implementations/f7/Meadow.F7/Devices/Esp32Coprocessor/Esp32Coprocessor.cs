@@ -26,9 +26,10 @@ public partial class Esp32Coprocessor : ICoprocessor
 
     private static readonly byte[] EmptyPayload = new byte[0];
 
-    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)> WiFiMessageReceived = default!;
-    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)> CellMessageReceived = default!;
-    internal event EventHandler<(EthernetFunction fn, StatusCodes status, byte[] data)> EthernetMessageReceived = default!;
+    internal event EventHandler<(WiFiFunction fn, StatusCodes status, byte[] data)>? WiFiMessageReceived = default!;
+    internal event EventHandler<(CellFunction fn, StatusCodes status, byte[] data)>? CellMessageReceived = default!;
+    internal event EventHandler<(EthernetFunction fn, StatusCodes status, byte[] data)>? EthernetMessageReceived = default!;
+    internal event EventHandler<(SystemFunction fn, StatusCodes status)>? SystemMessageReceived = default!;
 
 
     /// <summary>
@@ -125,8 +126,6 @@ public partial class Esp32Coprocessor : ICoprocessor
         StatusCodes result = StatusCodes.CompletedOk;
         try
         {
-            Resolver.Log.Trace($"Sending ESP command. destination:{destination}, function:{function}");
-
             var command = new Nuttx.UpdEsp32Command()
             {
                 Interface = destination,
@@ -160,7 +159,6 @@ public partial class Esp32Coprocessor : ICoprocessor
             if (updResult == 0)
             {
                 result = (StatusCodes)command.StatusCode;
-                Resolver.Log.Trace($"ESP Ioctl returned success: {result}");
             }
             else
             {
@@ -282,17 +280,15 @@ public partial class Esp32Coprocessor : ICoprocessor
                                 break;
                             case Esp32Interfaces.WiFi:
                                 WiFiMessageReceived?.Invoke(this, ((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
-                                //InvokeEvent((WiFiFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? new byte[0]);
                                 break;
                             case Esp32Interfaces.BlueTooth:
                                 InvokeEvent((BluetoothFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload);
                                 break;
                             case Esp32Interfaces.Cell:
                                 CellMessageReceived?.Invoke(this, ((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload));
-                                //InvokeEvent((CellFunction)eventData.Function, (StatusCodes)eventData.StatusCode, payload ?? EmptyPayload);
                                 break;
                             case Esp32Interfaces.System:
-                                Console.WriteLine($" ******************** Process system event {(SystemFunction) eventData.Function}, status code {(StatusCodes) eventData.StatusCode}.");
+                                SystemMessageReceived?.Invoke(this, ((SystemFunction)eventData.Function, (StatusCodes)eventData.StatusCode));
                                 break;
                             default:
                                 throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");

@@ -1,7 +1,9 @@
-﻿using Meadow.Gateways;
+﻿using Meadow.Devices.Esp32.MessagePayloads;
+using Meadow.Gateways;
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using System.Threading;
 
 namespace Meadow.Devices;
 
@@ -141,6 +143,13 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                     BluetoothAdapter = esp32;
                     Coprocessor = esp32;
 
+                    esp32.SystemMessageReceived += (s, e) =>
+                    {
+                        (PlatformOS as F7PlatformOS)?.RaiseSystemErrorException(new Esp32SystemErrorInfo((int)e.fn, e.status));
+
+                        // TODO: some of these may necessitate restarting the device
+                    };
+
                     if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                     {
                         Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
@@ -157,7 +166,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                             }
                             else
                             {
-                                wifiAdapter.ConnectToDefaultAccessPoint();
+                                wifiAdapter.ConnectToDefaultAccessPoint(TimeSpan.FromSeconds(60), CancellationToken.None).Wait();
                             }
                         }
                     }

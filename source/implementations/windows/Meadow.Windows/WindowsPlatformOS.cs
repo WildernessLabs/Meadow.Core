@@ -27,6 +27,8 @@ public class WindowsPlatformOS : IPlatformOS
     /// Event raised when an external storage device event occurs.
     /// </summary>
     public event ExternalStorageEventHandler ExternalStorageEvent = default!;
+    /// <inheritdoc/>
+    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError;
 
     /// <summary>
     /// Gets the OS version.

@@ -1,5 +1,4 @@
-﻿using Meadow.Devices;
-using Meadow.Foundation.Displays;
+﻿using Meadow.Foundation.Displays;
 using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
@@ -9,18 +8,22 @@ namespace Meadow;
 
 public class Windows : IMeadowDevice, IPixelDisplayProvider
 {
-    private readonly Lazy<NativeNetworkAdapterCollection> _networkAdapters;
+    private readonly Lazy<WindowsNetworkAdapterCollection> _networkAdapters;
 
+    /// <inheritdoc/>
     public IPlatformOS PlatformOS { get; }
+    /// <inheritdoc/>
     public DeviceCapabilities Capabilities { get; private set; }
+    /// <inheritdoc/>
     public IDeviceInformation Information { get; private set; }
+    /// <inheritdoc/>
     public INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
 
     public Windows()
     {
         PlatformOS = new WindowsPlatformOS();
-        _networkAdapters = new Lazy<NativeNetworkAdapterCollection>(
-            new NativeNetworkAdapterCollection());
+        _networkAdapters = new Lazy<WindowsNetworkAdapterCollection>(
+            new WindowsNetworkAdapterCollection());
     }
 
     /// <inheritdoc/>
