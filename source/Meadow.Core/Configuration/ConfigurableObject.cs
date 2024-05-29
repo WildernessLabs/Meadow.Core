@@ -104,7 +104,6 @@ public abstract class ConfigurableObject
     {
         var b = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
         b.AddYamlFile(DefaultYamlFileName, true);
-        b.AddJsonFile(DefaultJsonFileName, true);
 
         try
         {

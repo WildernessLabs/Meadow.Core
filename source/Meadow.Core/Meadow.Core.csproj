@@ -32,7 +32,6 @@
 	  <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
 	  <ProjectReference Include="..\..\..\Meadow.Modbus\src\Meadow.Modbus\Meadow.Modbus.csproj" />
 	  <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
-	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
       <PackageReference Include="System.IO.Hashing" Version="8.0.0" />      
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.2.0" />
   </ItemGroup>
