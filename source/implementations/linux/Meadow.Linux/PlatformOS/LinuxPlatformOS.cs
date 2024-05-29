@@ -31,6 +31,8 @@ public class LinuxPlatformOS : IPlatformOS
     /// Event raised when an external storage device event occurs.
     /// </summary>
     public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
+    /// <inheritdoc/>
+    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError;
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -55,9 +57,10 @@ public class LinuxPlatformOS : IPlatformOS
 
     internal static CancellationTokenSource AppAbort = new();
 
+    /// <inheritdoc/>
     public INtpClient NtpClient { get; private set; }
+    /// <inheritdoc/>
     public IPlatformOS.FileSystemInfo FileSystem { get; }
-    public string[] NtpServers => throw new NotImplementedException();
 
     internal LinuxPlatformOS()
     {
@@ -223,60 +226,79 @@ public class LinuxPlatformOS : IPlatformOS
 
 
 
+    /// <inheritdoc/>
+    public string[] NtpServers => throw new NotImplementedException();
+
+    /// <inheritdoc/>
     public bool RebootOnUnhandledException => false;
 
+    /// <inheritdoc/>
     public uint InitializationTimeout => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public bool AutomaticallyStartNetwork => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public IPlatformOS.NetworkConnectionType SelectedNetwork => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public bool SdStorageSupported => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public T GetConfigurationValue<T>(IPlatformOS.ConfigurationValues item) where T : struct
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void SetConfigurationValue<T>(IPlatformOS.ConfigurationValues item, T value) where T : struct
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void Sleep(TimeSpan duration)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void RegisterForSleep(ISleepAwarePeripheral peripheral)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public string ReservedPins => string.Empty;
 
+    /// <inheritdoc/>
     public int[] GetProcessorUtilization()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public IStorageInformation[] GetStorageInformation()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void Sleep(IPin interruptPin, InterruptMode interruptMode, ResistorMode resistorMode = ResistorMode.Disabled)
     {
         throw new NotImplementedException();

@@ -1,7 +1,5 @@
 ﻿using Meadow.Hardware;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Meadow.Devices
 {
@@ -12,33 +10,72 @@ namespace Meadow.Devices
         /// <summary>
         /// Defines the pinout for the Meadow F7 Core Compute v2 module.
         /// </summary>
-        public partial class Pinout : IF7CoreComputePinout
+        public partial class Pinout : PinDefinitionBase, IF7CoreComputePinout
         {
-            /// <inheritdoc/>
-            public IPinController? Controller { get; set; }
+            private IPin? _pa0;
+            private IPin? _pa1;
+            private IPin? _pa2;
+            private IPin? _pa3;
+            private IPin? _pa4;
+            private IPin? _pa5;
+            private IPin? _pa7;
+            private IPin? _pa9;
+            private IPin? _pa10;
+            private IPin? _pa13;
+            private IPin? _pa14;
+            private IPin? _pa15;
+            private IPin? _pb0;
+            private IPin? _pb1;
+            private IPin? _pb3;
+            private IPin? _pb4;
+            private IPin? _pb5;
+            private IPin? _pb6;
+            private IPin? _pb7;
+            private IPin? _pb8;
+            private IPin? _pb9;
+            private IPin? _pb11;
+            private IPin? _pb12;
+            private IPin? _pb13;
+            private IPin? _pb14;
+            private IPin? _pb15;
+            private IPin? _pc0;
+            private IPin? _pc1;
+            private IPin? _pc2;
+            private IPin? _pc4;
+            private IPin? _pc5;
+            private IPin? _pc6;
+            private IPin? _pc7;
+            private IPin? _pc8;
+            private IPin? _pc9;
+            private IPin? _pc10;
+            private IPin? _pc11;
+            private IPin? _pd5;
+            private IPin? _pd6;
+            private IPin? _pd7;
+            private IPin? _pf8;
+            private IPin? _pf9;
+            private IPin? _pg6;
+            private IPin? _pg9;
+            private IPin? _pg10;
+            private IPin? _pg11;
+            private IPin? _pg12;
+            private IPin? _pg13;
+            private IPin? _pg14;
+            private IPin? _ph6;
+            private IPin? _ph7;
+            private IPin? _ph8;
+            private IPin? _ph10;
+            private IPin? _ph12;
+            private IPin? _ph13;
+            private IPin? _ph14;
+            private IPin? _pi9;
+            private IPin? _pi11;
 
-            /// <inheritdoc/>
-            public IList<IPin> AllPins { get; }
-
-            internal Pinout()
-            {
-                AllPins = new List<IPin>();
-
-                foreach (var pin in this.GetType()
-                    .GetProperties()
-                    .Where(p => p.PropertyType is IPin)
-                    .Select(p => p.GetValue(this) as IPin))
-                {
-                    if (pin != null)
-                    {
-                        AllPins.Add(pin);
-                    }
-                }
-            }
+            internal Pinout() { }
 
             // ==== DISCRETES ====
             /// <inheritdoc/>
-            public IPin PA0 => new Pin(
+            public IPin PA0 => _pa0 ??= new Pin(
                 Controller,
                 "PA0", "PA0",
                 new List<IChannelInfo> {
@@ -48,7 +85,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA1_ETH_REF_CLK => new Pin(
+            public IPin PA1_ETH_REF_CLK => _pa1 ??= new Pin(
                 Controller,
                 "PA1", "PA1",
                 new List<IChannelInfo> {
@@ -57,7 +94,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA2_ETH_MDIO => new Pin(
+            public IPin PA2_ETH_MDIO => _pa2 ??= new Pin(
                 Controller,
                 "PA2", "PA2",
                 new List<IChannelInfo> {
@@ -66,7 +103,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA3 => new Pin(
+            public IPin PA3 => _pa3 ??= new Pin(
                 Controller,
                 "PA3", "PA3",
                 new List<IChannelInfo> {
@@ -76,7 +113,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA4 => new Pin(
+            public IPin PA4 => _pa4 ??= new Pin(
                 Controller,
                 "PA4", "PA4",
                 new List<IChannelInfo> {
@@ -86,7 +123,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA5 => new Pin(
+            public IPin PA5 => _pa5 ??= new Pin(
                 Controller,
                 "PA5", "PA5",
                 new List<IChannelInfo> {
@@ -96,7 +133,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA7_ETH_CRS_DV => new Pin(
+            public IPin PA7_ETH_CRS_DV => _pa7 ??= new Pin(
                 Controller,
                 "PA7", "PA7",
                 new List<IChannelInfo> {
@@ -105,7 +142,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA9 => new Pin(
+            public IPin PA9 => _pa9 ??= new Pin(
                 Controller,
                 "PA9", "PA9",
                 new List<IChannelInfo> {
@@ -114,7 +151,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA10 => new Pin(
+            public IPin PA10 => _pa10 ??= new Pin(
                 Controller,
                 "PA10", "PA10",
                 new List<IChannelInfo> {
@@ -123,7 +160,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA13 => new Pin(
+            public IPin PA13 => _pa13 ??= new Pin(
                 Controller,
                 "PA13", "PA13",
                 new List<IChannelInfo> {
@@ -132,7 +169,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA14 => new Pin(
+            public IPin PA14 => _pa14 ??= new Pin(
                 Controller,
                 "PA14", "PA14",
                 new List<IChannelInfo> {
@@ -141,7 +178,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PA15 => new Pin(
+            public IPin PA15 => _pa15 ??= new Pin(
                 Controller,
                 "PA15", "PA15",
                 new List<IChannelInfo> {
@@ -150,7 +187,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB0 => new Pin(
+            public IPin PB0 => _pb0 ??= new Pin(
                 Controller,
                 "PB0", "PB0",
                 new List<IChannelInfo> {
@@ -160,7 +197,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB1 => new Pin(
+            public IPin PB1 => _pb1 ??= new Pin(
                 Controller,
                 "PB1", "PB1",
                 new List<IChannelInfo> {
@@ -170,7 +207,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB3 => new Pin(
+            public IPin PB3 => _pb3 ??= new Pin(
                 Controller,
                 "PB3", "PB3",
                 new List<IChannelInfo> {
@@ -179,7 +216,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB4 => new Pin(
+            public IPin PB4 => _pb4 ??= new Pin(
                 Controller,
                 "PB4", "PB4",
                 new List<IChannelInfo> {
@@ -189,7 +226,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB5 => new Pin(
+            public IPin PB5 => _pb5 ??= new Pin(
                 Controller,
                 "PB5", "PB5",
                 new List<IChannelInfo> {
@@ -199,7 +236,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB6 => new Pin(
+            public IPin PB6 => _pb6 ??= new Pin(
                 Controller,
                 "PB6", "PB6",
                 new List<IChannelInfo> {
@@ -210,7 +247,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB7 => new Pin(
+            public IPin PB7 => _pb7 ??= new Pin(
                 Controller,
                 "PB7", "PB7",
                 new List<IChannelInfo> {
@@ -221,7 +258,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB8 => new Pin(
+            public IPin PB8 => _pb8 ??= new Pin(
                 Controller,
                 "PB8", "PB8",
                 new List<IChannelInfo> {
@@ -231,7 +268,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB9 => new Pin(
+            public IPin PB9 => _pb9 ??= new Pin(
                 Controller,
                 "PB9", "PB9",
                 new List<IChannelInfo> {
@@ -241,7 +278,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB11_ETH_TX_EN => new Pin(
+            public IPin PB11_ETH_TX_EN => _pb11 ??= new Pin(
                 Controller,
                 "PB11", "PB11",
                 new List<IChannelInfo> {
@@ -250,7 +287,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB12 => new Pin(
+            public IPin PB12 => _pb12 ??= new Pin(
                 Controller,
                 "PB12", "PB12",
                 new List<IChannelInfo> {
@@ -259,7 +296,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB13 => new Pin(
+            public IPin PB13 => _pb13 ??= new Pin(
                 Controller,
                 "PB13", "PB13",
                 new List<IChannelInfo> {
@@ -268,7 +305,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB14 => new Pin(
+            public IPin PB14 => _pb14 ??= new Pin(
                 Controller,
                 "PB14", "PB14",
                 new List<IChannelInfo> {
@@ -279,7 +316,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB15 => new Pin(
+            public IPin PB15 => _pb15 ??= new Pin(
                 Controller,
                 "PB15", "PB15",
                 new List<IChannelInfo> {
@@ -290,7 +327,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC0 => new Pin(
+            public IPin PC0 => _pc0 ??= new Pin(
                 Controller,
                 "PC0", "PC0",
                 new List<IChannelInfo> {
@@ -300,7 +337,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC1_ETH_MDC => new Pin(
+            public IPin PC1_ETH_MDC => _pc1 ??= new Pin(
                 Controller,
                 "PC1", "PC1",
                 new List<IChannelInfo> {
@@ -309,7 +346,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC2 => new Pin(
+            public IPin PC2 => _pc2 ??= new Pin(
                 Controller,
                 "PC2", "PC2",
                 new List<IChannelInfo> {
@@ -318,7 +355,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC4_ETH_RXD0 => new Pin(
+            public IPin PC4_ETH_RXD0 => _pc4 ??= new Pin(
                 Controller,
                 "PC4", "PC4",
                 new List<IChannelInfo> {
@@ -327,7 +364,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC5_ETH_RXD1 => new Pin(
+            public IPin PC5_ETH_RXD1 => _pc5 ??= new Pin(
                 Controller,
                 "PC5", "PC5",
                 new List<IChannelInfo> {
@@ -336,7 +373,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC6 => new Pin(
+            public IPin PC6 => _pc6 ??= new Pin(
                 Controller,
                 "PC6", "PC6",
                 new List<IChannelInfo> {
@@ -346,7 +383,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC7 => new Pin(
+            public IPin PC7 => _pc7 ??= new Pin(
                 Controller,
                 "PC7", "PC7",
                 new List<IChannelInfo> {
@@ -356,7 +393,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC8 => new Pin(
+            public IPin PC8 => _pc8 ??= new Pin(
                 Controller,
                 "PC8", "PC8",
                 new List<IChannelInfo> {
@@ -365,7 +402,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC9 => new Pin(
+            public IPin PC9 => _pc9 ??= new Pin(
                 Controller,
                 "PC9", "PC9",
                 new List<IChannelInfo> {
@@ -375,7 +412,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC10 => new Pin(
+            public IPin PC10 => _pc10 ??= new Pin(
                 Controller,
                 "PC10", "PC10",
                 new List<IChannelInfo> {
@@ -385,7 +422,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC11 => new Pin(
+            public IPin PC11 => _pc11 ??= new Pin(
                 Controller,
                 "PC11", "PC11",
                 new List<IChannelInfo> {
@@ -395,7 +432,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PD5 => new Pin(
+            public IPin PD5 => _pd5 ??= new Pin(
                 Controller,
                 "PD5", "PD5",
                 new List<IChannelInfo> {
@@ -404,7 +441,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PD6_SDMMC_CLK => new Pin(
+            public IPin PD6_SDMMC_CLK => _pd6 ??= new Pin(
                 Controller,
                 "PD6", "PD6",
                 new List<IChannelInfo> {
@@ -413,7 +450,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PD7_SDMMC_CMD => new Pin(
+            public IPin PD7_SDMMC_CMD => _pd7 ??= new Pin(
                 Controller,
                 "PD7", "PD7",
                 new List<IChannelInfo> {
@@ -422,7 +459,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PF8 => new Pin(
+            public IPin PF8 => _pf8 ??= new Pin(
                 Controller,
                 "PF8", "PF8",
                 new List<IChannelInfo> {
@@ -432,7 +469,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PF9 => new Pin(
+            public IPin PF9 => _pf9 ??= new Pin(
                 Controller,
                 "PF9", "PF9",
                 new List<IChannelInfo> {
@@ -442,7 +479,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG6_SDMMC_IN_L => new Pin(
+            public IPin PG6_SDMMC_IN_L => _pg6 ??= new Pin(
                 Controller,
                 "PG6", "PG6",
                 new List<IChannelInfo> {
@@ -451,7 +488,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG9_SDMMC_D0 => new Pin(
+            public IPin PG9_SDMMC_D0 => _pg9 ??= new Pin(
                 Controller,
                 "PG9", "PG9",
                 new List<IChannelInfo> {
@@ -460,7 +497,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG10_SDMMC_D1 => new Pin(
+            public IPin PG10_SDMMC_D1 => _pg10 ??= new Pin(
                 Controller,
                 "PG10", "PG10",
                 new List<IChannelInfo> {
@@ -469,7 +506,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG11_SDMMC_D2 => new Pin(
+            public IPin PG11_SDMMC_D2 => _pg11 ??= new Pin(
                 Controller,
                 "PG11", "PG11",
                 new List<IChannelInfo> {
@@ -478,7 +515,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG12_SDMMC_D3 => new Pin(
+            public IPin PG12_SDMMC_D3 => _pg12 ??= new Pin(
                 Controller,
                 "PG12", "PG12",
                 new List<IChannelInfo> {
@@ -487,7 +524,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG13_ETH_TXD0 => new Pin(
+            public IPin PG13_ETH_TXD0 => _pg13 ??= new Pin(
                 Controller,
                 "PG13", "PG13",
                 new List<IChannelInfo> {
@@ -496,7 +533,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PG14_ETH_TXD1 => new Pin(
+            public IPin PG14_ETH_TXD1 => _pg14 ??= new Pin(
                 Controller,
                 "PG14", "PG14",
                 new List<IChannelInfo> {
@@ -505,7 +542,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH6 => new Pin(
+            public IPin PH6 => _ph6 ??= new Pin(
                 Controller,
                 "PH6", "PH6",
                 new List<IChannelInfo> {
@@ -515,7 +552,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH7 => new Pin(
+            public IPin PH7 => _ph7 ??= new Pin(
                 Controller,
                 "PH7", "PH7",
                 new List<IChannelInfo> {
@@ -525,7 +562,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH8 => new Pin(
+            public IPin PH8 => _ph8 ??= new Pin(
                 Controller,
                 "PH8", "PH8",
                 new List<IChannelInfo> {
@@ -535,7 +572,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH10 => new Pin(
+            public IPin PH10 => _ph10 ??= new Pin(
                 Controller,
                 "PH10", "PH10",
                 new List<IChannelInfo> {
@@ -545,7 +582,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH12 => new Pin(
+            public IPin PH12 => _ph12 ??= new Pin(
                 Controller,
                 "PH12", "PH12",
                 new List<IChannelInfo> {
@@ -554,7 +591,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH13 => new Pin(
+            public IPin PH13 => _ph13 ??= new Pin(
                 Controller,
                 "PH13", "PH13",
                 new List<IChannelInfo> {
@@ -563,7 +600,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH14_ETH_IRQ => new Pin(
+            public IPin PH14_ETH_IRQ => _ph14 ??= new Pin(
                 Controller,
                 "PH14", "PH14",
                 new List<IChannelInfo> {
@@ -572,7 +609,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PI9 => new Pin(
+            public IPin PI9 => _pi9 ??= new Pin(
                 Controller,
                 "PI9", "PI9",
                 new List<IChannelInfo> {
@@ -582,7 +619,7 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PI11 => new Pin(
+            public IPin PI11 => _pi11 ??= new Pin(
                 Controller,
                 "PI11", "PI11",
                 new List<IChannelInfo> {
@@ -673,13 +710,6 @@ namespace Meadow.Devices
             public IPin D19 => PC8;
             /// <inheritdoc/>
             public IPin D20 => PA0; // BLINKY on dev board
-
-            /// <summary>
-            /// Get an enumeration of all pins
-            /// </summary>
-            /// <returns>The enumerator of type IPin</returns>
-            public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
     }
 }

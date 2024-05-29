@@ -1,43 +1,16 @@
 ﻿using Meadow.Hardware;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Meadow.Pinouts;
 
 /// <summary>
 /// Defines the pinout configuration for a Raspberry Pi.
 /// </summary>
-public class RaspberryPiPinout : IPinDefinitions
+public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
 {
-    /// <inheritdoc/>
-    public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    /// <inheritdoc/>
-    public IList<IPin> AllPins => new List<IPin>
-    {
-        GPIO2, GPIO3, GPIO4, GPIO17, GPIO18, GPIO27, GPIO22, GPIO23,
-        GPIO24, GPIO10, GPIO9, GPIO25, GPIO11, GPIO8, GPIO7, GPIO5,
-        GPIO6, GPIO12, GPIO13, GPIO19, GPIO16, GPIO26, GPIO20, GPIO21,
-        ACT_LED
-    };
-
-    /// <summary>
-    /// Retrieves a pin from <see cref="AllPins"/> by Name or Key
-    /// </summary>
-    public IPin? this[string name]
-    {
-        get => AllPins.FirstOrDefault(p =>
-            string.Compare(p.Name, name, true) == 0
-            || string.Compare($"{p.Key}", name, true) == 0);
-    }
+    internal RaspberryPiPinout() { }
 
     internal const string GpiodChipPi4 = "gpiochip0";
     internal const string GpiodChipPi5 = "gpiochip4";
-
-    /// <inheritdoc/>
-    public IPinController? Controller { get; set; } = default!;
 
     internal string GpiodChipName { get; } = "gpiochip0";
     internal int SysFsOffset { get; }
