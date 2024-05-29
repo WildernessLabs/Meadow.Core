@@ -15,7 +15,7 @@ public class HealthReporter : IHealthReporter
 {
     private Dictionary<string, Func<object>> _customMetrics = new Dictionary<string, Func<object>>();
     private Dictionary<string, Func<Task<object>>> _customMetricsAsync = new Dictionary<string, Func<Task<object>>>();
-    
+
     /// <inheritdoc/>
     public async Task Start(int interval)
     {
@@ -25,7 +25,7 @@ public class HealthReporter : IHealthReporter
         {
             throw new ArgumentException("HealthReporter interval must be a non-negative integer.");
         }
-        
+
         if (interval == 0)
         {
             // do not set the timer. metrics can be sent manually.
@@ -67,13 +67,21 @@ public class HealthReporter : IHealthReporter
     {
         return _customMetrics.TryAdd(name, func);
     }
-    
+
     /// <inheritdoc/>
     public bool AddMetric(string name, Func<Task<object>> func)
     {
         return _customMetricsAsync.TryAdd(name, func);
     }
-    
+
+    private (string name, Func<object> function)[] DefaultMetrics =
+    {
+        new ("health.cpu_temp_celsius", () => Resolver.Device.PlatformOS.GetCpuTemperature().Celsius),
+        new ("health.memory_used", () => GC.GetTotalMemory(false)),
+        new ("health.disk_space_used", () => Resolver.Device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes),
+        new ("info.os_version", () => Resolver.Device.Information.OSVersion)
+    };
+
     /// <inheritdoc/>
     public async Task Send()
     {
@@ -92,16 +100,26 @@ public class HealthReporter : IHealthReporter
         {
             Description = "device.health",
             EventId = 10,
-            Measurements = new Dictionary<string, object>()
-            {
-                { "health.cpu_temp_celsius", device.PlatformOS.GetCpuTemperature().Celsius },
-                { "health.memory_used", GC.GetTotalMemory(false) },
-                { "health.disk_space_used", device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes },
-                { "info.os_version", device.Information.OSVersion },
-            },
+            Measurements = new Dictionary<string, object>(),
             Timestamp = DateTimeOffset.UtcNow
         };
-        
+
+        foreach (var metric in DefaultMetrics)
+        {
+            try
+            {
+                var m = metric.function.Invoke();
+                if (m != null)
+                {
+                    ce.Measurements.Add(metric.name, m);
+                }
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Warn($"Cannot collect metric {metric.name}: {ex.Message}");
+            }
+        }
+
         var batteryInfo = device.GetBatteryInfo();
         if (batteryInfo != null)
         {
@@ -124,7 +142,7 @@ public class HealthReporter : IHealthReporter
                 Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
             }
         }
-        
+
         foreach (var metric in _customMetricsAsync)
         {
             try
@@ -136,7 +154,7 @@ public class HealthReporter : IHealthReporter
                 Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
             }
         }
-        
+
         try
         {
             await service!.SendEvent(ce);
