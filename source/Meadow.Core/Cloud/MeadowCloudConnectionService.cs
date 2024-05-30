@@ -740,35 +740,42 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
+            try
             {
-                attempt++;
-                // by setting this to null and retrying, Authenticate will get called
-                ClientOptions = null;
-                _jwt = null;
-                client.Dispose();
-                client = new HttpClient();
-                goto retry;
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
                 {
-                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                    attempt++;
+                    // by setting this to null and retrying, Authenticate will get called
+                    ClientOptions = null;
+                    _jwt = null;
+                    client.Dispose();
+                    client = new HttpClient();
+                    goto retry;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    if (response.StatusCode == HttpStatusCode.InternalServerError)
+                    {
+                        errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                    }
+                    else
+                    {
+                        errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                    }
+                    LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                    return false;
                 }
                 else
                 {
-                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                    Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
+                    return true;
                 }
-                LogAndRaiseOnErrorOccurredEvent(errorMessage);
-                return false;
             }
-            else
+            finally
             {
-                Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
-                return true;
+                response.Dispose();
             }
         }
         catch (Exception ex)
