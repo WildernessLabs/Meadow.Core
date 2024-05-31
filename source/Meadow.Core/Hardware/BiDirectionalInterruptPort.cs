@@ -135,7 +135,6 @@ namespace Meadow.Hardware
                 if (_currentDirection == PortDirectionType.Input)
                 {
                     // This call will ultimately result in Nuttx being called
-                    Resolver.Log.Info($"configure for interrupt: {interruptMode}");
                     this.IOController.ConfigureInput(this.Pin, this.Resistor, interruptMode, debounceDuration, glitchDuration);
                 }
                 else
@@ -254,9 +253,7 @@ namespace Meadow.Hardware
             get
             {
                 Direction = PortDirectionType.Input;
-                Resolver.Log.Info($"Reading state...");
                 var value = IOController.GetDiscrete(this.Pin);
-                Resolver.Log.Info($"state: {value}");
                 return InverseLogic ? !value : value;
             }
             set
@@ -294,7 +291,6 @@ namespace Meadow.Hardware
 
         private void OnInterrupt(IPin pin, bool state)
         {
-            Resolver.Log.Info($"interrupt!");
             if (pin == this.Pin)
             {
                 var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
