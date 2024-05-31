@@ -55,9 +55,6 @@ public abstract class App<D> : IApp, IAsyncDisposable
         }
     }
 
-    /// <inheritdoc/>
-    public virtual void OnBootFromCrash(IEnumerable<string> crashReports) { }
-
     /// <summary>
     /// Called by MeadowOS when everything is ready for the App to run
     /// </summary>
