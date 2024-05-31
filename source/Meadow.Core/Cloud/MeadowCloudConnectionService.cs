@@ -546,7 +546,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             try
             {
-                var response = await client.PostAsync(endpoint, content);
+                using var response = await client.PostAsync(endpoint, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
