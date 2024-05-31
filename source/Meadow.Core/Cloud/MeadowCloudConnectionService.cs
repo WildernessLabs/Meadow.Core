@@ -101,12 +101,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         var info = _dataQueue.Peek();
                         if (info != null)
                         {
-                            Resolver.Log.Info("sending item");
                             // failed to send, leave the item in the queue
                             if (await Send(info.Item, info.EndPoint))
                             {
-                                Resolver.Log.Info("item sent");
-
                                 // item was sent, remove from the queue and toss away
                                 _dataQueue.Dequeue();
                             }
@@ -152,11 +149,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             }
         }
 
-        Resolver.Log.Warn(message);
-
         var raisedException = new MeadowCloudException(message, ex);
-
-        Resolver.Log.Info($"Sending MeadowCloudException");
 
         if (ex != null && ex.HResult == -76)
         {
@@ -762,10 +755,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             if (Settings.UseAuthentication)
             {
-                //                if (_jwt == null)
-                //                {
-                await Authenticate();
-                //                }
+                if (_jwt == null)
+                {
+                    await Authenticate();
+                }
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
             }
 
