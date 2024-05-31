@@ -1,5 +1,6 @@
 ﻿using Meadow.Hardware;
 using Meadow.Pinouts;
+using Meadow.Units;
 using System;
 using System.IO;
 using System.Linq;
@@ -71,5 +72,20 @@ public partial class RaspberryPi : Linux
         }
 
         throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");
+    }
+
+    public override ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Frequency speed)
+    {
+        // TODO: validate pins for both buses
+
+        // just switch on the clock, assume they did the rest right
+        if (clock.Key.ToString() == "PIN40")
+        {
+            Resolver.Log.Info($"EQUAL");
+            return new SpiBus(1, 0, (SpiBus.SpiMode)mode, speed);
+        }
+
+        Resolver.Log.Info($"NOT {clock.Key.ToString()}");
+        return new SpiBus(0, 0, (SpiBus.SpiMode)mode, speed);
     }
 }

@@ -188,7 +188,7 @@ public class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
     {
-        return new SpiBus(0, (SpiBus.SpiMode)mode, speed);
+        return new SpiBus(0, 0, (SpiBus.SpiMode)mode, speed);
     }
 
     /// <inheritdoc/>
