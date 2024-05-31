@@ -16,6 +16,11 @@ public class F7ReliabilityService : ReliabilityServiceBase
     /// </summary>
     public const string OsMessageFile = "meadow.log";
 
+    internal F7ReliabilityService()
+        : base()
+    {
+    }
+
     /// <inheritdoc/>
     protected override void ProcessSystemError(MeadowSystemErrorInfo errorInfo, out bool recommendReset)
     {
@@ -45,9 +50,18 @@ public class F7ReliabilityService : ReliabilityServiceBase
                     break;
             }
         }
+        else if (errorInfo is MeadowCloudSystemErrorInfo cloudErrorInfo)
+        {
+            if (!ErrorListenerIsAttached)
+            {
+                Resolver.Log.Warn($"Meadow Cloud has had an error ({cloudErrorInfo.Exception}).");
+            }
+
+            shouldReset = true;
+        }
         else
         {
-            Resolver.Log.Info($"We've had a system error: {errorInfo}");
+            Resolver.Log.Info($"We've had a system error of type {errorInfo.Exception?.GetType().Name}: {errorInfo}");
         }
 
         recommendReset = shouldReset;
