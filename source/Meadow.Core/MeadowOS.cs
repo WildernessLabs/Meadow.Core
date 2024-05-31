@@ -212,6 +212,9 @@ public static partial class MeadowOS
 
         try
         {
+            var di = new DirectoryInfo(Path.GetDirectoryName(MeadowOS.FileSystem.AppCrashFile));
+            if (!di.Exists) { di.Create(); }
+
             using var file = File.CreateText(MeadowOS.FileSystem.AppCrashFile);
             file.Write(e.ToString());
         }

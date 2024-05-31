@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Devices.Esp32.MessagePayloads;
+using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,15 +16,41 @@ public class F7ReliabilityService : ReliabilityServiceBase
     /// </summary>
     public const string OsMessageFile = "meadow.log";
 
-    /// <summary>
-    /// Called when the device encoutners a system error
-    /// </summary>
-    /// <param name="error">The MeadowSystemErrorInfo describing the error details</param>
-    public override void OnMeadowSystemError(MeadowSystemErrorInfo error)
+    /// <inheritdoc/>
+    protected override void ProcessSystemError(MeadowSystemErrorInfo errorInfo, out bool recommendReset)
     {
-        // TODO: some of these may necessitate restarting the device
+        var shouldReset = false;
 
-        base.OnMeadowSystemError(error);
+        base.ProcessSystemError(errorInfo, out shouldReset);
+
+        // some of these may necessitate restarting the device
+        if (errorInfo is Esp32SystemErrorInfo espError)
+        {
+            if (!ErrorListenerIsAttached)
+            {
+                Resolver.Log.Warn($"The ESP32 has had an error ({espError.StatusCode}).");
+            }
+
+            switch (espError.StatusCode)
+            {
+                case StatusCodes.EspOutOfMemory:
+                    shouldReset = true;
+                    break;
+                default:
+                    // any ESP reset error code is also fatal
+                    if (espError.StatusCode >= StatusCodes.EspReset && espError.StatusCode <= StatusCodes.EspResetSDIO)
+                    {
+                        shouldReset = true;
+                    }
+                    break;
+            }
+        }
+        else
+        {
+            Resolver.Log.Info($"We've had a system error: {errorInfo}");
+        }
+
+        recommendReset = shouldReset;
     }
 
     /// <summary>
