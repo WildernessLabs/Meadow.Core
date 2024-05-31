@@ -1,5 +1,4 @@
-﻿using Meadow.Devices;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using Meadow.Units;
 using System;
 using System.Collections.Generic;
@@ -50,7 +49,7 @@ namespace Meadow
         public SpiClockConfiguration Configuration { get; private set; }
 
         public unsafe SpiBus(int chipSelect, SpiClockConfiguration.ClockPhase phase, SpiClockConfiguration.ClockPolarity polarity, Units.Frequency speed)
-            : this(chipSelect, (SpiMode)((int)phase | (int)polarity), speed)
+            : this(0, chipSelect, (SpiMode)((int)phase | (int)polarity), speed)
         {
         }
 
@@ -58,9 +57,9 @@ namespace Meadow
         /// 
         /// </summary>
         /// <param name="chipSelect">Must be 0 or 1</param>
-        public unsafe SpiBus(int chipSelect, SpiMode mode, Units.Frequency speed)
+        public unsafe SpiBus(int busNumber, int chipSelect, SpiMode mode, Units.Frequency speed)
         {
-            var busNumber = 0;
+            Resolver.Log.Info($"SPI{busNumber}");
 
             var driver = $"/dev/spidev{busNumber}.{chipSelect}";
             DriverHandle = Interop.open(driver, Interop.DriverFlags.O_RDWR);
@@ -116,7 +115,7 @@ namespace Meadow
             get
             {
                 byte value = 0;
-                var status = Interop.ioctl(DriverHandle, Interop._IOR('k', ModeIoctl, 1), (byte*)&value);
+                var status = Interop.ioctl(DriverHandle, Interop._IOR('k', ModeIoctl, 1), &value);
                 if (status < 0)
                 {
                     throw new NativeException($"Could not get SPIMode (RD): {status}", Marshal.GetLastWin32Error());
