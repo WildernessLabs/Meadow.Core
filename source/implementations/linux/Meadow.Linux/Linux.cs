@@ -131,12 +131,10 @@ public class Linux : IMeadowDevice
         }
         else if (_gpiod != null)
         {
-            Resolver.Log.Info("GPIOD");
             return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
         }
         else
         {
-            Resolver.Log.Info("SYSFS");
             return new SysFsDigitalOutputPort(_sysfs, pin, initialState);
         }
     }
