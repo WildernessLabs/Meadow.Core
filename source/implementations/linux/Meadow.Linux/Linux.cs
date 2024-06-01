@@ -204,7 +204,7 @@ public class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
+    public virtual IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
     {
         throw new PlatformNotSupportedException("This platform does not support PWMs.  Use an IO Extender.");
     }

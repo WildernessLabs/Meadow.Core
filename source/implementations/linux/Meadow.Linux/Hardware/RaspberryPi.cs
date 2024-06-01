@@ -11,12 +11,17 @@ public partial class RaspberryPi : Linux
 {
     private readonly DeviceCapabilities _capabilities;
     private bool? _isPi5;
+    private RaspberryPiPlatformOS _platformOS;
 
+    /// <inheritdoc/>
     public RaspberryPiPinout Pins { get; }
 
     /// <inheritdoc/>
     public override DeviceCapabilities Capabilities => _capabilities;
 
+    /// <summary>
+    /// Returns true if the current platform is a Raspberry Pi 5
+    /// </summary>
     public bool IsRaspberryPi5 => _isPi5 ??= CheckIfPi5();
 
     public RaspberryPi()
@@ -58,6 +63,9 @@ public partial class RaspberryPi : Linux
     }
 
     /// <inheritdoc/>
+    public override IPlatformOS PlatformOS => _platformOS ??= new RaspberryPiPlatformOS();
+
+    /// <inheritdoc/>
     public override IPin GetPin(string pinName)
     {
         return Pins.AllPins.First(p => string.Compare(p.Name, pinName) == 0);
@@ -74,6 +82,7 @@ public partial class RaspberryPi : Linux
         throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");
     }
 
+    /// <inheritdoc/>
     public override ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Frequency speed)
     {
         // TODO: validate pins for both buses
@@ -87,5 +96,15 @@ public partial class RaspberryPi : Linux
 
         Resolver.Log.Info($"NOT {clock.Key.ToString()}");
         return new SpiBus(0, 0, (SpiBus.SpiMode)mode, speed);
+    }
+
+    /// <inheritdoc/>
+    public override IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
+    {
+        // TODO
+        // We need to call mmap to map the PWM registers. this is a good ref:
+        // https://github.com/WiringPi/WiringPi/blob/8960cc91b911db8ec0c272781edf34b8aedb60d9/wiringPi/wiringPi.c#L2894
+
+        return base.CreatePwmPort(pin, frequency, dutyCycle, invert);
     }
 }
