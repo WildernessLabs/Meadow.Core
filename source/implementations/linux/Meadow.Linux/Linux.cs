@@ -131,12 +131,10 @@ public class Linux : IMeadowDevice
         }
         else if (_gpiod != null)
         {
-            Resolver.Log.Info("GPIOD");
             return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
         }
         else
         {
-            Resolver.Log.Info("SYSFS");
             return new SysFsDigitalOutputPort(_sysfs, pin, initialState);
         }
     }
@@ -204,7 +202,7 @@ public class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
+    public virtual IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
     {
         throw new PlatformNotSupportedException("This platform does not support PWMs.  Use an IO Extender.");
     }
