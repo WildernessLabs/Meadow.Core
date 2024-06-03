@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Meadow;
 
@@ -12,6 +13,7 @@ public abstract class ReliabilityServiceBase : IReliabilityService
 {
     private readonly List<(MeadowSystemErrorInfo error, bool recommendReset)> _systemErrorCache = new();
     private MeadowSystemErrorHandler? _systemError;
+    private bool _startupEventSubscribeTimeout = false;
 
     private readonly string[] _reportFiles;
 
@@ -75,6 +77,13 @@ public abstract class ReliabilityServiceBase : IReliabilityService
             MeadowOS.FileSystem.AppCrashFile,
             MeadowOS.FileSystem.RuntimeCrashFile
         };
+
+        Task.Run(async () =>
+        {
+            await Task.Delay(30000);
+            _startupEventSubscribeTimeout = true;
+        });
+
     }
 
     /// <summary>
@@ -98,20 +107,28 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     {
         ProcessSystemError(errorInfo, out bool recommendReset);
 
-        if (_systemError == null)
+        if (_systemError == null && !_startupEventSubscribeTimeout)
         {
+            // if we've only been up a short period of time, we need to cache potential errors that happened before app startup
+            // however, if the app comes up and no handler is attached, we want the automated behavior to take over
             _systemErrorCache.Add((errorInfo, recommendReset));
         }
         else
         {
-            bool forceReset = false;
-
             if (!ErrorListenerIsAttached && recommendReset)
             {
                 Resolver.Log.Error($"This is a fatal error. Resetting the device is recommended.");
             }
 
-            _systemError?.Invoke(errorInfo, recommendReset, out forceReset);
+            bool forceReset;
+            if (_systemError == null)
+            {
+                forceReset = recommendReset;
+            }
+            else
+            {
+                _systemError.Invoke(errorInfo, recommendReset, out forceReset);
+            }
 
             if (recommendReset != forceReset)
             {
