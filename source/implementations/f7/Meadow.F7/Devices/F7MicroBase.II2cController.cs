@@ -1,9 +1,12 @@
 ﻿using Meadow.Hardware;
+using System.Collections.Generic;
 
 namespace Meadow.Devices
 {
     public abstract partial class F7MicroBase
     {
+        private Dictionary<int, II2cBus> _i2cBusCache = new();
+
         /// <summary>
         /// Creates an I2C bus instance for the default Meadow F7 pins (SCL/D08 and SDA/D07) and the requested bus speed
         /// </summary>
@@ -48,9 +51,17 @@ namespace Meadow.Devices
             I2cBusSpeed busSpeed = I2cBusSpeed.Standard
         )
         {
-            var bus = I2cBus.From(IoController, clock, data, busSpeed);
-            bus.BusNumber = GetI2cBusNumberForPins(clock, data);
-            return bus;
+            lock (_i2cBusCache)
+            {
+                var busNumber = GetI2cBusNumberForPins(clock, data);
+                if (!_i2cBusCache.ContainsKey(busNumber))
+                {
+                    var bus = I2cBus.From(IoController, clock, data, busSpeed);
+                    bus.BusNumber = busNumber;
+                    _i2cBusCache.Add(busNumber, bus);
+                }
+                return _i2cBusCache[busNumber];
+            }
         }
     }
 }
