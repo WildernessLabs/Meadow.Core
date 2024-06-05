@@ -626,6 +626,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 {
                     // device is likely not provisioned?
                     errorMessage = $"Meadow.Cloud service returned 'Not Found': this device has likely not been provisioned";
+                    Resolver.Log.Warn(errorMessage);
                 }
                 else if (response.StatusCode == HttpStatusCode.InternalServerError)
                 {
