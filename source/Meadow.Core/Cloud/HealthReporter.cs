@@ -74,12 +74,13 @@ public class HealthReporter : IHealthReporter
         return _customMetricsAsync.TryAdd(name, func);
     }
 
-    private (string name, Func<object> function)[] DefaultMetrics =
+    private (string name, Func<object?> function)[] DefaultMetrics =
     {
         new ("health.cpu_temp_celsius", () => Resolver.Device.PlatformOS.GetCpuTemperature().Celsius),
         new ("health.memory_used", () => GC.GetTotalMemory(false)),
         new ("health.disk_space_used", () => Resolver.Device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes),
-        new ("info.os_version", () => Resolver.Device.Information.OSVersion)
+        new ("info.os_version", () => Resolver.Device.Information.OSVersion),
+        new ("up_time", () => Resolver.Services.Get<IReliabilityService>()?.UpTime ?? null),
     };
 
     /// <inheritdoc/>
