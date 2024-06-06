@@ -1,6 +1,7 @@
 ﻿using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     private readonly List<(MeadowSystemErrorInfo error, bool recommendReset)> _systemErrorCache = new();
     private MeadowSystemErrorHandler? _systemError;
     private bool _startupEventSubscribeTimeout = false;
+    private Stopwatch _uptimeStopwatch = new Stopwatch();
 
     private readonly string[] _reportFiles;
 
@@ -31,6 +33,9 @@ public abstract class ReliabilityServiceBase : IReliabilityService
 
     /// <inheritdoc/>
     public virtual int SystemPowerCycleCount => -1;
+
+    /// <inheritdoc/>
+    public virtual TimeSpan UpTime => _uptimeStopwatch.Elapsed;
 
     /// <summary>
     /// Returns <b>true</b> if any listener has attached to the MeadowSystemError event
@@ -72,6 +77,8 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     /// </summary>
     public ReliabilityServiceBase()
     {
+        _uptimeStopwatch.Start();
+
         _reportFiles = new string[]
         {
             MeadowOS.FileSystem.AppCrashFile,
