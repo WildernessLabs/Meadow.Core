@@ -84,9 +84,7 @@ public partial class F7PlatformOS : IPlatformOS
         Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
     }
 
-    /// <summary>
-    /// Retrieves memory allocation statistics from the OS
-    /// </summary>
+    /// <inheritdoc/>
     public AllocationInfo GetMemoryAllocationInfo()
     {
         return Core.Interop.Nuttx.mallinfo();

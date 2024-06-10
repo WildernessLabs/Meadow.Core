@@ -127,6 +127,27 @@ public class HealthReporter : IHealthReporter
             ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
         }
 
+        try
+        {
+            var systemMemoryInfo = device.PlatformOS.GetMemoryAllocationInfo();
+            if (!systemMemoryInfo.Equals(default(AllocationInfo)))
+            {
+                ce.Measurements.Add("health.total_memory_arena", systemMemoryInfo.Arena);
+                ce.Measurements.Add("health.total_memory_free_blocks", systemMemoryInfo.FreeBlocks);
+                ce.Measurements.Add("health.largest_memory_free_block", systemMemoryInfo.LargestFreeBlock);
+                ce.Measurements.Add("health.total_allocated_memory", systemMemoryInfo.TotalAllocated);
+                ce.Measurements.Add("health.total_free_memory", systemMemoryInfo.TotalFree);
+            }
+        }
+        catch (NotImplementedException ex)
+        {
+            Resolver.Log.Trace($"Cannot get system memory information: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"An unexpected error occurred while attempting to get system memory information: {ex.Message}");
+        }
+
         if (!string.IsNullOrEmpty(device.Information.CoprocessorOSVersion))
         {
             ce.Measurements.Add("info.coprocessor_os_version", device.Information.CoprocessorOSVersion);
