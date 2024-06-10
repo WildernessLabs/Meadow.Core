@@ -510,7 +510,15 @@ public enum WiFiFunction
     /// <summary>
     /// WiFiFunction - NodeDisconnectedEvent
     /// </summary>
-    NodeDisconnectedEvent = 45
+    NodeDisconnectedEvent = 45,
+    /// <summary>
+    /// WiFiFunction - ConnectionRetryCountExceededEvent
+    /// </summary>
+    NetworkConnectionRetryCountExceededEvent = 46,
+    /// <summary>
+    /// WiFiFunction - NetworkConnectingEvent
+    /// </summary>
+    NetworkConnectingEvent = 47,
 };
 
 /// <summary>
