@@ -66,6 +66,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization.MicroJson", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Displays.Silk", "..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Silk\Driver\Displays.Silk.csproj", "{8FC0D17C-64A3-438D-B503-382B4FDF6425}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_docs", "_docs", "{C3582F8C-7D7C-4898-8BE7-5B0AE537DC4D}"
+	ProjectSection(SolutionItems) = preProject
+		..\Interrupt.md = ..\Interrupt.md
+		..\README.md = ..\README.md
+		..\doc\services.md = ..\doc\services.md
+		..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-known-issues.md = ..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-known-issues.md
+		..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-validation.md = ..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-validation.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
