@@ -196,4 +196,6 @@ public class SimulatedPlatformOS : IPlatformOS
 
     public string[] NtpServers => throw new NotImplementedException();
 
+    /// <inheritdoc/>
+    public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
 }

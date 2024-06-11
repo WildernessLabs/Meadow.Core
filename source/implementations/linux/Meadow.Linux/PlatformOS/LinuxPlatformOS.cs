@@ -225,6 +225,8 @@ public class LinuxPlatformOS : IPlatformOS
 
 
 
+    /// <inheritdoc/>
+    public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public string[] NtpServers => throw new NotImplementedException();

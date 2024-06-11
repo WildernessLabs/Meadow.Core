@@ -1,9 +1,12 @@
 ﻿using Meadow.Hardware;
+using System.Collections.Generic;
 
 namespace Meadow.Devices
 {
     public abstract partial class F7MicroBase
     {
+        private Dictionary<int, ISpiBus> _spiBusCache = new();
+
         /// <summary>
         /// Retrieves the hardware bus number for the provided pins
         /// </summary>
@@ -75,10 +78,18 @@ namespace Meadow.Devices
             Units.Frequency speed
         )
         {
-            var bus = SpiBus.From(clock, copi, cipo);
-            bus.BusNumber = GetSpiBusNumberForPins(clock, copi, cipo);
-            bus.Configuration.Speed = speed;
-            return bus;
+            lock (_spiBusCache)
+            {
+                var busNumber = GetSpiBusNumberForPins(clock, copi, cipo);
+                if (!_spiBusCache.ContainsKey(busNumber))
+                {
+                    var bus = SpiBus.From(clock, copi, cipo);
+                    bus.BusNumber = busNumber;
+                    bus.Configuration.Speed = speed;
+                    _spiBusCache.Add(busNumber, bus);
+                }
+                return _spiBusCache[busNumber];
+            }
         }
 
         /// <summary>
@@ -96,10 +107,18 @@ namespace Meadow.Devices
             SpiClockConfiguration config
         )
         {
-            var bus = SpiBus.From(clock, copi, cipo);
-            bus.BusNumber = GetSpiBusNumberForPins(clock, copi, cipo);
-            bus.Configuration = config;
-            return bus;
+            lock (_spiBusCache)
+            {
+                var busNumber = GetSpiBusNumberForPins(clock, copi, cipo);
+                if (!_spiBusCache.ContainsKey(busNumber))
+                {
+                    var bus = SpiBus.From(clock, copi, cipo);
+                    bus.BusNumber = busNumber;
+                    bus.Configuration = config;
+                    _spiBusCache.Add(busNumber, bus);
+                }
+                return _spiBusCache[busNumber];
+            }
         }
     }
 }
