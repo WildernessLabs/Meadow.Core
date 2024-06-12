@@ -32,17 +32,17 @@ public class NmCliNetworkAdapter : INetworkAdapter
     /// <inheritdoc/>
     public string Name => NmCliDevice.Name;
     /// <inheritdoc/>
-    public IPAddress IpAddress => NmCliDevice.IPAddresses.First();
+    public IPAddress IpAddress => NmCliDevice.GetIPAddresses().First();
     /// <inheritdoc/>
     public PhysicalAddress MacAddress => PhysicalAddress.Parse(NmCliDevice.HardwareAddress);
+    /// <inheritdoc/>
+    public IPAddress Gateway => NmCliDevice.GetGateways().First();
+    /// <inheritdoc/>
+    public bool IsConnected => NmCliDevice.State.Contains("connected");
 
-
-
-
+    /// <inheritdoc/>
     public IPAddress SubnetMask => throw new NotImplementedException();
-    public IPAddress Gateway => throw new NotImplementedException();
-    public bool IsConnected => throw new NotImplementedException();
 
-
+    /// <inheritdoc/>
     public IPAddressCollection DnsAddresses => throw new NotImplementedException();
 }

@@ -15,6 +15,20 @@ public class NmCliWiFiNetworkAdapter : NmCliNetworkAdapter, IWiFiNetworkAdapter
     {
     }
 
+    /// <inheritdoc/>
+    public Task<IList<WifiNetwork>> Scan(CancellationToken token)
+    {
+        var result = NmCli.GetWirelessNetworksInfo();
+        return Task.FromResult(result as IList<WifiNetwork>);
+    }
+
+    /// <inheritdoc/>
+    public Task<IList<WifiNetwork>> Scan(TimeSpan timeout)
+    {
+        var result = NmCli.GetWirelessNetworksInfo();
+        return Task.FromResult(result as IList<WifiNetwork>);
+    }
+
     public string? Ssid => throw new NotImplementedException();
 
     public PhysicalAddress Bssid => throw new NotImplementedException();
@@ -47,18 +61,6 @@ public class NmCliWiFiNetworkAdapter : NmCliNetworkAdapter, IWiFiNetworkAdapter
     public Task Disconnect(bool turnOffWiFiInterface)
     {
         throw new NotImplementedException();
-    }
-
-    public Task<IList<WifiNetwork>> Scan(CancellationToken token)
-    {
-        var result = NmCli.GetWirelessNetworksInfo();
-        return Task.FromResult(result as IList<WifiNetwork>);
-    }
-
-    public Task<IList<WifiNetwork>> Scan(TimeSpan timeout)
-    {
-        var result = NmCli.GetWirelessNetworksInfo();
-        return Task.FromResult(result as IList<WifiNetwork>);
     }
 
     public void SetAntenna(AntennaType antenna, bool persist = true)

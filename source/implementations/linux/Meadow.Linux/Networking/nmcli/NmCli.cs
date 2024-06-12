@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 
 namespace Meadow.Networking;
@@ -116,6 +115,8 @@ internal static class NmCli
 
         foreach (var field in fields)
         {
+            if (field == null) continue;
+
             if (field[0] == "GENERAL.DEVICE")
             {
                 if (device != null)
@@ -123,44 +124,12 @@ internal static class NmCli
                     list.Add(device);
                 }
 
-                device = new NmCliDevice()
-                {
-                    Name = field[1],
-                };
+                device = new NmCliDevice();
             }
 
             if (device != null)
             {
-                switch (field[0])
-                {
-                    case "GENERAL.TYPE":
-                        device.Type = field[1];
-                        break;
-                    case "GENERAL.HWADDR":
-                        device.HardwareAddress = field[1];
-                        break;
-                    case "GENERAL.MTU":
-                        device.Mtu = field[1];
-                        break;
-                    case "GENERAL.STATE":
-                        device.State = field[1];
-                        break;
-                    case "GENERAL.CONNECTION":
-                        device.Connection = field[1];
-                        break;
-                    case "GENERAL.CON-PATH":
-                        device.ConnectionPath = field[1];
-                        break;
-                    default:
-                        if (field[0].StartsWith("IP4.ADDRESS") || field[0].StartsWith("IP6.ADDRESS"))
-                        {
-                            if (IPNetwork.TryParse(field[1], out IPNetwork network))
-                            {
-                                device.IPAddresses.Add(network.BaseAddress);
-                            }
-                        }
-                        break;
-                }
+                device.Fields.Add(field[0], field[1]);
             }
         }
 
