@@ -756,9 +756,11 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             if (Settings.UseAuthentication)
             {
-                if (_jwt == null)
+                if (await Authenticate() == false)
                 {
-                    await Authenticate();
+                    Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds...");
+                    await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                    goto retry;
                 }
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
             }
