@@ -1,6 +1,6 @@
-﻿using Meadow.Devices;
-using Meadow.Foundation.Displays;
+﻿using Meadow.Foundation.Displays;
 using Meadow.Hardware;
+using Meadow.Networking;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
@@ -15,7 +15,7 @@ public class Linux : IMeadowDevice
 {
     private SysFsGpioDriver _sysfs = null!;
     private Gpiod _gpiod = null!;
-    private Lazy<NativeNetworkAdapterCollection> _networkAdapters;
+    private NmCliNetworkAdapterCollection? _networkAdapters;
 
     /// <inheritdoc/>
     public event PowerTransitionHandler BeforeReset;
@@ -35,7 +35,7 @@ public class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual IDeviceInformation Information { get; }
     /// <inheritdoc/>
-    public virtual INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
+    public virtual INetworkAdapterCollection NetworkAdapters => _networkAdapters ??= new NmCliNetworkAdapterCollection();
 
     /// <summary>
     /// Creates the Meadow on Linux infrastructure instance
@@ -43,9 +43,6 @@ public class Linux : IMeadowDevice
     public Linux()
     {
         PlatformOS = new LinuxPlatformOS();
-
-        _networkAdapters = new Lazy<NativeNetworkAdapterCollection>(
-            new NativeNetworkAdapterCollection());
 
         Information = new LinuxDeviceInfo();
 

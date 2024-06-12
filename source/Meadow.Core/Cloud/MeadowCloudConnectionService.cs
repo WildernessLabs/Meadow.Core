@@ -67,7 +67,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         Settings = settings;
         _dataQueue = new CloudDataQueue();
-        _ = Task.Run(DataForwarderProc);
     }
 
     /// <inheritdoc/>
@@ -202,6 +201,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     public void Start()
     {
+        _ = Task.Run(DataForwarderProc);
+
         if (_stateMachineThread == null)
         {
             _stateMachineThread = new Thread(() => ConnectionStateMachine());

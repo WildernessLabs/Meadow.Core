@@ -56,6 +56,8 @@ public abstract class ReliabilityServiceBase : IReliabilityService
 
                     foreach (var e in _systemErrorCache)
                     {
+                        LogSystemError(e.error, e.recommendReset);
+
                         _systemError?.Invoke(e.error, e.recommendReset, out r);
                         forceReset |= r;
                     }
@@ -103,9 +105,47 @@ public abstract class ReliabilityServiceBase : IReliabilityService
         recommendReset = false;
     }
 
+    /// <summary>
+    /// Writes a system error to the App Crash file
+    /// </summary>
+    /// <param name="error">The error info to write</param>
+    /// <param name="recommendedReset">Whether or not reset was recommended</param>
+    protected void LogSystemError(MeadowSystemErrorInfo error, bool recommendedReset)
+    {
+        try
+        {
+            var fi = new FileInfo(MeadowOS.FileSystem.AppCrashFile);
+            if (!fi.Exists)
+            {
+                using var writer = fi.CreateText();
+                writer.WriteLine($"{DateTime.UtcNow:s}");
+                writer.WriteLine(error.ToString());
+                writer.WriteLine($"Recommend reset: {recommendedReset}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Unable to record system error: {ex.Message}");
+        }
+    }
+
     private void ResetDueToSystemError()
     {
         Resolver.Log.Error($"Resetting due to a system error.");
+        try
+        {
+            var fi = new FileInfo(MeadowOS.FileSystem.AppCrashFile);
+            if (!fi.Exists)
+            {
+                using var writer = fi.CreateText();
+                writer.WriteLine($"{DateTime.UtcNow:s}");
+                writer.WriteLine("ReliabilityService reset the device");
+            }
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Unable to record a reset: {ex.Message}");
+        }
         Resolver.Device.PlatformOS.Reset();
     }
 
@@ -134,6 +174,7 @@ public abstract class ReliabilityServiceBase : IReliabilityService
             }
             else
             {
+                LogSystemError(errorInfo, recommendReset);
                 _systemError.Invoke(errorInfo, recommendReset, out forceReset);
             }
 
