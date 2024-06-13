@@ -1,12 +1,35 @@
 ﻿using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Meadow
 {
     public partial class I2CBus : II2cBus, IDisposable
     {
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct I2CIoctlData
+        {
+            public ushort Address;
+            public I2CMessageFlags Flags;
+            public ushort Length;
+            public byte* Data;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct I2CIoctlDataSet
+        {
+            public I2CIoctlData* msgs;
+            public int nmsgs;
+        }
+
+        internal enum I2CMessageFlags : ushort
+        {
+            Write = 0x0000,
+            Read = 0x0001
+        }
+
         private class SMBusIoctlData
         {
             public SMBusIoctlData(int size)
@@ -94,6 +117,67 @@ namespace Meadow
         }
 
         public unsafe void Exchange(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            if (InfoMap.SupportsIoctlExchange)
+            {
+                ExchangeWithIoctl(peripheralAddress, writeBuffer, readBuffer);
+            }
+            else
+            {
+                ExchangeWithFileOps(peripheralAddress, writeBuffer, readBuffer);
+            }
+        }
+
+        private unsafe void ExchangeWithIoctl(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            Console.Write("IOCTL exchange");
+
+            I2CIoctlData* pMessages = stackalloc I2CIoctlData[2];
+            var index = 0;
+
+            var handle = InfoMap.GetAddressHandle(BusNumber, peripheralAddress);
+            fixed (byte* pWrite = writeBuffer)
+            fixed (byte* pRead = readBuffer)
+            {
+                if (writeBuffer != null)
+                {
+                    pMessages[index] = new I2CIoctlData()
+                    {
+                        Address = peripheralAddress,
+                        Flags = I2CMessageFlags.Write,
+                        Length = (ushort)writeBuffer.Length,
+                        Data = pWrite
+                    };
+                    index++;
+                }
+
+                if (readBuffer != null)
+                {
+                    pMessages[index] = new I2CIoctlData()
+                    {
+                        Address = peripheralAddress,
+                        Flags = I2CMessageFlags.Read,
+                        Length = (ushort)readBuffer.Length,
+                        Data = pRead
+                    };
+                    index++;
+                }
+
+                var data = new I2CIoctlDataSet()
+                {
+                    msgs = pMessages,
+                    nmsgs = index
+                };
+
+                int result = Interop.ioctl(handle, (int)I2CIoctl.RDWR, new IntPtr(&data));
+                if (result < 0)
+                {
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                }
+            }
+        }
+
+        private unsafe void ExchangeWithFileOps(byte peripheralAddress, Span<byte> writeBuffer, Span<byte> readBuffer)
         {
             var handle = InfoMap.GetAddressHandle(BusNumber, peripheralAddress);
             fixed (byte* pWrite = writeBuffer)
