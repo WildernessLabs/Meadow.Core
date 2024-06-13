@@ -19,6 +19,8 @@ namespace Meadow
                 _driverName = $"/dev/i2c-{busNumber}";
             }
 
+            public bool SupportsIoctlExchange { get; private set; }
+
             public int GetAddressHandle(int busNumber, byte busAddress)
             {
                 I2CPeripheralInfo info;
@@ -42,6 +44,18 @@ namespace Meadow
                         BusAddress = busAddress
                     };
                     _infoMap.Add(busAddress, info);
+
+                    // get the capabilities of the platform
+                    uint caps = 0;
+                    var result = Interop.ioctl(info.DriverHandle, (int)I2CIoctl.FUNCS, ref caps);
+                    if (result < 0)
+                    {
+                        SupportsIoctlExchange = false;
+                    }
+                    else
+                    {
+                        SupportsIoctlExchange = (caps & 0x01) != 0;
+                    }
                 }
 
                 if (!info.IsOpen)
