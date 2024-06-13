@@ -11,6 +11,7 @@ namespace Meadow;
 public class Desktop : IMeadowDevice
 {
     private IMeadowDevice _implementation = default!;
+    private IResizablePixelDisplay? _display;
 
     /// <inheritdoc/>
     public event NetworkConnectionHandler? NetworkConnected;
@@ -20,7 +21,18 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IResizablePixelDisplay? Display { get; private set; }
+    public virtual IResizablePixelDisplay? Display
+    {
+        get
+        {
+            if (_implementation is IPixelDisplayProvider displayProvider)
+            {
+                return _display ??= displayProvider.CreateDisplay();
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Initializes a new instance of the Desktop class.
@@ -41,11 +53,6 @@ public class Desktop : IMeadowDevice
         };
 
         _implementation.Initialize(detectedPlatform);
-
-        if (_implementation is IPixelDisplayProvider displayProvider)
-        {
-            Display = displayProvider.CreateDisplay();
-        }
 
         _implementation.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
         _implementation.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
