@@ -375,15 +375,13 @@ public static partial class MeadowOS
         {
             var genericArgs = type.GetGenericArguments();
 
-            Resolver.Log.Info($"{type.Name} generic args:");
             foreach (var arg in genericArgs)
             {
-                Resolver.Log.Info(arg.Name);
                 if (typeof(IMeadowDevice).IsAssignableFrom(arg))
                 {
                     deviceType = arg;
                 }
-                //else if (typeof(IMeadowAppEmbeddedHardwareProvider<IMeadowAppEmbeddedHardware>).IsAssignableFrom(arg))
+                // not a fan of this magic string, but the generic param type is unknown to us, so we can't look for it
                 else if (arg.GetInterfaces().Any(i => i.Name.StartsWith("IMeadowAppEmbeddedHardwareProvider")))
                 {
                     hardwareProviderType = arg;
@@ -408,7 +406,6 @@ public static partial class MeadowOS
             throw new Exception("Cannot find an IApp implementation");
         }
 
-        Resolver.Log.Info("IApps found:");
         foreach (var app in allApps)
         {
             Resolver.Log.Info(app.Name);
@@ -679,28 +676,23 @@ public static partial class MeadowOS
 
                     if (createMethod != null)
                     {
-                        Resolver.Log.Trace($"Creating provider '{hardwareProviderType.Name}'");
-                        var provider = Activator.CreateInstance(hardwareProviderType);
+                        Resolver.Log.Trace($"Creating hardware provider '{hardwareProviderType.Name}'");
+                        // allow using non-public constructors
+                        var provider = Activator.CreateInstance(
+                            hardwareProviderType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                            null, null, null);
 
-                        Resolver.Log.Trace($"Using provider to create hardware...");
+                        Resolver.Log.Trace($"Using hardware provider to create hardware...");
                         var hardware = createMethod.Invoke(provider, new object[] { CurrentDevice });
 
                         Resolver.Log.Trace($"Hardware is a {hardware.GetType().Name}");
                         appHardwareInstance = hardware as IMeadowAppEmbeddedHardware;
-                        if (appHardwareInstance != null)
-                        {
-                            Resolver.Log.Trace($"Hardware is an IMeadowAppEmbeddedHardware");
-                        }
                     }
                     else
                     {
-                        Resolver.Log.Trace($"No appropriavte Create method found");
+                        Resolver.Log.Warn($"No appropriate Create method found in {hardwareProviderType.Name}");
                     }
 
-                }
-                else
-                {
-                    Resolver.Log.Trace($"No hardware provider type");
                 }
             }
             catch (Exception ex)

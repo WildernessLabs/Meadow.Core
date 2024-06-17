@@ -39,7 +39,7 @@ public abstract class AppBase : IApp
     /// <param name="state">An optional state object to pass to the Action</param>
     public virtual void InvokeOnMainThread(Action<object?> action, object? state = null)
     {
-        ExecutionContext.Run(executionContext, new ContextCallback(action), state);
+        action.Invoke(state);
     }
 
     /// <summary>

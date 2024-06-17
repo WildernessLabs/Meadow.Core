@@ -426,6 +426,8 @@ namespace Meadow.Hardware
                         {
                             // if the event handler throws, we don't want this to die
                             Resolver.Log.Error($"Serial event handler threw: {ex.Message}");
+                            // the serial handler threw, we need to prevent a tight loop, so just sleep
+                            Thread.Sleep(1000);
                         }
                     }
                     else
