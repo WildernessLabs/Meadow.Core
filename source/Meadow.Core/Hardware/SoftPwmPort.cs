@@ -30,7 +30,7 @@ public class SoftPwmPort : IPwmPort
     /// <summary>
     /// Period of PWM 
     /// </summary>
-    public float Period
+    public double Period
     {
         get => 1 / (float)frequency.Hertz;
         set => frequency = new Frequency(1 / value, Units.Frequency.UnitType.Hertz);
@@ -45,7 +45,7 @@ public class SoftPwmPort : IPwmPort
     /// <summary>
     /// Duty cycle of PWM
     /// </summary>
-    public float DutyCycle
+    public double DutyCycle
     {
         get => dutyCycle;
         set
@@ -56,7 +56,7 @@ public class SoftPwmPort : IPwmPort
         }
     }
 
-    private float dutyCycle;
+    private double dutyCycle;
 
     /// <summary>
     /// Frequency of soft PWM
