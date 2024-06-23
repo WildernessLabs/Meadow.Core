@@ -101,6 +101,9 @@ public class Desktop : IMeadowDevice
     public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         => _implementation.CreateSerialMessagePort(portName, prefixDelimiter, preserveDelimiter, messageLength, baudRate, dataBits, parity, stopBits, readBufferSize);
     /// <inheritdoc/>
+    public ISpiBus CreateSpiBus(int busNumber, Frequency speed)
+        => _implementation.CreateSpiBus(busNumber, speed);
+    /// <inheritdoc/>
     public ISpiBus CreateSpiBus(IPin clock, IPin copi, IPin cipo, SpiClockConfiguration config)
         => _implementation.CreateSpiBus(clock, copi, cipo, config);
     /// <inheritdoc/>

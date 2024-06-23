@@ -171,6 +171,11 @@ public class Linux : IMeadowDevice
         }
     }
 
+    public ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
+    {
+        return new SpiBus(busNumber, 0, SpiBus.SpiMode.Mode0, speed);
+    }
+
     /// <inheritdoc/>
     public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
     {

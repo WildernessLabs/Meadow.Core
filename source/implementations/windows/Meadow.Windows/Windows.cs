@@ -64,6 +64,12 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
         throw new NotSupportedException("Add an IO Expander to your platform");
     }
 
+    /// <inheritdoc/>
+    public ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
+    {
+        throw new NotSupportedException("Add an IO Expander to your platform");
+    }
+
     public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
     {
         throw new NotSupportedException("Add an IO Expander to your platform");
