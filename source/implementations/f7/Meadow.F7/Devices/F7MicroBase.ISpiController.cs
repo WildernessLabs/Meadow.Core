@@ -120,5 +120,23 @@ namespace Meadow.Devices
                 return _spiBusCache[busNumber];
             }
         }
+
+        /// <inheritdoc/>
+        public ISpiBus CreateSpiBus(
+            int busNumber,
+            Units.Frequency speed
+        )
+        {
+            lock (_spiBusCache)
+            {
+                if (!_spiBusCache.ContainsKey(busNumber))
+                {
+                    var bus = SpiBus.From(busNumber);
+                    bus.Configuration.Speed = speed;
+                    _spiBusCache.Add(busNumber, bus);
+                }
+                return _spiBusCache[busNumber];
+            }
+        }
     }
 }
