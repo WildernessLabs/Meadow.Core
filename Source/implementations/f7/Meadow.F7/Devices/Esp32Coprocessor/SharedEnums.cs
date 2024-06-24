@@ -577,6 +577,15 @@ public enum CellFunction
     /// CellFunction - NtpUpdateEvent
     /// </summary>
     NtpUpdateEvent = 5,
+    /// <summary>
+    /// CellFunction - NetworkConnectingEvent
+    /// </summary>
+    NetworkConnectingEvent = 8,
+
+    /// <summary>
+    /// CellFunction - NetworkRetryExceededEvent
+    /// </summary>
+    NetworkRetryExceededEvent = 9,
 };
 
 /// <summary>
