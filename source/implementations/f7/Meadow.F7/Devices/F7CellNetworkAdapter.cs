@@ -157,6 +157,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
                 break;
+            case CellFunction.NetworkConnectingEvent:
+                Resolver.Log.Trace("Cell connecting event triggered!");
+                break;
+
+            case CellFunction.NetworkRetryExceededEvent:
+                Resolver.Log.Trace("Cell retry exceeded event triggered!");
+                break;
             default:
                 Resolver.Log.Trace("Event type not found");
                 break;

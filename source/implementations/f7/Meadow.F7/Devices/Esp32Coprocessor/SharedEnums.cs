@@ -554,13 +554,24 @@ public enum CellFunction
     /// </summary>
     NetworkDisconnectedEvent = 1,
     /// <summary>
-    /// CellFunction - NetworkAtCmdEvent
-    /// </summary>
-    NetworkAtCmdEvent = 4,
-    /// <summary>
     /// CellFunction - NetworkErrorEvent
     /// </summary>
     NetworkErrorEvent = 2,
+
+    /// <summary>
+    /// CellFunction - NetworkAtCmdEvent
+    /// </summary>
+    NetworkAtCmdEvent = 4,
+
+    /// <summary>
+    /// CellFunction - NetworkConnectingEvent
+    /// </summary>
+    NetworkConnectingEvent = 5,
+
+    /// <summary>
+    /// CellFunction - NetworkRetryExceededEvent
+    /// </summary>
+    NetworkRetryExceededEvent = 6,
 };
 
 /// <summary>
