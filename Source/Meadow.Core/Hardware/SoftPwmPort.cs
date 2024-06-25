@@ -21,19 +21,19 @@ public class SoftPwmPort : IPwmPort
     /// <summary>
     /// PWM duration in ms
     /// </summary>
-    public TimeSpan Duration
+    public TimePeriod Duration
     {
-        get => TimeSpan.FromSeconds(Period.TotalSeconds * DutyCycle);
+        get => TimePeriod.FromSeconds(Period.Seconds * DutyCycle);
         set { }
     }
 
     /// <summary>
     /// Period of PWM 
     /// </summary>
-    public TimeSpan Period
+    public TimePeriod Period
     {
-        get => TimeSpan.FromSeconds(1 / frequency.Hertz);
-        set => frequency = new Frequency(1 / value.TotalSeconds, Frequency.UnitType.Hertz);
+        get => TimePeriod.FromSeconds(1 / frequency.Hertz);
+        set => frequency = new Frequency(1 / value.Seconds, Frequency.UnitType.Hertz);
     }
 
     /// <summary>

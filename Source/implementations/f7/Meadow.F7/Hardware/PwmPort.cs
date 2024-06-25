@@ -157,28 +157,28 @@ namespace Meadow.Hardware
         /// <summary>
         /// The amount of time, in seconds, that the a PWM pulse is high.  This will always be less than or equal to the Period
         /// </summary>
-        public override TimeSpan Duration
+        public override TimePeriod Duration
         {
-            get => TimeSpan.FromSeconds(DutyCycle * Period.TotalSeconds);
+            get => TimePeriod.FromSeconds(DutyCycle * Period.Seconds);
             set
             {
                 if (value > Period) throw new ArgumentOutOfRangeException(nameof(Duration), "Duration must be less than or equal to Period");
                 // clamp
-                if (value.TotalSeconds < 0) { value = TimeSpan.Zero; }
+                if (value.Seconds < 0) { value = TimePeriod.Zero; }
 
-                DutyCycle = value.TotalSeconds / Period.TotalSeconds;
+                DutyCycle = value.Seconds / Period.Seconds;
             }
         }
 
         /// <summary>
         /// The reciprocal of the PWM frequency - in seconds.
         /// </summary>
-        public override TimeSpan Period
+        public override TimePeriod Period
         {
-            get => TimeSpan.FromSeconds(1.0f / Frequency.Hertz);
+            get => TimePeriod.FromSeconds(1.0f / Frequency.Hertz);
             set
             {
-                Frequency = new Frequency(1.0f / value.TotalSeconds);
+                Frequency = new Frequency(1.0f / value.Seconds);
             }
         }
 
