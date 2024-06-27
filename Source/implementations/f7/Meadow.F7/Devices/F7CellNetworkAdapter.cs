@@ -134,6 +134,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 UpdateAtCmdsOutput();
 
                 this.Refresh();
+
+                if (Resolver.Device.PlatformOS.NtpClient.Enabled)
+                {
+                    Resolver.Device.PlatformOS.NtpClient.StartPeriodicSynchronization();
+                }
+
                 RaiseNetworkConnected(args);
                 break;
             case CellFunction.NetworkDisconnectedEvent:

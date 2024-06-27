@@ -11,6 +11,10 @@ namespace Meadow;
 /// </summary>
 public class NtpClient : INtpClient
 {
+    private Timer _ntpSyncTimer;
+    private int _ntpLock = 1;
+    private TimeSpan _ntpRefreshPeriodSeconds = TimeSpan.FromSeconds(F7PlatformOS.GetUInt(IPlatformOS.ConfigurationValues.NtpRefreshPeriodSeconds));
+
     /// <summary>
     /// Event raised when the device clock is adjusted by NTP
     /// </summary>
@@ -27,10 +31,10 @@ public class NtpClient : INtpClient
     /// <summary>
     /// Time period that the NTP client attempts to query the NTP time server(s)
     /// </summary>
-    public TimeSpan PollPeriod
+    public TimeSpan NtpRefreshPeriodSeconds
     {
-        get => TimeSpan.Zero; // currently only happens at startup
-        set => throw new PlatformNotSupportedException("Changing NTP Poll Frequency not currently supported");
+        get => _ntpRefreshPeriodSeconds;
+        set => _ntpRefreshPeriodSeconds = value;
     }
 
     internal void RaiseTimeChanged()
@@ -38,11 +42,22 @@ public class NtpClient : INtpClient
         TimeChanged?.Invoke(DateTime.UtcNow);
     }
 
-    private int _ntpLock = 1;
+    /// <inheritdoc/>
+    public void StartPeriodicSynchronization()
+    {
+        if (_ntpSyncTimer != null)
+        {
+            _ntpSyncTimer.Dispose();
+        }
+
+        // Initialize the timer to call Synchronize method periodically
+        _ntpSyncTimer = new Timer(async _ => await Synchronize(), null, TimeSpan.Zero, _ntpRefreshPeriodSeconds);
+    }
 
     /// <inheritdoc/>
     public Task<bool> Synchronize(string? ntpServer = null)
     {
+        Resolver.Log.Trace("Starting NTP synchronization...");
         if (ntpServer == null)
         {
             if (Resolver.Device.PlatformOS.NtpServers.Length == 0)
@@ -93,6 +108,7 @@ public class NtpClient : INtpClient
                 var dt = new DateTime(1900, 1, 1).AddSeconds(s);
                 Resolver.Device.PlatformOS.SetClock(dt);
                 TimeChanged?.Invoke(dt);
+                Resolver.Log.Trace($"NTP synchronization successful. Current time set to: {dt:O}");
                 return Task.FromResult(true);
             }
             catch (Exception ex)
@@ -107,6 +123,7 @@ public class NtpClient : INtpClient
 
         }
 
+        Resolver.Log.Trace("NTP synchronization already in progress.");
         return Task.FromResult(false);
     }
 }

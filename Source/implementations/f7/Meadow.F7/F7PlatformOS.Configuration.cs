@@ -49,10 +49,16 @@ public partial class F7PlatformOS
 
                     while (true)
                     {
-                        line = reader.ReadLine().Trim();
-                        if (line.Length > 0 && line[0] == '-')
+                        line = reader.ReadLine();
+                        if (line == null || string.IsNullOrWhiteSpace(line))
                         {
-                            list.Add(line[2..]);
+                            break;
+                        }
+                        
+                        line = line.Trim();
+                        if (line.StartsWith("- "))
+                        {
+                            list.Add(line.Substring(2).Trim());
                         }
                         else
                         {
