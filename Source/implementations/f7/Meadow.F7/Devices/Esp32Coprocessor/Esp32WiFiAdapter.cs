@@ -271,6 +271,15 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
                 RaiseErrorEvent(statusCode);
                 break;
+            case WiFiFunction.NetworkConnectingEvent:
+                CurrentState = NetworkState.Connecting;
+                RaiseNetworkConnecting();
+                break;
+            case WiFiFunction.NetworkConnectionRetryCountExceededEvent:
+                CurrentState = NetworkState.Disconnected;
+                RaiseConnectFailed();
+                break;
+
             default:
                 throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
         }
