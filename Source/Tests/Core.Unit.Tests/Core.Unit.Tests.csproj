@@ -25,6 +25,12 @@
     <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="app.config.customsettingsafterempty.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.config.customsettings.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="app.config.envizor.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

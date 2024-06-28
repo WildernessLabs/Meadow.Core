@@ -1,0 +1,15 @@
+﻿Lifecycle:
+    RestartOnAppFailure: false
+    AppFailureRestartDelaySeconds: 15
+
+Logging:
+  LogLevel:
+    Default: Debug
+
+MeadowCloud:
+    # CloudSetting: true
+    # All the settings in this group are commented out
+
+CustomSettings:
+    Setting1: Expected1
+    Setting2: Expected2
