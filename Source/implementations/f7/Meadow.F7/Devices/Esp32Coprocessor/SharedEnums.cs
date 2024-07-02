@@ -554,13 +554,17 @@ public enum CellFunction
     /// </summary>
     NetworkDisconnectedEvent = 1,
     /// <summary>
+    /// CellFunction - NetworkErrorEvent
+    /// </summary>
+    NetworkErrorEvent = 2,
+    /// <summary>
     /// CellFunction - NetworkAtCmdEvent
     /// </summary>
     NetworkAtCmdEvent = 4,
     /// <summary>
-    /// CellFunction - NetworkErrorEvent
+    /// CellFunction - NtpUpdateEvent
     /// </summary>
-    NetworkErrorEvent = 2,
+    NtpUpdateEvent = 5,
 };
 
 /// <summary>
@@ -576,6 +580,10 @@ public enum EthernetFunction
     /// EthernetFunction - NetworkDisconnectedEvent
     /// </summary>
     NetworkDisconnectedEvent = 37,
+    /// <summary>
+    /// EthernetFunction - NtpUpdateEvent
+    /// </summary>
+    NtpUpdateEvent = 38,
 };
 
 /// <summary>
