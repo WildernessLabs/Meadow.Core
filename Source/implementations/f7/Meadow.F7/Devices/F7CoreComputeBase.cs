@@ -27,12 +27,6 @@ public abstract partial class F7CoreComputeBase : F7MicroBase, IF7CoreComputeMea
         : base(ioController, analogCapabilities, networkCapabilities, storageCapabilities)
     {
         Pins = pins;
-
-        if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
-        {
-            Resolver.Log.Info($"Device is configured to use Wired Ethernet for the network interface");
-            networkAdapters.Add(new WiredNetworkAdapter());
-        }
     }
 
     /// <inheritdoc/>
