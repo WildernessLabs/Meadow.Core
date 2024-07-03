@@ -40,13 +40,9 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
     protected void InvokeEvent(EthernetFunction eventId, StatusCodes statusCode, byte[] payload)
     {
-        Resolver.Log.Trace($"Ethernet InvokeEvent {eventId} returned {statusCode}");
-
         switch (eventId)
         {
             case EthernetFunction.NetworkConnectedEvent:
-                Resolver.Log.Trace("Ethernet connected event triggered!");
-
                 var args = new EthernetNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
 
                 this.Refresh();
@@ -56,8 +52,6 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
 
                 break;
             case EthernetFunction.NetworkDisconnectedEvent:
-                Resolver.Log.Trace("Ethernet disconnected event triggered!");
-
                 _isConnected = false;
                 RaiseNetworkDisconnected(null);
                 break;

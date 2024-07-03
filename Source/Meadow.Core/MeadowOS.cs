@@ -758,17 +758,7 @@ public static partial class MeadowOS
             }
             else
             {
-                Resolver.Log.Trace($"!! NO Hardware property.  Found these:");
-
-                foreach (var prop in appType.GetProperties(
-                    BindingFlags.Static
-                    | BindingFlags.Instance
-                    | BindingFlags.Public
-                    | BindingFlags.NonPublic
-                    | BindingFlags.FlattenHierarchy))
-                {
-                    Resolver.Log.Trace($" - {prop.Name}");
-                }
+                Resolver.Log.Trace($"No Hardware property found in App.");
             }
             App = app;
 
