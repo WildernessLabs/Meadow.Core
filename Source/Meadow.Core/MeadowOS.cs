@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using static Meadow.Logging.Logger;
 using RTI = System.Runtime.InteropServices.RuntimeInformation;
 namespace Meadow;
 
@@ -82,7 +83,7 @@ public static partial class MeadowOS
             if (!systemInitialized)
             {
                 // device initialization failed - don't try bring up the app
-                Resolver.Log.Error("Device (system) Initialization Failure");
+                Resolver.Log.Error("Device (system) Initialization Failure", MessageGroup.Core);
             }
         }
         catch (Exception e)
@@ -105,7 +106,7 @@ public static partial class MeadowOS
             catch (Exception ex)
             {
                 // if the app crashes in the crash report handler, we don't want to restart or we'll infinite loop!
-                Resolver.Log.Error($"IReliabilityService.HandleBootFromError error: {ex.Message}");
+                Resolver.Log.Error($"IReliabilityService.HandleBootFromError error: {ex.Message}", MessageGroup.Core);
             }
         }
 
@@ -117,12 +118,12 @@ public static partial class MeadowOS
 
             try
             {
-                Resolver.Log.Trace("Initializing App");
+                Resolver.Log.Trace("Initializing App", MessageGroup.Core);
                 await App.Initialize();
 
                 stepName = "App Run";
 
-                Resolver.Log.Trace("Running App");
+                Resolver.Log.Trace("Running App", MessageGroup.Core);
 
                 await App.Run();
                 AppAbort.Token.WaitHandle.WaitOne();
@@ -138,7 +139,7 @@ public static partial class MeadowOS
                 }
                 catch (Exception ex)
                 {
-                    Resolver.Log.Error($"Exception in OnError handling: {ex.Message}");
+                    Resolver.Log.Error($"Exception in OnError handling: {ex.Message}", MessageGroup.Core);
                 }
 
                 // set the cancel token so any waiting Tasks, etc can abort cleanly
@@ -148,7 +149,7 @@ public static partial class MeadowOS
             try
             {
                 // let the app handle shutdown
-                Resolver.Log.Trace($"App shutting down");
+                Resolver.Log.Trace($"App shutting down", MessageGroup.Core);
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
                 await App.OnShutdown();
@@ -156,7 +157,7 @@ public static partial class MeadowOS
             catch (Exception e)
             {
                 // we can't recover while shutting down
-                Resolver.Log.Error($"Exception in App.OnShutdown: {e.Message}");
+                Resolver.Log.Error($"Exception in App.OnShutdown: {e.Message}", MessageGroup.Core);
             }
             finally
             {
@@ -168,7 +169,7 @@ public static partial class MeadowOS
                     }
                     catch (Exception ex)
                     {
-                        Resolver.Log.Error($"Exception in App.Dispose: {ex.Message}");
+                        Resolver.Log.Error($"Exception in App.Dispose: {ex.Message}", MessageGroup.Core);
                     }
                 }
             }
@@ -184,7 +185,7 @@ public static partial class MeadowOS
     {
         try
         {
-            Resolver.Log.Error(message ?? " System Failure");
+            Resolver.Log.Error(message ?? " System Failure", MessageGroup.Core);
             Resolver.Log.Error($" {e.GetType()}: {e.Message}");
             Resolver.Log.Error(e.StackTrace);
 
@@ -192,13 +193,13 @@ public static partial class MeadowOS
             {
                 foreach (var ex in ae.InnerExceptions)
                 {
-                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}");
+                    Resolver.Log.Error($" Inner {ex.GetType()}: {ex.InnerException.Message}", MessageGroup.Core);
                     Resolver.Log.Error(ex.StackTrace);
                 }
             }
             else if (e.InnerException != null)
             {
-                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}");
+                Resolver.Log.Error($" Inner {e.InnerException.GetType()}: {e.InnerException.Message}", MessageGroup.Core);
                 Resolver.Log.Error(e.InnerException.StackTrace);
             }
         }
@@ -251,7 +252,7 @@ public static partial class MeadowOS
         Resolver.Log.ShowTicks = settings.LoggingSettings.ShowTicks;
 
         Resolver.Log.LogLevel = settings.LoggingSettings.LogLevel.Default;
-        Resolver.Log.Info($"Log level: {settings.LoggingSettings.LogLevel.Default}");
+        Resolver.Log.Info($"Log level: {settings.LoggingSettings.LogLevel.Default}", MessageGroup.Core);
 
         LifecycleSettings = settings.LifecycleSettings;
         MeadowCloudSettings = settings.MeadowCloudSettings;
@@ -271,7 +272,7 @@ public static partial class MeadowOS
 
     private static Type[] FindAppType(string? root)
     {
-        Resolver.Log.Trace($"Looking for app assembly...");
+        Resolver.Log.Trace($"Looking for app assembly...", MessageGroup.Core);
 
         Assembly? appAssembly;
 
@@ -297,14 +298,14 @@ public static partial class MeadowOS
                 var path = Path.Combine(root, name);
                 if (File.Exists(path))
                 {
-                    Resolver.Log.Trace($"Found '{path}'");
+                    Resolver.Log.Trace($"Found '{path}'", MessageGroup.Core);
                     try
                     {
                         return Assembly.LoadFrom(path);
                     }
                     catch (Exception ex)
                     {
-                        Resolver.Log.Warn($"Unable to load assembly '{name}': {ex.Message}");
+                        Resolver.Log.Warn($"Unable to load assembly '{name}': {ex.Message}", MessageGroup.Core);
                     }
                 }
             }
@@ -312,7 +313,7 @@ public static partial class MeadowOS
             return null;
         }
 
-        Resolver.Log.Trace($"Looking for IApp...");
+        Resolver.Log.Trace($"Looking for IApp...", MessageGroup.Core);
         var searchType = typeof(IApp);
         var resultList = new List<Type>();
         foreach (var type in appAssembly.GetTypes())
@@ -408,7 +409,7 @@ public static partial class MeadowOS
 
         foreach (var app in allApps)
         {
-            Resolver.Log.Info(app.Name);
+            Resolver.Log.Info(app.Name, MessageGroup.Core);
         }
 
         // find an IApp that matches our target platform
@@ -526,7 +527,7 @@ public static partial class MeadowOS
                         case Interop.HardwareVersion.Unknown:
                             if (allApps.Length > 1)
                             {
-                                Resolver.Log.Warn("Multi-targeting of F7 devices is only supported on OS 1.9 and later");
+                                Resolver.Log.Warn("Multi-targeting of F7 devices is only supported on OS 1.9 and later", MessageGroup.Core);
                             }
                             return (app, devicetype.DeviceType, devicetype.HardwareProviderType);
                         case Interop.HardwareVersion.F7FeatherV1:
@@ -617,7 +618,7 @@ public static partial class MeadowOS
                     throw new Exception($"Failed to create instance of '{deviceType.Name}'");
                 }
                 et = Environment.TickCount - b4;
-                Resolver.Log.Trace($"Creating '{deviceType.Name}' instance took {et}ms");
+                Resolver.Log.Trace($"Creating '{deviceType.Name}' instance took {et}ms", MessageGroup.Core);
 
                 CurrentDevice = device;
                 Resolver.Services.Add<IMeadowDevice>(CurrentDevice);
@@ -626,11 +627,11 @@ public static partial class MeadowOS
             {
                 if (ex.InnerException != null)
                 {
-                    Resolver.Log.Error($"Creating IMeadowDevice instance failure : {ex.Message}{Environment.NewLine}{ex.InnerException}");
+                    Resolver.Log.Error($"Creating IMeadowDevice instance failure : {ex.Message}{Environment.NewLine}{ex.InnerException}", MessageGroup.Core);
                 }
                 else
                 {
-                    Resolver.Log.Error($"Creating IMeadowDevice instance failure : {ex.Message}");
+                    Resolver.Log.Error($"Creating IMeadowDevice instance failure : {ex.Message}", MessageGroup.Core);
                 }
                 return false;
             }
@@ -645,17 +646,17 @@ public static partial class MeadowOS
             }
             catch (Exception ex)
             {
-                Resolver.Log.Warn($"Failed to create IReliabilityService: {ex.Message}");
+                Resolver.Log.Warn($"Failed to create IReliabilityService: {ex.Message}", MessageGroup.Core);
             }
 
-            Resolver.Log.Trace($"Device Initialize starting...");
+            Resolver.Log.Trace($"Device Initialize starting...", MessageGroup.Core);
             CurrentDevice.Initialize(platform);
-            Resolver.Log.Trace($"PlatformOS Initialize starting...");
+            Resolver.Log.Trace($"PlatformOS Initialize starting...", MessageGroup.Core);
             CurrentDevice.PlatformOS.Initialize(CurrentDevice.Capabilities, args); // initialize the devices' platform OS
 
             // initialize file system folders and such
             // TODO: move this to platformOS
-            Resolver.Log.Trace($"File system Initialize starting...");
+            Resolver.Log.Trace($"File system Initialize starting...", MessageGroup.Core);
             InitializeFileSystem();
 
             IMeadowAppEmbeddedHardware? appHardwareInstance = null;
@@ -676,21 +677,21 @@ public static partial class MeadowOS
 
                     if (createMethod != null)
                     {
-                        Resolver.Log.Trace($"Creating hardware provider '{hardwareProviderType.Name}'");
+                        Resolver.Log.Trace($"Creating hardware provider '{hardwareProviderType.Name}'", MessageGroup.Core);
                         // allow using non-public constructors
                         var provider = Activator.CreateInstance(
                             hardwareProviderType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                             null, null, null);
 
-                        Resolver.Log.Trace($"Using hardware provider to create hardware...");
+                        Resolver.Log.Trace($"Using hardware provider to create hardware...", MessageGroup.Core);
                         var hardware = createMethod.Invoke(provider, new object[] { CurrentDevice });
 
-                        Resolver.Log.Trace($"Hardware is a {hardware.GetType().Name}");
+                        Resolver.Log.Trace($"Hardware is a {hardware.GetType().Name}", MessageGroup.Core);
                         appHardwareInstance = hardware as IMeadowAppEmbeddedHardware;
                     }
                     else
                     {
-                        Resolver.Log.Warn($"No appropriate Create method found in {hardwareProviderType.Name}");
+                        Resolver.Log.Warn($"No appropriate Create method found in {hardwareProviderType.Name}", MessageGroup.Core);
                     }
 
                 }
@@ -699,11 +700,11 @@ public static partial class MeadowOS
             {
                 if (ex.InnerException != null)
                 {
-                    Resolver.Log.Error($"Creating hardware provider instance failure : {ex.Message}{Environment.NewLine}{ex.InnerException}");
+                    Resolver.Log.Error($"Creating hardware provider instance failure : {ex.Message}{Environment.NewLine}{ex.InnerException}", MessageGroup.Core);
                 }
                 else
                 {
-                    Resolver.Log.Error($"Creating hardware provider instance failure : {ex.Message}");
+                    Resolver.Log.Error($"Creating hardware provider instance failure : {ex.Message}", MessageGroup.Core);
                 }
                 return false;
             }
@@ -712,7 +713,7 @@ public static partial class MeadowOS
             {
                 // Create the app object, bound immediately to the <IMeadowDevice>
                 b4 = Environment.TickCount;
-                Resolver.Log.Trace($"Creating instance of {appType.Name}...");
+                Resolver.Log.Trace($"Creating instance of {appType.Name}...", MessageGroup.Core);
 
                 if (Activator.CreateInstance(appType, nonPublic: true) is not IApp capp)
                 {
@@ -720,7 +721,7 @@ public static partial class MeadowOS
                 }
                 app = capp;
                 et = Environment.TickCount - b4;
-                Resolver.Log.Trace($"Creating '{appType.Name}' instance took {et}ms");
+                Resolver.Log.Trace($"Creating '{appType.Name}' instance took {et}ms", MessageGroup.Core);
             }
 
             // feels off, but not seeing a super clean way without the generics, etc.
@@ -739,7 +740,7 @@ public static partial class MeadowOS
                 }
             }
 
-            Resolver.Log.Trace($"Checking for Hardware property");
+            Resolver.Log.Trace($"Checking for Hardware property", MessageGroup.Core);
             if (appType.GetProperty("Hardware",
                 BindingFlags.Static
                 | BindingFlags.Public
@@ -748,17 +749,17 @@ public static partial class MeadowOS
             {
                 if (hpi.CanWrite)
                 {
-                    Resolver.Log.Trace($"Setting Hardware property");
+                    Resolver.Log.Trace($"Setting Hardware property", MessageGroup.Core);
                     hpi.SetValue(app, appHardwareInstance);
                 }
                 else
                 {
-                    Resolver.Log.Trace($"!! Hardware property not writable");
+                    Resolver.Log.Trace($"!! Hardware property not writable", MessageGroup.Core);
                 }
             }
             else
             {
-                Resolver.Log.Trace($"No Hardware property found in App.");
+                Resolver.Log.Trace($"No Hardware property found in App.", MessageGroup.Core);
             }
             App = app;
 
@@ -787,7 +788,7 @@ public static partial class MeadowOS
                 }
                 else
                 {
-                    Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.");
+                    Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.", MessageGroup.Core);
                 }
             }
 
@@ -795,21 +796,21 @@ public static partial class MeadowOS
                 || MeadowCloudSettings.EnableUpdates
                 || MeadowCloudSettings.EnableHealthMetrics)
             {
-                Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}");
-                Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}");
-                Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}");
+                Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}", MessageGroup.Core);
+                Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}", MessageGroup.Core);
+                Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}", MessageGroup.Core);
                 cloudConnectionService.Start();
             }
             else
             {
-                Resolver.Log.Info("All cloud features are disabled.");
+                Resolver.Log.Info("All cloud features are disabled.", MessageGroup.Core);
             }
 
             return true;
         }
         catch (Exception e)
         {
-            Resolver.Log.Error(e.ToString());
+            Resolver.Log.Error(e.ToString(), MessageGroup.Core);
             return false;
         }
     }
@@ -840,7 +841,7 @@ public static partial class MeadowOS
 
         // Do a best-attempt at freeing memory and resources
         GC.Collect(GC.MaxGeneration);
-        Resolver.Log.Debug("Shutdown");
+        Resolver.Log.Debug("Shutdown", MessageGroup.Core);
 
         // just put the Main thread to sleep (don't exit) because we want the Update service to still be able to work
         _forceTerminate.WaitOne();
@@ -880,7 +881,7 @@ public static partial class MeadowOS
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Failed: {ex.Message}");
+                Resolver.Log.Error($"Failed: {ex.Message}", MessageGroup.Core);
             }
         }
     }
@@ -897,7 +898,7 @@ public static partial class MeadowOS
 
             if (CurrentDevice != null && CurrentDevice.PlatformOS != null)
             {
-                Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.");
+                Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.", MessageGroup.Core);
                 Thread.Sleep(restart * 1000);
 
                 CurrentDevice.PlatformOS.Reset();
@@ -906,7 +907,7 @@ public static partial class MeadowOS
             }
             else
             {
-                Resolver.Log.Info($"Initialization failure prevents automatic restart.");
+                Resolver.Log.Info($"Initialization failure prevents automatic restart.", MessageGroup.Core);
             }
         }
     }
