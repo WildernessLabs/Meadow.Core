@@ -243,7 +243,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <param name="o"></param>
     private void EventHandlerServiceThread(object o)
     {
-        Resolver.Log.Trace("Starting Esp32Coprocessor event handler thread.", "esp");
+        Resolver.Log.Trace("Starting Esp32Coprocessor event handler thread.", MessageGroup.Esp);
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
         byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
         while (true)
@@ -251,17 +251,17 @@ public partial class Esp32Coprocessor : ICoprocessor
             int priority = 0;
             try
             {
-                Resolver.Log.Trace("Waiting for event.", "esp");
+                Resolver.Log.Trace("Waiting for event.", MessageGroup.Esp);
                 int result;
                 do
                 {
                     result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
                 } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
-                Resolver.Log.Trace("Event received.", "esp");
+                Resolver.Log.Trace("Event received.", MessageGroup.Esp);
                 if (result >= 0)
                 {
-                    Resolver.Log.Trace("Processing event.", "esp");
+                    Resolver.Log.Trace("Processing event.", MessageGroup.Esp);
                     EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
                     byte[]? payload = null;
                     if (eventData.MessageId == 0)
@@ -270,10 +270,10 @@ public partial class Esp32Coprocessor : ICoprocessor
                     }
                     else
                     {
-                        Resolver.Log.Trace($"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, message ID: 0x{eventData.MessageId:x08}", "esp");
+                        Resolver.Log.Trace($"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, message ID: 0x{eventData.MessageId:x08}", MessageGroup.Esp);
                         GetEventData(eventData, out payload);
                     }
-                    Resolver.Log.Trace("Event data collected, raising event.", "esp");
+                    Resolver.Log.Trace("Event data collected, raising event.", MessageGroup.Esp);
                     Task.Run(() =>
                     {
                         switch ((Esp32Interfaces)eventData.Interface)
