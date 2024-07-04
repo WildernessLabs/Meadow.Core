@@ -4,6 +4,7 @@ using Meadow.Hardware;
 using Meadow.Units;
 using System;
 using System.Threading;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -151,17 +152,17 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
 
                     if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                     {
-                        Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
+                        Resolver.Log.Info($"Device is configured to use WiFi for the network interface", MessageGroup.Core);
                         var wifiAdapter = new Esp32WiFiAdapter(esp32);
                         networkAdapters.Add(wifiAdapter);
 
                         if (wifiAdapter.AutoConnect)
                         {
-                            Resolver.Log.Debug($"Device configured to auto-connect to SSID '{wifiAdapter.DefaultSsid}'");
+                            Resolver.Log.Debug($"Device configured to auto-connect to SSID '{wifiAdapter.DefaultSsid}'", MessageGroup.Core);
 
                             if (string.IsNullOrEmpty(wifiAdapter.DefaultSsid))
                             {
-                                Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.");
+                                Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.", MessageGroup.Core);
                             }
                             else
                             {
@@ -171,18 +172,18 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                     }
                     else if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Cell)
                     {
-                        Resolver.Log.Info($"Device is configured to use Cell for the network interface");
+                        Resolver.Log.Info($"Device is configured to use Cell for the network interface", MessageGroup.Core);
                         networkAdapters.Add(new F7CellNetworkAdapter(esp32));
                     }
                     else if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
                     {
-                        Resolver.Log.Info($"Device is configured to use Ethernet for the network interface");
+                        Resolver.Log.Info($"Device is configured to use Ethernet for the network interface", MessageGroup.Core);
                         networkAdapters.Add(new F7EthernetNetworkAdapter(esp32));
                     }
                 }
                 catch (Exception e)
                 {
-                    Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}");
+                    Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}", MessageGroup.Core);
                     return false;
                 }
                 finally

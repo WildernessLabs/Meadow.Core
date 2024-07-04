@@ -163,13 +163,13 @@ public partial class Esp32Coprocessor : ICoprocessor
             }
             else
             {
-                Resolver.Log.Warn($"ESP Ioctl returned non-success: {updResult}");
+                Resolver.Log.Warn($"ESP Ioctl returned non-success: {updResult}", MessageGroup.Esp);
                 result = StatusCodes.Failure;
             }
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"Exception sending ESP32 command: {ex.Message}");
+            Resolver.Log.Error($"Exception sending ESP32 command: {ex.Message}", MessageGroup.Esp);
         }
         finally
         {
@@ -193,7 +193,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <returns>StatusCodes enum indicating if the operation was successful or if an error occurred.</returns>
     private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
     {
-        Resolver.Log.Trace($"Getting event data for message ID 0x{eventData.MessageId:x08}");
+        Resolver.Log.Trace($"Getting event data for message ID 0x{eventData.MessageId:x08}", MessageGroup.Esp);
         var resultGcHandle = default(GCHandle);
         StatusCodes result = StatusCodes.CompletedOk;
         try
@@ -212,11 +212,6 @@ public partial class Esp32Coprocessor : ICoprocessor
             int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.UpdEsp32EventDataPayload, ref request);
             if (updResult == 0)
             {
-                //
-                //  Add the ability for a resolver to output the contents of a buffer ?
-                //
-                // Resolver.Log.Trace("Payload: ");
-                // Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
                 payload = new byte[request.PayloadLength];
                 Array.Copy(encodedResult, payload, request.PayloadLength);
                 result = StatusCodes.CompletedOk;

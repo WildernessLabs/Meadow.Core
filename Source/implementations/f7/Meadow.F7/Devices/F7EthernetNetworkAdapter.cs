@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using System.Net;
 using System.Net.NetworkInformation;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -56,7 +57,7 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
                 RaiseNetworkDisconnected(null);
                 break;
             default:
-                Resolver.Log.Trace("Event type not found");
+                Resolver.Log.Trace($"Ethernet event type {eventId} not found", MessageGroup.Core);
                 break;
         }
     }

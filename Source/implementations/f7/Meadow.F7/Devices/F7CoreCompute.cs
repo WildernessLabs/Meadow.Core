@@ -1,4 +1,5 @@
 ﻿using Meadow.Hardware;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices
 {
@@ -20,7 +21,7 @@ namespace Meadow.Devices
             if (this.Information.Platform != Hardware.MeadowPlatform.F7CoreComputeV2)
             {
                 var message = $"Application is defined as {nameof(F7CoreComputeV2)}, but running hardware is {this.Information.Platform}";
-                Resolver.Log.Error(message);
+                Resolver.Log.Error(message, MessageGroup.Core);
                 throw new UnsupportedPlatformException(this.Information.Platform, message);
             }
 

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -118,7 +119,7 @@ public partial class F7GPIOManager : IMeadowIOController
         var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
         if (result != 0)
         {
-            Resolver.Log.Error($"Failed to connect wake interrupt: {UPD.GetLastError()}");
+            Resolver.Log.Error($"Failed to connect wake interrupt: {UPD.GetLastError()}", MessageGroup.Core);
         }
     }
 

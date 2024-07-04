@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using Meadow.Units;
 using System;
 using System.IO;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -115,13 +116,13 @@ public partial class F7PlatformOS : IPlatformOS
     /// <inheritdoc/>
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
     {
-        Resolver.Log.Trace($"Attempting to set the server certificate validation mode to {authmode}");
+        Resolver.Log.Trace($"Attempting to set the server certificate validation mode to {authmode}", MessageGroup.Core);
 
         int authModeInt = (int)authmode;
         if (authModeInt < 0 || authModeInt > Enum.GetNames(typeof(ServerCertificateValidationMode)).Length - 1)
         {
             string errorMessage = $"Invalid validation mode: {authModeInt}";
-            Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
+            Resolver.Log.Error($"Invalid validation mode: {authModeInt}", MessageGroup.Core);
             throw new ArgumentException(errorMessage);
         }
 
@@ -129,23 +130,23 @@ public partial class F7PlatformOS : IPlatformOS
         if (ret == (int)ServerCertificateValidationError.InvalidMode)
         {
             string errorMessage = $"Invalid validation mode: {authModeInt}";
-            Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
+            Resolver.Log.Error($"Invalid validation mode: {authModeInt}", MessageGroup.Core);
             throw new ArgumentException(errorMessage);
         }
         else if (ret == (int)ServerCertificateValidationError.CannotChangeAfterInitialization)
         {
             string errorMessage = $"The server certificate validation mode cannot be changed after the TLS initialization.";
-            Resolver.Log.Error(errorMessage);
+            Resolver.Log.Error(errorMessage, MessageGroup.Core);
             throw new Exception(errorMessage);
         }
         else if (ret < 0)
         {
             string errorMessage = $"Error setting validation mode.";
-            Resolver.Log.Error(errorMessage);
+            Resolver.Log.Error(errorMessage, MessageGroup.Core);
             throw new Exception(errorMessage);
         }
 
-        Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!");
+        Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!", MessageGroup.Core);
 
         return;
     }

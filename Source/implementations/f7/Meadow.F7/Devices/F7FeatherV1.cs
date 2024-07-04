@@ -1,6 +1,7 @@
 ﻿using Meadow.Hardware;
 using Meadow.Units;
 using System;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -25,7 +26,7 @@ public partial class F7FeatherV1 : F7FeatherBase
         if (this.Information.Platform != Hardware.MeadowPlatform.F7FeatherV1)
         {
             var message = $"Application is defined as {nameof(F7FeatherV1)}, but running hardware is {this.Information.Platform}";
-            Resolver.Log.Error(message);
+            Resolver.Log.Error(message, MessageGroup.Core);
             throw new UnsupportedPlatformException(this.Information.Platform, message);
         }
 
@@ -38,25 +39,25 @@ public partial class F7FeatherV1 : F7FeatherBase
     /// <returns>A BatteryInfo instance</returns>
     /// <exception cref="Exception"></exception>
     public override BatteryInfo? GetBatteryInfo()
-{
-	if (Coprocessor == null)
-	{
-		throw new Exception("Coprocessor not initialized.");
-	}
+    {
+        if (Coprocessor == null)
+        {
+            throw new Exception("Coprocessor not initialized.");
+        }
 
-	return new BatteryInfo
-	{
-		Voltage = new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts)
-	};
-}
+        return new BatteryInfo
+        {
+            Voltage = new Voltage(Coprocessor.GetBatteryLevel(), Voltage.UnitType.Volts)
+        };
+    }
 
-/// <summary>
-/// Gets the hardware I2C bus number corresponding to the requested pins
-/// </summary>
-/// <param name="clock"></param>
-/// <param name="data"></param>
-/// <returns></returns>
-protected override int GetI2cBusNumberForPins(IPin clock, IPin data)
+    /// <summary>
+    /// Gets the hardware I2C bus number corresponding to the requested pins
+    /// </summary>
+    /// <param name="clock"></param>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    protected override int GetI2cBusNumberForPins(IPin clock, IPin data)
     {
         if (clock.Name == (Pins as F7FeatherV1.Pinout)?.I2C_SCL.Name)
         {

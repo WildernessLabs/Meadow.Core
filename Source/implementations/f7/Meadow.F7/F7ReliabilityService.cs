@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -33,7 +34,7 @@ public class F7ReliabilityService : ReliabilityServiceBase
         {
             if (!ErrorListenerIsAttached)
             {
-                Resolver.Log.Warn($"The ESP32 has had an error ({espError.StatusCode}).");
+                Resolver.Log.Warn($"The ESP32 has had an error ({espError.StatusCode}).", MessageGroup.Core);
             }
 
             switch (espError.StatusCode)
@@ -54,14 +55,14 @@ public class F7ReliabilityService : ReliabilityServiceBase
         {
             if (!ErrorListenerIsAttached)
             {
-                Resolver.Log.Warn($"Meadow Cloud has had an error ({cloudErrorInfo.Exception}).");
+                Resolver.Log.Warn($"Meadow Cloud has had an error ({cloudErrorInfo.Exception}).", MessageGroup.Core);
             }
 
             shouldReset = true;
         }
         else
         {
-            Resolver.Log.Info($"We've had a system error of type {errorInfo.Exception?.GetType().Name}: {errorInfo}");
+            Resolver.Log.Info($"We've had a system error of type {errorInfo.Exception?.GetType().Name}: {errorInfo}", MessageGroup.Core);
         }
 
         recommendReset = shouldReset;
@@ -150,7 +151,7 @@ public class F7ReliabilityService : ReliabilityServiceBase
             }
             catch (Exception ex)
             {
-                Resolver.Log.Warn($"Unable to parse Platform OS messages from '{path}': {ex.Message}");
+                Resolver.Log.Warn($"Unable to parse Platform OS messages from '{path}': {ex.Message}", MessageGroup.Core);
             }
         }
 
