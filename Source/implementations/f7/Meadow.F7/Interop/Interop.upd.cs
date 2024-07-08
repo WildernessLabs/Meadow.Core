@@ -1,4 +1,5 @@
 ﻿using System;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Core
 {
@@ -371,7 +372,7 @@ namespace Meadow.Core
                 if (result != 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Resolver.Log.Info($"GetRegister failed. ioctl returned{result} lasterr={errno}");
+                    Resolver.Log.Info($"GetRegister failed. ioctl returned{result} lasterr={errno}", MessageGroup.Core);
                     value = (uint)result;
                     return false;
                 }
@@ -397,7 +398,7 @@ namespace Meadow.Core
                 if (result != 0)
                 {
                     var errno = Devices.UPD.GetLastError();
-                    Resolver.Log.Error($"SetRegister failed: {errno}");
+                    Resolver.Log.Error($"SetRegister failed: {errno}", MessageGroup.Core);
                     return false;
                 }
                 return true;
@@ -421,7 +422,7 @@ namespace Meadow.Core
                 var result = Interop.Nuttx.ioctl(driverHandle, UpdIoctlFn.UpdateRegister, ref update);
                 if (result != 0)
                 {
-                    Resolver.Log.Error($"Update failed: {result}");
+                    Resolver.Log.Error($"Update failed: {result}", MessageGroup.Core);
                     return false;
                 }
                 return true;

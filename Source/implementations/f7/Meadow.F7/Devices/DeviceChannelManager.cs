@@ -3,6 +3,7 @@ using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Hardware
 {
@@ -35,7 +36,7 @@ namespace Meadow.Hardware
                 _reservedPins = value;
                 if (_reservedPins != null && _reservedPins.Length > 0)
                 {
-                    Resolver.Log.Debug($"System reserved pins: {string.Join(';', SystemReservedPins)}");
+                    Resolver.Log.Debug($"System reserved pins: {string.Join(';', SystemReservedPins)}", MessageGroup.Core);
                 }
             }
         }

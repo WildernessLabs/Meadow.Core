@@ -3,6 +3,7 @@ using Meadow.Units;
 using System;
 using System.Threading;
 using static Meadow.Core.Interop;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices
 {
@@ -210,8 +211,8 @@ namespace Meadow.Devices
 
                     if (temperature.Celsius < 0)
                     {
-                        Resolver.Log.Warn($"CPU Temp of {temperature.Celsius}C is incorrect!");
-                        Resolver.Log.Warn($"ADC reading: {adc}");
+                        Resolver.Log.Warn($"CPU Temp of {temperature.Celsius}C is incorrect!", MessageGroup.Core);
+                        Resolver.Log.Warn($"ADC reading: {adc}", MessageGroup.Core);
                     }
 
                     // TODO: I *think* the STM has factory temp calibrations set at 0x1FFF7A2E and 0x1FFF7A2E.  Try using them 
@@ -221,7 +222,7 @@ namespace Meadow.Devices
                 }
                 catch
                 {
-                    Resolver.Log.Warn($"CPU Temp read failure");
+                    Resolver.Log.Warn($"CPU Temp read failure", MessageGroup.Core);
 
                     if (attempts++ > 5)
                     {
