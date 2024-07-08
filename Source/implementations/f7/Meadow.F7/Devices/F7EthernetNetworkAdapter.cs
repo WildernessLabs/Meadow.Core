@@ -34,6 +34,19 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     }
 
     /// <summary>
+    /// Process the NtpTimeChanged event.
+    /// </summary>
+    protected void RaiseNtpTimeChangedEvent()
+    {
+        // the NtpClient should have been added to the Resolver, so pull it and raise an event
+        var client = Resolver.Services.Get<INtpClient>();
+        if (client is NtpClient ntp)
+        {
+            ntp.RaiseTimeChanged();
+        }
+    }
+
+    /// <summary>
     /// Use the event data to work out which event to invoke and create any event args that will be consumed.
     /// </summary>
     /// <param name="eventId">Event ID.</param>
@@ -55,6 +68,9 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
             case EthernetFunction.NetworkDisconnectedEvent:
                 _isConnected = false;
                 RaiseNetworkDisconnected(null);
+                break;
+            case EthernetFunction.NtpUpdateEvent:
+                RaiseNtpTimeChangedEvent();
                 break;
             default:
                 Resolver.Log.Trace($"Ethernet event type {eventId} not found", MessageGroup.Core);

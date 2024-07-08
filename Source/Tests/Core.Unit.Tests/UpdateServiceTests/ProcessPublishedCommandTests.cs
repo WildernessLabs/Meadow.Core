@@ -24,6 +24,7 @@ namespace Core.Unit.Tests.UpdateServiceTests
 
             Resolver.Services.GetOrCreate<Logger>();
             Resolver.Log.LogLevel = LogLevel.Trace;
+            Resolver.Log.ShowGroup = false;
             Resolver.Log.AddProvider(_log);
             if (Resolver.Services.Get<IJsonSerializer>() == null)
             {
