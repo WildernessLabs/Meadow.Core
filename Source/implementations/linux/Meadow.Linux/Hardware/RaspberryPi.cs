@@ -7,11 +7,13 @@ using System.Linq;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents a Raspberry Pi running the Linux operating system.
+/// </summary>
 public partial class RaspberryPi : Linux
 {
     private readonly DeviceCapabilities _capabilities;
     private bool? _isPi5;
-    private RaspberryPiPlatformOS _platformOS;
 
     /// <inheritdoc/>
     public RaspberryPiPinout Pins { get; }
@@ -24,6 +26,9 @@ public partial class RaspberryPi : Linux
     /// </summary>
     public bool IsRaspberryPi5 => _isPi5 ??= CheckIfPi5();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RaspberryPi"/> class.
+    /// </summary>
     public RaspberryPi()
     {
         // are we a Pi5?  if so, the GPIOs have moved
@@ -61,9 +66,6 @@ public partial class RaspberryPi : Linux
             return false;
         }
     }
-
-    /// <inheritdoc/>
-    public override IPlatformOS PlatformOS => _platformOS ??= new RaspberryPiPlatformOS();
 
     /// <inheritdoc/>
     public override IPin GetPin(string pinName)

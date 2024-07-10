@@ -119,10 +119,11 @@ public class LinuxPlatformOS : IPlatformOS
     public virtual SerialPortName[] GetSerialPortNames()
     {
         return SerialPort.GetPortNames().Select(n =>
-            new SerialPortName(n, n, Resolver.Device))
+            new SerialPortName(n.Substring(n.LastIndexOf('/') + 1), n, Resolver.Device))
         .ToArray();
     }
 
+    /// <inheritdoc/>
     public virtual Temperature GetCpuTemperature()
     {
         var fi = new FileInfo("/sys/class/thermal/thermal_zone0/temp");
