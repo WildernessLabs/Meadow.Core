@@ -69,8 +69,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_docs", "_docs", "{C3582F8C
 		..\Interrupt.md = ..\Interrupt.md
 		..\README.md = ..\README.md
 		..\doc\services.md = ..\doc\services.md
-		..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-known-issues.md = ..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-known-issues.md
-		..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-validation.md = ..\..\..\yoshimoshi\yoshipi\Hardware\v1b\v1b-validation.md
 	EndProjectSection
 EndProject
 Global
