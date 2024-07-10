@@ -130,7 +130,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             ntp.RaiseTimeChanged();
         }
     }
-    
+
     /// <summary>
     /// Use the event data to work out which event to invoke and create any event args that will be consumed.
     /// </summary>
@@ -161,7 +161,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 ResetCellTempData();
 
-                RaiseNetworkDisconnected(null);
+                RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
                 break;
             case CellFunction.NetworkAtCmdEvent:
                 Resolver.Log.Trace("Cell at cmd event triggered!", MessageGroup.Core);
@@ -285,7 +285,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <summary>
     /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
     /// </summary>
-    private string ParseCellConnectionError(string input)
+    private string ParseCellConnectionError(string? input)
     {
         if (input != null)
         {
@@ -428,7 +428,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             throw new System.IO.IOException("No available networks");
         }
 
-        return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output).ToArray();
+        return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output)?.ToArray() ?? Array.Empty<CellNetwork>();
     }
 
     /// <summary>

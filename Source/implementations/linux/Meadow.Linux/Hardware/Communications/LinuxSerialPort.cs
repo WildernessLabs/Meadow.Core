@@ -4,8 +4,20 @@ using System.Runtime.InteropServices;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents a serial port on a Linux system.
+/// </summary>
 public class LinuxSerialPort : SerialPortBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LinuxSerialPort"/> class.
+    /// </summary>
+    /// <param name="portName">The name of the serial port.</param>
+    /// <param name="baudRate">The baud rate for the serial port communication.</param>
+    /// <param name="dataBits">The number of data bits per byte.</param>
+    /// <param name="parity">The parity bit for the serial port communication.</param>
+    /// <param name="stopBits">The number of stop bits per byte.</param>
+    /// <param name="readBufferSize">The size of the buffer for reading data.</param>
     public LinuxSerialPort(
         SerialPortName portName,
         int baudRate,
@@ -17,11 +29,13 @@ public class LinuxSerialPort : SerialPortBase
     {
     }
 
+    /// <inheritdoc/>
     protected override void CloseHardwarePort(IntPtr handle)
     {
         Interop.close(handle.ToInt32());
     }
 
+    /// <inheritdoc/>
     protected override IntPtr OpenHardwarePort(string portName)
     {
         string driverName;
@@ -54,6 +68,7 @@ public class LinuxSerialPort : SerialPortBase
         return new IntPtr(handle);
     }
 
+    /// <inheritdoc/>
     protected override int ReadHardwarePort(IntPtr handle, byte[] readBuffer, int count)
     {
         var result = Interop.read(handle.ToInt32(), readBuffer, count);
@@ -67,6 +82,7 @@ public class LinuxSerialPort : SerialPortBase
         return result;
     }
 
+    /// <inheritdoc/>
     protected override void SetHardwarePortSettings(IntPtr handle)
     {
         // get the current settings
@@ -130,6 +146,7 @@ public class LinuxSerialPort : SerialPortBase
         }
     }
 
+    /// <inheritdoc/>
     protected override int WriteHardwarePort(IntPtr handle, byte[] writeBuffer, int count)
     {
         var result = Interop.write(handle.ToInt32(), writeBuffer, count);

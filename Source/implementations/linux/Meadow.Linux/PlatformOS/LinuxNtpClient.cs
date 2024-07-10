@@ -1,19 +1,27 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Meadow
+namespace Meadow;
+
+/// <summary>
+/// Represents an NTP (Network Time Protocol) client for Linux.
+/// </summary>
+public class LinuxNtpClient : INtpClient
 {
-    public class LinuxNtpClient : INtpClient
+    /// <inheritdoc/>
+    public bool Enabled => false;
+
+    /// <inheritdoc/>
+    public TimeSpan PollPeriod { get; set; }
+
+    /// <inheritdoc/>
+    public event TimeChangedEventHandler? TimeChanged;
+
+    /// <inheritdoc/>
+    public Task<bool> Synchronize(string? ntpServer = null)
     {
-        public bool Enabled => false;
+        TimeChanged?.Invoke(DateTime.UtcNow);
 
-        public TimeSpan PollPeriod { get; set; }
-
-        public event TimeChangedEventHandler TimeChanged;
-
-        public Task<bool> Synchronize(string? ntpServer = null)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

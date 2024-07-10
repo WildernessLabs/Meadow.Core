@@ -1,11 +1,13 @@
 ﻿using Meadow.Hardware;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents an I2C bus with specified bus number and speed.
+/// </summary>
 public partial class I2CBus : II2cBus, IDisposable
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -61,7 +63,7 @@ public partial class I2CBus : II2cBus, IDisposable
 
     private PeripheralMap InfoMap { get; }
 
-    public I2CBus(int busNumber, I2cBusSpeed busSpeed)
+    internal I2CBus(int busNumber, I2cBusSpeed busSpeed)
     {
         BusNumber = busNumber;
 
@@ -214,30 +216,5 @@ public partial class I2CBus : II2cBus, IDisposable
                 }
             }
         }
-    }
-
-    public void WriteData(byte peripheralAddress, params byte[] data)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void WriteData(byte peripheralAddress, byte[] data, int length)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void WriteData(byte peripheralAddress, IEnumerable<byte> data)
-    {
-        throw new NotImplementedException();
-    }
-
-    public byte[] WriteReadData(byte peripheralAddress, int byteCountToRead, params byte[] dataToWrite)
-    {
-        throw new NotImplementedException();
-    }
-
-    public byte[] ReadData(byte peripheralAddress, int numberOfBytes)
-    {
-        throw new NotImplementedException();
     }
 }

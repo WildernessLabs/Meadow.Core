@@ -30,6 +30,7 @@ namespace Meadow
             if (IsInvalid)
             {
                 Logger.Debug($"Chip ptr is invalid - cannot get GPIOD chip details");
+                Lines = new LineCollection(this, 0);
             }
             else
             {

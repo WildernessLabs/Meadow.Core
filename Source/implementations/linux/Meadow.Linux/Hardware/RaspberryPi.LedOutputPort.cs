@@ -6,6 +6,9 @@ namespace Meadow;
 
 public partial class RaspberryPi
 {
+    /// <summary>
+    /// Represents a digital output port for an LED on the Raspberry Pi.
+    /// </summary>
     public class LedOutputPort : DigitalOutputPortBase
     {
         private string brightnessFsPath;

@@ -11,6 +11,7 @@ namespace Meadow.Networking;
 /// </summary>
 public class NmCliNetworkAdapter : INetworkAdapter
 {
+#pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
     /// <inheritdoc/>
     public event NetworkStateHandler? NetworkConnecting;
     /// <inheritdoc/>
@@ -21,6 +22,7 @@ public class NmCliNetworkAdapter : INetworkAdapter
     public event NetworkStateHandler? NetworkConnectFailed;
     /// <inheritdoc/>
     public event NetworkErrorHandler? NetworkError;
+#pragma warning restore CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
 
     internal NmCliDevice NmCliDevice { get; }
 
@@ -30,7 +32,7 @@ public class NmCliNetworkAdapter : INetworkAdapter
     }
 
     /// <inheritdoc/>
-    public string Name => NmCliDevice.Name;
+    public string Name => NmCliDevice.Name ?? string.Empty;
     /// <inheritdoc/>
     public IPAddress IpAddress => NmCliDevice.GetIPAddresses().First();
     /// <inheritdoc/>
@@ -38,7 +40,7 @@ public class NmCliNetworkAdapter : INetworkAdapter
     /// <inheritdoc/>
     public IPAddress Gateway => NmCliDevice.GetGateways().First();
     /// <inheritdoc/>
-    public bool IsConnected => NmCliDevice.State.Contains("connected");
+    public bool IsConnected => NmCliDevice.State?.Contains("connected") ?? false;
 
     /// <inheritdoc/>
     public IPAddress SubnetMask => throw new NotImplementedException();

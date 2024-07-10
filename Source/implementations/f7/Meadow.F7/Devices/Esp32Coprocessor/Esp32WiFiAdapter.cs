@@ -763,7 +763,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     break;
                 case NetworkState.Connected:
                     Refresh();
-                    var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
+                    var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid ?? string.Empty, Bssid, (byte)Channel, _authenticationType);
                     RaiseNetworkConnected(args);
                     break;
                 case NetworkState.Disconnecting:

@@ -288,7 +288,7 @@ namespace Meadow
             // bool gpiod_line_is_requested(struct gpiod_line *line) GPIOD_API;
             // bool gpiod_line_is_free(struct gpiod_line *line) GPIOD_API;
 
-            /**
+            /*
              * @brief Update the configuration of a single GPIO line.
              * @param line GPIO line object.
              * @param direction Updated direction which may be one of
@@ -303,7 +303,7 @@ namespace Meadow
              */
             // int gpiod_line_set_config(struct gpiod_line *line, int direction, int flags, int value) GPIOD_API;
 
-            /**
+            /*
              * @brief Set the direction of a single GPIO line to output.
              * @param line GPIO line object.
              * @param value The logical value output on the line.
@@ -312,7 +312,7 @@ namespace Meadow
              */
             //int gpiod_line_set_direction_output(struct gpiod_line *line, int value) GPIOD_API;
 
-            /**
+            /*
              * @brief Set the direction of a single GPIO line to input.
              * @param line GPIO line object.
              * @return 0 is the operation succeeds. In case of an error this routine
@@ -320,7 +320,7 @@ namespace Meadow
              */
             //int gpiod_line_set_direction_input(struct gpiod_line *line) GPIOD_API;
 
-            /**
+            /*
              * @brief Update the configuration flags of a single GPIO line.
              * @param line GPIO line object.
              * @param flags Replacement flags.
@@ -329,7 +329,9 @@ namespace Meadow
              */
             // int gpiod_line_set_flags(struct gpiod_line *line, int flags) GPIOD_API;
 
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
             internal struct timespec
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
             {
                 public ulong tv_sec;      //   seconds 
                 public ulong tv_nsec;       // nanoseconds 
@@ -347,7 +349,7 @@ namespace Meadow
             public static extern int gpiod_line_event_wait(IntPtr line, ref timespec timeout);
 
 
-            /**
+            /*
              * @brief Request rising edge event notifications on a single line.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.
@@ -357,7 +359,7 @@ namespace Meadow
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_request_rising_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
-            /**
+            /*
              * @brief Request rising edge event notifications on a single line.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.
@@ -368,7 +370,7 @@ namespace Meadow
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
 
-            /**
+            /*
              * @brief Request falling edge event notifications on a single line.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.
@@ -378,7 +380,7 @@ namespace Meadow
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_request_falling_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
-            /**
+            /*
              * @brief Request all event type notifications on a single line.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.
@@ -388,7 +390,7 @@ namespace Meadow
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_request_both_edges_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
-            /**
+            /*
              * @brief Request falling edge event notifications on a single line.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.
@@ -397,7 +399,7 @@ namespace Meadow
              */
             // int gpiod_line_request_falling_edge_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
 
-            /**
+            /*
              * @brief Request all event type notifications on a single line.
              * @param line GPIO line object.
              * @param consumer Name of the consumer.

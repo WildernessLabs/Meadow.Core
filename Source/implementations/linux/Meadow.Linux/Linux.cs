@@ -8,6 +8,9 @@ using System.Diagnostics;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents a Linux-based Meadow device.
+/// </summary>
 public class Linux : IMeadowDevice
 #if NET7_0
     , IPixelDisplayProvider
@@ -17,16 +20,18 @@ public class Linux : IMeadowDevice
     private Gpiod _gpiod = null!;
     private NmCliNetworkAdapterCollection? _networkAdapters;
 
+#pragma warning disable CS0067
     /// <inheritdoc/>
-    public event PowerTransitionHandler BeforeReset;
+    public event PowerTransitionHandler? BeforeReset;
     /// <inheritdoc/>
-    public event PowerTransitionHandler BeforeSleep;
+    public event PowerTransitionHandler? BeforeSleep;
     /// <inheritdoc/>
-    public event PowerTransitionHandler AfterWake;
+    public event PowerTransitionHandler? AfterWake;
     /// <inheritdoc/>
-    public event NetworkConnectionHandler NetworkConnected;
+    public event NetworkConnectionHandler? NetworkConnected;
     /// <inheritdoc/>
-    public event NetworkDisconnectionHandler NetworkDisconnected;
+    public event NetworkDisconnectionHandler? NetworkDisconnected;
+#pragma warning restore CS0067 
 
     /// <inheritdoc/>
     public virtual DeviceCapabilities Capabilities { get; }
@@ -168,6 +173,7 @@ public class Linux : IMeadowDevice
         }
     }
 
+    /// <inheritdoc/>
     public ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
     {
         return new SpiBus(busNumber, 0, SpiBus.SpiMode.Mode0, speed);
@@ -215,6 +221,7 @@ public class Linux : IMeadowDevice
         throw new PlatformNotSupportedException("This platform has no II2CBusses.  Use an IO Extender.");
     }
 
+    /// <inheritdoc/>
     public BatteryInfo GetBatteryInfo()
     {
         return new BatteryInfo
@@ -223,7 +230,7 @@ public class Linux : IMeadowDevice
         };
     }
 
-    public static string ExecuteCommandLine(string command, string args)
+    internal static string ExecuteCommandLine(string command, string args)
     {
         var psi = new ProcessStartInfo()
         {
@@ -247,98 +254,117 @@ public class Linux : IMeadowDevice
     // ----------------------------------------------
     // ----------------------------------------------
 
+    /// <inheritdoc/>
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false, InterruptMode interruptMode = InterruptMode.None, ResistorMode resistorMode = ResistorMode.Disabled, PortDirectionType initialDirection = PortDirectionType.Input, double debounceDuration = 0, double glitchDuration = 0, OutputType output = OutputType.PushPull)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnReset()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void SetClock(DateTime dateTime)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void WatchdogEnable(TimeSpan timeout)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void WatchdogReset()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnSleep()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void Reset()
     {
         // TODO: $ sudo reboot
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void Sleep(TimeSpan duration)
     {
         // not supported on RasPi
         throw new PlatformNotSupportedException();
     }
 
+    /// <inheritdoc/>
     public void OnShutdown(out bool complete, Exception? e = null)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnError(Exception e, out bool recovered)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnResume()
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnRecovery(Exception e)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnUpdate(Version newVersion, out bool approveUpdate)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public void OnUpdateComplete(Version oldVersion, out bool rollbackUpdate)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public ICounter CreateCounter(IPin pin, InterruptMode edge)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
     public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
     {
         throw new NotImplementedException();
