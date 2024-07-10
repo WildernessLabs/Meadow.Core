@@ -6,17 +6,9 @@ using System.Linq;
 
 namespace Meadow;
 
-public class LinuxStorageInformation : StorageInformation
-{
-    internal LinuxStorageInformation(string name, string filesystem, DigitalStorage size, DigitalStorage spaceAvailable)
-        : base(name, size, spaceAvailable)
-    {
-        Filesystem = filesystem;
-    }
-
-    public string Filesystem { get; private set; }
-}
-
+/// <summary>
+/// Provides file system information specific to Linux systems.
+/// </summary>
 public class LinuxFileSystemInfo : IPlatformOS.FileSystemInfo
 {
     /// <inheritdoc/>
@@ -30,7 +22,7 @@ public class LinuxFileSystemInfo : IPlatformOS.FileSystemInfo
 
     }
 
-    public static IEnumerable<IStorageInformation> GetDrives()
+    internal static IEnumerable<IStorageInformation> GetDrives()
     {
         // any reported drive with one of the Filesystems will be ignored
         var ignoreTypes = new string[]

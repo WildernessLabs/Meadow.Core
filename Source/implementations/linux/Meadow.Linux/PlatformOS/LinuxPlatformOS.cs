@@ -17,6 +17,7 @@ namespace Meadow;
 /// </summary>
 public class LinuxPlatformOS : IPlatformOS
 {
+#pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
     /// <summary>
     /// Event raised before a software reset
     /// </summary>
@@ -26,13 +27,14 @@ public class LinuxPlatformOS : IPlatformOS
     /// </summary>
     public event PowerTransitionHandler BeforeSleep = delegate { };
     /// <inheritdoc/>
-    public event EventHandler<WakeSource>? AfterWake = null;
+    public event EventHandler<WakeSource>? AfterWake;
     /// <summary>
     /// Event raised when an external storage device event occurs.
     /// </summary>
     public event ExternalStorageEventHandler ExternalStorageEvent = delegate { };
     /// <inheritdoc/>
     public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError;
+#pragma warning restore CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -43,12 +45,12 @@ public class LinuxPlatformOS : IPlatformOS
     /// Gets the OS version.
     /// </summary>
     /// <returns>OS version.</returns>
-    public virtual string OSVersion { get; private set; }
+    public virtual string OSVersion { get; private set; } = string.Empty;
     /// <summary>
     /// Gets the OS build date.
     /// </summary>
     /// <returns>OS build date.</returns>
-    public virtual string OSBuildDate { get; private set; }
+    public virtual string OSBuildDate { get; private set; } = string.Empty;
     /// <summary>
     /// Get the current .NET runtime version being used to execute the application.
     /// </summary>
@@ -58,7 +60,8 @@ public class LinuxPlatformOS : IPlatformOS
     internal static CancellationTokenSource AppAbort = new();
 
     /// <inheritdoc/>
-    public INtpClient NtpClient { get; private set; }
+    public INtpClient NtpClient { get; private set; } = default!;
+
     /// <inheritdoc/>
     public IPlatformOS.FileSystemInfo FileSystem { get; }
 
@@ -88,7 +91,7 @@ public class LinuxPlatformOS : IPlatformOS
                 CreateNoWindow = true
             };
             var proc = Process.Start(psi);
-            OSVersion = proc.StandardOutput.ReadToEnd().Trim();
+            OSVersion = proc!.StandardOutput.ReadToEnd().Trim();
         }
         catch (Exception ex)
         {
@@ -104,7 +107,7 @@ public class LinuxPlatformOS : IPlatformOS
                 CreateNoWindow = true
             };
             var proc = Process.Start(psi);
-            OSBuildDate = proc.StandardOutput.ReadToEnd().Trim();
+            OSBuildDate = proc!.StandardOutput.ReadToEnd().Trim();
         }
         catch (Exception ex)
         {
@@ -188,6 +191,7 @@ public class LinuxPlatformOS : IPlatformOS
         return rsa.Decrypt(encryptedValue, RSAEncryptionPadding.Pkcs1);
     }
 
+    /// <inheritdoc/>
     public string? GetPublicKeyInPemFormat()
     {
         var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));

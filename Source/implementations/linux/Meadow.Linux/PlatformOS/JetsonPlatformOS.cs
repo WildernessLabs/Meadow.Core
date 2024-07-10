@@ -1,65 +1,62 @@
-﻿using Meadow.Hardware;
-using Meadow.Units;
+﻿using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Meadow
+namespace Meadow;
+
+/// <summary>
+/// Represents the operating system abstraction layer for the Jetson platform,
+/// inheriting functionality from the base Linux platform OS.
+/// </summary>
+public class JetsonPlatformOS : LinuxPlatformOS
 {
-    public class JetsonPlatformOS : LinuxPlatformOS
+    private Dictionary<string, string> _nameToPathLookup = new Dictionary<string, string>();
+
+    private void PopulatePathLookup()
     {
-        private Dictionary<string, string> _nameToPathLookup = new Dictionary<string, string>();
+        if (_nameToPathLookup.Count > 0) return;
 
-        private void PopulatePathLookup()
+        var root = new DirectoryInfo("/sys/class/thermal");
+        if (root.Exists)
         {
-            if (_nameToPathLookup.Count > 0) return;
-
-            var root = new DirectoryInfo("/sys/class/thermal");
-            if (root.Exists)
+            foreach (var zone in root.GetDirectories("thermal_zone*"))
             {
-                foreach (var zone in root.GetDirectories("thermal_zone*"))
-                {
-                    var name = File.ReadAllText(Path.Combine(zone.FullName, "type")).Trim();
-                    _nameToPathLookup.Add(name, Path.Combine(zone.FullName, "temp"));
-                }
+                var name = File.ReadAllText(Path.Combine(zone.FullName, "type")).Trim();
+                _nameToPathLookup.Add(name, Path.Combine(zone.FullName, "temp"));
             }
         }
+    }
 
-        public string[] GetTemperatureNames()
+    /// <inheritdoc/>
+    public string[] GetTemperatureNames()
+    {
+        PopulatePathLookup();
+
+        return _nameToPathLookup.Keys.ToArray();
+    }
+
+    /// <inheritdoc/>
+    public Temperature GetTemperature(string name)
+    {
+        PopulatePathLookup();
+
+        if (_nameToPathLookup.ContainsKey(name))
         {
-            PopulatePathLookup();
-
-            return _nameToPathLookup.Keys.ToArray();
+            var raw = File.ReadAllText(_nameToPathLookup[name]).Trim();
+            var c = double.Parse(raw);
+            return new Temperature(c / 1000d, Temperature.UnitType.Celsius);
         }
-
-        public Temperature GetTemperature(string name)
+        else
         {
-            PopulatePathLookup();
-
-            if (_nameToPathLookup.ContainsKey(name))
-            {
-                var raw = File.ReadAllText(_nameToPathLookup[name]).Trim();
-                var c = double.Parse(raw);
-                return new Temperature(c / 1000d, Temperature.UnitType.Celsius);
-            }
-            else
-            {
-                throw new ArgumentException($"Temperature name '{name}' not found");
-            }
+            throw new ArgumentException($"Temperature name '{name}' not found");
         }
+    }
 
-        public override Temperature GetCpuTemperature()
-        {
-            return GetTemperature("CPU-therm");
-        }
-
-        public override SerialPortName[] GetSerialPortNames()
-        {
-            return new SerialPortName[]
-                {
-                    new SerialPortName("UART2", "/dev/ttyTHS1", Resolver.Device)
-                };
-        }
+    /// <inheritdoc/>
+    public override Temperature GetCpuTemperature()
+    {
+        return GetTemperature("CPU-therm");
     }
 }

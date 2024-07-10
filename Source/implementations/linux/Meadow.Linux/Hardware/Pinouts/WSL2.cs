@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Meadow.Pinouts;
 
+/// <summary>
+/// Defines the pinout configuration for Windows Subsystem for Linux (WSL)
+/// </summary>
 public class WSL2 : IPinDefinitions
 {
     /// <inheritdoc/>
@@ -14,9 +17,9 @@ public class WSL2 : IPinDefinitions
     public IList<IPin> AllPins => new List<IPin>();
 
     /// <inheritdoc/>
-    public IPinController Controller { get; set; }
+    public IPinController? Controller { get; set; }
 
-    public WSL2()
+    internal WSL2()
     {
     }
 }

@@ -7,6 +7,9 @@ using RTI = System.Runtime.InteropServices.RuntimeInformation;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents device information specific to a Linux-based platform.
+/// </summary>
 public class LinuxDeviceInfo : IDeviceInformation
 {
     private Dictionary<string, string> _osInfo = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -22,7 +25,7 @@ public class LinuxDeviceInfo : IDeviceInformation
     /// <inheritdoc/>
     public string OSVersion => _osInfo["VERSION"];
     /// <inheritdoc/>
-    public string ProcessorType { get; private set; }
+    public string ProcessorType { get; private set; } = "Unknown";
     /// <inheritdoc/>
     public string ProcessorSerialNumber => "Unknown";
     /// <inheritdoc/>
@@ -72,18 +75,20 @@ public class LinuxDeviceInfo : IDeviceInformation
         while (!reader.EndOfStream)
         {
             var line = reader.ReadLine();
-            var items = line.Split(':', StringSplitOptions.RemoveEmptyEntries);
-            if (items.Length == 2)
+            if (line != null)
             {
-                switch (items[0].Trim())
+                var items = line.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                if (items.Length == 2)
                 {
-                    case "model name":
-                        ProcessorType = items[1].Trim();
-                        done = true;
-                        break;
+                    switch (items[0].Trim())
+                    {
+                        case "model name":
+                            ProcessorType = items[1].Trim();
+                            done = true;
+                            break;
+                    }
                 }
             }
-
             if (done) break;
         }
     }

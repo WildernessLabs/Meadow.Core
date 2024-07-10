@@ -11,11 +11,16 @@ namespace Meadow.Networking;
 /// </summary>
 public class NmCliNetworkAdapterCollection : INetworkAdapterCollection
 {
-    public event NetworkConnectionHandler NetworkConnected;
-    public event NetworkDisconnectionHandler NetworkDisconnected;
+#pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
+    /// <inheritdoc/>
+    public event NetworkConnectionHandler? NetworkConnected;
+    /// <inheritdoc/>
+    public event NetworkDisconnectionHandler? NetworkDisconnected;
+#pragma warning restore CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
 
     private List<NmCliNetworkAdapter> _adapters = new();
 
+    /// <inheritdoc/>
     public INetworkAdapter this[int index] => throw new NotImplementedException();
 
     internal NmCliNetworkAdapterCollection()
@@ -23,11 +28,13 @@ public class NmCliNetworkAdapterCollection : INetworkAdapterCollection
         Refresh().Wait();
     }
 
+    /// <inheritdoc/>
     public IEnumerator<INetworkAdapter> GetEnumerator()
     {
         return _adapters.GetEnumerator();
     }
 
+    /// <inheritdoc/>
     public Task Refresh()
     {
         _adapters.Clear();
