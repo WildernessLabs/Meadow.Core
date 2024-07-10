@@ -14,7 +14,7 @@ namespace Meadow.Devices;
 /// </summary>
 public abstract partial class F7MicroBase : IF7MeadowDevice
 {
-    private F7ReliabilityService _reliabilityService;
+    private F7ReliabilityService? _reliabilityService;
 
     /// <summary>
     /// Event raised when a new network is connected
@@ -25,11 +25,6 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// Event raised when an existing network connection is disconnected
     /// </summary>
     public event NetworkDisconnectionHandler NetworkDisconnected = default!;
-
-    /// <summary>
-    /// Event raised when the WiFi adapter is initialized
-    /// </summary>
-    public event EventHandler WiFiAdapterInitialized = default!;
 
     /// <summary>
     /// The Bluetooth adapter

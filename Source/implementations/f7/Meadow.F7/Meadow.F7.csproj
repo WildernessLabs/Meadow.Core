@@ -19,6 +19,7 @@
     <Description>STM32F7 .NET libraries for Wilderness Labs Meadow</Description>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>10.0</LangVersion>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

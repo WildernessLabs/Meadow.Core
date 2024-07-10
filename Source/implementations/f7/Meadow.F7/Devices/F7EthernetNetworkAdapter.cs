@@ -67,7 +67,7 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
                 break;
             case EthernetFunction.NetworkDisconnectedEvent:
                 _isConnected = false;
-                RaiseNetworkDisconnected(null);
+                RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
                 break;
             case EthernetFunction.NtpUpdateEvent:
                 RaiseNtpTimeChangedEvent();
