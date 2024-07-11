@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -48,7 +49,7 @@ public class NtpClient : INtpClient
             if (Resolver.Device.PlatformOS.NtpServers.Length == 0)
             {
                 ntpServer = "0.pool.ntp.org";
-                Resolver.Log.Info($"No configured NTP servers. Defaulting to {ntpServer}");
+                Resolver.Log.Info($"No configured NTP servers. Defaulting to {ntpServer}", MessageGroup.Core);
             }
             else
             {
@@ -97,7 +98,7 @@ public class NtpClient : INtpClient
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Failed to query NTP Server: '{ex.Message}'.");
+                Resolver.Log.Error($"Failed to query NTP Server: '{ex.Message}'.", MessageGroup.Core);
                 return Task.FromResult(false);
             }
             finally

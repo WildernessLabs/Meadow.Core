@@ -4,6 +4,7 @@ using Meadow.Hardware;
 using Meadow.Units;
 using System;
 using System.Threading;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -13,6 +14,8 @@ namespace Meadow.Devices;
 /// </summary>
 public abstract partial class F7MicroBase : IF7MeadowDevice
 {
+    private F7ReliabilityService? _reliabilityService;
+
     /// <summary>
     /// Event raised when a new network is connected
     /// </summary>
@@ -22,11 +25,6 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// Event raised when an existing network connection is disconnected
     /// </summary>
     public event NetworkDisconnectionHandler NetworkDisconnected = default!;
-
-    /// <summary>
-    /// Event raised when the WiFi adapter is initialized
-    /// </summary>
-    public event EventHandler WiFiAdapterInitialized = default!;
 
     /// <summary>
     /// The Bluetooth adapter
@@ -66,7 +64,6 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <remarks>Override this method if you have an SMBus Smart Battery</remarks>
     public abstract BatteryInfo? GetBatteryInfo();
 
-    //==== internals
     /// <summary>
     /// The collection of network adapters
     /// </summary>
@@ -145,24 +142,22 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
 
                     esp32.SystemMessageReceived += (s, e) =>
                     {
-                        (PlatformOS as F7PlatformOS)?.RaiseSystemErrorException(new Esp32SystemErrorInfo((int)e.fn, e.status));
-
-                        // TODO: some of these may necessitate restarting the device
+                        ReliabilityService?.OnMeadowSystemError(new Esp32SystemErrorInfo((int)e.fn, e.status));
                     };
 
                     if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.WiFi)
                     {
-                        Resolver.Log.Info($"Device is configured to use WiFi for the network interface");
+                        Resolver.Log.Info($"Device is configured to use WiFi for the network interface", MessageGroup.Core);
                         var wifiAdapter = new Esp32WiFiAdapter(esp32);
                         networkAdapters.Add(wifiAdapter);
 
                         if (wifiAdapter.AutoConnect)
                         {
-                            Resolver.Log.Debug($"Device configured to auto-connect to SSID '{wifiAdapter.DefaultSsid}'");
+                            Resolver.Log.Debug($"Device configured to auto-connect to SSID '{wifiAdapter.DefaultSsid}'", MessageGroup.Core);
 
                             if (string.IsNullOrEmpty(wifiAdapter.DefaultSsid))
                             {
-                                Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.");
+                                Resolver.Log.Warn($"Device configured to auto-connect to WiFi, but no Default SSID was provided.  Deploy a wifi.config.yaml file.", MessageGroup.Core);
                             }
                             else
                             {
@@ -172,18 +167,18 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                     }
                     else if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Cell)
                     {
-                        Resolver.Log.Info($"Device is configured to use Cell for the network interface");
+                        Resolver.Log.Info($"Device is configured to use Cell for the network interface", MessageGroup.Core);
                         networkAdapters.Add(new F7CellNetworkAdapter(esp32));
                     }
                     else if (PlatformOS.SelectedNetwork == IPlatformOS.NetworkConnectionType.Ethernet)
                     {
-                        Resolver.Log.Info($"Device is configured to use Ethernet for the network interface");
+                        Resolver.Log.Info($"Device is configured to use Ethernet for the network interface", MessageGroup.Core);
                         networkAdapters.Add(new F7EthernetNetworkAdapter(esp32));
                     }
                 }
                 catch (Exception e)
                 {
-                    Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}");
+                    Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}", MessageGroup.Core);
                     return false;
                 }
                 finally
@@ -220,5 +215,11 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
         InterruptMode edge)
     {
         return new Counter(pin, edge);
+    }
+
+    /// <inheritdoc/>
+    public IReliabilityService? ReliabilityService
+    {
+        get => _reliabilityService ??= new F7ReliabilityService();
     }
 }

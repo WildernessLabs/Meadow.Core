@@ -2,8 +2,8 @@
 using Meadow.Hardware;
 using Meadow.Units;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -13,30 +13,6 @@ namespace Meadow;
 public partial class F7PlatformOS : IPlatformOS
 {
     private readonly F7GPIOManager _ioController;
-
-    private readonly List<MeadowSystemErrorInfo> _systemErrorCache = new();
-    private EventHandler<MeadowSystemErrorInfo>? _systemError;
-
-    /// <inheritdoc/>
-    public event EventHandler<MeadowSystemErrorInfo>? MeadowSystemError
-    {
-        add
-        {
-            _systemError += value;
-            lock (_systemErrorCache)
-            {
-                if (_systemErrorCache.Count > 0)
-                {
-                    foreach (var e in _systemErrorCache)
-                    {
-                        _systemError?.Invoke(this, e);
-                    }
-                    _systemErrorCache.Clear();
-                }
-            }
-        }
-        remove => _systemError -= value;
-    }
 
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
@@ -57,18 +33,6 @@ public partial class F7PlatformOS : IPlatformOS
 
         NtpClient = new NtpClient();
         Resolver.Services.Add(NtpClient);
-    }
-
-    internal void RaiseSystemErrorException(MeadowSystemErrorInfo errorInfo)
-    {
-        if (_systemError == null)
-        {
-            _systemErrorCache.Add(errorInfo);
-        }
-        else
-        {
-            _systemError?.Invoke(this, errorInfo);
-        }
     }
 
     /// <summary>
@@ -121,9 +85,7 @@ public partial class F7PlatformOS : IPlatformOS
         Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
     }
 
-    /// <summary>
-    /// Retrieves memory allocation statistics from the OS
-    /// </summary>
+    /// <inheritdoc/>
     public AllocationInfo GetMemoryAllocationInfo()
     {
         return Core.Interop.Nuttx.mallinfo();
@@ -154,13 +116,13 @@ public partial class F7PlatformOS : IPlatformOS
     /// <inheritdoc/>
     public void SetServerCertificateValidationMode(ServerCertificateValidationMode authmode)
     {
-        Resolver.Log.Trace($"Attempting to set the server certificate validation mode to {authmode}");
+        Resolver.Log.Trace($"Attempting to set the server certificate validation mode to {authmode}", MessageGroup.Core);
 
         int authModeInt = (int)authmode;
         if (authModeInt < 0 || authModeInt > Enum.GetNames(typeof(ServerCertificateValidationMode)).Length - 1)
         {
             string errorMessage = $"Invalid validation mode: {authModeInt}";
-            Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
+            Resolver.Log.Error($"Invalid validation mode: {authModeInt}", MessageGroup.Core);
             throw new ArgumentException(errorMessage);
         }
 
@@ -168,23 +130,23 @@ public partial class F7PlatformOS : IPlatformOS
         if (ret == (int)ServerCertificateValidationError.InvalidMode)
         {
             string errorMessage = $"Invalid validation mode: {authModeInt}";
-            Resolver.Log.Error($"Invalid validation mode: {authModeInt}");
+            Resolver.Log.Error($"Invalid validation mode: {authModeInt}", MessageGroup.Core);
             throw new ArgumentException(errorMessage);
         }
         else if (ret == (int)ServerCertificateValidationError.CannotChangeAfterInitialization)
         {
             string errorMessage = $"The server certificate validation mode cannot be changed after the TLS initialization.";
-            Resolver.Log.Error(errorMessage);
+            Resolver.Log.Error(errorMessage, MessageGroup.Core);
             throw new Exception(errorMessage);
         }
         else if (ret < 0)
         {
             string errorMessage = $"Error setting validation mode.";
-            Resolver.Log.Error(errorMessage);
+            Resolver.Log.Error(errorMessage, MessageGroup.Core);
             throw new Exception(errorMessage);
         }
 
-        Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!");
+        Resolver.Log.Trace($"Server certificate validation mode set to {authmode} successfully!", MessageGroup.Core);
 
         return;
     }

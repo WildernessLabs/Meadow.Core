@@ -73,6 +73,12 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
     }
 
     /// <inheritdoc/>
+    public ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
+    {
+        throw new NotSupportedException("Add an IO Expander to your platform");
+    }
+
+    /// <inheritdoc/>
     public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
     {
         throw new NotSupportedException("Add an IO Expander to your platform");
@@ -207,7 +213,7 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
             double voltage = double.Parse(voltageMatch.Groups[1].Value) / 1000;
             batteryInfo.Voltage = new Meadow.Units.Voltage(voltage);
         }
-        
+
         // Extract State of Charge
         var socMatch = Regex.Match(output, "\"CurrentCapacity\"\\s*=\\s*(\\d+)");
         if (socMatch.Success)

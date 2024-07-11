@@ -9,6 +9,7 @@ using System.Threading;
 namespace Meadow.Devices;
 using Meadow.Networking;
 using Meadow.Peripherals.Sensors.Location.Gnss;
+using static Meadow.Logging.Logger;
 
 /// <summary>
 /// This file holds the Cell specific methods, properties etc for the ICellNetwork interface.
@@ -51,10 +52,14 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="csq">The CSQ value to convert.</param>
     /// <returns>The signal strength in dBm, or <b>NoSignal</b> if CSQ is 99 (no signal).</returns>
-    private int ConvertCsqToDbm(int csq) {
-        if (csq == 99) {
+    private int ConvertCsqToDbm(int csq)
+    {
+        if (csq == 99)
+        {
             return NoSignal; // No signal or unknown signal strength
-        } else {
+        }
+        else
+        {
             return -113 + 2 * csq;
         }
     }
@@ -87,7 +92,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             else
             {
                 _at_cmds_output = null;
-                Resolver.Log.Error("Fail to get the AT commands output!");
+                Resolver.Log.Error("Fail to get the AT commands output!", MessageGroup.Core);
             }
         }
         finally
@@ -114,6 +119,19 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     }
 
     /// <summary>
+    /// Process the NtpTimeChanged event.
+    /// </summary>
+    protected void RaiseNtpTimeChangedEvent()
+    {
+        // the NtpClient should have been added to the Resolver, so pull it and raise an event
+        var client = Resolver.Services.Get<INtpClient>();
+        if (client is NtpClient ntp)
+        {
+            ntp.RaiseTimeChanged();
+        }
+    }
+
+    /// <summary>
     /// Use the event data to work out which event to invoke and create any event args that will be consumed.
     /// </summary>
     /// <param name="eventId">Event ID.</param>
@@ -121,12 +139,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
     protected void InvokeEvent(CellFunction eventId, StatusCodes statusCode, byte[] payload)
     {
-        Resolver.Log.Trace($"Cell InvokeEvent {eventId} returned {statusCode}");
+        Resolver.Log.Trace($"Cell InvokeEvent {eventId} returned {statusCode}", MessageGroup.Core);
 
         switch (eventId)
         {
             case CellFunction.NetworkConnectedEvent:
-                Resolver.Log.Trace("Cell connected event triggered!");
+                Resolver.Log.Trace("Cell connected event triggered!", MessageGroup.Core);
 
                 // TODO: Get the IP, gateway and subnet from the OS land.
                 var args = new CellNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
@@ -137,25 +155,28 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 RaiseNetworkConnected(args);
                 break;
             case CellFunction.NetworkDisconnectedEvent:
-                Resolver.Log.Trace("Cell disconnected event triggered!");
-                
-                Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
+                Resolver.Log.Trace("Cell disconnected event triggered!", MessageGroup.Core);
+
+                Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}", MessageGroup.Core);
 
                 ResetCellTempData();
 
-                RaiseNetworkDisconnected(null);
+                RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
                 break;
             case CellFunction.NetworkAtCmdEvent:
-                Resolver.Log.Trace("Cell at cmd event triggered!");
+                Resolver.Log.Trace("Cell at cmd event triggered!", MessageGroup.Core);
 
                 UpdateAtCmdsOutput();
-                
+
                 CellSetState(CellNetworkState.Resumed);
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
 
                 Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
+                break;
+            case CellFunction.NtpUpdateEvent:
+                RaiseNtpTimeChangedEvent();
                 break;
             default:
                 Resolver.Log.Trace("Event type not found");
@@ -176,7 +197,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             }
             catch (Exception e)
             {
-                Resolver.Log.Error($"Failed to read meadow_cell_is_connected(): {e.Message}");
+                Resolver.Log.Error($"Failed to read meadow_cell_is_connected(): {e.Message}", MessageGroup.Core);
                 return false;
             }
         }
@@ -200,7 +221,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 }
                 else
                 {
-                    Resolver.Log.Error("IMEI not found! Please ensure that you have established a cellular connection at least once!");
+                    Resolver.Log.Error("IMEI not found! Please ensure that you have established a cellular connection at least once!", MessageGroup.Core);
                 }
             }
 
@@ -257,14 +278,14 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     public CellNetwork[] OfflineNetworkScan()
     {
-        Resolver.Log.Error("OfflineNetworkScan method has been deprecated! Please consult the cellular docs to learn how to use the network scanner");
+        Resolver.Log.Error("OfflineNetworkScan method has been deprecated! Please consult the cellular docs to learn how to use the network scanner", MessageGroup.Core);
         return Array.Empty<CellNetwork>();
     }
 
     /// <summary>
     /// Returns error according to an input value, otherwise <b>Undefined Cell error</b>
     /// </summary>
-    private string ParseCellConnectionError(string input)
+    private string ParseCellConnectionError(string? input)
     {
         if (input != null)
         {
@@ -308,7 +329,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             _ => $"An undefined error occurred. Please consult the troubleshooting section of the cellular documentation for more information. {logInfoMessage}",
         };
     }
-    
+
     /// <summary>
     /// Set the cell state
     /// </summary>
@@ -348,7 +369,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <returns>A number representing the Cell Signal Quality (CSQ) in dBm, or <b>NoSignal</b> if unavailable.</returns>
     public int GetSignalQuality(int timeout)
     {
-        Resolver.Log.Trace("Fetching cellular signal quality... It might take a few minutes and temporary disconnect you from the cellular network.");
+        Resolver.Log.Trace("Fetching cellular signal quality... It might take a few minutes and temporary disconnect you from the cellular network.", MessageGroup.Core);
 
         string csqPattern = @"\+CSQ:\s+(\d+),\d+";
         _at_cmds_output = string.Empty;
@@ -369,7 +390,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         if (string.IsNullOrEmpty(_at_cmds_output))
         {
-            Resolver.Log.Error("AT commands output not found!");
+            Resolver.Log.Error("AT commands output not found!", MessageGroup.Core);
             return NoSignal;
         }
 
@@ -385,7 +406,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <returns>An array of CellNetwork objects representing available networks.</returns>
     public CellNetwork[] ScanForAvailableNetworks(int timeout)
     {
-        Resolver.Log.Trace("Scanning for available cellular networks... It might take a few minutes and temporary disconnect you from the cellular network.");
+        Resolver.Log.Trace("Scanning for available cellular networks... It might take a few minutes and temporary disconnect you from the cellular network.", MessageGroup.Core);
 
         CellSetState(CellNetworkState.ScanningNetworks);
         _at_cmds_output = string.Empty;
@@ -407,7 +428,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             throw new System.IO.IOException("No available networks");
         }
 
-        return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output).ToArray();
+        return Core.Interop.Nuttx.ParseCellNetworkScannerOutput(_at_cmds_output)?.ToArray() ?? Array.Empty<CellNetwork>();
     }
 
     /// <summary>
@@ -441,7 +462,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         if (string.IsNullOrEmpty(gnssAtCmdsOutput))
         {
-            Resolver.Log.Error("AT commands output not found!");
+            Resolver.Log.Error("AT commands output not found!", MessageGroup.Core);
             return string.Empty;
         }
         return gnssAtCmdsOutput;

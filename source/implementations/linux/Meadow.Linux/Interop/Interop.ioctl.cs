@@ -26,7 +26,7 @@ namespace Meadow
 
         public static int _IOC(int dir, int type, int nr, int size)
         {
-            return   ((dir) << _IOC_DIRSHIFT) |
+            return ((dir) << _IOC_DIRSHIFT) |
                      ((type) << _IOC_TYPESHIFT) |
                      ((nr) << _IOC_NRSHIFT) |
                      ((size) << _IOC_SIZESHIFT);
@@ -56,9 +56,12 @@ namespace Meadow
         public static extern int ioctl(int fd, int request, byte data);
 
         [DllImport(LIBC, SetLastError = true)]
-        public unsafe static extern int ioctl(int fd, int request, byte* data);
+        public static extern unsafe int ioctl(int fd, int request, byte* data);
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int ioctl(int fd, int request, IntPtr pData);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern int ioctl(int fd, int request, ref uint data);
     }
 }

@@ -283,5 +283,10 @@ namespace Meadow.Simulation
         {
             throw new NotImplementedException();
         }
+
+        public ISpiBus CreateSpiBus(int busNumber, Frequency speed)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

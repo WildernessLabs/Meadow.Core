@@ -46,5 +46,20 @@ public static partial class MeadowOS
         /// The contents of this folder will be erased on device restart.
         /// </remarks>
         public static string TempDirectory => Path.GetFullPath("Temp", UserFileSystemRoot);
+
+        /// <summary>
+        /// Gets the `/crash` directory. This directory is used by various Meadow systems to store crash report
+        /// files. 
+        /// </summary>
+        public static string CrashReportDirectory => Path.GetFullPath("crash", UserFileSystemRoot);
+
+        /// <summary>
+        /// Gets the full path to the file used to store crash reports from unhandled app exceptions
+        /// </summary>
+        public static string AppCrashFile => Path.Combine(CrashReportDirectory, "meadow.error");
+        /// <summary>
+        /// Gets the full path to the file used to store crash reports from unhandled runtime exceptions
+        /// </summary>
+        public static string RuntimeCrashFile => Path.Combine(CrashReportDirectory, "meadow.error");
     }
 }

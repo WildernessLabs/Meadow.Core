@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.Core.Interop;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -162,13 +163,13 @@ public partial class Esp32Coprocessor : ICoprocessor
             }
             else
             {
-                Resolver.Log.Warn($"ESP Ioctl returned non-success: {updResult}");
+                Resolver.Log.Warn($"ESP Ioctl returned non-success: {updResult}", MessageGroup.Esp);
                 result = StatusCodes.Failure;
             }
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"Exception sending ESP32 command: {ex.Message}");
+            Resolver.Log.Error($"Exception sending ESP32 command: {ex.Message}", MessageGroup.Esp);
         }
         finally
         {
@@ -192,7 +193,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <returns>StatusCodes enum indicating if the operation was successful or if an error occurred.</returns>
     private StatusCodes GetEventData(EventData eventData, out byte[]? payload)
     {
-        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Getting event data for message ID 0x{eventData.MessageId:x08}");
+        Resolver.Log.Trace($"Getting event data for message ID 0x{eventData.MessageId:x08}", MessageGroup.Esp);
         var resultGcHandle = default(GCHandle);
         StatusCodes result = StatusCodes.CompletedOk;
         try
@@ -211,8 +212,6 @@ public partial class Esp32Coprocessor : ICoprocessor
             int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.UpdEsp32EventDataPayload, ref request);
             if (updResult == 0)
             {
-                Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Payload: ");
-                Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), encodedResult, 0, 32);
                 payload = new byte[request.PayloadLength];
                 Array.Copy(encodedResult, payload, request.PayloadLength);
                 result = StatusCodes.CompletedOk;
@@ -239,7 +238,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <param name="o"></param>
     private void EventHandlerServiceThread(object o)
     {
-        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Starting Esp32Coprocessor event handler thread.");
+        Resolver.Log.Trace("Starting Esp32Coprocessor event handler thread.", MessageGroup.Esp);
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
         byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
         while (true)
@@ -247,30 +246,29 @@ public partial class Esp32Coprocessor : ICoprocessor
             int priority = 0;
             try
             {
-                Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Waiting for event.");
+                Resolver.Log.Trace("Waiting for event.", MessageGroup.Esp);
                 int result;
                 do
                 {
                     result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
                 } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
-                Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event received.");
+                Resolver.Log.Trace("Event received.", MessageGroup.Esp);
                 if (result >= 0)
                 {
-                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Processing event.");
-                    Output.BufferIf(_debugLevel.HasFlag(DebugOptions.EventHandling), rxBuffer);
+                    Resolver.Log.Trace("Processing event.", MessageGroup.Esp);
                     EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
                     byte[]? payload = null;
                     if (eventData.MessageId == 0)
                     {
-                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}");
+                        Resolver.Log.Trace($"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}", MessageGroup.Esp);
                     }
                     else
                     {
-                        Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), $"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, message ID: 0x{eventData.MessageId:x08}");
+                        Resolver.Log.Trace($"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, message ID: 0x{eventData.MessageId:x08}", MessageGroup.Esp);
                         GetEventData(eventData, out payload);
                     }
-                    Output.WriteLineIf(_debugLevel.HasFlag(DebugOptions.EventHandling), "Event data collected, raising event.");
+                    Resolver.Log.Trace("Event data collected, raising event.", MessageGroup.Esp);
                     Task.Run(() =>
                     {
                         switch ((Esp32Interfaces)eventData.Interface)

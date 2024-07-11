@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using System.Net;
 using System.Net.NetworkInformation;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -33,6 +34,19 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     }
 
     /// <summary>
+    /// Process the NtpTimeChanged event.
+    /// </summary>
+    protected void RaiseNtpTimeChangedEvent()
+    {
+        // the NtpClient should have been added to the Resolver, so pull it and raise an event
+        var client = Resolver.Services.Get<INtpClient>();
+        if (client is NtpClient ntp)
+        {
+            ntp.RaiseTimeChanged();
+        }
+    }
+
+    /// <summary>
     /// Use the event data to work out which event to invoke and create any event args that will be consumed.
     /// </summary>
     /// <param name="eventId">Event ID.</param>
@@ -40,13 +54,9 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
     protected void InvokeEvent(EthernetFunction eventId, StatusCodes statusCode, byte[] payload)
     {
-        Resolver.Log.Trace($"Ethernet InvokeEvent {eventId} returned {statusCode}");
-
         switch (eventId)
         {
             case EthernetFunction.NetworkConnectedEvent:
-                Resolver.Log.Trace("Ethernet connected event triggered!");
-
                 var args = new EthernetNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
 
                 this.Refresh();
@@ -56,13 +66,14 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
 
                 break;
             case EthernetFunction.NetworkDisconnectedEvent:
-                Resolver.Log.Trace("Ethernet disconnected event triggered!");
-
                 _isConnected = false;
-                RaiseNetworkDisconnected(null);
+                RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
+                break;
+            case EthernetFunction.NtpUpdateEvent:
+                RaiseNtpTimeChangedEvent();
                 break;
             default:
-                Resolver.Log.Trace("Event type not found");
+                Resolver.Log.Trace($"Ethernet event type {eventId} not found", MessageGroup.Core);
                 break;
         }
     }

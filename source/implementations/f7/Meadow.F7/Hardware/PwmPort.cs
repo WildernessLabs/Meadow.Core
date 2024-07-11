@@ -13,7 +13,7 @@ namespace Meadow.Hardware
     {
         private bool _isRunning = false;
         private Frequency _frequency;
-        private float _dutyCycle;
+        private double _dutyCycle;
         private bool _inverted;
 
         // dirty dirty hack
@@ -68,7 +68,6 @@ namespace Meadow.Hardware
                 if (success.Item1)
                 {
                     var port = new PwmPort(pin, ioController, channel, inverted, isOnboard);
-                    port.TimeScale = TimeScale.Seconds;
                     port.Frequency = frequency;
                     port.DutyCycle = dutyCycle;
                     port.Inverted = inverted;
@@ -130,7 +129,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// The percentage of time the PWM pulse is high (in the range of 0.0 to 1.0)
         /// </summary>
-        public override float DutyCycle
+        public override double DutyCycle
         {
             get => _dutyCycle;
             set
@@ -158,34 +157,34 @@ namespace Meadow.Hardware
         /// <summary>
         /// The amount of time, in seconds, that the a PWM pulse is high.  This will always be less than or equal to the Period
         /// </summary>
-        public override float Duration
+        public override TimePeriod Duration
         {
-            get => DutyCycle * Period;
+            get => TimePeriod.FromSeconds(DutyCycle * Period.Seconds);
             set
             {
                 if (value > Period) throw new ArgumentOutOfRangeException(nameof(Duration), "Duration must be less than or equal to Period");
                 // clamp
-                if (value < 0) { value = 0; }
+                if (value.Seconds < 0) { value = TimePeriod.Zero; }
 
-                DutyCycle = value / Period;
+                DutyCycle = value.Seconds / Period.Seconds;
             }
         }
 
         /// <summary>
         /// The reciprocal of the PWM frequency - in seconds.
         /// </summary>
-        public override float Period
+        public override TimePeriod Period
         {
-            get => 1.0f / (float)Frequency.Hertz * (float)TimeScale;
+            get => TimePeriod.FromSeconds(1.0f / Frequency.Hertz);
             set
             {
-                Frequency = new Frequency(1.0f * (float)TimeScale / value);
+                Frequency = new Frequency(1.0f / value.Seconds);
             }
         }
 
         private void UpdateChannel()
         {
-            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency.Hertz, Inverted ? (1.0f - DutyCycle) : DutyCycle);
+            UPD.PWM.Start(PwmChannelInfo, (uint)Frequency.Hertz, (float)(Inverted ? (1.0f - DutyCycle) : DutyCycle));
         }
 
 
