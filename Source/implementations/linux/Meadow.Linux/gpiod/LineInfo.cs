@@ -7,7 +7,7 @@ using static Meadow.Gpiod.Interop;
 namespace Meadow
 {
     internal delegate void LineEventHandler(LineInfo lineInfo, gpiod_line_event evt);
-    
+
     internal class LineInfo
     {
         private IntPtr Handle { get; set; }
@@ -68,7 +68,17 @@ namespace Meadow
 
             if (result == -1)
             {
-                throw new NativeException("Failed to request line", Marshal.GetLastWin32Error());
+                var errorCode = Marshal.GetLastWin32Error();
+                if (errorCode == 16)
+                {
+                    // resource is busy - we might have crashed leaving the driver with the pin locked
+                    // or some other app, etc might be using it
+                    throw new NativeException($"Unable to access output pin.  Pin is in use", errorCode);
+                }
+                else
+                {
+                    throw new NativeException($"Unable to access output pin.  Error code {errorCode}", errorCode);
+                }
             }
         }
 
