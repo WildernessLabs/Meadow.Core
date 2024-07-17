@@ -178,6 +178,8 @@ public class WindowsPlatformOS : IPlatformOS
 
     // TODO: implement everything below here
 
+    /// <inheritdoc/>
+    public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
     public string ReservedPins => string.Empty;
     public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
     public INtpClient NtpClient => throw new NotImplementedException();

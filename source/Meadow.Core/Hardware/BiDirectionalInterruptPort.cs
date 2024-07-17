@@ -10,6 +10,7 @@ namespace Meadow.Hardware
     public class BiDirectionalInterruptPort : BiDirectionalInterruptPortBase
     {
         private PortDirectionType _currentDirection;
+        private ResistorMode _resistorMode;
         private TimeSpan _debounceDuration;
         private TimeSpan _glitchDuration;
 
@@ -116,8 +117,12 @@ namespace Meadow.Hardware
 
             this.IOController = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
             this.IOController.Interrupt += OnInterrupt;
+            this._resistorMode = resistorMode;
+            _debounceDuration = debounceDuration;
+            _glitchDuration = glitchDuration;
 
             // attempt to reserve the pin - we'll reserve it as an input even though we use it for bi-directional
+
             var result = this.IOController.DeviceChannelManager.ReservePin(
                 this.Pin,
                 ChannelConfigurationType.DigitalInput);
@@ -198,6 +203,20 @@ namespace Meadow.Hardware
                 throw new Exception("Unable to create an output port on the pin, because it doesn't have a digital channel");
             }
             return new BiDirectionalInterruptPort(pin, ioController, chan, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, outputType);
+        }
+
+        /// <inheritdoc/>
+        public override ResistorMode Resistor
+        {
+            get => _resistorMode;
+            set
+            {
+                // since we're overriding a virtual, which actually gets called in the base ctor, we need to ignore that ctor call (the IO Controller will be null)
+                if ((IOController == null) || (value == Resistor)) return;
+
+                IOController.SetResistorMode(this.Pin, value);
+                _resistorMode = value;
+            }
         }
 
         /// <summary>

@@ -325,8 +325,12 @@ public enum SystemFunction
 /// <summary>
 /// WiFi functions available on the ESP32
 /// </summary>
-public enum WiFiFunction
+internal enum WiFiFunction
 {
+    // DEV NOTE:
+    // THESE COME FROM espcp_shared_enums.h, which can be found here:
+    // https://github.com/WildernessLabs/Meadow/blob/main/nuttx/configs/stm32f777zit6-meadow/src/espcp/espcp_shared_enums.h
+
     /// <summary>
     /// WiFiFunction - StartWiFiInterface
     /// </summary>
@@ -510,7 +514,15 @@ public enum WiFiFunction
     /// <summary>
     /// WiFiFunction - NodeDisconnectedEvent
     /// </summary>
-    NodeDisconnectedEvent = 45
+    NodeDisconnectedEvent = 45,
+    /// <summary>
+    /// WiFiFunction - ConnectionRetryCountExceeded
+    /// </summary>
+    ConnectionRetryCountExceeded = 46,
+    /// <summary>
+    /// WiFiFunction - NetworkConnecting
+    /// </summary>
+    NetworkConnecting = 47,
 };
 
 /// <summary>
@@ -554,13 +566,17 @@ public enum CellFunction
     /// </summary>
     NetworkDisconnectedEvent = 1,
     /// <summary>
+    /// CellFunction - NetworkErrorEvent
+    /// </summary>
+    NetworkErrorEvent = 2,
+    /// <summary>
     /// CellFunction - NetworkAtCmdEvent
     /// </summary>
     NetworkAtCmdEvent = 4,
     /// <summary>
-    /// CellFunction - NetworkErrorEvent
+    /// CellFunction - NtpUpdateEvent
     /// </summary>
-    NetworkErrorEvent = 2,
+    NtpUpdateEvent = 5,
 };
 
 /// <summary>
@@ -576,6 +592,10 @@ public enum EthernetFunction
     /// EthernetFunction - NetworkDisconnectedEvent
     /// </summary>
     NetworkDisconnectedEvent = 37,
+    /// <summary>
+    /// EthernetFunction - NtpUpdateEvent
+    /// </summary>
+    NtpUpdateEvent = 38,
 };
 
 /// <summary>

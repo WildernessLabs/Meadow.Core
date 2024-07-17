@@ -32,6 +32,15 @@ namespace Meadow.Hardware
         }
 
         internal static SpiBus From(
+            int busNumber)
+        {
+            return new SpiBus()
+            {
+                BusNumber = busNumber
+            };
+        }
+
+        internal static SpiBus From(
             IPin clock,
             IPin mosi,
             IPin miso)

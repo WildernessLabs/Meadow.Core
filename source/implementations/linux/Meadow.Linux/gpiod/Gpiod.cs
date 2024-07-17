@@ -111,7 +111,7 @@ namespace Meadow
                 throw new NativeException($"Unknown GPIO chip {pin.Chip}");
             }
 
-            var line = Chips[pin.Chip].Lines[pin.Offset];
+            var line = Chips[pin.Chip]!.Lines[pin.Offset];
 
             // TODO: check availability, check for other reservations
 
@@ -125,7 +125,7 @@ namespace Meadow
                 throw new NativeException($"Unknown GPIO chip {pin.GpiodChip}");
             }
 
-            var line = Chips[pin.GpiodChip].Lines[pin.GpiodOffset];
+            var line = Chips[pin.GpiodChip]!.Lines[pin.GpiodOffset];
 
             // TODO: check availability, check for other reservations
 

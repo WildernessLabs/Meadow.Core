@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using static Meadow.IPlatformOS;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -185,13 +186,13 @@ public partial class F7PlatformOS
             }
             else
             {
-                Resolver.Log.Error($"Configuration ioctl failed, result code: {updResult}");
+                Resolver.Log.Error($"Configuration ioctl failed, result code: {updResult}", MessageGroup.Core);
                 result = false;
             }
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"Configuration ioctl failed: {ex.Message}");
+            Resolver.Log.Error($"Configuration ioctl failed: {ex.Message}", MessageGroup.Core);
             result = false;
         }
         finally

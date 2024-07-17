@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -128,7 +129,7 @@ internal static class UPD
         if (result != 0)
         {
             var err = GetLastError();
-            Resolver.Log.Error($"ioctl {request} returned {result}. Last error: {err}");
+            Resolver.Log.Error($"ioctl {request} returned {result}. Last error: {err}", MessageGroup.Core);
             return (int)err;
         }
 
@@ -279,7 +280,7 @@ internal static class UPD
             if (result != 0)
             {
                 var err = GetLastError();
-                Resolver.Log.Error($"PWM setup failed {err}");
+                Resolver.Log.Error($"PWM setup failed {err}", MessageGroup.Core);
                 return false;
             }
 

@@ -1,5 +1,6 @@
 ﻿using Meadow.Hardware;
 using System;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -25,7 +26,7 @@ public partial class F7FeatherV2 : F7FeatherBase
         if (Information.Platform != MeadowPlatform.F7FeatherV2)
         {
             var message = $"Application is defined as {nameof(F7FeatherV2)}, but running hardware is {Information.Platform}";
-            Resolver.Log.Error(message);
+            Resolver.Log.Error(message, MessageGroup.Core);
             throw new UnsupportedPlatformException(Information.Platform, message);
         }
 
