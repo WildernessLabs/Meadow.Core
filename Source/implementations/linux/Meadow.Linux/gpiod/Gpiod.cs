@@ -1,5 +1,7 @@
 ﻿using Meadow.Logging;
 using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Meadow;
 
@@ -38,7 +40,7 @@ internal partial class Gpiod : IDisposable
 
                     foreach (var line in info.Lines)
                     {
-                        Logger.Debug(line.ToString());
+                        Logger.Debug($"{info.Name} {line}");
                     }
                 }
             } while (p != IntPtr.Zero);
@@ -71,6 +73,35 @@ internal partial class Gpiod : IDisposable
     {
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    internal void LogAllAvailablePins()
+    {
+        var names = Directory.GetFiles("/dev", "gpiochip*");
+
+        foreach (var n in names)
+        {
+            Logger.Debug($"opening {n}");
+
+            var info = ChipInfo.FromIntPtr(Logger, Interop.gpiod_chip_open_by_name(n));
+            if (!info.IsInvalid)
+            {
+                Chips.Add(info);
+
+                Logger.Debug(info.ToString());
+
+                foreach (var line in info.Lines)
+                {
+                    Logger.Debug(line.ToString());
+                }
+            }
+            else
+            {
+                Console.WriteLine($"ERR: {Marshal.GetLastWin32Error()}");
+
+                Logger.Error($"Unable to get info for chip {n}");
+            }
+        }
     }
 
     public LineInfo GetLine(GpiodPin pin)
