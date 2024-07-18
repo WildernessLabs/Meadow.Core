@@ -6,9 +6,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using static Meadow.Resolver;
 
 namespace Meadow;
 
@@ -95,7 +97,7 @@ public class LinuxPlatformOS : IPlatformOS
         }
         catch (Exception ex)
         {
-            Resolver.Log.Debug($"Unable to parse lsb_release: {ex.Message}");
+            Log.Debug($"Unable to parse lsb_release: {ex.Message}");
         }
 
         try
@@ -111,7 +113,7 @@ public class LinuxPlatformOS : IPlatformOS
         }
         catch (Exception ex)
         {
-            Resolver.Log.Debug($"Unable to parse uname: {ex.Message}");
+            Log.Debug($"Unable to parse uname: {ex.Message}");
         }
     }
 
@@ -149,7 +151,72 @@ public class LinuxPlatformOS : IPlatformOS
     /// <param name="dateTime"></param>
     public void SetClock(DateTime dateTime)
     {
-        throw new PlatformNotSupportedException();
+        var ts = Interop.Timespec.From(dateTime);
+        var result = Interop.clock_settime(Interop.Clock.REALTIME, ref ts);
+
+        if (result != 0)
+        {
+            var err = Marshal.GetLastWin32Error();
+
+            string errorMessage;
+
+            if (err == 1)
+            {
+                // this is a permissions issue
+                errorMessage = "Application does not have permissions to set the clock.  Try running \"sudo setcap 'cap_sys_time=ep' $DOTNET_ROOT/dotnet\"";
+            }
+            else
+            {
+                errorMessage = $"Failed to set clock.  Error code {err}";
+            }
+
+            throw new NativeException(errorMessage, err);
+        }
+
+        // synchronize the system time to the hardware clock (not necessarily an RTC)
+        SetHwClock(dateTime);
+    }
+
+    private unsafe void SetHwClock(DateTime dateTime)
+    {
+        var rtcTime = Interop.Rtc_time.From(dateTime);
+        var fd = Interop.open("/dev/rtc", Interop.DriverFlags.O_RDONLY);
+        if (fd != 0)
+        {
+            // possible the platform doesn't have an hwclock, if so we just abandon the call
+            Log.Debug($"Call to open /dev/rtc yielded {Marshal.GetLastWin32Error()}");
+            return;
+        }
+
+        var gch = GCHandle.Alloc(rtcTime, GCHandleType.Pinned);
+        try
+        {
+            var result = Interop.ioctl(fd, Interop.Ioctl.RTC_SET_TIME, gch.AddrOfPinnedObject());
+
+            if (result != 0)
+            {
+                var err = Marshal.GetLastWin32Error();
+
+                string errorMessage;
+
+                if (err == 1)
+                {
+                    // this is a permissions issue
+                    errorMessage = "Application does not have permissions to set the hwclock.  Try running \"sudo setcap 'cap_sys_time=ep' $DOTNET_ROOT/dotnet\"";
+                }
+                else
+                {
+                    errorMessage = $"Failed to set hwclock.  Error code {err}";
+                }
+
+                throw new NativeException(errorMessage, err);
+            }
+        }
+        finally
+        {
+            gch.Free();
+            Interop.close(fd);
+        }
     }
 
     /// <inheritdoc/>

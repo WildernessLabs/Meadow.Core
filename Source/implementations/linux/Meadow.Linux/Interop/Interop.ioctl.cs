@@ -63,5 +63,11 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int ioctl(int fd, int request, ref uint data);
+
+        public static class Ioctl
+        {
+            // #define RTC_SET_TIME	_IOW('p', 0x0a, struct rtc_time) /* Set RTC time    */
+            public static int RTC_SET_TIME => _IOW('p', 0x0a, 9 * 4);
+        }
     }
 }
