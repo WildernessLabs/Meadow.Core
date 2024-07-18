@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security;
 
 namespace Meadow
@@ -18,18 +17,18 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int close(int handle);
-        
+
         [DllImport(LIBC, SetLastError = true)]
         public static extern int write(int handle, byte[] buf, int count);
 
         [DllImport(LIBC, SetLastError = true)]
-        public unsafe static extern int write(int handle, byte* buf, int count);
+        public static extern unsafe int write(int handle, byte* buf, int count);
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int read(int handle, byte[] buf, int count);
 
         [DllImport(LIBC, SetLastError = true)]
-        public unsafe static extern int read(int handle, byte* buf, int count);
+        public static extern unsafe int read(int handle, byte* buf, int count);
 
         //int tcgetattr(int fildes, struct termios *termios_p);
         [DllImport(LIBC, SetLastError = true)]
@@ -44,7 +43,7 @@ namespace Meadow
 
         [DllImport(LIBC, SetLastError = true)]
         public static extern int lseek(int fd, int offset, SeekWhence whence);
-        
+
         [DllImport(LIBC, SetLastError = true)]
         public static extern int poll(pollfd[] fds, int nfds, int timeout);
 
@@ -56,6 +55,14 @@ namespace Meadow
             SEEK_SET = 0, /* set file offset to offset */
             SEEK_CUR = 1, /* set file offset to current plus offset */
             SEEK_END = 2 /* set file offset to EOF plus offset */
+        }
+
+        public enum Errors
+        {
+            None = 0,
+            NoPermissions = 1,
+            NoSuchFile = 2,
+            BadFileNumber = 9,
         }
     }
 }
