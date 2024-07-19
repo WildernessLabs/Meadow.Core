@@ -92,6 +92,35 @@ public class BeagleBoneBlackPinout : PinDefinitionBase, IPinDefinitions
     public IPin GPIO_67 => new GpiodPin(Controller, "GPIO_67", "P8_8", gpiochip2, 3);
 
     /// <summary>
+    /// Represents the AIN0 pin.
+    /// </summary>
+    public IPin AIN0 => new Pin(Controller, "AIN0", "P9_39", new[] { new AnalogChannelInfo("AIN0", 12, true, false) });
+    /// <summary>
+    /// Represents the AIN1 pin.
+    /// </summary>
+    public IPin AIN1 => new Pin(Controller, "AIN1", "P9_40", new[] { new AnalogChannelInfo("AIN1", 12, true, false) });
+    /// <summary>
+    /// Represents the AIN2 pin.
+    /// </summary>
+    public IPin AIN2 => new Pin(Controller, "AIN2", "P9_37", new[] { new AnalogChannelInfo("AIN2", 12, true, false) });
+    /// <summary>
+    /// Represents the AIN3 pin.
+    /// </summary>
+    public IPin AIN3 => new Pin(Controller, "AIN3", "P9_38", new[] { new AnalogChannelInfo("AIN3", 12, true, false) });
+    /// <summary>
+    /// Represents the AIN4 pin.
+    /// </summary>
+    public IPin AIN4 => new Pin(Controller, "AIN4", "P9_33", new[] { new AnalogChannelInfo("AIN4", 12, true, false) });
+    /// <summary>
+    /// Represents the AIN5 pin.
+    /// </summary>
+    public IPin AIN5 => new Pin(Controller, "AIN5", "P9_36", new[] { new AnalogChannelInfo("AIN5", 12, true, false) });
+    /// <summary>
+    /// Represents the AIN6 pin.
+    /// </summary>
+    public IPin AIN6 => new Pin(Controller, "AIN6", "P9_35", new[] { new AnalogChannelInfo("AIN6", 12, true, false) });
+
+    /// <summary>
     /// Represents Pin P9_12, which corresponds to GPIO_60.
     /// </summary>
     public IPin P9_12 => GPIO_60;
@@ -167,6 +196,35 @@ public class BeagleBoneBlackPinout : PinDefinitionBase, IPinDefinitions
     /// Represents Pin P8_26, which corresponds to GPIO_61
     /// </summary>
     public IPin P8_26 => GPIO_61;
+
+    /// <summary>
+    /// Represents Pin P9_33, which corresponds to AIN4
+    /// </summary>
+    public IPin P9_33 => AIN4;
+    /// <summary>
+    /// Represents Pin P9_35, which corresponds to AIN6
+    /// </summary>
+    public IPin P9_35 => AIN6;
+    /// <summary>
+    /// Represents Pin P9_36, which corresponds to AIN5
+    /// </summary>
+    public IPin P9_36 => AIN5;
+    /// <summary>
+    /// Represents Pin P9_37, which corresponds to AIN2
+    /// </summary>
+    public IPin P9_37 => AIN2;
+    /// <summary>
+    /// Represents Pin P9_38, which corresponds to AIN3
+    /// </summary>
+    public IPin P9_38 => AIN3;
+    /// <summary>
+    /// Represents Pin P9_39, which corresponds to AIN0
+    /// </summary>
+    public IPin P9_39 => AIN0;
+    /// <summary>
+    /// Represents Pin P9_40, which corresponds to AIN1
+    /// </summary>
+    public IPin P9_40 => AIN1;
 }
 
 /*

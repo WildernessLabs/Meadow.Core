@@ -200,11 +200,11 @@ public class Linux : IMeadowDevice
     /// <inheritdoc/>
     public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, float voltageReference = 3.3F)
     {
-        throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
+        return CreateAnalogInputPort(pin, sampleCount, sampleInterval, voltageReference.Volts());
     }
 
     /// <inheritdoc/>
-    public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public virtual IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
     }
