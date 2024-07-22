@@ -114,3 +114,13 @@ This wll give the installed .NET version.
 ```
 8.0.301
 ```
+
+## Configuring Pins
+
+If you want to use a pin on the BeagleBone for a function otehr than its default configuration, you must change its behavior.  In example of this is PWM. None of the BeagleBone pins are configured for PWM by default, they are GPIO.  If you create a `PwmOutputPort` in your application, you will get no errors, but you also won't see any PWM signal.
+
+You must reconfigure the pin to be used for PWM.  For example, to change `P9_42` from `GPIO7` to `ECAPPWM0` you must run this:
+
+```
+sudo config-pin P9.42 pwm
+```

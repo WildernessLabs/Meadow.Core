@@ -30,11 +30,23 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the GPIO2 pin.
     /// </summary>
-    public IPin GPIO2 => new LinuxFlexiPin(Controller, "GPIO2", "PIN03", 2 + SysFsOffset, GpiodChipName, 2);
+    public IPin GPIO2 => new LinuxFlexiPin(Controller, "GPIO2", "PIN03", 2 + SysFsOffset, GpiodChipName, 2,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO2"),
+            new I2cChannelInfo("SDA1", I2cChannelFunctionType.Data, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the GPIO3 pin.
     /// </summary>
-    public IPin GPIO3 => new LinuxFlexiPin(Controller, "GPIO3", "PIN05", 3 + SysFsOffset, GpiodChipName, 3);
+    public IPin GPIO3 => new LinuxFlexiPin(Controller, "GPIO3", "PIN05", 3 + SysFsOffset, GpiodChipName, 3,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO3"),
+            new I2cChannelInfo("SCL1", I2cChannelFunctionType.Clock, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the GPIO4 pin.
     /// </summary>

@@ -2,6 +2,7 @@
 using Meadow.Pinouts;
 using Meadow.Units;
 using System;
+using System.Linq;
 
 namespace Meadow;
 
@@ -46,8 +47,30 @@ public partial class BeagleBoneBlack : Linux
     public override IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         // TODO: verify the vRef (1.8V on the BBB)
-        // TODO: verify the pin is analog capable
+        var channelInfo = pin.SupportedChannels!.OfType<IAnalogChannelInfo>().FirstOrDefault();
+        if (channelInfo == null)
+        {
+            throw new NotSupportedException($"Pin {pin.Name} is not Analog Input capable");
+        }
 
-        return new BeagleBoneAnalogInputPort(this, pin, sampleCount, sampleInterval);
+        return new BeagleBoneAnalogInputPort(pin, channelInfo, sampleCount, sampleInterval);
+    }
+
+    /// <inheritdoc/>
+    public override IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool inverted = false)
+    {
+        var channelInfo = pin.SupportedChannels!.OfType<IPwmChannelInfo>().FirstOrDefault();
+        if (channelInfo == null)
+        {
+            throw new NotSupportedException($"Pin {pin.Name} is not PWM capable");
+        }
+
+        return new BeagleBonePwmPort(pin, channelInfo, frequency, dutyCycle, inverted);
+    }
+
+    /// <inheritdoc/>
+    public override II2cBus CreateI2cBus(int busNumber = 2)
+    {
+        return base.CreateI2cBus(busNumber);
     }
 }

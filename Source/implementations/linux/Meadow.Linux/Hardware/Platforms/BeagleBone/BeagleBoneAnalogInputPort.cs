@@ -19,8 +19,8 @@ public class BeagleBoneAnalogInputPort : AnalogInputPortBase
     private CancellationTokenSource _cancellationTokenSource = new();
     private CircularBuffer<Voltage> _buffer;
 
-    internal BeagleBoneAnalogInputPort(BeagleBoneBlack controller, IPin pin, int sampleCount, TimeSpan sampleInterval)
-        : base(pin, pin.SupportedChannels!.OfType<IAnalogChannelInfo>().First(), sampleCount, sampleInterval, 1.8.Volts())
+    internal BeagleBoneAnalogInputPort(IPin pin, IAnalogChannelInfo channelInfo, int sampleCount, TimeSpan sampleInterval)
+        : base(pin, channelInfo, sampleCount, sampleInterval, 1.8.Volts())
     {
         // pin name is in the form AINx where x is the device number
         var deviceNumber = pin.Name.Last();

@@ -5,13 +5,14 @@ using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Meadow;
 
 /// <summary>
 /// Represents a Linux-based Meadow device.
 /// </summary>
-public class Linux : IMeadowDevice
+public abstract class Linux : IMeadowDevice
 #if NET7_0
     , IPixelDisplayProvider
 #endif
@@ -87,7 +88,7 @@ public class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public II2cBus CreateI2cBus(int busNumber = 1)
+    public virtual II2cBus CreateI2cBus(int busNumber = 1)
     {
         return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
     }
@@ -218,7 +219,33 @@ public class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
     {
-        throw new PlatformNotSupportedException("This platform has no II2CBusses.  Use an IO Extender.");
+        // verify pins are I2C capable
+        var clockChannel = clock.SupportedChannels
+            ?.OfType<II2cChannelInfo>()
+            .Where(c => c.ChannelFunction == I2cChannelFunctionType.Clock)
+            .FirstOrDefault();
+
+        if (clockChannel == null)
+        {
+            throw new ArgumentException($"Pin {clock.Name} does not support I2C Clock");
+        }
+
+        var dataChannel = data.SupportedChannels
+            ?.OfType<II2cChannelInfo>()
+            .Where(c => c.ChannelFunction == I2cChannelFunctionType.Data)
+            .FirstOrDefault();
+
+        if (dataChannel == null)
+        {
+            throw new ArgumentException($"Pin {data.Name} does not support I2C Data");
+        }
+
+        if (clockChannel.BusNumber != dataChannel.BusNumber)
+        {
+            throw new ArgumentException($"Pins {data.Name} and {clock.Name} are on different I2C buses");
+        }
+
+        return CreateI2cBus(clockChannel.BusNumber, busSpeed);
     }
 
     /// <inheritdoc/>

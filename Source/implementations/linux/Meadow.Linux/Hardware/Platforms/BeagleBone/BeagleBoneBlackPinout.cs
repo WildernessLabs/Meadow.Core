@@ -121,6 +121,49 @@ public class BeagleBoneBlackPinout : PinDefinitionBase, IPinDefinitions
     public IPin AIN6 => new Pin(Controller, "AIN6", "P9_35", new[] { new AnalogChannelInfo("AIN6", 12, true, false) });
 
     /// <summary>
+    /// Represents the ECAPPWM0 pin.
+    /// </summary>
+    public IPin ECAPPWM0 => new Pin(Controller, "ECAPPWM0", "P9_42", new[] { new PwmChannelInfo("ECAPPWM0", 0, 0) });
+    /// <summary>
+    /// Represents the ECAPPWM2 pin.
+    /// </summary>
+    public IPin ECAPPWM2 => new Pin(Controller, "ECAPPWM2", "P9_28", new[] { new PwmChannelInfo("ECAPPWM2", 1, 0) });
+    /// <summary>
+    /// Represents the EHRPWM1A pin.
+    /// </summary>
+    public IPin EHRPWM1A => new Pin(Controller, "EHRPWM1A", "P9_14", new[] { new PwmChannelInfo("EHRPWM1A", 2, 0) });
+    /// <summary>
+    /// Represents the EHRPWM1B pin.
+    /// </summary>
+    public IPin EHRPWM1B => new Pin(Controller, "EHRPWM1B", "P9_16", new[] { new PwmChannelInfo("EHRPWM1B", 3, 0) });
+    /// <summary>
+    /// Represents the EHRPWM2A pin.
+    /// </summary>
+    public IPin EHRPWM2A => new Pin(Controller, "EHRPWM2A", "P8_19", new[] { new PwmChannelInfo("EHRPWM2A", 5, 0) });
+    /// <summary>
+    /// Represents the EHRPWM2B pin.
+    /// </summary>
+    public IPin EHRPWM2B => new Pin(Controller, "EHRPWM2B", "P8_13", new[] { new PwmChannelInfo("EHRPWM2B", 7, 0) });
+
+    /// <summary>
+    /// Represents the I2C2_SCL pin.
+    /// </summary>
+    public IPin I2C2_SCL => new Pin(Controller, "I2C2_SCL", "P9_19", new[]
+    {
+        new I2cChannelInfo("I2C2_SCL", I2cChannelFunctionType.Clock, busNumber: 2)
+    });
+    /// <summary>
+    /// Represents the I2C2_SDA pin.
+    /// </summary>
+    public IPin I2C2_SDA => new Pin(Controller, "I2C2_SDA", "P9_20", new[]
+    {
+        new I2cChannelInfo("I2C2_SDA", I2cChannelFunctionType.Data, busNumber: 2)
+    });
+
+
+
+
+    /// <summary>
     /// Represents Pin P9_12, which corresponds to GPIO_60.
     /// </summary>
     public IPin P9_12 => GPIO_60;
@@ -225,6 +268,12 @@ public class BeagleBoneBlackPinout : PinDefinitionBase, IPinDefinitions
     /// Represents Pin P9_40, which corresponds to AIN1
     /// </summary>
     public IPin P9_40 => AIN1;
+
+    /// <summary>
+    /// Represents Pin P9_42, which corresponds to ECAPPWM0
+    /// </summary>
+    public IPin P9_42 => ECAPPWM0;
+
 }
 
 /*

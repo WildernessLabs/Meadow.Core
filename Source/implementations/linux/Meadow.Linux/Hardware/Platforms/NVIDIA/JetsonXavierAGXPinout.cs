@@ -12,12 +12,20 @@ public class JetsonXavierAGXPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Gets the I2C_GP5_DAT pin.
     /// </summary>
-    public IPin I2C_GP5_DAT => new Pin(Controller, "I2C_GP5_DAT", "PIN03", null);
+    public IPin I2C_GP5_DAT => new Pin(Controller, "I2C_GP5_DAT", "PIN03",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_GP5_DAT", I2cChannelFunctionType.Data, busNumber: 8)
+        });
 
     /// <summary>
     /// Gets the I2C_GP5_CLK pin.
     /// </summary>
-    public IPin I2C_GP5_CLK => new Pin(Controller, "I2C_GP5_CLK", "PIN05", null);
+    public IPin I2C_GP5_CLK => new Pin(Controller, "I2C_GP5_CLK", "PIN05",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_GP5_CLK", I2cChannelFunctionType.Clock, busNumber: 8)
+        });
 
     /// <summary>
     /// Gets the MCLK05 pin.
@@ -87,12 +95,20 @@ public class JetsonXavierAGXPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Gets the I2C_GP2_DAT pin.
     /// </summary>
-    public IPin I2C_GP2_DAT => new Pin(Controller, "I2C_GP2_DAT", "PIN27", null);
+    public IPin I2C_GP2_DAT => new Pin(Controller, "I2C_GP2_DAT", "PIN27",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_GP2_DAT", I2cChannelFunctionType.Data, busNumber: 1)
+        });
 
     /// <summary>
     /// Gets the I2C_GP2_CLK pin.
     /// </summary>
-    public IPin I2C_GP2_CLK => new Pin(Controller, "I2C_GP2_CLK", "PIN28", null);
+    public IPin I2C_GP2_CLK => new Pin(Controller, "I2C_GP2_CLK", "PIN28",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_GP2_CLK", I2cChannelFunctionType.Clock, busNumber: 1)
+        });
 
     /// <summary>
     /// Gets the CAN0_DIN pin.
