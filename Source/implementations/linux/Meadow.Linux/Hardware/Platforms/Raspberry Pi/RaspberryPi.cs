@@ -81,11 +81,9 @@ public partial class RaspberryPi : Linux
         // just switch on the clock, assume they did the rest right
         if (clock.Key.ToString() == "PIN40")
         {
-            Resolver.Log.Info($"EQUAL");
             return new SpiBus(1, 0, (SpiBus.SpiMode)mode, speed);
         }
 
-        Resolver.Log.Info($"NOT {clock.Key.ToString()}");
         return new SpiBus(0, 0, (SpiBus.SpiMode)mode, speed);
     }
 
