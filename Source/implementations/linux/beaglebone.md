@@ -117,10 +117,32 @@ This wll give the installed .NET version.
 
 ## Configuring Pins
 
-If you want to use a pin on the BeagleBone for a function otehr than its default configuration, you must change its behavior.  In example of this is PWM. None of the BeagleBone pins are configured for PWM by default, they are GPIO.  If you create a `PwmOutputPort` in your application, you will get no errors, but you also won't see any PWM signal.
+If you want to use a pin on the BeagleBone for a function other than its default configuration, you must change its behavior.  In example of this is PWM. None of the BeagleBone pins are configured for PWM by default, they are GPIO.  If you create a `PwmOutputPort` in your application, you will get no errors, but you also won't see any PWM signal.
 
 You must reconfigure the pin to be used for PWM.  For example, to change `P9_42` from `GPIO7` to `ECAPPWM0` you must run this:
 
 ```
 sudo config-pin P9.42 pwm
+```
+
+## Configuring for SPI
+
+`SPI0` takes a little extra work to access
+
+First, the pins must be configured for SPI:
+
+```
+sudo config-pin P9.18 spi
+sudo config-pin P9.21 spi
+sudo config-pin P9.22 spi_sclk_
+```
+
+The the `spi` group must be created, applied to the driver, and the use radded to the group:
+
+```
+sudo groupadd spi
+sudo adduser debian spi
+sudo chgrp spi /dev/spidev0.0
+sudo chmod 660 /dev/spidev0.0
+newgrp spi
 ```

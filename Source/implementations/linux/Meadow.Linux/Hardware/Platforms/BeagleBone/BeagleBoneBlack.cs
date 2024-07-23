@@ -73,4 +73,23 @@ public partial class BeagleBoneBlack : Linux
     {
         return base.CreateI2cBus(busNumber);
     }
+
+    /// <inheritdoc/>
+    public override ISpiBus CreateSpiBus(int busNumber, Frequency speed)
+    {
+        try
+        {
+            return base.CreateSpiBus(busNumber, speed);
+        }
+        catch (NativeException ne)
+        {
+            switch (ne.ErrorCode)
+            {
+                case 13:
+                    throw new NativeException($"No permissions to access the SPI bus.  Have you configured the lines with `config-pin`?", ne.ErrorCode.Value);
+                default:
+                    throw;
+            }
+        }
+    }
 }

@@ -160,7 +160,27 @@ public class BeagleBoneBlackPinout : PinDefinitionBase, IPinDefinitions
         new I2cChannelInfo("I2C2_SDA", I2cChannelFunctionType.Data, busNumber: 2)
     });
 
-
+    /// <summary>
+    /// Represents the SPI0_D0 (MISO/CIPO) pin.
+    /// </summary>
+    public IPin SPI0_D0 => new Pin(Controller, "SPI0_D0", "P9_21", new[]
+    {
+        new SpiChannelInfo("SPI0_D0", SpiLineType.CIPO, busNumber: 0)
+    });
+    /// <summary>
+    /// Represents the SPI0_D1 (MOSI/COPI) pin.
+    /// </summary>
+    public IPin SPI0_D1 => new Pin(Controller, "SPI0_D1", "P9_18", new[]
+    {
+        new SpiChannelInfo("SPI0_D1", SpiLineType.COPI, busNumber: 0)
+    });
+    /// <summary>
+    /// Represents the SPI0_SCLK pin.
+    /// </summary>
+    public IPin SPI0_SCLK => new Pin(Controller, "SPI0_SCLK", "P9_22", new[]
+    {
+        new SpiChannelInfo("SPI0_SCLK", SpiLineType.Clock, busNumber: 0)
+    });
 
 
     /// <summary>
@@ -273,7 +293,49 @@ public class BeagleBoneBlackPinout : PinDefinitionBase, IPinDefinitions
     /// Represents Pin P9_42, which corresponds to ECAPPWM0
     /// </summary>
     public IPin P9_42 => ECAPPWM0;
+    /// <summary>
+    /// Represents Pin P9_28, which corresponds to ECAPPWM2
+    /// </summary>
+    public IPin P9_28 => ECAPPWM2;
+    /// <summary>
+    /// Represents Pin P9_14, which corresponds to EHRPWM1A
+    /// </summary>
+    public IPin P9_14 => EHRPWM1A;
+    /// <summary>
+    /// Represents Pin P9_16, which corresponds to EHRPWM1B
+    /// </summary>
+    public IPin P9_16 => EHRPWM1B;
+    /// <summary>
+    /// Represents Pin P8_19, which corresponds to EHRPWM2A
+    /// </summary>
+    public IPin P8_19 => EHRPWM2A;
+    /// <summary>
+    /// Represents Pin P8_13, which corresponds to EHRPWM2B
+    /// </summary>
+    public IPin P8_13 => EHRPWM2B;
 
+    /// <summary>
+    /// Represents Pin P9_19, which corresponds to I2C2_SCL
+    /// </summary>
+    public IPin P9_19 => I2C2_SCL;
+    /// <summary>
+    /// Represents Pin P9_20, which corresponds to I2C2_SDA
+    /// </summary>
+    public IPin P9_20 => I2C2_SDA;
+
+
+    /// <summary>
+    /// Represents Pin P9_21, which corresponds to SPI0_D0
+    /// </summary>
+    public IPin P9_21 => SPI0_D0;
+    /// <summary>
+    /// Represents Pin P9_18, which corresponds to SPI0_D1
+    /// </summary>
+    public IPin P9_18 => SPI0_D1;
+    /// <summary>
+    /// Represents Pin P9_22, which corresponds to SPI0_SCLK
+    /// </summary>
+    public IPin P9_22 => SPI0_SCLK;
 }
 
 /*

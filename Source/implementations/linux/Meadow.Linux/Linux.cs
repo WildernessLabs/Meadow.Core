@@ -175,7 +175,7 @@ public abstract class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
+    public virtual ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
     {
         return new SpiBus(busNumber, 0, SpiBus.SpiMode.Mode0, speed);
     }
@@ -195,7 +195,42 @@ public abstract class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
     {
-        return new SpiBus(0, 0, (SpiBus.SpiMode)mode, speed);
+        // verify pins are SPI capable
+        var clockChannel = clock.SupportedChannels
+            ?.OfType<ISpiChannelInfo>()
+            .Where(c => c.LineTypes == SpiLineType.Clock)
+            .FirstOrDefault();
+        if (clockChannel == null)
+        {
+            throw new ArgumentException($"Pin {clock.Name} does not support SPI Clock");
+        }
+
+        var mosiChannel = mosi.SupportedChannels
+            ?.OfType<ISpiChannelInfo>()
+            .Where(c => c.LineTypes == SpiLineType.MOSI)
+            .FirstOrDefault();
+        if (mosiChannel == null)
+        {
+            throw new ArgumentException($"Pin {mosi.Name} does not support SPI MOSI");
+        }
+
+        var misoChannel = miso.SupportedChannels
+            ?.OfType<ISpiChannelInfo>()
+            .Where(c => c.LineTypes == SpiLineType.MISO)
+            .FirstOrDefault();
+        if (misoChannel == null)
+        {
+            throw new ArgumentException($"Pin {miso.Name} does not support SPI MISO");
+        }
+
+        if ((clockChannel.BusNumber != mosiChannel.BusNumber)
+            || (clockChannel.BusNumber != misoChannel.BusNumber)
+            || (mosiChannel.BusNumber != misoChannel.BusNumber))
+        {
+            throw new ArgumentException($"Pins {clock.Name}, {mosi.Name} and {miso.Name} are on different SPI buses");
+        }
+
+        return CreateSpiBus(clockChannel.BusNumber, speed);
     }
 
     /// <inheritdoc/>
