@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linux", "linux", "{B187C117-A16E-4A75-B862-3CA7DCA464B8}"
 	ProjectSection(SolutionItems) = preProject
 		implementations\linux\beaglebone.md = implementations\linux\beaglebone.md
+		implementations\linux\raspberrypi.md = implementations\linux\raspberrypi.md
 		implementations\linux\README.md = implementations\linux\README.md
 	EndProjectSection
 EndProject
