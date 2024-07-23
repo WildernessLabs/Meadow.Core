@@ -74,17 +74,6 @@ public partial class RaspberryPi : Linux
     }
 
     /// <inheritdoc/>
-    public override II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
-    {
-        if (clock == Pins["PIN05"] && data == Pins["PIN03"])
-        {
-            return new I2CBus(1, busSpeed);
-        }
-
-        throw new ArgumentOutOfRangeException("Requested pins are not I2C bus pins");
-    }
-
-    /// <inheritdoc/>
     public override ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Frequency speed)
     {
         // TODO: validate pins for both buses
