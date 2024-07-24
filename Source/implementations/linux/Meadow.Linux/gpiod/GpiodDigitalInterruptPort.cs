@@ -12,6 +12,8 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
     private Gpiod Driver { get; }
     private LineInfo Line { get; }
     private int? _lastInterrupt = null;
+    private InterruptMode _interruptMode;
+    private ResistorMode _resistorMode;
 
     /// <inheritdoc/>
     public override bool State => Line.GetValue();
@@ -26,14 +28,12 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
         ResistorMode resistorMode,
         TimeSpan debounceDuration,
         TimeSpan glitchDuration)
-        : base(pin, channel, interruptMode)
+        : base(pin, channel)
     {
         DebounceDuration = debounceDuration;
         GlitchDuration = glitchDuration;
         Driver = driver;
         Pin = pin;
-
-        line_request_flags flags = line_request_flags.None;
 
         LineInfo? li = null;
 
@@ -49,38 +49,47 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
         if (li != null)
         {
             Line = li;
-            switch (resistorMode)
-            {
-                case ResistorMode.InternalPullUp:
-                    flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
-                    break;
-                case ResistorMode.InternalPullDown:
-                    flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
-                    break;
-                default:
-                    flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;
-                    break;
-            }
 
-            InterruptMode = interruptMode;
-
-            switch (InterruptMode)
-            {
-                case InterruptMode.EdgeRising:
-                case InterruptMode.EdgeFalling:
-                case InterruptMode.EdgeBoth:
-                    Line.InterruptOccurred += OnInterruptOccurred;
-                    Line.RequestInterrupts(InterruptMode, flags);
-                    break;
-                default:
-                    Line.RequestInput(flags);
-                    break;
-            }
+            SetInterruptOrInputMode(resistorMode, interruptMode);
         }
         else
         {
             throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
         }
+    }
+
+    private void SetInterruptOrInputMode(ResistorMode resistorMode, InterruptMode interruptMode)
+    {
+        line_request_flags flags = line_request_flags.None;
+
+        switch (resistorMode)
+        {
+            case ResistorMode.InternalPullUp:
+                flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
+                break;
+            case ResistorMode.InternalPullDown:
+                flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
+                break;
+            default:
+                flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;
+                break;
+        }
+
+        switch (interruptMode)
+        {
+            case InterruptMode.EdgeRising:
+            case InterruptMode.EdgeFalling:
+            case InterruptMode.EdgeBoth:
+                Line.InterruptOccurred += OnInterruptOccurred;
+                Line.RequestInterrupts(interruptMode, flags);
+                break;
+            default:
+                Line.RequestInput(flags);
+                break;
+        }
+
+        _interruptMode = interruptMode;
+        _resistorMode = resistorMode;
     }
 
     private void OnInterruptOccurred(LineInfo sender, gpiod_line_event e)
@@ -108,10 +117,17 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
     }
 
     /// <inheritdoc/>
+    public override InterruptMode InterruptMode
+    {
+        get => _interruptMode;
+        set => SetInterruptOrInputMode(Resistor, value);
+    }
+
+    /// <inheritdoc/>
     public override ResistorMode Resistor
     {
-        get => ResistorMode.Disabled;
-        set => throw new NotSupportedException("Resistor Mode not supported on this platform");
+        get => _resistorMode;
+        set => SetInterruptOrInputMode(value, InterruptMode);
     }
 
     /// <inheritdoc/>

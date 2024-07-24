@@ -14,6 +14,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
     private DigitalPortResult _interruptResult = new DigitalPortResult();
     private DigitalState _newState = new DigitalState(false, DateTime.MinValue);
     private DigitalState _oldState = new DigitalState(false, DateTime.MinValue);
+    private InterruptMode _interruptMode;
 
     /// <inheritdoc/>
     protected IMeadowIOController IOController { get; set; }
@@ -38,7 +39,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         ResistorMode resistorMode,
         TimeSpan debounceDuration,
         TimeSpan glitchDuration
-        ) : base(pin, channel, interruptMode)
+        ) : base(pin, channel)
     {
         // DEVELOPER NOTE:
         // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
@@ -54,6 +55,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         this._resistorMode = resistorMode;
         _debounceDuration = debounceDuration;
         _glitchDuration = glitchDuration;
+        this.InterruptMode = interruptMode;
 
         // attempt to reserve
         var success = this.IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -124,6 +126,17 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         {
             IOController.SetResistorMode(this.Pin, value);
             _resistorMode = value;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override InterruptMode InterruptMode
+    {
+        get => _interruptMode;
+        set
+        {
+            IOController.ConfigureInput(this.Pin, Resistor, value, DebounceDuration, GlitchDuration);
+            _interruptMode = value;
         }
     }
 
