@@ -135,7 +135,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
             {
                 // this is all to prevent new-ing up (and thereby preventing GC stuff)
                 _oldState.Time = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                _newState.Time = this.LastEventTime = DateTime.Now;
+                _newState.Time = LastEventTime = DateTime.UtcNow;
                 _oldState.State = !state;
                 _newState.State = state;
                 _interruptResult.Old = (LastEventTime == DateTime.MinValue) ? null : _oldState;

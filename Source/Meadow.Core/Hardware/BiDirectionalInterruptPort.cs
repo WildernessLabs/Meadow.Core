@@ -293,12 +293,9 @@ namespace Meadow.Hardware
         {
             if (pin == this.Pin)
             {
-                var capturedLastTime = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                this.LastEventTime = DateTime.Now;
-                // BC 2021.05.21 b5.0: Changed this to the new result type.
-                // assuming that old state is just an inversion of the new state, yeah?
+                var capturedLastTime = LastEventTime;
+                this.LastEventTime = DateTime.UtcNow;
                 RaiseChangedAndNotify(new DigitalPortResult(new DigitalState(state, this.LastEventTime), new DigitalState(!state, capturedLastTime)));
-                //RaiseChangedAndNotify(new DigitalInputPortChangeResult(state, this.LastEventTime, capturedLastTime));
             }
         }
     }
