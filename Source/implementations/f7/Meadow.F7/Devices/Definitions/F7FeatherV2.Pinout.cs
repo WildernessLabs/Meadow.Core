@@ -257,41 +257,17 @@ namespace Meadow.Devices
             //==== Right Header
 
             // D05 //NOTE: we can expose UART_7 if we want here
-            // F7v2.a
-            // JTDI, TIM2_CH1/TIM2_ETR, HDMI_CEC, SPI1_NSS/I2S1_WS, SPI3_NSS/I2S3_WS, SPI6_NSS, UART4_RTS, CAN3_TX, UART7_TX, EVENTOUT
-            //public IPin D05 => new Pin(
-            //    "D05", "PA15",
-            //    new List<IChannelInfo> {
-            //        new DigitalChannelInfo("PA15", interruptGroup: 15),
-            //        //new PwmChannelInfo("TIM2_CH1", 1, 1), // Reserved for OnboardLED
-            //        new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
-            //    }
-            //);
-            // F7v2.b
             // NJTRST, TIM3_CH1, SPI1_MISO, SPI3_MISO, SPI2_NSS/I2S2_WS, SPI6_MISO, SDMMC2_D3, CAN3_TX, UART7_TX, EVENTOUT
             /// <inheritdoc/>
             public IPin D05 => _d05 ??= new Pin(
                 Controller,
                 "D05", "PB4",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB4", interruptGroup: 4),
-                    new PwmChannelInfo("TIM3_CH1", 3, 1),
-                    //new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
+                    new DigitalChannelInfo("PB4", interruptGroup: 4)
                 }
             );
 
-            // D06 //NOTE: we can expose UART_7 if we want here
-            // F7v2.a
-            // JTDO/TRACESWO, TIM2_CH2, SPI1_SCK/I2S1_CK, SPI3_SCK/I2S3_CK, SPI6_SCK, SDMMC2_D2, CAN3_RX, UART7_RX, EVENTOUT
-            //public IPin D06 => new Pin(
-            //    "D06", "PB3",
-            //    new List<IChannelInfo> {
-            //        new DigitalChannelInfo("PB3", interruptGroup: 3),
-            //        //new PwmChannelInfo("TIM2_CH2", 2, 2), // Reserved for OnboardLED
-            //        new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
-            //    }
-            //);
-            // F7v2.b
+            // D06
             // I2C2_SMBA, SPI5_SCK, TIM12_CH1, ETH_MII_RXD2, FMC_SDNE1, DCMI_D8, EVENTOUT
             /// <inheritdoc/>
             public IPin D06 => _d06 ??= new Pin(
@@ -299,8 +275,6 @@ namespace Meadow.Devices
                 "D06", "PB13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB13", interruptGroup: 13),
-                    //new PwmChannelInfo("TIM1_CH1", 1, 1),
-                    //new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
                 }
             );
 
