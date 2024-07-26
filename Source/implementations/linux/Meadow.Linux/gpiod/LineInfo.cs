@@ -101,8 +101,6 @@ internal class LineInfo
 
         int result;
 
-        Resolver.Log.Info($"Creating GpiodDigitalInterruptPort for {mode} on {Name} with flags {flags}");
-
         switch (mode)
         {
             case InterruptMode.EdgeRising:
