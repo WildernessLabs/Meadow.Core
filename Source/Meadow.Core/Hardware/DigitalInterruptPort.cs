@@ -135,7 +135,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
 
             if (InterruptMode != InterruptMode.None)
             {
-                // if we're alreaDy set up for an interrupt, disable all interrupts and reconnect
+                // if we're already set up for an interrupt, disable all interrupts and reconnect
                 IOController.WireInterrupt(Pin, InterruptMode.None, Resistor, DebounceDuration, GlitchDuration);
             }
 
