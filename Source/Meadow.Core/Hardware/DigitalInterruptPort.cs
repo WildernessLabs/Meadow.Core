@@ -55,7 +55,6 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         this._resistorMode = resistorMode;
         _debounceDuration = debounceDuration;
         _glitchDuration = glitchDuration;
-        this.InterruptMode = interruptMode;
 
         // attempt to reserve
         var success = this.IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -132,6 +131,14 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         get => _interruptMode ?? InterruptMode.None;
         set
         {
+            if (InterruptMode == value) { return; }
+
+            if (InterruptMode != InterruptMode.None)
+            {
+                // if we're already set up for an interrupt, disable all interrupts and reconnect
+                IOController.WireInterrupt(Pin, InterruptMode.None, Resistor, DebounceDuration, GlitchDuration);
+            }
+
             // don't call WireInterrupt if it's no interrupt and we're coming from the ctor
             if (_interruptMode != null || value != InterruptMode.None)
             {
