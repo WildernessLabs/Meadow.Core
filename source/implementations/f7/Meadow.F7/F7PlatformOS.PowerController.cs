@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
+using static Meadow.Logging.Logger;
 
 namespace Meadow
 {
@@ -142,7 +143,7 @@ namespace Meadow
             var result = UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
             if (result != 0)
             {
-                Resolver.Log.Error($"IOCTL to Sleep returned {result}");
+                Resolver.Log.Error($"IOCTL to Sleep returned {result}", MessageGroup.Core);
             }
 
             // Stop app execution while the OS actually does it's thing

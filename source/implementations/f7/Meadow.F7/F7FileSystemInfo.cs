@@ -1,8 +1,8 @@
 ﻿using Meadow.Devices;
-using Meadow.Hardware;
 using System.Collections.Generic;
 using System.Threading;
 using static Meadow.F7PlatformOS;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -33,7 +33,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 
         if (capabilities.HasSd && _sdSupported)
         {
-            Resolver.Log.Trace("Device is SD Card Capable");
+            Resolver.Log.Trace("Device is SD Card Capable", MessageGroup.Core);
 
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
@@ -48,11 +48,11 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
         }
         else if (!_sdSupported)
         {
-            Resolver.Log.Trace("SD Card is configured to 'off'");
+            Resolver.Log.Trace("SD Card is configured to 'off'", MessageGroup.Core);
         }
         else
         {
-            Resolver.Log.Trace("Device is not SD Card Capable");
+            Resolver.Log.Trace("Device is not SD Card Capable", MessageGroup.Core);
         }
     }
 
@@ -88,7 +88,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 
             if (firstRun || currentState != lastState)
             {
-                Resolver.Log.Debug($"SD State changed to {input.State}");
+                Resolver.Log.Debug($"SD State changed to {input.State}", MessageGroup.Core);
 
                 // DEV NOTE: The CCM SD Module uses inverse logic for card detect (high == no card, low == card)
                 if (!currentState)

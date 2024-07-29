@@ -62,6 +62,7 @@ internal static class AppSettingsParser
                         if (indent == 0)
                         {
                             level = 0;
+                            parents.Clear();
                         }
                         else if (indent > lastIndent)
                         {

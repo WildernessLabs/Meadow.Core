@@ -237,17 +237,58 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// </summary>
     public IPin Pin40 => GPIO21;
 
+    /// <summary>
+    /// Gets the I2C1_SDA pin.
+    /// </summary>
     public IPin I2C1_SDA => GPIO2;
+
+    /// <summary>
+    /// Gets the I2C1_SCL pin.
+    /// </summary>
     public IPin I2C1_SCL => GPIO3;
 
+    /// <summary>
+    /// Gets the SPI0_MOSI pin.
+    /// </summary>
     public IPin SPI0_MOSI => GPIO10;
+
+    /// <summary>
+    /// Gets the SPI0_MISO pin.
+    /// </summary>
     public IPin SPI0_MISO => GPIO9;
+
+    /// <summary>
+    /// Gets the SPI0_SCLK pin.
+    /// </summary>
     public IPin SPI0_SCLK => GPIO11;
+
+    /// <summary>
+    /// Gets the SPI0_CS0 pin.
+    /// </summary>
     public IPin SPI0_CS0 => GPIO8;
+
+    /// <summary>
+    /// Gets the SPI0_CS1 pin.
+    /// </summary>
     public IPin SPI0_CS1 => GPIO7;
 
+    /// <summary>
+    /// Gets the SPI1_MOSI pin.
+    /// </summary>
     public IPin SPI1_MOSI => GPIO20;
+
+    /// <summary>
+    /// Gets the SPI1_MISO pin.
+    /// </summary>
     public IPin SPI1_MISO => GPIO19;
+
+    /// <summary>
+    /// Gets the SPI1_SCLK pin.
+    /// </summary>
     public IPin SPI1_SCLK => GPIO21;
+
+    /// <summary>
+    /// Gets the SPI1_CS0 pin.
+    /// </summary>
     public IPin SPI1_CS0 => GPIO16;
 }

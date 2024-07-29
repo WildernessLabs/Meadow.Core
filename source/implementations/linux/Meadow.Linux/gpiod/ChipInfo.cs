@@ -1,6 +1,5 @@
 ﻿using Meadow.Logging;
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Meadow
@@ -28,22 +27,19 @@ namespace Meadow
 
             Handle = p;
 
-            Logger.Debug($"Chip ptr: {p.ToString()}");
-
-            if (!IsInvalid)
+            if (IsInvalid)
             {
-                Logger.Debug($"Chip ptr VALID");
-
+                Logger.Debug($"Chip ptr is invalid - cannot get GPIOD chip details");
+                Lines = new LineCollection(this, 0);
+            }
+            else
+            {
                 Chip = Marshal.PtrToStructure<Gpiod.Interop.gpiod_chip>(Handle);
                 Name = Chip.Value.name;
                 Label = Chip.Value.label;
 
                 // Init as an array of nulls.  We'll populate as they are accessed
                 Lines = new LineCollection(this, (int)Chip.Value.num_lines);
-            }
-            else
-            {
-                Logger.Error($"errno={Marshal.GetLastWin32Error()}");
             }
         }
 

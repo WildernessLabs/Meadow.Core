@@ -22,9 +22,15 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="1.12.0" />
+    <PackageReference Include="Meadow" Version="1.12.8" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="app.config.customsettingsafterempty.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.config.customsettings.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="app.config.envizor.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

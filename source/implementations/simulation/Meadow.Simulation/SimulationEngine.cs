@@ -1,4 +1,5 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Foundation.Serialization;
+using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Units;
 using System;
@@ -67,7 +68,7 @@ internal class SimulationEngine<TPinDefinitions> : SimulationEnvironment, IMeado
             state.PinStates.Add(pin.Name, pin.Voltage.Volts);
         }
 
-        var j = System.Text.Json.JsonSerializer.Serialize(state);
+        var j = MicroJson.Serialize(state);
         _wsServer.SendMessage(j);
     }
 

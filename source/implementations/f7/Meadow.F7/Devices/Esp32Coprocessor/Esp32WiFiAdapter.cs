@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.IPlatformOS;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -225,7 +226,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// <param name="payload">Optional payload containing data specific to the result of the event.</param>
     protected void InvokeEvent(WiFiFunction eventId, StatusCodes statusCode, byte[] payload)
     {
-        Resolver.Log.Trace($"Wifi InvokeEvent {eventId} returned {statusCode}");
+        Resolver.Log.Trace($"Wifi InvokeEvent {eventId} returned {statusCode}", MessageGroup.Esp);
 
         // look for errors first
         if (eventId == WiFiFunction.ErrorEvent)
@@ -238,7 +239,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             {
                 _lastStatus = statusCode;
                 CurrentState = NetworkState.Error;
-                Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
+                Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}", MessageGroup.Esp);
                 return;
             }
         }
@@ -260,6 +261,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 CurrentState = NetworkState.Connected;
 
                 break;
+            case WiFiFunction.ConnectionRetryCountExceeded:
             case WiFiFunction.NetworkDisconnectedEvent:
                 RaiseWiFiDisconnected(statusCode, payload);
                 CurrentState = NetworkState.Disconnected;
@@ -268,11 +270,15 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 RaiseNtpTimeChangedEvent();
                 break;
             case WiFiFunction.ErrorEvent:
-                Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}");
+                Resolver.Log.Debug($"Wifi function {eventId} returned {statusCode}", MessageGroup.Esp);
                 RaiseErrorEvent(statusCode);
                 break;
+            case WiFiFunction.NetworkConnecting:
+                RaiseNetworkConnecting();
+                break;
             default:
-                throw new NotImplementedException($"WiFi event not implemented ({eventId}).");
+                Resolver.Log.Error($"WiFi event {eventId} not implemented.", MessageGroup.Esp);
+                break;
         }
     }
 
@@ -359,13 +365,13 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                   }
                   else
                   {
-                      Resolver.Log.Error($"Error getting access points: {result}");
+                      Resolver.Log.Error($"Error getting access points: {result}", MessageGroup.Esp);
                   }
                   return networks;
               }
               catch (Exception ex)
               {
-                  Resolver.Log.Error($"Error getting access points: {ex.Message}");
+                  Resolver.Log.Error($"Error getting access points: {ex.Message}", MessageGroup.Esp);
 
                   token.ThrowIfCancellationRequested();
                   throw ex;
@@ -450,9 +456,9 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
             try
             {
-                Resolver.Log.Trace($"Sending command to connect");
+                Resolver.Log.Trace($"Sending command to connect", MessageGroup.Esp);
                 _lastStatus = _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.ConnectToAccessPoint, true, encodedPayload, resultBuffer);
-                Resolver.Log.Trace($"SendingCommand returned: {_lastStatus}");
+                Resolver.Log.Trace($"SendingCommand returned: {_lastStatus}", MessageGroup.Esp);
 
                 NetworkException? ne = null;
                 switch (_lastStatus)
@@ -476,7 +482,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Error connecting to access point: {ex.Message}");
+                Resolver.Log.Error($"Error connecting to access point: {ex.Message}", MessageGroup.Esp);
 
                 token.ThrowIfCancellationRequested();
                 throw new NetworkException(ex.Message);
@@ -589,7 +595,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     checkState:
         cancellationToken.ThrowIfCancellationRequested();
 
-        Resolver.Log.Info($"Current state: {CurrentState}");
+        Resolver.Log.Info($"Current state: {CurrentState}", MessageGroup.Esp);
 
         switch (CurrentState)
         {
@@ -748,16 +754,16 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             if (value == _state) return;
             _state = value;
 
-            Resolver.Log.Trace($"WiFi adapter state changed to: {CurrentState}");
+            Resolver.Log.Trace($"WiFi adapter state changed to: {CurrentState}", MessageGroup.Esp);
 
             switch (CurrentState)
             {
                 case NetworkState.Connecting:
-                    RaiseNetworkConnecting();
+                    // the ESP code itself will raise the event
                     break;
                 case NetworkState.Connected:
                     Refresh();
-                    var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid, Bssid, (byte)Channel, _authenticationType);
+                    var args = new WirelessNetworkConnectionEventArgs(IpAddress, SubnetMask, Gateway, Ssid ?? string.Empty, Bssid, (byte)Channel, _authenticationType);
                     RaiseNetworkConnected(args);
                     break;
                 case NetworkState.Disconnecting:

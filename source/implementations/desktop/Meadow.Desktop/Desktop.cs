@@ -11,6 +11,7 @@ namespace Meadow;
 public class Desktop : IMeadowDevice
 {
     private IMeadowDevice _implementation = default!;
+    private IResizablePixelDisplay? _display;
 
     /// <inheritdoc/>
     public event NetworkConnectionHandler? NetworkConnected;
@@ -20,7 +21,18 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IResizablePixelDisplay? Display { get; private set; }
+    public virtual IResizablePixelDisplay? Display
+    {
+        get
+        {
+            if (_implementation is IPixelDisplayProvider displayProvider)
+            {
+                return _display ??= displayProvider.CreateDisplay();
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Initializes a new instance of the Desktop class.
@@ -41,11 +53,6 @@ public class Desktop : IMeadowDevice
         };
 
         _implementation.Initialize(detectedPlatform);
-
-        if (_implementation is IPixelDisplayProvider displayProvider)
-        {
-            Display = displayProvider.CreateDisplay();
-        }
 
         _implementation.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
         _implementation.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
@@ -93,6 +100,9 @@ public class Desktop : IMeadowDevice
     /// <inheritdoc/>
     public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         => _implementation.CreateSerialMessagePort(portName, prefixDelimiter, preserveDelimiter, messageLength, baudRate, dataBits, parity, stopBits, readBufferSize);
+    /// <inheritdoc/>
+    public ISpiBus CreateSpiBus(int busNumber, Frequency speed)
+        => _implementation.CreateSpiBus(busNumber, speed);
     /// <inheritdoc/>
     public ISpiBus CreateSpiBus(IPin clock, IPin copi, IPin cipo, SpiClockConfiguration config)
         => _implementation.CreateSpiBus(clock, copi, cipo, config);

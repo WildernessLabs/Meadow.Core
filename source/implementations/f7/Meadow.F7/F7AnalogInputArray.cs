@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using System;
 using System.Runtime.InteropServices;
 using static Meadow.Core.Interop;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -95,7 +96,7 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 
         if (result < 0)
         {
-            Resolver.Log.Info($"read returned {result}");
+            Resolver.Log.Info($"read returned {result}", MessageGroup.Core);
         }
     }
 

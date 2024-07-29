@@ -1,6 +1,7 @@
 ﻿using Meadow.Units;
 using System;
 using System.IO;
+using static Meadow.Logging.Logger;
 
 namespace Meadow;
 
@@ -40,11 +41,11 @@ public class F7ExternalStorage : IExternalStorage
                 return true;
             }
 
-            Resolver.Log.Debug($"SD Card Mount returned {result}");
+            Resolver.Log.Debug($"SD Card Mount returned {result}", MessageGroup.Core);
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"Exception mounting SD card: {ex.Message}");
+            Resolver.Log.Error($"Exception mounting SD card: {ex.Message}", MessageGroup.Core);
         }
         store = default!;
         return false;
@@ -56,7 +57,7 @@ public class F7ExternalStorage : IExternalStorage
         var result = Core.Interop.Nuttx.umount2(_directory.FullName, 0);
         if (result != 0)
         {
-            Resolver.Log.Warn($"SD Card unmount failure: {result}");
+            Resolver.Log.Warn($"SD Card unmount failure: {result}", MessageGroup.Core);
         }
     }
 }

@@ -12,12 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using SRI = System.Runtime.InteropServices;
@@ -55,7 +55,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private Thread? _stateMachineThread;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly CloudDataQueue _dataQueue;
-    private Timer _storeAndForwardTimer;
+    private AutoResetEvent _dataReadyEvent = new(false);
 
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
@@ -67,7 +67,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         Settings = settings;
         _dataQueue = new CloudDataQueue();
-        _storeAndForwardTimer = new Timer(DataForwarderProc, null, TimeSpan.FromMilliseconds(-1), TimeSpan.FromMilliseconds(-1));
     }
 
     /// <inheritdoc/>
@@ -85,45 +84,49 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// <inheritdoc/>
     public int QueueCount { get => _dataQueue.Count; }
 
-    private async void DataForwarderProc(object _)
+    private async Task DataForwarderProc()
     {
-        if (_dataQueue.Count == 0) { return; }
-
-        try
+        while (true)
         {
-            if (ConnectionState == CloudConnectionState.Connected)
-            {
-                // get the head item
-                var info = _dataQueue.Peek();
-                if (info != null)
-                {
-                    // failed to send, leave the item in the queue
-                    if (await Send(info.Item, info.EndPoint))
-                    {
+            _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
 
-                        // item was sent, remove from the queue and toss away
-                        _dataQueue.Dequeue();
+            while (_dataQueue.Count > 0)
+            {
+                try
+                {
+                    if (ConnectionState == CloudConnectionState.Connected)
+                    {
+                        // get the head item
+                        var info = _dataQueue.Peek();
+                        if (info != null)
+                        {
+                            // failed to send, leave the item in the queue
+                            if (await Send(info.Item, info.EndPoint))
+                            {
+                                // item was sent, remove from the queue and toss away
+                                _dataQueue.Dequeue();
+                            }
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    LogAndRaiseOnErrorOccurredEvent("Unable to forward Meadow Cloud record", ex);
+                    break;
+                }
+
+                // throttle bulk sends
+                await Task.Delay(TimeSpan.FromSeconds(5));
             }
         }
-        catch (Exception ex)
-        {
-            LogAndRaiseOnErrorOccurredEvent("Unable to forward Meadow Cloud record", ex);
-        }
+    }
 
-        // schedule the next send
-        // TODO: make this configurable or more intelligent
-        TimeSpan nextSend;
-        if (_dataQueue.Count > 0 && ConnectionState == CloudConnectionState.Connected)
-        {
-            nextSend = TimeSpan.FromSeconds(1);
-        }
-        else
-        {
-            nextSend = TimeSpan.FromSeconds(60);
-        }
-        _storeAndForwardTimer.Change(nextSend, TimeSpan.FromMilliseconds(-1));
+    private void ReportFatalErrorToReliabilityService(MeadowCloudException exception)
+    {
+        Resolver
+            .Services
+            .Get<IReliabilityService>()
+            ?.OnMeadowSystemError(new MeadowCloudSystemErrorInfo(exception));
     }
 
     private void LogAndRaiseOnErrorOccurredEvent(string message, Exception? ex = null)
@@ -145,8 +148,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             }
         }
 
-        Resolver.Log.Warn(message);
-        ErrorOccurred?.Invoke(this, new MeadowCloudException(message, ex));
+        var raisedException = new MeadowCloudException(message, ex);
+
+        if (ex != null && ex.HResult == -76)
+        {
+            ReportFatalErrorToReliabilityService(raisedException);
+        }
+
+        ErrorOccurred?.Invoke(this, raisedException);
     }
 
     /// <inheritdoc/>
@@ -192,6 +201,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     public void Start()
     {
+        _ = Task.Run(DataForwarderProc);
+
         if (_stateMachineThread == null)
         {
             _stateMachineThread = new Thread(() => ConnectionStateMachine());
@@ -199,15 +210,12 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             IsEnabled = true;
         }
-
-        _storeAndForwardTimer.Change(TimeSpan.FromSeconds(30), TimeSpan.FromMilliseconds(-1));
     }
 
     /// <inheritdoc/>
     public void Stop()
     {
         _stopService = true;
-        _storeAndForwardTimer.Change(TimeSpan.FromMilliseconds(-1), TimeSpan.FromMilliseconds(-1));
         IsEnabled = false;
     }
 
@@ -457,9 +465,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         }
                     }
 
-                    // trigger a send 
-                    _storeAndForwardTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
-
                     Thread.Sleep(1000);
                     break;
             }
@@ -546,7 +551,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             try
             {
-                var response = await client.PostAsync(endpoint, content);
+                using var response = await client.PostAsync(endpoint, content);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -603,7 +608,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         _jwt = Encoding.UTF8.GetString(decryptedToken);
 
                         // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                        _jwt = Regex.Replace(_jwt, @"[^\w\.@-]", "");
+                        // DO NOT USE REGEX!  They are horrible in Mono.
+                        _jwt = SanitizeJwt(_jwt);
 
                         Resolver.Log.Debug($"auth token successfully received", "cloud");
                         return true;
@@ -621,6 +627,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 {
                     // device is likely not provisioned?
                     errorMessage = $"Meadow.Cloud service returned 'Not Found': this device has likely not been provisioned";
+                    Resolver.Log.Warn(errorMessage);
                 }
                 else if (response.StatusCode == HttpStatusCode.InternalServerError)
                 {
@@ -654,17 +661,33 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
     }
 
+    private string SanitizeJwt(string jwt)
+    {
+        // DO NOT USE REGEX!  They are horrible in Mono.  The line below is a legacy reminder
+        //_jwt = Regex.Replace(_jwt, @"[^\w\.@-]", ""); // this takes 4200 ms
+        return
+            new string(jwt.TakeWhile(c =>
+            c switch
+            {
+                >= 'A' and <= 'Z' => true,
+                >= 'a' and <= 'z' => true,
+                >= '-' and <= '9' => true,
+                '_' or '+' or '=' => true,
+                _ => false
+            }).ToArray());
+    }
+
     private bool SendCrashReports()
     {
         var result = true;
 
-        var crashReporter = Resolver.Services.Get<CrashReporter>();
-        if (crashReporter != null)
+        var reliabilityService = Resolver.Services.Get<IReliabilityService>();
+        if (reliabilityService != null)
         {
-            if (crashReporter.CrashDataAvailable)
+            if (reliabilityService.IsCrashDataAvailable)
             {
 
-                foreach (var report in crashReporter.GetCrashData())
+                foreach (var report in reliabilityService.GetCrashData())
                 {
                     try
                     {
@@ -677,7 +700,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                 }
 
-                crashReporter.ClearCrashData();
+                reliabilityService.ClearCrashData();
             }
         }
 
@@ -689,7 +712,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         // enqueue and trigger the timer - this will send any older data before this record
         _dataQueue.Enqueue(log, "/api/logs");
-        _storeAndForwardTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+        _dataReadyEvent.Set();
         return Task.CompletedTask;
     }
 
@@ -698,13 +721,18 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         // enqueue and trigger the timer - this will send any older data before this record
         _dataQueue.Enqueue(cloudEvent, "/api/events");
-        _storeAndForwardTimer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(-1));
+        _dataReadyEvent.Set();
         return Task.CompletedTask;
     }
 
     private async Task<bool> Send<T>(T item, string endpoint)
     {
         if (item == null) throw new ArgumentNullException(nameof(item));
+
+        if (!IsEnabled)
+        {
+            Resolver.Log.Warn("MeadowCloud is not enabled. Send call will not deliver data");
+        }
 
         if (ConnectionState != CloudConnectionState.Connected)
         {
@@ -731,7 +759,12 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             {
                 if (_jwt == null)
                 {
-                    await Authenticate();
+                    if (await Authenticate() == false)
+                    {
+                        Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds...");
+                        await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                        goto retry;
+                    }
                 }
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
             }
@@ -740,35 +773,42 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
+            try
             {
-                attempt++;
-                // by setting this to null and retrying, Authenticate will get called
-                ClientOptions = null;
-                _jwt = null;
-                client.Dispose();
-                client = new HttpClient();
-                goto retry;
-            }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                if (response.StatusCode == HttpStatusCode.InternalServerError)
+                if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
                 {
-                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                    attempt++;
+                    // by setting this to null and retrying, Authenticate will get called
+                    ClientOptions = null;
+                    _jwt = null;
+                    client.Dispose();
+                    client = new HttpClient();
+                    goto retry;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    if (response.StatusCode == HttpStatusCode.InternalServerError)
+                    {
+                        errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'";
+                    }
+                    else
+                    {
+                        errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                    }
+                    LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                    return false;
                 }
                 else
                 {
-                    errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
+                    Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
+                    return true;
                 }
-                LogAndRaiseOnErrorOccurredEvent(errorMessage);
-                return false;
             }
-            else
+            finally
             {
-                Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
-                return true;
+                response.Dispose();
             }
         }
         catch (Exception ex)

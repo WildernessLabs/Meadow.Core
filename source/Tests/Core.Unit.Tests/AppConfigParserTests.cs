@@ -66,5 +66,27 @@ namespace Core.Unit.Tests
 
             // no error means pass
         }
+
+        [Fact]
+        public void CustomSettings()
+        {
+            var yml = File.ReadAllText("app.config.customsettings.yaml");
+
+            var s = AppSettingsParser.Parse(yml);
+
+            Assert.Equal("Expected1", s.Settings["CustomSettings.Setting1"]);
+            Assert.Equal("Expected2", s.Settings["CustomSettings.Setting2"]);
+        }
+
+        [Fact]
+        public void CustomSettingsAfterEmptySettings()
+        {
+            var yml = File.ReadAllText("app.config.customsettingsafterempty.yaml");
+
+            var s = AppSettingsParser.Parse(yml);
+
+            Assert.Equal("Expected1", s.Settings["CustomSettings.Setting1"]);
+            Assert.Equal("Expected2", s.Settings["CustomSettings.Setting2"]);
+        }
     }
 }

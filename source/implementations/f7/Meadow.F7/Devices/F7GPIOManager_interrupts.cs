@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
+using static Meadow.Logging.Logger;
 
 namespace Meadow.Devices;
 
@@ -118,7 +119,7 @@ public partial class F7GPIOManager : IMeadowIOController
         var result = UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
         if (result != 0)
         {
-            Resolver.Log.Error($"Failed to connect wake interrupt: {UPD.GetLastError()}");
+            Resolver.Log.Error($"Failed to connect wake interrupt: {UPD.GetLastError()}", MessageGroup.Core);
         }
     }
 
@@ -262,7 +263,6 @@ public partial class F7GPIOManager : IMeadowIOController
         // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
         // the debounced state of the GPIO
         var rx_buffer = new byte[2];
-        bool lockTaken = false;
         int lockvar = 0;
 
         while (true)
@@ -289,7 +289,7 @@ public partial class F7GPIOManager : IMeadowIOController
                 bool state = rx_buffer[1] != 0;
                 var port = irq >> 4;
                 var pin = irq & 0xf;
-                IPin ipin;
+                IPin? ipin;
 
                 do
                 {
