@@ -14,7 +14,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
     private DigitalPortResult _interruptResult = new DigitalPortResult();
     private DigitalState _newState = new DigitalState(false, DateTime.MinValue);
     private DigitalState _oldState = new DigitalState(false, DateTime.MinValue);
-    private InterruptMode _interruptMode;
+    private InterruptMode? _interruptMode;
 
     /// <inheritdoc/>
     protected IMeadowIOController IOController { get; set; }
@@ -63,10 +63,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         {
             // make sure the pin is configured as a digital input with the proper state
             ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
-            if (interruptMode != InterruptMode.None)
-            {
-                IOController.WireInterrupt(pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
-            }
+            InterruptMode = interruptMode;
         }
         else
         {
@@ -132,10 +129,14 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
     /// <inheritdoc/>
     public override InterruptMode InterruptMode
     {
-        get => _interruptMode;
+        get => _interruptMode ?? InterruptMode.None;
         set
         {
-            IOController.ConfigureInput(this.Pin, Resistor, value, DebounceDuration, GlitchDuration);
+            // don't call WireInterrupt if it's no interrupt and we're coming from the ctor
+            if (_interruptMode != null || value != InterruptMode.None)
+            {
+                IOController.WireInterrupt(Pin, value, Resistor, DebounceDuration, GlitchDuration);
+            }
             _interruptMode = value;
         }
     }
