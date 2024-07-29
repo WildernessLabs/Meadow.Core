@@ -14,6 +14,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
     private DigitalPortResult _interruptResult = new DigitalPortResult();
     private DigitalState _newState = new DigitalState(false, DateTime.MinValue);
     private DigitalState _oldState = new DigitalState(false, DateTime.MinValue);
+    private InterruptMode? _interruptMode;
 
     /// <inheritdoc/>
     protected IMeadowIOController IOController { get; set; }
@@ -38,7 +39,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         ResistorMode resistorMode,
         TimeSpan debounceDuration,
         TimeSpan glitchDuration
-        ) : base(pin, channel, interruptMode)
+        ) : base(pin, channel)
     {
         // DEVELOPER NOTE:
         // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
@@ -54,6 +55,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         this._resistorMode = resistorMode;
         _debounceDuration = debounceDuration;
         _glitchDuration = glitchDuration;
+        this.InterruptMode = interruptMode;
 
         // attempt to reserve
         var success = this.IOController.DeviceChannelManager.ReservePin(pin, ChannelConfigurationType.DigitalInput);
@@ -61,10 +63,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         {
             // make sure the pin is configured as a digital input with the proper state
             ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
-            if (interruptMode != InterruptMode.None)
-            {
-                IOController.WireInterrupt(pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
-            }
+            InterruptMode = interruptMode;
         }
         else
         {
@@ -124,6 +123,21 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         {
             IOController.SetResistorMode(this.Pin, value);
             _resistorMode = value;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override InterruptMode InterruptMode
+    {
+        get => _interruptMode ?? InterruptMode.None;
+        set
+        {
+            // don't call WireInterrupt if it's no interrupt and we're coming from the ctor
+            if (_interruptMode != null || value != InterruptMode.None)
+            {
+                IOController.WireInterrupt(Pin, value, Resistor, DebounceDuration, GlitchDuration);
+            }
+            _interruptMode = value;
         }
     }
 
