@@ -498,6 +498,7 @@ public static partial class MeadowOS
                     switch (devicetype.DeviceType.FullName)
                     {
                         case "Meadow.BeagleBoneBlack":
+                        case "Meadow.OrangePi":
                         case "Meadow.RaspberryPi":
                         case "Meadow.JetsonNano":
                         case "Meadow.JetsonXavierAgx":
