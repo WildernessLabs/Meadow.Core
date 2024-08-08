@@ -150,11 +150,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         var raisedException = new MeadowCloudException(message, ex);
 
-        if (ex != null && ex.HResult == -76)
-        {
-            ReportFatalErrorToReliabilityService(raisedException);
-        }
-
         ErrorOccurred?.Invoke(this, raisedException);
     }
 
