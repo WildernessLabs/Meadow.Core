@@ -117,6 +117,9 @@ public class LinuxPlatformOS : IPlatformOS
         }
     }
 
+    /// <inheritdoc/>
+    public string[] NtpServers => new string[] { "pool.ntp.org" };
+
     /// <summary>
     /// Gets the name of all available serial ports on the platform
     /// </summary>
@@ -151,6 +154,17 @@ public class LinuxPlatformOS : IPlatformOS
     /// <param name="dateTime"></param>
     public void SetClock(DateTime dateTime)
     {
+        if (dateTime.Kind != DateTimeKind.Utc)
+        {
+            TimeZoneInfo localZone = TimeZoneInfo.Local;
+            dateTime = dateTime.AddMinutes(localZone.BaseUtcOffset.TotalMinutes);
+
+            if (localZone.IsDaylightSavingTime(dateTime))
+            {
+                dateTime = dateTime.AddHours(1);
+            }
+        }
+
         var ts = Interop.Timespec.From(dateTime);
         var result = Interop.clock_settime(Interop.Clock.REALTIME, ref ts);
 
@@ -299,9 +313,6 @@ public class LinuxPlatformOS : IPlatformOS
 
     /// <inheritdoc/>
     public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
-
-    /// <inheritdoc/>
-    public string[] NtpServers => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public bool RebootOnUnhandledException => false;

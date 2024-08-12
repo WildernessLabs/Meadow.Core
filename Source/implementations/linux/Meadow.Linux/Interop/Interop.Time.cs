@@ -7,6 +7,19 @@ namespace Meadow
     [SuppressUnmanagedCodeSecurity]
     internal static partial class Interop
     {
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern void tzset();
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern ref Rtc_time localtime(ref long time_t);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern IntPtr localtime_r(ref long time_t, ref Tm tm);
+
+        [DllImport(LIBC, SetLastError = true)]
+        public static extern IntPtr gmtime_r(ref long time_t, ref Tm tm);
+
         [DllImport(LIBC, SetLastError = true)]
         public static extern int clock_settime(Clock clock, ref Timespec timespec);
 
@@ -24,6 +37,21 @@ namespace Meadow
             //#define CLOCK_THREAD_CPUTIME_ID		4
             //#define CLOCK_UPTIME			5
             //#define CLOCK_BOOTTIME			6
+        }
+
+        public struct Tm
+        {
+            public int tm_sec;
+            public int tm_min;
+            public int tm_hour;
+            public int tm_mday;
+            public int tm_mon;
+            public int tm_year;
+            public int tm_wday;
+            public int tm_yday;
+            public int tm_isdst;
+            //            public long tm_gmtoff;           /* Seconds east of UTC */
+            //            public string tm_zone;      /* Timezone abbreviation */
         }
 
         public struct Rtc_time
