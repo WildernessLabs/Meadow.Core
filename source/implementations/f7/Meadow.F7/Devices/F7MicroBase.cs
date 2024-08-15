@@ -161,7 +161,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                             }
                             else
                             {
-                                wifiAdapter.ConnectToDefaultAccessPoint(TimeSpan.FromSeconds(60), CancellationToken.None).Wait();
+                                _ = wifiAdapter.ConnectToDefaultAccessPoint(TimeSpan.FromSeconds(60), CancellationToken.None);
                             }
                         }
                     }
@@ -178,13 +178,10 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
                 }
                 catch (Exception e)
                 {
-                    Resolver.Log.Error($"Unable to create ESP32 coprocessor: {e.Message}", MessageGroup.Core);
+                    Resolver.Log.Error($"Error initializing ESP32 coprocessor: {e.Message}", MessageGroup.Core);
                     return false;
                 }
-                finally
-                {
 
-                }
                 return true;
             }
             else

@@ -14,6 +14,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
     private DigitalPortResult _interruptResult = new DigitalPortResult();
     private DigitalState _newState = new DigitalState(false, DateTime.MinValue);
     private DigitalState _oldState = new DigitalState(false, DateTime.MinValue);
+    private InterruptMode? _interruptMode;
 
     /// <inheritdoc/>
     protected IMeadowIOController IOController { get; set; }
@@ -38,7 +39,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         ResistorMode resistorMode,
         TimeSpan debounceDuration,
         TimeSpan glitchDuration
-        ) : base(pin, channel, interruptMode)
+        ) : base(pin, channel)
     {
         // DEVELOPER NOTE:
         // Debounce recognizes the first state transition and then ignores anything after that for a period of time.
@@ -61,10 +62,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         {
             // make sure the pin is configured as a digital input with the proper state
             ioController.ConfigureInput(pin, resistorMode, interruptMode, debounceDuration, glitchDuration);
-            if (interruptMode != InterruptMode.None)
-            {
-                IOController.WireInterrupt(pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
-            }
+            InterruptMode = interruptMode;
         }
         else
         {
@@ -127,6 +125,29 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
         }
     }
 
+    /// <inheritdoc/>
+    public override InterruptMode InterruptMode
+    {
+        get => _interruptMode ?? InterruptMode.None;
+        set
+        {
+            if (InterruptMode == value) { return; }
+
+            if (InterruptMode != InterruptMode.None)
+            {
+                // if we're already set up for an interrupt, disable all interrupts and reconnect
+                IOController.WireInterrupt(Pin, InterruptMode.None, Resistor, DebounceDuration, GlitchDuration);
+            }
+
+            // don't call WireInterrupt if it's no interrupt and we're coming from the ctor
+            if (_interruptMode != null || value != InterruptMode.None)
+            {
+                IOController.WireInterrupt(Pin, value, Resistor, DebounceDuration, GlitchDuration);
+            }
+            _interruptMode = value;
+        }
+    }
+
     private void OnInterrupt(IPin pin, bool state)
     {
         if (pin == this.Pin)
@@ -135,7 +156,7 @@ public class DigitalInterruptPort : DigitalInterruptPortBase
             {
                 // this is all to prevent new-ing up (and thereby preventing GC stuff)
                 _oldState.Time = LastEventTime; // note: doing this for latency reasons. kind of. sort of. bad time good time. all time.
-                _newState.Time = this.LastEventTime = DateTime.Now;
+                _newState.Time = LastEventTime = DateTime.UtcNow;
                 _oldState.State = !state;
                 _newState.State = state;
                 _interruptResult.Old = (LastEventTime == DateTime.MinValue) ? null : _oldState;

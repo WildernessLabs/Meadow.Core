@@ -5,9 +5,9 @@ using System.Collections.Generic;
 namespace Meadow.Pinouts;
 
 /// <summary>
-/// Defines the pinout configuration for Windows Subsystem for Linux (WSL)
+/// Defines the an empty pinout configuration
 /// </summary>
-public class WSL2 : IPinDefinitions
+public class EmptyPinout : IPinDefinitions
 {
     /// <inheritdoc/>
     public IEnumerator<IPin> GetEnumerator() => AllPins.GetEnumerator();
@@ -19,7 +19,7 @@ public class WSL2 : IPinDefinitions
     /// <inheritdoc/>
     public IPinController? Controller { get; set; }
 
-    internal WSL2()
+    internal EmptyPinout()
     {
     }
 }

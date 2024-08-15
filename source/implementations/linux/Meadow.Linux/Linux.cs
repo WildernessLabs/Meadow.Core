@@ -5,13 +5,14 @@ using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Meadow;
 
 /// <summary>
 /// Represents a Linux-based Meadow device.
 /// </summary>
-public class Linux : IMeadowDevice
+public abstract class Linux : IMeadowDevice
 #if NET7_0
     , IPixelDisplayProvider
 #endif
@@ -87,7 +88,7 @@ public class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public II2cBus CreateI2cBus(int busNumber = 1)
+    public virtual II2cBus CreateI2cBus(int busNumber = 1)
     {
         return CreateI2cBus(busNumber, II2cController.DefaultI2cBusSpeed);
     }
@@ -174,7 +175,7 @@ public class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
+    public virtual ISpiBus CreateSpiBus(int busNumber, Units.Frequency speed)
     {
         return new SpiBus(busNumber, 0, SpiBus.SpiMode.Mode0, speed);
     }
@@ -194,17 +195,52 @@ public class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration.Mode mode, Units.Frequency speed)
     {
-        return new SpiBus(0, 0, (SpiBus.SpiMode)mode, speed);
+        // verify pins are SPI capable
+        var clockChannel = clock.SupportedChannels
+            ?.OfType<ISpiChannelInfo>()
+            .Where(c => c.LineTypes == SpiLineType.Clock)
+            .FirstOrDefault();
+        if (clockChannel == null)
+        {
+            throw new ArgumentException($"Pin {clock.Name} does not support SPI Clock");
+        }
+
+        var mosiChannel = mosi.SupportedChannels
+            ?.OfType<ISpiChannelInfo>()
+            .Where(c => c.LineTypes == SpiLineType.MOSI)
+            .FirstOrDefault();
+        if (mosiChannel == null)
+        {
+            throw new ArgumentException($"Pin {mosi.Name} does not support SPI MOSI");
+        }
+
+        var misoChannel = miso.SupportedChannels
+            ?.OfType<ISpiChannelInfo>()
+            .Where(c => c.LineTypes == SpiLineType.MISO)
+            .FirstOrDefault();
+        if (misoChannel == null)
+        {
+            throw new ArgumentException($"Pin {miso.Name} does not support SPI MISO");
+        }
+
+        if ((clockChannel.BusNumber != mosiChannel.BusNumber)
+            || (clockChannel.BusNumber != misoChannel.BusNumber)
+            || (mosiChannel.BusNumber != misoChannel.BusNumber))
+        {
+            throw new ArgumentException($"Pins {clock.Name}, {mosi.Name} and {miso.Name} are on different SPI buses");
+        }
+
+        return CreateSpiBus(clockChannel.BusNumber, speed);
     }
 
     /// <inheritdoc/>
     public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, float voltageReference = 3.3F)
     {
-        throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
+        return CreateAnalogInputPort(pin, sampleCount, sampleInterval, voltageReference.Volts());
     }
 
     /// <inheritdoc/>
-    public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public virtual IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
     }
@@ -218,7 +254,33 @@ public class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
     {
-        throw new PlatformNotSupportedException("This platform has no II2CBusses.  Use an IO Extender.");
+        // verify pins are I2C capable
+        var clockChannel = clock.SupportedChannels
+            ?.OfType<II2cChannelInfo>()
+            .Where(c => c.ChannelFunction == I2cChannelFunctionType.Clock)
+            .FirstOrDefault();
+
+        if (clockChannel == null)
+        {
+            throw new ArgumentException($"Pin {clock.Name} does not support I2C Clock");
+        }
+
+        var dataChannel = data.SupportedChannels
+            ?.OfType<II2cChannelInfo>()
+            .Where(c => c.ChannelFunction == I2cChannelFunctionType.Data)
+            .FirstOrDefault();
+
+        if (dataChannel == null)
+        {
+            throw new ArgumentException($"Pin {data.Name} does not support I2C Data");
+        }
+
+        if (clockChannel.BusNumber != dataChannel.BusNumber)
+        {
+            throw new ArgumentException($"Pins {data.Name} and {clock.Name} are on different I2C buses");
+        }
+
+        return CreateI2cBus(clockChannel.BusNumber, busSpeed);
     }
 
     /// <inheritdoc/>

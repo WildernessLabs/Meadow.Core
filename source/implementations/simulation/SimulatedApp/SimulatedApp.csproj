@@ -12,6 +12,6 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow.Simulation" Version="1.12.8" />
+    <PackageReference Include="Meadow.Simulation" Version="1.13.0" />
   </ItemGroup>
 </Project>
