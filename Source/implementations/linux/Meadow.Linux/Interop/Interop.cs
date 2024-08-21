@@ -63,6 +63,7 @@ namespace Meadow
             NoPermissions = 1,
             NoSuchFile = 2,
             BadFileNumber = 9,
+            DeviceBusy = 16
         }
     }
 }

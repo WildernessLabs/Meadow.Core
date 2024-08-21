@@ -63,7 +63,7 @@ internal class LineInfo
         }
         else
         {
-            result = gpiod_line_request_output(Handle, MeadowConsumer);
+            result = gpiod_line_request_output(Handle, MeadowConsumer, 0);
         }
 
         if (result == -1)
@@ -89,8 +89,17 @@ internal class LineInfo
 
         if (result == -1)
         {
+            var err = Marshal.GetLastWin32Error();
             throw new NativeException("Failed to request line", Marshal.GetLastWin32Error());
         }
+    }
+
+    public bool RequestOutput(line_request_flags flags, bool initialState)
+    {
+        // TODO: check for free?
+        var result = gpiod_line_request_output_flags(Handle, MeadowConsumer, flags, initialState ? 1 : 0);
+
+        return result != -1;
     }
 
     public void RequestInterrupts(InterruptMode mode, line_request_flags flags)
