@@ -13,6 +13,7 @@ public class SysFsDigitalInterruptPort : DigitalInterruptPortBase, IDigitalInput
     private SysFsGpioDriver Driver { get; }
     private ResistorMode _resistorMode = ResistorMode.Disabled;
     private int? _lastInterrupt = null;
+    private InterruptMode _interruptMode;
 
     /// <inheritdoc/>
     public override bool State => Driver.GetValue(Gpio);
@@ -27,15 +28,9 @@ public class SysFsDigitalInterruptPort : DigitalInterruptPortBase, IDigitalInput
         ResistorMode resistorMode,
         TimeSpan debounceDuration,
         TimeSpan glitchDuration)
-        : base(pin, channel, interruptMode)
+        : base(pin, channel)
     {
-        switch (resistorMode)
-        {
-            case ResistorMode.InternalPullUp:
-            case ResistorMode.InternalPullDown:
-                throw new NotSupportedException("Internal Resistor Modes are not supported on the current OS");
-        }
-
+        Resistor = resistorMode;
         DebounceDuration = debounceDuration;
         GlitchDuration = glitchDuration;
         Driver = driver;
@@ -56,17 +51,26 @@ public class SysFsDigitalInterruptPort : DigitalInterruptPortBase, IDigitalInput
         Driver.Export(Gpio);
         Thread.Sleep(100); // this seems to be required to prevent an error 13
         Driver.SetDirection(Gpio, SysFsGpioDriver.GpioDirection.Input);
-        switch (interruptMode)
-        {
-            case InterruptMode.None:
-                // nothing to do
-                break;
-            default:
-                Driver.HookInterrupt(Gpio, interruptMode, InterruptCallback);
-                break;
-        }
-
         InterruptMode = interruptMode;
+    }
+
+    /// <inheritdoc/>
+    public override InterruptMode InterruptMode
+    {
+        get => _interruptMode;
+        set
+        {
+            _interruptMode = value;
+            switch (_interruptMode)
+            {
+                case InterruptMode.None:
+                    // nothing to do
+                    break;
+                default:
+                    Driver.HookInterrupt(Gpio, _interruptMode, InterruptCallback);
+                    break;
+            }
+        }
     }
 
     private void InterruptCallback()

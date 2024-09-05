@@ -253,8 +253,11 @@ namespace Meadow
              */
             //int gpiod_line_request_output(struct gpiod_line *line, const char *consumer, int default_val) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
-            public static extern int gpiod_line_request_output(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+            public static extern int gpiod_line_request_output(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, int default_val);
 
+            //int gpiod_line_request_output(struct gpiod_line *line, const char *consumer, int default_val) GPIOD_API;
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_output_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags, int default_val);
 
             /**
              * @brief Read current value of a single GPIO line.

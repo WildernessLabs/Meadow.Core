@@ -22,7 +22,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow" Version="1.12.8" />
+    <PackageReference Include="Meadow" Version="1.14.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="app.config.customsettingsafterempty.yaml">

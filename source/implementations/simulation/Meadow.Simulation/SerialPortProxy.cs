@@ -6,8 +6,8 @@ namespace Meadow.Simulation;
 
 public class SerialPortProxy : ISerialPort
 {
-    public event Hardware.SerialDataReceivedEventHandler DataReceived;
-    public event EventHandler BufferOverrun;
+    public event Hardware.SerialDataReceivedEventHandler? DataReceived;
+    public event EventHandler? BufferOverrun;
 
     private SerialPort _port;
 
