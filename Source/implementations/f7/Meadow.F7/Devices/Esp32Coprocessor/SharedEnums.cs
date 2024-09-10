@@ -190,9 +190,22 @@ public enum StatusCodes
     /// </summary>
     InvalidCellConfigurationFile = 45,
     /// <summary>
-    /// Network deadlock detected.
+    /// Possible network deadlock detected.
     /// </summary>
     NetworkDeadlock = 46,
+    /// <summary>
+    /// Possible network deadlock detected on close().
+    /// </summary>
+    NetworkCloseDeadlock = 47,
+    /// <summary>
+    /// Possible network deadlock detected on poll().
+    /// </summary>
+    NetworkPollDeadlock = 48,
+    /// <summary>
+    /// Possible network deadlock detected on socket().
+    /// </summary>
+    NetworkSocketDeadlock = 49,
+
     /// <summary>
     /// ESP reset for unknown reason
     /// </summary>
