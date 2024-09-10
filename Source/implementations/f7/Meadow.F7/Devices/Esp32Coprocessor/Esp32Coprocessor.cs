@@ -106,7 +106,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <returns>StatusCodes enum indicating if the command was successful or if an error occurred.</returns>
     protected StatusCodes SendBluetoothCommand(BluetoothFunction function, bool block, byte[]? encodedRequest, byte[]? encodedResult)
     {
-        return (SendCommand((byte)Esp32Interfaces.BlueTooth, (uint)function, block, encodedRequest, encodedResult));
+        return SendCommand((byte)Esp32Interfaces.BlueTooth, (uint)function, block, encodedRequest, encodedResult);
     }
 
 
@@ -182,7 +182,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                 resultGcHandle.Free();
             }
         }
-        return (result);
+        return result;
     }
 
     /// <summary>
@@ -229,7 +229,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                 resultGcHandle.Free();
             }
         }
-        return (result);
+        return result;
     }
 
     /// <summary>
@@ -289,7 +289,8 @@ public partial class Esp32Coprocessor : ICoprocessor
                                 SystemMessageReceived?.Invoke(this, ((SystemFunction)eventData.Function, (StatusCodes)eventData.StatusCode));
                                 break;
                             default:
-                                throw new NotImplementedException($"Events not implemented for interface {eventData.Interface}");
+                                Resolver.Log.Warn($"Received an ESP32 event for interface {eventData.Interface}.  Ignored");
+                                break;
                         }
                     }).RethrowUnhandledExceptions();
                 }
@@ -325,6 +326,6 @@ public partial class Esp32Coprocessor : ICoprocessor
             GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
             voltage = response.Level / 1000f;
         }
-        return (voltage);
+        return voltage;
     }
 }
