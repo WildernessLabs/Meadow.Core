@@ -229,33 +229,37 @@ internal class MeadowCloudUpdateService : IUpdateService
             {
                 // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
                 using (var httpClient = new HttpClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, destination))
                 {
                     if (_connectionService.Settings.UseAuthentication)
                     {
-                        httpClient.DefaultRequestHeaders.Authorization = _connectionService.CreateAuthenticationHeaderValue();
+                        request.Headers.Authorization = _connectionService.CreateAuthenticationHeaderValue();
                     }
 
                     // Configure the HTTP range header to indicate resumption of partial download, starting from 
                     // the 'totalBytesDownloaded' byte position and extending to the end of the content.
-                    httpClient.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
+                    request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
 
-                    using (var stream = await httpClient.GetStreamAsync(destination))
+                    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                    var contentLength = response.Content.Headers.ContentLength;
+                    Resolver.Log.Info($"Requested file has a Content-Length of {contentLength:N0} bytes");
+
+                    using (var stream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = Store.GetUpdateFileStream(message.ID))
                     {
-                        using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                        byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
+                        int bytesRead;
+
+                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
-                            byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
-                            int bytesRead;
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesDownloaded += bytesRead;
 
-                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                            {
-                                await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                totalBytesDownloaded += bytesRead;
+                            message.DownloadProgress = totalBytesDownloaded;
 
-                                message.DownloadProgress = totalBytesDownloaded;
-
-                                RetrieveProgress?.Invoke(this, message);
-                                Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
-                            }
+                            RetrieveProgress?.Invoke(this, message);
+                            Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
                         }
                     }
                 }
