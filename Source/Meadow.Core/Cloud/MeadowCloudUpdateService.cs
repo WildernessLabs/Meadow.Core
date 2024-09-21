@@ -229,37 +229,44 @@ internal class MeadowCloudUpdateService : IUpdateService
             {
                 // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
                 using (var httpClient = new HttpClient())
-                using (var request = new HttpRequestMessage(HttpMethod.Get, destination))
                 {
-                    if (_connectionService.Settings.UseAuthentication)
+                    using (var request = new HttpRequestMessage(HttpMethod.Get, destination))
                     {
-                        request.Headers.Authorization = _connectionService.CreateAuthenticationHeaderValue();
-                    }
-
-                    // Configure the HTTP range header to indicate resumption of partial download, starting from 
-                    // the 'totalBytesDownloaded' byte position and extending to the end of the content.
-                    request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
-
-                    var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
-                    var contentLength = response.Content.Headers.ContentLength;
-                    Resolver.Log.Info($"Requested file has a Content-Length of {contentLength:N0} bytes");
-
-                    using (var stream = await response.Content.ReadAsStreamAsync())
-                    using (var fileStream = Store.GetUpdateFileStream(message.ID))
-                    {
-                        byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
-                        int bytesRead;
-
-                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        if (_connectionService.Settings.UseAuthentication)
                         {
-                            await fileStream.WriteAsync(buffer, 0, bytesRead);
-                            totalBytesDownloaded += bytesRead;
+                            request.Headers.Authorization = _connectionService.CreateAuthenticationHeaderValue();
+                        }
 
-                            message.DownloadProgress = totalBytesDownloaded;
+                        // Configure the HTTP range header to indicate resumption of partial download, starting from 
+                        // the 'totalBytesDownloaded' byte position and extending to the end of the content.
+                        request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
 
-                            RetrieveProgress?.Invoke(this, message);
-                            Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+                        var contentLength = response.Content.Headers.ContentLength;
+                        var lengthMessage = contentLength.HasValue 
+                            ? contentLength.Value.ToString("N0") + " bytes" 
+                            : "Unknown size";
+                        Resolver.Log.Trace($"Starting download. File size: {lengthMessage}.");
+
+                        using (var stream = await response.Content.ReadAsStreamAsync()) 
+                        {
+                            using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                            {
+                                byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
+                                int bytesRead;
+
+                                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                    totalBytesDownloaded += bytesRead;
+
+                                    message.DownloadProgress = totalBytesDownloaded;
+
+                                    RetrieveProgress?.Invoke(this, message);
+                                    Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                                }
+                            }
                         }
                     }
                 }
