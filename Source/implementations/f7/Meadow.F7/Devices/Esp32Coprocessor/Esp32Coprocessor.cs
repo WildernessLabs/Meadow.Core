@@ -328,4 +328,25 @@ public partial class Esp32Coprocessor : ICoprocessor
         }
         return voltage;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public void SendIncommingEvent(byte destination , uint function)
+    {
+        IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/IncomingEvents"), Nuttx.QueueOpenFlag.ReadWrite);
+
+        EventData eventData = new EventData();
+        eventData.Interface = destination;
+        eventData.Function = function;
+        eventData.MessageId = 0;
+
+        byte[] txBuffer = Encoders.EncodeEventData(eventData);
+        int priority = 0;
+        Resolver.Log.Trace($"Buffer Len = {txBuffer.Length}.");
+        int result = Interop.Nuttx.mq_send(queue, txBuffer, txBuffer.Length, ref priority);
+        
+
+        Interop.Nuttx.mq_close(queue);
+    }
 }

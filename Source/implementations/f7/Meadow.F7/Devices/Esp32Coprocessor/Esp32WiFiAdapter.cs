@@ -777,13 +777,13 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
         }
     }
 
-    private enum NetworkState
-    {
-        Unknown,
-        Disconnected,
-        Connecting,
-        Connected,
-        Disconnecting,
-        Error
-    }
+    // private enum NetworkState
+    // {
+    //     Unknown,
+    //     Disconnected,
+    //     Connecting,
+    //     Connected,
+    //     Disconnecting,
+    //     Error
+    // }
 }

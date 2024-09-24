@@ -234,6 +234,10 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// Reason element.
         /// </summary>
         public UInt32 Reason;
+        /// <summary>
+        /// Dns element.
+        /// </summary>
+        public UInt32 Dns;
     };
 
 

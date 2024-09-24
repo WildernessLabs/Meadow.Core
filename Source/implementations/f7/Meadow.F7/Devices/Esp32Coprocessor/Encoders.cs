@@ -721,6 +721,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             connectEventData.AuthenticationMode = buffer[offset];
             offset += 1;
             connectEventData.Reason = ExtractUInt32(buffer, offset);
+            offset += 4;
+            connectEventData.Dns = ExtractUInt32(buffer, offset);
             return connectEventData;
         }
 

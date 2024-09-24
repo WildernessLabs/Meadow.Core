@@ -3,6 +3,9 @@ using Meadow.Hardware;
 using System.Net;
 using System.Net.NetworkInformation;
 using static Meadow.Logging.Logger;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Devices;
 
@@ -13,8 +16,7 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
 {
 
     private readonly Esp32Coprocessor _esp32;
-    private bool _isConnected = false;
-
+    private NetworkState _state;
 
     /// <inheritdoc/>
     public override string Name => "Ethernet";
@@ -31,6 +33,30 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
         {
             InvokeEvent(e.fn, e.status, e.data);
         };
+        _state = NetworkState.Unknown;
+        EthernetStartup();
+    }
+
+    private Task EthernetStartup()
+    {
+        return Task.Run(() =>
+        {
+            //((byte)Esp32Interfaces.WiredEthernet, (UInt32)EthernetFunction.StartEthernetInterface, false, null);
+            //Resolver.Log.Info($"Sending command result = {result}");
+            _esp32.SendIncommingEvent((byte)Esp32Interfaces.WiredEthernet, (UInt32)EthernetFunction.StartEthernetInterface);
+
+            var timeout = 0;
+            while(_state == NetworkState.Unknown)
+            {
+                Thread.Sleep(500);
+                timeout += 500;
+                if (timeout > TimeSpan.FromSeconds(10).TotalMilliseconds)
+                {
+                    // throw new TimeoutException();
+                    Resolver.Log.Info("TimeoutException");
+                }
+            }
+        });
     }
 
     /// <summary>
@@ -60,13 +86,13 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
                 var args = new EthernetNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
 
                 this.Refresh();
-                _isConnected = true;
+               _state = NetworkState.Connected;
 
                 RaiseNetworkConnected(args);
 
                 break;
             case EthernetFunction.NetworkDisconnectedEvent:
-                _isConnected = false;
+                _state = NetworkState.Connected;
                 RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
                 break;
             case EthernetFunction.NtpUpdateEvent:
@@ -81,5 +107,5 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     /// <summary>
     /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
     /// </summary>
-    public override bool IsConnected => _isConnected;
+    public override bool IsConnected { get => _state == NetworkState.Connected; }
 }

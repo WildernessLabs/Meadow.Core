@@ -594,6 +594,10 @@ public enum CellFunction
 public enum EthernetFunction
 {
     /// <summary>
+    /// EthernetFunction - StartEthernetInterface
+    /// </summary>
+    StartEthernetInterface = 0,
+    /// <summary>
     /// EthernetFunction - NetworkConnectedEvent
     /// </summary>
     NetworkConnectedEvent = 36,
@@ -1610,4 +1614,35 @@ public enum Esp32ResetCodes
     /// Esp32ResetCodes - SDIO
     /// </summary>
     SDIO = 10
+};
+
+/// <summary>
+/// Network States.
+/// </summary>
+public enum NetworkState
+{
+    /// <summary>
+    /// NetworkState - Unknown
+    /// </summary>
+    Unknown,
+    /// <summary>
+    /// NetworkState - Disconnected
+    /// </summary>
+    Disconnected,
+    /// <summary>
+    /// NetworkState - Connecting
+    /// </summary>
+    Connecting,
+    /// <summary>
+    /// NetworkState - Connected
+    /// </summary>
+    Connected,
+    /// <summary>
+    /// NetworkState - Disconnecting
+    /// </summary>
+    Disconnecting,
+    /// <summary>
+    /// NetworkState - Error
+    /// </summary>
+    Error
 };
