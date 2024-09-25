@@ -202,6 +202,7 @@ internal class MeadowCloudUpdateService : IUpdateService
         if (!string.IsNullOrEmpty(message.OsVersion)
             && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
         {
+            Resolver.Log.Trace($"This OTA requires an OS update.");
             destination = message.MpakWithOsDownloadUrl;
         }
 
@@ -241,13 +242,17 @@ internal class MeadowCloudUpdateService : IUpdateService
                         // the 'totalBytesDownloaded' byte position and extending to the end of the content.
                         request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
 
+                        // Get the actual update file size, which might be larger than the expected
+                        // if this OTA requires an OS update
                         var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-
                         var contentLength = response.Content.Headers.ContentLength;
-                        var lengthMessage = contentLength.HasValue 
-                            ? contentLength.Value.ToString("N0") + " bytes" 
-                            : "Unknown size";
-                        Resolver.Log.Trace($"Starting download. File size: {lengthMessage}.");
+                        if (contentLength.HasValue && retryCount == 0)
+                        {
+                            // Content-Length indicates the remaining bytes to download, as the Range header may change after retries.
+                            // Then, to determine the total file size, the Content-Length from the first download attempt is used.
+                            message.FileSize = contentLength.Value;
+                            Resolver.Log.Trace($"Starting download... File size: {message.FileSize.ToString("N0")} bytes.");
+                        }
 
                         using (var stream = await response.Content.ReadAsStreamAsync()) 
                         {
