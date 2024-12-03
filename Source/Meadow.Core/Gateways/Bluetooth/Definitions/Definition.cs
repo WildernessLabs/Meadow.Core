@@ -13,7 +13,7 @@ public class Definition : IDefinition
     /// <summary>
     /// Gets the company ID.
     /// </summary>
-    public short ?CompanyId { get; }
+    public short? CompanyId { get; }
 
     /// <summary>
     /// Gets the collection of services associated with this device definition.
