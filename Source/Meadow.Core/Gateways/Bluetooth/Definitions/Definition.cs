@@ -11,11 +11,6 @@ public class Definition : IDefinition
     public string DeviceName { get; }
 
     /// <summary>
-    /// Gets the company ID.
-    /// </summary>
-    public short? CompanyId { get; }
-
-    /// <summary>
     /// Gets the collection of services associated with this device definition.
     /// </summary>
     public ServiceCollection Services { get; }
@@ -28,21 +23,6 @@ public class Definition : IDefinition
     public Definition(string deviceName, params IService[] services)
     {
         DeviceName = deviceName;
-        CompanyId = null;
-        Services = new ServiceCollection();
-        Services.AddRange(services);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Definition"/> class with the specified device name and services.
-    /// </summary>
-    /// <param name="companyId">The company ID (assigned number).</param>
-    /// <param name="deviceName">The name of the device.</param>
-    /// <param name="services">The services associated with the device.</param>
-    public Definition(short companyId, string deviceName, params IService[] services)
-    {
-        DeviceName = deviceName;
-        CompanyId = companyId;
         Services = new ServiceCollection();
         Services.AddRange(services);
     }
@@ -57,11 +37,6 @@ public class Definition : IDefinition
         var json = $@"{{
                         ""deviceName"":""{DeviceName}""
                     ";
-
-        if (CompanyId != null)
-        {
-            json += $@", ""companyIdentifier"":{CompanyId}";
-        }
 
         if (Services != null && Services.Count > 0)
         {
