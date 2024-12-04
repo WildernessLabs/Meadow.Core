@@ -13,7 +13,7 @@ public class Definition : IDefinition
     /// <summary>
     /// Gets the company ID.
     /// </summary>
-    public UInt16? CompanyId { get; }
+    public ushort? CompanyId { get; }
 
     /// <summary>
     /// Gets the collection of services associated with this device definition.
@@ -39,7 +39,7 @@ public class Definition : IDefinition
     /// <param name="companyId">The company ID (assigned number).</param>
     /// <param name="deviceName">The name of the device.</param>
     /// <param name="services">The services associated with the device.</param>
-    public Definition(UInt16 companyId, string deviceName, params IService[] services)
+    public Definition(ushort companyId, string deviceName, params IService[] services)
     {
         DeviceName = deviceName;
         CompanyId = companyId;
