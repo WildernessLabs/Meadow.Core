@@ -81,6 +81,8 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     {
         _uptimeStopwatch.Start();
 
+        EnsureCrashReportDirectoryExists();
+
         _reportFiles = new string[]
         {
             MeadowOS.FileSystem.AppCrashFile,
@@ -105,6 +107,21 @@ public abstract class ReliabilityServiceBase : IReliabilityService
         recommendReset = false;
     }
 
+    private void EnsureCrashReportDirectoryExists()
+    {
+        if (!Directory.Exists(MeadowOS.FileSystem.CrashReportDirectory))
+        {
+            try
+            {
+                Directory.CreateDirectory(MeadowOS.FileSystem.CrashReportDirectory);
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Unable to create crash report directory: {ex.Message}");
+            }
+        }
+    }
+
     /// <summary>
     /// Writes a system error to the App Crash file
     /// </summary>
@@ -114,6 +131,8 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     {
         try
         {
+            EnsureCrashReportDirectoryExists();
+
             var fi = new FileInfo(MeadowOS.FileSystem.AppCrashFile);
             if (!fi.Exists)
             {
@@ -134,6 +153,8 @@ public abstract class ReliabilityServiceBase : IReliabilityService
         Resolver.Log.Error($"Resetting due to a system error.");
         try
         {
+            EnsureCrashReportDirectoryExists();
+
             var fi = new FileInfo(MeadowOS.FileSystem.AppCrashFile);
             if (!fi.Exists)
             {
