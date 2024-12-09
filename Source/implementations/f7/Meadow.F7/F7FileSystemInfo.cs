@@ -24,7 +24,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 
     internal F7FileSystemInfo(StorageCapabilities capabilities, bool sdSupported)
     {
-        _drives.Add(F7StorageInformation.Create(Resolver.Device));
+        // _drives.Add(F7StorageInformation.Create(Resolver.Device));
 
         _sdSupported = sdSupported;
 
@@ -59,6 +59,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
         {
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
+                _drives.Add(_sdCard);
                 RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Inserted);
             }
         }
@@ -69,6 +70,8 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
         if (_sdCard != null)
         {
             RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Ejected);
+            _sdCard.Eject();
+            _drives.Clear();
             _sdCard = null;
         }
     }
