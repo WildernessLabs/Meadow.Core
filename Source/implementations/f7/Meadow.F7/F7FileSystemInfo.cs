@@ -11,9 +11,6 @@ namespace Meadow;
 /// </summary>
 public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 {
-    /// <inheritdoc/>
-    public new event ExternalStorageEventHandler ExternalStorageEvent = default!;
-
     private readonly List<IStorageInformation> _drives = new();
     private F7ExternalStorage? _sdCard = default;
 
@@ -62,7 +59,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
         {
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
-                ExternalStorageEvent?.Invoke(_sdCard, ExternalStorageState.Inserted);
+                RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Inserted);
             }
         }
     }
@@ -71,7 +68,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
     {
         if (_sdCard != null)
         {
-            ExternalStorageEvent?.Invoke(_sdCard, ExternalStorageState.Ejected);
+            RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Ejected);
             _sdCard = null;
         }
     }
