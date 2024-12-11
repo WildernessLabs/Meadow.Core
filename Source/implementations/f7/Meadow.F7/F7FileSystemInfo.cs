@@ -13,7 +13,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 {
     private readonly List<IStorageInformation> _drives = new();
     private F7ExternalStorage? _sdCard = default;
-    private bool _IsMount = false;
+    private bool _isMounted = false;
     private readonly bool _sdSupported;
 
     /// <inheritdoc/>
@@ -35,11 +35,11 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
                 _drives.Add(_sdCard);
-                _IsMount = true;
+                _isMounted = true;
             }
             else
             {
-                _IsMount = false;
+                _isMounted = false;
             }
             if (Resolver.Device is F7CoreComputeBase ccm)
             {
@@ -65,7 +65,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
             {
                 _drives.Add(_sdCard);
                 RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Inserted);
-                _IsMount = true;
+                _isMounted = true;
             }
         }
     }
@@ -76,7 +76,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
         {
             RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Ejected);
             _drives.Remove(_sdCard);
-            _IsMount = false;
+            _isMounted = false;
             _sdCard = null;
         }
     }
