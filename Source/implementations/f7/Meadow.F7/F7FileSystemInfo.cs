@@ -1,4 +1,4 @@
-using Meadow.Devices;
+﻿using Meadow.Devices;
 using System.Collections.Generic;
 using System.Threading;
 using static Meadow.F7PlatformOS;
@@ -13,7 +13,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 {
     private readonly List<IStorageInformation> _drives = new();
     private F7ExternalStorage? _sdCard = default;
-    private bool IsMount = false;
+    private bool _IsMount = false;
     private readonly bool _sdSupported;
 
     /// <inheritdoc/>
@@ -35,11 +35,11 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
                 _drives.Add(_sdCard);
-                IsMount = true;
+                _IsMount = true;
             }
             else
             {
-                IsMount = false;
+                _IsMount = false;
             }
             if (Resolver.Device is F7CoreComputeBase ccm)
             {
@@ -59,13 +59,13 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 
     private void HandleInserted()
     {
-        if (!IsMount)
+        if (!_IsMount)
         {
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
                 _drives.Add(_sdCard);
                 RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Inserted);
-                IsMount = true;
+                _IsMount = true;
             }
         }
     }
@@ -76,7 +76,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
         {
             RaiseExternalStorageEvent(_sdCard, ExternalStorageState.Ejected);
             _drives.Remove(_sdCard);
-            IsMount = false;
+            _IsMount = false;
             _sdCard = null;
         }
     }
