@@ -59,7 +59,7 @@ public class F7FileSystemInfo : IPlatformOS.FileSystemInfo
 
     private void HandleInserted()
     {
-        if (!_IsMount)
+        if (!_isMounted)
         {
             if (F7ExternalStorage.TryMount("/dev/mmcsd0", "/sdcard", out _sdCard))
             {
