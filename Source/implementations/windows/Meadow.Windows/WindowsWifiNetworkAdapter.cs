@@ -66,6 +66,7 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
     }
 
     /// <inheritdoc/>
+    /*
     public override bool IsConnected
     {
         get
@@ -83,7 +84,7 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
             return false;
         }
     }
-
+    */
     /// <inheritdoc/>
     public async Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Manual)
     {

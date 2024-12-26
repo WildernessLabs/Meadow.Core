@@ -19,6 +19,8 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
         string gpiodChipName = GpiodChipPi4,
         int sysfsOffset = 0)
     {
+        // query to see if GPIOD is available
+
         GpiodChipName = gpiodChipName;
         SysFsOffset = sysfsOffset;
     }

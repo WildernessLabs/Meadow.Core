@@ -15,7 +15,7 @@ internal partial class Gpiod : IDisposable
 
     public bool IsDisposed { get; private set; }
 
-    private ChipCollection Chips { get; set; }
+    internal ChipCollection Chips { get; set; }
     private Logger Logger { get; }
 
     public unsafe Gpiod(Logger logger)
@@ -37,6 +37,8 @@ internal partial class Gpiod : IDisposable
                 if (!info.IsInvalid)
                 {
                     Chips.Add(info);
+
+                    Logger.Debug($">> CHIP {info.Name} [{info.Label}] ({info.Lines} lines)");
 
                     foreach (var line in info.Lines)
                     {

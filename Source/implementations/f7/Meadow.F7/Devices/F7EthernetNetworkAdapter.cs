@@ -81,5 +81,5 @@ internal unsafe class F7EthernetNetworkAdapter : NetworkAdapterBase, IWiredNetwo
     /// <summary>
     /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
     /// </summary>
-    public override bool IsConnected => _isConnected;
+    public bool IsConnected => _isConnected;
 }

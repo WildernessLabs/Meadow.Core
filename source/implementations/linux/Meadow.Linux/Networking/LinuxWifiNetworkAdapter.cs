@@ -53,8 +53,6 @@ public class LinuxWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapt
     {
         throw new NotImplementedException();
     }
-    /// <inheritdoc/>
-    public override bool IsConnected => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public string? Ssid => throw new NotImplementedException();

@@ -29,10 +29,4 @@ public class WiredNetworkAdapter : NetworkAdapterBase, IWiredNetworkAdapter
         : base(NetworkInterfaceType.Ethernet)
     {
     }
-
-    // TODO: determine a way to detect this
-    /// <summary>
-    /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
-    /// </summary>
-    public override bool IsConnected => true;
 }

@@ -6,11 +6,16 @@ using System.Net.NetworkInformation;
 
 namespace Meadow;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 /// <summary>
 /// A base class for INetworkAdapter implementations
 /// </summary>
 public abstract class NetworkAdapterBase : INetworkAdapter
 {
+    /// <inheritdoc/>
+    public event NetworkAdapterStateChangedHandler? AdapterStateChanged;
+
     /// <inheritdoc/>
     public event NetworkStateHandler? NetworkConnecting;
 
@@ -29,11 +34,7 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     public event NetworkErrorHandler NetworkError = default!;
 
     private NetworkInterface? nativeInterface = default!;
-
-    /// <summary>
-    /// returns the connection state of the NetworkAdapter
-    /// </summary>
-    public abstract bool IsConnected { get; }
+    private NetworkAdapterState _state;
 
     /// <summary>
     /// Gets the physical (MAC) address of the network adapter
@@ -67,6 +68,17 @@ public abstract class NetworkAdapterBase : INetworkAdapter
     {
         InterfaceType = nativeInterface.NetworkInterfaceType;
         this.nativeInterface = nativeInterface;
+    }
+
+    /// <inheritdoc/>
+    public NetworkAdapterState CurrentState
+    {
+        get => _state;
+        protected set
+        {
+            _state = value;
+            AdapterStateChanged?.Invoke(this, CurrentState);
+        }
     }
 
     /// <summary>

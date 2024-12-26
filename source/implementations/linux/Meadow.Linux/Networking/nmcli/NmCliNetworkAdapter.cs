@@ -6,12 +6,17 @@ using System.Net.NetworkInformation;
 
 namespace Meadow.Networking;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
+
 /// <summary>
 /// Provides wrapper around a Linux Network Manager device
 /// </summary>
 public class NmCliNetworkAdapter : INetworkAdapter
 {
-#pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
+    /// <inheritdoc/>
+    public event NetworkAdapterStateChangedHandler? AdapterStateChanged;
+
     /// <inheritdoc/>
     public event NetworkStateHandler? NetworkConnecting;
     /// <inheritdoc/>
@@ -22,7 +27,6 @@ public class NmCliNetworkAdapter : INetworkAdapter
     public event NetworkStateHandler? NetworkConnectFailed;
     /// <inheritdoc/>
     public event NetworkErrorHandler? NetworkError;
-#pragma warning restore CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
 
     internal NmCliDevice NmCliDevice { get; }
 
@@ -47,4 +51,7 @@ public class NmCliNetworkAdapter : INetworkAdapter
 
     /// <inheritdoc/>
     public IPAddressCollection DnsAddresses => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public NetworkAdapterState CurrentState => throw new NotImplementedException();
 }

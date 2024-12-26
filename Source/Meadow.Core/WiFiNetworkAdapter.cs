@@ -26,12 +26,6 @@ public class WiFiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter, I
         }
     }
 
-    // TODO: determine a way to detect this
-    /// <summary>
-    /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
-    /// </summary>
-    public override bool IsConnected => true;
-
     /// <summary>
     /// Returns the current Antenna type
     /// </summary>

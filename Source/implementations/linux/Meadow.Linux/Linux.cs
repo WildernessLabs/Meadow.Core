@@ -17,8 +17,8 @@ public abstract class Linux : IMeadowDevice
     , IPixelDisplayProvider
 #endif
 {
-    private SysFsGpioDriver _sysfs = null!;
-    private Gpiod _gpiod = null!;
+    private SysFsGpioDriver? _sysfs = null!;
+    private Gpiod? _gpiod = null!;
     private NmCliNetworkAdapterCollection? _networkAdapters;
 
 #pragma warning disable CS0067
@@ -136,10 +136,11 @@ public abstract class Linux : IMeadowDevice
         {
             return new GpiodDigitalOutputPort(_gpiod, pin, initialState);
         }
-        else
+        else if (_sysfs != null)
         {
             return new SysFsDigitalOutputPort(_sysfs, pin, initialState);
         }
+        throw new Exception("No GPIO driver available");
     }
 
     /// <inheritdoc/>
@@ -155,10 +156,11 @@ public abstract class Linux : IMeadowDevice
         {
             return new GpiodDigitalInputPort(_gpiod, pin, new GpiodDigitalChannelInfo(pin.Name), resistorMode);
         }
-        else
+        else if (_sysfs != null)
         {
             return new SysFsDigitalInputPort(_sysfs, pin, new SysFsDigitalChannelInfo(pin.Name), resistorMode);
         }
+        throw new Exception("No GPIO driver available");
     }
 
     /// <inheritdoc/>
@@ -168,10 +170,11 @@ public abstract class Linux : IMeadowDevice
         {
             return new GpiodDigitalInterruptPort(_gpiod, pin, new GpiodDigitalChannelInfo(pin.Name), interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
-        else
+        else if (_sysfs != null)
         {
             return new SysFsDigitalInterruptPort(_sysfs, pin, new SysFsDigitalChannelInfo(pin.Name), interruptMode, resistorMode, debounceDuration, glitchDuration);
         }
+        throw new Exception("No GPIO driver available");
     }
 
     /// <inheritdoc/>
