@@ -92,7 +92,7 @@ public abstract partial class F7MicroBase
     private bool _supportsOsAnalyzer = true;
 
     /// <inheritdoc/>
-    public virtual IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin)
+    public virtual IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle = true)
     {
         if (_supportsOsAnalyzer)
         {
@@ -100,7 +100,7 @@ public abstract partial class F7MicroBase
             {
                 try
                 {
-                    var f7Analyzer = new F7DigitalSignalAnalyzer(f7Pin);
+                    var f7Analyzer = new F7DigitalSignalAnalyzer(f7Pin, captureDutyCycle);
                     return f7Analyzer;
                 }
                 catch (Exception ex)
