@@ -39,7 +39,7 @@ internal class F7DigitalSignalAnalyzer : IDigitalSignalAnalyzer, IDisposable
 
         switch (result)
         {
-            case Nuttx.AnalyzerCallStatus.ConfigureSUCCESSFUL:
+            case Nuttx.AnalyzerCallStatus.ConfigureSuccess:
                 break;
             default:
                 Resolver.Log.Warn($"Configure analyzer pin returned {result}");
@@ -49,38 +49,42 @@ internal class F7DigitalSignalAnalyzer : IDigitalSignalAnalyzer, IDisposable
 
     public double GetDutyCycle()
     {
-        var result = Nuttx.meadow_measure_freq_return_freq_info(ref _analyzerData);
-
-        if (result == AnalyzerCallStatus.ReadSUCCESSFUL)
-        {
-            return _analyzerData.DutyCycle1k / 1000d;
-        }
-
-        throw new Exception($"Analyzer read failed.  Returned {result}");
+        var data = ReadData();
+        return data.DutyCycle1k / 1000d;
     }
 
     public Frequency GetFrequency()
     {
-        var result = Nuttx.meadow_measure_freq_return_freq_info(ref _analyzerData);
-
-        if (result == AnalyzerCallStatus.ReadSUCCESSFUL)
-        {
-            return new Frequency(_analyzerData.Frequency1k / 1000d, Frequency.UnitType.Hertz);
-        }
-
-        throw new Exception($"Analyzer read failed.  Returned {result}");
+        var data = ReadData();
+        return new Frequency(data.Frequency1k / 1000d, Frequency.UnitType.Hertz);
     }
 
     public Frequency GetMeanFrequency()
     {
+        var data = ReadData();
+        return new Frequency(data.AvgFrequency1k / 1000d, Frequency.UnitType.Hertz);
+    }
+
+    private AnalyzerData ReadData()
+    {
+        _analyzerData.TimerNumber = _analyzerConfig.TimerNumber;
+        _analyzerData.ChannelNumber = _analyzerConfig.ChannelNumber;
+
         var result = Nuttx.meadow_measure_freq_return_freq_info(ref _analyzerData);
 
-        if (result == AnalyzerCallStatus.ReadSUCCESSFUL)
+        switch (result)
         {
-            return new Frequency(_analyzerData.AvgFrequency1k / 1000d, Frequency.UnitType.Hertz);
+            case AnalyzerCallStatus.ReadSuccess:
+                return _analyzerData;
+            case AnalyzerCallStatus.FrequencyInputNotDetected:
+                // no input signal - don't throw an exception, make sure data is just zero
+                _analyzerData.Frequency1k = 0;
+                _analyzerData.DutyCycle1k = 0;
+                _analyzerData.AvgFrequency1k = 0;
+                return _analyzerData;
+            default:
+                throw new Exception($"Analyzer read failed.  Returned {result} (T:{_analyzerData.TimerNumber} C:{_analyzerData.ChannelNumber} )");
         }
-
-        throw new Exception($"Analyzer read failed.  Returned {result}");
     }
 
     private void Unconfigure()
