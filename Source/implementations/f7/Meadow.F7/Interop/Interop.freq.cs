@@ -94,13 +94,13 @@ namespace Meadow.Core
                 NoActiveChannels = (-27),
                 FrequencyInputNotDetected = (-28),
                 // unconfigure results
-                UnconfigureSUCCESSFUL = (30),
-                UnconfigureINVALID_TIMER_NUMB = (-31),
-                UnconfigureINVALID_CHANNEL_NUMB = (-32),
-                UnconfigureTIMER_ACCESS_NULL = (-33),
-                UnconfigureCHAN_NOT_CONFIG = (-34),
-                UnconfigureNO_CHANNEL = (-35),
-                UnconfigureIRQ_DETACH_ERR = (-36),
+                UnconfigureSuccess = (30),
+                UnconfigureInvalidTimer = (-31),
+                UnconfigureInvalidChannel = (-32),
+                UnconfigureTimerAccessNull = (-33),
+                UnconfigureChannelNotConfigured = (-34),
+                UnconfigureNoChannel = (-35),
+                UnconfigureInterruptDetachError = (-36),
             }
 
             /*
