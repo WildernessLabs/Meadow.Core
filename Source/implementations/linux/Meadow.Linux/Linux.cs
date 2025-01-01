@@ -310,6 +310,12 @@ public abstract class Linux : IMeadowDevice
         return process?.StandardOutput.ReadToEnd() ?? string.Empty;
     }
 
+    /// <inheritdoc/>
+    public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
+    {
+        return new SoftDigitalSignalAnalyzer(pin, captureDutyCycle: captureDutyCycle);
+    }
+
     // ----------------------------------------------
     // ----------------------------------------------
     // ----- BELOW HERE ARE NOT YET IMPLEMENTED -----

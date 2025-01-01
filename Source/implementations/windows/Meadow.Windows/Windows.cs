@@ -95,6 +95,11 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
         throw new NotSupportedException("Add an IO Expander to your platform");
     }
 
+    /// <inheritdoc/>
+    public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
+    {
+        throw new NotSupportedException("Add an IO Expander to your platform");
+    }
 
     public ISerialPort CreateSerialPort(string portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
     {
