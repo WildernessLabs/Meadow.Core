@@ -47,18 +47,28 @@ internal class F7DigitalSignalAnalyzer : IDigitalSignalAnalyzer, IDisposable
         }
     }
 
+    /// <inheritdoc/>
+    public ulong GetCount()
+    {
+        var data = ReadData();
+        return (ulong)data.GpioCount;
+    }
+
+    /// <inheritdoc/>
     public double GetDutyCycle()
     {
         var data = ReadData();
         return data.DutyCycle1k / 1000d;
     }
 
+    /// <inheritdoc/>
     public Frequency GetFrequency()
     {
         var data = ReadData();
         return new Frequency(data.Frequency1k / 1000d, Frequency.UnitType.Hertz);
     }
 
+    /// <inheritdoc/>
     public Frequency GetMeanFrequency()
     {
         var data = ReadData();
