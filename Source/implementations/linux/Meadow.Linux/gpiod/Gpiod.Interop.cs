@@ -383,6 +383,9 @@ namespace Meadow
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_request_falling_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
 
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_falling_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
+
             /*
              * @brief Request all event type notifications on a single line.
              * @param line GPIO line object.
@@ -392,6 +395,9 @@ namespace Meadow
             //int gpiod_line_request_both_edges_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
             [DllImport(LIB_GPIOD, SetLastError = true)]
             public static extern int gpiod_line_request_both_edges_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+
+            [DllImport(LIB_GPIOD, SetLastError = true)]
+            public static extern int gpiod_line_request_both_edges_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
 
             /*
              * @brief Request falling edge event notifications on a single line.
