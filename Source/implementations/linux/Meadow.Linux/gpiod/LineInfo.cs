@@ -116,10 +116,10 @@ internal class LineInfo
                 result = gpiod_line_request_rising_edge_events_flags(Handle, MeadowConsumer, flags);
                 break;
             case InterruptMode.EdgeFalling:
-                result = gpiod_line_request_falling_edge_events(Handle, MeadowConsumer);
+                result = gpiod_line_request_falling_edge_events_flags(Handle, MeadowConsumer, flags);
                 break;
             case InterruptMode.EdgeBoth:
-                result = gpiod_line_request_both_edges_events(Handle, MeadowConsumer);
+                result = gpiod_line_request_both_edges_events_flags(Handle, MeadowConsumer, flags);
                 break;
             default:
                 return;

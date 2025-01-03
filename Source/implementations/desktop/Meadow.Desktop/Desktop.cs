@@ -142,6 +142,9 @@ public class Desktop : IMeadowDevice
     /// <inheritdoc/>
     public ICounter CreateCounter(IPin pin, InterruptMode edge)
         => _implementation.CreateCounter(pin, edge);
+    /// <inheritdoc/>
+    public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
+        => _implementation.CreateDigitalSignalAnalyzer(pin, captureDutyCycle);
 }
 
 
