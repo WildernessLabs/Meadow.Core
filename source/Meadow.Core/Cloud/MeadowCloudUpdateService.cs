@@ -202,6 +202,7 @@ internal class MeadowCloudUpdateService : IUpdateService
         if (!string.IsNullOrEmpty(message.OsVersion)
             && Resolver.Device.PlatformOS.OSVersion != message.OsVersion)
         {
+            Resolver.Log.Trace($"This OTA requires an OS update.");
             destination = message.MpakWithOsDownloadUrl;
         }
 
@@ -230,31 +231,46 @@ internal class MeadowCloudUpdateService : IUpdateService
                 // Note: this is infrequently called, so we don't want to follow the advice of "use one instance for all calls"
                 using (var httpClient = new HttpClient())
                 {
-                    if (_connectionService.Settings.UseAuthentication)
+                    using (var request = new HttpRequestMessage(HttpMethod.Get, destination))
                     {
-                        httpClient.DefaultRequestHeaders.Authorization = _connectionService.CreateAuthenticationHeaderValue();
-                    }
-
-                    // Configure the HTTP range header to indicate resumption of partial download, starting from 
-                    // the 'totalBytesDownloaded' byte position and extending to the end of the content.
-                    httpClient.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
-
-                    using (var stream = await httpClient.GetStreamAsync(destination))
-                    {
-                        using (var fileStream = Store.GetUpdateFileStream(message.ID))
+                        if (_connectionService.Settings.UseAuthentication)
                         {
-                            byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
-                            int bytesRead;
+                            request.Headers.Authorization = _connectionService.CreateAuthenticationHeaderValue();
+                        }
 
-                            while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        // Configure the HTTP range header to indicate resumption of partial download, starting from 
+                        // the 'totalBytesDownloaded' byte position and extending to the end of the content.
+                        request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(totalBytesDownloaded, null);
+
+                        // Get the actual update file size, which might be larger than the expected
+                        // if this OTA requires an OS update
+                        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                        var contentLength = response.Content.Headers.ContentLength;
+                        if (contentLength.HasValue && retryCount == 0)
+                        {
+                            // Content-Length indicates the remaining bytes to download, as the Range header may change after retries.
+                            // Then, to determine the total file size, the Content-Length from the first download attempt is used.
+                            message.FileSize = contentLength.Value;
+                            Resolver.Log.Trace($"Starting download... File size: {message.FileSize.ToString("N0")} bytes.");
+                        }
+
+                        using (var stream = await response.Content.ReadAsStreamAsync()) 
+                        {
+                            using (var fileStream = Store.GetUpdateFileStream(message.ID))
                             {
-                                await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                totalBytesDownloaded += bytesRead;
+                                byte[] buffer = new byte[1024 * 64]; // TODO: make this configurable/platform dependent
+                                int bytesRead;
 
-                                message.DownloadProgress = totalBytesDownloaded;
+                                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                    totalBytesDownloaded += bytesRead;
 
-                                RetrieveProgress?.Invoke(this, message);
-                                Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                                    message.DownloadProgress = totalBytesDownloaded;
+
+                                    RetrieveProgress?.Invoke(this, message);
+                                    Resolver.Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                                }
                             }
                         }
                     }

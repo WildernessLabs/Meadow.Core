@@ -44,7 +44,7 @@ namespace Meadow.Hardware
             IPwmChannelInfo channel,
             bool inverted = false,
             bool isOnboard = false)
-            : base(pin, channel, new Frequency(100f, Units.Frequency.UnitType.Hertz))
+            : base(pin, channel)
         {
             this.IsOnboard = isOnboard;
             this.IOController = ioController;

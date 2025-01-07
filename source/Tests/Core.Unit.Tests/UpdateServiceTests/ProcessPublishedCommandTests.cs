@@ -428,7 +428,7 @@ namespace Core.Unit.Tests.UpdateServiceTests
     {
         public bool ArgProperty { get; set; }
 
-        public Dictionary<string, object> AdditionalData { get; set; }
+        public Dictionary<string, object> AdditionalData { get; set; } = new();
     }
 
     public class TestLogProvider : ILogProvider
