@@ -76,7 +76,11 @@ public class HealthReporter : IHealthReporter
 
     private (string name, Func<object?> function)[] DefaultMetrics =
     {
-        new ("health.cpu_temp_celsius", () => Resolver.Device.PlatformOS.GetCpuTemperature().Celsius),
+        new ("health.cpu_temp_celsius", () =>
+        {
+            var temp = Resolver.Device.PlatformOS.GetCpuTemperature().Celsius;
+            return temp < -30 ? -30 : temp > 70 ? 70 : temp;
+        }),
         new ("health.memory_used", () => GC.GetTotalMemory(false)),
         new ("health.disk_space_used", () => Resolver.Device.PlatformOS.GetPrimaryDiskSpaceInUse().Bytes),
         new ("info.os_version", () => Resolver.Device.Information.OSVersion),
