@@ -17,10 +17,11 @@ public class Counter : ICounter, IDisposable
     /// Enables or disables the counter
     /// </summary>
     public bool Enabled { get; set; }
+
     /// <summary>
     /// Returns the current Counter value
     /// </summary>
-    public long Count => count;
+    public ulong Count => (uint)count;
 
     /// <summary>
     /// Creates a Counter instance

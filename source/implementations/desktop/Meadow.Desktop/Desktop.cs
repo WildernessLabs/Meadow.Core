@@ -1,5 +1,6 @@
 ﻿using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
+using Meadow.Pinouts;
 using Meadow.Units;
 using System;
 
@@ -47,7 +48,7 @@ public class Desktop : IMeadowDevice
         _implementation = detectedPlatform switch
         {
             MeadowPlatform.OSX => new Mac(),
-            MeadowPlatform.DesktopLinux => new Linux(),
+            MeadowPlatform.DesktopLinux => new DesktopLinux(),
             MeadowPlatform.Windows => new Windows(),
             _ => throw new ArgumentException($"Desktop cannot run on {detectedPlatform}"),
         };
@@ -130,6 +131,9 @@ public class Desktop : IMeadowDevice
     /// <inheritdoc/>
     public ICounter CreateCounter(IPin pin, InterruptMode edge)
         => _implementation.CreateCounter(pin, edge);
+    /// <inheritdoc/>
+    public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
+        => _implementation.CreateDigitalSignalAnalyzer(pin, captureDutyCycle);
 }
 
 

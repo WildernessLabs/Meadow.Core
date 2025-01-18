@@ -32,6 +32,7 @@ public partial class SpiBus : ISpiBus, IDisposable
     }
 
     private int DriverHandle { get; set; }
+    private int BusNumber { get; }
 
     /// <inheritdoc/>
     public Frequency[] SupportedSpeeds
@@ -59,8 +60,7 @@ public partial class SpiBus : ISpiBus, IDisposable
 
     internal unsafe SpiBus(int busNumber, int chipSelect, SpiMode mode, Units.Frequency speed)
     {
-        Resolver.Log.Info($"SPI{busNumber}");
-
+        BusNumber = busNumber;
         var driver = $"/dev/spidev{busNumber}.{chipSelect}";
         DriverHandle = Interop.open(driver, Interop.DriverFlags.O_RDWR);
         if (DriverHandle < 0)
