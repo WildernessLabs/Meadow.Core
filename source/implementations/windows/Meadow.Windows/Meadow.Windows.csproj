@@ -19,11 +19,16 @@
   </PropertyGroup>
     
   <ItemGroup>
-    <PackageReference Include="ManagedNativeWifi" Version="2.5.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+    <PackageReference Include="ManagedNativeWifi" Version="2.6.0" />
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.1.0" />
+    <PackageReference Include="Silk.NET" Version="2.22.0" />
+    <PackageReference Include="SkiaSharp" Version="2.88.9" />
+    <PackageReference Include="System.IO.Hashing" Version="9.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
-    <PackageReference Include="Meadow.Foundation.Displays.Silk" Version="1.12.8" />
-    <PackageReference Include="Meadow" Version="1.12.8" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="Meadow.Foundation.Displays.Silk" Version="2.0.1" />
+    <PackageReference Include="Meadow" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />

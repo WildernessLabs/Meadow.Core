@@ -190,9 +190,22 @@ public enum StatusCodes
     /// </summary>
     InvalidCellConfigurationFile = 45,
     /// <summary>
-    /// Network deadlock detected.
+    /// Possible network deadlock detected.
     /// </summary>
     NetworkDeadlock = 46,
+    /// <summary>
+    /// Possible network deadlock detected on close().
+    /// </summary>
+    NetworkCloseDeadlock = 47,
+    /// <summary>
+    /// Possible network deadlock detected on poll().
+    /// </summary>
+    NetworkPollDeadlock = 48,
+    /// <summary>
+    /// Possible network deadlock detected on socket().
+    /// </summary>
+    NetworkSocketDeadlock = 49,
+
     /// <summary>
     /// ESP reset for unknown reason
     /// </summary>
@@ -531,25 +544,49 @@ internal enum WiFiFunction
 public enum BluetoothFunction
 {
     /// <summary>
-    /// BluetoothFunction - Start
+    /// Start the Bluetooth service.
     /// </summary>
     Start = 0,
     /// <summary>
-    /// BluetoothFunction - Stop
+    /// Stop the Bluetooth service.
     /// </summary>
     Stop = 1,
     /// <summary>
-    /// BluetoothFunction - GetHandles
+    /// Get the handles for the service and characteristics.
     /// </summary>
     GetHandles = 2,
     /// <summary>
-    /// BluetoothFunction - ServerDataSet
+    /// BSet a characteristic value.
     /// </summary>
     ServerDataSet = 3,
     /// <summary>
-    /// BluetoothFunction - ClientWriteRequestEvent
+    /// Client has written to a characteristic value.
     /// </summary>
-    ClientWriteRequestEvent = 4
+    ClientWriteRequestEvent = 4,
+    /// <summary>
+    /// Bluetooth service is starting event.
+    /// </summary>
+    BluetoothStartingEvent = 5,
+    /// <summary>
+    /// Bluetooth has started event.
+    /// </summary>
+    BluetoothStartedEvent = 6,
+    /// <summary>
+    /// Bluetooth is stopping event.
+    /// </summary>
+    BluetoothStoppingEvent = 7,
+    /// <summary>
+    /// Bluetooth has stopped event.
+    /// </summary>
+    BluetoothStoppedEvent = 8,
+    /// <summary>
+    /// Bluetooth client connected event.
+    /// </summary>
+    ClientConnectedEvent = 9,
+    /// <summary>
+    /// Bluetooth client disconnected event.
+    /// </summary>
+    ClientDisconnectedEvent = 10,
 };
 
 /// <summary>
@@ -577,6 +614,15 @@ public enum CellFunction
     /// CellFunction - NtpUpdateEvent
     /// </summary>
     NtpUpdateEvent = 5,
+    /// <summary>
+    /// CellFunction - NetworkConnectingEvent
+    /// </summary>
+    NetworkConnectingEvent = 8,
+
+    /// <summary>
+    /// CellFunction - NetworkRetryExceededEvent
+    /// </summary>
+    NetworkRetryExceededEvent = 9,
 };
 
 /// <summary>

@@ -30,11 +30,23 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the GPIO2 pin.
     /// </summary>
-    public IPin GPIO2 => new LinuxFlexiPin(Controller, "GPIO2", "PIN03", 2 + SysFsOffset, GpiodChipName, 2);
+    public IPin GPIO2 => new LinuxFlexiPin(Controller, "GPIO2", "PIN03", 2 + SysFsOffset, GpiodChipName, 2,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO2"),
+            new I2cChannelInfo("SDA1", I2cChannelFunctionType.Data, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the GPIO3 pin.
     /// </summary>
-    public IPin GPIO3 => new LinuxFlexiPin(Controller, "GPIO3", "PIN05", 3 + SysFsOffset, GpiodChipName, 3);
+    public IPin GPIO3 => new LinuxFlexiPin(Controller, "GPIO3", "PIN05", 3 + SysFsOffset, GpiodChipName, 3,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO3"),
+            new I2cChannelInfo("SCL1", I2cChannelFunctionType.Clock, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the GPIO4 pin.
     /// </summary>
@@ -66,11 +78,23 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the GPIO10 pin.
     /// </summary>
-    public IPin GPIO10 => new LinuxFlexiPin(Controller, "GPIO10", "PIN19", 10 + SysFsOffset, GpiodChipName, 10);
+    public IPin GPIO10 => new LinuxFlexiPin(Controller, "GPIO10", "PIN19", 10 + SysFsOffset, GpiodChipName, 10,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO10"),
+            new SpiChannelInfo("SPI0_MOSI", SpiLineType.MOSI, busNumber: 0)
+        });
+
     /// <summary>
     /// Represents the GPIO9 pin.
     /// </summary>
-    public IPin GPIO9 => new LinuxFlexiPin(Controller, "GPIO9", "PIN21", 9 + SysFsOffset, GpiodChipName, 9);
+    public IPin GPIO9 => new LinuxFlexiPin(Controller, "GPIO9", "PIN21", 9 + SysFsOffset, GpiodChipName, 9,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO9"),
+            new SpiChannelInfo("SPI0_MISO", SpiLineType.MISO, busNumber: 0)
+        });
+
     /// <summary>
     /// Represents the GPIO25 pin.
     /// </summary>
@@ -78,7 +102,13 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the GPIO11 pin.
     /// </summary>
-    public IPin GPIO11 => new LinuxFlexiPin(Controller, "GPIO11", "PIN23", 11 + SysFsOffset, GpiodChipName, 11);
+    public IPin GPIO11 => new LinuxFlexiPin(Controller, "GPIO11", "PIN23", 11 + SysFsOffset, GpiodChipName, 11,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO11"),
+            new SpiChannelInfo("SPI0_SCLK", SpiLineType.Clock, busNumber: 0)
+        });
+
     /// <summary>
     /// Represents the GPIO8 pin.
     /// </summary>
@@ -114,7 +144,13 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the GPIO19 pin.
     /// </summary>
-    public IPin GPIO19 => new LinuxFlexiPin(Controller, "GPIO19", "PIN35", 19 + SysFsOffset, GpiodChipName, 19);
+    public IPin GPIO19 => new LinuxFlexiPin(Controller, "GPIO19", "PIN35", 19 + SysFsOffset, GpiodChipName, 19,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO19"),
+            new SpiChannelInfo("SPI1_MISO", SpiLineType.Clock, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the GPIO16 pin.
     /// </summary>
@@ -126,11 +162,22 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the GPIO20 pin.
     /// </summary>
-    public IPin GPIO20 => new LinuxFlexiPin(Controller, "GPIO20", "PIN38", 20 + SysFsOffset, GpiodChipName, 20);
+    public IPin GPIO20 => new LinuxFlexiPin(Controller, "GPIO20", "PIN38", 20 + SysFsOffset, GpiodChipName, 20,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO20"),
+            new SpiChannelInfo("SPI1_MOSI", SpiLineType.Clock, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the GPIO21 pin.
     /// </summary>
-    public IPin GPIO21 => new LinuxFlexiPin(Controller, "GPIO21", "PIN40", 21 + SysFsOffset, GpiodChipName, 21);
+    public IPin GPIO21 => new LinuxFlexiPin(Controller, "GPIO21", "PIN40", 21 + SysFsOffset, GpiodChipName, 21,
+        new IChannelInfo[]
+        {
+            new GpiodDigitalChannelInfo("GPIO21"),
+            new SpiChannelInfo("SPI1_SCLK", SpiLineType.Clock, busNumber: 1)
+        });
 
     /// <summary>
     /// Represents Pin 3, which corresponds to GPIO2.

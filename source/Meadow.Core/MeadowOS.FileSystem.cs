@@ -60,6 +60,6 @@ public static partial class MeadowOS
         /// <summary>
         /// Gets the full path to the file used to store crash reports from unhandled runtime exceptions
         /// </summary>
-        public static string RuntimeCrashFile => Path.Combine(CrashReportDirectory, "meadow.error");
+        public static string RuntimeCrashFile => Path.Combine(CrashReportDirectory, "mono_error.txt");
     }
 }

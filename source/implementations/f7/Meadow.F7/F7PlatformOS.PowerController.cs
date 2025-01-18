@@ -63,9 +63,6 @@ namespace Meadow
             // This should suspend the processor and code should stop executing
             UPD.Ioctl(UpdIoctlFn.PowerSleep, cmd);
 
-            // Stop execution while the device actually does it's thing
-            Thread.Sleep(100);
-
             // sleeping invalidates the UPD driver handle
             UPD.ReOpen();
 
