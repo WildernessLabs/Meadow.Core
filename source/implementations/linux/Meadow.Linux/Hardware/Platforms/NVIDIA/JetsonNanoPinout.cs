@@ -12,11 +12,20 @@ public class JetsonNanoPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the I2C_2_SDA pin.
     /// </summary>
-    public IPin I2C_2_SDA => new Pin(Controller, "I2C_2_SDA", "PIN03", null);
+    public IPin I2C_2_SDA => new Pin(Controller, "I2C_2_SDA", "PIN03",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_2_SDA", I2cChannelFunctionType.Data, busNumber: 2)
+        });
+
     /// <summary>
     /// Represents the I2C_2_SCL pin.
     /// </summary>
-    public IPin I2C_2_SCL => new Pin(Controller, "I2C_2_SCL", "PIN05", null);
+    public IPin I2C_2_SCL => new Pin(Controller, "I2C_2_SCL", "PIN05",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_2_SCL", I2cChannelFunctionType.Clock, busNumber: 2)
+        });
 
     /// <summary>
     /// Represents the D04 pin.
@@ -85,11 +94,20 @@ public class JetsonNanoPinout : PinDefinitionBase, IPinDefinitions
     /// <summary>
     /// Represents the I2C_1_SDA pin.
     /// </summary>
-    public IPin I2C_1_SDA => new Pin(Controller, "I2C_1_SDA", "PIN27", null);
+    public IPin I2C_1_SDA => new Pin(Controller, "I2C_1_SDA", "PIN27",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_1_SDA", I2cChannelFunctionType.Data, busNumber: 1)
+        });
+
     /// <summary>
     /// Represents the I2C_1_SCL pin.
     /// </summary>
-    public IPin I2C_1_SCL => new Pin(Controller, "I2C_1_SCL", "PIN28", null);
+    public IPin I2C_1_SCL => new Pin(Controller, "I2C_1_SCL", "PIN28",
+        new IChannelInfo[]
+        {
+            new I2cChannelInfo("I2C_1_SCL", I2cChannelFunctionType.Clock, busNumber: 1)
+        });
 
     /// <summary>
     /// Represents the D05 pin.

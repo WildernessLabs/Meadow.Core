@@ -1,5 +1,6 @@
 ﻿using Meadow.Hardware;
 using System;
+using System.Runtime.InteropServices;
 
 namespace Meadow;
 
@@ -30,18 +31,28 @@ public class GpiodDigitalOutputPort : IDigitalOutputPort
         if (pin is GpiodPin { } gp)
         {
             Line = Driver.GetLine(gp);
-            Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_OUTPUT);
         }
         else if (pin is LinuxFlexiPin { } fp)
         {
             Line = Driver.GetLine(fp);
-            Line.Request(Gpiod.Interop.line_direction.GPIOD_LINE_DIRECTION_OUTPUT);
         }
         else
         {
             throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
         }
 
+        var result = Line.RequestOutput(Gpiod.Interop.line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE, initialState);
+        if (!result)
+        {
+            var err = Marshal.GetLastWin32Error();
+
+            if ((Interop.Errors)err == Interop.Errors.DeviceBusy)
+            {
+                throw new NativeException($"Pin {pin.Name} already in use");
+            }
+
+            throw new NativeException($"Failed to request line for Pin {pin.Name} (error {err})", err);
+        }
     }
 
     /// <inheritdoc/>

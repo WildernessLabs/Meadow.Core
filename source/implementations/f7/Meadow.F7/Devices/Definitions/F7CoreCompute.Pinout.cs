@@ -216,9 +216,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB4 => _pb4 ??= new Pin(
+            public IPin PB4 => _pb4 ??= new F7Pin(
                 Controller,
                 "PB4", "PB4",
+                Core.Interop.STM32.GpioPort.PortB, 4,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB4", interruptGroup: 4),
                     new PwmChannelInfo("TIM3_CH1", 3, 1),
@@ -236,9 +237,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB6 => _pb6 ??= new Pin(
+            public IPin PB6 => _pb6 ??= new F7Pin(
                 Controller,
                 "PB6", "PB6",
+                Core.Interop.STM32.GpioPort.PortB, 6,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB6", interruptGroup: 6),
                     new PwmChannelInfo("TIM4_CH1", 4, 1),
@@ -247,9 +249,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB7 => _pb7 ??= new Pin(
+            public IPin PB7 => _pb7 ??= new F7Pin(
                 Controller,
                 "PB7", "PB7",
+                Core.Interop.STM32.GpioPort.PortB, 7,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7", interruptGroup: 7),
                     new PwmChannelInfo("TIM4_CH2", 4, 2),
@@ -258,9 +261,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB8 => _pb8 ??= new Pin(
+            public IPin PB8 => _pb8 ??= new F7Pin(
                 Controller,
                 "PB8", "PB8",
+                Core.Interop.STM32.GpioPort.PortB, 8,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB8", interruptGroup: 8),
                     new PwmChannelInfo("TIM4_CH3", 4, 3)
@@ -268,9 +272,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB9 => _pb9 ??= new Pin(
+            public IPin PB9 => _pb9 ??= new F7Pin(
                 Controller,
                 "PB9", "PB9",
+                Core.Interop.STM32.GpioPort.PortB, 9,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9", interruptGroup: 9),
                     new PwmChannelInfo("TIM4_CH4", 4, 4),
@@ -305,9 +310,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB14 => _pb14 ??= new Pin(
+            public IPin PB14 => _pb14 ??= new F7Pin(
                 Controller,
                 "PB14", "PB14",
+                Core.Interop.STM32.GpioPort.PortB, 14,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB14", interruptGroup: 14),
                     new PwmChannelInfo("TIM12_CH1", 12, 1),
@@ -316,9 +322,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PB15 => _pb15 ??= new Pin(
+            public IPin PB15 => _pb15 ??= new F7Pin(
                 Controller,
                 "PB15", "PB15",
+                Core.Interop.STM32.GpioPort.PortB, 15,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB15", interruptGroup: 15),
                     new PwmChannelInfo("TIM12_CH2", 12, 2),
@@ -373,9 +380,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC6 => _pc6 ??= new Pin(
+            public IPin PC6 => _pc6 ??= new F7Pin(
                 Controller,
                 "PC6", "PC6",
+                Core.Interop.STM32.GpioPort.PortC, 6,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC6", interruptGroup: 6),
                     new PwmChannelInfo("TIM8_CH1", 8, 1), // or TIM3_CH1 (see D05)
@@ -383,9 +391,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC7 => _pc7 ??= new Pin(
+            public IPin PC7 => _pc7 ??= new F7Pin(
                 Controller,
                 "PC7", "PC7",
+                Core.Interop.STM32.GpioPort.PortC, 7,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC7", interruptGroup: 7),
                     new PwmChannelInfo("TIM3_CH2", 3, 2) // or TIM8_CH2
@@ -402,9 +411,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PC9 => _pc9 ??= new Pin(
+            public IPin PC9 => _pc9 ??= new F7Pin(
                 Controller,
                 "PC9", "PC9",
+                Core.Interop.STM32.GpioPort.PortC, 9,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC9", interruptGroup: 9),
                     new PwmChannelInfo("TIM8_CH4", 8, 4)
@@ -572,9 +582,10 @@ namespace Meadow.Devices
             );
 
             /// <inheritdoc/>
-            public IPin PH10 => _ph10 ??= new Pin(
+            public IPin PH10 => _ph10 ??= new F7Pin(
                 Controller,
                 "PH10", "PH10",
+                Core.Interop.STM32.GpioPort.PortH, 10,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH10", interruptCapable: false ),
                     new PwmChannelInfo("TIM5_CH1", 5, 1)

@@ -37,38 +37,48 @@ namespace Meadow.Simulation
             Information = new SimulationInformation();
         }
 
+        /// <inheritdoc/>
         public TPinDefinitions Pins { get; }
+
+        /// <inheritdoc/>
         public IDeviceInformation Information { get; }
 
+        /// <inheritdoc/>
         public IPlatformOS PlatformOS => _platformOS;
+
+        /// <inheritdoc/>
         public DeviceCapabilities Capabilities { get; private set; } = new DeviceCapabilities(
                 new AnalogCapabilities(false, null),
                 new NetworkCapabilities(false, true),
                 new StorageCapabilities(true)
                 );
 
+        /// <inheritdoc/>
         public INetworkAdapterCollection NetworkAdapters { get; private set; } = new NativeNetworkAdapterCollection();
 
         private void LaunchUI()
         {
-
         }
 
+        /// <inheritdoc/>
         public void DrivePinVoltage(IPin pin, Voltage voltage)
         {
             _simulationEngine.SetPinVoltage(pin, voltage);
         }
 
+        /// <inheritdoc/>
         public void DrivePinState(IPin pin, bool state)
         {
             _simulationEngine.SetDiscrete(pin, state);
         }
 
+        /// <inheritdoc/>
         public bool ReadPinState(IPin pin)
         {
             return _simulationEngine.GetDiscrete(pin);
         }
 
+        /// <inheritdoc/>
         public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Meadow.Units.Voltage voltageReference)
         {
             var dc = pin.SupportedChannels?.FirstOrDefault(i => i is IAnalogChannelInfo) as AnalogChannelInfo;
@@ -82,6 +92,7 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
             var dc = pin.SupportedChannels?.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
@@ -93,11 +104,13 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public IDigitalInputPort CreateDigitalInputPort(IPin pin)
         {
             return CreateDigitalInputPort(pin, ResistorMode.Disabled);
         }
 
+        /// <inheritdoc/>
         public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
         {
             var dci = pin.SupportedChannels?.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
@@ -111,6 +124,7 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
         {
             var dco = pin.SupportedChannels?.FirstOrDefault(i => i is IDigitalChannelInfo) as DigitalChannelInfo;
@@ -128,6 +142,7 @@ namespace Meadow.Simulation
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
         {
             return SerialMessagePort.From(
@@ -145,103 +160,128 @@ namespace Meadow.Simulation
                 messageLength);
         }
 
+        /// <inheritdoc/>
         public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
         {
             return new SerialPortProxy(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
         }
 
+        /// <inheritdoc/>
         public IPin GetPin(string name)
         {
             return Pins[name];
         }
 
+        /// <inheritdoc/>
+        public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
+        {
+            return new SoftDigitalSignalAnalyzer(pin, captureDutyCycle: captureDutyCycle);
+        }
+
 
         // ========= not implemented below here =========
-
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(int busNumber = 0)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public IPwmPort CreatePwmPort(IPin pin, float frequency = 100, float dutyCycle = 0.5F, bool invert = false)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, SpiClockConfiguration config)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public ISpiBus CreateSpiBus(IPin clock, IPin mosi, IPin miso, Meadow.Units.Frequency speed)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void Initialize(MeadowPlatform detectedPlatform)
         {
         }
 
+        /// <inheritdoc/>
         public void Reset()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void SetClock(DateTime dateTime)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void WatchdogEnable(TimeSpan timeout)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void WatchdogReset()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public void Sleep(int seconds = -1)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public BatteryInfo GetBatteryInfo()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public Temperature GetProcessorTemperature()
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public ICounter CreateCounter(IPin pin, InterruptMode edge)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(int busNumber, I2cBusSpeed busSpeed)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(IPin[] pins, I2cBusSpeed busSpeed)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode)
         {
             return CreateDigitalInterruptPort(
@@ -269,21 +309,25 @@ namespace Meadow.Simulation
                 TimeSpan.Zero);
         }
 
+        /// <inheritdoc/>
         public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState = false)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
         {
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
         public ISpiBus CreateSpiBus(int busNumber, Frequency speed)
         {
             throw new NotImplementedException();

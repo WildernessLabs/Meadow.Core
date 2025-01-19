@@ -221,9 +221,10 @@ namespace Meadow.Devices
             // D02
             // TIM5_CH1, I2C4_SMBA, FMC_D18, DCMI_D1, LCD_R4, EVENTOUT
             /// <inheritdoc/>
-            public IPin D02 => _d02 ??= new Pin(
+            public IPin D02 => _d02 ??= new F7Pin(
                 Controller,
                 "D02", "PH10",
+                Core.Interop.STM32.GpioPort.PortH, 10,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PH10", interruptCapable: false),
                     new PwmChannelInfo("TIM5_CH1", 5, 1)
@@ -232,9 +233,10 @@ namespace Meadow.Devices
             // D03
             // I2C4_SCL, TIM4_CH3, TIM10_CH1, I2C1_SCL, DFSDM_CKIN7, UART5_RX, CAN1_RX, SDMMC2_D4, ETH_MII_TXD3, SDMMC1_D4, DCMI_D6, LCD_B6, EVENTOUT
             /// <inheritdoc/>
-            public IPin D03 => _d03 ??= new Pin(
+            public IPin D03 => _d03 ??= new F7Pin(
                 Controller,
                 "D03", "PB8",
+                Core.Interop.STM32.GpioPort.PortB, 8,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB8", interruptGroup: 8),
                     new PwmChannelInfo("TIM4_CH3", 4, 3),
@@ -244,9 +246,10 @@ namespace Meadow.Devices
             // D04
             // I2C4_SDA, TIM4_CH4, TIM11_CH1, I2C1_SDA, SPI2_NSS/I2S2_WS, DFSDM_DATIN7, UART5_TX, CAN1_TX, SDMMC2_D5, I2C4_SMBA, SDMMC1_D5, DCMI_D7, LCD_B7, EVENTOUT
             /// <inheritdoc/>
-            public IPin D04 => _d04 ??= new Pin(
+            public IPin D04 => _d04 ??= new F7Pin(
                 Controller,
                 "D04", "PB9",
+                Core.Interop.STM32.GpioPort.PortB, 9,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB9", interruptGroup: 9),
                     new PwmChannelInfo("TIM4_CH4", 4, 4),
@@ -257,41 +260,17 @@ namespace Meadow.Devices
             //==== Right Header
 
             // D05 //NOTE: we can expose UART_7 if we want here
-            // F7v2.a
-            // JTDI, TIM2_CH1/TIM2_ETR, HDMI_CEC, SPI1_NSS/I2S1_WS, SPI3_NSS/I2S3_WS, SPI6_NSS, UART4_RTS, CAN3_TX, UART7_TX, EVENTOUT
-            //public IPin D05 => new Pin(
-            //    "D05", "PA15",
-            //    new List<IChannelInfo> {
-            //        new DigitalChannelInfo("PA15", interruptGroup: 15),
-            //        //new PwmChannelInfo("TIM2_CH1", 1, 1), // Reserved for OnboardLED
-            //        new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
-            //    }
-            //);
-            // F7v2.b
             // NJTRST, TIM3_CH1, SPI1_MISO, SPI3_MISO, SPI2_NSS/I2S2_WS, SPI6_MISO, SDMMC2_D3, CAN3_TX, UART7_TX, EVENTOUT
             /// <inheritdoc/>
             public IPin D05 => _d05 ??= new Pin(
                 Controller,
                 "D05", "PB4",
                 new List<IChannelInfo> {
-                    new DigitalChannelInfo("PB4", interruptGroup: 4),
-                    new PwmChannelInfo("TIM3_CH1", 3, 1),
-                    //new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
+                    new DigitalChannelInfo("PB4", interruptGroup: 4)
                 }
             );
 
-            // D06 //NOTE: we can expose UART_7 if we want here
-            // F7v2.a
-            // JTDO/TRACESWO, TIM2_CH2, SPI1_SCK/I2S1_CK, SPI3_SCK/I2S3_CK, SPI6_SCK, SDMMC2_D2, CAN3_RX, UART7_RX, EVENTOUT
-            //public IPin D06 => new Pin(
-            //    "D06", "PB3",
-            //    new List<IChannelInfo> {
-            //        new DigitalChannelInfo("PB3", interruptGroup: 3),
-            //        //new PwmChannelInfo("TIM2_CH2", 2, 2), // Reserved for OnboardLED
-            //        new UartChannelInfo("UART7_TX", SerialDirectionType.Transmit)
-            //    }
-            //);
-            // F7v2.b
+            // D06
             // I2C2_SMBA, SPI5_SCK, TIM12_CH1, ETH_MII_RXD2, FMC_SDNE1, DCMI_D8, EVENTOUT
             /// <inheritdoc/>
             public IPin D06 => _d06 ??= new Pin(
@@ -299,17 +278,16 @@ namespace Meadow.Devices
                 "D06", "PB13",
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB13", interruptGroup: 13),
-                    //new PwmChannelInfo("TIM1_CH1", 1, 1),
-                    //new UartChannelInfo("UART7_RX", SerialDirectionType.Receive)
                 }
             );
 
             // D07
             // TIM4_CH2, I2C1_SDA, DFSDM_CKIN5, USART1_RX, I2C4_SDA, FMC_NL, DCMI_VSYNC, EVENTOUT
             /// <inheritdoc/>
-            public IPin D07 => _d07 ??= new Pin(
+            public IPin D07 => _d07 ??= new F7Pin(
                 Controller,
                 "D07", "PB7",
+                Core.Interop.STM32.GpioPort.PortB, 7,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB7", interruptGroup: 7),
                     new PwmChannelInfo("TIM4_CH2", 4, 2),
@@ -321,9 +299,10 @@ namespace Meadow.Devices
             // D08
             // UART5_TX, TIM4_CH1, HDMI_CEC, I2C1_SCL, DFSDM_DATIN5, USART1_TX, CAN2_TX, QUADSPI_BK1_NCS, I2C4_SCL, FMC_SDNE1, DCMI_D5, EVENTOUT
             /// <inheritdoc/>
-            public IPin D08 => _d08 ??= new Pin(
+            public IPin D08 => _d08 ??= new F7Pin(
                 Controller,
                 "D08", "PB6",
+                Core.Interop.STM32.GpioPort.PortB, 6,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB6", interruptGroup: 6),
                     new PwmChannelInfo("TIM4_CH1", 4, 1),
@@ -333,9 +312,10 @@ namespace Meadow.Devices
             // D09
             // TIM3_CH1, TIM8_CH1, I2S2_MCK, DFSDM_CKIN3, USART6_TX, FMC_NWAIT, SDMMC2_D6, SDMMC1_D6, DCMI_D0, LCD_HSYNC, EVENTOUT
             /// <inheritdoc/>
-            public IPin D09 => _d09 ??= new Pin(
+            public IPin D09 => _d09 ??= new F7Pin(
                 Controller,
                 "D09", "PC6",
+                Core.Interop.STM32.GpioPort.PortC, 6,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC6", interruptGroup: 6),
                     new PwmChannelInfo("TIM8_CH1", 8, 1), // or TIM3_CH1 (see D05)
@@ -344,9 +324,10 @@ namespace Meadow.Devices
             // D10
             // TIM3_CH2, TIM8_CH2, I2S3_MCK, DFSDM_DATIN3, USART6_RX, FMC_NE1, SDMMC2_D7, SDMMC1_D7, DCMI_D1, LCD_G6, EVENTOUT
             /// <inheritdoc/>
-            public IPin D10 => _d10 ??= new Pin(
+            public IPin D10 => _d10 ??= new F7Pin(
                 Controller,
                 "D10", "PC7",
+                Core.Interop.STM32.GpioPort.PortC, 7,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC7", interruptGroup: 7),
                     new PwmChannelInfo("TIM3_CH2", 3, 2) // or TIM8_CH2
@@ -355,9 +336,10 @@ namespace Meadow.Devices
             // D11
             // MCO2, TIM3_CH4, TIM8_CH4, I2C3_SDA, I2S_CKIN, UART5_CTS, QUADSPI_BK1_IO0, LCD_G3, SDMMC1_D1, DCMI_D3, LCD_B2, EVENTOUT   
             /// <inheritdoc/>
-            public IPin D11 => _d11 ??= new Pin(
+            public IPin D11 => _d11 ??= new F7Pin(
                 Controller,
                 "D11", "PC9",
+                Core.Interop.STM32.GpioPort.PortC, 9,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PC9", interruptGroup: 9),
                     new PwmChannelInfo("TIM8_CH4", 8, 4)
@@ -366,9 +348,10 @@ namespace Meadow.Devices
             // D12
             // TIM1_CH2N, TIM8_CH2N, USART1_TX, SPI2_MISO, DFSDM_DATIN2, USART3_RTS, UART4_RTS, TIM12_CH1, SDMMC2_D0, OTG_HS_DM, EVENTOUT
             /// <inheritdoc/>
-            public IPin D12 => _d12 ??= new Pin(
+            public IPin D12 => _d12 ??= new F7Pin(
                 Controller,
                 "D12", "PB14",
+                Core.Interop.STM32.GpioPort.PortB, 14,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB14", interruptGroup: 14),
                     new PwmChannelInfo("TIM12_CH1", 12, 1),
@@ -378,9 +361,10 @@ namespace Meadow.Devices
             // D13
             // RTC_REFIN, TIM1_CH3N, TIM8_CH3N, USART1_RX, SPI2_MOSI/I2S2_SD, DFSDM_CKIN2, UART4_CTS, TIM12_CH2, SDMMC2_D1, OTG_HS_DP, EVENTOUT
             /// <inheritdoc/>
-            public IPin D13 => _d13 ??= new Pin(
+            public IPin D13 => _d13 ??= new F7Pin(
                 Controller,
                 "D13", "PB15",
+                Core.Interop.STM32.GpioPort.PortB, 15,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB15", interruptGroup: 15),
                     new PwmChannelInfo("TIM12_CH2", 12, 2),
@@ -390,9 +374,10 @@ namespace Meadow.Devices
             // D14
             // TIM1_BKIN, I2C2_SMBA, SPI2_NSS/I2S2_WS, DFSDM_DATIN1, USART3_CK, UART5_RX, CAN2_RX, OTG_HS_ULPI_D5, ETH_MII_TXD0/ETH_RMII _TXD0, OTG_HS_ID, EVENTOUT
             /// <inheritdoc/>
-            public IPin D14 => _d14 ??= new Pin(
+            public IPin D14 => _d14 ??= new F7Pin(
                 Controller,
                 "D14", "PB12",
+                Core.Interop.STM32.GpioPort.PortB, 12,
                 new List<IChannelInfo> {
                     new DigitalChannelInfo("PB12", interruptCapable: false),
                     //new PwmChannelInfo("TIM12_CH2", 12, 2),
