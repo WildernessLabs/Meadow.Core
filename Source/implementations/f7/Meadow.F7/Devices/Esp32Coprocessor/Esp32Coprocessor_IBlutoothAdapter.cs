@@ -92,6 +92,16 @@ namespace Meadow.Devices
                 throw new Exception("Bluetooth stack is not active.");
             }
 
+            foreach (var service in _definition.Services)
+            {
+                foreach (var characteristic in service.Characteristics)
+                {
+                    characteristic.ServerValueSet -= OnServerValueSet;
+                }
+                service.Characteristics.Clear();
+            }
+            _handleToCharacteristicMap.Clear();
+            _definition.Services.Clear();
             _definition = null!;
 
             var result = SendBluetoothCommand(BluetoothFunction.Stop, true, null, null);
