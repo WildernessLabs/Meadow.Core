@@ -81,6 +81,24 @@ namespace Meadow.Devices
             }
         }
 
+        /// <summary>
+        /// Stop the Bluetooth server.
+        /// </summary>
+        /// <returns>True if the Bluetooth server stopped successfully, false otherwise.</returns>
+        public bool StopBluetoothServer()
+        {
+            if (_definition == null)
+            {
+                throw new Exception("Bluetooth stack is not active.");
+            }
+
+            _definition = null!;
+
+            var result = SendBluetoothCommand(BluetoothFunction.Stop, true, null, null);
+
+            return result == StatusCodes.CompletedOk;
+        }
+
         private void OnServerValueSet(ICharacteristic c, byte[] valueBytes)
         {
             if (c.ValueHandle == 0)
