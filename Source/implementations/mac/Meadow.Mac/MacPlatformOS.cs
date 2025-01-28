@@ -349,15 +349,15 @@ public class MacPlatformOS : IPlatformOS
         var drives = DriveInfo.GetDrives();
 
         // Assuming the primary drive is of type 'Fixed'
-        DriveInfo primaryDrive = drives.FirstOrDefault(drive => drive.DriveType == DriveType.Fixed);
+        DriveInfo? primaryDrive = drives.FirstOrDefault(drive => drive.DriveType == DriveType.Fixed);
 
         if (primaryDrive != null)
         {
             long bytesAvailable = primaryDrive.TotalSize - primaryDrive.AvailableFreeSpace;
-            return new Units.DigitalStorage(bytesAvailable, Units.DigitalStorage.UnitType.Bytes);
+            return new DigitalStorage(bytesAvailable, DigitalStorage.UnitType.Bytes);
         }
 
         // If the primary drive is not found, returns 0 bytes.
-        return new Units.DigitalStorage(0, Units.DigitalStorage.UnitType.Bytes);
+        return new DigitalStorage(0, DigitalStorage.UnitType.Bytes);
     }
 }
