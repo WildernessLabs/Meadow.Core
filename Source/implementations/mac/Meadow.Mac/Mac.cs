@@ -25,6 +25,9 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
     /// <inheritdoc/>
     public INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
 
+    /// <summary>
+    /// Creates a new instance of the Mac class.
+    /// </summary>
     public Mac()
     {
         PlatformOS = new MacPlatformOS();
