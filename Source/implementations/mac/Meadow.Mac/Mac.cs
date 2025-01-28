@@ -9,6 +9,9 @@ using System.Text.RegularExpressions;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents a Mac device running the Meadow OS.
+/// </summary>
 public class Mac : IMeadowDevice, IPixelDisplayProvider
 {
     private readonly Lazy<NativeNetworkAdapterCollection> _networkAdapters;
@@ -16,12 +19,15 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
     /// <inheritdoc/>
     public IPlatformOS PlatformOS { get; }
     /// <inheritdoc/>
-    public DeviceCapabilities Capabilities { get; private set; }
+    public DeviceCapabilities Capabilities { get; private set; } = default!;
     /// <inheritdoc/>
-    public IDeviceInformation Information { get; private set; }
+    public IDeviceInformation Information { get; private set; } = default!;
     /// <inheritdoc/>
     public INetworkAdapterCollection NetworkAdapters => _networkAdapters.Value;
 
+    /// <summary>
+    /// Creates a new instance of the Mac class.
+    /// </summary>
     public Mac()
     {
         PlatformOS = new MacPlatformOS();

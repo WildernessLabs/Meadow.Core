@@ -4,6 +4,9 @@ using System.IO;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents the file system information for the Mac platform
+/// </summary>
 public class MacFileSystemInfo : IPlatformOS.FileSystemInfo
 {
     /// <inheritdoc/>
