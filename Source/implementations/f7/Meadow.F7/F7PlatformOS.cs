@@ -3,6 +3,7 @@ using Meadow.Hardware;
 using Meadow.Units;
 using System;
 using System.IO;
+using System.Threading;
 using static Meadow.Logging.Logger;
 
 namespace Meadow;
@@ -43,7 +44,22 @@ public partial class F7PlatformOS : IPlatformOS
     {
         if (Resolver.Device is F7MicroBase f7)
         {
-            return f7.GetProcessorTemperature();
+            var valid = false;
+
+            do
+            {
+                var temp = f7.GetProcessorTemperature();
+
+                // sanity check this, occasionally it gives wildly out-of-range values
+                if (temp.Celsius > -40 && temp.Celsius < 85)
+                {
+                    valid = true;
+                }
+                else
+                {
+                    Thread.Sleep(250);
+                }
+            } while (!valid);
         }
 
         // should never occur, but makes the compiler happy
