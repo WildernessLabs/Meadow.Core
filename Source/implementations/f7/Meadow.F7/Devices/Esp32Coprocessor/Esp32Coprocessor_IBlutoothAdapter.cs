@@ -98,10 +98,8 @@ namespace Meadow.Devices
                 {
                     characteristic.ServerValueSet -= OnServerValueSet;
                 }
-                service.Characteristics.Clear();
             }
             _handleToCharacteristicMap.Clear();
-            _definition.Services.Clear();
             _definition = null!;
 
             var result = SendBluetoothCommand(BluetoothFunction.Stop, true, null, null);
