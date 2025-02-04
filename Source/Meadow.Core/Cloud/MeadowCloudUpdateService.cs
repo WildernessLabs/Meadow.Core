@@ -321,7 +321,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                 sw.Stop();
 
                 // TODO: raise some event?
-                Resolver.Log.Error($"Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message}");
+                Resolver.Log.Error($"[ {ex.GetType().Name} ] Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message} {ex.StackTrace}");
 
                 Resolver.Log.Info($"Retrying attempt {retryCount + 1} of {MaxDownloadRetries} in {RetryDelayMilliseconds} milliseconds...");
                 await Task.Delay(RetryDelayMilliseconds);
