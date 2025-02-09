@@ -21,6 +21,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _csq;
     private string? _at_cmds_output;
     private static CellNetworkState _cell_state;
+    private NetworkState CurrentState;
+    public override bool IsConnected { get => CurrentState == NetworkState.Connected; }
 
     /// <summary>
     /// Represents a signal strength value that indicates no signal or an extremely weak signal.
@@ -148,7 +150,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 // TODO: Get the IP, gateway and subnet from the OS land.
                 var args = new CellNetworkConnectionEventArgs(IPAddress.Loopback, IPAddress.Any, IPAddress.None);
-
+                CurrentState = NetworkState.Connected;
                 UpdateAtCmdsOutput();
 
                 this.Refresh();
@@ -158,7 +160,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 Resolver.Log.Trace("Cell disconnected event triggered!", MessageGroup.Core);
 
                 Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}", MessageGroup.Core);
-
+                CurrentState = NetworkState.Disconnected;
                 ResetCellTempData();
 
                 RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
@@ -172,7 +174,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
-
+                CurrentState = NetworkState.Error;
                 Resolver.Log.Trace($"Cell connection error: {GetCellConnectionError()}");
                 break;
             case CellFunction.NtpUpdateEvent:
@@ -181,6 +183,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             case CellFunction.NetworkConnectingEvent:
                 Resolver.Log.Trace("Cell connecting event triggered!");
                 RaiseNetworkConnecting();
+                CurrentState = NetworkState.Connecting;
                 break;
             case CellFunction.NetworkRetryExceededEvent:
                 Resolver.Log.Trace("Cell retry exceeded event triggered!");
@@ -189,25 +192,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             default:
                 Resolver.Log.Trace("Event type not found");
                 break;
-        }
-    }
-
-    /// <summary>
-    /// Returns <c>true</c> if the adapter is connected, otherwise <c>false</c>
-    /// </summary>
-    public override bool IsConnected
-    {
-        get
-        {
-            try
-            {
-                return Core.Interop.Nuttx.meadow_cell_is_connected();
-            }
-            catch (Exception e)
-            {
-                Resolver.Log.Error($"Failed to read meadow_cell_is_connected(): {e.Message}", MessageGroup.Core);
-                return false;
-            }
         }
     }
 
@@ -474,5 +458,15 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             return string.Empty;
         }
         return gnssAtCmdsOutput;
+    }
+
+    private enum NetworkState
+    {
+        Unknown,
+        Disconnected,
+        Connecting,
+        Connected,
+        Disconnecting,
+        Error
     }
 }
