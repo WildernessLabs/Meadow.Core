@@ -793,7 +793,15 @@ public enum ConfigurationItems
     /// <summary>
     /// ConfigurationItems - SoftApMacAddress
     /// </summary>
-    SoftApMacAddress = 14
+    SoftApMacAddress = 14,
+    /// <summary>
+    /// ConfigurationItems - SubnetMask
+    /// </summary>
+    SubnetMask = 15,
+    /// <summary>
+    /// ConfigurationItems - BluetoothMacAddress
+    /// </summary>
+    BluetoothMacAddress = 16,
 };
 
 /// <summary>

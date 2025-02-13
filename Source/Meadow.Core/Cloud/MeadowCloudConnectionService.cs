@@ -348,6 +348,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                                 tlsParameters.UseTls = Settings.MqttPort == 8883;
                             })
                             .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+                            .WithCleanSession(false)
+                            .WithSessionExpiryInterval(86400) // Keep the session for 1 day
                             .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
 
                         if (Settings.UseAuthentication)
