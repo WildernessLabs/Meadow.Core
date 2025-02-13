@@ -666,6 +666,7 @@ public static partial class MeadowOS
             {
                 if (hardwareProviderType != null)
                 {
+                    Resolver.Log.Trace($"Searching for 'Create' method in type '{hardwareProviderType.Name}'", MessageGroup.Core);
                     // because reflection doesn't seem to traverse the type constraints, manually do this trash
                     var createMethod = hardwareProviderType
                         .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.FlattenHierarchy)
@@ -679,10 +680,18 @@ public static partial class MeadowOS
                     if (createMethod != null)
                     {
                         Resolver.Log.Trace($"Creating hardware provider '{hardwareProviderType.Name}'", MessageGroup.Core);
+
                         // allow using non-public constructors
-                        var provider = Activator.CreateInstance(
-                            hardwareProviderType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-                            null, null, null);
+                        var ctor = hardwareProviderType.GetConstructor(
+                            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy,
+                            null, Array.Empty<Type>(), null);
+
+                        if (ctor is null)
+                        {
+                            Resolver.Log.Error($"Cannot find constructor for '{hardwareProviderType.Name}'.  Has it been added to the nolink settings?", MessageGroup.Core);
+                        }
+
+                        var provider = Activator.CreateInstance(hardwareProviderType, true);
 
                         Resolver.Log.Trace($"Using hardware provider to create hardware...", MessageGroup.Core);
                         var hardware = createMethod.Invoke(provider, new object[] { CurrentDevice });
