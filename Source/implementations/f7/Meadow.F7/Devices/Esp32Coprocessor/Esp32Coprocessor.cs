@@ -287,13 +287,38 @@ public partial class Esp32Coprocessor : ICoprocessor
                     Resolver.Log.Trace("Processing event.", MessageGroup.Esp);
                     EventData eventData = Encoders.ExtractEventData(rxBuffer, 0);
                     byte[]? payload = null;
+                    string functionName = string.Empty;
+                    switch ((Esp32Interfaces) eventData.Interface)
+                    {
+                        case Esp32Interfaces.WiFi:
+                            functionName = ((WiFiFunction) eventData.Function).ToString();
+                            break;
+                        case Esp32Interfaces.BlueTooth:
+                            functionName = ((BluetoothFunction) eventData.Function).ToString();
+                            break;
+                        case Esp32Interfaces.Cell:
+                            functionName = ((CellFunction) eventData.Function).ToString();
+                            break;
+                        case Esp32Interfaces.System:
+                            functionName = ((SystemFunction) eventData.Function).ToString();
+                            break;
+                        case Esp32Interfaces.WiredEthernet:
+                            functionName = ((EthernetFunction) eventData.Function).ToString();
+                            break;
+                        case Esp32Interfaces.Transport:
+                            functionName = ((TransportFunction) eventData.Function).ToString();
+                            break;
+                        default:
+                            functionName = "Unknown";
+                            break;
+                    }
                     if (eventData.MessageId == 0)
                     {
-                        Resolver.Log.Trace($"Simple event, interface {eventData.Interface}, event code: {eventData.Function}, status code 0x{eventData.StatusCode:x08}", MessageGroup.Esp);
+                        Resolver.Log.Trace($"Simple event, interface {((Esp32Interfaces) eventData.Interface).ToString()}, event code: {functionName}, status code {((StatusCodes) eventData.StatusCode).ToString()} (0x{eventData.StatusCode:x08})", MessageGroup.Esp);
                     }
                     else
                     {
-                        Resolver.Log.Trace($"Complex event, interface {eventData.Interface}, event code: {eventData.Function}, message ID: 0x{eventData.MessageId:x08}", MessageGroup.Esp);
+                        Resolver.Log.Trace($"Complex event, interface {((Esp32Interfaces) eventData.Interface).ToString()}, event code: {functionName}, status code {((StatusCodes) eventData.StatusCode).ToString()} (0x{eventData.StatusCode:x08})", MessageGroup.Esp);
                         GetEventData(eventData, out payload);
                     }
                     Resolver.Log.Trace("Event data collected, raising event.", MessageGroup.Esp);
@@ -333,7 +358,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                                 SystemMessageReceived?.Invoke(this, ((SystemFunction)eventData.Function, (StatusCodes)eventData.StatusCode));
                                 break;
                             default:
-                                Resolver.Log.Warn($"Received an ESP32 event for interface {eventData.Interface}.  Ignored");
+                                Resolver.Log.Warn($"Received an ESP32 event for interface {eventData.Interface.ToString()}.  Ignored");
                                 break;
                         }
                     }).RethrowUnhandledExceptions();
