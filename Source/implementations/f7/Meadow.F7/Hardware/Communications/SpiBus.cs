@@ -24,10 +24,6 @@ namespace Meadow.Hardware
         /// </remarks>
         protected SpiBus()
         {
-#if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and forgets during check-in
-            _showSpiDebug = false;
-#endif
         }
 
         internal static SpiBus From(
