@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace Meadow.Core
+﻿namespace Meadow.Core
 {
     internal static partial class Interop
     {
@@ -96,7 +93,7 @@ namespace Meadow.Core
             public const int ADC_SR_AWD = (1 << 0); // analog watchdog
 
             public const int ADC_CCR_NON_RESERVED_MASK = 0x00c3ef1f;
-            
+
             public const int ADC_CCR_TSVREFE_SHIFT = 23;
             public const int ADC_CCR_VBATE_SHIFT = 22;
             public const int ADC_CCR_ADCPRE_SHIFT = 16;

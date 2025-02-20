@@ -254,7 +254,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                             Resolver.Log.Trace($"Starting download... File size: {message.FileSize.ToString("N0")} bytes.");
                         }
 
-                        using (var stream = await response.Content.ReadAsStreamAsync()) 
+                        using (var stream = await response.Content.ReadAsStreamAsync())
                         {
                             using (var fileStream = Store.GetUpdateFileStream(message.ID))
                             {

@@ -1,5 +1,4 @@
-﻿using System;
-namespace Meadow.Gateways.Bluetooth
+﻿namespace Meadow.Gateways.Bluetooth
 {
     /*
     /// <summary>
