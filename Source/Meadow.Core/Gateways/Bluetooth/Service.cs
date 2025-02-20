@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-
-namespace Meadow.Gateways.Bluetooth
+﻿namespace Meadow.Gateways.Bluetooth
 {
     /*
     public class Service : IService

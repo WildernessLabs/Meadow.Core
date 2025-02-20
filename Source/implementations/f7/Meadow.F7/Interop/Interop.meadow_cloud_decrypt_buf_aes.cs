@@ -22,7 +22,7 @@ internal static partial class Interop
             IntPtr ivBufferPtr = IntPtr.Zero;
 
             if (encrypted_data.Length % 16 != 0)
-                 throw new ArgumentException(nameof(encrypted_data));
+                throw new ArgumentException(nameof(encrypted_data));
 
             if (key.Length != aes_key_size)
                 throw new ArgumentException(nameof(key));

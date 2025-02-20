@@ -268,8 +268,8 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// <summary>
         /// Bssid element.
         /// </summary>
-        public Byte []Bssid;
-         /// <summary>
+        public Byte[] Bssid;
+        /// <summary>
         /// Rssi element.
         /// </summary>
         public Byte Rssi;
