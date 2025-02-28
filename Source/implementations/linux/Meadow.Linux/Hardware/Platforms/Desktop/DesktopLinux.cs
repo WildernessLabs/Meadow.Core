@@ -1,9 +1,12 @@
-﻿namespace Meadow.Pinouts;
+﻿using Meadow.Foundation.Displays;
+using Meadow.Peripherals.Displays;
+
+namespace Meadow.Pinouts;
 
 /// <summary>
 /// Represents a generic desktop Linux operating system.
 /// </summary>
-public class DesktopLinux : Linux
+public class DesktopLinux : Linux, IPixelDisplayProvider
 {
     /// <inheritdoc/>
     public EmptyPinout Pins { get; }
@@ -15,5 +18,11 @@ public class DesktopLinux : Linux
     {
         Pins = new EmptyPinout();
         Pins.Controller = this;
+    }
+
+    /// <inheritdoc/>
+    public IResizablePixelDisplay CreateDisplay(int? width = null, int? height = null)
+    {
+        return new SilkDisplay(width ?? 320, height ?? 240);
     }
 }

@@ -1,7 +1,5 @@
-﻿using Meadow.Foundation.Displays;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using Meadow.Networking;
-using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 using System.Diagnostics;
@@ -57,12 +55,6 @@ public abstract class Linux : IMeadowDevice
             new NetworkCapabilities(false, true),
             new StorageCapabilities(true)
             );
-    }
-
-    /// <inheritdoc/>
-    public IResizablePixelDisplay CreateDisplay(int? width = null, int? height = null)
-    {
-        return new SilkDisplay(width ?? 320, height ?? 240);
     }
 
     /// <inheritdoc/>
