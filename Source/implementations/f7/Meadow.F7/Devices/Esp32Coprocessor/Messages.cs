@@ -1180,4 +1180,23 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public byte[] SetData;
     };
 
+    /// <summary>
+    /// Structure to hold CellAttentionCmd data.
+    /// </summary>
+    public struct CellAttentionCmd
+    {
+        /// <summary>
+        /// Command element.
+        /// </summary>
+        public String Command;
+        /// <summary>
+        /// Timeout element.
+        /// </summary>
+        public UInt16 Timeout;
+        /// <summary>
+        /// Response element.
+        /// </summary>
+        public UInt16 Response;
+    }
+
 }

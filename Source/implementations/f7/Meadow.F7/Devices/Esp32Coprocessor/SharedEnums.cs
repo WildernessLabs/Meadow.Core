@@ -623,6 +623,10 @@ public enum CellFunction
     /// CellFunction - NetworkRetryExceededEvent
     /// </summary>
     NetworkRetryExceededEvent = 9,
+    /// <summary>
+    /// CellFunction - AtCommand
+    /// </summary>
+    AtCommand = 10,
 };
 
 /// <summary>
