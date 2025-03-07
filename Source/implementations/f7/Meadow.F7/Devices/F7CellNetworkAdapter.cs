@@ -17,6 +17,7 @@ using static Meadow.Logging.Logger;
 internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
     private readonly Esp32Coprocessor _esp32;
+
     private string? _imei;
     private string? _csq;
     private string? _at_cmds_output;
@@ -167,8 +168,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 Resolver.Log.Trace("Cell at cmd event triggered!", MessageGroup.Core);
 
                 UpdateAtCmdsOutput();
-
-                CellSetState(CellNetworkState.Resumed);
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
@@ -474,5 +473,41 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             return string.Empty;
         }
         return gnssAtCmdsOutput;
+    }
+
+    /// <summary>
+    /// Send an attention (AT) command to the modem.
+    /// </summary>
+    /// <param name="cmd">A valid command to send.</param>
+    /// <param name="timeout">The send timout duration in seconds.</param>
+    public void SendAtCmd(string cmd, int timeout)
+    {
+        CellAttentionCmd request = new CellAttentionCmd()
+        {
+            Timeout = (UInt16)timeout,
+            Response = 0, // OK = 0
+            Command = cmd,
+        };
+
+        byte[] encodedPayload = Encoders.EncodeAtCommand(request);
+        byte[] resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
+
+        StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.Cell, (UInt32)CellFunction.AtCommand, false, encodedPayload, resultBuffer);
+        if (result != StatusCodes.CompletedOk)
+        {
+            Resolver.Log.Error("Failed to send the command", MessageGroup.Core);
+        }
+
+        ResetCellTempData();
+
+        while (timeout > 0)
+        {
+            if (_at_cmds_output != null && _at_cmds_output.Length > 0)
+            {
+                break;
+            }
+            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
+            timeout--;
+        }
     }
 }
