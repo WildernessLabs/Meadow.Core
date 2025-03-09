@@ -37,9 +37,8 @@ public partial class F7PlatformOS : IPlatformOS
     }
 
     /// <summary>
-    /// Get the current CPU temperature (Not supported on F7).
+    /// Get the current CPU temperature.
     /// </summary>
-    /// <exception cref="NotSupportedException">Method is not supported on the F7 platform.</exception>
     public Temperature GetCpuTemperature()
     {
         if (Resolver.Device is F7MicroBase f7)
@@ -53,7 +52,7 @@ public partial class F7PlatformOS : IPlatformOS
                 // sanity check this, occasionally it gives wildly out-of-range values
                 if (temp.Celsius > -40 && temp.Celsius < 85)
                 {
-                    valid = true;
+                    return temp;
                 }
                 else
                 {
