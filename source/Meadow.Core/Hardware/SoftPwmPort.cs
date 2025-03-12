@@ -1,5 +1,4 @@
 using Meadow.Units;
-using System;
 using System.Threading;
 
 namespace Meadow.Hardware;
@@ -8,8 +7,6 @@ namespace Meadow.Hardware;
 /// A Pulse Width Modulation Generator that can
 /// generates waveforms in software. The maximum
 /// Frequency is about 100 Hz.
-/// 
-/// Note: This class is not yet implemented.
 /// </summary>
 public class SoftPwmPort : IPwmPort
 {
@@ -89,7 +86,7 @@ public class SoftPwmPort : IPwmPort
     /// </summary>
     public IPin Pin => Port.Pin;
 
-    IDigitalChannelInfo IPort<IDigitalChannelInfo>.Channel => throw new NotImplementedException();
+    IDigitalChannelInfo IPort<IDigitalChannelInfo>.Channel => new DigitalChannelInfo("soft-pwm", false, false, false, false, false, false);
 
     private Thread? thread = null;
     private int onTimeMilliseconds = 0;

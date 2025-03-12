@@ -4,6 +4,9 @@ using System.IO;
 
 namespace Meadow;
 
+/// <summary>
+/// Represents the file system information for the Windows platform
+/// </summary>
 public class WindowsFileSystemInfo : IPlatformOS.FileSystemInfo
 {
     /// <inheritdoc/>

@@ -114,7 +114,7 @@ namespace Meadow
             var path = $"{GpioFolder}/gpio{gpio}/direction";
 
             var handle = Interop.open(path, Interop.DriverFlags.O_WRONLY);
-            if(handle < 0)
+            if (handle < 0)
             {
                 throw new NativeException($"Unable to get handle for GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
             }
@@ -195,7 +195,7 @@ namespace Meadow
             try
             {
                 byte[] content;
-                switch(mode)
+                switch (mode)
                 {
                     case InterruptMode.EdgeBoth:
                         content = Encoding.ASCII.GetBytes("both\0");
@@ -279,7 +279,7 @@ namespace Meadow
                 {
                     throw new NativeException($"Failed to poll for interrupt: {Marshal.GetLastWin32Error()}");
                 }
-                else if(result == 0)
+                else if (result == 0)
                 {
                     // timeout, NOP
                 }

@@ -11,7 +11,6 @@ namespace Meadow.Hardware
     /// </summary>
     public partial class SpiBus : ISpiBus
     {
-        private bool _showSpiDebug = false;
         private SemaphoreSlim _busSemaphore = new SemaphoreSlim(1, 1);
         private SpiClockConfiguration? _clockConfig;
 
@@ -25,10 +24,6 @@ namespace Meadow.Hardware
         /// </remarks>
         protected SpiBus()
         {
-#if !DEBUG
-            // ensure this is off in release (in case a dev sets it to true and forgets during check-in
-            _showSpiDebug = false;
-#endif
         }
 
         internal static SpiBus From(
@@ -187,7 +182,6 @@ namespace Meadow.Hardware
             ChipSelectMode csMode = ChipSelectMode.ActiveLow)
         {
             _busSemaphore.Wait();
-            Output.WriteLineIf(_showSpiDebug, $" +SendData");
 
             try
             {
@@ -207,13 +201,11 @@ namespace Meadow.Hardware
                         BusNumber = BusNumber
                     };
 
-                    Output.WriteLineIf(_showSpiDebug, $" sending {writeBuffer.Length} bytes: {BitConverter.ToString(writeBuffer.ToArray())}");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
                     if (result != 0)
                     {
                         DecipherSPIError(UPD.GetLastError());
                     }
-                    Output.WriteLineIf(_showSpiDebug, $" send complete");
 
                     if (chipSelect != null)
                     {
@@ -225,7 +217,6 @@ namespace Meadow.Hardware
             finally
             {
                 _busSemaphore.Release();
-                Output.WriteLineIf(_showSpiDebug, $" -SendData");
             }
         }
 
@@ -267,14 +258,11 @@ namespace Meadow.Hardware
                         BusNumber = BusNumber
                     };
 
-                    Output.WriteLineIf(_showSpiDebug, "+Exchange");
-                    Output.WriteLineIf(_showSpiDebug, $" Sending {writeBuffer.Length} bytes");
                     var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIData, ref command);
                     if (result != 0)
                     {
                         DecipherSPIError(UPD.GetLastError());
                     }
-                    Output.WriteLineIf(_showSpiDebug, $" Received {readBuffer.Length} bytes");
 
                     if (chipSelect != null)
                     {
@@ -319,7 +307,6 @@ namespace Meadow.Hardware
                 BitsPerWord = bitsPerWord
             };
 
-            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} bits per word to {command.BitsPerWord}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIBits, ref command);
             if (result != 0)
             {
@@ -336,14 +323,11 @@ namespace Meadow.Hardware
                 Mode = mode
             };
 
-            Output.WriteLineIf(_showSpiDebug, "+SetMode");
-            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} mode to {command.Mode}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPIMode, ref command);
             if (result != 0)
             {
                 DecipherSPIError(UPD.GetLastError());
             }
-            Output.WriteLineIf(_showSpiDebug, $" mode set to {mode}");
         }
 
         private Units.Frequency SetFrequency(Units.Frequency desiredSpeed)
@@ -357,14 +341,11 @@ namespace Meadow.Hardware
                 Frequency = Convert.ToInt64(speed.Hertz)
             };
 
-            Output.WriteLineIf(_showSpiDebug, "+SetFrequency");
-            Output.WriteLineIf(_showSpiDebug, $" setting bus {command.BusNumber} speed to {command.Frequency}");
             var result = UPD.Ioctl(Nuttx.UpdIoctlFn.SPISpeed, ref command);
             if (result != 0)
             {
                 DecipherSPIError(UPD.GetLastError());
             }
-            Output.WriteLineIf(_showSpiDebug, $" speed set to {desiredSpeed}");
 
             return speed;
         }

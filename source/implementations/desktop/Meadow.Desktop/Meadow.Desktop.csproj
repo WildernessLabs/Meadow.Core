@@ -29,9 +29,9 @@
     <PackageReference Include="System.IO.Ports" Version="9.0.0" />
     <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
-    <PackageReference Include="Meadow.Foundation" Version="2.0.1.2" />
-    <PackageReference Include="Meadow.Linux" Version="2.0.1.2" />
-    <PackageReference Include="Meadow.Mac" Version="2.0.1.2" />
-    <PackageReference Include="Meadow.Windows" Version="2.0.1.2" />
+    <PackageReference Include="Meadow.Foundation" Version="2.1.0.1" />
+    <PackageReference Include="Meadow.Linux" Version="2.1.0.1" />
+    <PackageReference Include="Meadow.Mac" Version="2.1.0.1" />
+    <PackageReference Include="Meadow.Windows" Version="2.1.0.1" />
   </ItemGroup>
 </Project>
