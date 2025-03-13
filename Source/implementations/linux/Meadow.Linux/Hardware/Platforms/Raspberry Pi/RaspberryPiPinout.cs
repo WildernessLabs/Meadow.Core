@@ -10,7 +10,8 @@ public class RaspberryPiPinout : PinDefinitionBase, IPinDefinitions
     internal RaspberryPiPinout() { }
 
     internal const string GpiodChipPi4 = "gpiochip0";
-    internal const string GpiodChipPi5 = "gpiochip4";
+    internal const string GpiodChipPi5_4 = "gpiochip4";
+    internal const string GpiodChipPi5_0 = "gpiochip0";
 
     internal string GpiodChipName { get; } = "gpiochip0";
     internal int SysFsOffset { get; }

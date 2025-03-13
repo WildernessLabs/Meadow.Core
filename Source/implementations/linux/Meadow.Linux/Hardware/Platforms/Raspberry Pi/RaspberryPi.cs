@@ -37,13 +37,7 @@ public partial class RaspberryPi : Linux
             Console.WriteLine("We're on a Raspberry Pi 5");
         }
 
-        Pins = new RaspberryPiPinout(
-            IsRaspberryPi5 ?
-                RaspberryPiPinout.GpiodChipPi5 :
-                RaspberryPiPinout.GpiodChipPi4,
-            IsRaspberryPi5 ? 53 : 0
-            );
-
+        Pins = InitializeRaspberryPiPinout();
         Pins.Controller = this;
 
         _capabilities = new DeviceCapabilities(
@@ -51,6 +45,34 @@ public partial class RaspberryPi : Linux
             new NetworkCapabilities(false, true),
             new StorageCapabilities(true)
             );
+    }
+
+    private RaspberryPiPinout InitializeRaspberryPiPinout()
+    {
+        string gpiodChipName;
+
+        if (IsRaspberryPi5)
+        {
+            //The GPIOs have moved around on the Pi 5
+            // After Kernel 6.6.45, GPIO moved from gpiochip4 to gpiochip0 
+            if (File.Exists($"/dev/{RaspberryPiPinout.GpiodChipPi5_0}"))
+            {
+                gpiodChipName = RaspberryPiPinout.GpiodChipPi5_0;
+            }
+            else
+            {
+                gpiodChipName = RaspberryPiPinout.GpiodChipPi5_4;
+            }
+        }
+        else
+        {
+            gpiodChipName = RaspberryPiPinout.GpiodChipPi4;
+        }
+
+        Console.WriteLine($"Loading GPIOs from file: {gpiodChipName}");
+        var sysfsOffset = IsRaspberryPi5 ? 53 : 0;
+
+        return new RaspberryPiPinout(gpiodChipName, sysfsOffset);
     }
 
     private bool CheckIfPi5()
