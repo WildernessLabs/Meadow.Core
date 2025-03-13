@@ -66,15 +66,9 @@ jobs:
       with:
         dotnet-version:
           8.0.x
-
-#    - name: Install MAUI Workload
-#      run: dotnet workload install maui --ignore-failed-sources
-          
-#    - name: Workload Restore Meadow.Core
-#      run: dotnet workload restore Meadow.Core/source/Meadow.Core.sln
       
     - name: Build Meadow.Core
-      run: dotnet build -c Release Meadow.Core/source/Meadow.Core.sln
+      run: dotnet build /p:GeneratePackageOnBuild=false -c Release Meadow.Core/source/Meadow.Core.sln
     
     - name: Test Core.Unit.Tests
       run: dotnet test -c Release --no-build Meadow.Core/source/Tests/Core.Unit.Tests/Core.Unit.Tests.csproj
