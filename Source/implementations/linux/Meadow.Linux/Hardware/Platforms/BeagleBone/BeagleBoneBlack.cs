@@ -38,13 +38,13 @@ public partial class BeagleBoneBlack : Linux
     /// <param name="pin">The pin to create the port on.</param>
     /// <param name="sampleCount">The number of samples to use for input averaging</param>
     /// <param name="sampleInterval">The interval between readings</param>
-    public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval)
+    public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval)
     {
         return CreateAnalogInputPort(pin, sampleCount, sampleInterval, 1.8.Volts());
     }
 
     /// <inheritdoc/>
-    public override IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public override IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         // TODO: verify the vRef (1.8V on the BBB)
         var channelInfo = pin.SupportedChannels!.OfType<IAnalogChannelInfo>().FirstOrDefault();

@@ -10,7 +10,7 @@ namespace Meadow.Devices;
 /// </summary>
 public partial class F7FeatherV2 : F7FeatherBase
 {
-    private readonly Lazy<IAnalogInputPort?> _adc_bat;
+    private readonly Lazy<IObservableAnalogInputPort?> _adc_bat;
 
     /// <summary>
     /// Create a new F7FeatherV2 instance
@@ -30,7 +30,7 @@ public partial class F7FeatherV2 : F7FeatherBase
             throw new UnsupportedPlatformException(Information.Platform, message);
         }
 
-        _adc_bat = new Lazy<IAnalogInputPort?>(() => CreateAnalogInputPort((Pins as F7FeatherV2.Pinout)!.BAT));
+        _adc_bat = new Lazy<IObservableAnalogInputPort?>(() => CreateAnalogInputPort((Pins as F7FeatherV2.Pinout)!.BAT));
 
         Pins.Controller = this;
     }
