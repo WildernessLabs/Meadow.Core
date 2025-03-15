@@ -33,6 +33,18 @@ public abstract partial class F7MicroBase
             voltageReference);
     }
 
+    /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(
+        IPin pin,
+        Voltage? referenceVoltage)
+    {
+        return CreateAnalogInputPort(
+            pin,
+            1,
+            AnalogInputPort.DefaultSampleInterval,
+            AnalogInputPort.DefaultReferenceVoltage);
+    }
+
     /// <summary>
     /// Creates an `IAnalogInputPort` on the given pin. 
     /// </summary>
