@@ -308,4 +308,10 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
     {
         throw new NotImplementedException();
     }
+
+    /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference = null)
+    {
+        throw new NotImplementedException();
+    }
 }

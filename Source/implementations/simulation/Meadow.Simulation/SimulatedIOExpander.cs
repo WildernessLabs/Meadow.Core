@@ -41,13 +41,11 @@ public class SimulatedIOExpander : IAnalogInputController, IDigitalInputOutputCo
     }
 
     /// <inheritdoc/>
-    public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference)
     {
         return new SimulatedAnalogInputPort(
             pin as SimulatedPin ?? throw new Exception("Pin must be a SimulatedPin"),
             (IAnalogChannelInfo)pin.SupportedChannels.First(c => c is IAnalogChannelInfo),
-            sampleCount,
-            sampleInterval,
             voltageReference);
     }
 

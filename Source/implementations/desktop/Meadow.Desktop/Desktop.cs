@@ -84,6 +84,9 @@ public class Desktop : IMeadowDevice
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState)
         => _implementation.CreateBiDirectionalPort(pin, initialState);
     /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference)
+        => _implementation.CreateAnalogInputPort(pin, voltageReference);
+    /// <inheritdoc/>
     public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
         => _implementation.CreateAnalogInputPort(pin, sampleCount, sampleInterval, voltageReference);
     /// <inheritdoc/>

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+      <OutputType>Library</OutputType>
+      <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <ProjectReference Include="..\..\implementations\desktop\Meadow.Desktop\Meadow.Desktop.csproj" />
+      <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj">
+          <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+          <PrivateAssets>all</PrivateAssets>
+      </ProjectReference>
+  </ItemGroup>
+
+</Project>

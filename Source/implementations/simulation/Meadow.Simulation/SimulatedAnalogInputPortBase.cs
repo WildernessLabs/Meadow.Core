@@ -14,11 +14,9 @@ public abstract class SimulatedAnalogInputPortBase : AnalogInputPortBase
     /// </summary>
     /// <param name="pin">The simulated pin for the port</param>
     /// <param name="channel">The channel info for the port</param>
-    /// <param name="sampleCount">The sample count for the port</param>
-    /// <param name="sampleInterval">The sample interval for the port</param>
     /// <param name="referenceVoltage">The reference voltage for the port</param>
-    protected SimulatedAnalogInputPortBase(SimulatedPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage)
-        : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
+    protected SimulatedAnalogInputPortBase(SimulatedPin pin, IAnalogChannelInfo channel, Voltage? referenceVoltage)
+        : base(pin, channel, 1, TimeSpan.FromSeconds(1), referenceVoltage ?? new Voltage(3.3))
     {
     }
 

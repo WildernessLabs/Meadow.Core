@@ -494,4 +494,10 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
     {
         throw new NotImplementedException();
     }
+
+    /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference = null)
+    {
+        throw new NotImplementedException();
+    }
 }

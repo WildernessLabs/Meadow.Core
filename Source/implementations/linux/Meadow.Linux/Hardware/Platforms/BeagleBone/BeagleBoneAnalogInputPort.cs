@@ -11,21 +11,28 @@ namespace Meadow.Pinouts;
 /// <summary>
 /// Represents an analog input port for BeagleBone
 /// </summary>
-public class BeagleBoneAnalogInputPort : AnalogInputPortBase
+public class BeagleBoneAnalogInputPort : IAnalogInputPort
 {
     private readonly string _devicePath;
-    private Task? _updateTask;
-    private bool _isUpdating = false;
-    private CancellationTokenSource _cancellationTokenSource = new();
-    private CircularBuffer<Voltage> _buffer;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    internal BeagleBoneAnalogInputPort(IPin pin, IAnalogChannelInfo channelInfo, int sampleCount, TimeSpan sampleInterval)
-        : base(pin, channelInfo, sampleCount, sampleInterval, 1.8.Volts())
+    /// <inheritdoc/>
+    public Voltage ReferenceVoltage => 1.8.Volts();
+
+    /// <inheritdoc/>
+    public IAnalogChannelInfo Channel { get; }
+
+    /// <inheritdoc/>
+    public IPin Pin { get; }
+
+    internal BeagleBoneAnalogInputPort(IPin pin, IAnalogChannelInfo channelInfo)
     {
+        Pin = pin;
+        Channel = channelInfo;
+
         // pin name is in the form AINx where x is the device number
         var deviceNumber = pin.Name.Last();
         _devicePath = $"/sys/bus/iio/devices/iio:device0/in_voltage{deviceNumber}_raw";
-        _buffer = new CircularBuffer<Voltage>(sampleCount);
     }
 
     private Voltage GetChannelVoltage()
@@ -42,39 +49,13 @@ public class BeagleBoneAnalogInputPort : AnalogInputPortBase
     }
 
     /// <inheritdoc/>
-    public override Task<Voltage> Read()
+    public Task<Voltage> Read()
     {
-        if (_isUpdating)
-        {
-            return Task.FromResult(_buffer.Average(e => e.Volts).Volts());
-        }
-
         return Task.FromResult(GetChannelVoltage());
     }
 
     /// <inheritdoc/>
-    public override void StartUpdating(TimeSpan? updateInterval)
+    public void Dispose()
     {
-        if (_isUpdating) return;
-
-        _updateTask = Task.Run(async () =>
-        {
-            _isUpdating = true;
-            _cancellationTokenSource.TryReset();
-
-            while (!_cancellationTokenSource.IsCancellationRequested)
-            {
-                _buffer.Append(GetChannelVoltage());
-                await Task.Delay(UpdateInterval);
-            }
-        }, _cancellationTokenSource.Token);
-    }
-
-    /// <inheritdoc/>
-    public override void StopUpdating()
-    {
-        if (!_isUpdating) return;
-
-        _cancellationTokenSource.Cancel();
     }
 }
