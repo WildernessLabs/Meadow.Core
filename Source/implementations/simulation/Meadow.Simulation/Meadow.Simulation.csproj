@@ -19,11 +19,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="System.IO.Hashing" Version="9.0.0" />
-    <PackageReference Include="System.IO.Ports" Version="9.0.0" />
-    <PackageReference Include="System.Net.WebSockets" Version="4.3.0" />
+    <PackageReference Include="BouncyCastle.Cryptography" />
+    <PackageReference Include="Microsoft.Win32.Registry" />
+    <PackageReference Include="System.IO.Hashing" />
+    <PackageReference Include="System.IO.Ports" />
+    <PackageReference Include="System.Net.WebSockets" />
     <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -10,18 +10,16 @@ namespace Meadow.Simulation;
 /// </summary>
 public class SimulatedAnalogInputPort : SimulatedAnalogInputPortBase
 {
-    private SimulatedPin _pin;
+    private readonly SimulatedPin _pin;
 
     /// <summary>
     /// Creates a SimulatedAnalogInputPort instance
     /// </summary>
     /// <param name="pin">The simulated pin for the port</param>
     /// <param name="channel">The channel info for the port</param>
-    /// <param name="sampleCount">The sample count for the port</param>
-    /// <param name="sampleInterval">The sample interval for the port</param>
     /// <param name="referenceVoltage">The reference voltage for the port</param>
-    public SimulatedAnalogInputPort(SimulatedPin pin, IAnalogChannelInfo channel, int sampleCount, TimeSpan sampleInterval, Voltage referenceVoltage)
-        : base(pin, channel, sampleCount, sampleInterval, referenceVoltage)
+    public SimulatedAnalogInputPort(SimulatedPin pin, IAnalogChannelInfo channel, Voltage? referenceVoltage)
+        : base(pin, channel, referenceVoltage)
     {
         _pin = pin;
     }

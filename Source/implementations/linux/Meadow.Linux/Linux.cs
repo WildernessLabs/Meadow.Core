@@ -234,13 +234,13 @@ public abstract class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, float voltageReference = 3.3F)
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, float voltageReference = 3.3F)
     {
-        return CreateAnalogInputPort(pin, sampleCount, sampleInterval, voltageReference.Volts());
+        return CreateAnalogInputPort(pin, voltageReference.Volts());
     }
 
     /// <inheritdoc/>
-    public virtual IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public virtual IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference)
     {
         throw new PlatformNotSupportedException("This platform does not support analog inputs.  Use an IO Extender.");
     }
@@ -434,6 +434,12 @@ public abstract class Linux : IMeadowDevice
 
     /// <inheritdoc/>
     public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         throw new NotImplementedException();
     }

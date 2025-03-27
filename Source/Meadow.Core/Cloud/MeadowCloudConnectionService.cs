@@ -46,7 +46,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     internal IMeadowCloudSettings Settings { get; private set; }
 
-    private List<string> _subscriptionTopics = new();
+    private readonly List<string> _subscriptionTopics = new();
     private bool _stopService = true;
     private bool _firstConection = true;
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
@@ -55,7 +55,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private Thread? _stateMachineThread;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly CloudDataQueue _dataQueue;
-    private AutoResetEvent _dataReadyEvent = new(false);
+    private readonly AutoResetEvent _dataReadyEvent = new(false);
 
     private IMqttClientOptions? ClientOptions { get; set; } = default!;
     private IMqttClient MqttClient { get; set; } = default!;
@@ -149,6 +149,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         var raisedException = new MeadowCloudException(message, ex);
+        Resolver.Log.Debug(message);
 
         ErrorOccurred?.Invoke(this, raisedException);
     }

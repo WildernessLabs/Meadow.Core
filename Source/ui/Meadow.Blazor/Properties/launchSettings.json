@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Meadow.Blazor": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:52364;http://localhost:52365"
+    }
+  }
+}
