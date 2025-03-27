@@ -262,6 +262,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
                 break;
             case WiFiFunction.ConnectionRetryCountExceeded:
+                break;
             case WiFiFunction.NetworkDisconnectedEvent:
                 RaiseWiFiDisconnected(statusCode, payload);
                 CurrentState = NetworkState.Disconnected;
