@@ -381,7 +381,14 @@ internal class MeadowCloudUpdateService : IUpdateService
         }
         finally
         {
-            File.Delete(sourcePath!);
+            try
+            {
+                File.Delete(sourcePath!);
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Failed to delete source file: {ex.Message}");
+            }
         }
 
         // do we actually contain an update?
