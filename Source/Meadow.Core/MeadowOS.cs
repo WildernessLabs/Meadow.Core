@@ -57,6 +57,15 @@ public static partial class MeadowOS
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
+    public static Task Start<TApp>()
+        where TApp : IApp
+    {
+        return Start(null, null, typeof(TApp));
+    }
+
+    /// <summary>
+    /// Initializes and starts up the Meadow Core software stack
+    /// </summary>
     public static Task Start(string[]? args)
     {
         return Start(args, null);
@@ -73,12 +82,12 @@ public static partial class MeadowOS
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
-    private static async Task Start(string[]? args, IApp? app)
+    private static async Task Start(string[]? args, IApp? app, Type? appType = null)
     {
         bool systemInitialized = false;
         try
         {
-            systemInitialized = Initialize(args, app);
+            systemInitialized = Initialize(args, app, appType);
 
             if (!systemInitialized)
             {
@@ -398,9 +407,9 @@ public static partial class MeadowOS
         return FindDeviceTypeParameter(type.BaseType);
     }
 
-    private static (Type appType, Type deviceType, Type? hardwareProviderType)? FindAppForPlatform(MeadowPlatform platform)
+    private static (Type appType, Type deviceType, Type? hardwareProviderType)? GetConstructionTypesForPlatform(MeadowPlatform platform, Type? appType)
     {
-        var allApps = FindAppType(null);
+        var allApps = appType == null ? FindAppType(null) : new Type[] { appType };
 
         if (allApps.Length == 0)
         {
@@ -558,7 +567,7 @@ public static partial class MeadowOS
         }
     }
 
-    private static bool Initialize(string[]? args, IApp? app)
+    private static bool Initialize(string[]? args, IApp? app, Type? appType)
     {
         try
         {
@@ -585,9 +594,9 @@ public static partial class MeadowOS
 
         var settings = LoadSettings();
         var platform = DetectPlatform();
-        var appTypes = FindAppForPlatform(platform);
 
-        Type appType = appTypes!.Value.appType;
+        var appTypes = GetConstructionTypesForPlatform(platform, appType);
+        appType = appTypes!.Value.appType;
         var deviceType = appTypes!.Value.deviceType;
         var hardwareProviderType = appTypes!.Value.hardwareProviderType;
 
@@ -825,7 +834,7 @@ public static partial class MeadowOS
         }
     }
 
-    private static ManualResetEvent _forceTerminate = new ManualResetEvent(false);
+    private static readonly ManualResetEvent _forceTerminate = new ManualResetEvent(false);
 
     /// <summary>
     /// Cancel the meadow OS application Run call and allow the process to exit

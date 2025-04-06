@@ -20,7 +20,7 @@ public abstract partial class F7MicroBase
     /// reduce noise, a process known as _oversampling_.</param>
     /// <param name="sampleInterval">Duration in between samples when oversampling</param>
     /// <param name="voltageReference">Reference voltage, in Volts, of the maximum input value.</param>
-    public IAnalogInputPort CreateAnalogInputPort(
+    public IObservableAnalogInputPort CreateAnalogInputPort(
         IPin pin,
         int sampleCount,
         TimeSpan sampleInterval,
@@ -33,6 +33,18 @@ public abstract partial class F7MicroBase
             voltageReference);
     }
 
+    /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(
+        IPin pin,
+        Voltage? referenceVoltage)
+    {
+        return CreateAnalogInputPort(
+            pin,
+            1,
+            AnalogInputPort.DefaultSampleInterval,
+            AnalogInputPort.DefaultReferenceVoltage);
+    }
+
     /// <summary>
     /// Creates an `IAnalogInputPort` on the given pin. 
     /// </summary>
@@ -40,7 +52,7 @@ public abstract partial class F7MicroBase
     /// <param name="sampleCount">Number of samples to take per reading. If > `1` then the port will
     /// take multiple readings and These are automatically averaged to
     /// reduce noise, a process known as _oversampling_. Default is `5` samples.</param>
-    public IAnalogInputPort CreateAnalogInputPort(
+    public IObservableAnalogInputPort CreateAnalogInputPort(
         IPin pin,
         int sampleCount = 5)
     {
@@ -59,7 +71,7 @@ public abstract partial class F7MicroBase
     /// take multiple readings and These are automatically averaged to
     /// reduce noise, a process known as _oversampling_.</param>
     /// <param name="sampleInterval">Duration in between samples when oversampling</param>
-    public IAnalogInputPort CreateAnalogInputPort(
+    public IObservableAnalogInputPort CreateAnalogInputPort(
         IPin pin,
         int sampleCount,
         TimeSpan sampleInterval)

@@ -79,14 +79,14 @@ namespace Meadow.Simulation
         }
 
         /// <inheritdoc/>
-        public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Meadow.Units.Voltage voltageReference)
+        public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference)
         {
             var dc = pin.SupportedChannels?.FirstOrDefault(i => i is IAnalogChannelInfo) as AnalogChannelInfo;
             if (dc != null)
             {
                 return new SimulatedAnalogInputPort(
                     pin as SimulatedPin ?? throw new ArgumentException("pin must be a SimulatedPin"),
-                    dc, sampleCount, sampleInterval, voltageReference);
+                    dc, voltageReference);
             }
 
             throw new NotSupportedException();
@@ -329,6 +329,11 @@ namespace Meadow.Simulation
 
         /// <inheritdoc/>
         public ISpiBus CreateSpiBus(int busNumber, Frequency speed)
+        {
+            throw new NotImplementedException();
+        }
+
+        IObservableAnalogInputPort IObservableAnalogInputController.CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
         {
             throw new NotImplementedException();
         }

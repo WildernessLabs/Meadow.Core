@@ -103,7 +103,7 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
     }
 
     /// <inheritdoc/>
-    public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         throw new NotSupportedException("Add an IO Expander to your platform");
     }
@@ -305,6 +305,12 @@ public class Mac : IMeadowDevice, IPixelDisplayProvider
 
     /// <inheritdoc/>
     public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference = null)
     {
         throw new NotImplementedException();
     }

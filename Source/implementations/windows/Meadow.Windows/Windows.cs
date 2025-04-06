@@ -173,7 +173,7 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
     /// <param name="voltageReference">Reference voltage for the input measurement.</param>
     /// <returns>This method always throws <see cref="NotSupportedException"/> on Windows.</returns>
     /// <exception cref="NotSupportedException">Thrown on all Windows platforms without an IO Expander.</exception>
-    public IAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
+    public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         throw new NotSupportedException("Add an IO Expander to your platform");
     }
@@ -491,6 +491,12 @@ public class Windows : IMeadowDevice, IPixelDisplayProvider
     /// <returns>This method always throws <see cref="NotImplementedException"/> in Windows.</returns>
     /// <exception cref="NotImplementedException">Always thrown.</exception>
     public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference = null)
     {
         throw new NotImplementedException();
     }
