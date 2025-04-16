@@ -158,6 +158,7 @@ internal class MeadowCloudUpdateService : IUpdateService
     /// </summary>
     public void Start()
     {
+        CleanupUpdateStore();
         _isEnabled = true;
     }
 
@@ -342,7 +343,7 @@ internal class MeadowCloudUpdateService : IUpdateService
 
         Resolver.Log.Debug($"Applying update from '{sourcePath}'");
 
-        if (sourcePath == null)
+        if (sourcePath == null || !File.Exists(sourcePath))
         {
             UpdateFailure?.Invoke(this, updateInfo);
             throw new ArgumentException($"Cannot find update with ID {updateInfo.ID}");
@@ -377,6 +378,17 @@ internal class MeadowCloudUpdateService : IUpdateService
             Resolver.Log.Error($"Failed to extract update package: {ex.Message}");
             UpdateFailure?.Invoke(this, updateInfo);
             throw ex;
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(sourcePath!);
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Failed to delete source file: {ex.Message}");
+            }
         }
 
         // do we actually contain an update?
@@ -432,6 +444,23 @@ internal class MeadowCloudUpdateService : IUpdateService
             {
                 d.Delete();
             }
+        }
+    }
+
+    private void CleanupUpdateStore()
+    {
+        try
+        {
+            var di = new DirectoryInfo(UpdateStoreDirectory);
+            if (di.Exists)
+            {
+                Resolver.Log.Debug($"Cleaning up extracted update files in {UpdateStoreDirectory}");
+                DeleteDirectoryContents(di);
+            }
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Error cleaning up update directory: {ex.Message}");
         }
     }
 
