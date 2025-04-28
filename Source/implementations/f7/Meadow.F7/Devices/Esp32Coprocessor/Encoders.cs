@@ -997,7 +997,7 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         /// </summary>
         /// <param name="cellAttentionCmd">CellAttentionCmd object to be encoded.</param>
         /// <returns>CellAttentionCmd object.</returns>
-        public static byte[] EncodeAtCommand(MessagePayloads.CellAttentionCmd cellAttentionCmd)
+        public static byte[] EncodeATCommand(MessagePayloads.CellAttentionCmd cellAttentionCmd)
         {
             int offset = 0;
             int length = 0;
