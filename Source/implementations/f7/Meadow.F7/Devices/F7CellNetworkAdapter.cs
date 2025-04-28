@@ -484,7 +484,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="cmd">A valid command to send.</param>
     /// <param name="timeout">The send timout duration in seconds.</param>
-    public void SendAtCmd(string cmd, int timeout)
+    public void SendATCommand(string cmd, int timeout)
     {
         CellAttentionCmd request = new CellAttentionCmd()
         {
@@ -493,7 +493,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             Command = cmd,
         };
 
-        byte[] encodedPayload = Encoders.EncodeAtCommand(request);
+        byte[] encodedPayload = Encoders.EncodeATCommand(request);
         byte[] resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
 
         StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.Cell, (UInt32)CellFunction.AtCommand, false, encodedPayload, resultBuffer);
