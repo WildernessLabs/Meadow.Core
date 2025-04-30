@@ -12,10 +12,11 @@ public class WindowsSerialPort : ISerialPort, IDisposable
 {
     /// <inheritdoc/>
     public event Hardware.SerialDataReceivedEventHandler DataReceived = default!;
+
     /// <inheritdoc/>
     public event EventHandler BufferOverrun = default!;
 
-    private SerialPort _port;
+    private readonly SerialPort _port;
 
     /// <inheritdoc/>
     public int BytesToRead => _port.BytesToRead;
@@ -62,6 +63,12 @@ public class WindowsSerialPort : ISerialPort, IDisposable
 
         _port = new SerialPort(name, baudRate, (System.IO.Ports.Parity)parity, dataBits, (System.IO.Ports.StopBits)stopBits);
         _port.ReadBufferSize = readBufferSize;
+        _port.DataReceived += _port_DataReceived;
+    }
+
+    private void _port_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+    {
+        DataReceived?.Invoke(this, new Hardware.SerialDataReceivedEventArgs(SerialDataType.Chars));
     }
 
     /// <summary>
@@ -129,7 +136,7 @@ public class WindowsSerialPort : ISerialPort, IDisposable
     /// <inheritdoc/>
     public void ClearReceiveBuffer()
     {
-        _port.DiscardOutBuffer();
+        _port.DiscardInBuffer();
     }
 
     /// <inheritdoc/>
