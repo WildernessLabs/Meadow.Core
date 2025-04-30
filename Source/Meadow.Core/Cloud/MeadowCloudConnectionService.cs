@@ -706,8 +706,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public Task SendLog(CloudLog log)
+    public Task SendLog(CloudLog log, bool throwIfDisabled = true)
     {
+        if (!IsEnabled && throwIfDisabled)
+        {
+            throw new Exception("Meadow Cloud Service is not enabled");
+        }
+
         // enqueue and trigger the timer - this will send any older data before this record
         _dataQueue.Enqueue(log, "/api/logs");
         _dataReadyEvent.Set();
@@ -715,8 +720,13 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public Task SendEvent(CloudEvent cloudEvent)
+    public Task SendEvent(CloudEvent cloudEvent, bool throwIfDisabled = true)
     {
+        if (!IsEnabled && throwIfDisabled)
+        {
+            throw new Exception("Meadow Cloud Service is not enabled");
+        }
+
         // enqueue and trigger the timer - this will send any older data before this record
         _dataQueue.Enqueue(cloudEvent, "/api/events");
         _dataReadyEvent.Set();
