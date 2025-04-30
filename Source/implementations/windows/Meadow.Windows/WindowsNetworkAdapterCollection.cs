@@ -1,6 +1,7 @@
 ﻿using Meadow.Devices;
 using Meadow.Hardware;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
 namespace Meadow;
 
@@ -13,5 +14,11 @@ public class WindowsNetworkAdapterCollection : NativeNetworkAdapterCollection
     public override IWiFiNetworkAdapter GetWiFiNetworkAdapter(NetworkInterface ni)
     {
         return new WindowsWifiNetworkAdapter(ni);
+    }
+
+    /// <inheritdoc/>
+    public override Task Refresh()
+    {
+        return base.Refresh();
     }
 }

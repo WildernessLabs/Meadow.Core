@@ -50,7 +50,7 @@ public class NativeNetworkAdapterCollection : INetworkAdapterCollection
     /// <summary>
     /// Refreshes the collection
     /// </summary>
-    public Task Refresh()
+    public virtual Task Refresh()
     {
         lock (_adapters)
         {
