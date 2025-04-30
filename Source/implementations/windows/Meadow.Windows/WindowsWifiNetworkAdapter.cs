@@ -14,7 +14,7 @@ namespace Meadow;
 /// </summary>
 public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter, IWiFiNetworkAdapter
 {
-    private NetworkInterface _networkInterface;
+    private readonly NetworkInterface _networkInterface;
 
     /// <summary>
     /// Creates a WindowsWifiNetworkAdapter
