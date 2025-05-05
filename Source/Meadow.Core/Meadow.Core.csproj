@@ -16,7 +16,7 @@
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
     <Description>Core .NET libraries for Wilderness Labs Meadow</Description>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>12</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>

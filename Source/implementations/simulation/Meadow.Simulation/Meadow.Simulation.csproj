@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>12</LangVersion>
     <Description>A simulation Environment for Wilderness Labs Meadow Platform</Description>
   </PropertyGroup>
   <ItemGroup>

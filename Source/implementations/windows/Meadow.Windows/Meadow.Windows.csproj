@@ -3,7 +3,7 @@
     <Authors>Wilderness Labs, Inc</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <LangVersion>12.0</LangVersion>
+    <LangVersion>12</LangVersion>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AssemblyName>Meadow.Windows</AssemblyName>
