@@ -357,7 +357,7 @@ internal class MeadowCloudUpdateService : IUpdateService
         }
         else
         {
-            DeleteDirectoryContents(di);
+            MeadowOS.DeleteDirectoryContents(di);
         }
 
         try
@@ -430,23 +430,6 @@ internal class MeadowCloudUpdateService : IUpdateService
         State = _connectionService.ConnectionState == CloudConnectionState.Connected ? UpdateState.Connected : UpdateState.Disconnected;
     }
 
-    private void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
-    {
-        foreach (var f in di.EnumerateFiles())
-        {
-            f.Delete();
-        }
-
-        foreach (var d in di.EnumerateDirectories())
-        {
-            DeleteDirectoryContents(d, true);
-            if (deleteDirectory)
-            {
-                d.Delete();
-            }
-        }
-    }
-
     private void CleanupUpdateStore()
     {
         try
@@ -455,7 +438,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             if (di.Exists)
             {
                 Resolver.Log.Debug($"Cleaning up extracted update files in {UpdateStoreDirectory}");
-                DeleteDirectoryContents(di);
+                MeadowOS.DeleteDirectoryContents(di);
             }
         }
         catch (Exception ex)

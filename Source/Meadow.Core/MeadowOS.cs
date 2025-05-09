@@ -130,6 +130,11 @@ public static partial class MeadowOS
                 Resolver.Log.Trace("Initializing App", MessageGroup.Core);
                 await App.Initialize();
 
+                // if system and app are initialized without faults, we can finally remove the rollback directory
+                var rollback_dir = new DirectoryInfo("/meadow0/rollback");
+                DeleteDirectoryContents(rollback_dir, deleteDirectory: true);
+
+
                 stepName = "App Run";
 
                 Resolver.Log.Trace("Running App", MessageGroup.Core);
@@ -941,6 +946,26 @@ public static partial class MeadowOS
 
         // final shutdown - which really is just an infinite Sleep()
         Shutdown();
+    }
+
+    /// <summary>
+    /// Utility method to delete non-empty directories
+    /// </summary>
+    public static void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
+    {
+        foreach (var f in di.EnumerateFiles())
+        {
+            f.Delete();
+        }
+
+        foreach (var d in di.EnumerateDirectories())
+        {
+            DeleteDirectoryContents(d, true);
+            if (deleteDirectory)
+            {
+                d.Delete();
+            }
+        }
     }
 }
 
