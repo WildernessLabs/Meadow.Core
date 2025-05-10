@@ -17,7 +17,7 @@
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow,Meadow.Blazor</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>Utility library for aiding in using Wilderness Labs' Meadow stack in a Blazor Server application</Description>
+    <Description>Utility library for aiding in using Wilderness Labs Meadow stack in a Blazor Server application</Description>
   </PropertyGroup>
 
   <ItemGroup>
