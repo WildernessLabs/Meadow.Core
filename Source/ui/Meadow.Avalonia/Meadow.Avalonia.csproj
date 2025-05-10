@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow,Meadow.Avalonia,Avalonia</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>Utility library for aiding in using Wilderness Labs' Meadow stack in an Avalonia application</Description>
+    <Description>Utility library for aiding in using Wilderness Labs Meadow stack in an Avalonia application</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" />
