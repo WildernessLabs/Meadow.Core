@@ -18,6 +18,11 @@ public static partial class MeadowOS
         }
 
         /// <summary>
+        /// Gets the rollback directory used with Over-the-Air (OtA) updates.
+        /// </summary>
+        internal static string OtARollbackDirectory => Path.GetFullPath("rollback", UserFileSystemRoot);
+
+        /// <summary>
         /// Gets the `/Data` directory. Use this directory to store files that
         /// require permanent persistence, such as SQL data files, even
         /// through OS deployments and Over-the-Air (OtA) updates.
