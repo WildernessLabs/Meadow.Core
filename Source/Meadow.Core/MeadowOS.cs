@@ -131,9 +131,12 @@ public static partial class MeadowOS
                 await App.Initialize();
 
                 // if system and app are initialized without faults, we can finally remove the rollback directory
-                var rollback_dir = new DirectoryInfo("/meadow0/rollback");
-                DeleteDirectoryContents(rollback_dir, deleteDirectory: true);
+                var rollback_dir = new DirectoryInfo(FileSystem.OtARollbackDirectory);
 
+                if (rollback_dir.Exists)
+                {
+                    DeleteDirectoryContents(rollback_dir, deleteDirectory: true);
+                }
 
                 stepName = "App Run";
 
@@ -953,6 +956,11 @@ public static partial class MeadowOS
     /// </summary>
     public static void DeleteDirectoryContents(DirectoryInfo di, bool deleteDirectory = false)
     {
+        if (!di.Exists)
+        {
+            return;
+        }
+
         foreach (var f in di.EnumerateFiles())
         {
             f.Delete();
