@@ -857,12 +857,6 @@ public static partial class MeadowOS
     {
         AppAbort.Cancel(true);
 
-        // stop the update service
-        if (Resolver.Services.Get<IMeadowCloudService>() is { } cloudService)
-        {
-            cloudService.Stop();
-        }
-
         // schedule a device restart if possible and if the user hasn't disabled it
         ScheduleRestart();
 
