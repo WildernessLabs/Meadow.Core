@@ -66,7 +66,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
-        _dataQueue = new CloudDataQueue();
+        _dataQueue = new CloudDataQueue(settings.MaxQueueDepth > 0 ? settings.MaxQueueDepth : CloudDataQueue.DefaultQueueDepth);
     }
 
     /// <inheritdoc/>
