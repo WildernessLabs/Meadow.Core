@@ -22,6 +22,13 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _csq;
     private string? _at_cmds_output;
     private static CellNetworkState _cell_state;
+    private event Action CellAttentionCommandCompleted = delegate { };
+
+    /// <summary>
+    /// Lock object to make sure the events and the methods do not try to access
+    /// properties simultaneously.
+    /// </summary>
+    private readonly object _lock = new object();
 
     /// <summary>
     /// Represents a signal strength value that indicates no signal or an extremely weak signal.
@@ -164,9 +171,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
                 break;
-            case CellFunction.NetworkAtCmdEvent:
+            case CellFunction.NetworkAttentionCommandReplyEvent:
                 Resolver.Log.Trace("Cell at cmd event triggered!", MessageGroup.Core);
-
+                CellAttentionCommandCompleted?.Invoke();
                 UpdateAtCmdsOutput();
                 break;
             case CellFunction.NetworkErrorEvent:
@@ -480,34 +487,41 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// </summary>
     /// <param name="cmd">A valid command to send.</param>
     /// <param name="timeout">The send timout duration in seconds.</param>
-    public void SendATCommand(string cmd, int timeout)
+    /// <returns>A string containing the attention command reponse</returns>
+    public string SendATCommand(string cmd, int timeout)
     {
-        CellAttentionCmd request = new CellAttentionCmd()
+        ModemAttentionCommand request = new ModemAttentionCommand()
         {
             Timeout = (UInt16)timeout,
             Response = 0, // OK = 0
             Command = cmd,
         };
 
-        byte[] encodedPayload = Encoders.EncodeATCommand(request);
-        byte[] resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
-
-        StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.Cell, (UInt32)CellFunction.AtCommand, false, encodedPayload, resultBuffer);
-        if (result != StatusCodes.CompletedOk)
+        lock (_lock)
         {
-            Resolver.Log.Error("Failed to send the command", MessageGroup.Core);
-        }
+            ResetCellTempData();
+            using var replyReceived = new ManualResetEventSlim(false);
+            Action eventHandler = () => replyReceived.Set();
 
-        ResetCellTempData();
-
-        while (timeout > 0)
-        {
-            if (_at_cmds_output != null && _at_cmds_output.Length > 0)
+            try
             {
-                break;
+                CellAttentionCommandCompleted += eventHandler;
+
+                byte[] encodedPayload = Encoders.EncodeATCommand(request);
+                byte[] resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
+                StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.Cell, (UInt32)CellFunction.AttentionCommand, false, encodedPayload, resultBuffer);
+                if (result != StatusCodes.CompletedOk)
+                {
+                    Resolver.Log.Error("Failed to send the command", MessageGroup.Core);
+                    return string.Empty;
+                }
+                bool responseReceived = replyReceived.Wait(timeout);
+                return responseReceived ? _at_cmds_output ?? string.Empty : string.Empty;
             }
-            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout--;
+            finally
+            {
+                CellAttentionCommandCompleted -= eventHandler;
+            }
         }
     }
 }

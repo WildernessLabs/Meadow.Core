@@ -993,25 +993,25 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
-        /// Extract a CellAttentionCmd object from a byte array.
+        /// Extract a ModemAttentionCommand object from a byte array.
         /// </summary>
-        /// <param name="cellAttentionCmd">CellAttentionCmd object to be encoded.</param>
-        /// <returns>CellAttentionCmd object.</returns>
-        public static byte[] EncodeATCommand(MessagePayloads.CellAttentionCmd cellAttentionCmd)
+        /// <param name="ModemAttentionCommand">ModemAttentionCommand object to be encoded.</param>
+        /// <returns>ModemAttentionCommand object.</returns>
+        public static byte[] EncodeATCommand(MessagePayloads.ModemAttentionCommand ModemAttentionCommand)
         {
             int offset = 0;
             int length = 0;
 
-            length += cellAttentionCmd.Command.Length + 1;
+            length += ModemAttentionCommand.Command.Length + 1;
             length += 4;
 
             byte[] buffer = new byte[length];
             Array.Clear(buffer, 0, buffer.Length);
-            EncodeString(cellAttentionCmd.Command, buffer, offset);
-            offset += cellAttentionCmd.Command.Length + 1;
-            EncodeUInt16(cellAttentionCmd.Timeout, buffer, offset);
+            EncodeString(ModemAttentionCommand.Command, buffer, offset);
+            offset += ModemAttentionCommand.Command.Length + 1;
+            EncodeUInt16(ModemAttentionCommand.Timeout, buffer, offset);
             offset+= 2;
-            EncodeUInt16(cellAttentionCmd.Response, buffer, offset);
+            EncodeUInt16(ModemAttentionCommand.Response, buffer, offset);
             return buffer;
         }
 

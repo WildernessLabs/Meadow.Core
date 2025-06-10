@@ -1181,9 +1181,9 @@ namespace Meadow.Devices.Esp32.MessagePayloads
     };
 
     /// <summary>
-    /// Structure to hold CellAttentionCmd data.
+    /// Structure to hold ModemAttentionCommand data.
     /// </summary>
-    public struct CellAttentionCmd
+    public struct ModemAttentionCommand
     {
         /// <summary>
         /// Command element.
