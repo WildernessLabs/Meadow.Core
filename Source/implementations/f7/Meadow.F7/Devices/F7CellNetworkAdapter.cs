@@ -174,7 +174,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             case CellFunction.NetworkAttentionCommandReplyEvent:
                 Resolver.Log.Trace("Cell at cmd event triggered!", MessageGroup.Core);
                 CellAttentionCommandCompleted?.Invoke();
-                UpdateAtCmdsOutput();
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
@@ -499,7 +498,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
         lock (_lock)
         {
-            ResetCellTempData();
             using var replyReceived = new ManualResetEventSlim(false);
             Action eventHandler = () => replyReceived.Set();
 
@@ -515,7 +513,11 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                     Resolver.Log.Error("Failed to send the command", MessageGroup.Core);
                     return string.Empty;
                 }
-                bool responseReceived = replyReceived.Wait(timeout);
+                bool responseReceived = replyReceived.Wait(timeout * 1000);
+                if (responseReceived)
+                {
+                    UpdateAtCmdsOutput();
+                }
                 return responseReceived ? _at_cmds_output ?? string.Empty : string.Empty;
             }
             finally
