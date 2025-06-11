@@ -6,6 +6,7 @@ using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -967,6 +968,70 @@ public static partial class MeadowOS
             {
                 d.Delete();
             }
+        }
+    }
+
+    /// <summary>
+    /// Safely extracts a ZIP file to a target directory by using a temporary directory
+    /// and then atomically renaming it to the target location.
+    /// </summary>
+    /// <param name="file">Path to the ZIP file to extract</param>
+    /// <param name="empty_target_dir">Path to the target directory (must be empty or non-existent)</param>
+    /// <exception cref="ArgumentException">Thrown if the ZIP file doesn't exist or target directory is not empty</exception>
+    /// <exception cref="IOException">Thrown if extraction or directory operations fail</exception>
+    public static void SafelyExtractZIPFile(string file, string empty_target_dir)
+    {
+        if (!File.Exists(file))
+        {
+            throw new ArgumentException($"ZIP file does not exist: {file}");
+        }
+
+        // Delete the target directory if it exists 
+        DirectoryInfo existing_target_dir = new DirectoryInfo(empty_target_dir);
+        DeleteDirectoryContents(existing_target_dir);
+
+        // Create a temporary directory with a unique name in the system temp location
+        string tempDirectory = Path.Combine(
+            FileSystem.TempDirectory, 
+            "zip_extract_" + Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            // Create the temp directory
+            Directory.CreateDirectory(tempDirectory);
+
+            // Extract the ZIP file
+            Resolver.Log.Info($"Extracting ZIP file {file} to temporary location {tempDirectory}", MessageGroup.Core);
+            ZipFile.ExtractToDirectory(file, tempDirectory);
+
+            // Ensure the parent directory of the target exists
+            string parentDir = Path.GetDirectoryName(empty_target_dir);
+            if (!string.IsNullOrEmpty(parentDir) && !Directory.Exists(parentDir))
+            {
+                Directory.CreateDirectory(parentDir);
+            }
+
+            // Move the temporary directory to the target directory
+            Resolver.Log.Info($"Moving extracted contents from {tempDirectory} to {empty_target_dir}", MessageGroup.Core);
+            Directory.Move(tempDirectory, empty_target_dir);
+        }
+        catch (Exception ex)
+        {
+            // Clean up the temp directory if something went wrong
+            if (Directory.Exists(tempDirectory))
+            {
+                try
+                {
+                    Directory.Delete(tempDirectory, true);
+                }
+                catch
+                {
+                    // Best effort cleanup - ignore errors during cleanup
+                }
+            }
+
+            Resolver.Log.Error($"Failed to extract ZIP file: {ex.Message}", MessageGroup.Core);
+            throw; // Re-throw the exception for the caller to handle
         }
     }
 }

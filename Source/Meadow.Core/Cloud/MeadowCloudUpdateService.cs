@@ -363,9 +363,8 @@ internal class MeadowCloudUpdateService : IUpdateService
         try
         {
             // extract zip
-            Resolver.Log.Debug($"Extracting update to '{UpdateDirectory}'...");
             var sw = Stopwatch.StartNew();
-            ZipFile.ExtractToDirectory(sourcePath, UpdateDirectory);
+            MeadowOS.SafelyExtractZIPFile(sourcePath, UpdateDirectory);
             sw.Stop();
             Resolver.Log.Debug($"Extracting took {sw.Elapsed.TotalSeconds} seconds.");
 
