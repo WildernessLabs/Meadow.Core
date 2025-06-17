@@ -17,10 +17,18 @@ using static Meadow.Logging.Logger;
 internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAdapter
 {
     private readonly Esp32Coprocessor _esp32;
+
     private string? _imei;
     private string? _csq;
     private string? _at_cmds_output;
     private static CellNetworkState _cell_state;
+    private event Action CellAttentionCommandCompleted = delegate { };
+
+    /// <summary>
+    /// Lock object to make sure the events and the methods do not try to access
+    /// properties simultaneously.
+    /// </summary>
+    private readonly object _lock = new object();
 
     /// <summary>
     /// Represents a signal strength value that indicates no signal or an extremely weak signal.
@@ -163,12 +171,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
 
                 RaiseNetworkDisconnected(new NetworkDisconnectionEventArgs(NetworkDisconnectReason.Unspecified));
                 break;
-            case CellFunction.NetworkAtCmdEvent:
+            case CellFunction.NetworkAttentionCommandReplyEvent:
                 Resolver.Log.Trace("Cell at cmd event triggered!", MessageGroup.Core);
-
-                UpdateAtCmdsOutput();
-
-                CellSetState(CellNetworkState.Resumed);
+                CellAttentionCommandCompleted?.Invoke();
                 break;
             case CellFunction.NetworkErrorEvent:
                 Resolver.Log.Trace("Cell error event triggered!");
@@ -356,12 +361,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             case CellNetworkState.TrackingGPSLocation:
                 state |= 1 << 1;
                 break;
-            case CellNetworkState.FetchingSignalQuality:
-                state |= 1 << 2;
-                break;
-            case CellNetworkState.ScanningNetworks:
-                state |= 1 << 3;
-                break;
             default:
                 state |= 1 << 0;
                 break;
@@ -382,21 +381,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         string csqPattern = @"\+CSQ:\s+(\d+),\d+";
         _at_cmds_output = string.Empty;
 
-        CellSetState(CellNetworkState.FetchingSignalQuality);
-
-        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
-        {
-            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout--;
-        }
-
-        // Resume cell if the timeout was reached
-        if (timeout == 0)
-        {
-            CellSetState(CellNetworkState.Resumed);
-        }
-
-        if (string.IsNullOrEmpty(_at_cmds_output))
+        if (string.IsNullOrEmpty(SendATCommand("AT+CSQ", timeout)))
         {
             Resolver.Log.Error("AT commands output not found!", MessageGroup.Core);
             return NoSignal;
@@ -415,23 +400,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     public CellNetwork[] ScanForAvailableNetworks(int timeout)
     {
         Resolver.Log.Trace("Scanning for available cellular networks... It might take a few minutes and temporary disconnect you from the cellular network.", MessageGroup.Core);
-
-        CellSetState(CellNetworkState.ScanningNetworks);
         _at_cmds_output = string.Empty;
 
-        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
-        {
-            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout--;
-        }
-
-        // Resume cell if the timeout was reached
-        if (timeout == 0)
-        {
-            CellSetState(CellNetworkState.Resumed);
-        }
-
-        if (string.IsNullOrEmpty(_at_cmds_output))
+        if (string.IsNullOrEmpty(SendATCommand("AT+COPS=?", timeout)))
         {
             throw new System.IO.IOException("No available networks");
         }
@@ -474,5 +445,51 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             return string.Empty;
         }
         return gnssAtCmdsOutput;
+    }
+
+    /// <summary>
+    /// Send an attention (AT) command to the modem.
+    /// </summary>
+    /// <param name="cmd">A valid command to send.</param>
+    /// <param name="timeout">The send timout duration in seconds.</param>
+    /// <returns>A string containing the attention command reponse</returns>
+    public string SendATCommand(string cmd, int timeout)
+    {
+        ModemAttentionCommand request = new ModemAttentionCommand()
+        {
+            Timeout = (UInt16)timeout,
+            Response = 0, // OK = 0
+            Command = cmd,
+        };
+
+        lock (_lock)
+        {
+            using var replyReceived = new ManualResetEventSlim(false);
+            Action eventHandler = () => replyReceived.Set();
+
+            try
+            {
+                CellAttentionCommandCompleted += eventHandler;
+
+                byte[] encodedPayload = Encoders.EncodeATCommand(request);
+                byte[] resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
+                StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.Cell, (UInt32)CellFunction.AttentionCommand, false, encodedPayload, resultBuffer);
+                if (result != StatusCodes.CompletedOk)
+                {
+                    Resolver.Log.Error("Failed to send the command", MessageGroup.Core);
+                    return string.Empty;
+                }
+                bool responseReceived = replyReceived.Wait(timeout * 1000);
+                if (responseReceived)
+                {
+                    UpdateAtCmdsOutput();
+                }
+                return responseReceived ? _at_cmds_output ?? string.Empty : string.Empty;
+            }
+            finally
+            {
+                CellAttentionCommandCompleted -= eventHandler;
+            }
+        }
     }
 }

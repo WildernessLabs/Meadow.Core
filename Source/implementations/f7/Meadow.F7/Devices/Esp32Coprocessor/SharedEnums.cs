@@ -607,9 +607,9 @@ public enum CellFunction
     /// </summary>
     NetworkErrorEvent = 2,
     /// <summary>
-    /// CellFunction - NetworkAtCmdEvent
+    /// CellFunction - NetworkAttentionCommandReplyEvent
     /// </summary>
-    NetworkAtCmdEvent = 4,
+    NetworkAttentionCommandReplyEvent = 4,
     /// <summary>
     /// CellFunction - NtpUpdateEvent
     /// </summary>
@@ -623,6 +623,10 @@ public enum CellFunction
     /// CellFunction - NetworkRetryExceededEvent
     /// </summary>
     NetworkRetryExceededEvent = 9,
+    /// <summary>
+    /// CellFunction - AttentionCommand
+    /// </summary>
+    AttentionCommand = 10,
 };
 
 /// <summary>

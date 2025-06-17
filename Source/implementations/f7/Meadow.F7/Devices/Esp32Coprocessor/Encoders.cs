@@ -993,6 +993,29 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         }
 
         /// <summary>
+        /// Extract a ModemAttentionCommand object from a byte array.
+        /// </summary>
+        /// <param name="ModemAttentionCommand">ModemAttentionCommand object to be encoded.</param>
+        /// <returns>ModemAttentionCommand object.</returns>
+        public static byte[] EncodeATCommand(MessagePayloads.ModemAttentionCommand ModemAttentionCommand)
+        {
+            int offset = 0;
+            int length = 0;
+
+            length += ModemAttentionCommand.Command.Length + 1;
+            length += 4;
+
+            byte[] buffer = new byte[length];
+            Array.Clear(buffer, 0, buffer.Length);
+            EncodeString(ModemAttentionCommand.Command, buffer, offset);
+            offset += ModemAttentionCommand.Command.Length + 1;
+            EncodeUInt16(ModemAttentionCommand.Timeout, buffer, offset);
+            offset+= 2;
+            EncodeUInt16(ModemAttentionCommand.Response, buffer, offset);
+            return buffer;
+        }
+
+        /// <summary>
         /// Extract a AccessPointList object from a byte array.
         /// </summary>
         /// <param name="buffer">Byte array containing the encoded data.</param>
