@@ -361,12 +361,6 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             case CellNetworkState.TrackingGPSLocation:
                 state |= 1 << 1;
                 break;
-            case CellNetworkState.FetchingSignalQuality:
-                state |= 1 << 2;
-                break;
-            case CellNetworkState.ScanningNetworks:
-                state |= 1 << 3;
-                break;
             default:
                 state |= 1 << 0;
                 break;
@@ -387,21 +381,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
         string csqPattern = @"\+CSQ:\s+(\d+),\d+";
         _at_cmds_output = string.Empty;
 
-        CellSetState(CellNetworkState.FetchingSignalQuality);
-
-        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
-        {
-            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout--;
-        }
-
-        // Resume cell if the timeout was reached
-        if (timeout == 0)
-        {
-            CellSetState(CellNetworkState.Resumed);
-        }
-
-        if (string.IsNullOrEmpty(_at_cmds_output))
+        if (string.IsNullOrEmpty(SendATCommand("AT+CSQ", timeout)))
         {
             Resolver.Log.Error("AT commands output not found!", MessageGroup.Core);
             return NoSignal;
@@ -420,23 +400,9 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     public CellNetwork[] ScanForAvailableNetworks(int timeout)
     {
         Resolver.Log.Trace("Scanning for available cellular networks... It might take a few minutes and temporary disconnect you from the cellular network.", MessageGroup.Core);
-
-        CellSetState(CellNetworkState.ScanningNetworks);
         _at_cmds_output = string.Empty;
 
-        while (_cell_state != CellNetworkState.Resumed && timeout > 0)
-        {
-            Thread.Sleep(TimeSpan.FromMilliseconds(1000));
-            timeout--;
-        }
-
-        // Resume cell if the timeout was reached
-        if (timeout == 0)
-        {
-            CellSetState(CellNetworkState.Resumed);
-        }
-
-        if (string.IsNullOrEmpty(_at_cmds_output))
+        if (string.IsNullOrEmpty(SendATCommand("AT+COPS=?", timeout)))
         {
             throw new System.IO.IOException("No available networks");
         }
