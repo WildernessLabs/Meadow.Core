@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using Meadow.Update;
 using MQTTnet;
+using MQTTnet.Adapter;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;

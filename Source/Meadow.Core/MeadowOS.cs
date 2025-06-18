@@ -14,6 +14,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.Logging.Logger;
 using RTI = System.Runtime.InteropServices.RuntimeInformation;
+using System.Runtime.CompilerServices;
+
 namespace Meadow;
 
 /// <summary>
@@ -969,6 +971,8 @@ public static partial class MeadowOS
                 d.Delete();
             }
         }
+        if (deleteDirectory)
+            di.Delete();
     }
 
     /// <summary>
@@ -976,10 +980,10 @@ public static partial class MeadowOS
     /// and then atomically renaming it to the target location.
     /// </summary>
     /// <param name="file">Path to the ZIP file to extract</param>
-    /// <param name="empty_target_dir">Path to the target directory (must be empty or non-existent)</param>
+    /// <param name="nonexisting_target_dir">Path to the target directory (must be empty or non-existent)</param>
     /// <exception cref="ArgumentException">Thrown if the ZIP file doesn't exist or target directory is not empty</exception>
     /// <exception cref="IOException">Thrown if extraction or directory operations fail</exception>
-    public static void SafelyExtractZIPFile(string file, string empty_target_dir)
+    public static void SafelyExtractZIPFile(string file, string nonexisting_target_dir)
     {
         if (!File.Exists(file))
         {
@@ -987,12 +991,12 @@ public static partial class MeadowOS
         }
 
         // Delete the target directory if it exists 
-        DirectoryInfo existing_target_dir = new DirectoryInfo(empty_target_dir);
-        DeleteDirectoryContents(existing_target_dir);
+        DirectoryInfo existing_target_dir = new DirectoryInfo(nonexisting_target_dir);
+        DeleteDirectoryContents(existing_target_dir, deleteDirectory: true);
 
         // Create a temporary directory with a unique name in the system temp location
         string tempDirectory = Path.Combine(
-            FileSystem.TempDirectory, 
+            FileSystem.TempDirectory,
             "zip_extract_" + Guid.NewGuid().ToString("N"));
 
         try
@@ -1005,15 +1009,15 @@ public static partial class MeadowOS
             ZipFile.ExtractToDirectory(file, tempDirectory);
 
             // Ensure the parent directory of the target exists
-            string parentDir = Path.GetDirectoryName(empty_target_dir);
+            string parentDir = Path.GetDirectoryName(nonexisting_target_dir);
             if (!string.IsNullOrEmpty(parentDir) && !Directory.Exists(parentDir))
             {
                 Directory.CreateDirectory(parentDir);
             }
 
             // Move the temporary directory to the target directory
-            Resolver.Log.Info($"Moving extracted contents from {tempDirectory} to {empty_target_dir}", MessageGroup.Core);
-            Directory.Move(tempDirectory, empty_target_dir);
+            Resolver.Log.Info($"Moving extracted contents from {tempDirectory} to {nonexisting_target_dir}", MessageGroup.Core);
+            Directory.Move(tempDirectory, nonexisting_target_dir);
         }
         catch (Exception ex)
         {
