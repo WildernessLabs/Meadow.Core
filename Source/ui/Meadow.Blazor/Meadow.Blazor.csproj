@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -16,6 +16,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow,Meadow.Blazor</PackageTags>
+	<IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Utility library for aiding in using Wilderness Labs Meadow stack in a Blazor Server application</Description>
   </PropertyGroup>
@@ -25,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	  <None Include="..\..\icon.png" Pack="true" PackagePath="" />
       <ProjectReference Include="..\..\implementations\desktop\Meadow.Desktop\Meadow.Desktop.csproj" />
       <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj">
           <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
