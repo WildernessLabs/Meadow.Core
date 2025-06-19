@@ -19,9 +19,6 @@ namespace Core.Unit.Tests.UpdateServiceTests
 
         public ProcessPublishedCommandTests()
         {
-            _connectionService = new(_settings);
-            _updateService = new(_connectionService);
-
             Resolver.Services.GetOrCreate<Logger>();
             Resolver.Log.LogLevel = LogLevel.Trace;
             Resolver.Log.ShowGroup = false;
@@ -30,6 +27,9 @@ namespace Core.Unit.Tests.UpdateServiceTests
             {
                 Resolver.Services.Add<IJsonSerializer>(new MicroJsonSerializer());
             }
+
+            _connectionService = new(_settings);
+            _updateService = new(_connectionService);
         }
 
         public void Dispose()
