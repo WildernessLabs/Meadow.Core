@@ -13,8 +13,8 @@ namespace Meadow;
 /// </summary>
 public class HealthReporter : IHealthReporter
 {
-    private Dictionary<string, Func<object>> _customMetrics = new Dictionary<string, Func<object>>();
-    private Dictionary<string, Func<Task<object>>> _customMetricsAsync = new Dictionary<string, Func<Task<object>>>();
+    private readonly Dictionary<string, Func<object>> _customMetrics = new Dictionary<string, Func<object>>();
+    private readonly Dictionary<string, Func<Task<object>>> _customMetricsAsync = new Dictionary<string, Func<Task<object>>>();
 
     /// <inheritdoc/>
     public async Task Start(int interval)
@@ -74,7 +74,7 @@ public class HealthReporter : IHealthReporter
         return _customMetricsAsync.TryAdd(name, func);
     }
 
-    private (string name, Func<object?> function)[] DefaultMetrics =
+    private readonly (string name, Func<object?> function)[] DefaultMetrics =
     {
         new ("health.cpu_temp_celsius", () => Resolver.Device.PlatformOS.GetCpuTemperature().Celsius),
         new ("health.memory_used", () => GC.GetTotalMemory(false)),
@@ -95,6 +95,19 @@ public class HealthReporter : IHealthReporter
         }
 
         var service = Resolver.Services.Get<IMeadowCloudService>();
+
+        if (service == null)
+        {
+            Resolver.Log.Info("Cloud service is not found.");
+            return;
+        }
+
+        if (!service.IsEnabled)
+        {
+            Resolver.Log.Info("Could not send health metric, cloud service is not enabled.");
+            return;
+        }
+
         var device = Resolver.Device;
 
         var ce = new CloudEvent()
@@ -121,10 +134,17 @@ public class HealthReporter : IHealthReporter
             }
         }
 
-        var batteryInfo = device.GetBatteryInfo();
-        if (batteryInfo != null)
+        try
         {
-            ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
+            var batteryInfo = device.GetBatteryInfo();
+            if (batteryInfo != null)
+            {
+                ce.Measurements.Add("health.battery_percentage", batteryInfo.StateOfCharge);
+            }
+        }
+        catch (NotImplementedException ex)
+        {
+            Resolver.Log.Trace($"Cannot get battery information: {ex.Message}");
         }
 
         try
