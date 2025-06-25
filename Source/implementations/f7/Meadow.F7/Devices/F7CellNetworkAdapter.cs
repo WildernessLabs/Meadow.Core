@@ -258,8 +258,12 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
                 }
             }
 
-            var csqValue = int.Parse(_csq ?? "99");
-            return ConvertCsqToDbm(csqValue);
+            if (int.TryParse(_csq, out var csqValue))
+            {
+                return ConvertCsqToDbm(csqValue);
+            }
+
+            return ConvertCsqToDbm(99);
         }
     }
 
