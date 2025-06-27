@@ -205,7 +205,6 @@ internal class MeadowCloudUpdateService : IUpdateService
 
         try
         {
-            // Add timeout settings to HttpClient
             using var httpClient = new HttpClient();
 
             // Set timeout for the entire operation
@@ -220,12 +219,10 @@ internal class MeadowCloudUpdateService : IUpdateService
             // Configure the HTTP range header to indicate resumption of partial download, starting from 
             // the 'EOF' byte position of the partial download and extending to the end of the content.
             using var fileStream = Store.StartMpak();
-            Log.Debug($"Resuming from offset {fileStream.Length}");
+            Log.Debug($"Resuming from offset {fileStream.Length}", "update service");
             request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(fileStream.Length, null);
 
-            // Create a cancellation token with timeout to prevent stalled downloads
-            using var downloadCts = new CancellationTokenSource();
-            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, downloadCts.Token);
+            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, new CancellationTokenSource(millisecondsDelay: 15000).Token);
             var contentLength = response.Content.Headers.ContentLength;
             if (contentLength.HasValue)
             {
@@ -233,13 +230,14 @@ internal class MeadowCloudUpdateService : IUpdateService
                 // Then, to determine the total file size, the Content-Length from the first download attempt is used.
                 if (message.FileSize == 0)
                     message.FileSize = contentLength.Value;
-                Log.Debug($"File size: {message.FileSize:N0} bytes.");
+                Log.Debug($"File size: {message.FileSize:N0} bytes.", "update service");
             }
 
             using var stream = await response.Content.ReadAsStreamAsync();
             int bytesRead;
 
-            // Add a timer to detect stalled downloads
+            // Create a cancellation token with timeout to prevent stalled downloads
+            using var downloadCts = new CancellationTokenSource();
             var lastProgressTime = DateTime.UtcNow;
             using var progressTimer = new Timer(_ =>
             {
@@ -270,12 +268,12 @@ internal class MeadowCloudUpdateService : IUpdateService
                 update_cancellation.Token.ThrowIfCancellationRequested();
                 cancel.Token.ThrowIfCancellationRequested();
 
-                Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded");
+                Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded", "update service");
             }
             await writeTask; // wait for last write to disk task to complete
 
             sw.Stop();
-            Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.");
+            Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
         }
 
         catch (OperationCanceledException)
