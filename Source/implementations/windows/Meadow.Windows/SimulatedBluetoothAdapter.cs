@@ -15,6 +15,24 @@ namespace Meadow;
 
 public class SimulatedBluetoothAdapter : IBluetoothAdapter
 {
+    /// <inheritdoc/>
+    public event EventHandler? ServerStarting;
+
+    /// <inheritdoc/>
+    public event EventHandler? ServerStarted;
+
+    /// <inheritdoc/>
+    public event EventHandler? ServerStopping;
+
+    /// <inheritdoc/>
+    public event EventHandler? ServerStopped;
+
+    /// <inheritdoc/>
+    public event EventHandler? ClientConnected;
+
+    /// <inheritdoc/>
+    public event EventHandler? ClientDisconnected;
+
     private SimulatedBluetoothServer? _server;
 
     public bool StartBluetoothServer(IDefinition configuration)
@@ -43,7 +61,7 @@ internal class SimulatedBluetoothServer
     private readonly ConcurrentDictionary<string, WebSocket> _connectedClients = new();
     private readonly HttpListener _listener;
     private readonly CancellationTokenSource _cancellationSource = new();
-    private Task _listenerTask;
+    private readonly Task _listenerTask;
 
     public SimulatedBluetoothServer(IDefinition configuration, int port = 8080)
     {
@@ -167,7 +185,7 @@ internal class SimulatedBluetoothServer
         }
     }
 
-    private Dictionary<string, string> _valueCache = new();
+    private readonly Dictionary<string, string> _valueCache = new();
 
     private async Task HandleMessage(WebSocket webSocket, Message message)
     {
