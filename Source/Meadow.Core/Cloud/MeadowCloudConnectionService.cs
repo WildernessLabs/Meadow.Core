@@ -684,6 +684,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         {
             if (reliabilityService.IsCrashDataAvailable)
             {
+                Resolver.Log.Info($"Sending crash data to Meadow Cloud...");
 
                 foreach (var report in reliabilityService.GetCrashData())
                 {
