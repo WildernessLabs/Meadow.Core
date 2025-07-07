@@ -2,6 +2,7 @@
 using Meadow.Hardware;
 using Meadow.Update;
 using MQTTnet;
+using MQTTnet.Adapter;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
@@ -341,8 +342,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 case CloudConnectionState.Connecting:
                     if (ClientOptions == null)
                     {
-                        Resolver.Log.Debug("Creating MQTT client options", "cloud");
+                        var client_id = Resolver.Device?.Information.UniqueID.ToUpper();
+                        Resolver.Log.Debug($"Creating MQTT client ID {client_id}", "cloud");
                         var builder = new MqttClientOptionsBuilder()
+                            .WithClientId(client_id)
                             .WithTcpServer(Settings.MqttHostname, Settings.MqttPort)
                             .WithTls(tlsParameters =>
                             {
@@ -437,7 +440,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             }
 
                             Resolver.Log.Debug($"Meadow.Cloud service subscribing to '{topicName}'", "cloud");
-                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic(topicName).Build());
+                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+                                                                .WithTopic(topicName)
+                                                                .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+                                                                .Build());
                         }
                         ConnectionState = CloudConnectionState.Connected;
                     }
