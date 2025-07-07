@@ -68,7 +68,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                 continue;
 
             
-            var service_or_update_cancellation = CancellationTokenSource.CreateLinkedTokenSource(_service_cancellation.Token,
+            using var service_or_update_cancellation = CancellationTokenSource.CreateLinkedTokenSource(_service_cancellation.Token,
                                                                                                      update_cancellation.Token);
 
             try
@@ -222,7 +222,8 @@ internal class MeadowCloudUpdateService : IUpdateService
             Log.Debug($"Resuming from offset {fileStream.Length}", "update service");
             request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(fileStream.Length, null);
 
-            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, new CancellationTokenSource(millisecondsDelay: 15000).Token);
+            using var sendCts = new CancellationTokenSource(millisecondsDelay: 15000);
+            var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token);
             var contentLength = response.Content.Headers.ContentLength;
             if (contentLength.HasValue)
             {
