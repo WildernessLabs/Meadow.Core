@@ -38,7 +38,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// <summary>
     /// Retry period the service will use to attempt network reconnection
     /// </summary>
-    public const int NetworkRetryTimeoutSeconds = 15;
+    public const int NetworkRetryTimeoutSeconds = 5;
     /// <summary>
     /// Auth token expiration period in minutes.
     /// TODO: Replace this hard-coded value with one retrieved from the Meadow Cloud.
@@ -89,10 +89,12 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         while (true)
         {
+            Resolver.Log.Trace("data forwarder heartbeat", "cloud");
             _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
 
             while (_dataQueue.Count > 0)
             {
+                Resolver.Log.Trace($"Data queue: {_dataQueue.Count}/{_dataQueue.MaxQueueItems}", "cloud");
                 try
                 {
                     if (ConnectionState == CloudConnectionState.Connected)
@@ -105,9 +107,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             if (await Send(info.Item, info.EndPoint))
                             {
                                 // item was sent, remove from the queue and toss away
+                                Resolver.Log.Trace("Data queue sent an item", "cloud");
                                 _dataQueue.Dequeue();
                             }
                         }
+                    }
+                    else
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(3));
                     }
                 }
                 catch (Exception ex)
@@ -115,9 +122,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     LogAndRaiseOnErrorOccurredEvent("Unable to forward Meadow Cloud record", ex);
                     break;
                 }
-
-                // throttle bulk sends
-                await Task.Delay(TimeSpan.FromSeconds(5));
             }
         }
     }
@@ -288,6 +292,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         // update state machine
         while (!_stopService)
         {
+            Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
             switch (ConnectionState)
             {
                 case CloudConnectionState.Disconnected:
@@ -371,7 +376,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                         try
                         {
                             Resolver.Log.Debug("Connecting MQTT client", "cloud");
-                            await MqttClient.ConnectAsync(ClientOptions);
+                            await MqttClient.ConnectAsync(ClientOptions, new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);
                         }
                         catch (MqttCommunicationTimedOutException)
                         {
@@ -380,16 +385,33 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
+                        catch (MqttConnectingFailedException e)
+                        {
+                            Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
+                            ConnectionState = CloudConnectionState.Disconnected;
+                            if (e.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                            {
+                                Resolver.Log.Debug($"MQTT authentication error, invalidating credentials", "cloud");
+                                InvalidateAuthentication();
+                                await MqttClient.DisconnectAsync();
+                            }
+                            else
+                            {
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            }
+                        }
                         catch (MqttCommunicationException e)
                         {
-                            Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e.Message}", "cloud");
+
+                            Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
                             ConnectionState = CloudConnectionState.Disconnected;
                             //  just delay for a while
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                         catch (Exception ex)
                         {
-                            Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex.Message}");
+                            Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex}");
                             if (ex.InnerException != null)
                             {
                                 Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
@@ -478,6 +500,15 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         _stateMachineThread = null;
     }
 
+    private void InvalidateAuthentication()
+    {
+        Resolver.Log.Debug("Token explicitly invalidated", "cloud");
+        // by setting this to null and retrying, Authenticate will get called
+        ClientOptions = null;
+        _jwt = null;
+    }
+
+
     internal AuthenticationHeaderValue CreateAuthenticationHeaderValue()
     {
         return new AuthenticationHeaderValue("Bearer", _jwt);
@@ -555,7 +586,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             try
             {
-                using var response = await client.PostAsync(endpoint, content);
+                using var response = await client.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: 10000).Token);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -793,9 +824,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
                 {
                     attempt++;
-                    // by setting this to null and retrying, Authenticate will get called
-                    ClientOptions = null;
-                    _jwt = null;
+                    InvalidateAuthentication();
                     client.Dispose();
                     client = new HttpClient();
                     goto retry;
