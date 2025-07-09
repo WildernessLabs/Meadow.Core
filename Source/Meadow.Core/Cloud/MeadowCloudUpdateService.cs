@@ -142,6 +142,9 @@ internal class MeadowCloudUpdateService : IUpdateService
                     Thread.Sleep(1000);
                 Store.State = UpdateStore.States.Empty; // should not be needed
             }
+
+            //FIXME: Store.AddManifest doesn't work right now because File.Move doesn't work. Check to see if OS 2.3 change in corefx fixed this
+            //       hardcode a path for now
             //Store.AddManifest(temp_path);
             File.Copy(temp_path, "/meadow0/update-store/info.json");
         }
@@ -168,7 +171,6 @@ internal class MeadowCloudUpdateService : IUpdateService
     /// </summary>
     public void Start()
     {
-        // _connectionService.MqttMessageReceived += OnMqttMessageReceived;
         UpdateServiceTask = Task.Run(async () =>
         {
             try
@@ -188,7 +190,6 @@ internal class MeadowCloudUpdateService : IUpdateService
     /// <inheritdoc/>
     public void Stop()
     {
-        // _connectionService.MqttMessageReceived -= OnMqttMessageReceived;
         _service_cancellation.Cancel();
         _service_cancellation.Dispose();
         _service_cancellation = new();
