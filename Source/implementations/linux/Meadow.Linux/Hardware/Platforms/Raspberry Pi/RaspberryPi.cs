@@ -51,6 +51,8 @@ public partial class RaspberryPi : Linux
             new NetworkCapabilities(false, true),
             new StorageCapabilities(true)
             );
+
+        BluetoothAdapter = new DBusBluetoothAdapter();
     }
 
     private bool CheckIfPi5()

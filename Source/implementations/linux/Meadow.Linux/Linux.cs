@@ -1,4 +1,5 @@
 ﻿using Meadow.Foundation.Displays;
+using Meadow.Gateways;
 using Meadow.Hardware;
 using Meadow.Networking;
 using Meadow.Peripherals.Displays;
@@ -42,6 +43,11 @@ public abstract class Linux : IMeadowDevice
     public virtual IDeviceInformation Information { get; }
     /// <inheritdoc/>
     public virtual INetworkAdapterCollection NetworkAdapters => _networkAdapters ??= new NmCliNetworkAdapterCollection();
+
+    /// <summary>
+    /// The bluetooth adapter on the device
+    /// </summary>
+    public IBluetoothAdapter? BluetoothAdapter { get; protected set; }
 
     /// <summary>
     /// Creates the Meadow on Linux infrastructure instance
