@@ -16,6 +16,8 @@ namespace Meadow;
 /// </summary>
 public class WindowsPlatformOS : IPlatformOS
 {
+    private WindowsNtpClient _ntpClient;
+
     /// <summary>
     /// Event raised before a software reset.
     /// </summary>
@@ -181,11 +183,13 @@ public class WindowsPlatformOS : IPlatformOS
         MeadowOS.TerminateRun();
     }
 
-
-    // TODO: implement everything below here
-
-    /// <inheritdoc/>
-    public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
+    /// <summary>
+    /// Gets the Network Time Protocol (NTP) client.
+    /// </summary>
+    public INtpClient NtpClient
+    {
+        get => _ntpClient ??= new WindowsNtpClient();
+    }
 
     /// <summary>
     /// Gets or sets the string that shows which pins are reserved, if any.
@@ -193,17 +197,16 @@ public class WindowsPlatformOS : IPlatformOS
     /// <remarks>On Windows, this is always an empty string.</remarks>
     public string ReservedPins => string.Empty;
 
+    // TODO: implement everything below here
+
+    /// <inheritdoc/>
+    public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
+
     /// <summary>
     /// Gets a collection of external storage devices.
     /// </summary>
     /// <remarks>This is not implemented on Windows.</remarks>
     public IEnumerable<IExternalStorage> ExternalStorage => throw new NotImplementedException();
-
-    /// <summary>
-    /// Gets the Network Time Protocol (NTP) client.
-    /// </summary>
-    /// <remarks>This is not implemented on Windows.</remarks>
-    public INtpClient NtpClient => throw new NotImplementedException();
 
     /// <summary>
     /// Gets a value indicating whether the system should reboot on an unhandled exception.
