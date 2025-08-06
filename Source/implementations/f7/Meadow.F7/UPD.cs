@@ -129,7 +129,7 @@ internal static class UPD
         if (result != 0)
         {
             var err = GetLastError();
-            Resolver.Log.Error($"ioctl {request} returned {result}. Last error: {err}", MessageGroup.Core);
+            Resolver.Log.Debug($"ioctl {request} returned {result}. Last error: {err}", MessageGroup.Core);
             return (int)err;
         }
 
