@@ -201,6 +201,7 @@ namespace Meadow.Hardware
                 (Nuttx.ErrorCode)125 => new NativeException("Communication error. Verify address and that SCL and SDA are not reversed."),
                 (Nuttx.ErrorCode)116 => new NativeException("Communication error. Verify device is powered and that SCL is Connected."),
                 (Nuttx.ErrorCode)112 => new NativeException("Communication error. No device found at requested address."),
+                (Nuttx.ErrorCode)70 => new NativeException("Communication error. No device found at requested address."),
                 Nuttx.ErrorCode.TryAgain => new NativeException("Communication error. Verify SDA Is Connected."),
                 _ => new NativeException($"Communication error.  Error code {(int)ec}"),
             };
