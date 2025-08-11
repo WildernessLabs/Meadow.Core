@@ -304,7 +304,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             && Device.PlatformOS.OSVersion != message.OsVersion)
         {
             Log.Debug($"This OTA requires an OS update.");
-            // destination = message.MpakWithOsDownloadUrl; DISABLING UNTIL CRC CHECKS WORK
+            destination = message.MpakWithOsDownloadUrl;
         }
 
         if (!destination.StartsWith("http"))

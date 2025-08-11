@@ -89,7 +89,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         while (true)
         {
-            Resolver.Log.Trace("data forwarder heartbeat", "cloud");
             _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
 
             while (_dataQueue.Count > 0)
