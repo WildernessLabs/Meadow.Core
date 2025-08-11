@@ -21,7 +21,8 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     private string? _csq;
     private string? _at_cmds_output;
     private static CellNetworkState _cell_state;
-
+    private IDigitalOutputPort? _cellPwr;
+    private const int _cellLevelUpDelay = 3;
     /// <summary>
     /// Represents a signal strength value that indicates no signal or an extremely weak signal.
     /// </summary>
@@ -478,5 +479,34 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
             return string.Empty;
         }
         return gnssAtCmdsOutput;
+    }
+
+    /// <summary>
+    /// Enable the modem to communicate through serial (COM1 or COM4).
+    /// </summary>
+    /// <param name="pin"> Output pin connected to PWRKEY.</param>
+    /// <param name="modem">The type of modem model ported. </param>
+    public void EnableModem(IPin pin, CellModemType modem)
+    {
+        TimeSpan levelUpDelay = TimeSpan.FromSeconds(_cellLevelUpDelay);
+        _cellPwr = Resolver.Device.CreateDigitalOutputPort(pin);
+
+        switch (modem)
+        {
+            case CellModemType.Bg95:
+                levelUpDelay = TimeSpan.FromSeconds(3);
+                break;
+            case CellModemType.Eg21gl:
+                levelUpDelay = TimeSpan.FromSeconds(2);
+                break;
+            case CellModemType.M95:
+                break;
+            default:
+                break;
+        }
+
+        _cellPwr.State = true;
+        Thread.Sleep(levelUpDelay);
+        _cellPwr.State = false;
     }
 }
