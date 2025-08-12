@@ -11,6 +11,9 @@ namespace Meadow.Simulation;
 
 public class SimulatedPlatformOS : IPlatformOS
 {
+    /// <inheritdoc/>
+    public event TimeChangedEventHandler? TimeChanged;
+
     /// <summary>
     /// Event raised before a software reset
     /// </summary>

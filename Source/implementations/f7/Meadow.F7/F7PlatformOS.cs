@@ -15,6 +15,9 @@ public partial class F7PlatformOS : IPlatformOS
 {
     private readonly F7GPIOManager _ioController;
 
+    /// <inheritdoc/>
+    public event TimeChangedEventHandler? TimeChanged;
+
     /// <summary>
     /// The command line arguments provided when the Meadow application was launched
     /// </summary>
@@ -98,6 +101,8 @@ public partial class F7PlatformOS : IPlatformOS
         };
 
         Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
+
+        TimeChanged?.Invoke(dateTime);
     }
 
     /// <inheritdoc/>
