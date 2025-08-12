@@ -16,6 +16,9 @@ namespace Meadow;
 /// </summary>
 public class MacPlatformOS : IPlatformOS
 {
+    /// <inheritdoc/>
+    public event TimeChangedEventHandler? TimeChanged;
+
     /// <summary>
     /// Event raised before a software reset.
     /// </summary>

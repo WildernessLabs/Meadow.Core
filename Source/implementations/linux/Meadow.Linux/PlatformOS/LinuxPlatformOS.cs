@@ -19,6 +19,9 @@ namespace Meadow;
 /// </summary>
 public class LinuxPlatformOS : IPlatformOS
 {
+    /// <inheritdoc/>
+    public event TimeChangedEventHandler? TimeChanged;
+
 #pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
     /// <summary>
     /// Event raised before a software reset
@@ -189,6 +192,8 @@ public class LinuxPlatformOS : IPlatformOS
 
         // synchronize the system time to the hardware clock (not necessarily an RTC)
         SetHwClock(dateTime);
+
+        TimeChanged?.Invoke(dateTime);
     }
 
     private unsafe void SetHwClock(DateTime dateTime)

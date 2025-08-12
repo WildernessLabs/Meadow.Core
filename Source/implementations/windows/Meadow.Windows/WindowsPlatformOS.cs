@@ -18,6 +18,9 @@ public class WindowsPlatformOS : IPlatformOS
 {
     private WindowsNtpClient _ntpClient;
 
+    /// <inheritdoc/>
+    public event TimeChangedEventHandler? TimeChanged;
+
     /// <summary>
     /// Event raised before a software reset.
     /// </summary>
