@@ -16,4 +16,6 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     public int ConnectRetrySeconds { get; set; } = 15;
     public int AuthTimeoutSeconds { get; set; } = 120;
     public int MaxQueueDepth { get; set; } = CloudDataQueue.DefaultQueueDepth;
+
+    public int MaximumDisconnectTimeMinutes { get; set; } = 180;
 }

@@ -64,6 +64,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// <inheritdoc/>
     public bool IsEnabled { get; private set; }
 
+    // Track the last time we were connected
+    private DateTime _lastConnectedTime = DateTime.UtcNow;
+
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
@@ -288,10 +291,25 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         var stopwatch = new Stopwatch();
 
+        Resolver.Device!.PlatformOS.TimeChanged += (_) =>
+        {
+            // gotta reset the last connect time
+            _lastConnectedTime = DateTime.UtcNow;
+        };
+
         // update state machine
         while (!_stopService)
         {
             Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
+
+            // Restart device if not connected for more than the configured time
+            if ((DateTime.UtcNow - _lastConnectedTime).TotalMinutes > Settings.MaximumDisconnectTimeMinutes)
+            {
+                Resolver.Log.Error($"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...");
+                Resolver.Device?.PlatformOS.Reset();
+                return;
+            }
+
             switch (ConnectionState)
             {
                 case CloudConnectionState.Disconnected:
@@ -482,6 +500,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     break;
                 case CloudConnectionState.Connected:
+                    _lastConnectedTime = DateTime.UtcNow; // Update last connected time
                     if (_firstConection)
                     {
                         if (SendCrashReports())

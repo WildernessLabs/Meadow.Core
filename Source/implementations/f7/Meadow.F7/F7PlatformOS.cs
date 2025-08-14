@@ -102,7 +102,7 @@ public partial class F7PlatformOS : IPlatformOS
 
         Core.Interop.Nuttx.clock_settime(Core.Interop.Nuttx.clockid_t.CLOCK_REALTIME, ref ts);
 
-        TimeChanged?.Invoke(dateTime);
+        RaiseTimeChanged(dateTime);
     }
 
     /// <inheritdoc/>
@@ -199,5 +199,11 @@ public partial class F7PlatformOS : IPlatformOS
         }
 
         return size;
+    }
+
+    /// <inheritdoc/>
+    public void RaiseTimeChanged(DateTime utcTime)
+    {
+        TimeChanged?.Invoke(utcTime);
     }
 }

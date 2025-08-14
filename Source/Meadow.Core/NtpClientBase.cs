@@ -26,7 +26,11 @@ public abstract class NtpClientBase : INtpClient
     /// Raises the TimeChanged event with a given time
     /// </summary>
     /// <param name="utcTime">The new time</param>
-    protected void RaiseTimeChanged(DateTime utcTime) => TimeChanged?.Invoke(utcTime);
+    protected void RaiseTimeChanged(DateTime utcTime)
+    {
+        TimeChanged?.Invoke(utcTime);
+        Resolver.Device.PlatformOS.RaiseTimeChanged(utcTime);
+    }
 
     /// <inheritdoc/>
     public Task<bool> Synchronize(string? ntpServer = null)

@@ -19,6 +19,12 @@ public class WindowsPlatformOS : IPlatformOS
     private WindowsNtpClient _ntpClient;
 
     /// <inheritdoc/>
+    public void RaiseTimeChanged(DateTime utcTime)
+    {
+        TimeChanged?.Invoke(utcTime);
+    }
+
+    /// <inheritdoc/>
     public event TimeChangedEventHandler? TimeChanged;
 
     /// <summary>
