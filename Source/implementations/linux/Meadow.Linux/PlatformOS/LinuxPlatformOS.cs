@@ -22,12 +22,6 @@ public class LinuxPlatformOS : IPlatformOS
     /// <inheritdoc/>
     public event TimeChangedEventHandler? TimeChanged;
 
-    /// <inheritdoc/>
-    public void RaiseTimeChanged(DateTime utcTime)
-    {
-        TimeChanged?.Invoke(utcTime);
-    }
-
 #pragma warning disable CS0067 // The event 'NmCliNetworkAdapter.NetworkConnecting' is never used
     /// <summary>
     /// Event raised before a software reset

@@ -19,12 +19,6 @@ public class MacPlatformOS : IPlatformOS
     /// <inheritdoc/>
     public event TimeChangedEventHandler? TimeChanged;
 
-    /// <inheritdoc/>
-    public void RaiseTimeChanged(DateTime utcTime)
-    {
-        TimeChanged?.Invoke(utcTime);
-    }
-
     /// <summary>
     /// Event raised before a software reset.
     /// </summary>
