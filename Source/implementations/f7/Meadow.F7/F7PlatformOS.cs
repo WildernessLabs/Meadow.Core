@@ -202,7 +202,7 @@ public partial class F7PlatformOS : IPlatformOS
     }
 
     /// <inheritdoc/>
-    public void RaiseTimeChanged(DateTime utcTime)
+    internal void RaiseTimeChanged(DateTime utcTime)
     {
         TimeChanged?.Invoke(utcTime);
     }

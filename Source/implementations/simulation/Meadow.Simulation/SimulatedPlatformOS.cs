@@ -15,7 +15,7 @@ public class SimulatedPlatformOS : IPlatformOS
     public event TimeChangedEventHandler? TimeChanged;
 
     /// <inheritdoc/>
-    public void RaiseTimeChanged(DateTime utcTime)
+    internal void RaiseTimeChanged(DateTime utcTime)
     {
         TimeChanged?.Invoke(utcTime);
     }
