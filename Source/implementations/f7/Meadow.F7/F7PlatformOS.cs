@@ -201,7 +201,8 @@ public partial class F7PlatformOS : IPlatformOS
         return size;
     }
 
-    internal void RaiseTimeChanged(DateTime utcTime)
+    /// <inheritdoc/>
+    public void RaiseTimeChanged(DateTime utcTime)
     {
         TimeChanged?.Invoke(utcTime);
     }
