@@ -297,6 +297,12 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             _lastConnectedTime = DateTime.UtcNow;
         };
 
+        Resolver.Device!.PlatformOS.NtpClient.TimeChanged += (_) =>
+        {
+            // gotta reset the last connect time
+            _lastConnectedTime = DateTime.UtcNow;
+        };
+
         // update state machine
         while (!_stopService)
         {
