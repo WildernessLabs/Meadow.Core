@@ -13,6 +13,7 @@ public class Desktop : IMeadowDevice
 {
     private IMeadowDevice _implementation = default!;
     private IResizablePixelDisplay? _display;
+    private Func<IResizablePixelDisplay?> _displayFactory;
 
     /// <inheritdoc/>
     public event NetworkConnectionHandler? NetworkConnected;
@@ -22,17 +23,25 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IResizablePixelDisplay? Display
-    {
-        get
-        {
-            if (_implementation is IPixelDisplayProvider displayProvider)
-            {
-                return _display ??= displayProvider.CreateDisplay();
-            }
+    public virtual IResizablePixelDisplay? Display => _display ??= DisplayFactory();
 
-            return null;
+    private IResizablePixelDisplay? GenerateDefaultDisplay()
+    {
+        if (_implementation is IPixelDisplayProvider displayProvider)
+        {
+            return displayProvider.CreateDisplay();
         }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Override this property to provide a non-default factory method for generating the platform Display
+    /// </summary>
+    public virtual Func<IResizablePixelDisplay?> DisplayFactory
+    {
+        get => _displayFactory;
+        set => _displayFactory = value;
     }
 
     /// <summary>
@@ -40,11 +49,13 @@ public class Desktop : IMeadowDevice
     /// </summary>
     public Desktop()
     {
+        _displayFactory = GenerateDefaultDisplay;
     }
 
     /// <inheritdoc/>
     public void Initialize(MeadowPlatform detectedPlatform)
     {
+
         _implementation = detectedPlatform switch
         {
             MeadowPlatform.OSX => new Mac(),
