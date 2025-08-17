@@ -68,7 +68,7 @@ jobs:
           8.0.x
       
     - name: Build Meadow.Core
-      run: dotnet build /p:GeneratePackageOnBuild=false -c Release Meadow.Core/source/Meadow.Core.sln
+      run: dotnet build /p:GeneratePackageOnBuild=false -c Release Meadow.Core/source/Meadow.Core.slnx
     
     - name: Test Core.Unit.Tests
       run: dotnet test -c Release --no-build Meadow.Core/source/Tests/Core.Unit.Tests/Core.Unit.Tests.csproj

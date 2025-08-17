@@ -56,9 +56,6 @@
     <Project Path="ui/Meadow.Avalonia/Meadow.Avalonia.csproj">
       <BuildType Solution="Core|*" Project="Debug" />
     </Project>
-    <Project Path="ui/Meadow.Blazor/Meadow.Blazor.csproj">
-      <BuildType Solution="Core|*" Project="Debug" />
-    </Project>
   </Folder>
   <Folder Name="/_docs/">
     <File Path="../doc/services.md" />
