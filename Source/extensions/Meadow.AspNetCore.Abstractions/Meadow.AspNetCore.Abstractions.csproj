@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+
+  </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\icon.png" Pack="true" PackagePath="" />
+        <ProjectReference Include="..\..\implementations\desktop\Meadow.Desktop\Meadow.Desktop.csproj" />
+        <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
+    </ItemGroup>
+
+</Project>
