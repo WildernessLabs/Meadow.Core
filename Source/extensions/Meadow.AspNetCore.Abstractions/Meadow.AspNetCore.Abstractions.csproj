@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+      <LangVersion>12.0</LangVersion>
+      <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+      <AssemblyName>Meadow.AspNetCore.Abstractions</AssemblyName>
+      <GenerateDocumentationFile>true</GenerateDocumentationFile>
+      <Authors>Wilderness Labs, Inc</Authors>
+      <Company>Wilderness Labs, Inc</Company>
+      <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/Meadow.Core/</PackageProjectUrl>
+      <PackageId>Meadow.AspNetCore.Abstractions</PackageId>
+      <PackageIcon>icon.png</PackageIcon>
+      <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
+      <PackageTags>Meadow,Meadow.Blazor,Meadow AspNetCore</PackageTags>
+      <IsPackable>true</IsPackable>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <Description>Extensions to provide easy integration of the Meadow IoT stack with AspNetCore-based applications.</Description>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\icon.png" Pack="true" PackagePath="" />
+        <ProjectReference Include="..\..\implementations\desktop\Meadow.Desktop\Meadow.Desktop.csproj" />
+        <ProjectReference Include="..\..\Meadow.Core\Meadow.Core.csproj" />
+    </ItemGroup>
+
+</Project>

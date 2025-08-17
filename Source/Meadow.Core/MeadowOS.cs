@@ -14,7 +14,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.Logging.Logger;
 using RTI = System.Runtime.InteropServices.RuntimeInformation;
-using System.Runtime.CompilerServices;
 
 namespace Meadow;
 
@@ -23,10 +22,15 @@ namespace Meadow;
 /// </summary>
 public static partial class MeadowOS
 {
-    //==== internals
+    /// <summary>
+    /// Occurs when a device has been successfully initialized.
+    /// </summary>
+    /// <remarks>Subscribe to this event to perform actions after a device has been initialized.  The event is
+    /// raised with an <see cref="EventArgs"/> instance, and the sender  represents the source of the event.</remarks>
+    public static event EventHandler? DeviceInitialized;
+
     private static bool _startedDirectly = false;  // true when this assembly is the entry point
 
-    //==== properties
     internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
 
     private static IApp App { get; set; } = default!;
@@ -96,6 +100,10 @@ public static partial class MeadowOS
             {
                 // device initialization failed - don't try bring up the app
                 Resolver.Log.Error("Device (system) Initialization Failure", MessageGroup.Core);
+            }
+            else
+            {
+                DeviceInitialized?.Invoke(CurrentDevice, EventArgs.Empty);
             }
         }
         catch (Exception e)

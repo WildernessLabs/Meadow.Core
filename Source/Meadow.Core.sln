@@ -81,6 +81,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Blazor", "ui\Meadow.Blazor\Meadow.Blazor.csproj", "{F83DB330-D051-17AB-3F8A-831201DAD4B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.AspNetCore.Abstractions", "extensions\Meadow.AspNetCore.Abstractions\Meadow.AspNetCore.Abstractions.csproj", "{450F08BC-2EA0-4E80-82F4-549A401B1B90}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Core|Any CPU = Core|Any CPU
@@ -232,6 +234,12 @@ Global
 		{F83DB330-D051-17AB-3F8A-831201DAD4B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F83DB330-D051-17AB-3F8A-831201DAD4B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F83DB330-D051-17AB-3F8A-831201DAD4B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90}.Core|Any CPU.ActiveCfg = Debug|Any CPU
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90}.Core|Any CPU.Build.0 = Debug|Any CPU
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -263,6 +271,7 @@ Global
 		{63C537CF-30A5-4F63-85FA-05BF5EBE2986} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
 		{8FC0D17C-64A3-438D-B503-382B4FDF6425} = {6CEB0BB1-724E-464A-BAA2-DD50427D597F}
 		{F83DB330-D051-17AB-3F8A-831201DAD4B1} = {E7E568E2-4B82-4FF8-839F-AC2648925485}
+		{450F08BC-2EA0-4E80-82F4-549A401B1B90} = {CC469899-D08C-417C-A908-C052CA155BEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {346406ED-19A9-40FB-A3F7-14139F44C0C8}
