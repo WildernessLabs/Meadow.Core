@@ -29,7 +29,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 {
     /// <inheritdoc/>
     public event EventHandler<Exception>? ErrorOccurred;
-
+    /// <inheritdoc/>
+    public event EventHandler? MessageSent;
     /// <inheritdoc/>
     public event EventHandler<CloudConnectionState>? ConnectionStateChanged;
 
@@ -871,6 +872,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 else
                 {
                     Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
+                    MessageSent?.Invoke(this, EventArgs.Empty);
                     return true;
                 }
             }
