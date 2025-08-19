@@ -205,7 +205,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     public void Start()
     {
-        _ = Task.Run(DataForwarderProc);
+        Task.Run(DataForwarderProc).RethrowUnhandledExceptions();
 
         if (_stateMachineThread == null)
         {
@@ -304,49 +304,163 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             _lastConnectedTime = DateTime.UtcNow;
         };
 
+        //TODO: Canonicalize the fact that this service is critical and should never actually stop
+        //Here, we restart the service if it stops unexpectedly
+
         // update state machine
-        while (!_stopService)
+        try
         {
-            Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
-
-            // Restart device if not connected for more than the configured time
-            if ((DateTime.UtcNow - _lastConnectedTime).TotalMinutes > Settings.MaximumDisconnectTimeMinutes)
+            while (!_stopService)
             {
-                Resolver.Log.Error($"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...");
-                Resolver.Device?.PlatformOS.Reset();
-                return;
-            }
+                Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
 
-            switch (ConnectionState)
-            {
-                case CloudConnectionState.Disconnected:
-                    if (ShouldAuthenticate())
-                    {
-                        ConnectionState = CloudConnectionState.Authenticating;
-                    }
-                    else
-                    {
-                        ConnectionState = CloudConnectionState.Connecting;
-                    }
-                    break;
-                case CloudConnectionState.Authenticating:
-                    try
-                    {
-                        if (nic != null && nic.IsConnected)
+                // Restart device if not connected for more than the configured time
+                if ((DateTime.UtcNow - _lastConnectedTime).TotalMinutes > Settings.MaximumDisconnectTimeMinutes)
+                {
+                    Resolver.Log.Error($"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...");
+                    ReportFatalErrorToReliabilityService(
+                        new MeadowCloudException(
+                            $"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...",
+                            null
+                        )
+                    );
+                    Resolver.Device?.PlatformOS.Reset();
+                    return;
+                }
+
+                switch (ConnectionState)
+                {
+                    case CloudConnectionState.Disconnected:
+                        if (ShouldAuthenticate())
                         {
-                            stopwatch.Restart();
-
-                            if (await Authenticate())
+                            ConnectionState = CloudConnectionState.Authenticating;
+                        }
+                        else
+                        {
+                            ConnectionState = CloudConnectionState.Connecting;
+                        }
+                        break;
+                    case CloudConnectionState.Authenticating:
+                        try
+                        {
+                            if (nic != null && nic.IsConnected)
                             {
-                                Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms");
-                                stopwatch.Stop();
-                                // Update the last authentication time when successfully authenticated
-                                _lastAuthenticationTime = DateTime.UtcNow;
-                                ConnectionState = CloudConnectionState.Connecting;
+                                stopwatch.Restart();
+
+                                if (await Authenticate())
+                                {
+                                    Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms");
+                                    stopwatch.Stop();
+                                    // Update the last authentication time when successfully authenticated
+                                    _lastAuthenticationTime = DateTime.UtcNow;
+                                    ConnectionState = CloudConnectionState.Connecting;
+                                }
+                                else
+                                {
+                                    Resolver.Log.Error("Failed to authenticate with Meadow.Cloud");
+                                    await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                                }
                             }
                             else
                             {
-                                Resolver.Log.Error("Failed to authenticate with Meadow.Cloud");
+                                if (!stopwatch.IsRunning) stopwatch.Restart();
+
+                                Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
+                                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                            }
+                        }
+                        catch (Exception ae)
+                        {
+                            Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud: {ae.Message}");
+                            if (ae.InnerException != null)
+                            {
+                                Resolver.Log.Error($"Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
+                            }
+                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                        }
+                        break;
+                    case CloudConnectionState.Connecting:
+                        if (ClientOptions == null)
+                        {
+                            var client_id = Resolver.Device?.Information.UniqueID.ToUpper();
+                            Resolver.Log.Debug($"Creating MQTT client ID {client_id}", "cloud");
+                            var builder = new MqttClientOptionsBuilder()
+                                .WithClientId(client_id)
+                                .WithTcpServer(Settings.MqttHostname, Settings.MqttPort)
+                                .WithTls(tlsParameters =>
+                                {
+                                    tlsParameters.UseTls = Settings.MqttPort == 8883;
+                                })
+                                .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
+                                .WithCleanSession(false)
+                                .WithSessionExpiryInterval(86400) // Keep the session for 1 day
+                                .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
+
+                            if (Settings.UseAuthentication)
+                            {
+                                Resolver.Log.Debug("Adding MQTT creds", "cloud");
+                                builder.WithCredentials(Resolver.Device?.Information.UniqueID.ToUpper(), _jwt);
+                            }
+
+                            ClientOptions = builder.Build();
+                        }
+
+                        if (nic != null && nic.IsConnected)
+                        {
+                            stopwatch.Stop();
+                            try
+                            {
+                                Resolver.Log.Debug("Connecting MQTT client", "cloud");
+                                await MqttClient.ConnectAsync(ClientOptions, new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);
+                            }
+                            catch (InvalidOperationException ioe)
+                            {
+                                // Known MQTTnet deadlock: further retries won't clear it; force device reset to recover
+                                Resolver.Log.Error("MQTT deadlock detected (connect/disconnect pending). Resetting device to recover...");
+                                ReportFatalErrorToReliabilityService(new MeadowCloudException("MQTT deadlock: connect/disconnect pending", ioe));
+                                Resolver.Device?.PlatformOS.Reset();
+                                return;
+                            }
+                            catch (MqttCommunicationTimedOutException)
+                            {
+                                Resolver.Log.Debug("Timeout connecting to Meadow.Cloud", "cloud");
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            }
+                            catch (MqttConnectingFailedException e)
+                            {
+                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                if (e.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                                {
+                                    Resolver.Log.Debug($"MQTT authentication error, invalidating credentials", "cloud");
+                                    InvalidateAuthentication();
+                                    await MqttClient.DisconnectAsync();
+                                }
+                                else
+                                {
+                                    //  just delay for a while
+                                    await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                                }
+                            }
+                            catch (MqttCommunicationException e)
+                            {
+
+                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            }
+                            catch (Exception ex)
+                            {
+                                Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex}");
+                                if (ex.InnerException != null)
+                                {
+                                    Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                                }
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
                         }
@@ -357,172 +471,87 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
                             Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                         }
-                    }
-                    catch (Exception ae)
-                    {
-                        Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud: {ae.Message}");
-                        if (ae.InnerException != null)
-                        {
-                            Resolver.Log.Error($"Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
-                        }
-                        await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                    }
-                    break;
-                case CloudConnectionState.Connecting:
-                    if (ClientOptions == null)
-                    {
-                        var client_id = Resolver.Device?.Information.UniqueID.ToUpper();
-                        Resolver.Log.Debug($"Creating MQTT client ID {client_id}", "cloud");
-                        var builder = new MqttClientOptionsBuilder()
-                            .WithClientId(client_id)
-                            .WithTcpServer(Settings.MqttHostname, Settings.MqttPort)
-                            .WithTls(tlsParameters =>
-                            {
-                                tlsParameters.UseTls = Settings.MqttPort == 8883;
-                            })
-                            .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
-                            .WithCleanSession(false)
-                            .WithSessionExpiryInterval(86400) // Keep the session for 1 day
-                            .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
-
-                        if (Settings.UseAuthentication)
-                        {
-                            Resolver.Log.Debug("Adding MQTT creds", "cloud");
-                            builder.WithCredentials(Resolver.Device?.Information.UniqueID.ToUpper(), _jwt);
-                        }
-
-                        ClientOptions = builder.Build();
-                    }
-
-                    if (nic != null && nic.IsConnected)
-                    {
-                        stopwatch.Stop();
+                        break;
+                    case CloudConnectionState.Subscribing:
                         try
                         {
-                            Resolver.Log.Debug("Connecting MQTT client", "cloud");
-                            await MqttClient.ConnectAsync(ClientOptions, new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);
-                        }
-                        catch (MqttCommunicationTimedOutException)
-                        {
-                            Resolver.Log.Debug("Timeout connecting to Meadow.Cloud", "cloud");
-                            ConnectionState = CloudConnectionState.Disconnected;
-                            //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                        }
-                        catch (MqttConnectingFailedException e)
-                        {
-                            Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
-                            ConnectionState = CloudConnectionState.Disconnected;
-                            if (e.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                            JsonWebTokenPayload? jwtPayload = null;
+                            if (Settings.UseAuthentication)
                             {
-                                Resolver.Log.Debug($"MQTT authentication error, invalidating credentials", "cloud");
-                                InvalidateAuthentication();
-                                await MqttClient.DisconnectAsync();
-                            }
-                            else
-                            {
-                                //  just delay for a while
-                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                            }
-                        }
-                        catch (MqttCommunicationException e)
-                        {
+                                if (string.IsNullOrWhiteSpace(_jwt))
+                                {
+                                    throw new InvalidOperationException("Meadow.Cloud service authentication is enabled but no JWT is available");
+                                }
 
-                            Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
-                            ConnectionState = CloudConnectionState.Disconnected;
-                            //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                                jwtPayload = GetJsonWebTokenPayload(_jwt);
+                            }
+
+                            // the config RootTopic can have multiple semicolon-delimited topics
+                            //                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach (var topic in _subscriptionTopics)
+                            {
+                                string topicName = topic;
+
+                                // look for macro-substitutions
+                                if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OId))
+                                {
+                                    topicName = topicName.Replace("{OID}", jwtPayload.OId);
+                                }
+
+                                if (topic.Contains("{ID}"))
+                                {
+                                    topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
+                                }
+
+                                Resolver.Log.Debug($"Meadow.Cloud service subscribing to '{topicName}'", "cloud");
+                                await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+                                                                    .WithTopic(topicName)
+                                                                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
+                                                                    .Build());
+                            }
+                            ConnectionState = CloudConnectionState.Connected;
                         }
                         catch (Exception ex)
                         {
-                            Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex}");
+                            Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
                             if (ex.InnerException != null)
                             {
                                 Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
                             }
+                            // if subscribing fails, then we need to disconnect from the server
+                            await MqttClient.DisconnectAsync();
+
                             ConnectionState = CloudConnectionState.Disconnected;
-                            //  just delay for a while
-                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
-                    }
-                    else
-                    {
-                        if (!stopwatch.IsRunning) stopwatch.Restart();
-
-                        Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
-                        Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
-                    }
-                    break;
-                case CloudConnectionState.Subscribing:
-                    try
-                    {
-                        JsonWebTokenPayload? jwtPayload = null;
-                        if (Settings.UseAuthentication)
+                        break;
+                    case CloudConnectionState.Connected:
+                        _lastConnectedTime = DateTime.UtcNow; // Update last connected time
+                        if (_firstConection)
                         {
-                            if (string.IsNullOrWhiteSpace(_jwt))
+                            if (SendCrashReports())
                             {
-                                throw new InvalidOperationException("Meadow.Cloud service authentication is enabled but no JWT is available");
+                                _firstConection = false;
                             }
-
-                            jwtPayload = GetJsonWebTokenPayload(_jwt);
                         }
 
-                        // the config RootTopic can have multiple semicolon-delimited topics
-                        //                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
-
-                        foreach (var topic in _subscriptionTopics)
-                        {
-                            string topicName = topic;
-
-                            // look for macro-substitutions
-                            if (topic.Contains("{OID}") && !string.IsNullOrWhiteSpace(jwtPayload?.OId))
-                            {
-                                topicName = topicName.Replace("{OID}", jwtPayload.OId);
-                            }
-
-                            if (topic.Contains("{ID}"))
-                            {
-                                topicName = topicName.Replace("{ID}", Resolver.Device?.Information.UniqueID.ToUpper());
-                            }
-
-                            Resolver.Log.Debug($"Meadow.Cloud service subscribing to '{topicName}'", "cloud");
-                            await MqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-                                                                .WithTopic(topicName)
-                                                                .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-                                                                .Build());
-                        }
-                        ConnectionState = CloudConnectionState.Connected;
-                    }
-                    catch (Exception ex)
-                    {
-                        Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
-                        if (ex.InnerException != null)
-                        {
-                            Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
-                        }
-                        // if subscribing fails, then we need to disconnect from the server
-                        await MqttClient.DisconnectAsync();
-
-                        ConnectionState = CloudConnectionState.Disconnected;
-                    }
-                    break;
-                case CloudConnectionState.Connected:
-                    _lastConnectedTime = DateTime.UtcNow; // Update last connected time
-                    if (_firstConection)
-                    {
-                        if (SendCrashReports())
-                        {
-                            _firstConection = false;
-                        }
-                    }
-
-                    Thread.Sleep(1000);
-                    break;
+                        Thread.Sleep(1000);
+                        break;
+                }
             }
-        }
 
-        ConnectionState = CloudConnectionState.Unknown;
-        _stateMachineThread = null;
+        }
+        catch (Exception ex)
+        {
+            ReportFatalErrorToReliabilityService(new MeadowCloudException("Meadow Cloud connection service has abnormally terminated", ex));
+        }
+        finally
+        {
+            ConnectionState = CloudConnectionState.Unknown;
+            _stateMachineThread = null;
+            // restart the device - see above TODO
+            Resolver.Device.PlatformOS.Reset();
+        }
     }
 
     private void InvalidateAuthentication()
