@@ -6,6 +6,28 @@ using System;
 
 namespace Meadow;
 
+public class Desktop<TDisplay> : Desktop
+    where TDisplay : IPixelDisplay
+{
+    private IResizablePixelDisplay? _display;
+
+    public override IResizablePixelDisplay? Display
+    {
+        get
+        {
+            if (_display == null)
+            {
+                // clunky AF, but this is where we are right now
+                // get the ctor that takes in an IPixelDisplay
+                var ctor = typeof(TDisplay).GetConstructor([typeof(IPixelDisplay)]);
+                _display = (IResizablePixelDisplay)ctor.Invoke([base.Display]);
+            }
+
+            return _display;
+        }
+    }
+}
+
 /// <summary>
 /// Represents a desktop implementation of the Meadow device.
 /// </summary>
@@ -22,7 +44,7 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IResizablePixelDisplay? Display
+    public virtual IPixelDisplay? Display
     {
         get
         {
