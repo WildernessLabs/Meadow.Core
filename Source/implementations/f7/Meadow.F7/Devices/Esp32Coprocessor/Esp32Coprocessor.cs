@@ -33,7 +33,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     internal event EventHandler<(SystemFunction fn, StatusCodes status)>? SystemMessageReceived = default!;
 
     private EventHandler<(EthernetFunction fn, StatusCodes status, byte[] data)>? _ethernetMessageHandlers;
-    private Queue<RawEventData> _queuedEthernetEvents = new();
+    private readonly Queue<RawEventData> _queuedEthernetEvents = new();
 
     private record RawEventData
     {
@@ -74,12 +74,12 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// The flags set in this variable determine the type and amount of output generated when
     /// debugging this class.
     /// </remarks>
-    private static DebugOptions _debugLevel = DebugOptions.None;
+    private static readonly DebugOptions _debugLevel = DebugOptions.None;
 
     /// <summary>
-    /// Event handler service thread.
+    /// Event handler service task.
     /// </summary>
-    private Thread? _eventHandlerThread = null;
+    private readonly Task? _eventHandlerTask = null;
 
     /// <summary>
     /// Current status of the coprocessor.
@@ -101,13 +101,9 @@ public partial class Esp32Coprocessor : ICoprocessor
     {
         Status = ICoprocessor.CoprocessorState.NotReady;
 
-        if (_eventHandlerThread == null)
+        if (_eventHandlerTask == null)
         {
-            _eventHandlerThread = new Thread(EventHandlerServiceThread)
-            {
-                IsBackground = true
-            };
-            _eventHandlerThread.Start();
+            _eventHandlerTask = Task.Run(() => EventHandlerServiceTask(Resolver.App.CancellationToken));
         }
     }
 
@@ -261,15 +257,15 @@ public partial class Esp32Coprocessor : ICoprocessor
     }
 
     /// <summary>
-    /// Interrupt service handler for the ESP32 coprocessor.
-    /// </summary>`
-    /// <param name="o"></param>
-    private void EventHandlerServiceThread(object o)
+    /// Event handler service task for the ESP32 coprocessor.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to gracefully stop the task.</param>
+    private void EventHandlerServiceTask(CancellationToken cancellationToken)
     {
-        Resolver.Log.Trace("Starting Esp32Coprocessor event handler thread.", MessageGroup.Esp);
+        Resolver.Log.Trace("Starting Esp32Coprocessor event handler task.", MessageGroup.Esp);
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
         byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             int priority = 0;
             try
