@@ -11,15 +11,22 @@ namespace Meadow;
 /// <summary>
 /// Logic responsible for reporting device health metrics to Meadow.Cloud.
 /// </summary>
-public class HealthReporter : IHealthReporter
+internal class HealthReporter : IHealthReporter
 {
     private readonly Dictionary<string, Func<object>> _customMetrics = new Dictionary<string, Func<object>>();
     private readonly Dictionary<string, Func<Task<object>>> _customMetricsAsync = new Dictionary<string, Func<Task<object>>>();
 
+    private const string LogGroup = "HealthReporter";
+
+    /// <summary>
+    /// Gets the enabled state of the HealthReporter
+    /// </summary>
+    public bool IsEnabled { get; private set; } = false;
+
     /// <inheritdoc/>
     public async Task Start(int interval)
     {
-        Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).");
+        Resolver.Log.Info($"Health Metrics enabled with interval: {interval} minute(s).", LogGroup);
 
         if (interval < 0)
         {
@@ -32,7 +39,15 @@ public class HealthReporter : IHealthReporter
             return;
         }
 
-        System.Timers.Timer timer = new(interval: interval * 60 * 1000);
+        if (IsEnabled)
+        {
+            Resolver.Log.Warn("HealthReporter is already started.", LogGroup);
+            return;
+        }
+
+        IsEnabled = true;
+
+        Timer timer = new(interval: interval * 60 * 1000);
         timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
         timer.AutoReset = true;
 
@@ -41,7 +56,7 @@ public class HealthReporter : IHealthReporter
         // if we're already connected, start the timer
         if (anyAdapter != null && anyAdapter.IsConnected)
         {
-            Resolver.Log.Trace($"starting health metrics timer");
+            Resolver.Log.Trace($"starting health metrics timer", LogGroup);
             timer.Start();
 
             await Send();
@@ -53,7 +68,7 @@ public class HealthReporter : IHealthReporter
 
             if (!timer.Enabled)
             {
-                Resolver.Log.Trace($"starting health metrics timer");
+                Resolver.Log.Trace($"starting health metrics timer", LogGroup);
                 timer.Start();
 
                 // send the first health metric
@@ -90,7 +105,7 @@ public class HealthReporter : IHealthReporter
 
         if (!connected)
         {
-            Resolver.Log.Trace("could not send health metric, connection unavailable.");
+            Resolver.Log.Trace("could not send health metric, connection unavailable.", LogGroup);
             return;
         }
 
@@ -98,13 +113,13 @@ public class HealthReporter : IHealthReporter
 
         if (service == null)
         {
-            Resolver.Log.Info("Cloud service is not found.");
+            Resolver.Log.Info("Cloud service is not found.", LogGroup);
             return;
         }
 
         if (!service.IsEnabled)
         {
-            Resolver.Log.Info("Could not send health metric, cloud service is not enabled.");
+            Resolver.Log.Info("Could not send health metric, cloud service is not enabled.", LogGroup);
             return;
         }
 
@@ -130,7 +145,7 @@ public class HealthReporter : IHealthReporter
             }
             catch (Exception ex)
             {
-                Resolver.Log.Warn($"Cannot collect metric {metric.name}: {ex.Message}");
+                Resolver.Log.Warn($"Cannot collect metric {metric.name}: {ex.Message}", LogGroup);
             }
         }
 
@@ -144,7 +159,7 @@ public class HealthReporter : IHealthReporter
         }
         catch (NotImplementedException ex)
         {
-            Resolver.Log.Trace($"Cannot get battery information: {ex.Message}");
+            Resolver.Log.Trace($"Cannot get battery information: {ex.Message}", LogGroup);
         }
 
         try
@@ -161,11 +176,11 @@ public class HealthReporter : IHealthReporter
         }
         catch (NotImplementedException ex)
         {
-            Resolver.Log.Trace($"Cannot get system memory information: {ex.Message}");
+            Resolver.Log.Trace($"Cannot get system memory information: {ex.Message}", LogGroup);
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"An unexpected error occurred while attempting to get system memory information: {ex.Message}");
+            Resolver.Log.Error($"An unexpected error occurred while attempting to get system memory information: {ex.Message}", LogGroup);
         }
 
         if (!string.IsNullOrEmpty(device.Information.CoprocessorOSVersion))
@@ -181,7 +196,7 @@ public class HealthReporter : IHealthReporter
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}", LogGroup);
             }
         }
 
@@ -193,7 +208,7 @@ public class HealthReporter : IHealthReporter
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}");
+                Resolver.Log.Error($"Error reading value for health metric '{metric.Key}': {ex.Message}", LogGroup);
             }
         }
 
@@ -203,7 +218,7 @@ public class HealthReporter : IHealthReporter
         }
         catch (MeadowCloudException ex)
         {
-            Resolver.Log.Error($"sending health metrics failed: {ex.Message}");
+            Resolver.Log.Error($"sending health metrics failed: {ex.Message}", LogGroup);
         }
     }
 
