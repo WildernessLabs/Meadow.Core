@@ -931,7 +931,7 @@ public static partial class MeadowOS
             if (CurrentDevice != null && CurrentDevice.PlatformOS != null)
             {
                 Resolver.Log.Info($"CRASH: Meadow will restart in {restart} seconds.", MessageGroup.Core);
-                Thread.Sleep(restart * 1000);
+                Task.Delay(restart * 1000).Wait();
 
                 CurrentDevice.PlatformOS.Reset();
 

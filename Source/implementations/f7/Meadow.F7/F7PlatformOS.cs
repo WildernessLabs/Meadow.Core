@@ -3,7 +3,7 @@ using Meadow.Hardware;
 using Meadow.Units;
 using System;
 using System.IO;
-using System.Threading;
+using System.Threading.Tasks;
 using static Meadow.Logging.Logger;
 
 namespace Meadow;
@@ -59,7 +59,7 @@ public partial class F7PlatformOS : IPlatformOS
                 }
                 else
                 {
-                    Thread.Sleep(250);
+                    Task.Delay(250).Wait();
                 }
             } while (!valid);
         }

@@ -258,7 +258,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             case MeadowPlatform.F7FeatherV1:
             case MeadowPlatform.F7FeatherV2:
             case MeadowPlatform.F7CoreComputeV2:
-                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                 break;
         }
 
@@ -364,7 +364,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                                 if (!stopwatch.IsRunning) stopwatch.Restart();
 
                                 Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
-                                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                                await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                             }
                         }
                         catch (Exception ae)
@@ -467,7 +467,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             if (!stopwatch.IsRunning) stopwatch.Restart();
 
                             Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
-                            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                            await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                         }
                         break;
                     case CloudConnectionState.Subscribing:
@@ -533,7 +533,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             }
                         }
 
-                        Thread.Sleep(1000);
+                        await Task.Delay(1000);
                         break;
                 }
             }

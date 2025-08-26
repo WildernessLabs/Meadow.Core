@@ -1,7 +1,7 @@
 ﻿using Meadow.Hardware;
 using Meadow.Units;
 using System;
-using System.Threading;
+using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 using static Meadow.Logging.Logger;
 
@@ -229,7 +229,7 @@ namespace Meadow.Devices
                         return Temperature.AbsoluteZero;
                     }
 
-                    Thread.Sleep(100);
+                    Task.Delay(100).Wait();
                 }
             }
         }
