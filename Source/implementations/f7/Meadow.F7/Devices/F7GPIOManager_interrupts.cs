@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 using static Meadow.Core.Interop.Nuttx;
 using static Meadow.Logging.Logger;
@@ -17,7 +18,7 @@ public partial class F7GPIOManager : IMeadowIOController
     /// </summary>
     public event InterruptHandler Interrupt = default!;
 
-    private Thread? _ist;
+    private Task? _ist;
     private readonly List<int> _interruptGroupsInUse = new();
     private bool _firstInterrupt = true;
 
@@ -58,7 +59,7 @@ public partial class F7GPIOManager : IMeadowIOController
         }
     }
 
-    private Dictionary<IPin, Nuttx.UpdGpioInterruptConfiguration> _configuredInterrupts = new();
+    private readonly Dictionary<IPin, Nuttx.UpdGpioInterruptConfiguration> _configuredInterrupts = new();
 
     internal UpdGpioInterruptConfiguration? GetConfiguredInterruptMode(IPin pin)
     {
@@ -179,12 +180,7 @@ public partial class F7GPIOManager : IMeadowIOController
 
         if (_ist == null)
         {
-            _ist = new Thread(InterruptServiceThreadProc)
-            {
-                Priority = ThreadPriority.Highest
-            };
-
-            _ist.Start();
+            _ist = Task.Run(() => InterruptServiceTaskProc(Resolver.App.CancellationToken), Resolver.App.CancellationToken);
         }
 
         //Not sure why but Ioctl fails without this after reasserting interrupt groups
@@ -256,7 +252,7 @@ public partial class F7GPIOManager : IMeadowIOController
         }
     }
 
-    private void InterruptServiceThreadProc(object o)
+    private void InterruptServiceTaskProc(CancellationToken cancellationToken)
     {
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
 
@@ -265,11 +261,11 @@ public partial class F7GPIOManager : IMeadowIOController
         var rx_buffer = new byte[2];
         int lockvar = 0;
 
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             if (_firstInterrupt)
             {
-                // DEV NOTE: this is to force the interp pipeline top build at least some of the call stack and improve the response of first-interrupt results
+                // DEV NOTE: this is to force the interp pipeline to build at least some of the call stack and improve the response of first-interrupt results
                 Interrupt?.Invoke(_nullPin, false);
                 _firstInterrupt = false;
             }
