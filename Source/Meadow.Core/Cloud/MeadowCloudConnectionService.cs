@@ -54,7 +54,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
     private string? _jwt = null;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
-    private Thread? _stateMachineThread;
+    private Task? _stateMachineTask;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly CloudDataQueue _dataQueue;
     private readonly AutoResetEvent _dataReadyEvent = new(false);
@@ -91,7 +91,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task DataForwarderProc()
     {
-        while (true)
+        while (!Resolver.App.CancellationToken.IsCancellationRequested)
         {
             _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
 
@@ -207,11 +207,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         Task.Run(DataForwarderProc).RethrowUnhandledExceptions();
 
-        if (_stateMachineThread == null)
+        if (_stateMachineTask == null)
         {
-            _stateMachineThread = new Thread(() => ConnectionStateMachine());
-            _stateMachineThread.Start();
-
+            _stateMachineTask = Task.Run(() => ConnectionStateMachine(), Resolver.App.CancellationToken);
             IsEnabled = true;
         }
     }
@@ -250,7 +248,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         });
     }
 
-    private async void ConnectionStateMachine()
+    private async Task ConnectionStateMachine()
     {
         _stopService = false;
 
@@ -310,7 +308,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         // update state machine
         try
         {
-            while (!_stopService)
+            while (!_stopService && !Resolver.App.CancellationToken.IsCancellationRequested)
             {
                 Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
 
@@ -548,7 +546,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         finally
         {
             ConnectionState = CloudConnectionState.Unknown;
-            _stateMachineThread = null;
+            _stateMachineTask = null;
             // restart the device - see above TODO
             Resolver.Device.PlatformOS.Reset();
         }
