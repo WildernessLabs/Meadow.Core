@@ -54,7 +54,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
     private string? _jwt = null;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
-    private Thread? _stateMachineThread;
+    private Task? _stateMachineTask;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
     private readonly CloudDataQueue _dataQueue;
     private readonly AutoResetEvent _dataReadyEvent = new(false);
@@ -91,7 +91,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task DataForwarderProc()
     {
-        while (true)
+        while (!Resolver.App.CancellationToken.IsCancellationRequested)
         {
             _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
 
@@ -207,11 +207,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         Task.Run(DataForwarderProc).RethrowUnhandledExceptions();
 
-        if (_stateMachineThread == null)
+        if (_stateMachineTask == null)
         {
-            _stateMachineThread = new Thread(() => ConnectionStateMachine());
-            _stateMachineThread.Start();
-
+            _stateMachineTask = Task.Run(() => ConnectionStateMachine(), Resolver.App.CancellationToken);
             IsEnabled = true;
         }
     }
@@ -250,7 +248,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         });
     }
 
-    private async void ConnectionStateMachine()
+    private async Task ConnectionStateMachine()
     {
         _stopService = false;
 
@@ -260,7 +258,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             case MeadowPlatform.F7FeatherV1:
             case MeadowPlatform.F7FeatherV2:
             case MeadowPlatform.F7CoreComputeV2:
-                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                 break;
         }
 
@@ -310,7 +308,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         // update state machine
         try
         {
-            while (!_stopService)
+            while (!_stopService) // do not look at the App cancellation token - if the app is being shutdown, we still want to handle potential OtA updates
             {
                 Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
 
@@ -366,7 +364,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                                 if (!stopwatch.IsRunning) stopwatch.Restart();
 
                                 Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
-                                Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                                await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                             }
                         }
                         catch (Exception ae)
@@ -469,7 +467,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             if (!stopwatch.IsRunning) stopwatch.Restart();
 
                             Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
-                            Thread.Sleep(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                            await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
                         }
                         break;
                     case CloudConnectionState.Subscribing:
@@ -485,9 +483,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
                                 jwtPayload = GetJsonWebTokenPayload(_jwt);
                             }
-
-                            // the config RootTopic can have multiple semicolon-delimited topics
-                            //                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
                             foreach (var topic in _subscriptionTopics)
                             {
@@ -535,7 +530,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             }
                         }
 
-                        Thread.Sleep(1000);
+                        await Task.Delay(1000);
                         break;
                 }
             }
@@ -548,7 +543,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         finally
         {
             ConnectionState = CloudConnectionState.Unknown;
-            _stateMachineThread = null;
+            _stateMachineTask = null;
             // restart the device - see above TODO
             Resolver.Device.PlatformOS.Reset();
         }

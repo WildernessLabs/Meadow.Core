@@ -25,11 +25,11 @@ internal class MeadowCloudUpdateService : IUpdateService
     /// <inheritdoc/>
     public event UpdateEventHandler? UpdateFailure;
 
-    const int RetryDelayMilliseconds = 1000;
-    const int UpdateServicePulseMilliseconds = 10000;
+    private const int RetryDelayMilliseconds = 1000;
+    private const int UpdateServicePulseMilliseconds = 10000;
 
-    readonly byte[] read_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
-    readonly byte[] write_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
+    private readonly byte[] read_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
+    private readonly byte[] write_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
 
     private const string DefaultUpdateStoreDirectoryName = "update-store";
     private const string DefaultUpdateDirectoryName = "update";
@@ -42,7 +42,7 @@ internal class MeadowCloudUpdateService : IUpdateService
     private string UpdateStoreDirectory { get; }
 
     private CancellationTokenSource _service_cancellation = new();
-    CancellationTokenSource update_cancellation = new();
+    private CancellationTokenSource _update_cancellation = new();
     public Task UpdateServiceTask = Task.CompletedTask;
 
     public MeadowCloudUpdateService(string fsRoot, MeadowCloudConnectionService connectionService)
@@ -53,12 +53,12 @@ internal class MeadowCloudUpdateService : IUpdateService
 
         _connectionService = connectionService;
         _connectionService.MqttMessageReceived += OnMqttMessageReceived;
-        _connectionService.AddSubscription("{OID}/ota/{ID}");   
+        _connectionService.AddSubscription("{OID}/ota/{ID}");
     }
 
     private async Task UpdateService()
-    {        
-        while (true)
+    {
+        while (!Resolver.App.CancellationToken.IsCancellationRequested)
         {
             await Task.Delay(UpdateServicePulseMilliseconds);
             Log.Trace($"store state: {Store.State} cloud connection state: {_connectionService.ConnectionState}", "update service");
@@ -67,9 +67,9 @@ internal class MeadowCloudUpdateService : IUpdateService
             if (_connectionService.ConnectionState != CloudConnectionState.Connected && Store.State != UpdateStore.States.Mpak)
                 continue;
 
-            
+
             using var service_or_update_cancellation = CancellationTokenSource.CreateLinkedTokenSource(_service_cancellation.Token,
-                                                                                                     update_cancellation.Token);
+                                                                                                     _update_cancellation.Token);
 
             try
             {
@@ -81,38 +81,38 @@ internal class MeadowCloudUpdateService : IUpdateService
                         break;
                     case UpdateStore.States.Manifest:
                         Log.Debug("update available", "update service");
-                        UpdateAvailable?.Invoke(this, Store.Manifest!, update_cancellation);
-                        update_cancellation.Token.ThrowIfCancellationRequested();
+                        UpdateAvailable?.Invoke(this, Store.Manifest!, _update_cancellation);
+                        _update_cancellation.Token.ThrowIfCancellationRequested();
                         await DownloadProc(Store.Manifest!, service_or_update_cancellation);
                         Store.CompleteMpak();
 
                         break;
                     case UpdateStore.States.Mpak:
                         Log.Debug("update retrieved", "update service");
-                        UpdateRetrieved?.Invoke(this, Store.Manifest!, update_cancellation);
-                        update_cancellation.Token.ThrowIfCancellationRequested();
+                        UpdateRetrieved?.Invoke(this, Store.Manifest!, _update_cancellation);
+                        _update_cancellation.Token.ThrowIfCancellationRequested();
                         ApplyUpdate(Store.Manifest!);
-                        Store.State = UpdateStore.States.Empty;                       
+                        Store.State = UpdateStore.States.Empty;
                         Log.Debug($"Requesting a device reset to apply the Update");
                         Device.PlatformOS.Reset();
-                        UpdateSuccess?.Invoke(this, Store.Manifest!, update_cancellation); // not called - device has reset by now
+                        UpdateSuccess?.Invoke(this, Store.Manifest!, _update_cancellation); // not called - device has reset by now
                         break;
                 }
             }
             catch (OperationCanceledException e)
             {
-                if (e.CancellationToken == update_cancellation.Token)
+                if (e.CancellationToken == _update_cancellation.Token)
                 {
                     Log.Info("Update cancellation detected, clearing update store", "update service");
                     Store.State = UpdateStore.States.Empty;
-                    update_cancellation.Dispose();
-                    update_cancellation = new();
+                    _update_cancellation.Dispose();
+                    _update_cancellation = new();
                 }
             }
             catch (Exception e)
             {
                 Log.Error(e, "update service");
-                UpdateFailure?.Invoke(this, Store.Manifest!, update_cancellation);
+                UpdateFailure?.Invoke(this, Store.Manifest!, _update_cancellation);
             }
         }
     }
@@ -136,10 +136,12 @@ internal class MeadowCloudUpdateService : IUpdateService
             if (Store.State != UpdateStore.States.Empty)
             {
                 // cancel old update
-                var current_update_cancellation = update_cancellation;
+                var current_update_cancellation = _update_cancellation;
                 current_update_cancellation.Cancel();
-                while (current_update_cancellation == update_cancellation)
-                    Thread.Sleep(1000);
+                while (current_update_cancellation == _update_cancellation)
+                {
+                    Task.Delay(1000).Wait();
+                }
                 Store.State = UpdateStore.States.Empty; // should not be needed
             }
 
@@ -266,8 +268,8 @@ internal class MeadowCloudUpdateService : IUpdateService
 
                 message.DownloadProgress = totalBytesDownloaded;
 
-                RetrieveProgress?.Invoke(this, message, update_cancellation);
-                update_cancellation.Token.ThrowIfCancellationRequested();
+                RetrieveProgress?.Invoke(this, message, _update_cancellation);
+                _update_cancellation.Token.ThrowIfCancellationRequested();
                 cancel.Token.ThrowIfCancellationRequested();
 
                 Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded", "update service");

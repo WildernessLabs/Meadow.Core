@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Meadow;
 
-internal class ThreadedPollingSensorMonitor : ISensorMonitor
+internal class ThreadedPollingSensorMonitor : ISensorMonitor, IDisposable
 {
     public event EventHandler<object> SampleAvailable = default!;
 
     private readonly List<SensorMeta> _metaList = new();
-    private readonly Thread _sampleThread;
+    private readonly Task _sampleTask;
     private readonly Random _random = new();
     private readonly TimeSpan PollPeriod = TimeSpan.FromSeconds(1);
 
@@ -34,8 +34,7 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
 
     public ThreadedPollingSensorMonitor()
     {
-        _sampleThread = new Thread(SamplingThreadProc);
-        _sampleThread.Start();
+        _sampleTask = Task.Run(() => SamplingTaskProc(Resolver.App.CancellationToken), Resolver.App.CancellationToken);
     }
 
     public void StartSampling(ISamplingSensor sensor)
@@ -68,9 +67,9 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
         }
     }
 
-    private async void SamplingThreadProc()
+    private async Task SamplingTaskProc(CancellationToken cancellationToken)
     {
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             foreach (var meta in _metaList)
             {
@@ -114,7 +113,15 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
                 }
             }
 
-            Thread.Sleep(PollPeriod); // TODO: improve this algorithm
+            try
+            {
+                await Task.Delay(PollPeriod, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected when cancellation is requested
+                break;
+            }
         }
     }
 
@@ -126,6 +133,22 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor
         {
             existing.EnableReading = false;
         }
+    }
+
+    /// <summary>
+    /// Dispose of sensor monitoring resources.
+    /// </summary>
+    public void Dispose()
+    {
+        try
+        {
+            _sampleTask?.Wait(TimeSpan.FromSeconds(1));
+        }
+        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+        {
+            // Expected when canceling the task
+        }
+        _sampleTask?.Dispose();
     }
 }
 

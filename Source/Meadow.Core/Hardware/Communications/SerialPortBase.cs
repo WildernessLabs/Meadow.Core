@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow.Hardware
 {
@@ -18,9 +19,14 @@ namespace Meadow.Hardware
         private Parity _parity;
 
         /// <summary>
-        /// Thread responsible for reading from the serial port.
+        /// Task responsible for reading from the serial port.
         /// </summary>
-        protected Thread? _readThread;
+        protected Task? _readTask;
+
+        /// <summary>
+        /// Cancellation token source for the read task.
+        /// </summary>
+        protected CancellationTokenSource? _readCancellationTokenSource;
 
         /// <summary>
         /// The baud rate for the serial port.
@@ -301,12 +307,8 @@ namespace Meadow.Hardware
 
             SetHardwarePortSettings(_driverHandle);
 
-            _readThread = new Thread(ReadThreadProc)
-            {
-                IsBackground = true,
-                Name = "Serial Read Thread"
-            };
-            _readThread.Start();
+            _readCancellationTokenSource = new CancellationTokenSource();
+            _readTask = Task.Run(() => ReadTaskProc(_readCancellationTokenSource.Token), _readCancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -315,6 +317,20 @@ namespace Meadow.Hardware
         public void Close()
         {
             if (!IsOpen) return;
+
+            _readCancellationTokenSource?.Cancel();
+            try
+            {
+                _readTask?.Wait(TimeSpan.FromSeconds(1));
+            }
+            catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+            {
+                // Expected when canceling the task
+            }
+            _readCancellationTokenSource?.Dispose();
+            _readTask?.Dispose();
+            _readCancellationTokenSource = null;
+            _readTask = null;
 
             CloseHardwarePort(_driverHandle);
 
@@ -404,11 +420,11 @@ namespace Meadow.Hardware
             }
         }
 
-        private void ReadThreadProc()
+        private async Task ReadTaskProc(CancellationToken cancellationToken)
         {
             var readBuffer = new byte[4096];
 
-            while (IsOpen)
+            while (IsOpen && !cancellationToken.IsCancellationRequested)
             {
                 try
                 {
@@ -426,18 +442,32 @@ namespace Meadow.Hardware
                         {
                             // if the event handler throws, we don't want this to die
                             Resolver.Log.Error($"Serial event handler threw: {ex.Message}");
-                            // the serial handler threw, we need to prevent a tight loop, so just sleep
-                            Thread.Sleep(1000);
+                            // the serial handler threw, we need to prevent a tight loop, so just delay
+                            try
+                            {
+                                await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
+                            }
+                            catch (OperationCanceledException)
+                            {
+                                return;
+                            }
                         }
                     }
                     else
                     {
-                        Thread.Sleep(100);
+                        try
+                        {
+                            await Task.Delay(100, cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            return;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Resolver.Log.Error($"{nameof(ReadThreadProc)} error: {ex.Message}");
+                    Resolver.Log.Error($"{nameof(ReadTaskProc)} error: {ex.Message}");
                 }
             }
         }
