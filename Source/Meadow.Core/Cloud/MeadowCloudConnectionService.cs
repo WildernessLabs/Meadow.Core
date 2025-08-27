@@ -308,7 +308,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         // update state machine
         try
         {
-            while (!_stopService && !Resolver.App.CancellationToken.IsCancellationRequested)
+            while (!_stopService) // do not look at the App cancellation token - if the app is being shutdown, we still want to handle potential OtA updates
             {
                 Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
 
@@ -483,9 +483,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
                                 jwtPayload = GetJsonWebTokenPayload(_jwt);
                             }
-
-                            // the config RootTopic can have multiple semicolon-delimited topics
-                            //                        var topics = Config.RootTopic.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
                             foreach (var topic in _subscriptionTopics)
                             {
