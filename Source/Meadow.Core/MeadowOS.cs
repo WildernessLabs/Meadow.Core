@@ -209,6 +209,13 @@ public static partial class MeadowOS
         // we should never get to this point
     }
 
+    private static readonly PropertyInfo? _appCancellationTokenPropertyInfo = null;
+
+    internal static void SetAppCancellationToken()
+    {
+        _appCancellationTokenPropertyInfo?.GetValue(Resolver.App);
+    }
+
     private static void ReportAppException(Exception e, string? message = null)
     {
         try

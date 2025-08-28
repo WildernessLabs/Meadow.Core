@@ -180,7 +180,7 @@ public partial class F7GPIOManager : IMeadowIOController
 
         if (_ist == null)
         {
-            _ist = Task.Run(() => InterruptServiceTaskProc(Resolver.App.CancellationToken), Resolver.App.CancellationToken);
+            _ist = Task.Run(InterruptServiceTaskProc);
         }
 
         //Not sure why but Ioctl fails without this after reasserting interrupt groups
@@ -252,7 +252,7 @@ public partial class F7GPIOManager : IMeadowIOController
         }
     }
 
-    private void InterruptServiceTaskProc(CancellationToken cancellationToken)
+    private void InterruptServiceTaskProc()
     {
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
 
@@ -261,7 +261,7 @@ public partial class F7GPIOManager : IMeadowIOController
         var rx_buffer = new byte[2];
         int lockvar = 0;
 
-        while (!cancellationToken.IsCancellationRequested)
+        while (true) // Resolver.App.CancellationToken doesn't yet exist
         {
             if (_firstInterrupt)
             {
