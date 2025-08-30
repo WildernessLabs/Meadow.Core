@@ -315,6 +315,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 // Restart device if not connected for more than the configured time
                 if ((DateTime.UtcNow - _lastConnectedTime).TotalMinutes > Settings.MaximumDisconnectTimeMinutes)
                 {
+                    Resolver.Log.Error($"It is now {DateTime.UtcNow:MM/dd/yy HH:mm:ss}. Last connect was {_lastAuthenticationTime:MM/dd/yy HH:mm:ss} ");
                     Resolver.Log.Error($"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...");
                     ReportFatalErrorToReliabilityService(
                         new MeadowCloudException(

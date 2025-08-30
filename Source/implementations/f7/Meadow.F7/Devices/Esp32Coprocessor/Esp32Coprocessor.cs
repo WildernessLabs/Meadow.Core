@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 using static Meadow.Logging.Logger;
@@ -103,7 +102,7 @@ public partial class Esp32Coprocessor : ICoprocessor
 
         if (_eventHandlerTask == null)
         {
-            _eventHandlerTask = Task.Run(() => EventHandlerServiceTask(Resolver.App.CancellationToken));
+            _eventHandlerTask = Task.Run(() => EventHandlerServiceTask());
         }
     }
 
@@ -259,13 +258,12 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// <summary>
     /// Event handler service task for the ESP32 coprocessor.
     /// </summary>
-    /// <param name="cancellationToken">Cancellation token to gracefully stop the task.</param>
-    private void EventHandlerServiceTask(CancellationToken cancellationToken)
+    private void EventHandlerServiceTask()
     {
         Resolver.Log.Trace("Starting Esp32Coprocessor event handler task.", MessageGroup.Esp);
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
         byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
-        while (!cancellationToken.IsCancellationRequested)
+        while (true)
         {
             int priority = 0;
             try
