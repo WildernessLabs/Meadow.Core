@@ -310,8 +310,6 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         {
             while (!_stopService) // do not look at the App cancellation token - if the app is being shutdown, we still want to handle potential OtA updates
             {
-                Resolver.Log.Trace($"connection state machine heartbeat: {ConnectionState}", "cloud");
-
                 // Restart device if not connected for more than the configured time
                 if ((DateTime.UtcNow - _lastConnectedTime).TotalMinutes > Settings.MaximumDisconnectTimeMinutes)
                 {
