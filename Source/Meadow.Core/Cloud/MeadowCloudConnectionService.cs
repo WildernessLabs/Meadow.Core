@@ -262,6 +262,11 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 break;
         }
 
+        Resolver.Device.PlatformOS.TimeChanged += (s) =>
+        {
+            _lastAuthenticationTime = DateTime.UtcNow;
+        };
+
         Initialize();
 
         ConnectionState = CloudConnectionState.Disconnected;
