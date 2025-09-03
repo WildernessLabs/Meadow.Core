@@ -131,7 +131,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                 MeadowOS.FileSystem.TempDirectory,
                 $"manifest_{Guid.NewGuid():N}"); // TODO: Replace with Path.GetTempPath() when https://github.com/WildernessLabs/Meadow/pull/734 lands
             Log.Debug($"Using temp path {temp_path}");
-            File.WriteAllBytes(temp_path, e.Payload);
+            File.WriteAllBytes(temp_path, e.PayloadSegment.ToArray());
 
             if (Store.State != UpdateStore.States.Empty)
             {
