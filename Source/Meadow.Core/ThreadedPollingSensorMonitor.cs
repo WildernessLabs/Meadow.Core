@@ -19,14 +19,14 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor, IDisposable
 
     private class SensorMeta
     {
-        public SensorMeta(ISamplingSensor sensor, MethodInfo readmethod)
+        public SensorMeta(ISamplingSensor sensor, Func<Task> readDelegate)
         {
             Sensor = sensor;
-            ReadMethod = readmethod;
+            ReadDelegate = readDelegate;
         }
 
         public ISamplingSensor Sensor { get; set; }
-        public MethodInfo ReadMethod { get; set; }
+        public Func<Task> ReadDelegate { get; set; }
         public PropertyInfo? ResultProperty { get; set; }
         public TimeSpan NextReading { get; set; }
         public bool EnableReading { get; set; }
@@ -49,9 +49,12 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor, IDisposable
 
             if (readMethod != null)
             {
+                // create a compiled delegate for better performance
+                var readDelegate = (Func<Task>)Delegate.CreateDelegate(typeof(Func<Task>), sensor, readMethod);
+
                 // wait a random period to attempt to spread the updates over time
                 var firstInterval = _random.Next(0, (int)(sensor.UpdateInterval.TotalSeconds + 1));
-                var meta = new SensorMeta(sensor, readMethod)
+                var meta = new SensorMeta(sensor, readDelegate)
                 {
                     EnableReading = true,
                     NextReading = TimeSpan.FromSeconds(firstInterval)
@@ -87,7 +90,7 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor, IDisposable
                     // read the sensor
                     try
                     {
-                        var task = (Task)meta.ReadMethod.Invoke(meta.Sensor, null);
+                        var task = meta.ReadDelegate();
                         await task.ConfigureAwait(false);
 
                         if (meta.ResultProperty == null)
@@ -98,7 +101,7 @@ internal class ThreadedPollingSensorMonitor : ISensorMonitor, IDisposable
                         var value = meta.ResultProperty.GetValue(task);
 
                         // raise an event - not ideal as all sensors get events for all other sensors
-                        // fixing this requires eitehr exposing a "set" method, which I'd prefer be kept internal
+                        // fixing this requires either exposing a "set" method, which I'd prefer be kept internal
                         // or using reflection to find a set method, which is fragile
                         SampleAvailable?.Invoke(meta.Sensor, value);
                     }
