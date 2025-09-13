@@ -791,6 +791,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
                 reliabilityService.ClearCrashData();
             }
+            else
+            {
+                Resolver.Log.Info($"No crash data to send to Meadow Cloud.");
+            }
         }
 
         return result;
