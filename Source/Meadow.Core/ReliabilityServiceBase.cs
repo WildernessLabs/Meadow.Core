@@ -15,7 +15,7 @@ public abstract class ReliabilityServiceBase : IReliabilityService
     private readonly List<(MeadowSystemErrorInfo error, bool recommendReset)> _systemErrorCache = new();
     private MeadowSystemErrorHandler? _systemError;
     private bool _startupEventSubscribeTimeout = false;
-    private Stopwatch _uptimeStopwatch = new Stopwatch();
+    private readonly Stopwatch _uptimeStopwatch = new Stopwatch();
 
     private readonly string[] _reportFiles;
 
@@ -86,7 +86,8 @@ public abstract class ReliabilityServiceBase : IReliabilityService
         _reportFiles = new string[]
         {
             MeadowOS.FileSystem.AppCrashFile,
-            MeadowOS.FileSystem.RuntimeCrashFile
+            MeadowOS.FileSystem.RuntimeCrashFile,
+            MeadowOS.FileSystem.OsCrashFile
         };
 
         Task.Run(async () =>
