@@ -4,10 +4,6 @@ using Meadow.Update;
 using MQTTnet;
 using MQTTnet.Adapter;
 using MQTTnet.Client;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Receiving;
 using MQTTnet.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -59,8 +55,8 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private readonly CloudDataQueue _dataQueue;
     private readonly AutoResetEvent _dataReadyEvent = new(false);
 
-    private IMqttClientOptions? ClientOptions { get; set; } = default!;
-    private IMqttClient MqttClient { get; set; } = default!;
+    private MqttClientOptions? ClientOptions { get; set; } = default!;
+    private MqttClient MqttClient { get; set; } = default!;
 
     /// <inheritdoc/>
     public bool IsEnabled { get; private set; }
@@ -224,28 +220,28 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private void Initialize()
     {
         var factory = new MqttFactory();
-        MqttClient = factory.CreateMqttClient();
+        MqttClient = (MqttClient) factory.CreateMqttClient();
 
-        MqttClient.ConnectedHandler = new MqttClientConnectedHandlerDelegate((f) =>
+        MqttClient.ConnectedAsync += (args) =>
         {
             Resolver.Log.Debug("MQTT connected", "cloud");
             ConnectionState = CloudConnectionState.Subscribing;
             return Task.CompletedTask;
-        });
+        };
 
-        MqttClient.DisconnectedHandler = new MqttClientDisconnectedHandlerDelegate((f) =>
+        MqttClient.DisconnectedAsync += (args) =>
         {
             Resolver.Log.Debug("MQTT disconnected", "cloud");
             ConnectionState = CloudConnectionState.Disconnected;
             return Task.CompletedTask;
-        });
+        };
 
-        MqttClient.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate((f) =>
+        MqttClient.ApplicationMessageReceivedAsync += (args) =>
         {
-            Resolver.Log.Debug($"MQTT message received at topic: {f.ApplicationMessage.Topic}", "cloud");
-            MqttMessageReceived?.Invoke(this, f.ApplicationMessage);
+            Resolver.Log.Debug($"MQTT message received at topic: {args.ApplicationMessage.Topic}", "cloud");
+            MqttMessageReceived?.Invoke(this, args.ApplicationMessage);
             return Task.CompletedTask;
-        });
+        };
     }
 
     private async Task ConnectionStateMachine()
@@ -389,14 +385,14 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                             var builder = new MqttClientOptionsBuilder()
                                 .WithClientId(client_id)
                                 .WithTcpServer(Settings.MqttHostname, Settings.MqttPort)
-                                .WithTls(tlsParameters =>
+                                .WithTlsOptions(options =>
                                 {
-                                    tlsParameters.UseTls = Settings.MqttPort == 8883;
+                                    options.UseTls(Settings.MqttPort == 8883);
                                 })
                                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                                 .WithCleanSession(false)
                                 .WithSessionExpiryInterval(86400) // Keep the session for 1 day
-                                .WithCommunicationTimeout(TimeSpan.FromSeconds(30));
+                                .WithTimeout(TimeSpan.FromSeconds(30));
 
                             if (Settings.UseAuthentication)
                             {

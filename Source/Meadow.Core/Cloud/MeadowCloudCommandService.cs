@@ -80,8 +80,8 @@ internal class MeadowCloudCommandService : ICommandService
             IReadOnlyDictionary<string, object>? arguments;
             try
             {
-                arguments = message.Payload != null
-                    ? Resolver.JsonSerializer.Deserialize<Dictionary<string, object>>(message.Payload)
+                arguments = message.PayloadSegment.Count > 0
+                    ? Resolver.JsonSerializer.Deserialize<Dictionary<string, object>>(message.PayloadSegment.Array)
                     : null;
             }
             catch (Exception ex)
@@ -113,8 +113,8 @@ internal class MeadowCloudCommandService : ICommandService
             object command;
             try
             {
-                command = message.Payload != null
-                    ? Resolver.JsonSerializer.Deserialize(message.Payload, value.CommandType) ?? Activator.CreateInstance(subscription.Value.commandType)
+                command = message.PayloadSegment.Count > 0
+                    ? Resolver.JsonSerializer.Deserialize(message.PayloadSegment.Array, value.CommandType) ?? Activator.CreateInstance(subscription.Value.commandType)
                     : Activator.CreateInstance(subscription.Value.commandType);
             }
             catch (Exception ex)
