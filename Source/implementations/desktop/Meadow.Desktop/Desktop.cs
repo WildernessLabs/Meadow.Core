@@ -6,12 +6,41 @@ using System;
 
 namespace Meadow;
 
+public class Desktop<TDisplay> : Desktop where TDisplay : IPixelDisplay
+{
+    private TDisplay? _virtualDisplay;
+
+    /// <inheritdoc/>
+    public override IPixelDisplay? Display
+    {
+        get
+        {
+            if (_virtualDisplay is null && _implementation is IPixelDisplayProvider provider)
+            {
+                var renderer = provider.CreateDisplay();
+
+                var ctor = typeof(TDisplay).GetConstructor([typeof(IResizablePixelDisplay)]);
+
+                _virtualDisplay = (TDisplay)ctor?.Invoke([renderer])!;
+            }
+
+            return _virtualDisplay;
+        }
+    }
+    /// <summary>
+    /// Initializes a new instance of the Desktop class with a specific display type.
+    /// </summary>
+    public Desktop() : base()
+    {
+    }
+}
+
 /// <summary>
 /// Represents a desktop implementation of the Meadow device.
 /// </summary>
 public class Desktop : IMeadowDevice
 {
-    private IMeadowDevice _implementation = default!;
+    protected IMeadowDevice _implementation = default!;
     private IResizablePixelDisplay? _display;
 
     /// <inheritdoc/>
@@ -22,7 +51,7 @@ public class Desktop : IMeadowDevice
     /// <summary>
     /// Gets or sets the display associated with the desktop.
     /// </summary>
-    public virtual IResizablePixelDisplay? Display
+    public virtual IPixelDisplay? Display
     {
         get
         {
