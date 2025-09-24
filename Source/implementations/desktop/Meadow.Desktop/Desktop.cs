@@ -15,7 +15,7 @@ public class Desktop<TDisplay> : Desktop where TDisplay : IPixelDisplay
     {
         get
         {
-            if (_virtualDisplay is null && _implementation is IPixelDisplayProvider provider)
+            if (_virtualDisplay is null && Implementation is IPixelDisplayProvider provider)
             {
                 var renderer = provider.CreateDisplay();
 
@@ -40,7 +40,11 @@ public class Desktop<TDisplay> : Desktop where TDisplay : IPixelDisplay
 /// </summary>
 public class Desktop : IMeadowDevice
 {
-    protected IMeadowDevice _implementation = default!;
+    /// <summary>
+    /// Gets or sets the underlying Meadow device implementation.
+    /// </summary>
+    protected IMeadowDevice Implementation { get; set; } = default!;
+
     private IResizablePixelDisplay? _display;
 
     /// <inheritdoc/>
@@ -55,7 +59,7 @@ public class Desktop : IMeadowDevice
     {
         get
         {
-            if (_implementation is IPixelDisplayProvider displayProvider)
+            if (Implementation is IPixelDisplayProvider displayProvider)
             {
                 return _display ??= displayProvider.CreateDisplay();
             }
@@ -74,7 +78,7 @@ public class Desktop : IMeadowDevice
     /// <inheritdoc/>
     public void Initialize(MeadowPlatform detectedPlatform)
     {
-        _implementation = detectedPlatform switch
+        Implementation = detectedPlatform switch
         {
             MeadowPlatform.OSX => new Mac(),
             MeadowPlatform.DesktopLinux => new DesktopLinux(),
@@ -82,90 +86,90 @@ public class Desktop : IMeadowDevice
             _ => throw new ArgumentException($"Desktop cannot run on {detectedPlatform}"),
         };
 
-        _implementation.Initialize(detectedPlatform);
+        Implementation.Initialize(detectedPlatform);
 
-        _implementation.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
-        _implementation.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
+        Implementation.NetworkConnected += (s, e) => NetworkConnected?.Invoke(s, e);
+        Implementation.NetworkDisconnected += (s, e) => NetworkDisconnected?.Invoke(s, e);
     }
 
     /// <inheritdoc/>
-    public IPlatformOS PlatformOS => _implementation.PlatformOS;
+    public IPlatformOS PlatformOS => Implementation.PlatformOS;
     /// <inheritdoc/>
-    public IDeviceInformation Information => _implementation.Information;
+    public IDeviceInformation Information => Implementation.Information;
     /// <inheritdoc/>
-    public DeviceCapabilities Capabilities => _implementation.Capabilities;
+    public DeviceCapabilities Capabilities => Implementation.Capabilities;
     /// <inheritdoc/>
-    public INetworkAdapterCollection NetworkAdapters => _implementation.NetworkAdapters;
+    public INetworkAdapterCollection NetworkAdapters => Implementation.NetworkAdapters;
     /// <inheritdoc/>
-    public IPin GetPin(string name) => _implementation.GetPin(name);
+    public IPin GetPin(string name) => Implementation.GetPin(name);
     /// <inheritdoc/>
-    public BatteryInfo? GetBatteryInfo() => _implementation.GetBatteryInfo();
+    public BatteryInfo? GetBatteryInfo() => Implementation.GetBatteryInfo();
     /// <inheritdoc/>
     public IDigitalInputPort CreateDigitalInputPort(IPin pin, ResistorMode resistorMode)
-        => _implementation.CreateDigitalInputPort(pin, resistorMode);
+        => Implementation.CreateDigitalInputPort(pin, resistorMode);
     /// <inheritdoc/>
     public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
-        => _implementation.CreateDigitalInterruptPort(pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
+        => Implementation.CreateDigitalInterruptPort(pin, interruptMode, resistorMode, debounceDuration, glitchDuration);
     /// <inheritdoc/>
     public IBiDirectionalInterruptPort CreateBiDirectionalInterruptPort(IPin pin, bool initialState, InterruptMode interruptMode, ResistorMode resistorMode, PortDirectionType initialDirection, TimeSpan debounceDuration, TimeSpan glitchDuration, OutputType output = OutputType.PushPull)
-        => _implementation.CreateBiDirectionalInterruptPort(pin, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, output);
+        => Implementation.CreateBiDirectionalInterruptPort(pin, initialState, interruptMode, resistorMode, initialDirection, debounceDuration, glitchDuration, output);
     /// <inheritdoc/>
     public IBiDirectionalPort CreateBiDirectionalPort(IPin pin, bool initialState)
-        => _implementation.CreateBiDirectionalPort(pin, initialState);
+        => Implementation.CreateBiDirectionalPort(pin, initialState);
     /// <inheritdoc/>
     public IAnalogInputPort CreateAnalogInputPort(IPin pin, Voltage? voltageReference)
-        => _implementation.CreateAnalogInputPort(pin, voltageReference);
+        => Implementation.CreateAnalogInputPort(pin, voltageReference);
     /// <inheritdoc/>
     public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
-        => _implementation.CreateAnalogInputPort(pin, sampleCount, sampleInterval, voltageReference);
+        => Implementation.CreateAnalogInputPort(pin, sampleCount, sampleInterval, voltageReference);
     /// <inheritdoc/>
     public IAnalogInputArray CreateAnalogInputArray(params IPin[] pins)
-        => _implementation.CreateAnalogInputArray(pins);
+        => Implementation.CreateAnalogInputArray(pins);
     /// <inheritdoc/>
     public IPwmPort CreatePwmPort(IPin pin, Frequency frequency, float dutyCycle = 0.5F, bool invert = false)
-        => _implementation.CreatePwmPort(pin, frequency, dutyCycle, invert);
+        => Implementation.CreatePwmPort(pin, frequency, dutyCycle, invert);
     /// <inheritdoc/>
     public ISerialPort CreateSerialPort(SerialPortName portName, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 1024)
-        => _implementation.CreateSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
+        => Implementation.CreateSerialPort(portName, baudRate, dataBits, parity, stopBits, readBufferSize);
     /// <inheritdoc/>
     public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] suffixDelimiter, bool preserveDelimiter, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
-        => _implementation.CreateSerialMessagePort(portName, suffixDelimiter, preserveDelimiter, baudRate, dataBits, parity, stopBits, readBufferSize);
+        => Implementation.CreateSerialMessagePort(portName, suffixDelimiter, preserveDelimiter, baudRate, dataBits, parity, stopBits, readBufferSize);
     /// <inheritdoc/>
     public ISerialMessagePort CreateSerialMessagePort(SerialPortName portName, byte[] prefixDelimiter, bool preserveDelimiter, int messageLength, int baudRate = 9600, int dataBits = 8, Parity parity = Parity.None, StopBits stopBits = StopBits.One, int readBufferSize = 512)
-        => _implementation.CreateSerialMessagePort(portName, prefixDelimiter, preserveDelimiter, messageLength, baudRate, dataBits, parity, stopBits, readBufferSize);
+        => Implementation.CreateSerialMessagePort(portName, prefixDelimiter, preserveDelimiter, messageLength, baudRate, dataBits, parity, stopBits, readBufferSize);
     /// <inheritdoc/>
     public ISpiBus CreateSpiBus(int busNumber, Frequency speed)
-        => _implementation.CreateSpiBus(busNumber, speed);
+        => Implementation.CreateSpiBus(busNumber, speed);
     /// <inheritdoc/>
     public ISpiBus CreateSpiBus(IPin clock, IPin copi, IPin cipo, SpiClockConfiguration config)
-        => _implementation.CreateSpiBus(clock, copi, cipo, config);
+        => Implementation.CreateSpiBus(clock, copi, cipo, config);
     /// <inheritdoc/>
     public ISpiBus CreateSpiBus(IPin clock, IPin copi, IPin cipo, Frequency speed)
-        => _implementation.CreateSpiBus(clock, copi, cipo, speed);
+        => Implementation.CreateSpiBus(clock, copi, cipo, speed);
     /// <inheritdoc/>
     public IDigitalOutputPort CreateDigitalOutputPort(IPin pin, bool initialState = false, OutputType initialOutputType = OutputType.PushPull)
-        => _implementation.CreateDigitalOutputPort(pin, initialState, initialOutputType);
+        => Implementation.CreateDigitalOutputPort(pin, initialState, initialOutputType);
     /// <inheritdoc/>
     public II2cBus CreateI2cBus(int busNumber = 1, I2cBusSpeed busSpeed = I2cBusSpeed.Standard)
-        => _implementation.CreateI2cBus(busNumber, busSpeed);
+        => Implementation.CreateI2cBus(busNumber, busSpeed);
     /// <inheritdoc/>
     public II2cBus CreateI2cBus(IPin[] pins, I2cBusSpeed busSpeed)
-        => _implementation.CreateI2cBus(pins, busSpeed);
+        => Implementation.CreateI2cBus(pins, busSpeed);
     /// <inheritdoc/>
     public II2cBus CreateI2cBus(IPin clock, IPin data, I2cBusSpeed busSpeed)
-        => _implementation.CreateI2cBus(clock, data, busSpeed);
+        => Implementation.CreateI2cBus(clock, data, busSpeed);
     /// <inheritdoc/>
     public void WatchdogEnable(TimeSpan timeout)
-        => _implementation.WatchdogEnable(timeout);
+        => Implementation.WatchdogEnable(timeout);
     /// <inheritdoc/>
     public void WatchdogReset()
-        => _implementation.WatchdogReset();
+        => Implementation.WatchdogReset();
     /// <inheritdoc/>
     public ICounter CreateCounter(IPin pin, InterruptMode edge)
-        => _implementation.CreateCounter(pin, edge);
+        => Implementation.CreateCounter(pin, edge);
     /// <inheritdoc/>
     public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
-        => _implementation.CreateDigitalSignalAnalyzer(pin, captureDutyCycle);
+        => Implementation.CreateDigitalSignalAnalyzer(pin, captureDutyCycle);
 }
 
 
