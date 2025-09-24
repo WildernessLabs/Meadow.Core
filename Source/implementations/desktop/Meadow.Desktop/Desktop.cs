@@ -1,39 +1,9 @@
-﻿using Meadow.Hardware;
+﻿using Meadow;
+using Meadow.Hardware;
 using Meadow.Peripherals.Displays;
 using Meadow.Pinouts;
 using Meadow.Units;
 using System;
-
-namespace Meadow;
-
-public class Desktop<TDisplay> : Desktop where TDisplay : IPixelDisplay
-{
-    private TDisplay? _virtualDisplay;
-
-    /// <inheritdoc/>
-    public override IPixelDisplay? Display
-    {
-        get
-        {
-            if (_virtualDisplay is null && Implementation is IPixelDisplayProvider provider)
-            {
-                var renderer = provider.CreateDisplay();
-
-                var ctor = typeof(TDisplay).GetConstructor([typeof(IResizablePixelDisplay)]);
-
-                _virtualDisplay = (TDisplay)ctor?.Invoke([renderer])!;
-            }
-
-            return _virtualDisplay;
-        }
-    }
-    /// <summary>
-    /// Initializes a new instance of the Desktop class with a specific display type.
-    /// </summary>
-    public Desktop() : base()
-    {
-    }
-}
 
 /// <summary>
 /// Represents a desktop implementation of the Meadow device.
@@ -171,6 +141,3 @@ public class Desktop : IMeadowDevice
     public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
         => Implementation.CreateDigitalSignalAnalyzer(pin, captureDutyCycle);
 }
-
-
-
