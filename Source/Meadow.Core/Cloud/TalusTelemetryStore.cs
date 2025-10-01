@@ -13,10 +13,10 @@ namespace Meadow.Cloud;
 /// </summary>
 internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 {
-    // Default table sizes per priority - can be tuned based on expected usage
-    private const int HighPriorityMaxElements = 500;
-    private const int NormalPriorityMaxElements = 2000;
-    private const int LowPriorityMaxElements = 5000;
+    // TODO: we probablyu need to sanigty-check these values and make them configurable
+    private const int HighPriorityMaxElements = 100;
+    private const int NormalPriorityMaxElements = 1000;
+    private const int LowPriorityMaxElements = 100;
 
     private readonly Database _database;
     private readonly Dictionary<(Type, CloudTelemetryPriority), object> _tables;
