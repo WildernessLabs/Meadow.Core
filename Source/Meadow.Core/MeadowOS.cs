@@ -459,7 +459,7 @@ public static partial class MeadowOS
                 {
                     var devicetype = FindDeviceTypeParameter(app);
 
-                    if (devicetype.DeviceType.FullName.StartsWith("Meadow.Desktop"))
+                    if (devicetype.DeviceType.FullName.StartsWith("Meadow.Desktop") || devicetype.DeviceType.FullName == "Desktop")
                     {
                         return (app, devicetype.DeviceType, devicetype.HardwareProviderType);
                     }
