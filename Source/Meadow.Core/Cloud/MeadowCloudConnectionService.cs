@@ -67,7 +67,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
-        _dataQueue = new CloudDataQueue(settings.MaxQueueDepth > 0 ? settings.MaxQueueDepth : CloudDataQueue.DefaultQueueDepth);
+        var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud");
+
+        _dataQueue = new CloudDataQueue(
+            new PriorityTelemetryStore(path, 50));
     }
 
     /// <inheritdoc/>
@@ -93,7 +96,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             while (_dataQueue.Count > 0)
             {
-                Resolver.Log.Trace($"Data queue: {_dataQueue.Count}/{_dataQueue.MaxQueueItems}", "cloud");
+                Resolver.Log.Trace($"Data queue: {_dataQueue.Count}", "cloud");
                 try
                 {
                     if (ConnectionState == CloudConnectionState.Connected)
@@ -220,7 +223,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private void Initialize()
     {
         var factory = new MqttFactory();
-        MqttClient = (MqttClient) factory.CreateMqttClient();
+        MqttClient = (MqttClient)factory.CreateMqttClient();
 
         MqttClient.ConnectedAsync += (args) =>
         {

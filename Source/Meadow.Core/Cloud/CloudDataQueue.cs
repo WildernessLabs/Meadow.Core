@@ -1,60 +1,44 @@
-﻿namespace Meadow;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Meadow;
 
 internal class CloudDataQueue
 {
-    public const int DefaultQueueDepth = 30;
+    private readonly IMeadowCloudTelemetryStore _store;
 
-    public class DataInfo
+    public int Count => _store.Count;
+
+    public CloudDataQueue(IMeadowCloudTelemetryStore store)
     {
-        public DataInfo(object item, string endpoint)
-        {
-            Item = item;
-            EndPoint = endpoint;
-        }
-
-        public object Item { get; set; }
-        public string EndPoint { get; set; }
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+        Resolver.Log.Info($"Cloud Data Queue initialized with telemetry store");
     }
 
-    private readonly CircularBuffer<DataInfo> _items;
-
-    public int Count => _items.Count;
-    public int MaxQueueItems { get; }
-
-    public CloudDataQueue(int maxQueueItems = DefaultQueueDepth)
+    public CloudTelemetryItem? Peek()
     {
-        Resolver.Log.Info($"Cloud Data Queue Depth: {maxQueueItems}");
-        MaxQueueItems = maxQueueItems <= 0 ? DefaultQueueDepth : maxQueueItems;
-        _items = new CircularBuffer<DataInfo>(maxQueueItems);
-
-        _items.Overrun += OnQueueOverrun;
+        return _store.Peek();
     }
 
-    private void OnQueueOverrun(object sender, System.EventArgs e)
+    public CloudTelemetryItem? Dequeue()
     {
-        // DEV NOTE: don't elevate this above Info or it will become circular/re-entrant
-        Resolver.Log.Info($"Cloud Data Queue overrun (data loss)");
+        return _store.Dequeue();
     }
 
-    public DataInfo? Peek()
+    public void Enqueue(CloudTelemetryItem info)
     {
-        return _items.Peek();
+        _store.Enqueue(info.Item, info.EndPoint, info.Priority);
     }
 
-    public DataInfo? Dequeue()
-    {
-        return _items.Remove();
-    }
-
-    public void Enqueue(DataInfo info)
-    {
-        _items.Append(info);
-    }
-
-    public void Enqueue<T>(T item, string endPoint)
+    public void Enqueue<T>(T item, string endPoint, int priority = 3)
     {
         if (item == null) { return; }
 
-        Enqueue(new DataInfo(item, endPoint));
+        _store.Enqueue(item, endPoint, priority);
+    }
+
+    public Dictionary<int, int> CountByPriority()
+    {
+        return _store.CountByPriority();
     }
 }
