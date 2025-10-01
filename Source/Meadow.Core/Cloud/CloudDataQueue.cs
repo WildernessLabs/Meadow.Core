@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Meadow;
+namespace Meadow.Cloud;
 
 internal class CloudDataQueue
 {
@@ -27,14 +27,19 @@ internal class CloudDataQueue
 
     public void Enqueue(CloudTelemetryItem info)
     {
-        _store.Enqueue(info.Item, info.EndPoint, info.Priority);
+        _store.Enqueue(info);
     }
 
-    public void Enqueue<T>(T item, string endPoint, int priority = 3)
+    public void Enqueue(CloudLog cloudLog, CloudTelemetryPriority priority = CloudTelemetryPriority.Normal)
     {
-        if (item == null) { return; }
+        var item = new CloudTelemetryItem(cloudLog, "/api/logs", priority);
+        _store.Enqueue(item);
+    }
 
-        _store.Enqueue(item, endPoint, priority);
+    public void Enqueue(CloudEvent cloudEvent, CloudTelemetryPriority priority = CloudTelemetryPriority.Normal)
+    {
+        var item = new CloudTelemetryItem(cloudEvent, "/api/events", priority);
+        _store.Enqueue(item);
     }
 
     public Dictionary<int, int> CountByPriority()

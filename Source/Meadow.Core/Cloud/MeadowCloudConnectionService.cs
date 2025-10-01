@@ -69,8 +69,9 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         Settings = settings;
         var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud");
 
+        // Option 2: TalusDB-based store (faster, lower memory)
         _dataQueue = new CloudDataQueue(
-            new PriorityTelemetryStore(path, 50));
+            new TalusTelemetryStore(path));
     }
 
     /// <inheritdoc/>
@@ -800,7 +801,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public Task SendLog(CloudLog log, bool throwIfDisabled = true)
+    public Task SendLog(
+        CloudLog log,
+        CloudTelemetryPriority priority = CloudTelemetryPriority.Normal,
+        bool throwIfDisabled = true)
     {
         if (!IsEnabled && throwIfDisabled)
         {
@@ -808,7 +812,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         // enqueue and trigger the timer - this will send any older data before this record
-        _dataQueue.Enqueue(log, "/api/logs");
+        _dataQueue.Enqueue(log, priority);
         _dataReadyEvent.Set();
         return Task.CompletedTask;
     }
@@ -822,7 +826,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         // enqueue and trigger the timer - this will send any older data before this record
-        _dataQueue.Enqueue(cloudEvent, "/api/events");
+        _dataQueue.Enqueue(cloudEvent);
         _dataReadyEvent.Set();
         return Task.CompletedTask;
     }

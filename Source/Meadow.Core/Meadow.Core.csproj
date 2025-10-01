@@ -30,6 +30,7 @@
         <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
         <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
+        <ProjectReference Include="..\..\..\talusdb\src\WildernessLabs.TalusDB\WildernessLabs.TalusDB.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="System.IO.Hashing" />

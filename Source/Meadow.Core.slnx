@@ -100,6 +100,9 @@
     <Project Path="../../MQTTnet/Source/MQTTnet/MQTTnet.csproj">
       <BuildType Solution="Core|*" Project="Debug" />
     </Project>
+    <Project Path="../../talusdb/src/WildernessLabs.TalusDB/WildernessLabs.TalusDB.csproj">
+      <BuildType Solution="Core|*" Project="Debug" />
+    </Project>
   </Folder>
   <Project Path="Meadow.Core/Meadow.Core.csproj">
     <BuildType Solution="Core|*" Project="Debug" />
