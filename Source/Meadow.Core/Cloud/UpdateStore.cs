@@ -145,6 +145,9 @@ internal class UpdateStore
         if (State != States.Manifest)
             throw new Exception("Cannot delete MPAK, no manifest in store");
 
+        mpak_stream?.Dispose();
+        mpak_stream = null;
+
         File.Delete(mpak_partial_path);
         File.Delete(mpak_path);
     }

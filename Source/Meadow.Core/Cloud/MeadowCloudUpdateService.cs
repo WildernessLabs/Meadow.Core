@@ -241,12 +241,10 @@ internal class MeadowCloudUpdateService : IUpdateService
                 Log.Info("Server responded with 416 Range Not Satisfiable. Assuming file is fully downloaded.", "update service");
                 if (totalContentLength.HasValue && fileStream.Length != totalContentLength.Value)
                 {
-                    fileStream.Close();
                     Store.DeleteMpak();
                     throw new MpakValidationFailedException($"Download size mismatch. Expected {totalContentLength.Value:N0} bytes but received {fileStream.Length:N0} bytes.");
                 }
 
-                fileStream.Close();
                 if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash1))
                 {
                     Store.DeleteMpak();
@@ -321,24 +319,22 @@ internal class MeadowCloudUpdateService : IUpdateService
                 Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded", "update service");
             }
             await writeTask; // wait for last write to disk task to complete
-            
+            sw.Stop();
+
             // Validate download completion
             if (rangeContentLength.HasValue && totalBytesDownloaded != rangeContentLength.Value)
             {
-                fileStream.Close();
                 Store.DeleteMpak();
                 throw new MpakValidationFailedException($"Download size mismatch. Expected {rangeContentLength.Value:N0} bytes but received {totalBytesDownloaded:N0} bytes.");
             }
 
             // Validate CRC if provided
-            fileStream.Close();
             if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash2))
             {   
                 Store.DeleteMpak();
                 throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash2}.");
             }
 
-            sw.Stop();
             Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
         }
         catch (OperationCanceledException)
