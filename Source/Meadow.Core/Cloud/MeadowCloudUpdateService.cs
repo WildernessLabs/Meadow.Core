@@ -228,6 +228,8 @@ internal class MeadowCloudUpdateService : IUpdateService
             using var sendCts = new CancellationTokenSource(millisecondsDelay: 15000);
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token);
 
+            // Handle Content-Range header (for resumable downloads)
+            var rangeContentLength = response.Content.Headers.ContentLength;
             var totalContentLength = response.Content.Headers.ContentRange?.Length;
             var contentDigest = response.Headers.GetContentDigests().FirstOrDefault();
 
@@ -254,9 +256,6 @@ internal class MeadowCloudUpdateService : IUpdateService
             }
 
             response.EnsureSuccessStatusCode();
-
-            // Handle Content-Range header (for resumable downloads)
-            var rangeContentLength = response.Content.Headers.ContentLength;
 
             // Determine the total file size
             if (totalContentLength.HasValue)
