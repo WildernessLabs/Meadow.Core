@@ -231,7 +231,8 @@ internal class MeadowCloudUpdateService : IUpdateService
             // Handle Content-Range header (for resumable downloads)
             var rangeContentLength = response.Content.Headers.ContentLength;
             var totalContentLength = response.Content.Headers.ContentRange?.Length;
-            var contentDigest = response.Headers.GetContentDigests().FirstOrDefault();
+            var contentDigests = response.Headers.GetContentDigests();
+            var contentDigest = contentDigests.Count > 0 ? contentDigests[0] : null;
 
             // Handle RequestedRangeNotSatisfiable which means the either the file is fully downloaded, or
             // the file on disk is larger than the file on the server (indicating an incorrect file)
@@ -249,7 +250,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                 if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash1))
                 {
                     Store.DeleteMpak();
-                    throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but rececived {actualHash1}.");
+                    throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash1}.");
                 }
 
                 return;
@@ -334,7 +335,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash2))
             {   
                 Store.DeleteMpak();
-                throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but rececived {actualHash2}.");
+                throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash2}.");
             }
 
             sw.Stop();
@@ -441,15 +442,4 @@ internal class MeadowCloudUpdateService : IUpdateService
             DisplayTree(d);
         }
     }
-}
-
-/// <summary>
-/// 
-/// </summary>
-public class MpakValidationFailedException : Exception
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    public MpakValidationFailedException(string message) : base(message) { }
 }
