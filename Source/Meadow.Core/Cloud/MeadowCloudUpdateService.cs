@@ -227,14 +227,60 @@ internal class MeadowCloudUpdateService : IUpdateService
 
             using var sendCts = new CancellationTokenSource(millisecondsDelay: 15000);
             var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, sendCts.Token);
-            var contentLength = response.Content.Headers.ContentLength;
-            if (contentLength.HasValue)
+
+            var totalContentLength = response.Content.Headers.ContentRange?.Length;
+            var contentDigest = response.Headers.GetContentDigests().FirstOrDefault();
+
+            // Handle RequestedRangeNotSatisfiable which means the either the file is fully downloaded, or
+            // the file on disk is larger than the file on the server (indicating an incorrect file)
+            if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
             {
-                // Content-Length indicates the remaining bytes to download, as the Range header may change after retries.
-                // Then, to determine the total file size, the Content-Length from the first download attempt is used.
-                if (message.FileSize == 0)
-                    message.FileSize = contentLength.Value;
-                Log.Debug($"File size: {message.FileSize:N0} bytes.", "update service");
+                Log.Info("Server responded with 416 Range Not Satisfiable. Assuming file is fully downloaded.", "update service");
+                if (totalContentLength.HasValue && fileStream.Length != totalContentLength.Value)
+                {
+                    fileStream.Close();
+                    Store.DeleteMpak();
+                    throw new MpakValidationFailedException($"Download size mismatch. Expected {totalContentLength.Value:N0} bytes but received {fileStream.Length:N0} bytes.");
+                }
+
+                fileStream.Close();
+                if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash1))
+                {
+                    Store.DeleteMpak();
+                    throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but rececived {actualHash1}.");
+                }
+
+                return;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            // Handle Content-Range header (for resumable downloads)
+            var rangeContentLength = response.Content.Headers.ContentLength;
+
+            // Determine the total file size
+            if (totalContentLength.HasValue)
+            {
+                // Content-Range header provides the total file size (preferred for resumable downloads)
+                message.FileSize = totalContentLength.Value;
+                Log.Debug($"Total file size from Content-Range: {message.FileSize:N0} bytes.", "update service");
+            }
+            else if (rangeContentLength.HasValue && fileStream.Length == 0)
+            {
+                // First download attempt - Content-Length is the total size
+                message.FileSize = rangeContentLength.Value;
+                Log.Debug($"Total file size from Content-Length: {message.FileSize:N0} bytes.", "update service");
+            }
+            else if (!rangeContentLength.HasValue)
+            {
+                Log.Warn("Server did not provide Content-Length header. Progress tracking may be inaccurate.", "update service");
+                // FileSize remains at its previous value or 0 if not set
+            }
+
+            // Validate that we got some length information for resumed downloads
+            if (fileStream.Length > 0 && !totalContentLength.HasValue && !rangeContentLength.HasValue)
+            {
+                Log.Warn("Resuming download but server provided no length headers. Download may be incomplete.", "update service");
             }
 
             using var stream = await response.Content.ReadAsStreamAsync();
@@ -275,15 +321,37 @@ internal class MeadowCloudUpdateService : IUpdateService
                 Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded", "update service");
             }
             await writeTask; // wait for last write to disk task to complete
+            
+            // Validate download completion
+            if (rangeContentLength.HasValue && totalBytesDownloaded != rangeContentLength.Value)
+            {
+                fileStream.Close();
+                Store.DeleteMpak();
+                throw new MpakValidationFailedException($"Download size mismatch. Expected {rangeContentLength.Value:N0} bytes but received {totalBytesDownloaded:N0} bytes.");
+            }
+
+            // Validate CRC if provided
+            fileStream.Close();
+            if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash2))
+            {   
+                Store.DeleteMpak();
+                throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but rececived {actualHash2}.");
+            }
 
             sw.Stop();
             Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
         }
-
         catch (OperationCanceledException)
         {
             sw.Stop();
             Log.Error($"Download timed out or cancelled after {sw.Elapsed.TotalSeconds:0} seconds", "update service");
+            await Task.Delay(RetryDelayMilliseconds);
+            throw;
+        }
+        catch (MpakValidationFailedException ex)
+        {
+            sw.Stop();
+            Log.Error($"Download failed mpak validation: {ex.Message}", "update service");
             await Task.Delay(RetryDelayMilliseconds);
             throw;
         }
@@ -374,4 +442,15 @@ internal class MeadowCloudUpdateService : IUpdateService
             DisplayTree(d);
         }
     }
+}
+
+/// <summary>
+/// 
+/// </summary>
+public class MpakValidationFailedException : Exception
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public MpakValidationFailedException(string message) : base(message) { }
 }
