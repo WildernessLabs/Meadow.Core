@@ -141,7 +141,7 @@ internal class UpdateStore
 
     internal void DeleteMpak()
     {
-        Log.Debug("ResetMpak()", "update store");
+        Log.Debug("DeleteMpak()", "update store");
         if (State != States.Manifest)
             throw new Exception("Cannot delete MPAK, no manifest in store");
 

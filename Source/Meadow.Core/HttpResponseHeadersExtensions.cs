@@ -20,7 +20,7 @@ internal static class HttpResponseHeadersExtensions
             var values = header.Split(',');
             foreach (var value in values)
             {
-                var parts = value.Split('=');
+                var parts = value.Split('=', 2);
                 if (parts.Length > 1)
                 {
                     items.Add(new ContentDigestItem(parts[0].Trim(), parts[1].Trim()));
