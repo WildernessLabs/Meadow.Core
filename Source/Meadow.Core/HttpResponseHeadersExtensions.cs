@@ -30,6 +30,36 @@ internal static class HttpResponseHeadersExtensions
 
         return items;
     }
+
+    public static ContentDigestItem? GetContentDigest(this HttpResponseHeaders headers, string algorithm)
+    {
+        if (headers == null || string.IsNullOrWhiteSpace(algorithm))
+        {
+            return null;
+        }
+
+        var digests = headers.GetContentDigests();
+        foreach (var digest in digests)
+        {
+            if (string.Equals(digest.Algorithm, algorithm, StringComparison.OrdinalIgnoreCase))
+            {
+                return digest;
+            }
+        }
+        return null;
+    }
+
+    public static ContentDigestItem? GetContentDigest(this HttpResponseHeaders headers)
+    {
+        if (headers == null)
+        {
+            return null;
+        }
+
+        var digests = headers.GetContentDigests();
+
+        return digests.Count > 0 ? digests[0] : null;
+    }
 }
 
 internal class ContentDigestItem(string algorithm, string value)

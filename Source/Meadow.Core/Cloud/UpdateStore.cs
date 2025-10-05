@@ -165,6 +165,9 @@ internal class UpdateStore
             throw new NotImplementedException();
         }
 
+        mpak_stream?.Dispose();
+        mpak_stream = null;
+
         var mpakFilePath = 
               File.Exists(mpak_partial_path) ? mpak_partial_path 
             : File.Exists(mpak_path) ? mpak_path 
@@ -181,7 +184,9 @@ internal class UpdateStore
         if (State != States.Manifest)
             throw new Exception("Cannot add a MPAK, no manifest in store");
 
-        mpak_stream!.Close();
+        mpak_stream?.Dispose();
+        mpak_stream = null;
+
         File.Copy(mpak_partial_path, mpak_path);
         File.Delete(mpak_partial_path);
     }

@@ -231,8 +231,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             // Handle Content-Range header (for resumable downloads)
             var rangeContentLength = response.Content.Headers.ContentLength;
             var totalContentLength = response.Content.Headers.ContentRange?.Length;
-            var contentDigests = response.Headers.GetContentDigests();
-            var contentDigest = contentDigests.Count > 0 ? contentDigests[0] : null;
+            var contentDigest = response.Headers.GetContentDigest();
 
             // Handle RequestedRangeNotSatisfiable which means the either the file is fully downloaded, or
             // the file on disk is larger than the file on the server (indicating an incorrect file)
@@ -250,7 +249,12 @@ internal class MeadowCloudUpdateService : IUpdateService
                     Store.DeleteMpak();
                     throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash1}.");
                 }
+                else if (contentDigest == null)
+                {
+                    Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", "update service");
+                }
 
+                Log.Debug($"Download validation successful.", "update service");
                 return;
             }
 
@@ -320,6 +324,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             }
             await writeTask; // wait for last write to disk task to complete
             sw.Stop();
+            Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
 
             // Validate download completion
             if (rangeContentLength.HasValue && totalBytesDownloaded != rangeContentLength.Value)
@@ -334,8 +339,12 @@ internal class MeadowCloudUpdateService : IUpdateService
                 Store.DeleteMpak();
                 throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash2}.");
             }
+            else if (contentDigest == null)
+            {
+                Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", "update service");
+            }
 
-            Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
+            Log.Debug($"Download validation successful.", "update service");
         }
         catch (OperationCanceledException)
         {
