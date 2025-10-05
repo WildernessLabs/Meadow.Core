@@ -162,7 +162,7 @@ internal class UpdateStore
 
         if (!string.Equals(hashAlgorithm, "meadowCrc", StringComparison.OrdinalIgnoreCase))
         {
-            throw new NotImplementedException();
+            throw new MpakValidationFailedException($"Hash algorithm '{hashAlgorithm}' is not supported.");
         }
 
         mpak_stream?.Dispose();
