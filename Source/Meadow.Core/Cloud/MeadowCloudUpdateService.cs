@@ -238,23 +238,9 @@ internal class MeadowCloudUpdateService : IUpdateService
             if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
             {
                 Log.Info("Server responded with 416 Range Not Satisfiable. Assuming file is fully downloaded.", "update service");
-                if (totalContentLength.HasValue && fileStream.Length != totalContentLength.Value)
-                {
-                    Store.DeleteMpak();
-                    throw new MpakValidationFailedException($"Download size mismatch. Expected {totalContentLength.Value:N0} bytes but received {fileStream.Length:N0} bytes.");
-                }
 
-                if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash1))
-                {
-                    Store.DeleteMpak();
-                    throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash1}.");
-                }
-                else if (contentDigest == null)
-                {
-                    Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", "update service");
-                }
-
-                Log.Debug($"Download validation successful.", "update service");
+                // Validate download completion
+                PerformMpakValidation(contentDigest, totalContentLength, fileStream.Length);
                 return;
             }
 
@@ -327,24 +313,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
 
             // Validate download completion
-            if (rangeContentLength.HasValue && totalBytesDownloaded != rangeContentLength.Value)
-            {
-                Store.DeleteMpak();
-                throw new MpakValidationFailedException($"Download size mismatch. Expected {rangeContentLength.Value:N0} bytes but received {totalBytesDownloaded:N0} bytes.");
-            }
-
-            // Validate CRC if provided
-            if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash2))
-            {   
-                Store.DeleteMpak();
-                throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash2}.");
-            }
-            else if (contentDigest == null)
-            {
-                Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", "update service");
-            }
-
-            Log.Debug($"Download validation successful.", "update service");
+            PerformMpakValidation(contentDigest, rangeContentLength, totalBytesDownloaded);
         }
         catch (OperationCanceledException)
         {
@@ -446,5 +415,28 @@ internal class MeadowCloudUpdateService : IUpdateService
         {
             DisplayTree(d);
         }
+    }
+
+    private void PerformMpakValidation(ContentDigestItem? contentDigest, long? expectedDownloadSize, long actualDownloadSize)
+    {
+        // Validate download size against expected size, if provided
+        if (expectedDownloadSize.HasValue && expectedDownloadSize.Value != actualDownloadSize)
+        {
+            Store.DeleteMpak();
+            throw new MpakValidationFailedException($"Download size mismatch. Expected {expectedDownloadSize.Value:N0} bytes but received {actualDownloadSize:N0} bytes.");
+        }
+
+        // Validate CRC, if provided
+        if (contentDigest != null && !Store.ValidateMpak(contentDigest.Algorithm, contentDigest.Value, out var actualHash))
+        {
+            Store.DeleteMpak();
+            throw new MpakValidationFailedException($"CRC hash mismatch. Expected {contentDigest.Value} but received {actualHash}.");
+        }
+        else if (contentDigest == null)
+        {
+            Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", "update service");
+        }
+
+        Log.Debug($"Download validation successful.", "update service");
     }
 }
