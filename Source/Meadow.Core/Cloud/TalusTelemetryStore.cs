@@ -93,16 +93,21 @@ internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 
         var db = new Database(tablePath, StreamBehavior.KeepOpen);
 
-        try
+        Table<CloudLogRecord> table;
+
+        // Check if table files exist on disk
+        var tableExists = Directory.GetFiles(tablePath, "*.tdb").Length > 0;
+
+        if (tableExists)
         {
-            var table = db.GetTable<CloudLogRecord>();
-            _tables[(typeof(CloudLog), priority)] = table;
+            table = db.GetTable<CloudLogRecord>();
         }
-        catch
+        else
         {
-            var table = db.CreateTable<CloudLogRecord>(maxElements);
-            _tables[(typeof(CloudLog), priority)] = table;
+            table = db.CreateTable<CloudLogRecord>(maxElements);
         }
+
+        _tables[(typeof(CloudLog), priority)] = table;
     }
 
     private void CreateOrOpenEventTable(CloudTelemetryPriority priority, int maxElements)
@@ -115,16 +120,21 @@ internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 
         var db = new Database(tablePath, StreamBehavior.KeepOpen);
 
-        try
+        Table<CloudEventRecord> table;
+
+        // Check if table files exist on disk
+        var tableExists = Directory.GetFiles(tablePath, "*.tdb").Length > 0;
+
+        if (tableExists)
         {
-            var table = db.GetTable<CloudEventRecord>();
-            _tables[(typeof(CloudEvent), priority)] = table;
+            table = db.GetTable<CloudEventRecord>();
         }
-        catch
+        else
         {
-            var table = db.CreateTable<CloudEventRecord>(maxElements);
-            _tables[(typeof(CloudEvent), priority)] = table;
+            table = db.CreateTable<CloudEventRecord>(maxElements);
         }
+
+        _tables[(typeof(CloudEvent), priority)] = table;
     }
 
     private void RecoverReceptionCounter()
