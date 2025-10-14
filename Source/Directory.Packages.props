@@ -1,3 +1,6 @@
 <Project>
-  <Import Project="../../Meadow.Contracts/Source/Directory.Packages.props" />
+    <Import Project="../../Meadow.Contracts/Source/Directory.Packages.props" />
+    <ItemGroup>
+        <PackageVersion Include="sqlite-net-static" Version="1.8.116" />
+    </ItemGroup>
 </Project>

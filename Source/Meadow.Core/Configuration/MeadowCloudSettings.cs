@@ -18,4 +18,5 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     //    public int MaxQueueDepth { get; set; } = CloudDataQueue.DefaultQueueDepth;
 
     public int MaximumDisconnectTimeMinutes { get; set; } = 180;
+    public string TelemetryStore { get; set; } = "memory";
 }

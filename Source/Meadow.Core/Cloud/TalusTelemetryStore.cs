@@ -285,11 +285,17 @@ internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                 var json = _stringPool.Get(record.Value.LogJsonPoolId);
                 if (json == null)
                 {
-                    Resolver.Log.Info($"TalusDB: String pool lookup failed for CloudLog (poolId={record.Value.LogJsonPoolId}, seq={record.Value.ReceptionSequence})");
+                    Resolver.Log.Warn($"TalusDB: String pool lookup failed for CloudLog (poolId={record.Value.LogJsonPoolId}, seq={record.Value.ReceptionSequence}) - data lost but continuing");
                     // This record is corrupted, remove it if we're dequeuing
                     if (remove)
                     {
                         // Already removed above, just continue
+                    }
+                    else
+                    {
+                        // If peeking and corrupted, remove it to avoid getting stuck
+                        table.Remove();
+                        Resolver.Log.Info($"TalusDB: Removed corrupted CloudLog record to continue operation");
                     }
                     return null;
                 }
@@ -312,6 +318,19 @@ internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         catch (Exception ex)
         {
             Resolver.Log.Error($"TalusDB: Failed to retrieve CloudLog: {ex.Message}");
+            // Try to remove corrupted record if we haven't already
+            if (!remove)
+            {
+                try
+                {
+                    table.Remove();
+                    Resolver.Log.Info($"TalusDB: Removed corrupted CloudLog record after error");
+                }
+                catch
+                {
+                    // Best effort - continue even if removal fails
+                }
+            }
         }
 
         return null;
@@ -329,11 +348,17 @@ internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                 var json = _stringPool.Get(record.Value.EventJsonPoolId);
                 if (json == null)
                 {
-                    Resolver.Log.Info($"TalusDB: String pool lookup failed for CloudEvent (poolId={record.Value.EventJsonPoolId}, seq={record.Value.ReceptionSequence})");
+                    Resolver.Log.Warn($"TalusDB: String pool lookup failed for CloudEvent (poolId={record.Value.EventJsonPoolId}, seq={record.Value.ReceptionSequence}) - data lost but continuing");
                     // This record is corrupted, remove it if we're dequeuing
                     if (remove)
                     {
                         // Already removed above, just continue
+                    }
+                    else
+                    {
+                        // If peeking and corrupted, remove it to avoid getting stuck
+                        table.Remove();
+                        Resolver.Log.Info($"TalusDB: Removed corrupted CloudEvent record to continue operation");
                     }
                     return null;
                 }
@@ -356,6 +381,19 @@ internal class TalusTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         catch (Exception ex)
         {
             Resolver.Log.Error($"TalusDB: Failed to retrieve CloudEvent: {ex.Message}");
+            // Try to remove corrupted record if we haven't already
+            if (!remove)
+            {
+                try
+                {
+                    table.Remove();
+                    Resolver.Log.Info($"TalusDB: Removed corrupted CloudEvent record after error");
+                }
+                catch
+                {
+                    // Best effort - continue even if removal fails
+                }
+            }
         }
 
         return null;
@@ -522,16 +560,91 @@ internal class SimpleStringPool : IDisposable
 
     private void Load()
     {
-        if (!File.Exists(_filePath))
+        // Try loading from main file first, then backup if that fails
+        if (TryLoadFromFile(_filePath))
         {
             return;
         }
 
+        // Main file failed, try backup
+        var backupPath = _filePath + ".bak";
+        if (File.Exists(backupPath))
+        {
+            Resolver.Log.Warn($"Main string pool corrupted or missing, attempting recovery from backup");
+            if (TryLoadFromFile(backupPath))
+            {
+                // Restore backup as main file
+                try
+                {
+                    File.Copy(backupPath, _filePath, true);
+                    Resolver.Log.Info($"Restored string pool from backup");
+                }
+                catch (Exception ex)
+                {
+                    Resolver.Log.Error($"Failed to restore backup as main file: {ex.Message}");
+                }
+                return;
+            }
+        }
+
+        Resolver.Log.Warn($"No valid string pool found, starting fresh");
+    }
+
+    private bool TryLoadFromFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            return false;
+        }
+
         try
         {
-            var lines = File.ReadAllLines(_filePath);
-            foreach (var line in lines)
+            var allLines = File.ReadAllLines(filePath);
+            if (allLines.Length == 0)
             {
+                return false;
+            }
+
+            // Check for checksum (first line)
+            int? expectedChecksum = null;
+            int startLine = 0;
+
+            if (allLines[0].StartsWith("#CHECKSUM:"))
+            {
+                if (int.TryParse(allLines[0].Substring(10), out var checksum))
+                {
+                    expectedChecksum = checksum;
+                    startLine = 1;
+                }
+            }
+
+            // Collect data lines (excluding checksum line)
+            var dataLines = allLines.Skip(startLine).ToList();
+
+            // Validate checksum if present
+            if (expectedChecksum.HasValue)
+            {
+                var content = string.Join("\n", dataLines);
+                var actualChecksum = ComputeSimpleChecksum(content);
+
+                if (actualChecksum != expectedChecksum.Value)
+                {
+                    Resolver.Log.Error($"String pool checksum mismatch in {filePath} (expected: {expectedChecksum.Value}, actual: {actualChecksum}) - file is corrupted");
+                    return false;
+                }
+            }
+
+            // Parse data lines
+            int validLines = 0;
+            int invalidLines = 0;
+
+            foreach (var line in dataLines)
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
                 var parts = line.Split('|');
                 if (parts.Length == 3 && int.TryParse(parts[0], out var id) && int.TryParse(parts[2], out var refCount))
                 {
@@ -542,14 +655,29 @@ internal class SimpleStringPool : IDisposable
                     {
                         _nextId = id + 1;
                     }
+                    validLines++;
+                }
+                else
+                {
+                    invalidLines++;
+                    Resolver.Log.Warn($"Skipping corrupted string pool entry: {line.Substring(0, Math.Min(50, line.Length))}...");
                 }
             }
 
-            Resolver.Log.Info($"Loaded {_pool.Count} strings from pool");
+            if (validLines == 0 && invalidLines > 0)
+            {
+                Resolver.Log.Error($"String pool in {filePath} has no valid entries");
+                return false;
+            }
+
+            Resolver.Log.Info($"Loaded {validLines} strings from {filePath}" +
+                (invalidLines > 0 ? $" ({invalidLines} corrupted entries skipped)" : ""));
+            return true;
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"Failed to load string pool: {ex.Message}");
+            Resolver.Log.Error($"Failed to load string pool from {filePath}: {ex.Message}");
+            return false;
         }
     }
 
@@ -557,12 +685,79 @@ internal class SimpleStringPool : IDisposable
     {
         try
         {
-            var lines = _pool.Select(kvp => $"{kvp.Key}|{kvp.Value.Value}|{kvp.Value.RefCount}");
-            File.WriteAllLines(_filePath, lines);
+            var lines = _pool.Select(kvp => $"{kvp.Key}|{kvp.Value.Value}|{kvp.Value.RefCount}").ToList();
+
+            // Calculate checksum for integrity verification
+            var content = string.Join("\n", lines);
+            var checksum = ComputeSimpleChecksum(content);
+
+            // Use atomic write with temp file and fsync to prevent corruption from power loss
+            var tempPath = _filePath + ".tmp";
+
+            // Write to temp file with explicit flush to disk
+            using (var stream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.WriteThrough))
+            using (var writer = new StreamWriter(stream))
+            {
+                // Write checksum as first line
+                writer.WriteLine($"#CHECKSUM:{checksum}");
+
+                foreach (var line in lines)
+                {
+                    writer.WriteLine(line);
+                }
+
+                writer.Flush();
+                stream.Flush(flushToDisk: true); // Ensure data hits physical disk
+            }
+
+            // Now perform atomic rename
+            var backupPath = _filePath + ".bak";
+
+            if (File.Exists(_filePath))
+            {
+                // Move current file to backup
+                if (File.Exists(backupPath))
+                {
+                    File.Delete(backupPath);
+                }
+                File.Move(_filePath, backupPath);
+            }
+
+            // Move temp to current (atomic on most filesystems)
+            File.Move(tempPath, _filePath);
+
+            // Keep backup file for recovery - don't delete it
         }
         catch (Exception ex)
         {
             Resolver.Log.Error($"Failed to save string pool: {ex.Message}");
+
+            // Clean up temp file if it exists
+            try
+            {
+                var tempPath = _filePath + ".tmp";
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+            }
+            catch
+            {
+                // Best effort cleanup
+            }
+        }
+    }
+
+    private int ComputeSimpleChecksum(string content)
+    {
+        unchecked
+        {
+            int hash = 17;
+            foreach (char c in content)
+            {
+                hash = hash * 31 + c;
+            }
+            return hash;
         }
     }
 

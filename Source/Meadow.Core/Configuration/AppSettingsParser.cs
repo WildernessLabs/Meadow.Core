@@ -184,6 +184,9 @@ internal static class AppSettingsParser
             case "MeadowCloud.HealthMetricsIntervalMinutes":
                 ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.HealthMetricsIntervalMinutes = i);
                 break;
+            case "MeadowCloud.TelemetryStore":
+                settings.MeadowCloudSettings.TelemetryStore = settingValue;
+                break;
             //case "MeadowCloud.MaxQueueDepth":
             //    ParseIntSetting(settingValue, (i) => settings.MeadowCloudSettings.MaxQueueDepth = i);
             //    break;

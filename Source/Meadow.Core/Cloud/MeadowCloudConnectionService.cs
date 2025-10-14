@@ -67,11 +67,29 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
-        var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud");
 
-        // Option 2: TalusDB-based store (faster, lower memory)
-        _dataQueue = new CloudDataQueue(
-            new TalusTelemetryStore(path));
+        if (string.Compare(settings.TelemetryStore, "talusdb", true) == 0)
+        {
+            Resolver.Log.Info("Using TalusDB telemetry store", "cloud");
+            var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud");
+            _dataQueue = new CloudDataQueue(
+                new TalusTelemetryStore(path));
+        }
+        else if (string.Compare(settings.TelemetryStore, "sqlite", true) == 0)
+        {
+            Resolver.Log.Info("Using SQLite telemetry store", "cloud");
+
+            var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud", "telemetry.sqlite");
+            _dataQueue = new CloudDataQueue(
+                new SqliteTelemetryStore(path, 50, 1000));
+        }
+        else
+        {
+            Resolver.Log.Info("Using in-memory telemetry store", "cloud");
+
+            _dataQueue = new CloudDataQueue(
+                new InMemoryTelemetryStore());
+        }
     }
 
     /// <inheritdoc/>
