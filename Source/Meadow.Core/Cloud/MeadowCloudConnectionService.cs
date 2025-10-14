@@ -35,7 +35,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     /// <summary>
     /// Retry period the service will use to attempt network reconnection
     /// </summary>
-    public const int NetworkRetryTimeoutSeconds = 5;
+    public const int NetworkRetryTimeoutSeconds = 3;
     /// <summary>
     /// Auth token expiration period in minutes.
     /// TODO: Replace this hard-coded value with one retrieved from the Meadow Cloud.

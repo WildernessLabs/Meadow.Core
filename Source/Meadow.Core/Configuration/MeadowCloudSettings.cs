@@ -13,8 +13,8 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     public bool EnableHealthMetrics { get; set; } = false;
     public int HealthMetricsIntervalMinutes { get; set; } = 60;
     public int MqttPort { get; set; } = 8883;
-    public int ConnectRetrySeconds { get; set; } = 15;
-    public int AuthTimeoutSeconds { get; set; } = 120;
+    public int ConnectRetrySeconds { get; set; } = 5;
+    public int AuthTimeoutSeconds { get; set; } = 20;
     public int MaxQueueDepth { get; set; } = CloudDataQueue.DefaultQueueDepth;
 
     public int MaximumDisconnectTimeMinutes { get; set; } = 180;
