@@ -50,10 +50,6 @@ internal class UpdateStore
 
                     if (File.Exists(mpak_path))
                     {
-                        if (GetFileHash(mpak_path) != Manifest.Crc)
-                        {
-                            Log.Warn("MPAK file hash does not match manifest CRC");
-                        }
                         state = States.Mpak;
                     }
                 }
@@ -143,13 +139,54 @@ internal class UpdateStore
         return mpak_stream;
     }
 
+    internal void DeleteMpak()
+    {
+        Log.Debug("DeleteMpak()", "update store");
+        if (State != States.Manifest)
+            throw new Exception("Cannot delete MPAK, no manifest in store");
+
+        mpak_stream?.Dispose();
+        mpak_stream = null;
+
+        File.Delete(mpak_partial_path);
+        File.Delete(mpak_path);
+    }
+
+    internal bool ValidateMpak(string hashAlgorithm, string expectedHash, out string actualHash)
+    {
+        Log.Debug("ValidateMpak()", "update store");
+        if (State != States.Manifest)
+        {
+            throw new Exception("Cannot validate a MPAK, no manifest in store");
+        }
+
+        if (!string.Equals(hashAlgorithm, "meadowCrc", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new MpakValidationFailedException($"Hash algorithm '{hashAlgorithm}' is not supported.");
+        }
+
+        mpak_stream?.Dispose();
+        mpak_stream = null;
+
+        var mpakFilePath = 
+              File.Exists(mpak_partial_path) ? mpak_partial_path 
+            : File.Exists(mpak_path) ? mpak_path 
+            : throw new FileNotFoundException("Cannot validate a MPAK, no mpak in store");
+
+        actualHash = GetFileHash(mpakFilePath);
+
+        return string.Equals(actualHash, expectedHash, StringComparison.Ordinal);
+    }
+
     internal void CompleteMpak()
     {
         Log.Debug("CompleteMpak()", "update store");
         if (State != States.Manifest)
             throw new Exception("Cannot add a MPAK, no manifest in store");
 
-        mpak_stream!.Close();
+        mpak_stream?.Dispose();
+        mpak_stream = null;
+
         File.Copy(mpak_partial_path, mpak_path);
         File.Delete(mpak_partial_path);
     }
