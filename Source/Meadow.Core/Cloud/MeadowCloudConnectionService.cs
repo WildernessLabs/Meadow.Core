@@ -517,7 +517,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
             ConnectionState = CloudConnectionState.Unknown;
             _stateMachineTask = null;
             // restart the device - see above TODO
-            Resolver.Device.PlatformOS.Reset();
+            Resolver.Device?.PlatformOS.Reset();
         }
     }
 
