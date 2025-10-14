@@ -980,11 +980,7 @@ public static partial class MeadowOS
 
         foreach (var d in di.EnumerateDirectories())
         {
-            DeleteDirectoryContents(d, false);
-            if (deleteDirectory)
-            {
-                d.Delete();
-            }
+            DeleteDirectoryContents(d, deleteDirectory);
         }
         if (deleteDirectory)
         {
