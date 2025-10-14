@@ -281,90 +281,62 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
         nic.NetworkDisconnected += (s, e) =>
         {
-            Resolver.Log.Debug($"Meadow.Cloud detected network disconnect");
             ConnectionState = CloudConnectionState.Disconnected;
-        };
-        nic.NetworkConnected += (s, e) =>
-        {
-            Resolver.Log.Debug($"Meadow.Cloud detected network connect");
         };
 
         var stopwatch = new Stopwatch();
-
-        Resolver.Device!.PlatformOS.TimeChanged += (_) =>
-        {
-            // gotta reset the last connect time
-            _lastConnectedTime = DateTime.UtcNow;
-        };
-
-        Resolver.Device!.PlatformOS.NtpClient.TimeChanged += (_) =>
-        {
-            // gotta reset the last connect time
-            _lastConnectedTime = DateTime.UtcNow;
-        };
-
-        //TODO: Canonicalize the fact that this service is critical and should never actually stop
-        //Here, we restart the service if it stops unexpectedly
 
         // update state machine
         try
         {
             while (!_stopService) // do not look at the App cancellation token - if the app is being shutdown, we still want to handle potential OtA updates
             {
-                // Restart device if not connected for more than the configured time
-                if ((DateTime.UtcNow - _lastConnectedTime).TotalMinutes > Settings.MaximumDisconnectTimeMinutes)
-                {
-                    Resolver.Log.Error($"It is now {DateTime.UtcNow:MM/dd/yy HH:mm:ss}. Last connect was {_lastAuthenticationTime:MM/dd/yy HH:mm:ss} ");
-                    Resolver.Log.Error($"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...");
-                    ReportFatalErrorToReliabilityService(
-                        new MeadowCloudException(
-                            $"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...",
-                            null
-                        )
-                    );
-                    Resolver.Device?.PlatformOS.Reset();
-                    return;
-                }
-
                 switch (ConnectionState)
                 {
                     case CloudConnectionState.Disconnected:
-                        if (ShouldAuthenticate())
+                        if (nic == null || !nic.IsConnected) // not connected yet
                         {
-                            ConnectionState = CloudConnectionState.Authenticating;
+                            if (!stopwatch.IsRunning) stopwatch.Restart();
+                            Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
+
+                            if (stopwatch.Elapsed.TotalMinutes > Settings.MaximumDisconnectTimeMinutes) // Restart device if not connected for more than the configured time
+                            {
+                                ReportFatalErrorToReliabilityService(
+                            new MeadowCloudException(
+                                $"Device has not been connected to Meadow.Cloud for more than {Settings.MaximumDisconnectTimeMinutes} minutes. Restarting device...",
+                                null));
+                                Resolver.Device?.PlatformOS.Reset();
+                            }
+                            await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                            continue;
                         }
-                        else
+                        else // we are connected
                         {
-                            ConnectionState = CloudConnectionState.Connecting;
+                            if (ShouldAuthenticate())
+                            {
+                                ConnectionState = CloudConnectionState.Authenticating;
+                            }
+                            else
+                            {
+                                ConnectionState = CloudConnectionState.Connecting;
+                            }
                         }
                         break;
                     case CloudConnectionState.Authenticating:
                         try
                         {
-                            if (nic != null && nic.IsConnected)
+                            stopwatch.Restart();
+                            if (await Authenticate())
                             {
-                                stopwatch.Restart();
-
-                                if (await Authenticate())
-                                {
-                                    Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms");
-                                    stopwatch.Stop();
-                                    // Update the last authentication time when successfully authenticated
-                                    _lastAuthenticationTime = DateTime.UtcNow;
-                                    ConnectionState = CloudConnectionState.Connecting;
-                                }
-                                else
-                                {
-                                    Resolver.Log.Error("Failed to authenticate with Meadow.Cloud");
-                                    await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                                }
+                                Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms");
+                                stopwatch.Stop();
+                                _lastAuthenticationTime = DateTime.UtcNow;
+                                ConnectionState = CloudConnectionState.Connecting;
                             }
                             else
                             {
-                                if (!stopwatch.IsRunning) stopwatch.Restart();
-
-                                Resolver.Log.Debug($"Meadow.Cloud service waiting for network connection ({stopwatch.Elapsed.TotalSeconds} s)", "cloud");
-                                await Task.Delay(TimeSpan.FromSeconds(NetworkRetryTimeoutSeconds));
+                                Resolver.Log.Error("Failed to authenticate with Meadow.Cloud");
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
                         }
                         catch (Exception ae)
