@@ -10,12 +10,7 @@ using System.Threading.Tasks;
 namespace Meadow.Cloud;
 
 /// <summary>
-/// SQLite-based telemetry store with batched writes for slow NAND flash
-/// Features:
-/// - Non-blocking enqueue (writes to memory queue)
-/// - Background batch writer (flushes in batches)
-/// - WAL mode for crash safety
-/// - Automatic recovery on corruption
+/// SQLite-based telemetry store with batched writes
 /// </summary>
 internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 {

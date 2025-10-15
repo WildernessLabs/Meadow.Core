@@ -68,14 +68,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     {
         Settings = settings;
 
-        if (string.Compare(settings.TelemetryStore, "talusdb", true) == 0)
-        {
-            Resolver.Log.Info("Using TalusDB telemetry store", "cloud");
-            var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud");
-            _dataQueue = new CloudDataQueue(
-                new TalusTelemetryStore(path));
-        }
-        else if (string.Compare(settings.TelemetryStore, "sqlite", true) == 0)
+        if (string.Compare(settings.TelemetryStore, "sqlite", true) == 0)
         {
             Resolver.Log.Info("Using SQLite telemetry store", "cloud");
 
