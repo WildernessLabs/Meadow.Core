@@ -56,6 +56,13 @@ jobs:
         path: MQTTnet
         ref: develop
         
+    - name: Checkout talusdb
+      uses: actions/checkout@v4
+      with:
+        repository: WildernessLabs/talusdb
+        path: talusdb
+        ref: main
+
     - name: Checkout Meadow.Core
       uses: actions/checkout@v4
       with:
