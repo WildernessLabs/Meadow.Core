@@ -22,10 +22,13 @@ namespace Core.Unit.Tests.UpdateServiceTests
             // Initialize Resolver.Log if not already initialized
             if (Resolver.Log == null)
             {
-                // Check if Logger already exists in services before creating
-                if (Resolver.Services.Get<Logger>() == null)
+                try
                 {
                     Resolver.Services.GetOrCreate<Logger>();
+                }
+                catch (ArgumentException)
+                {
+                    // Logger already exists, that's fine
                 }
             }
             Resolver.Log.LogLevel = LogLevel.Trace;

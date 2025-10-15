@@ -19,10 +19,13 @@ public class InMemoryTelemetryStoreTests : IDisposable
         // Initialize Resolver.Log to prevent NullReferenceException
         if (Resolver.Log == null)
         {
-            // Check if Logger already exists in services before creating
-            if (Resolver.Services.Get<Logger>() == null)
+            try
             {
                 Resolver.Services.GetOrCreate<Logger>();
+            }
+            catch (ArgumentException)
+            {
+                // Logger already exists, that's fine
             }
         }
     }
