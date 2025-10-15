@@ -1,5 +1,6 @@
 using Meadow;
 using Meadow.Cloud;
+using Meadow.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +18,12 @@ public class SqliteTelemetryStoreTests : IDisposable
 
     public SqliteTelemetryStoreTests()
     {
+        // Initialize Resolver.Log to prevent NullReferenceException
+        if (Resolver.Log == null)
+        {
+            Resolver.Services.GetOrCreate<Logger>();
+        }
+
         _testDbPath = Path.Combine(Path.GetTempPath(), $"test-telemetry-{Guid.NewGuid()}.db");
     }
 

@@ -19,7 +19,11 @@ namespace Core.Unit.Tests.UpdateServiceTests
 
         public ProcessPublishedCommandTests()
         {
-            Resolver.Services.GetOrCreate<Logger>();
+            // Initialize Resolver.Log if not already initialized
+            if (Resolver.Log == null)
+            {
+                Resolver.Services.GetOrCreate<Logger>();
+            }
             Resolver.Log.LogLevel = LogLevel.Trace;
             Resolver.Log.ShowGroup = false;
             Resolver.Log.AddProvider(_log);
