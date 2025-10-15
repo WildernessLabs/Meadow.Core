@@ -1,5 +1,6 @@
 using Meadow;
 using Meadow.Cloud;
+using Meadow.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,8 +12,21 @@ namespace Core.Unit.Tests;
 /// <summary>
 /// Tests for InMemoryTelemetryStore
 /// </summary>
-public class InMemoryTelemetryStoreTests
+public class InMemoryTelemetryStoreTests : IDisposable
 {
+    public InMemoryTelemetryStoreTests()
+    {
+        // Initialize Resolver.Log to prevent NullReferenceException
+        if (Resolver.Log == null)
+        {
+            Resolver.Services.GetOrCreate<Logger>();
+        }
+    }
+
+    public void Dispose()
+    {
+        // Cleanup if needed
+    }
     [Fact]
     public void InitializesEmpty()
     {
@@ -144,9 +158,13 @@ public class InMemoryTelemetryStoreTests
     [Fact]
     public void HandlesHighThroughput()
     {
-        var store = new InMemoryTelemetryStore();
-
         const int itemCount = 10000;
+
+        // Create store with sufficient capacity for the test
+        var store = new InMemoryTelemetryStore(
+            highPriorityCapacity: 100,
+            normalPriorityCapacity: itemCount,
+            lowPriorityCapacity: 100);
 
         // Rapidly enqueue items
         for (int i = 0; i < itemCount; i++)
@@ -182,9 +200,14 @@ public class InMemoryTelemetryStoreTests
     [Fact]
     public void ThreadSafeEnqueueDequeue()
     {
-        var store = new InMemoryTelemetryStore();
         const int itemsPerThread = 1000;
         const int threadCount = 4;
+
+        // Create store with sufficient capacity for the test
+        var store = new InMemoryTelemetryStore(
+            highPriorityCapacity: 100,
+            normalPriorityCapacity: threadCount * itemsPerThread,
+            lowPriorityCapacity: 100);
 
         // Enqueue from multiple threads
         var enqueueTasks = new Task[threadCount];
