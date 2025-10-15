@@ -15,6 +15,8 @@ namespace Core.Unit.Tests;
 public class SqliteTelemetryStoreTests : IDisposable
 {
     private readonly string _testDbPath;
+    private static bool? _sqliteAvailable;
+    private static readonly object _sqliteCheckLock = new object();
 
     public SqliteTelemetryStoreTests()
     {
@@ -25,6 +27,49 @@ public class SqliteTelemetryStoreTests : IDisposable
         }
 
         _testDbPath = Path.Combine(Path.GetTempPath(), $"test-telemetry-{Guid.NewGuid()}.db");
+    }
+
+    /// <summary>
+    /// Check if SQLite is available on this platform (cache result)
+    /// </summary>
+    private static bool IsSqliteAvailable()
+    {
+        lock (_sqliteCheckLock)
+        {
+            if (_sqliteAvailable.HasValue)
+            {
+                return _sqliteAvailable.Value;
+            }
+
+            try
+            {
+                var testPath = Path.Combine(Path.GetTempPath(), $"sqlite-test-{Guid.NewGuid()}.db");
+                using (var testConn = new SQLite.SQLiteConnection(testPath))
+                {
+                    testConn.Execute("CREATE TABLE IF NOT EXISTS test (id INTEGER)");
+                }
+                File.Delete(testPath);
+                _sqliteAvailable = true;
+            }
+            catch
+            {
+                _sqliteAvailable = false;
+            }
+
+            return _sqliteAvailable.Value;
+        }
+    }
+
+    /// <summary>
+    /// Skip test if SQLite is not available
+    /// </summary>
+    private void RequireSqlite()
+    {
+        if (!IsSqliteAvailable())
+        {
+            // Use Skip.If from xUnit to conditionally skip the test
+            throw new Xunit.SkipException("SQLite native libraries not available on this platform");
+        }
     }
 
     public void Dispose()
@@ -53,6 +98,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void InitializesDatabase()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath);
 
         Assert.True(File.Exists(_testDbPath), "Database file should be created");
@@ -62,6 +108,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void EnqueueAndDequeueItem()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         var item = new CloudTelemetryItem(
@@ -85,6 +132,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void BatchesMultipleWrites()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 10, batchIntervalMs: 500);
 
         // Enqueue multiple items rapidly
@@ -107,6 +155,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void RespectsPriorityOrdering()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 100, batchIntervalMs: 100);
 
         // Add items in mixed priority order
@@ -145,6 +194,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void PreservesFIFOWithinPriority()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 100, batchIntervalMs: 100);
 
         // Add multiple items with same priority
@@ -174,6 +224,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void CountByPriorityWorks()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 100, batchIntervalMs: 100);
 
         store.Enqueue(new CloudTelemetryItem(new Dictionary<string, object>(), "/api/test", CloudTelemetryPriority.High));
@@ -193,6 +244,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void PersistsAcrossInstances()
     {
+        RequireSqlite();
         // Create store and add items
         using (var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100))
         {
@@ -222,6 +274,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void RecoversSequenceCounter()
     {
+        RequireSqlite();
         long lastSequence;
 
         // Create store and add items
@@ -255,6 +308,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void HandlesHighThroughput()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 50, batchIntervalMs: 200);
 
         const int itemCount = 500;
@@ -277,6 +331,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void BackpressureDropsOldestWhenFull()
     {
+        RequireSqlite();
         // Create store with small batch interval to fill queue
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 10, batchIntervalMs: 10000);
 
@@ -297,6 +352,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void PeekDoesNotRemoveItem()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         store.Enqueue(new CloudTelemetryItem(
@@ -318,6 +374,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void FlushesOnDispose()
     {
+        RequireSqlite();
         var item = new CloudTelemetryItem(
             new Dictionary<string, object> { { "test", "value" } },
             "/api/test",
@@ -339,6 +396,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void HandlesComplexObjectSerialization()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         var complexObject = new Dictionary<string, object>
@@ -370,6 +428,7 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void WALFilesCreated()
     {
+        RequireSqlite();
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         store.Enqueue(new CloudTelemetryItem(

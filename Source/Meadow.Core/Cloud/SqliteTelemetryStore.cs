@@ -135,7 +135,15 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
     {
         if (_connection == null)
         {
-            _connection = new SQLiteConnection(_databasePath);
+            try
+            {
+                _connection = new SQLiteConnection(_databasePath);
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Failed to create SQLite connection: {ex.GetType().Name} - {ex.Message}");
+                throw new InvalidOperationException($"Unable to initialize SQLite database at {_databasePath}. This may be due to missing native libraries or platform incompatibility.", ex);
+            }
         }
     }
 
