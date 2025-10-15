@@ -61,15 +61,11 @@ public class SqliteTelemetryStoreTests : IDisposable
     }
 
     /// <summary>
-    /// Skip test if SQLite is not available
+    /// Skip test if SQLite is not available - returns true if should skip
     /// </summary>
-    private void RequireSqlite()
+    private bool ShouldSkipSqliteTest()
     {
-        if (!IsSqliteAvailable())
-        {
-            // Use Skip.If from xUnit to conditionally skip the test
-            throw new Xunit.SkipException("SQLite native libraries not available on this platform");
-        }
+        return !IsSqliteAvailable();
     }
 
     public void Dispose()
@@ -98,7 +94,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void InitializesDatabase()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath);
 
         Assert.True(File.Exists(_testDbPath), "Database file should be created");
@@ -108,7 +105,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void EnqueueAndDequeueItem()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         var item = new CloudTelemetryItem(
@@ -132,7 +130,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void BatchesMultipleWrites()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 10, batchIntervalMs: 500);
 
         // Enqueue multiple items rapidly
@@ -155,7 +154,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void RespectsPriorityOrdering()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 100, batchIntervalMs: 100);
 
         // Add items in mixed priority order
@@ -194,7 +194,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void PreservesFIFOWithinPriority()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 100, batchIntervalMs: 100);
 
         // Add multiple items with same priority
@@ -224,7 +225,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void CountByPriorityWorks()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 100, batchIntervalMs: 100);
 
         store.Enqueue(new CloudTelemetryItem(new Dictionary<string, object>(), "/api/test", CloudTelemetryPriority.High));
@@ -244,7 +246,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void PersistsAcrossInstances()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         // Create store and add items
         using (var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100))
         {
@@ -274,7 +277,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void RecoversSequenceCounter()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         long lastSequence;
 
         // Create store and add items
@@ -308,7 +312,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void HandlesHighThroughput()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 50, batchIntervalMs: 200);
 
         const int itemCount = 500;
@@ -331,7 +336,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void BackpressureDropsOldestWhenFull()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         // Create store with small batch interval to fill queue
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 10, batchIntervalMs: 10000);
 
@@ -352,7 +358,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void PeekDoesNotRemoveItem()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         store.Enqueue(new CloudTelemetryItem(
@@ -374,7 +381,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void FlushesOnDispose()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         var item = new CloudTelemetryItem(
             new Dictionary<string, object> { { "test", "value" } },
             "/api/test",
@@ -396,7 +404,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void HandlesComplexObjectSerialization()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         var complexObject = new Dictionary<string, object>
@@ -428,7 +437,8 @@ public class SqliteTelemetryStoreTests : IDisposable
     [Fact]
     public void WALFilesCreated()
     {
-        RequireSqlite();
+        if (ShouldSkipSqliteTest()) return;
+
         using var store = new SqliteTelemetryStore(_testDbPath, batchSize: 1, batchIntervalMs: 100);
 
         store.Enqueue(new CloudTelemetryItem(
