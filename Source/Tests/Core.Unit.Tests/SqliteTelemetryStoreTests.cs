@@ -1,4 +1,10 @@
+using Meadow;
 using Meadow.Cloud;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using Xunit;
 
 namespace Core.Unit.Tests;
 
@@ -65,7 +71,7 @@ public class SqliteTelemetryStoreTests : IDisposable
 
         var retrieved = store.Dequeue();
         Assert.NotNull(retrieved);
-        Assert.Equal("/api/test", retrieved!.Endpoint);
+        Assert.Equal("/api/test", retrieved!.EndPoint);
         Assert.Equal(0, store.Count);
     }
 
