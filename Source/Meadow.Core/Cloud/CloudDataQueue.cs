@@ -1,60 +1,49 @@
-﻿namespace Meadow;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Meadow.Cloud;
 
 internal class CloudDataQueue
 {
-    public const int DefaultQueueDepth = 30;
+    private readonly IMeadowCloudTelemetryStore _store;
 
-    public class DataInfo
+    public int Count => _store.Count;
+
+    public CloudDataQueue(IMeadowCloudTelemetryStore store)
     {
-        public DataInfo(object item, string endpoint)
-        {
-            Item = item;
-            EndPoint = endpoint;
-        }
-
-        public object Item { get; set; }
-        public string EndPoint { get; set; }
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+        Resolver.Log.Info($"Cloud Data Queue initialized with telemetry store");
     }
 
-    private readonly CircularBuffer<DataInfo> _items;
-
-    public int Count => _items.Count;
-    public int MaxQueueItems { get; }
-
-    public CloudDataQueue(int maxQueueItems = DefaultQueueDepth)
+    public CloudTelemetryItem? Peek()
     {
-        Resolver.Log.Info($"Cloud Data Queue Depth: {maxQueueItems}");
-        MaxQueueItems = maxQueueItems <= 0 ? DefaultQueueDepth : maxQueueItems;
-        _items = new CircularBuffer<DataInfo>(maxQueueItems);
-
-        _items.Overrun += OnQueueOverrun;
+        return _store.Peek();
     }
 
-    private void OnQueueOverrun(object sender, System.EventArgs e)
+    public CloudTelemetryItem? Dequeue()
     {
-        // DEV NOTE: don't elevate this above Info or it will become circular/re-entrant
-        Resolver.Log.Info($"Cloud Data Queue overrun (data loss)");
+        return _store.Dequeue();
     }
 
-    public DataInfo? Peek()
+    public void Enqueue(CloudTelemetryItem info)
     {
-        return _items.Peek();
+        _store.Enqueue(info);
     }
 
-    public DataInfo? Dequeue()
+    public void Enqueue(CloudLog cloudLog, CloudTelemetryPriority priority = CloudTelemetryPriority.Normal)
     {
-        return _items.Remove();
+        var item = new CloudTelemetryItem(cloudLog, "/api/logs", priority);
+        _store.Enqueue(item);
     }
 
-    public void Enqueue(DataInfo info)
+    public void Enqueue(CloudEvent cloudEvent, CloudTelemetryPriority priority = CloudTelemetryPriority.Normal)
     {
-        _items.Append(info);
+        var item = new CloudTelemetryItem(cloudEvent, "/api/events", priority);
+        _store.Enqueue(item);
     }
 
-    public void Enqueue<T>(T item, string endPoint)
+    public Dictionary<int, int> CountByPriority()
     {
-        if (item == null) { return; }
-
-        Enqueue(new DataInfo(item, endPoint));
+        return _store.CountByPriority();
     }
 }

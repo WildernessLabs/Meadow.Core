@@ -15,7 +15,8 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     public int MqttPort { get; set; } = 8883;
     public int ConnectRetrySeconds { get; set; } = 5;
     public int AuthTimeoutSeconds { get; set; } = 20;
-    public int MaxQueueDepth { get; set; } = CloudDataQueue.DefaultQueueDepth;
+    //    public int MaxQueueDepth { get; set; } = CloudDataQueue.DefaultQueueDepth;
 
     public int MaximumDisconnectTimeMinutes { get; set; } = 180;
+    public string TelemetryStore { get; set; } = "memory";
 }

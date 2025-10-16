@@ -67,7 +67,22 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
-        _dataQueue = new CloudDataQueue(settings.MaxQueueDepth > 0 ? settings.MaxQueueDepth : CloudDataQueue.DefaultQueueDepth);
+
+        if (string.Compare(settings.TelemetryStore, "sqlite", true) == 0)
+        {
+            Resolver.Log.Info("Using SQLite telemetry store", "cloud");
+
+            var path = Path.Combine(Resolver.Device.PlatformOS.FileSystem.FileSystemRoot, "cloud", "telemetry.sqlite");
+            _dataQueue = new CloudDataQueue(
+                new SqliteTelemetryStore(path, 50, 1000));
+        }
+        else
+        {
+            Resolver.Log.Info("Using in-memory telemetry store", "cloud");
+
+            _dataQueue = new CloudDataQueue(
+                new InMemoryTelemetryStore());
+        }
     }
 
     /// <inheritdoc/>
@@ -93,7 +108,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
 
             while (_dataQueue.Count > 0)
             {
-                Resolver.Log.Trace($"Data queue: {_dataQueue.Count}/{_dataQueue.MaxQueueItems}", "cloud");
+                Resolver.Log.Trace($"Data queue: {_dataQueue.Count}", "cloud");
                 try
                 {
                     if (ConnectionState == CloudConnectionState.Connected)
@@ -220,7 +235,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     private void Initialize()
     {
         var factory = new MqttFactory();
-        MqttClient = (MqttClient) factory.CreateMqttClient();
+        MqttClient = (MqttClient)factory.CreateMqttClient();
 
         MqttClient.ConnectedAsync += (args) =>
         {
@@ -769,7 +784,10 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
-    public Task SendLog(CloudLog log, bool throwIfDisabled = true)
+    public Task SendLog(
+        CloudLog log,
+        CloudTelemetryPriority priority = CloudTelemetryPriority.Normal,
+        bool throwIfDisabled = true)
     {
         if (!IsEnabled && throwIfDisabled)
         {
@@ -777,7 +795,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         // enqueue and trigger the timer - this will send any older data before this record
-        _dataQueue.Enqueue(log, "/api/logs");
+        _dataQueue.Enqueue(log, priority);
         _dataReadyEvent.Set();
         return Task.CompletedTask;
     }
@@ -791,7 +809,7 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         // enqueue and trigger the timer - this will send any older data before this record
-        _dataQueue.Enqueue(cloudEvent, "/api/events");
+        _dataQueue.Enqueue(cloudEvent);
         _dataReadyEvent.Set();
         return Task.CompletedTask;
     }

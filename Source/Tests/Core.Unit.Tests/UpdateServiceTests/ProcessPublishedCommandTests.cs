@@ -19,7 +19,18 @@ namespace Core.Unit.Tests.UpdateServiceTests
 
         public ProcessPublishedCommandTests()
         {
-            Resolver.Services.GetOrCreate<Logger>();
+            // Initialize Resolver.Log if not already initialized
+            if (Resolver.Log == null)
+            {
+                try
+                {
+                    Resolver.Services.GetOrCreate<Logger>();
+                }
+                catch (ArgumentException)
+                {
+                    // Logger already exists, that's fine
+                }
+            }
             Resolver.Log.LogLevel = LogLevel.Trace;
             Resolver.Log.ShowGroup = false;
             Resolver.Log.AddProvider(_log);
@@ -434,8 +445,19 @@ namespace Core.Unit.Tests.UpdateServiceTests
     public class TestLogProvider : ILogProvider
     {
         private bool _isEnabled = true;
+        private readonly object _lock = new object();
+        private readonly List<LogMessage> _logMessages = new List<LogMessage>();
 
-        public List<LogMessage> LogMessages { get; } = new List<LogMessage>();
+        public List<LogMessage> LogMessages
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return new List<LogMessage>(_logMessages);
+                }
+            }
+        }
 
         public void Log(LogLevel level, string message, string? _)
         {
@@ -449,7 +471,10 @@ namespace Core.Unit.Tests.UpdateServiceTests
                 throw new ArgumentException($"'{nameof(message)}' cannot be null or whitespace.", nameof(message));
             }
 
-            LogMessages.Add(new LogMessage(level, message));
+            lock (_lock)
+            {
+                _logMessages.Add(new LogMessage(level, message));
+            }
         }
 
         public void Disable()
