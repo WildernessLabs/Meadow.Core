@@ -187,7 +187,6 @@ internal class UpdateStore
         mpak_stream?.Dispose();
         mpak_stream = null;
 
-        File.Copy(mpak_partial_path, mpak_path);
-        File.Delete(mpak_partial_path);
+        File.Move(mpak_partial_path, mpak_path);
     }
 }
