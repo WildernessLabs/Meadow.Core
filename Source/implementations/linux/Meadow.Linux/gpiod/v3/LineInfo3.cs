@@ -13,6 +13,11 @@ internal class LineInfo3 : ILineInfo
     private readonly ChipInfo3 _chip;
     private IntPtr _infoHandle;
     private IntPtr _requestHandle;
+    private IntPtr _eventBuffer;
+
+    // Interrupt handling state
+    private bool _istIsRunning = false;
+    private bool _istShouldStop = false;
 
     public string Name { get; private set; } = string.Empty;
     public string Consumer { get; private set; } = string.Empty;
@@ -20,6 +25,9 @@ internal class LineInfo3 : ILineInfo
     public Gpiod3.Interop.gpiod_line_direction Direction { get; private set; }
     public bool IsUsed { get; private set; }
     public bool IsInvalid => _infoHandle == IntPtr.Zero;
+
+    // ILineInfo unified event
+    public event LineEdgeEventHandler? InterruptOccurred;
 
     public LineInfo3(ChipInfo3 chip, int offset)
     {
@@ -262,6 +270,11 @@ internal class LineInfo3 : ILineInfo
     /// </summary>
     public void RequestInterrupts(InterruptMode mode, Gpiod3.Interop.gpiod_line_bias bias = Gpiod3.Interop.gpiod_line_bias.GPIOD_LINE_BIAS_AS_IS)
     {
+        if (_istIsRunning)
+        {
+            return; // Already monitoring interrupts
+        }
+
         if (_requestHandle != IntPtr.Zero)
         {
             throw new InvalidOperationException("Line already requested");
@@ -327,6 +340,17 @@ internal class LineInfo3 : ILineInfo
                     {
                         throw new NativeException($"Failed to request line {Offset} for interrupts", Marshal.GetLastWin32Error());
                     }
+
+                    // Create event buffer for reading edge events
+                    _eventBuffer = Gpiod3.Interop.gpiod_edge_event_buffer_new((UIntPtr)16);
+                    if (_eventBuffer == IntPtr.Zero)
+                    {
+                        throw new NativeException("Failed to create edge event buffer");
+                    }
+
+                    // Start interrupt service thread
+                    _istShouldStop = false;
+                    System.Threading.Tasks.Task.Run(() => IST());
                 }
                 finally
                 {
@@ -344,8 +368,87 @@ internal class LineInfo3 : ILineInfo
         }
     }
 
+    /// <summary>
+    /// Interrupt Service Thread - monitors for edge events and raises InterruptOccurred
+    /// </summary>
+    private void IST()
+    {
+        _istIsRunning = true;
+        const long timeout_ns = 1_000_000_000; // 1 second timeout
+
+        try
+        {
+            while (!_istShouldStop)
+            {
+                // Wait for edge events with timeout
+                var result = Gpiod3.Interop.gpiod_line_request_wait_edge_events(_requestHandle, timeout_ns);
+
+                if (result < 0)
+                {
+                    // Error occurred
+                    throw new NativeException("Waiting for interrupt event failed", Marshal.GetLastWin32Error());
+                }
+                else if (result == 0)
+                {
+                    // Timeout - continue loop
+                    continue;
+                }
+
+                // Events available - read them
+                var numEvents = Gpiod3.Interop.gpiod_line_request_read_edge_events(_requestHandle, _eventBuffer, (UIntPtr)16);
+                if (numEvents < 0)
+                {
+                    throw new NativeException("Failed to read edge events", Marshal.GetLastWin32Error());
+                }
+
+                var eventCount = Gpiod3.Interop.gpiod_edge_event_buffer_get_num_events(_eventBuffer);
+
+                // Process all events in the buffer
+                for (ulong i = 0; i < (ulong)eventCount; i++)
+                {
+                    var eventPtr = Gpiod3.Interop.gpiod_edge_event_buffer_get_event(_eventBuffer, i);
+                    if (eventPtr == IntPtr.Zero) continue;
+
+                    var lineOffset = Gpiod3.Interop.gpiod_edge_event_get_line_offset(eventPtr);
+                    var timestampNs = Gpiod3.Interop.gpiod_edge_event_get_timestamp_ns(eventPtr);
+
+                    // Determine edge type (v3 doesn't have explicit edge type getter in the interop we defined)
+                    // We'll infer from current value
+                    var currentValue = GetValue();
+
+                    var args = new GpiodEdgeEventArgs
+                    {
+                        EventType = currentValue ? GpiodEdgeEventType.Rising : GpiodEdgeEventType.Falling,
+                        TimestampNs = timestampNs,
+                        LineOffset = (int)lineOffset
+                    };
+
+                    InterruptOccurred?.Invoke(this, args);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Silently exit on error (thread is stopping)
+        }
+        finally
+        {
+            _istIsRunning = false;
+        }
+    }
+
     public void Release()
     {
+        // Stop interrupt thread if running
+        _istShouldStop = true;
+
+        // Free event buffer if allocated
+        if (_eventBuffer != IntPtr.Zero)
+        {
+            Gpiod3.Interop.gpiod_edge_event_buffer_free(_eventBuffer);
+            _eventBuffer = IntPtr.Zero;
+        }
+
         if (_requestHandle != IntPtr.Zero)
         {
             Gpiod3.Interop.gpiod_line_request_release(_requestHandle);

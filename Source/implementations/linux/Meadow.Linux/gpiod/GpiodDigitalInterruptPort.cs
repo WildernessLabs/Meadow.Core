@@ -92,7 +92,7 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
         _resistorMode = resistorMode;
     }
 
-    private void OnInterruptOccurred(LineInfo2 sender, gpiod_line_event e)
+    private void OnInterruptOccurred(ILineInfo sender, GpiodEdgeEventArgs e)
     {
         if (DebounceDuration.TotalMilliseconds > 0)
         {
@@ -104,7 +104,7 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
             _lastInterrupt = now;
         }
 
-        var state = e.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE ? true : false;
+        var state = e.EventType == GpiodEdgeEventType.Rising;
 
         this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
     }

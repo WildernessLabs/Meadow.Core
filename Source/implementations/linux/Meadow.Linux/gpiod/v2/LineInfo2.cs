@@ -22,7 +22,17 @@ internal class LineInfo2 : ILineInfo
 
     private bool _istIsRunning = false;
     private bool _istShouldStop = false;
+
+    // v2-specific event (legacy)
     public event LineEventHandler InterruptOccurred = delegate { };
+
+    // ILineInfo unified event
+    event LineEdgeEventHandler ILineInfo.InterruptOccurred
+    {
+        add { _unifiedInterruptOccurred += value; }
+        remove { _unifiedInterruptOccurred -= value; }
+    }
+    private event LineEdgeEventHandler? _unifiedInterruptOccurred;
 
     public LineInfo2(ChipInfo2 chip, int offset)
     {
@@ -172,7 +182,22 @@ internal class LineInfo2 : ILineInfo
 
                     if (result == 0)
                     {
+                        // Raise legacy v2-specific event
                         InterruptOccurred?.Invoke(this, evnt);
+
+                        // Raise unified event for ILineInfo
+                        if (_unifiedInterruptOccurred != null)
+                        {
+                            var args = new GpiodEdgeEventArgs
+                            {
+                                EventType = evnt.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE
+                                    ? GpiodEdgeEventType.Rising
+                                    : GpiodEdgeEventType.Falling,
+                                TimestampNs = evnt.ts.tv_sec * 1_000_000_000UL + evnt.ts.tv_nsec,
+                                LineOffset = Offset
+                            };
+                            _unifiedInterruptOccurred.Invoke(this, args);
+                        }
                     }
                     else
                     {

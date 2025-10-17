@@ -1,4 +1,5 @@
 using Meadow.Hardware;
+using System;
 
 namespace Meadow;
 
@@ -16,6 +17,37 @@ public enum GpiodLineBias
     /// <summary>Enable pull-down resistor</summary>
     PullDown
 }
+
+/// <summary>
+/// Edge event type for GPIO interrupts
+/// </summary>
+public enum GpiodEdgeEventType
+{
+    /// <summary>Rising edge detected</summary>
+    Rising,
+    /// <summary>Falling edge detected</summary>
+    Falling
+}
+
+/// <summary>
+/// Event arguments for GPIO line edge events (unified across v2 and v3)
+/// </summary>
+public class GpiodEdgeEventArgs : EventArgs
+{
+    /// <summary>Type of edge detected</summary>
+    public GpiodEdgeEventType EventType { get; set; }
+
+    /// <summary>Timestamp in nanoseconds</summary>
+    public ulong TimestampNs { get; set; }
+
+    /// <summary>Line offset that triggered the event</summary>
+    public int LineOffset { get; set; }
+}
+
+/// <summary>
+/// Delegate for line edge events
+/// </summary>
+internal delegate void LineEdgeEventHandler(ILineInfo sender, GpiodEdgeEventArgs args);
 
 /// <summary>
 /// Interface for GPIO line information across libgpiod versions
@@ -41,6 +73,11 @@ internal interface ILineInfo
     /// Whether this line handle is invalid
     /// </summary>
     bool IsInvalid { get; }
+
+    /// <summary>
+    /// Event fired when an edge interrupt occurs on this line
+    /// </summary>
+    event LineEdgeEventHandler InterruptOccurred;
 
     /// <summary>
     /// Request this line for output with specified bias and initial state

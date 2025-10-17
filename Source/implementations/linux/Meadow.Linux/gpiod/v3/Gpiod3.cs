@@ -45,29 +45,35 @@ internal partial class Gpiod3 : Gpiod
         }
     }
 
-    public override LineInfo2 GetLine(GpiodPin pin)
+    public override ILineInfo GetLine(GpiodPin pin)
     {
-        // TODO: V3 uses different types - need adapter or return LineInfo3
-        throw new NotImplementedException("Gpiod v3 requires migration to LineInfo3 types");
-    }
-
-    public override LineInfo2 GetLine(LinuxFlexiPin pin)
-    {
-        // TODO: V3 uses different types - need adapter or return LineInfo3
-        throw new NotImplementedException("Gpiod v3 requires migration to LineInfo3 types");
-    }
-
-    /// <summary>
-    /// Get a line using v3 API - returns LineInfo3
-    /// </summary>
-    public LineInfo3 GetLine3(string chipName, int offset)
-    {
-        var chip = _chips[chipName] as ChipInfo3;
-        if (chip == null)
+        if (!_chips.Contains(pin.Chip))
         {
-            throw new NativeException($"Unknown GPIO chip {chipName}");
+            throw new NativeException($"Unknown GPIO chip {pin.Chip}");
         }
 
-        return chip.Lines[offset];
+        var chip = _chips[pin.Chip] as ChipInfo3;
+        if (chip == null)
+        {
+            throw new NativeException($"Chip {pin.Chip} is not a v3 chip");
+        }
+
+        return chip.Lines[pin.Offset];
+    }
+
+    public override ILineInfo GetLine(LinuxFlexiPin pin)
+    {
+        if (!_chips.Contains(pin.GpiodChip))
+        {
+            throw new NativeException($"Unknown GPIO chip {pin.GpiodChip}");
+        }
+
+        var chip = _chips[pin.GpiodChip] as ChipInfo3;
+        if (chip == null)
+        {
+            throw new NativeException($"Chip {pin.GpiodChip} is not a v3 chip");
+        }
+
+        return chip.Lines[pin.GpiodOffset];
     }
 }
