@@ -16,7 +16,7 @@ public class GpiodDigitalOutputPort : IDigitalOutputPort
     private bool LastState { get; set; }
 
     private Gpiod Driver { get; }
-    private LineInfo Line { get; }
+    private ILineInfo Line { get; }
 
 
     /// <inheritdoc/>
@@ -41,7 +41,7 @@ public class GpiodDigitalOutputPort : IDigitalOutputPort
             throw new NativeException($"Pin {pin.Name} does not support GPIOD operations");
         }
 
-        var result = Line.RequestOutput(Gpiod.Interop.line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE, initialState);
+        var result = Line.RequestOutput(GpiodLineBias.Disabled, initialState);
         if (!result)
         {
             var err = Marshal.GetLastWin32Error();

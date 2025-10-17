@@ -1,6 +1,6 @@
 ﻿using Meadow.Hardware;
 using System;
-using static Meadow.Gpiod.Interop;
+using static Meadow.Gpiod2.Interop;
 
 namespace Meadow;
 
@@ -10,7 +10,7 @@ namespace Meadow;
 public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
 {
     private Gpiod Driver { get; }
-    private LineInfo Line { get; }
+    private ILineInfo Line { get; }
     private int? _lastInterrupt = null;
     private InterruptMode _interruptMode;
     private ResistorMode _resistorMode;
@@ -35,7 +35,7 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
         Driver = driver;
         Pin = pin;
 
-        LineInfo? li = null;
+        ILineInfo? li = null;
 
         if (pin is GpiodPin { } gp)
         {
@@ -60,18 +60,18 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
 
     private void SetInterruptOrInputMode(ResistorMode resistorMode, InterruptMode interruptMode)
     {
-        line_request_flags flags = line_request_flags.None;
+        GpiodLineBias bias;
 
         switch (resistorMode)
         {
             case ResistorMode.InternalPullUp:
-                flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
+                bias = GpiodLineBias.PullUp;
                 break;
             case ResistorMode.InternalPullDown:
-                flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
+                bias = GpiodLineBias.PullDown;
                 break;
             default:
-                flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;
+                bias = GpiodLineBias.Disabled;
                 break;
         }
 
@@ -81,10 +81,10 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
             case InterruptMode.EdgeFalling:
             case InterruptMode.EdgeBoth:
                 Line.InterruptOccurred += OnInterruptOccurred;
-                Line.RequestInterrupts(interruptMode, flags);
+                Line.RequestInterrupts(interruptMode, bias);
                 break;
             default:
-                Line.RequestInput(flags);
+                Line.RequestInput(bias);
                 break;
         }
 
@@ -92,7 +92,7 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
         _resistorMode = resistorMode;
     }
 
-    private void OnInterruptOccurred(LineInfo sender, gpiod_line_event e)
+    private void OnInterruptOccurred(LineInfo2 sender, gpiod_line_event e)
     {
         if (DebounceDuration.TotalMilliseconds > 0)
         {

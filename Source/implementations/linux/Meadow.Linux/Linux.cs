@@ -72,8 +72,16 @@ public abstract class Linux : IMeadowDevice
 
         try
         {
-            _gpiod = new Gpiod(Resolver.Log);
-            Resolver.Log.Debug("Platform will use gpiod for GPIO");
+            var gpiod = Gpiod.GetGpiod(Resolver.Log);
+            if (gpiod != null)
+            {
+                _gpiod = gpiod;
+                Resolver.Log.Debug("Platform will use gpiod for GPIO");
+            }
+            else
+            {
+                Resolver.Log.Debug("Platform does not support gpiod. Sysfs will be used for GPIO");
+            }
         }
         catch
         {

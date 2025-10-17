@@ -1,60 +1,51 @@
-﻿using Meadow.Logging;
+using Meadow.Logging;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Meadow;
 
-internal class ChipInfo : IDisposable
+/// <summary>
+/// Abstract base class for GPIO chip information across libgpiod versions
+/// </summary>
+internal abstract class ChipInfo : IDisposable
 {
-    private Logger Logger { get; }
-    public IntPtr Handle { get; private set; }
-    private Gpiod.Interop.gpiod_chip? Chip { get; }
-    public string Name { get; } = string.Empty;
-    public string Label { get; } = string.Empty;
+    protected Logger Logger { get; }
 
-    public LineCollection Lines { get; }
+    /// <summary>
+    /// Native handle to the chip
+    /// </summary>
+    public IntPtr Handle { get; protected set; }
 
-    public bool IsInvalid => Handle.ToInt64() <= 0;
+    /// <summary>
+    /// Chip name (e.g., "gpiochip0")
+    /// </summary>
+    public string Name { get; protected set; } = string.Empty;
 
-    public static ChipInfo FromIntPtr(Logger logger, IntPtr p)
-    {
-        return new ChipInfo(logger, p);
-    }
+    /// <summary>
+    /// Chip label/description (e.g., "pinctrl-bcm2711")
+    /// </summary>
+    public string Label { get; protected set; } = string.Empty;
 
-    private ChipInfo(Logger logger, IntPtr p)
+    /// <summary>
+    /// Number of GPIO lines available on this chip
+    /// </summary>
+    public abstract int LineCount { get; }
+
+    /// <summary>
+    /// Whether this chip handle is invalid
+    /// </summary>
+    public abstract bool IsInvalid { get; }
+
+    protected ChipInfo(Logger logger)
     {
         Logger = logger;
-
-        Handle = p;
-
-        if (IsInvalid)
-        {
-            Logger.Debug($"Chip ptr is invalid - cannot get GPIOD chip details");
-            Lines = new LineCollection(this, 0);
-        }
-        else
-        {
-            Chip = Marshal.PtrToStructure<Gpiod.Interop.gpiod_chip>(Handle);
-            Name = Chip.Value.name;
-            Label = Chip.Value.label;
-
-            // Init as an array of nulls.  We'll populate as they are accessed
-            Lines = new LineCollection(this, (int)Chip.Value.num_lines);
-        }
     }
 
-    public void Dispose()
-    {
-        if (IsInvalid) return;
-
-        Gpiod.Interop.gpiod_chip_close(Handle);
-        Handle = IntPtr.Zero;
-    }
+    public abstract void Dispose();
 
     public override string ToString()
     {
-        // same format as gpiodetect
+        // Same format as gpiodetect
         // gpiochip0 [pinctrl-bcm2711] (58 lines)
-        return $"{Name} [{Label}] ({Lines.Count} lines)";
+        return $"{Name} [{Label}] ({LineCount} lines)";
     }
 }

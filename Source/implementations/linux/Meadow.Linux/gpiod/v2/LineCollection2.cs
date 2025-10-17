@@ -3,32 +3,32 @@ using System.Collections.Generic;
 
 namespace Meadow;
 
-internal class LineCollection : IEnumerable<LineInfo>
+internal class LineCollection2 : IEnumerable<LineInfo2>
 {
-    private LineInfo[] Lines { get; }
-    private ChipInfo Chip { get; }
+    private LineInfo2[] Lines { get; }
+    private ChipInfo2 Chip { get; }
 
-    internal LineCollection(ChipInfo chip, int count)
+    internal LineCollection2(ChipInfo2 chip, int count)
     {
         Chip = chip;
-        Lines = new LineInfo[count];
+        Lines = new LineInfo2[count];
     }
 
     public int Count => Lines.Length;
 
-    public LineInfo this[int index]
+    public LineInfo2 this[int index]
     {
         get
         {
             if (Lines[index] == null)
             {
-                Lines[index] = new LineInfo(Chip, index);
+                Lines[index] = new LineInfo2(Chip, index);
             }
             return Lines[index];
         }
     }
 
-    public IEnumerator<LineInfo> GetEnumerator()
+    public IEnumerator<LineInfo2> GetEnumerator()
     {
         int position = 0; // state
         while (position < Count)

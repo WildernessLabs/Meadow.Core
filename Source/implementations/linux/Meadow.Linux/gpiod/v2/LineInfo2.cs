@@ -2,13 +2,13 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using static Meadow.Gpiod.Interop;
+using static Meadow.Gpiod2.Interop;
 
 namespace Meadow;
 
-internal delegate void LineEventHandler(LineInfo lineInfo, gpiod_line_event evt);
+internal delegate void LineEventHandler(LineInfo2 lineInfo, gpiod_line_event evt);
 
-internal class LineInfo
+internal class LineInfo2 : ILineInfo
 {
     private IntPtr Handle { get; set; }
     private gpiod_line? Line { get; set; }
@@ -24,7 +24,7 @@ internal class LineInfo
     private bool _istShouldStop = false;
     public event LineEventHandler InterruptOccurred = delegate { };
 
-    public LineInfo(ChipInfo chip, int offset)
+    public LineInfo2(ChipInfo2 chip, int offset)
     {
         Offset = offset;
         Handle = gpiod_chip_get_line(chip.Handle, Offset);
@@ -52,6 +52,23 @@ internal class LineInfo
 
     private const string MeadowConsumer = "Meadow";
 
+    // ILineInfo implementation
+    bool ILineInfo.RequestOutput(GpiodLineBias bias, bool initialState)
+    {
+        return RequestOutput(bias.AsGpiod2Flags(), initialState);
+    }
+
+    void ILineInfo.RequestInput(GpiodLineBias bias)
+    {
+        RequestInput(bias.AsGpiod2Flags());
+    }
+
+    void ILineInfo.RequestInterrupts(InterruptMode mode, GpiodLineBias bias)
+    {
+        RequestInterrupts(mode, bias.AsGpiod2Flags());
+    }
+
+    // Existing v2-specific methods
     public void Request(line_direction direction)
     {
         // TODO: check for free?
