@@ -813,6 +813,17 @@ public static partial class MeadowOS
             var commandService = new MeadowCloudCommandService(cloudConnectionService);
             Resolver.Services.Add<ICommandService>(commandService);
 
+            commandService.Subscribe(cmd =>
+            {
+                // reset when receiving "MeadowReset" command
+                if (cmd.CommandName == "MeadowReset")
+                {
+                    // Reset logic here
+                    Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
+                    CurrentDevice.PlatformOS.Reset();
+                }
+            });
+
             var updateService = new MeadowCloudUpdateService(
                 CurrentDevice.PlatformOS.FileSystem.FileSystemRoot,
                 cloudConnectionService);
