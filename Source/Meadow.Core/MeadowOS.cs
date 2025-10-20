@@ -810,18 +810,14 @@ public static partial class MeadowOS
 
             var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
             Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
-            var commandService = new MeadowCloudCommandService(cloudConnectionService);
-            Resolver.Services.Add<ICommandService>(commandService);
+            ICommandService commandService = new MeadowCloudCommandService(cloudConnectionService);
+            Resolver.Services.Add(commandService);
 
-            commandService.Subscribe(cmd =>
+            commandService.Subscribe<MeadowResetCommand>(cmd =>
             {
                 // reset when receiving "MeadowReset" command
-                if (cmd.CommandName == "MeadowReset")
-                {
-                    // Reset logic here
-                    Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
-                    CurrentDevice.PlatformOS.Reset();
-                }
+                Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
+                CurrentDevice.PlatformOS.Reset();
             });
 
             var updateService = new MeadowCloudUpdateService(
