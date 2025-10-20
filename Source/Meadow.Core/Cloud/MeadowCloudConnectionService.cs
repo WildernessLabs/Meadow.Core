@@ -113,16 +113,89 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                 {
                     if (ConnectionState == CloudConnectionState.Connected)
                     {
-                        // get the head item
-                        var info = _dataQueue.Peek();
-                        if (info != null)
+                        // optimization: if more than one item is queued, try bulk send
+                        if (_dataQueue.Count > 1)
                         {
-                            // failed to send, leave the item in the queue
-                            if (await Send(info.Item, info.EndPoint))
+                            // gather a batch of items with same endpoint (up to a reasonable limit)
+                            const int MaxBatchSize = 50; // arbitrary cap to avoid overly large payloads
+                            var first = _dataQueue.Peek();
+                            if (first == null)
                             {
-                                // item was sent, remove from the queue and toss away
-                                Resolver.Log.Trace("Data queue sent an item", "cloud");
-                                _dataQueue.Dequeue();
+                                break;
+                            }
+
+                            var endpoint = GetBulkEndpoint(first.EndPoint);
+                            var batch = new List<object>();
+                            var originalItems = new List<CloudTelemetryItem>();
+
+                            // We only dequeue after successful send; so peek then dequeue into temp list
+                            // copy items with same original endpoint (not bulk) to maintain grouping
+                            while (_dataQueue.Count > 0 && batch.Count < MaxBatchSize)
+                            {
+                                var next = _dataQueue.Peek();
+                                if (next == null || next.EndPoint != first.EndPoint)
+                                {
+                                    // stop grouping when endpoint differs to keep semantics
+                                    break;
+                                }
+                                // remove from queue, but keep reference in case we need to re-add on failure
+                                next = _dataQueue.Dequeue();
+                                if (next == null) break;
+                                batch.Add(next.Item);
+                                originalItems.Add(next);
+                            }
+
+                            if (batch.Count == 1)
+                            {
+                                // fallback to single send semantics
+                                if (await Send(batch[0], first.EndPoint))
+                                {
+                                    Resolver.Log.Trace("Data queue sent single item (fallback from bulk)", "cloud");
+                                }
+                                else
+                                {
+                                    // failed; re-enqueue original item preserving priority
+                                    foreach (var oi in originalItems)
+                                    {
+                                        _dataQueue.Enqueue(oi);
+                                    }
+                                }
+                            }
+                            else if (batch.Count > 1)
+                            {
+                                // perform bulk send
+                                if (await BulkSend(batch, endpoint))
+                                {
+                                    Resolver.Log.Trace($"Bulk send succeeded for {batch.Count} items", "cloud");
+                                }
+                                else
+                                {
+                                    Resolver.Log.Trace("Bulk send failed; restoring items to queue", "cloud");
+                                    // restore in original order by priority (originalItems already ordered)
+                                    foreach (var oi in originalItems)
+                                    {
+                                        _dataQueue.Enqueue(oi);
+                                    }
+                                    // small back-off to avoid tight failure loops
+                                    await Task.Delay(TimeSpan.FromSeconds(3));
+                                }
+                            }
+                        }
+                        else // single item path
+                        {
+                            var info = _dataQueue.Peek();
+                            if (info != null)
+                            {
+                                if (await Send(info.Item, info.EndPoint))
+                                {
+                                    Resolver.Log.Trace("Data queue sent an item", "cloud");
+                                    _dataQueue.Dequeue();
+                                }
+                                else
+                                {
+                                    // if send fails, add a short delay to avoid busy loop
+                                    await Task.Delay(TimeSpan.FromSeconds(1));
+                                }
                             }
                         }
                     }
@@ -137,6 +210,109 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
                     break;
                 }
             }
+        }
+    }
+
+    private string GetBulkEndpoint(string endpoint)
+    {
+        // explicit mapping for known endpoints
+        // /api/logs -> /api/bulklogs
+        // /api/events -> /api/bulkevents
+        if (string.IsNullOrEmpty(endpoint)) return endpoint;
+        return endpoint switch
+        {
+            "/api/logs" => "/api/bulklogs",
+            "/api/events" => "/api/bulkevents",
+            _ => endpoint // leave other endpoints unchanged unless future mapping required
+        };
+    }
+
+    private async Task<bool> BulkSend<T>(IEnumerable<T> items, string endpoint)
+    {
+        if (items == null) throw new ArgumentNullException(nameof(items));
+
+        if (!IsEnabled)
+        {
+            Resolver.Log.Warn("MeadowCloud is not enabled. BulkSend call will not deliver data");
+        }
+
+        if (ConnectionState != CloudConnectionState.Connected)
+        {
+            return false;
+        }
+
+        // Convert to list to avoid multiple enumeration and for count logging
+        var itemList = items as IList<T> ?? items.ToList();
+        if (itemList.Count == 0) return true; // nothing to send
+
+        HttpClient client = new HttpClient();
+        await _semaphoreSlim.WaitAsync();
+        try
+        {
+            int attempt = 0;
+            int maxRetries = 1;
+            while (true)
+            {
+                client.BaseAddress = new Uri(Settings.DataHostname);
+
+                if (Settings.UseAuthentication)
+                {
+                    if (_jwt == null)
+                    {
+                        if (await Authenticate() == false)
+                        {
+                            Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds...");
+                            await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            continue; // retry auth
+                        }
+                    }
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                }
+
+                var json = Resolver.JsonSerializer.Serialize(itemList);
+                using var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                Resolver.Log.Debug($"making bulk cloud request to {endpoint} with {itemList.Count} items", "cloud");
+                HttpResponseMessage response = await client.PostAsync(endpoint, content);
+                try
+                {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
+                    {
+                        attempt++;
+                        InvalidateAuthentication();
+                        client.Dispose();
+                        client = new HttpClient();
+                        continue; // redo with new auth
+                    }
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        string errorMessage = response.StatusCode == HttpStatusCode.InternalServerError
+                            ? $"bulk cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'"
+                            : $"bulk cloud request to {endpoint} failed with {response.StatusCode}";
+                        LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                        return false;
+                    }
+                    Resolver.Log.Debug($"bulk cloud request to {endpoint} completed successfully", messageGroup: "cloud");
+                    MessageSent?.Invoke(this, EventArgs.Empty);
+                    return true;
+                }
+                finally
+                {
+                    response.Dispose();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogAndRaiseOnErrorOccurredEvent("Exception sending bulk cloud message", ex);
+            return false;
+        }
+        finally
+        {
+            client.Dispose();
+            _semaphoreSlim.Release();
         }
     }
 
