@@ -1,6 +1,5 @@
 ﻿using Meadow.Hardware;
 using System;
-using static Meadow.Gpiod.Interop;
 
 namespace Meadow;
 
@@ -10,7 +9,7 @@ namespace Meadow;
 public class GpiodDigitalInputPort : DigitalInputPortBase
 {
     private Gpiod Driver { get; }
-    private LineInfo Line { get; }
+    private ILineInfo Line { get; }
 
     /// <inheritdoc/>
     public override bool State => Line.GetValue();
@@ -24,7 +23,7 @@ public class GpiodDigitalInputPort : DigitalInputPortBase
     {
         Driver = driver;
         Pin = pin;
-        LineInfo? li = null;
+        ILineInfo? li = null;
 
         if (pin is GpiodPin { } gp)
         {
@@ -39,23 +38,22 @@ public class GpiodDigitalInputPort : DigitalInputPortBase
         {
             Line = li;
 
-            line_request_flags flags;
+            GpiodLineBias bias;
 
             switch (resistorMode)
             {
                 case ResistorMode.InternalPullUp:
-                    flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;
+                    bias = GpiodLineBias.PullUp;
                     break;
                 case ResistorMode.InternalPullDown:
-                    flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;
+                    bias = GpiodLineBias.PullDown;
                     break;
                 default:
-                    flags = line_request_flags.GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;
+                    bias = GpiodLineBias.Disabled;
                     break;
             }
 
-            Line.RequestInput(flags);
-
+            Line.RequestInput(bias);
         }
         else
         {

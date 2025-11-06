@@ -1,54 +1,23 @@
 ﻿using Meadow.Logging;
 using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Meadow;
 
-internal partial class Gpiod : IDisposable
+internal abstract class Gpiod : IDisposable
 {
-    private class PinInfo
-    {
-        public int FileDescriptor { get; set; }
-        public int ReferenceCount { get; set; }
-    }
-
     public bool IsDisposed { get; private set; }
 
-    private ChipCollection Chips { get; set; }
-    private Logger Logger { get; }
+    protected Logger Logger { get; }
 
-    public unsafe Gpiod(Logger logger)
+    // Abstract members that version-specific implementations must provide
+    public abstract IChipCollection Chips { get; }
+    public abstract ILineInfo GetLine(GpiodPin pin);
+    public abstract ILineInfo GetLine(LinuxFlexiPin pin);
+
+    protected Gpiod(Logger logger)
     {
-        Chips = new ChipCollection();
         Logger = logger;
-
-        var iter = Interop.gpiod_chip_iter_new();
-
-        try
-        {
-            IntPtr p;
-
-            do
-            {
-                p = Interop.gpiod_chip_iter_next_noclose(iter);
-
-                var info = ChipInfo.FromIntPtr(logger, p);
-                if (!info.IsInvalid)
-                {
-                    Chips.Add(info);
-
-                    foreach (var line in info.Lines)
-                    {
-                        Logger.Debug($"{info.Name} {line}");
-                    }
-                }
-            } while (p != IntPtr.Zero);
-        }
-        finally
-        {
-            Interop.gpiod_chip_iter_free(iter);
-        }
     }
 
     protected virtual void Dispose(bool disposing)
@@ -75,60 +44,25 @@ internal partial class Gpiod : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    internal void LogAllAvailablePins()
+    public static Gpiod? GetGpiod(Logger logger)
     {
-        var names = Directory.GetFiles("/dev", "gpiochip*");
-
-        foreach (var n in names)
+        // Try v3 first (Debian Trixie and newer)
+        if (NativeLibrary.TryLoad("libgpiod.so.3", out IntPtr handle))
         {
-            Logger.Debug($"opening {n}");
-
-            var info = ChipInfo.FromIntPtr(Logger, Interop.gpiod_chip_open_by_name(n));
-            if (!info.IsInvalid)
-            {
-                Chips.Add(info);
-
-                Logger.Debug(info.ToString());
-
-                foreach (var line in info.Lines)
-                {
-                    Logger.Debug(line.ToString());
-                }
-            }
-            else
-            {
-                Console.WriteLine($"ERR: {Marshal.GetLastWin32Error()}");
-
-                Logger.Error($"Unable to get info for chip {n}");
-            }
-        }
-    }
-
-    public LineInfo GetLine(GpiodPin pin)
-    {
-        if (!Chips.Contains(pin.Chip))
-        {
-            throw new NativeException($"Unknown GPIO chip {pin.Chip}");
+            NativeLibrary.Free(handle);
+            logger.Info("Using libgpiod v3 (API v2.x)");
+            return new Gpiod3(logger);
         }
 
-        var line = Chips[pin.Chip]!.Lines[pin.Offset];
-
-        // TODO: check availability, check for other reservations
-
-        return line;
-    }
-
-    public LineInfo GetLine(LinuxFlexiPin pin)
-    {
-        if (!Chips.Contains(pin.GpiodChip))
+        // Fallback to v2 (Debian Bookworm and older)
+        if (NativeLibrary.TryLoad("libgpiod.so.2", out handle))
         {
-            throw new NativeException($"Unknown GPIO chip {pin.GpiodChip}");
+            NativeLibrary.Free(handle);
+            logger.Info("Using libgpiod v2 (API v1.x)");
+            return new Gpiod2(logger);
         }
 
-        var line = Chips[pin.GpiodChip]!.Lines[pin.GpiodOffset];
-
-        // TODO: check availability, check for other reservations
-
-        return line;
+        logger.Warn("No compatible libgpiod version found");
+        return null;
     }
 }

@@ -2,13 +2,13 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using static Meadow.Gpiod.Interop;
+using static Meadow.Gpiod2.Interop;
 
 namespace Meadow;
 
-internal delegate void LineEventHandler(LineInfo lineInfo, gpiod_line_event evt);
+internal delegate void LineEventHandler(LineInfo2 lineInfo, gpiod_line_event evt);
 
-internal class LineInfo
+internal class LineInfo2 : ILineInfo
 {
     private IntPtr Handle { get; set; }
     private gpiod_line? Line { get; set; }
@@ -22,9 +22,19 @@ internal class LineInfo
 
     private bool _istIsRunning = false;
     private bool _istShouldStop = false;
+
+    // v2-specific event (legacy)
     public event LineEventHandler InterruptOccurred = delegate { };
 
-    public LineInfo(ChipInfo chip, int offset)
+    // ILineInfo unified event
+    event LineEdgeEventHandler ILineInfo.InterruptOccurred
+    {
+        add { _unifiedInterruptOccurred += value; }
+        remove { _unifiedInterruptOccurred -= value; }
+    }
+    private event LineEdgeEventHandler? _unifiedInterruptOccurred;
+
+    public LineInfo2(ChipInfo2 chip, int offset)
     {
         Offset = offset;
         Handle = gpiod_chip_get_line(chip.Handle, Offset);
@@ -52,6 +62,23 @@ internal class LineInfo
 
     private const string MeadowConsumer = "Meadow";
 
+    // ILineInfo implementation
+    bool ILineInfo.RequestOutput(GpiodLineBias bias, bool initialState)
+    {
+        return RequestOutput(bias.AsGpiod2Flags(), initialState);
+    }
+
+    void ILineInfo.RequestInput(GpiodLineBias bias)
+    {
+        RequestInput(bias.AsGpiod2Flags());
+    }
+
+    void ILineInfo.RequestInterrupts(InterruptMode mode, GpiodLineBias bias)
+    {
+        RequestInterrupts(mode, bias.AsGpiod2Flags());
+    }
+
+    // Existing v2-specific methods
     public void Request(line_direction direction)
     {
         // TODO: check for free?
@@ -155,7 +182,22 @@ internal class LineInfo
 
                     if (result == 0)
                     {
+                        // Raise legacy v2-specific event
                         InterruptOccurred?.Invoke(this, evnt);
+
+                        // Raise unified event for ILineInfo
+                        if (_unifiedInterruptOccurred != null)
+                        {
+                            var args = new GpiodEdgeEventArgs
+                            {
+                                EventType = evnt.event_type == gpiod_event_type.GPIOD_LINE_EVENT_RISING_EDGE
+                                    ? GpiodEdgeEventType.Rising
+                                    : GpiodEdgeEventType.Falling,
+                                TimestampNs = evnt.ts.tv_sec * 1_000_000_000UL + evnt.ts.tv_nsec,
+                                LineOffset = Offset
+                            };
+                            _unifiedInterruptOccurred.Invoke(this, args);
+                        }
                     }
                     else
                     {
