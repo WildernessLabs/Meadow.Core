@@ -13,7 +13,9 @@ internal partial class Gpiod3 : Gpiod
     private readonly ChipCollection3 _chips = new ChipCollection3();
     public override IChipCollection Chips => _chips;
 
-    public Gpiod3(Logger logger)
+    public string GpioControllerName { get; } = "gpiochip4";
+
+    public Gpiod3(Logger? logger)
         : base(logger)
     {
         // V3 API doesn't have chip iterators - enumerate /dev/gpiochip* directly
@@ -22,7 +24,7 @@ internal partial class Gpiod3 : Gpiod
 
         foreach (var path in chipPaths)
         {
-            Logger.Debug($"Opening {path}");
+            Logger?.Debug($"Opening {path}");
 
             try
             {
@@ -30,18 +32,23 @@ internal partial class Gpiod3 : Gpiod
                 if (!chipInfo.IsInvalid)
                 {
                     _chips.Add(chipInfo);
-                    Logger.Info($"Found GPIO chip: {chipInfo.Name} ({chipInfo.NumLines} lines)");
+                    Logger?.Info($"Found GPIO chip: {chipInfo.Name} [{chipInfo.Label}] ({chipInfo.NumLines} lines)");
+
+                    if (chipInfo.Label.Contains("pinctrl"))
+                    {
+                        GpioControllerName = chipInfo.Name;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Logger.Warn($"Failed to open {path}: {ex.Message}");
+                Logger?.Warn($"Failed to open {path}: {ex.Message}");
             }
         }
 
         if (_chips.Count == 0)
         {
-            Logger.Warn("No GPIO chips found");
+            Logger?.Warn("No GPIO chips found");
         }
     }
 

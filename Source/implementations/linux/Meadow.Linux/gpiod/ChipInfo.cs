@@ -8,7 +8,7 @@ namespace Meadow;
 /// </summary>
 internal abstract class ChipInfo : IDisposable
 {
-    protected Logger Logger { get; }
+    protected Logger? Logger { get; }
 
     /// <summary>
     /// Native handle to the chip
@@ -35,7 +35,7 @@ internal abstract class ChipInfo : IDisposable
     /// </summary>
     public abstract bool IsInvalid { get; }
 
-    protected ChipInfo(Logger logger)
+    protected ChipInfo(Logger? logger)
     {
         Logger = logger;
     }
