@@ -88,5 +88,24 @@ namespace Core.Unit.Tests
             Assert.Equal("Expected1", s.Settings["CustomSettings.Setting1"]);
             Assert.Equal("Expected2", s.Settings["CustomSettings.Setting2"]);
         }
+
+        [Fact]
+        public void ParseInlineComments()
+        {
+            var yml = File.ReadAllText("app.config.inlinecomments.yaml");
+
+            var s = AppSettingsParser.Parse(yml);
+
+            // Test inline comment stripping
+            Assert.Equal("./positives", s.Settings["MyApp.PositiveCaptureFolder"]);
+            Assert.True(s.Settings["MyApp.EnableManualCapture"] == "true");
+            Assert.Equal("123", s.Settings["MyApp.SomeNumber"]);
+
+            // Test that # inside quotes is preserved
+            Assert.Equal("value with # hash", s.Settings["MyApp.ValueWithHash"]);
+
+            // Test values without inline comments still work
+            Assert.Equal("normalvalue", s.Settings["MyApp.NormalValue"]);
+        }
     }
 }

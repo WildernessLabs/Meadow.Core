@@ -102,14 +102,14 @@ internal static class AppSettingsParser
                             break;
                         case 2:
                             var name = $"{parent}.{kvp[0].Trim()}";
-                            var value = kvp[1].Trim();
+                            var value = StripInlineComment(kvp[1]).Trim();
                             ApplySetting(settings, name, value);
                             break;
                         default:
                             // the value had a colon in it, so re-assemble
                             var val = string.Join(':', kvp, 1, kvp.Length - 1);
                             var n = $"{parent}.{kvp[0].Trim()}";
-                            var v = val.Trim();
+                            var v = StripInlineComment(val).Trim();
                             ApplySetting(settings, n, v);
                             break;
                     }
@@ -226,5 +226,42 @@ internal static class AppSettingsParser
         {
             Console.WriteLine($"Unable to parse value '{settingValue}' to an int");
         }
+    }
+
+    private static string StripInlineComment(string value)
+    {
+        var inQuotes = false;
+        var escapeNext = false;
+
+        for (int i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+
+            if (escapeNext)
+            {
+                escapeNext = false;
+                continue;
+            }
+
+            if (c == '\\')
+            {
+                escapeNext = true;
+                continue;
+            }
+
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+                continue;
+            }
+
+            // If we find a # outside of quotes, strip from here
+            if (c == '#' && !inQuotes)
+            {
+                return value.Substring(0, i);
+            }
+        }
+
+        return value;
     }
 }
