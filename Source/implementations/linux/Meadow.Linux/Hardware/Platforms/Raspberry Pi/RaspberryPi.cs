@@ -38,9 +38,7 @@ public partial class RaspberryPi : Linux
         }
 
         Pins = new RaspberryPiPinout(
-            IsRaspberryPi5 ?
-                RaspberryPiPinout.GpiodChipPi5 :
-                RaspberryPiPinout.GpiodChipPi4,
+            GetGpioControllerName(),
             IsRaspberryPi5 ? 53 : 0
             );
 
@@ -51,6 +49,29 @@ public partial class RaspberryPi : Linux
             new NetworkCapabilities(false, true),
             new StorageCapabilities(true)
             );
+    }
+
+    private string GetGpioControllerName()
+    {
+        // TODO: test this on onlder hardware to see if the pi5 search works on a pi4
+        if (IsRaspberryPi5)
+        {
+            // this has moved twice now.  Let's dynamically find it instead of hard-coded
+            // what version of gpiod are we running on?
+            var gpiod = Gpiod.GetGpiod(Resolver.Log);
+            if (gpiod is Gpiod3 gpiod3)
+            {
+                return gpiod3.GpioControllerName;
+            }
+            else
+            {
+                return RaspberryPiPinout.GpiodChipPi5;
+            }
+        }
+        else
+        {
+            return RaspberryPiPinout.GpiodChipPi4;
+        }
     }
 
     private bool CheckIfPi5()

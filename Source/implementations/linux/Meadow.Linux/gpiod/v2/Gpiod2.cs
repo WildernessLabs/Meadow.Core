@@ -16,7 +16,7 @@ internal partial class Gpiod2 : Gpiod
     private readonly ChipCollection2 _chips = new ChipCollection2();
     public override IChipCollection Chips => _chips;
 
-    public unsafe Gpiod2(Logger logger)
+    public unsafe Gpiod2(Logger? logger)
         : base(logger)
     {
         var iter = Interop.gpiod_chip_iter_new();
@@ -36,7 +36,7 @@ internal partial class Gpiod2 : Gpiod
 
                     foreach (var line in info.Lines)
                     {
-                        Logger.Debug($"{info.Name} {line}");
+                        Logger?.Debug($"{info.Name} {line}");
                     }
                 }
             } while (p != IntPtr.Zero);
@@ -53,25 +53,25 @@ internal partial class Gpiod2 : Gpiod
 
         foreach (var n in names)
         {
-            Logger.Debug($"opening {n}");
+            Logger?.Debug($"opening {n}");
 
             var info = ChipInfo2.FromIntPtr(Logger, Interop.gpiod_chip_open_by_name(n));
             if (!info.IsInvalid)
             {
                 Chips.Add(info);
 
-                Logger.Debug(info.ToString());
+                Logger?.Debug(info.ToString());
 
                 foreach (var line in info.Lines)
                 {
-                    Logger.Debug(line.ToString());
+                    Logger?.Debug(line.ToString());
                 }
             }
             else
             {
                 Console.WriteLine($"ERR: {Marshal.GetLastWin32Error()}");
 
-                Logger.Error($"Unable to get info for chip {n}");
+                Logger?.Error($"Unable to get info for chip {n}");
             }
         }
     }

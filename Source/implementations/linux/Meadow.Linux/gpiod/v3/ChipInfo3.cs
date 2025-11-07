@@ -21,13 +21,13 @@ internal class ChipInfo3 : ChipInfo
 
     public override bool IsInvalid => Handle == IntPtr.Zero;
 
-    public static ChipInfo3 FromPath(Logger logger, string path)
+    public static ChipInfo3 FromPath(Logger? logger, string path)
     {
         var chipHandle = Gpiod3.Interop.gpiod_chip_open(path);
         return new ChipInfo3(logger, chipHandle, path);
     }
 
-    private ChipInfo3(Logger logger, IntPtr chipHandle, string path)
+    private ChipInfo3(Logger? logger, IntPtr chipHandle, string path)
         : base(logger)
     {
         Handle = chipHandle;
@@ -35,7 +35,7 @@ internal class ChipInfo3 : ChipInfo
 
         if (IsInvalid)
         {
-            Logger.Debug($"Chip handle is invalid for {path}");
+            Logger?.Debug($"Chip handle is invalid for {path}");
             Lines = new LineCollection3(this, 0);
         }
         else
@@ -60,7 +60,7 @@ internal class ChipInfo3 : ChipInfo
             }
             else
             {
-                Logger.Warn($"Failed to get chip info for {path}");
+                Logger?.Warn($"Failed to get chip info for {path}");
                 Lines = new LineCollection3(this, 0);
             }
         }

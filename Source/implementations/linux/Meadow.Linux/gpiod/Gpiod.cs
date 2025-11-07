@@ -8,14 +8,14 @@ internal abstract class Gpiod : IDisposable
 {
     public bool IsDisposed { get; private set; }
 
-    protected Logger Logger { get; }
+    protected Logger? Logger { get; }
 
     // Abstract members that version-specific implementations must provide
     public abstract IChipCollection Chips { get; }
     public abstract ILineInfo GetLine(GpiodPin pin);
     public abstract ILineInfo GetLine(LinuxFlexiPin pin);
 
-    protected Gpiod(Logger logger)
+    protected Gpiod(Logger? logger)
     {
         Logger = logger;
     }
@@ -44,13 +44,13 @@ internal abstract class Gpiod : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public static Gpiod? GetGpiod(Logger logger)
+    public static Gpiod? GetGpiod(Logger? logger)
     {
         // Try v3 first (Debian Trixie and newer)
         if (NativeLibrary.TryLoad("libgpiod.so.3", out IntPtr handle))
         {
             NativeLibrary.Free(handle);
-            logger.Info("Using libgpiod v3 (API v2.x)");
+            logger?.Info("Using libgpiod v3 (API v2.x)");
             return new Gpiod3(logger);
         }
 
@@ -58,11 +58,11 @@ internal abstract class Gpiod : IDisposable
         if (NativeLibrary.TryLoad("libgpiod.so.2", out handle))
         {
             NativeLibrary.Free(handle);
-            logger.Info("Using libgpiod v2 (API v1.x)");
+            logger?.Info("Using libgpiod v2 (API v1.x)");
             return new Gpiod2(logger);
         }
 
-        logger.Warn("No compatible libgpiod version found");
+        logger?.Warn("No compatible libgpiod version found");
         return null;
     }
 }

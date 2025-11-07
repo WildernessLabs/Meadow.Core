@@ -18,19 +18,19 @@ internal class ChipInfo2 : ChipInfo
 
     public override bool IsInvalid => Handle.ToInt64() <= 0;
 
-    public static ChipInfo2 FromIntPtr(Logger logger, IntPtr p)
+    public static ChipInfo2 FromIntPtr(Logger? logger, IntPtr p)
     {
         return new ChipInfo2(logger, p);
     }
 
-    private ChipInfo2(Logger logger, IntPtr p)
+    private ChipInfo2(Logger? logger, IntPtr p)
         : base(logger)
     {
         Handle = p;
 
         if (IsInvalid)
         {
-            Logger.Debug($"Chip ptr is invalid - cannot get GPIOD chip details");
+            Logger?.Debug($"Chip ptr is invalid - cannot get GPIOD chip details");
             Lines = new LineCollection2(this, 0);
         }
         else
