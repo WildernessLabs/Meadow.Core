@@ -36,6 +36,9 @@
     <None Update="app.config.envizor.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="app.config.inlinecomments.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="app.config.quotes.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,0 +1,6 @@
+MyApp:
+  PositiveCaptureFolder: ./positives     # High-confidence detections
+  EnableManualCapture: true              # GPIO-triggered capture
+  SomeNumber: 123                        # A number with comment
+  ValueWithHash: "value with # hash"     # This should preserve the # inside quotes
+  NormalValue: normalvalue
