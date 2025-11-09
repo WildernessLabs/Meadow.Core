@@ -21,7 +21,13 @@ using SRI = System.Runtime.InteropServices;
 
 namespace Meadow;
 
-internal class MeadowCloudConnectionService : IMeadowCloudService
+/// <summary>
+/// Provides functionality to manage and maintain a connection to the Meadow Cloud service.
+/// </summary>
+/// <remarks>This service handles authentication, message queuing, and communication with the Meadow Cloud. It
+/// supports automatic reconnection, message retrying, and subscription management for MQTT topics. The service also
+/// provides events for monitoring connection state, error occurrences, and message transmissions.</remarks>
+public class MeadowCloudConnectionService : IMeadowCloudService
 {
     /// <inheritdoc/>
     public event EventHandler<Exception>? ErrorOccurred;
@@ -64,7 +70,17 @@ internal class MeadowCloudConnectionService : IMeadowCloudService
     // Track the last time we were connected
     private DateTime _lastConnectedTime = DateTime.UtcNow;
 
-    internal MeadowCloudConnectionService(IMeadowCloudSettings settings)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MeadowCloudConnectionService"/> class with the specified cloud
+    /// settings.
+    /// </summary>
+    /// <remarks>The constructor determines the telemetry store type based on the <see
+    /// cref="IMeadowCloudSettings.TelemetryStore"/> value. If the value is "sqlite" (case-insensitive), a SQLite-based
+    /// telemetry store is used,  with the database file stored in the device's file system. Otherwise, an in-memory
+    /// telemetry store is used.</remarks>
+    /// <param name="settings">The cloud settings used to configure the connection service.  This includes the telemetry store type and other
+    /// related configuration options.</param>
+    public MeadowCloudConnectionService(IMeadowCloudSettings settings)
     {
         Settings = settings;
 

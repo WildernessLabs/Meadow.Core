@@ -32,6 +32,7 @@ public static partial class MeadowOS
     private static bool _startedDirectly = false;  // true when this assembly is the entry point
 
     internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
+    private static readonly ManualResetEvent _forceTerminate = new ManualResetEvent(false);
 
     private static IApp App { get; set; } = default!;
     private static ILifecycleSettings LifecycleSettings { get; set; } = default!;
@@ -808,55 +809,7 @@ public static partial class MeadowOS
             }
             App = app;
 
-            var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
-            Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
-            ICommandService commandService = new MeadowCloudCommandService(cloudConnectionService);
-            Resolver.Services.Add(commandService);
-
-            commandService.Subscribe<MeadowResetCommand>(cmd =>
-            {
-                // reset when receiving "MeadowReset" command
-                Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
-                CurrentDevice.PlatformOS.Reset();
-            });
-
-            var updateService = new MeadowCloudUpdateService(
-                CurrentDevice.PlatformOS.FileSystem.FileSystemRoot,
-                cloudConnectionService);
-            Resolver.Services.Add<IUpdateService>(updateService);
-
-            if (MeadowCloudSettings.EnableUpdates)
-            {
-                updateService.Start();
-            }
-
-            var healthReporter = new HealthReporter();
-            Resolver.Services.Add<IHealthReporter>(healthReporter);
-            if (MeadowCloudSettings.EnableHealthMetrics)
-            {
-                if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
-                {
-                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
-                }
-                else
-                {
-                    Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.", MessageGroup.Core);
-                }
-            }
-
-            if (MeadowCloudSettings.Enabled
-                || MeadowCloudSettings.EnableUpdates
-                || MeadowCloudSettings.EnableHealthMetrics)
-            {
-                Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}", MessageGroup.Core);
-                Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}", MessageGroup.Core);
-                Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}", MessageGroup.Core);
-                cloudConnectionService.Start();
-            }
-            else
-            {
-                Resolver.Log.Info("All cloud features are disabled.", MessageGroup.Core);
-            }
+            StartCloudServices(CurrentDevice.PlatformOS, MeadowCloudSettings);
 
             return true;
         }
@@ -867,7 +820,68 @@ public static partial class MeadowOS
         }
     }
 
-    private static readonly ManualResetEvent _forceTerminate = new ManualResetEvent(false);
+    private static void StartCloudServices(IPlatformOS platformOS, IMeadowCloudSettings cloudSettings)
+    {
+        var cloudConnectionService = platformOS.GetCloudConnectionService(cloudSettings);
+        var commandService = platformOS.GetCloudCommandService(cloudConnectionService);
+
+        commandService.Subscribe<MeadowResetCommand>(cmd =>
+        {
+            // reset when receiving "MeadowReset" command
+            Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
+            platformOS.Reset();
+        });
+
+
+        //var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
+        //ICommandService commandService = new MeadowCloudCommandService(cloudConnectionService);
+
+        //commandService.Subscribe<MeadowResetCommand>(cmd =>
+        //{
+        //    // reset when receiving "MeadowReset" command
+        //    Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
+        //    CurrentDevice.PlatformOS.Reset();
+        //});
+
+        var updateService = platformOS.GetUpdateService(cloudConnectionService);
+
+        if (MeadowCloudSettings.EnableUpdates)
+        {
+            updateService.Start();
+        }
+
+        var healthReporter = new HealthReporter();
+        if (MeadowCloudSettings.EnableHealthMetrics)
+        {
+            if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
+            {
+                healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
+            }
+            else
+            {
+                Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.", MessageGroup.Core);
+            }
+        }
+
+        if (MeadowCloudSettings.Enabled
+            || MeadowCloudSettings.EnableUpdates
+            || MeadowCloudSettings.EnableHealthMetrics)
+        {
+            Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}", MessageGroup.Core);
+            Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}", MessageGroup.Core);
+            Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}", MessageGroup.Core);
+            cloudConnectionService.Start();
+        }
+        else
+        {
+            Resolver.Log.Info("All cloud features are disabled.", MessageGroup.Core);
+        }
+
+        Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
+        Resolver.Services.Add<ICommandService>(commandService);
+        Resolver.Services.Add<IUpdateService>(updateService);
+        Resolver.Services.Add<IHealthReporter>(healthReporter);
+    }
 
     /// <summary>
     /// Cancel the meadow OS application Run call and allow the process to exit
