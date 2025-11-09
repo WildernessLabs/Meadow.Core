@@ -66,13 +66,7 @@ public class MeadowCloudUpdateService : IUpdateService
     {
         var connectionService = meadowCloudService as MeadowCloudConnectionService;
 
-        if (connectionService != null)
-        {
-            _connectionService = connectionService;
-            _connectionService.MqttMessageReceived += OnMqttMessageReceived;
-            _connectionService.AddSubscription("{OID}/commands/{ID}");
-        }
-        else
+        if (connectionService == null)
         {
             throw new ArgumentException("meadowCloudService must be of type MeadowCloudConnectionService", nameof(meadowCloudService));
         }
@@ -82,6 +76,9 @@ public class MeadowCloudUpdateService : IUpdateService
 
         Resolver.Log.Info($"Update Store Directory: {UpdateStoreDirectory}", LogMessageGroup);
         Resolver.Log.Info($"Update Directory: {UpdateDirectory}", LogMessageGroup);
+
+        // TODO: if the store and binaries folder overlap, bad things will ensue.
+        // need to guard against that.
 
         Store = new UpdateStore(UpdateStoreDirectory);
 
@@ -109,7 +106,9 @@ public class MeadowCloudUpdateService : IUpdateService
 
             _service_cancellation.Token.ThrowIfCancellationRequested();
             if (_connectionService.ConnectionState != CloudConnectionState.Connected && Store.State != UpdateStore.States.Mpak)
+            {
                 continue;
+            }
 
             using var service_or_update_cancellation = CancellationTokenSource.CreateLinkedTokenSource(_service_cancellation.Token,
                                                                                                      _update_cancellation.Token);
@@ -133,11 +132,10 @@ public class MeadowCloudUpdateService : IUpdateService
                         Log.Debug("update retrieved", LogMessageGroup);
                         UpdateRetrieved?.Invoke(this, Store.Manifest!, _update_cancellation);
                         _update_cancellation.Token.ThrowIfCancellationRequested();
-                        ApplyUpdate(Store.Manifest!);
+                        var expandedPath = ApplyUpdate(Store.Manifest!);
                         Store.State = UpdateStore.States.Empty;
-                        Log.Debug($"Requesting a device reset to apply the Update");
-                        Device.PlatformOS.Reset();
                         UpdateSuccess?.Invoke(this, Store.Manifest!, _update_cancellation); // not called - device has reset by now
+                        AfterUpdatePackageExpanded(expandedPath);
                         break;
                 }
             }
@@ -160,6 +158,21 @@ public class MeadowCloudUpdateService : IUpdateService
     }
 
     /// <summary>
+    /// Performs actions after the update package has been expanded.
+    /// </summary>
+    /// <param name="expandedPackagePath">The file system path where the update package has been expanded.</param>
+    /// <remarks>The default implementation requests a full device reset to apply the update.  Platforms with
+    /// specific requirements, such as embedded Linux, may override this  method to implement alternative behaviors,
+    /// such as restarting only the application process.</remarks>
+    protected virtual void AfterUpdatePackageExpanded(string expandedPackagePath)
+    {
+        // default behavior (i.e. F7) is to fully reset the device.
+        // some platforms (e.g. embedded linux?) might decide to only restart the app process?
+        Log.Debug($"Requesting a device reset to apply the Update");
+        Device.PlatformOS.Reset();
+    }
+
+    /// <summary>
     /// Generates a unique temporary folder path for storing update-related files.
     /// </summary>
     /// <remarks>The folder path is created by combining the system's temporary directory with a unique
@@ -168,28 +181,46 @@ public class MeadowCloudUpdateService : IUpdateService
     /// <returns>A string representing the full path to the temporary folder.</returns>
     protected virtual string GetUpdateTempFolder()
     {
-        return Path.Combine(
-            MeadowOS.FileSystem.TempDirectory,
-            $"manifest_{Guid.NewGuid():N}"); // TODO: Replace with Path.GetTempPath() when https://github.com/WildernessLabs/Meadow/pull/734 lands
+        // TODO: Replace with Path.GetTempPath() when https://github.com/WildernessLabs/Meadow/pull/734 lands
+        return MeadowOS.FileSystem.TempDirectory;
     }
 
     private void OnMqttMessageReceived(object sender, MqttApplicationMessage e)
     {
         Log.Debug("MQTT message received", LogMessageGroup);
         if (!e.Topic.EndsWith($"/ota/{Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
+        {
             return;
+        }
 
         Log.Debug("MQTT message is OTA message for this device", LogMessageGroup);
 
         try
         {
             var temp_path = GetUpdateTempFolder();
-
             Log.Debug($"Using temp path {temp_path}", LogMessageGroup);
-            File.WriteAllBytes(temp_path, e.PayloadSegment.ToArray());
+
+            if (!Directory.Exists(temp_path))
+            {
+                Log.Debug($"Creating temp directory {temp_path}", LogMessageGroup);
+                Directory.CreateDirectory(temp_path);
+            }
+
+            var packageFileName = Path.Combine(temp_path, $"manifest_{Guid.NewGuid():N}");
+
+            Log.Debug($"Writing package to {packageFileName}", LogMessageGroup);
+
+            File.WriteAllBytes(
+                packageFileName,
+                e.PayloadSegment.Array);
+
+            var fileInfo = new FileInfo(packageFileName);
+            Log.Debug($"file size: {fileInfo.Length}", LogMessageGroup);
 
             if (Store.State != UpdateStore.States.Empty)
             {
+                Log.Info("New update received, cancelling any in-progress update", LogMessageGroup);
+
                 // cancel old update
                 var current_update_cancellation = _update_cancellation;
                 current_update_cancellation.Cancel();
@@ -200,7 +231,7 @@ public class MeadowCloudUpdateService : IUpdateService
                 Store.State = UpdateStore.States.Empty; // should not be needed
             }
 
-            Store.AddManifest(temp_path);
+            Store.AddManifest(packageFileName);
         }
         catch (Exception ex)
         {
@@ -422,10 +453,10 @@ public class MeadowCloudUpdateService : IUpdateService
     }
 
     /// <inheritdoc/>
-    private void ApplyUpdate(UpdateInfo updateInfo)
+    protected virtual string ApplyUpdate(UpdateInfo updateInfo)
     {
         var sourcePath = Store.MpakPath;
-        Log.Debug($"Applying update from '{sourcePath}'", LogMessageGroup);
+        Log.Debug($"Applying update from '{sourcePath}' to {UpdateDirectory} ", LogMessageGroup);
 
         try
         {
@@ -438,6 +469,8 @@ public class MeadowCloudUpdateService : IUpdateService
             Log.Debug($"Contents of Update", LogMessageGroup);
             Log.Debug($"------------------", LogMessageGroup);
             DisplayTree(new DirectoryInfo(UpdateDirectory));
+
+            return UpdateDirectory;
         }
         catch (Exception ex)
         {
@@ -448,6 +481,7 @@ public class MeadowCloudUpdateService : IUpdateService
         {
             try
             {
+                Log.Debug($"Deleting source file '{sourcePath}'", LogMessageGroup);
                 File.Delete(sourcePath!);
             }
             catch (Exception ex)

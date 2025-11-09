@@ -89,9 +89,11 @@ internal class UpdateStore
     {
         Log.Debug("AddManifest()", "update store");
         if (State != States.Empty)
+        {
             throw new Exception("Cannot add a manifest, store already includes an update");
+        }
 
-        Log.Debug($"{Path.GetFullPath(manifest_path)} -> {this.manifest_path}");
+        Log.Debug($"Move manifest {Path.GetFullPath(manifest_path)} -> {this.manifest_path}", "update store");
 
         File.Move(manifest_path, this.manifest_path);
     }
@@ -123,7 +125,9 @@ internal class UpdateStore
     {
         Log.Debug("StartMpak()", "update store");
         if (State != States.Manifest)
+        {
             throw new Exception("Cannot add a MPAK, no manifest in store");
+        }
 
         var fi = new FileInfo(mpak_partial_path);
         if (fi.Exists)
@@ -136,6 +140,7 @@ internal class UpdateStore
         {
             mpak_stream = fi.Create();
         }
+        Log.Debug($"Saving MPAK to{fi.FullName}", "update store");
         return mpak_stream;
     }
 
@@ -168,9 +173,9 @@ internal class UpdateStore
         mpak_stream?.Dispose();
         mpak_stream = null;
 
-        var mpakFilePath = 
-              File.Exists(mpak_partial_path) ? mpak_partial_path 
-            : File.Exists(mpak_path) ? mpak_path 
+        var mpakFilePath =
+              File.Exists(mpak_partial_path) ? mpak_partial_path
+            : File.Exists(mpak_path) ? mpak_path
             : throw new FileNotFoundException("Cannot validate a MPAK, no mpak in store");
 
         actualHash = GetFileHash(mpakFilePath);
@@ -182,11 +187,33 @@ internal class UpdateStore
     {
         Log.Debug("CompleteMpak()", "update store");
         if (State != States.Manifest)
+        {
             throw new Exception("Cannot add a MPAK, no manifest in store");
+        }
 
         mpak_stream?.Dispose();
         mpak_stream = null;
 
-        File.Move(mpak_partial_path, mpak_path);
+        Log.Debug($"Moving completed MPAK {mpak_partial_path} -> {mpak_path}", "update store");
+
+        try
+        {
+            var fi = new FileInfo(mpak_path);
+            if (!Directory.Exists(fi.DirectoryName))
+            {
+                Log.Debug($"Creating directory for MPAK: {fi.DirectoryName}", "update store");
+                Directory.CreateDirectory(fi.DirectoryName!);
+            }
+            File.Move(mpak_partial_path, mpak_path);
+
+            fi.Refresh();
+
+            Log.Debug($"MPAK is now at {fi.FullName} ({fi.Length} bytes)", "update store");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Unable to move MPAK:{ex.Message}", "update store");
+            throw;
+        }
     }
 }
