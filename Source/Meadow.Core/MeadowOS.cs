@@ -1010,6 +1010,49 @@ public static partial class MeadowOS
     }
 
     /// <summary>
+    /// Moves a directory from source to destination, handling cross-filesystem moves.
+    /// This method copies all contents recursively and then deletes the source.
+    /// </summary>
+    /// <param name="sourceDir">Source directory path</param>
+    /// <param name="destDir">Destination directory path</param>
+    private static void MoveDirectoryCrossFilesystem(string sourceDir, string destDir)
+    {
+        // Try the fast path first (same filesystem)
+        try
+        {
+            Directory.Move(sourceDir, destDir);
+            return;
+        }
+        catch (IOException ex) when (ex.Message.Contains("Invalid cross-device link"))
+        {
+            // Fall through to copy+delete approach
+            Resolver.Log.Debug($"Cross-filesystem move detected, using copy+delete approach", MessageGroup.Core);
+        }
+
+        // Create destination directory
+        Directory.CreateDirectory(destDir);
+
+        // Copy all files
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            var fileName = Path.GetFileName(file);
+            var destFile = Path.Combine(destDir, fileName);
+            File.Copy(file, destFile, overwrite: true);
+        }
+
+        // Recursively copy subdirectories
+        foreach (var subDir in Directory.GetDirectories(sourceDir))
+        {
+            var dirName = Path.GetFileName(subDir);
+            var destSubDir = Path.Combine(destDir, dirName);
+            MoveDirectoryCrossFilesystem(subDir, destSubDir);
+        }
+
+        // Delete the source directory after successful copy
+        Directory.Delete(sourceDir, recursive: true);
+    }
+
+    /// <summary>
     /// Safely extracts a ZIP file to a target directory by using a temporary directory
     /// and then atomically renaming it to the target location.
     /// </summary>
@@ -1052,7 +1095,7 @@ public static partial class MeadowOS
 
             // Move the temporary directory to the target directory
             Resolver.Log.Info($"Moving extracted contents from {tempDirectory} to {nonexisting_target_dir}", MessageGroup.Core);
-            Directory.Move(tempDirectory, nonexisting_target_dir);
+            MoveDirectoryCrossFilesystem(tempDirectory, nonexisting_target_dir);
         }
         catch (Exception ex)
         {
@@ -1062,6 +1105,19 @@ public static partial class MeadowOS
                 try
                 {
                     Directory.Delete(tempDirectory, true);
+                }
+                catch
+                {
+                    // Best effort cleanup - ignore errors during cleanup
+                }
+            }
+
+            // Also clean up the destination directory if it was partially created
+            if (Directory.Exists(nonexisting_target_dir))
+            {
+                try
+                {
+                    Directory.Delete(nonexisting_target_dir, true);
                 }
                 catch
                 {

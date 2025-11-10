@@ -37,7 +37,7 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
     protected override string GetUpdateTempFolder()
     {
         // TODO: query this from the daemon
-        return "/opt/meadow/update-store/temp";
+        return "/tmp/meadow";
     }
 
     /// <inheritdoc/>
@@ -46,7 +46,7 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
         get
         {
             // TODO: query this from the daemon
-            return "/opt/meadow/update-store";
+            return "/tmp/meadow/update-store";
         }
     }
 
@@ -56,7 +56,7 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
         get
         {
             // TODO: query this from the daemon
-            return "/opt/meadow/update";
+            return "/tmp/meadow/update";
         }
     }
 
@@ -66,6 +66,12 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
         // now tell the daemon we need to restart, where the update is, and what our PID is
         Resolver.Log.Info("Notifying Meadow Daemon to apply update...");
 
-        MeadowDaemon.RestartForUpdate();
+        var updateTask = MeadowDaemon.ApplyUpdate();
+
+        updateTask.Wait();
+
+        Resolver.Log.Info("Shutting down the app");
+
+        MeadowOS.TerminateRun();
     }
 }
