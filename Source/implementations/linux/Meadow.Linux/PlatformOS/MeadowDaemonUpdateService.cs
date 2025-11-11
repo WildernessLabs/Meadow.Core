@@ -11,6 +11,8 @@ namespace Meadow;
 /// progress, and success or failure outcomes.</remarks>
 public class MeadowDaemonUpdateService : MeadowCloudUpdateService
 {
+    private static MeadowDaemon.DaemonConfig? _daemonConfig;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MeadowDaemonUpdateService"/> class.
     /// </summary>
@@ -21,23 +23,27 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
     {
     }
 
+    private static MeadowDaemon.DaemonConfig? GetConfig()
+    {
+        if (_daemonConfig == null)
+        {
+            Resolver.Log.Info("Loading Meadow Daemon configuration...");
+            _daemonConfig = MeadowDaemon.GetConfiguration().GetAwaiter().GetResult();
+        }
+        return _daemonConfig;
+    }
+
     private static string GetDaemonMeadowRootFolder(string defaultValue)
     {
-        // if the Meadow.Daemon is installed, we want to use its configured meadow root
-
-        Resolver.Log.Info("Querying Meadow Daemon for configured Meadow root folder...");
-
-        // TODO: query this from the daemon
-        return "/opt/meadow";
-
-        //        return defaultValue;
+        var config = GetConfig();
+        return config?.MeadowRoot ?? "/opt/meadow";
     }
 
     /// <inheritdoc/>
     protected override string GetUpdateTempFolder()
     {
-        // TODO: query this from the daemon
-        return "/tmp/meadow";
+        var config = GetConfig();
+        return config?.MeadowTemp ?? "/tmp/meadow";
     }
 
     /// <inheritdoc/>
@@ -45,8 +51,8 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
     {
         get
         {
-            // TODO: query this from the daemon
-            return "/tmp/meadow/update-store";
+            var config = GetConfig();
+            return config?.UpdateStorePath ?? "/meadow/update-store";
         }
     }
 
@@ -55,8 +61,8 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
     {
         get
         {
-            // TODO: query this from the daemon
-            return "/tmp/meadow/update";
+            var config = GetConfig();
+            return config?.TempExtractPath ?? "/tmp/meadow/update";
         }
     }
 

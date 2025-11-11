@@ -14,10 +14,43 @@ internal static class MeadowDaemon
     private const string DaemonServiceAddress = "http://127.0.0.1";
     private const int DaemonServicePort = 5000;
 
-    public static object? GetConfiguration()
+    public static async Task<DaemonConfig?> GetConfiguration()
     {
-        // TODO:
-        return null;
+        try
+        {
+            using var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri($"{DaemonServiceAddress}:{DaemonServicePort}/api/")
+            };
+
+            Resolver.Log.Debug($"Fetching daemon configuration from {DaemonServiceAddress}:{DaemonServicePort}/api/{Endpoints.DeviceInfo}", "meadow-daemon");
+
+            var response = await httpClient.GetAsync(Endpoints.DeviceInfo);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Resolver.Log.Error($"Failed to fetch daemon configuration ({response.StatusCode}): {errorContent}", "meadow-daemon");
+                return null;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var info = JsonSerializer.Deserialize<DaemonInfoResponse>(content);
+
+            if (info?.Config == null)
+            {
+                Resolver.Log.Warn("Daemon info response did not contain config", "meadow-daemon");
+                return null;
+            }
+
+            Resolver.Log.Debug($"Successfully retrieved daemon configuration", "meadow-daemon");
+            return info.Config;
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Exception while fetching daemon configuration: {ex.Message}", "meadow-daemon");
+            return null;
+        }
     }
 
     public static async Task ApplyUpdate()
@@ -106,5 +139,89 @@ internal static class MeadowDaemon
             : base(JsonSerializer.Serialize(content), Encoding.UTF8, "text/json")
         {
         }
+    }
+
+    internal record DaemonConfig
+    {
+        [JsonPropertyName("enabled")]
+        public bool Enabled { get; set; }
+
+        [JsonPropertyName("enable_mqtt_listener")]
+        public bool EnableMqttListener { get; set; }
+
+        [JsonPropertyName("meadow_root")]
+        public string? MeadowRoot { get; set; }
+
+        [JsonPropertyName("meadow_temp")]
+        public string? MeadowTemp { get; set; }
+
+        [JsonPropertyName("update_store_path")]
+        public string? UpdateStorePath { get; set; }
+
+        [JsonPropertyName("temp_extract_path")]
+        public string? TempExtractPath { get; set; }
+
+        [JsonPropertyName("staging_path")]
+        public string? StagingPath { get; set; }
+
+        [JsonPropertyName("rollback_path")]
+        public string? RollbackPath { get; set; }
+
+        [JsonPropertyName("rest_api_bind_address")]
+        public string? RestApiBindAddress { get; set; }
+
+        [JsonPropertyName("update_server_address")]
+        public string? UpdateServerAddress { get; set; }
+
+        [JsonPropertyName("update_server_port")]
+        public int UpdateServerPort { get; set; }
+
+        [JsonPropertyName("use_authentication")]
+        public bool UseAuthentication { get; set; }
+
+        [JsonPropertyName("mqtt_topics")]
+        public string[]? MqttTopics { get; set; }
+
+        [JsonPropertyName("connect_retry_seconds")]
+        public int ConnectRetrySeconds { get; set; }
+
+        [JsonPropertyName("update_apply_timeout_seconds")]
+        public int UpdateApplyTimeoutSeconds { get; set; }
+
+        [JsonPropertyName("auth_max_retries")]
+        public int AuthMaxRetries { get; set; }
+
+        [JsonPropertyName("auto_download_updates")]
+        public bool AutoDownloadUpdates { get; set; }
+
+        [JsonPropertyName("app_is_systemd_service")]
+        public bool AppIsSystemdService { get; set; }
+
+        [JsonPropertyName("app_service_name")]
+        public string? AppServiceName { get; set; }
+    }
+
+    internal record DaemonInfoResponse
+    {
+        [JsonPropertyName("service")]
+        public string? Service { get; set; }
+
+        [JsonPropertyName("up_time")]
+        public long UpTime { get; set; }
+
+        [JsonPropertyName("version")]
+        public string? Version { get; set; }
+
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+
+        [JsonPropertyName("device_info")]
+        public object? DeviceInfo { get; set; }
+
+        [JsonPropertyName("public_key")]
+        public string? PublicKey { get; set; }
+
+        [JsonPropertyName("config")]
+        public DaemonConfig? Config { get; set; }
     }
 }
