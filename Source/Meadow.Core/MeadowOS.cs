@@ -809,7 +809,15 @@ public static partial class MeadowOS
             }
             App = app;
 
-            StartCloudServices(CurrentDevice.PlatformOS, MeadowCloudSettings);
+            try
+            {
+                StartCloudServices(CurrentDevice.PlatformOS, MeadowCloudSettings);
+            }
+            catch (Exception e)
+            {
+                Resolver.Log.Error($"Failed to start Cloud services:{e.Message}", MessageGroup.Core);
+                return true; // we'll let the device start, just let the user know that cloud services are broken
+            }
 
             return true;
         }
