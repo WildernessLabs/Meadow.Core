@@ -19,7 +19,7 @@ public static class MeadowHostApplicationExtensions
         {
             initialized = true;
         };
-        while (Resolver.Device == null && !initialized)
+        while (!meadowTask.IsCompleted && !initialized)
         {
             Thread.Sleep(100);
         }
@@ -49,7 +49,7 @@ public static class MeadowHostApplicationExtensions
         {
             initialized = true;
         };
-        while (Resolver.Device == null && !initialized)
+        while (!meadowTask.IsCompleted && !initialized)
         {
             Thread.Sleep(100);
         }
