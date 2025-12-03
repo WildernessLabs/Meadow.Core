@@ -1,4 +1,6 @@
-﻿namespace Meadow.Pinouts;
+﻿using Meadow.Pinouts;
+
+namespace Meadow;
 
 /// <summary>
 /// Represents a generic desktop Linux operating system.

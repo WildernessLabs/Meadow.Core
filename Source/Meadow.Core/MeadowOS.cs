@@ -408,9 +408,13 @@ public static partial class MeadowOS
         Type? deviceType = null;
         Type? hardwareProviderType = null;
 
-        if (type.IsGenericType)
+        var t = type.IsGenericType ? type
+            : type.BaseType.IsGenericType ? type.BaseType
+            : null;
+
+        if (t != null)
         {
-            var genericArgs = type.GetGenericArguments();
+            var genericArgs = t.GetGenericArguments();
 
             foreach (var arg in genericArgs)
             {
@@ -425,6 +429,7 @@ public static partial class MeadowOS
                 }
             }
         }
+
 
         if (deviceType != null)
         {

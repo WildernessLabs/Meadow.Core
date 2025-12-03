@@ -10,8 +10,10 @@ namespace Meadow.Avalonia
     public class AvaloniaMeadowApplication<T> : Application, IApp
         where T : class, IMeadowDevice
     {
+        private readonly CancellationTokenSource _cts = new();
+
         /// <inheritdoc/>
-        public CancellationToken CancellationToken => throw new NotImplementedException();
+        public CancellationToken CancellationToken => _cts.Token;
 
         /// <summary>
         /// Gets the Meadow device instance.
@@ -26,6 +28,7 @@ namespace Meadow.Avalonia
         /// </summary>
         protected AvaloniaMeadowApplication()
         {
+            Resolver.Services.Add<IApp>(this);
         }
 
         /// <inheritdoc/>
@@ -92,16 +95,17 @@ namespace Meadow.Avalonia
         /// <summary>
         /// Loads MeadowOS in a background thread.
         /// </summary>
-        protected void LoadMeadowOS()
+        protected async Task<IMeadowDevice> LoadMeadowOS()
         {
-            new Thread((o) =>
+            // MeadowOS.Start() must be on a background thread to avoid blocking the UI thread
+            _ = Task.Run(() => MeadowOS.Start(this, null));
+
+            // however we must wait for the Device to be ready before returning
+            while (Device == null)
             {
-                _ = MeadowOS.Start(this, null);
-            })
-            {
-                IsBackground = true
+                await Task.Delay(100);
             }
-            .Start();
+            return Device;
         }
     }
 }

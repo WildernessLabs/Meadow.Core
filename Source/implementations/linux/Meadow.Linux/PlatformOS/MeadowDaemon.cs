@@ -25,16 +25,16 @@ internal static class MeadowDaemon
 
             Resolver.Log.Debug($"Fetching daemon configuration from {DaemonServiceAddress}:{DaemonServicePort}/api/{Endpoints.DeviceInfo}", "meadow-daemon");
 
-            var response = await httpClient.GetAsync(Endpoints.DeviceInfo);
+            var response = await httpClient.GetAsync(Endpoints.DeviceInfo).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = await response.Content.ReadAsStringAsync();
+                var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 Resolver.Log.Error($"Failed to fetch daemon configuration ({response.StatusCode}): {errorContent}", "meadow-daemon");
                 return null;
             }
 
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             var info = JsonSerializer.Deserialize<DaemonInfoResponse>(content);
 
             if (info?.Config == null)
@@ -76,15 +76,15 @@ internal static class MeadowDaemon
 
 
             Resolver.Log.Info("Notifying Meadow Daemon to apply update and restart application...", "meadow-daemon");
-            Resolver.Log.Debug($"ApplyUpdate Payload: {await payload.ReadAsStringAsync()}", "meadow-daemon");
+            Resolver.Log.Debug($"ApplyUpdate Payload: {await payload.ReadAsStringAsync().ConfigureAwait(false)}", "meadow-daemon");
 
-            var response = await httpClient.PutAsync(Endpoints.Apply, payload);
+            var response = await httpClient.PutAsync(Endpoints.Apply, payload).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
                 // TODO: raise/call error handler?
 
-                var resp = await response.Content.ReadAsStringAsync();
+                var resp = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 Resolver.Log.Error($"ApplyUpdate Error ({response.StatusCode}: {resp})", "meadow-daemon");
                 // TODO: throw an appropriate exception
             }

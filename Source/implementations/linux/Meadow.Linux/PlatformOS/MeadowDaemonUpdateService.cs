@@ -1,4 +1,5 @@
 ﻿using Meadow.Cloud;
+using System.Threading.Tasks;
 
 namespace Meadow;
 
@@ -28,7 +29,25 @@ public class MeadowDaemonUpdateService : MeadowCloudUpdateService
         if (_daemonConfig == null)
         {
             Resolver.Log.Info("Loading Meadow Daemon configuration...");
-            _daemonConfig = MeadowDaemon.GetConfiguration().GetAwaiter().GetResult();
+            var timeoutTask = Task.Delay(1000);
+            var configTask = MeadowDaemon.GetConfiguration();
+            var i = Task.WaitAny(timeoutTask, configTask);
+            if (i == 1)
+            {
+                _daemonConfig = configTask.Result;
+                if (_daemonConfig != null)
+                {
+                    Resolver.Log.Info("Meadow Daemon configuration loaded.");
+                }
+                else
+                {
+                    Resolver.Log.Warn("Meadow Daemon configuration is null.");
+                }
+            }
+            else
+            {
+                Resolver.Log.Warn("Timed out while trying to get Meadow Daemon configuration.");
+            }
         }
         return _daemonConfig;
     }
