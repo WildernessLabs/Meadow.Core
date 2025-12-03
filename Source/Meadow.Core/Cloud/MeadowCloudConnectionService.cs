@@ -478,12 +478,12 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
         if (nic == null)
         {
-            Resolver.Log.Error($"Meadow.Cloud service detected no network interface!");
+            Resolver.Log.Error($"Meadow.Cloud service detected no network interface!", "meadow-cloud");
             return;
         }
         else
         {
-            Resolver.Log.Debug($"Meadow.Cloud service will use the {nic.GetType().Name} network interface");
+            Resolver.Log.Debug($"Meadow.Cloud service will use the {nic.GetType().Name} network interface", "meadow-cloud");
         }
 
         nic.NetworkDisconnected += (s, e) =>

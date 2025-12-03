@@ -1,7 +1,6 @@
 ﻿using Meadow.Gateway.WiFi;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 
@@ -31,9 +30,9 @@ internal static class NmCli
         // NAME   SSID         SSID-HEX                 BSSID       MODE CHAN FREQ   RATE   SIGNAL BARS SECURITY WPA-FLAGS  RSN-FLAGS      DEVICE ACTIVE IN-USE  DBUS-PATH
         //  0      1              2                       3           4    5  6        7         8   9   10    11            12                13   14  15  16                            
         // AP[5]:interwebs:696E74657277656273:78\:D6\:D6\:F0\:B6\:C5:Infra:6:2437 MHz:270 Mbit/s:72:▂▄▆_:WPA2:(none):pair_ccmp group_ccmp psk:wlan0:yes:*:/org/freedesktop/NetworkManager/AccessPoint/4
-        var output = ExecuteBashCommandLine($"nmcli -g all -c no d wifi");
+        var output = Linux.ExecuteBashCommandLine($"nmcli -g all -c no d wifi");
 
-        var rows = output.Split('\n', System.StringSplitOptions.RemoveEmptyEntries);
+        var rows = output.StdOut.Split('\n', System.StringSplitOptions.RemoveEmptyEntries);
 
         //.Select(line => ParseDeviceRow(line));
 
@@ -93,9 +92,9 @@ internal static class NmCli
     public static string[][] GetDeviceDetail(string deviceName)
     {
         //  nmcli -f all d show wlan0
-        var output = ExecuteBashCommandLine($"nmcli -c no -f all device show {deviceName}");
+        var output = Linux.ExecuteBashCommandLine($"nmcli -c no -f all device show {deviceName}");
 
-        return output
+        return output.StdOut
             .Split('\n', System.StringSplitOptions.RemoveEmptyEntries)
             .Select(line => ParseDeviceRow(line) ?? Array.Empty<string>())
             .ToArray();
@@ -103,9 +102,9 @@ internal static class NmCli
 
     public static IEnumerable<NmCliDevice> GetDevices()
     {
-        var output = ExecuteBashCommandLine("nmcli -c no device show");
+        var output = Linux.ExecuteBashCommandLine("nmcli -c no device show");
 
-        var fields = output
+        var fields = output.StdOut
             .Split('\n', System.StringSplitOptions.RemoveEmptyEntries)
             .Select(line => ParseDeviceRow(line));
 
@@ -127,30 +126,10 @@ internal static class NmCli
                 device = new NmCliDevice();
             }
 
-            if (device != null)
-            {
-                device.Fields.Add(field[0], field[1]);
-            }
+            device?.Fields.Add(field[0], field[1]);
         }
 
         return list;
     }
 
-    private static string ExecuteBashCommandLine(string command)
-    {
-        var psi = new ProcessStartInfo()
-        {
-            FileName = "/bin/bash",
-            Arguments = $"-c \"{command}\"",
-            RedirectStandardOutput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = Process.Start(psi);
-
-        process?.WaitForExit();
-
-        return process?.StandardOutput.ReadToEnd() ?? string.Empty;
-    }
 }
