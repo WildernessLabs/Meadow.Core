@@ -535,7 +535,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             stopwatch.Restart();
                             if (await Authenticate())
                             {
-                                Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms");
+                                Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms", "cloud");
                                 stopwatch.Stop();
                                 _lastAuthenticationTime = DateTime.UtcNow;
                                 ConnectionState = CloudConnectionState.Connecting;
