@@ -1,5 +1,7 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using Meadow.Units;
+using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -313,8 +315,25 @@ public class LinuxPlatformOS : IPlatformOS
         return drive.Size - drive.SpaceAvailable;
     }
 
+    /// <inheritdoc/>
+    public IMeadowCloudService GetCloudConnectionService(IMeadowCloudSettings settings)
+    {
+        return new MeadowCloudConnectionService(settings);
+    }
 
+    /// <inheritdoc/>
+    public IUpdateService GetUpdateService(IMeadowCloudService meadowCloudService)
+    {
+        return new MeadowDaemonUpdateService(
+            FileSystem.FileSystemRoot,
+            meadowCloudService);
+    }
 
+    /// <inheritdoc/>
+    public ICommandService GetCloudCommandService(IMeadowCloudService meadowCloudService)
+    {
+        return new MeadowCloudCommandService(meadowCloudService);
+    }
 
     /// <inheritdoc/>
     public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();

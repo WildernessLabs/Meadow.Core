@@ -1,5 +1,7 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using Meadow.Units;
+using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -201,4 +203,19 @@ public class SimulatedPlatformOS : IPlatformOS
 
     /// <inheritdoc/>
     public AllocationInfo GetMemoryAllocationInfo() => throw new NotImplementedException();
+
+    public IMeadowCloudService GetCloudConnectionService(IMeadowCloudSettings settings)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ICommandService GetCloudCommandService(IMeadowCloudService meadowCloudService)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IUpdateService GetUpdateService(IMeadowCloudService meadowCloudService)
+    {
+        throw new NotImplementedException();
+    }
 }

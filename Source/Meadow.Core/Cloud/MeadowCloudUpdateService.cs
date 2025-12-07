@@ -1,4 +1,5 @@
-﻿using Meadow.Update;
+﻿using Meadow.Cloud;
+using Meadow.Update;
 using MQTTnet;
 using System;
 using System.Diagnostics;
@@ -11,8 +12,18 @@ namespace Meadow;
 
 using static Resolver;
 
-internal class MeadowCloudUpdateService : IUpdateService
+/// <summary>
+/// Provides functionality to manage and apply updates from the Meadow Cloud service.
+/// </summary>
+/// <remarks>This service handles the retrieval, validation, and application of updates for devices connected to
+/// the Meadow Cloud. It listens for update notifications, downloads update packages, validates their integrity, and
+/// applies them to the device. The service also manages its internal state and raises events to notify subscribers
+/// about update progress and results.</remarks>
+public class MeadowCloudUpdateService : IUpdateService
 {
+    private const string LogMessageGroup = "update service";
+
+    /// <inheritdoc/>
     public event EventHandler<UpdateState>? StateChanged;
     /// <inheritdoc/>
     public event UpdateEventHandler? UpdateAvailable;
@@ -31,9 +42,6 @@ internal class MeadowCloudUpdateService : IUpdateService
     private readonly byte[] read_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
     private readonly byte[] write_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
 
-    private const string DefaultUpdateStoreDirectoryName = "update-store";
-    private const string DefaultUpdateDirectoryName = "update";
-
     private readonly MeadowCloudConnectionService _connectionService;
     private UpdateState _state = UpdateState.Disconnected;
 
@@ -43,12 +51,35 @@ internal class MeadowCloudUpdateService : IUpdateService
 
     private CancellationTokenSource _service_cancellation = new();
     private CancellationTokenSource _update_cancellation = new();
-    public Task UpdateServiceTask = Task.CompletedTask;
+    internal Task UpdateServiceTask = Task.CompletedTask;
 
-    public MeadowCloudUpdateService(string fsRoot, MeadowCloudConnectionService connectionService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MeadowCloudUpdateService"/> class,  setting up directories for
+    /// update storage and subscribing to OTA-related messages.
+    /// </summary>
+    /// <remarks>This constructor configures the update service by initializing the update store and
+    /// directories  required for managing updates. It also subscribes to relevant MQTT topics for receiving OTA
+    /// messages.</remarks>
+    /// <param name="fsRoot">The root directory path where update-related files will be stored.</param>
+    /// <param name="meadowCloudService">An instance of <see cref="IMeadowCloudService"/> used to manage cloud connectivity and message subscriptions.</param>
+    public MeadowCloudUpdateService(string fsRoot, IMeadowCloudService meadowCloudService)
     {
-        UpdateStoreDirectory = Path.Combine(fsRoot, DefaultUpdateStoreDirectoryName);
-        UpdateDirectory = Path.Combine(fsRoot, DefaultUpdateDirectoryName);
+        var connectionService = meadowCloudService as MeadowCloudConnectionService;
+
+        if (connectionService == null)
+        {
+            throw new ArgumentException("meadowCloudService must be of type MeadowCloudConnectionService", nameof(meadowCloudService));
+        }
+
+        UpdateStoreDirectory = Path.Combine(fsRoot, UpdateStoreDirectoryName);
+        UpdateDirectory = Path.Combine(fsRoot, UpdateBinaryDirectoryName);
+
+        Resolver.Log.Info($"Update Store Directory: {UpdateStoreDirectory}", LogMessageGroup);
+        Resolver.Log.Info($"Update Directory: {UpdateDirectory}", LogMessageGroup);
+
+        // TODO: if the store and binaries folder overlap, bad things will ensue.
+        // need to guard against that.
+
         Store = new UpdateStore(UpdateStoreDirectory);
 
         _connectionService = connectionService;
@@ -56,21 +87,31 @@ internal class MeadowCloudUpdateService : IUpdateService
         _connectionService.AddSubscription("{OID}/ota/{ID}");
     }
 
+    /// <summary>
+    /// Gets the name of the directory used to store update-related files.
+    /// </summary>
+    /// <remarks>This property can be overridden in a derived class to customize the directory name.</remarks>
+    protected virtual string UpdateStoreDirectoryName => "update-store";
+    /// <summary>
+    /// Gets the name of the directory where update binaries are stored after extraction from an MPAK download
+    /// </summary>
+    protected virtual string UpdateBinaryDirectoryName => "update";
+
     private async Task UpdateService()
     {
         while (!Resolver.App.CancellationToken.IsCancellationRequested)
         {
             await Task.Delay(UpdateServicePulseMilliseconds);
-            Log.Trace($"store state: {Store.State} cloud connection state: {_connectionService.ConnectionState}", "update service");
+            Log.Trace($"store state: {Store.State} cloud connection state: {_connectionService.ConnectionState}", LogMessageGroup);
 
             _service_cancellation.Token.ThrowIfCancellationRequested();
             if (_connectionService.ConnectionState != CloudConnectionState.Connected && Store.State != UpdateStore.States.Mpak)
+            {
                 continue;
-
+            }
 
             using var service_or_update_cancellation = CancellationTokenSource.CreateLinkedTokenSource(_service_cancellation.Token,
                                                                                                      _update_cancellation.Token);
-
             try
             {
                 switch (Store.State)
@@ -80,7 +121,7 @@ internal class MeadowCloudUpdateService : IUpdateService
                         //nothing - wait for OnMqttMessageReceived
                         break;
                     case UpdateStore.States.Manifest:
-                        Log.Debug("update available", "update service");
+                        Log.Debug("update available", LogMessageGroup);
                         UpdateAvailable?.Invoke(this, Store.Manifest!, _update_cancellation);
                         _update_cancellation.Token.ThrowIfCancellationRequested();
                         await DownloadProc(Store.Manifest!, service_or_update_cancellation);
@@ -88,14 +129,13 @@ internal class MeadowCloudUpdateService : IUpdateService
 
                         break;
                     case UpdateStore.States.Mpak:
-                        Log.Debug("update retrieved", "update service");
+                        Log.Debug("update retrieved", LogMessageGroup);
                         UpdateRetrieved?.Invoke(this, Store.Manifest!, _update_cancellation);
                         _update_cancellation.Token.ThrowIfCancellationRequested();
-                        ApplyUpdate(Store.Manifest!);
+                        var expandedPath = ApplyUpdate(Store.Manifest!);
                         Store.State = UpdateStore.States.Empty;
-                        Log.Debug($"Requesting a device reset to apply the Update");
-                        Device.PlatformOS.Reset();
                         UpdateSuccess?.Invoke(this, Store.Manifest!, _update_cancellation); // not called - device has reset by now
+                        AfterUpdatePackageExpanded(expandedPath);
                         break;
                 }
             }
@@ -103,7 +143,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             {
                 if (e.CancellationToken == _update_cancellation.Token)
                 {
-                    Log.Info("Update cancellation detected, clearing update store", "update service");
+                    Log.Info("Update cancellation detected, clearing update store", LogMessageGroup);
                     Store.State = UpdateStore.States.Empty;
                     _update_cancellation.Dispose();
                     _update_cancellation = new();
@@ -111,30 +151,76 @@ internal class MeadowCloudUpdateService : IUpdateService
             }
             catch (Exception e)
             {
-                Log.Error(e, "update service");
+                Log.Error(e, LogMessageGroup);
                 UpdateFailure?.Invoke(this, Store.Manifest!, _update_cancellation);
             }
         }
     }
 
+    /// <summary>
+    /// Performs actions after the update package has been expanded.
+    /// </summary>
+    /// <param name="expandedPackagePath">The file system path where the update package has been expanded.</param>
+    /// <remarks>The default implementation requests a full device reset to apply the update.  Platforms with
+    /// specific requirements, such as embedded Linux, may override this  method to implement alternative behaviors,
+    /// such as restarting only the application process.</remarks>
+    protected virtual void AfterUpdatePackageExpanded(string expandedPackagePath)
+    {
+        // default behavior (i.e. F7) is to fully reset the device.
+        // some platforms (e.g. embedded linux?) might decide to only restart the app process?
+        Log.Debug($"Requesting a device reset to apply the Update");
+        Device.PlatformOS.Reset();
+    }
+
+    /// <summary>
+    /// Generates a unique temporary folder path for storing update-related files.
+    /// </summary>
+    /// <remarks>The folder path is created by combining the system's temporary directory with a unique
+    /// identifier. This method is virtual and can be overridden to customize the location or naming convention of the
+    /// temporary folder.</remarks>
+    /// <returns>A string representing the full path to the temporary folder.</returns>
+    protected virtual string GetUpdateTempFolder()
+    {
+        // TODO: Replace with Path.GetTempPath() when https://github.com/WildernessLabs/Meadow/pull/734 lands
+        return MeadowOS.FileSystem.TempDirectory;
+    }
+
     private void OnMqttMessageReceived(object sender, MqttApplicationMessage e)
     {
-        Log.Debug("MQTT message received", "update service");
+        Log.Debug("MQTT message received", LogMessageGroup);
         if (!e.Topic.EndsWith($"/ota/{Device.Information.UniqueID}", StringComparison.OrdinalIgnoreCase))
+        {
             return;
+        }
 
-        Log.Debug("MQTT message is OTA message for this device", "update service");
+        Log.Debug("MQTT message is OTA message for this device", LogMessageGroup);
 
         try
         {
-            var temp_path = Path.Combine(
-                MeadowOS.FileSystem.TempDirectory,
-                $"manifest_{Guid.NewGuid():N}"); // TODO: Replace with Path.GetTempPath() when https://github.com/WildernessLabs/Meadow/pull/734 lands
-            Log.Debug($"Using temp path {temp_path}");
-            File.WriteAllBytes(temp_path, e.PayloadSegment.ToArray());
+            var temp_path = GetUpdateTempFolder();
+            Log.Debug($"Using temp path {temp_path}", LogMessageGroup);
+
+            if (!Directory.Exists(temp_path))
+            {
+                Log.Debug($"Creating temp directory {temp_path}", LogMessageGroup);
+                Directory.CreateDirectory(temp_path);
+            }
+
+            var packageFileName = Path.Combine(temp_path, $"manifest_{Guid.NewGuid():N}");
+
+            Log.Debug($"Writing package to {packageFileName}", LogMessageGroup);
+
+            File.WriteAllBytes(
+                packageFileName,
+                e.PayloadSegment.Array);
+
+            var fileInfo = new FileInfo(packageFileName);
+            Log.Debug($"file size: {fileInfo.Length}", LogMessageGroup);
 
             if (Store.State != UpdateStore.States.Empty)
             {
+                Log.Info("New update received, cancelling any in-progress update", LogMessageGroup);
+
                 // cancel old update
                 var current_update_cancellation = _update_cancellation;
                 current_update_cancellation.Cancel();
@@ -145,14 +231,15 @@ internal class MeadowCloudUpdateService : IUpdateService
                 Store.State = UpdateStore.States.Empty; // should not be needed
             }
 
-            Store.AddManifest(temp_path);
+            Store.AddManifest(packageFileName);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "update service");
+            Log.Error(ex, LogMessageGroup);
         }
     }
 
+    /// <inheritdoc/>
     public UpdateState State
     {
         get => _state;
@@ -178,12 +265,12 @@ internal class MeadowCloudUpdateService : IUpdateService
             }
             catch (Exception e)
             {
-                Log.Error(e, "updater service");
+                Log.Error(e, LogMessageGroup);
                 Stop();
             }
         }, _service_cancellation.Token);
         State = UpdateState.Connected;
-        Log.Info("Update Service started", "update service");
+        Log.Info("Update Service started", LogMessageGroup);
     }
 
     /// <inheritdoc/>
@@ -193,12 +280,12 @@ internal class MeadowCloudUpdateService : IUpdateService
         _service_cancellation.Dispose();
         _service_cancellation = new();
         State = UpdateState.Disconnected;
-        Log.Info("Update Service stopped", "update service");
+        Log.Info("Update Service stopped", LogMessageGroup);
     }
 
     private async Task SafeDownloadFile(string url, UpdateInfo message, CancellationTokenSource cancel)
     {
-        Log.Debug($"Attempting to retrieve {url}");
+        Log.Debug($"Attempting to retrieve {url}", LogMessageGroup);
         var sw = Stopwatch.StartNew();
 
         long totalBytesDownloaded = 0;
@@ -219,7 +306,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             // Configure the HTTP range header to indicate resumption of partial download, starting from 
             // the 'EOF' byte position of the partial download and extending to the end of the content.
             using var fileStream = Store.StartMpak();
-            Log.Debug($"Resuming from offset {fileStream.Length}", "update service");
+            Log.Debug($"Resuming from offset {fileStream.Length}", LogMessageGroup);
             request.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(fileStream.Length, null);
 
             using var sendCts = new CancellationTokenSource(millisecondsDelay: 15000);
@@ -234,7 +321,7 @@ internal class MeadowCloudUpdateService : IUpdateService
             // the file on disk is larger than the file on the server (indicating an incorrect file)
             if (response.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
             {
-                Log.Info("Server responded with 416 Range Not Satisfiable. Assuming file is fully downloaded.", "update service");
+                Log.Info("Server responded with 416 Range Not Satisfiable. Assuming file is fully downloaded.", LogMessageGroup);
 
                 // Validate download completion
                 PerformMpakValidation(contentDigest, totalContentLength, fileStream.Length);
@@ -248,24 +335,24 @@ internal class MeadowCloudUpdateService : IUpdateService
             {
                 // Content-Range header provides the total file size (preferred for resumable downloads)
                 message.FileSize = totalContentLength.Value;
-                Log.Debug($"Total file size from Content-Range: {message.FileSize:N0} bytes.", "update service");
+                Log.Debug($"Total file size from Content-Range: {message.FileSize:N0} bytes.", LogMessageGroup);
             }
             else if (rangeContentLength.HasValue && fileStream.Length == 0)
             {
                 // First download attempt - Content-Length is the total size
                 message.FileSize = rangeContentLength.Value;
-                Log.Debug($"Total file size from Content-Length: {message.FileSize:N0} bytes.", "update service");
+                Log.Debug($"Total file size from Content-Length: {message.FileSize:N0} bytes.", LogMessageGroup);
             }
             else if (!rangeContentLength.HasValue)
             {
-                Log.Warn("Server did not provide Content-Length header. Progress tracking may be inaccurate.", "update service");
+                Log.Warn("Server did not provide Content-Length header. Progress tracking may be inaccurate.", LogMessageGroup);
                 // FileSize remains at its previous value or 0 if not set
             }
 
             // Validate that we got some length information for resumed downloads
             if (fileStream.Length > 0 && !totalContentLength.HasValue && !rangeContentLength.HasValue)
             {
-                Log.Warn("Resuming download but server provided no length headers. Download may be incomplete.", "update service");
+                Log.Warn("Resuming download but server provided no length headers. Download may be incomplete.", LogMessageGroup);
             }
 
             using var stream = await response.Content.ReadAsStreamAsync();
@@ -276,10 +363,10 @@ internal class MeadowCloudUpdateService : IUpdateService
             var lastProgressTime = DateTime.UtcNow;
             using var progressTimer = new Timer(_ =>
             {
-                Log.Trace($"{DateTime.UtcNow - lastProgressTime} since last chunk downloaded", "update service");
+                Log.Trace($"{DateTime.UtcNow - lastProgressTime} since last chunk downloaded", LogMessageGroup);
                 if ((DateTime.UtcNow - lastProgressTime) > TimeSpan.FromMinutes(1))
                 {
-                    Log.Warn("Stall detected, cancelling download", "update service");
+                    Log.Warn("Stall detected, cancelling download", LogMessageGroup);
                     downloadCts.Cancel();
                 }
             }, null, 30000, 30000);
@@ -303,11 +390,11 @@ internal class MeadowCloudUpdateService : IUpdateService
                 _update_cancellation.Token.ThrowIfCancellationRequested();
                 cancel.Token.ThrowIfCancellationRequested();
 
-                Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded", "update service");
+                Log.Trace($"Download progress: {totalBytesDownloaded:N0} bytes downloaded", LogMessageGroup);
             }
             await writeTask; // wait for last write to disk task to complete
             sw.Stop();
-            Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", "update service");
+            Log.Debug($"Download complete: {totalBytesDownloaded} bytes in {sw.Elapsed.TotalSeconds} secs.", LogMessageGroup);
 
             // Validate download completion
             PerformMpakValidation(contentDigest, rangeContentLength, totalBytesDownloaded);
@@ -315,21 +402,21 @@ internal class MeadowCloudUpdateService : IUpdateService
         catch (OperationCanceledException)
         {
             sw.Stop();
-            Log.Error($"Download timed out or cancelled after {sw.Elapsed.TotalSeconds:0} seconds", "update service");
+            Log.Error($"Download timed out or cancelled after {sw.Elapsed.TotalSeconds:0} seconds", LogMessageGroup);
             await Task.Delay(RetryDelayMilliseconds);
             throw;
         }
         catch (MpakValidationFailedException ex)
         {
             sw.Stop();
-            Log.Error($"Download failed mpak validation: {ex.Message}", "update service");
+            Log.Error($"Download failed mpak validation: {ex.Message}", LogMessageGroup);
             await Task.Delay(RetryDelayMilliseconds);
             throw;
         }
         catch (Exception ex)
         {
             sw.Stop();
-            Log.Error($"[ {ex.GetType().Name} ] Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message} {ex.StackTrace}", "update service");
+            Log.Error($"[ {ex.GetType().Name} ] Failed to download Update after {sw.Elapsed.TotalSeconds:0} seconds: {ex.Message} {ex.StackTrace}", LogMessageGroup);
             await Task.Delay(RetryDelayMilliseconds);
             throw;
         }
@@ -337,14 +424,14 @@ internal class MeadowCloudUpdateService : IUpdateService
 
     private async Task DownloadProc(UpdateMessage message, CancellationTokenSource cancel)
     {
-        Log.Debug($"Device OS Version: {Resolver.Device.PlatformOS.OSVersion}, Update OS Version: {message.OsVersion}");
+        Log.Debug($"Device OS Version: {Resolver.Device.PlatformOS.OSVersion}, Update OS Version: {message.OsVersion}", LogMessageGroup);
 
         var destination = message.MpakDownloadUrl;
 
         if (!string.IsNullOrEmpty(message.OsVersion)
             && Device.PlatformOS.OSVersion != message.OsVersion)
         {
-            Log.Debug($"This OTA requires an OS update.");
+            Log.Debug($"This OTA requires an OS update.", LogMessageGroup);
             destination = message.MpakWithOsDownloadUrl;
         }
 
@@ -366,10 +453,10 @@ internal class MeadowCloudUpdateService : IUpdateService
     }
 
     /// <inheritdoc/>
-    private void ApplyUpdate(UpdateInfo updateInfo)
+    protected virtual string ApplyUpdate(UpdateInfo updateInfo)
     {
         var sourcePath = Store.MpakPath;
-        Log.Debug($"Applying update from '{sourcePath}'");
+        Log.Debug($"Applying update from '{sourcePath}' to {UpdateDirectory} ", LogMessageGroup);
 
         try
         {
@@ -377,36 +464,39 @@ internal class MeadowCloudUpdateService : IUpdateService
             var sw = Stopwatch.StartNew();
             MeadowOS.SafelyExtractZIPFile(sourcePath, UpdateDirectory);
             sw.Stop();
-            Log.Debug($"Extracting took {sw.Elapsed.TotalSeconds} seconds.");
+            Log.Debug($"Extracting took {sw.Elapsed.TotalSeconds} seconds.", LogMessageGroup);
 
-            Log.Debug($"Contents of Update");
-            Log.Debug($"------------------");
+            Log.Debug($"Contents of Update", LogMessageGroup);
+            Log.Debug($"------------------", LogMessageGroup);
             DisplayTree(new DirectoryInfo(UpdateDirectory));
+
+            return UpdateDirectory;
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to extract update package: {ex.Message}");
+            Log.Error($"Failed to extract update package: {ex.Message}", LogMessageGroup);
             throw ex;
         }
         finally
         {
             try
             {
+                Log.Debug($"Deleting source file '{sourcePath}'", LogMessageGroup);
                 File.Delete(sourcePath!);
             }
             catch (Exception ex)
             {
-                Log.Error($"Failed to delete source file: {ex.Message}");
+                Log.Error($"Failed to delete source file: {ex.Message}", LogMessageGroup);
             }
         }
     }
 
     private void DisplayTree(DirectoryInfo di)
     {
-        Log.Debug($"+ {di.Name}");
+        Log.Debug($"+ {di.Name}", LogMessageGroup);
         foreach (var f in di.GetFiles())
         {
-            Log.Debug($"  - {f.Name}");
+            Log.Debug($"  - {f.Name}", LogMessageGroup);
         }
         foreach (var d in di.GetDirectories())
         {
@@ -431,9 +521,9 @@ internal class MeadowCloudUpdateService : IUpdateService
         }
         else if (contentDigest == null)
         {
-            Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", "update service");
+            Log.Debug($"Skipping CRC hash check. Hash was not provided by server.", LogMessageGroup);
         }
 
-        Log.Debug($"Download validation successful.", "update service");
+        Log.Debug($"Download validation successful.", LogMessageGroup);
     }
 }

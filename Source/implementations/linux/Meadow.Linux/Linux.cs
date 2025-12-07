@@ -19,7 +19,6 @@ public abstract class Linux : IMeadowDevice
 {
     private SysFsGpioDriver _sysfs = null!;
     private Gpiod _gpiod = null!;
-    private NmCliNetworkAdapterCollection? _networkAdapters;
 
 #pragma warning disable CS0067
     /// <inheritdoc/>
@@ -41,13 +40,15 @@ public abstract class Linux : IMeadowDevice
     /// <inheritdoc/>
     public virtual IDeviceInformation Information { get; }
     /// <inheritdoc/>
-    public virtual INetworkAdapterCollection NetworkAdapters => _networkAdapters ??= new NmCliNetworkAdapterCollection();
+    public virtual INetworkAdapterCollection NetworkAdapters { get; }
 
     /// <summary>
     /// Creates the Meadow on Linux infrastructure instance
     /// </summary>
     public Linux()
     {
+        NetworkAdapters = LinuxNetworkAdapterManager.GetNetworkAdapters();
+
         PlatformOS = new LinuxPlatformOS();
 
         Information = new LinuxDeviceInfo();
@@ -450,5 +451,28 @@ public abstract class Linux : IMeadowDevice
     public IObservableAnalogInputPort CreateAnalogInputPort(IPin pin, int sampleCount, TimeSpan sampleInterval, Voltage voltageReference)
     {
         throw new NotImplementedException();
+    }
+
+
+    internal static (string StdOut, string StdErr) ExecuteBashCommandLine(string command)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = "/bin/bash",
+            Arguments = $"-c \"{command}\"",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+
+        process?.WaitForExit();
+
+        var output = process?.StandardOutput.ReadToEnd() ?? string.Empty;
+        var error = process?.StandardError.ReadToEnd() ?? string.Empty;
+
+        return (output, error);
     }
 }

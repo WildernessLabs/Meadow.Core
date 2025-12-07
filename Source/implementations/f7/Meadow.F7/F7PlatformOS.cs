@@ -1,6 +1,8 @@
-﻿using Meadow.Devices;
+﻿using Meadow.Cloud;
+using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Units;
+using Meadow.Update;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -37,6 +39,26 @@ public partial class F7PlatformOS : IPlatformOS
 
         NtpClient = new NtpClient();
         Resolver.Services.Add(NtpClient);
+    }
+
+    /// <inheritdoc/>
+    public IMeadowCloudService GetCloudConnectionService(IMeadowCloudSettings settings)
+    {
+        return new MeadowCloudConnectionService(settings);
+    }
+
+    /// <inheritdoc/>
+    public IUpdateService GetUpdateService(IMeadowCloudService meadowCloudService)
+    {
+        return new MeadowCloudUpdateService(
+            FileSystem.FileSystemRoot,
+            meadowCloudService);
+    }
+
+    /// <inheritdoc/>
+    public ICommandService GetCloudCommandService(IMeadowCloudService meadowCloudService)
+    {
+        return new MeadowCloudCommandService(meadowCloudService);
     }
 
     /// <summary>

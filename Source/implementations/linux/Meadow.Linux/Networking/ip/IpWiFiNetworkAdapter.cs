@@ -1,8 +1,7 @@
-﻿using Meadow.Gateway.WiFi;
+using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,51 +9,28 @@ using System.Threading.Tasks;
 namespace Meadow.Networking;
 
 /// <summary>
-/// Encapsulates WiFi functionality specific to Linux platforms
+/// Represents a WiFi network adapter using ip and iw commands.
 /// </summary>
-public class LinuxWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapter, IWiFiNetworkAdapter
+public class IpWiFiNetworkAdapter : IpNetworkAdapter, IWiFiNetworkAdapter
 {
-    private readonly NetworkInterface _networkInterface;
-
-    /// <summary>
-    /// Creates a WindowsWifiNetworkAdapter
-    /// </summary>
-    /// <param name="ni">The managed NetworkInterface describing the adapter</param>
-    public LinuxWifiNetworkAdapter(NetworkInterface ni)
-        : base(NetworkInterfaceType.Wireless80211)
+    internal IpWiFiNetworkAdapter(IpDevice ipDevice)
+        : base(ipDevice)
     {
-        _networkInterface = ni;
     }
+
     /// <inheritdoc/>
     public Task<IList<WifiNetwork>> Scan(CancellationToken token)
     {
-        return Task.FromResult(Scan() as IList<WifiNetwork>);
+        var result = IpCommand.GetWirelessNetworksInfo(IpDevice.Name ?? string.Empty);
+        return Task.FromResult(result as IList<WifiNetwork>);
     }
 
     /// <inheritdoc/>
     public Task<IList<WifiNetwork>> Scan(TimeSpan timeout)
     {
-        return Task.FromResult(Scan() as IList<WifiNetwork>);
+        var result = IpCommand.GetWirelessNetworksInfo(IpDevice.Name ?? string.Empty);
+        return Task.FromResult(result as IList<WifiNetwork>);
     }
-
-    private List<WifiNetwork> Scan()
-    {
-        return Array.Empty<WifiNetwork>().ToList();
-    }
-
-    /// <inheritdoc/>
-    public Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Manual)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc/>
-    public Task Disconnect(bool turnOffWiFiInterface)
-    {
-        throw new NotImplementedException();
-    }
-    /// <inheritdoc/>
-    public override bool IsConnected => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public string? Ssid => throw new NotImplementedException();
@@ -84,7 +60,19 @@ public class LinuxWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAdapt
     }
 
     /// <inheritdoc/>
-    public Task ConnectToDefaultAccessPoint(TimeSpan timeout, CancellationToken cancellationToken)
+    public Task Connect(string ssid, string password, TimeSpan timeout, CancellationToken token, ReconnectionType reconnection = ReconnectionType.Automatic)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task ConnectToDefaultAccessPoint(TimeSpan timeout, CancellationToken token)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task Disconnect(bool turnOffWiFiInterface)
     {
         throw new NotImplementedException();
     }

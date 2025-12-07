@@ -1,5 +1,7 @@
-﻿using Meadow.Hardware;
+﻿using Meadow.Cloud;
+using Meadow.Hardware;
 using Meadow.Units;
+using Meadow.Update;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -199,6 +201,26 @@ public class WindowsPlatformOS : IPlatformOS
     /// </summary>
     /// <remarks>On Windows, this is always an empty string.</remarks>
     public string ReservedPins => string.Empty;
+
+    /// <inheritdoc/>
+    public IMeadowCloudService GetCloudConnectionService(IMeadowCloudSettings settings)
+    {
+        return new MeadowCloudConnectionService(settings);
+    }
+
+    /// <inheritdoc/>
+    public IUpdateService GetUpdateService(IMeadowCloudService meadowCloudService)
+    {
+        return new MeadowCloudUpdateService(
+            FileSystem.FileSystemRoot,
+            meadowCloudService);
+    }
+
+    /// <inheritdoc/>
+    public ICommandService GetCloudCommandService(IMeadowCloudService meadowCloudService)
+    {
+        return new MeadowCloudCommandService(meadowCloudService);
+    }
 
     // TODO: implement everything below here
 

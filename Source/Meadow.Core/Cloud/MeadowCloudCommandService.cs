@@ -7,20 +7,39 @@ using System.Linq;
 
 namespace Meadow;
 
-internal class MeadowCloudCommandService : ICommandService
+/// <summary>
+/// Provides functionality for subscribing to and processing commands received from the Meadow Cloud service.
+/// </summary>
+/// <remarks>This service allows clients to subscribe to commands of specific types or to generic Meadow commands.
+/// Commands are received via the associated <see cref="MeadowCloudConnectionService"/> and dispatched to the
+/// appropriate subscribers.</remarks>
+public class MeadowCloudCommandService : ICommandService
 {
     private const string UntypedCommandTypeName = "<<<MEADOWCOMMAND>>>";
 
     private readonly ConcurrentDictionary<string, (Type CommandType, Action<object> Action)> _commandSubscriptions = new();
     private readonly MeadowCloudConnectionService _connectionService;
 
-    public MeadowCloudCommandService(MeadowCloudConnectionService connectionService)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MeadowCloudCommandService"/> class.
+    /// </summary>
+    /// <remarks>This constructor subscribes to the MQTT topic "{OID}/commands/{ID}" and attaches an event
+    /// handler  to process incoming MQTT messages via the <see
+    /// cref="MeadowCloudConnectionService.MqttMessageReceived"/> event.</remarks>
+    /// <param name="meadowCloudService">The <see cref="IMeadowCloudService"/> instance used to manage the connection and handle MQTT messages.</param>
+    public MeadowCloudCommandService(IMeadowCloudService meadowCloudService)
     {
-        _connectionService = connectionService;
+        var connectionService = meadowCloudService as MeadowCloudConnectionService;
+
         if (connectionService != null)
         {
+            _connectionService = connectionService;
             _connectionService.MqttMessageReceived += OnMqttMessageReceived;
             _connectionService.AddSubscription("{OID}/commands/{ID}");
+        }
+        else
+        {
+            throw new ArgumentException("meadowCloudService must be of type MeadowCloudConnectionService", nameof(meadowCloudService));
         }
     }
 
@@ -33,6 +52,14 @@ internal class MeadowCloudCommandService : ICommandService
         }
     }
 
+    /// <summary>
+    /// Subscribes to receive notifications for commands of type <see cref="MeadowCommand"/>.
+    /// </summary>
+    /// <remarks>This method allows you to register a handler for processing commands of type <see
+    /// cref="MeadowCommand"/>.  Only one subscription is allowed per command type; calling this method again for the
+    /// same command type will overwrite the previous subscription.</remarks>
+    /// <param name="action">The callback to invoke when a <see cref="MeadowCommand"/> is received. The callback takes a single parameter of
+    /// type <see cref="MeadowCommand"/>.</param>
     public void Subscribe(Action<MeadowCommand> action)
     {
         _commandSubscriptions[UntypedCommandTypeName] = (CommandType: typeof(MeadowCommand), Action: x => action((MeadowCommand)x));
@@ -44,6 +71,11 @@ internal class MeadowCloudCommandService : ICommandService
         _commandSubscriptions[commandTypeName.ToUpperInvariant()] = (CommandType: typeof(T), Action: x => action((T)x));
     }
 
+    /// <summary>
+    /// Unsubscribes from the current command, removing the associated subscription.
+    /// </summary>
+    /// <remarks>This method removes the subscription for the command identified by the current instance. 
+    /// After calling this method, the command will no longer receive notifications or updates.</remarks>
     public void Unsubscribe()
     {
         _commandSubscriptions.TryRemove(UntypedCommandTypeName, out _);

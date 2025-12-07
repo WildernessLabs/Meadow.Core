@@ -37,6 +37,7 @@ internal partial class Gpiod3 : Gpiod
                     if (chipInfo.Label.Contains("pinctrl"))
                     {
                         GpioControllerName = chipInfo.Name;
+                        break;
                     }
                 }
             }

@@ -32,6 +32,7 @@ public static partial class MeadowOS
     private static bool _startedDirectly = false;  // true when this assembly is the entry point
 
     internal static IMeadowDevice CurrentDevice { get; private set; } = null!;
+    private static readonly ManualResetEvent _forceTerminate = new ManualResetEvent(false);
 
     private static IApp App { get; set; } = default!;
     private static ILifecycleSettings LifecycleSettings { get; set; } = default!;
@@ -407,9 +408,13 @@ public static partial class MeadowOS
         Type? deviceType = null;
         Type? hardwareProviderType = null;
 
-        if (type.IsGenericType)
+        var t = type.IsGenericType ? type
+            : type.BaseType.IsGenericType ? type.BaseType
+            : null;
+
+        if (t != null)
         {
-            var genericArgs = type.GetGenericArguments();
+            var genericArgs = t.GetGenericArguments();
 
             foreach (var arg in genericArgs)
             {
@@ -424,6 +429,7 @@ public static partial class MeadowOS
                 }
             }
         }
+
 
         if (deviceType != null)
         {
@@ -808,54 +814,14 @@ public static partial class MeadowOS
             }
             App = app;
 
-            var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
-            Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
-            ICommandService commandService = new MeadowCloudCommandService(cloudConnectionService);
-            Resolver.Services.Add(commandService);
-
-            commandService.Subscribe<MeadowResetCommand>(cmd =>
+            try
             {
-                // reset when receiving "MeadowReset" command
-                Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
-                CurrentDevice.PlatformOS.Reset();
-            });
-
-            var updateService = new MeadowCloudUpdateService(
-                CurrentDevice.PlatformOS.FileSystem.FileSystemRoot,
-                cloudConnectionService);
-            Resolver.Services.Add<IUpdateService>(updateService);
-
-            if (MeadowCloudSettings.EnableUpdates)
-            {
-                updateService.Start();
+                StartCloudServices(CurrentDevice.PlatformOS, MeadowCloudSettings);
             }
-
-            var healthReporter = new HealthReporter();
-            Resolver.Services.Add<IHealthReporter>(healthReporter);
-            if (MeadowCloudSettings.EnableHealthMetrics)
+            catch (Exception e)
             {
-                if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
-                {
-                    healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
-                }
-                else
-                {
-                    Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.", MessageGroup.Core);
-                }
-            }
-
-            if (MeadowCloudSettings.Enabled
-                || MeadowCloudSettings.EnableUpdates
-                || MeadowCloudSettings.EnableHealthMetrics)
-            {
-                Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}", MessageGroup.Core);
-                Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}", MessageGroup.Core);
-                Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}", MessageGroup.Core);
-                cloudConnectionService.Start();
-            }
-            else
-            {
-                Resolver.Log.Info("All cloud features are disabled.", MessageGroup.Core);
+                Resolver.Log.Error($"Failed to start Cloud services:{e.Message}", MessageGroup.Core);
+                return true; // we'll let the device start, just let the user know that cloud services are broken
             }
 
             return true;
@@ -867,7 +833,68 @@ public static partial class MeadowOS
         }
     }
 
-    private static readonly ManualResetEvent _forceTerminate = new ManualResetEvent(false);
+    private static void StartCloudServices(IPlatformOS platformOS, IMeadowCloudSettings cloudSettings)
+    {
+        var cloudConnectionService = platformOS.GetCloudConnectionService(cloudSettings);
+        var commandService = platformOS.GetCloudCommandService(cloudConnectionService);
+
+        commandService.Subscribe<MeadowResetCommand>(cmd =>
+        {
+            // reset when receiving "MeadowReset" command
+            Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
+            platformOS.Reset();
+        });
+
+
+        //var cloudConnectionService = new MeadowCloudConnectionService(MeadowCloudSettings);
+        //ICommandService commandService = new MeadowCloudCommandService(cloudConnectionService);
+
+        //commandService.Subscribe<MeadowResetCommand>(cmd =>
+        //{
+        //    // reset when receiving "MeadowReset" command
+        //    Resolver.Log.Info("Received MeadowReset command. Resetting device...", MessageGroup.Core);
+        //    CurrentDevice.PlatformOS.Reset();
+        //});
+
+        var updateService = platformOS.GetUpdateService(cloudConnectionService);
+
+        if (MeadowCloudSettings.EnableUpdates)
+        {
+            updateService.Start();
+        }
+
+        var healthReporter = new HealthReporter();
+        if (MeadowCloudSettings.EnableHealthMetrics)
+        {
+            if (MeadowCloudSettings.HealthMetricsIntervalMinutes > 0)
+            {
+                healthReporter.Start(MeadowCloudSettings.HealthMetricsIntervalMinutes).RethrowUnhandledExceptions();
+            }
+            else
+            {
+                Resolver.Log.Warn($"Health metrics interval of {MeadowCloudSettings.HealthMetricsIntervalMinutes} is invalid.", MessageGroup.Core);
+            }
+        }
+
+        if (MeadowCloudSettings.Enabled
+            || MeadowCloudSettings.EnableUpdates
+            || MeadowCloudSettings.EnableHealthMetrics)
+        {
+            Resolver.Log.Info($"Meadow cloud base features: {(MeadowCloudSettings.Enabled ? "enabled" : "disabled")}", MessageGroup.Core);
+            Resolver.Log.Info($"Meadow cloud updates: {(MeadowCloudSettings.EnableUpdates ? "enabled" : "disabled")}", MessageGroup.Core);
+            Resolver.Log.Info($"Meadow cloud health metrics: {(MeadowCloudSettings.EnableHealthMetrics ? "enabled" : "disabled")}", MessageGroup.Core);
+            cloudConnectionService.Start();
+        }
+        else
+        {
+            Resolver.Log.Info("All cloud features are disabled.", MessageGroup.Core);
+        }
+
+        Resolver.Services.Add<IMeadowCloudService>(cloudConnectionService);
+        Resolver.Services.Add<ICommandService>(commandService);
+        Resolver.Services.Add<IUpdateService>(updateService);
+        Resolver.Services.Add<IHealthReporter>(healthReporter);
+    }
 
     /// <summary>
     /// Cancel the meadow OS application Run call and allow the process to exit
@@ -996,6 +1023,49 @@ public static partial class MeadowOS
     }
 
     /// <summary>
+    /// Moves a directory from source to destination, handling cross-filesystem moves.
+    /// This method copies all contents recursively and then deletes the source.
+    /// </summary>
+    /// <param name="sourceDir">Source directory path</param>
+    /// <param name="destDir">Destination directory path</param>
+    private static void MoveDirectoryCrossFilesystem(string sourceDir, string destDir)
+    {
+        // Try the fast path first (same filesystem)
+        try
+        {
+            Directory.Move(sourceDir, destDir);
+            return;
+        }
+        catch (IOException ex) when (ex.Message.Contains("Invalid cross-device link"))
+        {
+            // Fall through to copy+delete approach
+            Resolver.Log.Debug($"Cross-filesystem move detected, using copy+delete approach", MessageGroup.Core);
+        }
+
+        // Create destination directory
+        Directory.CreateDirectory(destDir);
+
+        // Copy all files
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            var fileName = Path.GetFileName(file);
+            var destFile = Path.Combine(destDir, fileName);
+            File.Copy(file, destFile, overwrite: true);
+        }
+
+        // Recursively copy subdirectories
+        foreach (var subDir in Directory.GetDirectories(sourceDir))
+        {
+            var dirName = Path.GetFileName(subDir);
+            var destSubDir = Path.Combine(destDir, dirName);
+            MoveDirectoryCrossFilesystem(subDir, destSubDir);
+        }
+
+        // Delete the source directory after successful copy
+        Directory.Delete(sourceDir, recursive: true);
+    }
+
+    /// <summary>
     /// Safely extracts a ZIP file to a target directory by using a temporary directory
     /// and then atomically renaming it to the target location.
     /// </summary>
@@ -1016,6 +1086,7 @@ public static partial class MeadowOS
 
         // Create a temporary directory with a unique name in the system temp location
         string tempDirectory = Path.Combine(
+
             FileSystem.TempDirectory,
             "zip_extract_" + Guid.NewGuid().ToString("N"));
 
@@ -1037,7 +1108,7 @@ public static partial class MeadowOS
 
             // Move the temporary directory to the target directory
             Resolver.Log.Info($"Moving extracted contents from {tempDirectory} to {nonexisting_target_dir}", MessageGroup.Core);
-            Directory.Move(tempDirectory, nonexisting_target_dir);
+            MoveDirectoryCrossFilesystem(tempDirectory, nonexisting_target_dir);
         }
         catch (Exception ex)
         {
@@ -1047,6 +1118,19 @@ public static partial class MeadowOS
                 try
                 {
                     Directory.Delete(tempDirectory, true);
+                }
+                catch
+                {
+                    // Best effort cleanup - ignore errors during cleanup
+                }
+            }
+
+            // Also clean up the destination directory if it was partially created
+            if (Directory.Exists(nonexisting_target_dir))
+            {
+                try
+                {
+                    Directory.Delete(nonexisting_target_dir, true);
                 }
                 catch
                 {
