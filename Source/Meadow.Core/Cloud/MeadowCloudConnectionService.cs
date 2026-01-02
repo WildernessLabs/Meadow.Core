@@ -48,6 +48,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     public const int TokenExpirationPeriod = 60;
 
+    private const int HttpClientTimeoutSeconds = 60;
+
     internal IMeadowCloudSettings Settings { get; private set; }
 
     private readonly List<string> _subscriptionTopics = new();
@@ -64,8 +66,22 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private MqttClientOptions? ClientOptions { get; set; } = default!;
     private MqttClient MqttClient { get; set; } = default!;
 
+    // Static HttpClient instances for connection reuse (prevent socket exhaustion)
+    private static readonly HttpClient _dataHttpClient = new HttpClient
+    {
+        Timeout = TimeSpan.FromSeconds(HttpClientTimeoutSeconds)
+    };
+
+    private static readonly HttpClient _authHttpClient = new HttpClient
+    {
+        Timeout = TimeSpan.FromSeconds(HttpClientTimeoutSeconds) // Will be updated from Settings in Initialize()
+    };
+
     /// <inheritdoc/>
     public bool IsEnabled { get; private set; }
+
+    /// <inheritdoc/>
+    public DateTimeOffset? LastSuccessfulSend { get; private set; }
 
     // Track the last time we were connected
     private DateTime _lastConnectedTime = DateTime.UtcNow;
@@ -118,23 +134,30 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task DataForwarderProc()
     {
+        Resolver.Log.Trace($">>> DataForwarderProc started", "cloud");
         while (!Resolver.App.CancellationToken.IsCancellationRequested)
         {
+            Resolver.Log.Trace($">>> Data queue wait...", "cloud");
             _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
+            Resolver.Log.Trace($">>> Data queue wait complete", "cloud");
 
             while (_dataQueue.Count > 0)
             {
-                Resolver.Log.Trace($"Data queue: {_dataQueue.Count}", "cloud");
+                Resolver.Log.Trace($">>> Data queue: {_dataQueue.Count}", "cloud");
                 try
                 {
+                    Resolver.Log.Trace($">>> Connection state: {ConnectionState}", "cloud");
                     if (ConnectionState == CloudConnectionState.Connected)
                     {
                         // optimization: if more than one item is queued, try bulk send
                         if (_dataQueue.Count > 1)
                         {
+                            Resolver.Log.Trace($">>> Attempting bulk send path", "cloud");
                             // gather a batch of items with same endpoint (up to a reasonable limit)
                             const int MaxBatchSize = 50; // arbitrary cap to avoid overly large payloads
+                            Resolver.Log.Trace($">>> Peeking first item", "cloud");
                             var first = _dataQueue.Peek();
+                            Resolver.Log.Trace($">>> Peek complete. Item {(first is null ? "IS" : "IS NOT")} null", "cloud");
                             if (first == null)
                             {
                                 break;
@@ -146,6 +169,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
                             // We only dequeue after successful send; so peek then dequeue into temp list
                             // copy items with same original endpoint (not bulk) to maintain grouping
+                            Resolver.Log.Trace($">>> queue has {_dataQueue.Count} items", "cloud");
+
                             while (_dataQueue.Count > 0 && batch.Count < MaxBatchSize)
                             {
                                 var next = _dataQueue.Peek();
@@ -161,8 +186,11 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                 originalItems.Add(next);
                             }
 
+                            Resolver.Log.Trace($">>> batch has {batch.Count} items", "cloud");
+
                             if (batch.Count == 1)
                             {
+                                Resolver.Log.Trace($">>> Calling Send (batch=1)", "cloud");
                                 // fallback to single send semantics
                                 if (await Send(batch[0], first.EndPoint))
                                 {
@@ -179,6 +207,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             }
                             else if (batch.Count > 1)
                             {
+                                Resolver.Log.Trace($">>> Calling BulkSend for {batch.Count} items", "cloud");
                                 // perform bulk send
                                 if (await BulkSend(batch, endpoint))
                                 {
@@ -199,9 +228,11 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         }
                         else // single item path
                         {
+                            Resolver.Log.Trace($">>> Single item path", "cloud");
                             var info = _dataQueue.Peek();
                             if (info != null)
                             {
+                                Resolver.Log.Trace($">>> Calling Send (single)", "cloud");
                                 if (await Send(info.Item, info.EndPoint))
                                 {
                                     Resolver.Log.Trace("Data queue sent an item", "cloud");
@@ -217,16 +248,23 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     else
                     {
+                        Resolver.Log.Trace($">>> Not connected, delaying", "cloud");
                         await Task.Delay(TimeSpan.FromSeconds(3));
                     }
                 }
                 catch (Exception ex)
                 {
+                    Resolver.Log.Trace($"Data queue exception!", "cloud");
                     LogAndRaiseOnErrorOccurredEvent("Unable to forward Meadow Cloud record", ex);
                     break;
                 }
+                Resolver.Log.Trace($">>> Inner loop iteration complete", "cloud");
             }
+            Resolver.Log.Trace($">>> Exited inner loop, count={_dataQueue.Count}", "cloud");
         }
+
+        Resolver.Log.Trace($">>> Data queue cancelled!", "cloud");
+
     }
 
     private string GetBulkEndpoint(string endpoint)
@@ -245,6 +283,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task<bool> BulkSend<T>(IEnumerable<T> items, string endpoint)
     {
+        Resolver.Log.Trace($">>> BulkSend() entered for {endpoint}", "cloud");
         if (items == null) throw new ArgumentNullException(nameof(items));
 
         if (!IsEnabled)
@@ -254,6 +293,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
         if (ConnectionState != CloudConnectionState.Connected)
         {
+            Resolver.Log.Trace($">>> BulkSend() not connected, returning false", "cloud");
             return false;
         }
 
@@ -261,75 +301,119 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         var itemList = items as IList<T> ?? items.ToList();
         if (itemList.Count == 0) return true; // nothing to send
 
-        HttpClient client = new HttpClient();
-        await _semaphoreSlim.WaitAsync();
+        Resolver.Log.Trace($">>> BulkSend() waiting for semaphore", "cloud");
+        if (!await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(60)))
+        {
+            Resolver.Log.Error($">>> BulkSend() semaphore timeout after 60 seconds - possible deadlock!", "cloud");
+            return false;
+        }
+        Resolver.Log.Trace($">>> BulkSend() semaphore acquired", "cloud");
         try
         {
             int attempt = 0;
             int maxRetries = 1;
+            int authRetries = 0;
+            int maxAuthRetries = 3;
             while (true)
             {
-                client.BaseAddress = new Uri(Settings.DataHostname);
+                Resolver.Log.Trace($">>> BulkSend() retry loop (attempt={attempt}, authRetries={authRetries})", "cloud");
 
                 if (Settings.UseAuthentication)
                 {
                     if (_jwt == null)
                     {
+                        Resolver.Log.Trace($">>> BulkSend() authenticating", "cloud");
                         if (await Authenticate() == false)
                         {
-                            Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds...");
+                            authRetries++;
+                            if (authRetries >= maxAuthRetries)
+                            {
+                                Resolver.Log.Error($"BulkSend() failed to authenticate after {maxAuthRetries} attempts, giving up", "cloud");
+                                return false;
+                            }
+                            Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds... (attempt {authRetries}/{maxAuthRetries})");
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            Resolver.Log.Trace($">>> BulkSend() auth failed, continue loop", "cloud");
                             continue; // retry auth
                         }
                     }
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                    _dataHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
                 }
 
+                Resolver.Log.Trace($">>> BulkSend() serializing {itemList.Count} items", "cloud");
                 var json = Resolver.JsonSerializer.Serialize(itemList);
                 using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 Resolver.Log.Debug($"making bulk cloud request to {endpoint} with {itemList.Count} items", "cloud");
-                HttpResponseMessage response = await client.PostAsync(endpoint, content);
+                Resolver.Log.Trace($">>> BulkSend() posting to {endpoint}", "cloud");
+
+                // Wrap HTTP POST with timeout to prevent infinite hangs
+                var postTask = _dataHttpClient.PostAsync(endpoint, content);
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds));
+                var completedTask = await Task.WhenAny(postTask, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    Resolver.Log.Error($"BulkSend() HTTP POST to {endpoint} timed out after {HttpClientTimeoutSeconds} seconds - network may be hung", "cloud");
+                    break; // Exit retry loop on timeout
+                }
+
+                HttpResponseMessage response = await postTask;
+                Resolver.Log.Trace($">>> BulkSend() post complete", "cloud");
                 try
                 {
                     if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
                     {
                         attempt++;
+                        Resolver.Log.Trace($">>> BulkSend() unauthorized, invalidating and retry", "cloud");
                         InvalidateAuthentication();
-                        client.Dispose();
-                        client = new HttpClient();
+                        _dataHttpClient.DefaultRequestHeaders.Authorization = null; // Clear old auth header
                         continue; // redo with new auth
                     }
 
                     if (!response.IsSuccessStatusCode)
                     {
+                        Resolver.Log.Trace($">>> BulkSend() reading error response", "cloud");
                         var responseContent = await response.Content.ReadAsStringAsync();
                         string errorMessage = response.StatusCode == HttpStatusCode.InternalServerError
                             ? $"bulk cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'"
                             : $"bulk cloud request to {endpoint} failed with {response.StatusCode}";
                         LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                        Resolver.Log.Trace($">>> BulkSend() returning false (not success)", "cloud");
                         return false;
                     }
                     Resolver.Log.Debug($"bulk cloud request to {endpoint} completed successfully", messageGroup: "cloud");
                     MessageSent?.Invoke(this, EventArgs.Empty);
+                    LastSuccessfulSend = DateTime.UtcNow;
+                    Resolver.Log.Trace($">>> BulkSend() returning true", "cloud");
                     return true;
                 }
                 finally
                 {
+                    Resolver.Log.Trace($">>> BulkSend() disposing response", "cloud");
                     response.Dispose();
                 }
             }
         }
+        catch (TaskCanceledException ex)
+        {
+            Resolver.Log.Trace($">>> BulkSend() timeout or cancellation: {ex.Message}", "cloud");
+            LogAndRaiseOnErrorOccurredEvent($"Bulk cloud request to {endpoint} timed out after {HttpClientTimeoutSeconds} seconds", ex);
+            return false;
+        }
         catch (Exception ex)
         {
+            Resolver.Log.Trace($">>> BulkSend() caught exception: {ex.Message}", "cloud");
             LogAndRaiseOnErrorOccurredEvent("Exception sending bulk cloud message", ex);
             return false;
         }
         finally
         {
-            client.Dispose();
+            Resolver.Log.Trace($">>> BulkSend() releasing semaphore", "cloud");
             _semaphoreSlim.Release();
+            Resolver.Log.Trace($">>> BulkSend() semaphore released", "cloud");
         }
+        return true;
     }
 
     private void ReportFatalErrorToReliabilityService(MeadowCloudException exception)
@@ -449,6 +533,10 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             MqttMessageReceived?.Invoke(this, args.ApplicationMessage);
             return Task.CompletedTask;
         };
+
+        // Configure auth client timeout and base address from settings
+        _authHttpClient.Timeout = TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds);
+        _dataHttpClient.BaseAddress = new Uri(Settings.DataHostname);
     }
 
     private async Task ConnectionStateMachine()
@@ -533,7 +621,19 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         try
                         {
                             stopwatch.Restart();
-                            if (await Authenticate())
+
+                            // Wrap authentication with a timeout to prevent infinite hangs
+                            var authTask = Authenticate();
+                            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds));
+                            var completedTask = await Task.WhenAny(authTask, timeoutTask);
+
+                            if (completedTask == timeoutTask)
+                            {
+                                Resolver.Log.Error($"Authentication timed out after {HttpClientTimeoutSeconds} seconds - network may be hung");
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            }
+                            else if (await authTask)
                             {
                                 Resolver.Log.Debug($"Authentication took {stopwatch.ElapsedMilliseconds:N} ms", "cloud");
                                 stopwatch.Stop();
@@ -543,6 +643,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             else
                             {
                                 Resolver.Log.Error("Failed to authenticate with Meadow.Cloud");
+                                ConnectionState = CloudConnectionState.Disconnected;
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
                         }
@@ -553,6 +654,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             {
                                 Resolver.Log.Error($"Inner Exception ({ae.InnerException.GetType().Name}): {ae.InnerException.Message}");
                             }
+                            ConnectionState = CloudConnectionState.Disconnected;
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                         }
                         break;
@@ -571,7 +673,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                                 .WithCleanSession(false)
                                 .WithSessionExpiryInterval(86400) // Keep the session for 1 day
-                                .WithTimeout(TimeSpan.FromSeconds(30));
+                                .WithTimeout(TimeSpan.FromSeconds(HttpClientTimeoutSeconds));
 
                             if (Settings.UseAuthentication)
                             {
@@ -588,12 +690,26 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             try
                             {
                                 Resolver.Log.Debug("Connecting MQTT client", "cloud");
-                                await MqttClient.ConnectAsync(ClientOptions, new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);
+
+                                // Wrap MQTT connect with timeout to prevent infinite hangs
+                                var connectTask = MqttClient.ConnectAsync(ClientOptions, new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);
+                                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds + 15)); // Slightly longer than internal timeout
+                                var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+
+                                if (completedTask == timeoutTask)
+                                {
+                                    Resolver.Log.Error("MQTT connect timed out after 45 seconds - network may be hung");
+                                    ConnectionState = CloudConnectionState.Disconnected;
+                                    await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                                    break;
+                                }
+
+                                await connectTask; // Re-await to get any exceptions
                             }
                             catch (InvalidOperationException ioe)
                             {
                                 // Known MQTTnet deadlock: further retries won't clear it; force device reset to recover
-                                Resolver.Log.Error("MQTT deadlock detected (connect/disconnect pending). Resetting device to recover...");
+                                Resolver.Log.Error("MQTT deadlock detected (connect/disconnect pending). Resetting device to recover...", "cloud");
                                 ReportFatalErrorToReliabilityService(new MeadowCloudException("MQTT deadlock: connect/disconnect pending", ioe));
                                 Resolver.Device?.PlatformOS.Reset();
                                 return;
@@ -631,10 +747,10 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             }
                             catch (Exception ex)
                             {
-                                Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex}");
+                                Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex}", "cloud");
                                 if (ex.InnerException != null)
                                 {
-                                    Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                                    Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}", "cloud");
                                 }
                                 ConnectionState = CloudConnectionState.Disconnected;
                                 //  just delay for a while
@@ -688,10 +804,10 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         }
                         catch (Exception ex)
                         {
-                            Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}");
+                            Resolver.Log.Error($"Error subscribing to Meadow.Cloud: {ex.Message}", "cloud");
                             if (ex.InnerException != null)
                             {
-                                Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}");
+                                Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}", "cloud");
                             }
                             // if subscribing fails, then we need to disconnect from the server
                             await MqttClient.DisconnectAsync();
@@ -802,125 +918,125 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     {
         string errorMessage;
 
-        using (var client = new HttpClient())
+        Resolver.Log.Info($"Starting authentication with Meadow.Cloud...", "cloud");
+        var json = Resolver.JsonSerializer.Serialize(new JsonIdPayload(Resolver.Device.Information.UniqueID.ToUpper()));
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var endpoint = $"{Settings.AuthHostname}/api/devices/login";
+        Resolver.Log.Info($"Attempting to login to {endpoint} with {json}...", "cloud");
+
+        try
         {
-            client.Timeout = TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds);
+            Resolver.Log.Info($"Posting authentication request...", "cloud");
+            using var response = await _authHttpClient.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: 10000).Token);
+            Resolver.Log.Info($"Authentication response received: {response.StatusCode}", "cloud");
+            var responseContent = await response.Content.ReadAsStringAsync();
 
-            var json = Resolver.JsonSerializer.Serialize(new JsonIdPayload(Resolver.Device.Information.UniqueID.ToUpper()));
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var endpoint = $"{Settings.AuthHostname}/api/devices/login";
-            Resolver.Log.Debug($"Attempting to login to {endpoint} with {json}...", "cloud");
-
-            try
+            if (response.IsSuccessStatusCode)
             {
-                using var response = await client.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: 10000).Token);
-                var responseContent = await response.Content.ReadAsStringAsync();
+                Resolver.Log.Info($"authentication successful. extracting token", "cloud");
 
-                if (response.IsSuccessStatusCode)
+                var payload = Resolver.JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent);
+
+                if (payload == null)
                 {
-                    Resolver.Log.Debug($"authentication successful. extracting token", "cloud");
+                    Resolver.Log.Error($"invalid auth payload - deserialization failed", "cloud");
+                    _jwt = null;
+                    return false;
+                }
 
-                    var payload = Resolver.JsonSerializer.Deserialize<MeadowCloudLoginResponseMessage>(responseContent);
+                Resolver.Log.Info($"decrypting auth payload", "cloud");
+                var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
 
-                    if (payload == null)
+                byte[]? decryptedKey;
+                try
+                {
+                    var privateKey = GetPrivateKeyInPemFormat();
+                    if (privateKey == null)
                     {
-                        Resolver.Log.Warn($"invalid auth payload");
-                        _jwt = null;
                         return false;
                     }
 
-                    Resolver.Log.Debug($"decrypting auth payload", "cloud");
-                    var encryptedKeyBytes = System.Convert.FromBase64String(payload.EncryptedKey);
-
-                    byte[]? decryptedKey;
-                    try
-                    {
-                        var privateKey = GetPrivateKeyInPemFormat();
-                        if (privateKey == null)
-                        {
-                            return false;
-                        }
-
-                        decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes, privateKey);
-                    }
-                    catch (OverflowException)
-                    {
-                        // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
-                        // TODO: add platform and OS checking for this?
-                        LogAndRaiseOnErrorOccurredEvent("RSA decrypt failure. This device likely needs to be reprovisioned.");
-
-                        _jwt = null;
-                        return false;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogAndRaiseOnErrorOccurredEvent("RSA decrypt failure", ex);
-
-                        _jwt = null;
-                        return false;
-                    }
-
-                    // then need to call method to AES decrypt the EncryptedToken with IV
-                    try
-                    {
-                        var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
-                        var ivBytes = Convert.FromBase64String(payload.Iv);
-                        var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
-
-                        _jwt = Encoding.UTF8.GetString(decryptedToken);
-
-                        // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
-                        // DO NOT USE REGEX!  They are horrible in Mono.
-                        _jwt = SanitizeJwt(_jwt);
-
-                        Resolver.Log.Debug($"auth token successfully received", "cloud");
-                        return true;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogAndRaiseOnErrorOccurredEvent("AES decrypt failure", ex);
-
-                        _jwt = null;
-                        return false;
-                    }
+                    decryptedKey = Resolver.Device.PlatformOS.RsaDecrypt(encryptedKeyBytes, privateKey);
                 }
-
-                if (response.StatusCode == HttpStatusCode.NotFound)
+                catch (OverflowException)
                 {
-                    // device is likely not provisioned?
-                    errorMessage = $"Meadow.Cloud service returned 'Not Found': this device has likely not been provisioned";
-                    Resolver.Log.Warn(errorMessage);
+                    // dev note: bug in pre-0.9.6.3 on F7 will provision with a bad key and end up here
+                    // TODO: add platform and OS checking for this?
+                    LogAndRaiseOnErrorOccurredEvent("RSA decrypt failure. This device likely needs to be reprovisioned.");
+
+                    _jwt = null;
+                    return false;
                 }
-                else if (response.StatusCode == HttpStatusCode.InternalServerError)
+                catch (Exception ex)
                 {
-                    errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}: {responseContent}";
-                }
-                else
-                {
-                    errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}";
+                    LogAndRaiseOnErrorOccurredEvent("RSA decrypt failure", ex);
+
+                    _jwt = null;
+                    return false;
                 }
 
-                LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                // then need to call method to AES decrypt the EncryptedToken with IV
+                try
+                {
+                    var encryptedTokenBytes = Convert.FromBase64String(payload.EncryptedToken);
+                    var ivBytes = Convert.FromBase64String(payload.Iv);
+                    var decryptedToken = Resolver.Device.PlatformOS.AesDecrypt(encryptedTokenBytes, decryptedKey, ivBytes);
 
-                _jwt = null;
-                return false;
+                    _jwt = Encoding.UTF8.GetString(decryptedToken);
+
+                    // trim any "unprintable character" padding.  in my testing it was a 0x05, but unsure if that's consistent, so this is safer
+                    // DO NOT USE REGEX!  They are horrible in Mono.
+                    _jwt = SanitizeJwt(_jwt);
+
+                    Resolver.Log.Info($"✓ Authentication completed successfully", "cloud");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    LogAndRaiseOnErrorOccurredEvent("AES decrypt failure", ex);
+
+                    _jwt = null;
+                    return false;
+                }
             }
-            catch (Exception ex)
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                errorMessage = $"Exception authenticating with Meadow.Cloud @{endpoint}";
-                if (ex.InnerException != null)
-                {
-                    if (ex.InnerException is IOException && ex.InnerException.HResult == -2146232800 /*0x80131620*/)
-                    {
-                        errorMessage += $"{Environment.NewLine}Is your device clock correct? (UTC date is {DateTime.Now.ToShortDateString()})";
-                    }
-                }
-                LogAndRaiseOnErrorOccurredEvent(errorMessage, ex);
-
-                _jwt = null;
-                return false;
+                // device is likely not provisioned?
+                errorMessage = $"Meadow.Cloud service returned 'Not Found': this device has likely not been provisioned";
+                Resolver.Log.Error(errorMessage, "cloud");
             }
+            else if (response.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}: {responseContent}";
+                Resolver.Log.Error(errorMessage, "cloud");
+            }
+            else
+            {
+                errorMessage = $"Meadow.Cloud service login returned {response.StatusCode}";
+                Resolver.Log.Error(errorMessage, "cloud");
+            }
+
+            LogAndRaiseOnErrorOccurredEvent(errorMessage);
+
+            _jwt = null;
+            return false;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Exception authenticating with Meadow.Cloud @{endpoint}";
+            if (ex.InnerException != null)
+            {
+                if (ex.InnerException is IOException && ex.InnerException.HResult == -2146232800 /*0x80131620*/)
+                {
+                    errorMessage += $"{Environment.NewLine}Is your device clock correct? (UTC date is {DateTime.Now.ToShortDateString()})";
+                }
+            }
+            LogAndRaiseOnErrorOccurredEvent(errorMessage, ex);
+
+            _jwt = null;
+            return false;
         }
     }
 
@@ -1001,6 +1117,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         // enqueue and trigger the timer - this will send any older data before this record
+        Resolver.Log.Trace($">>> SendEvent() enqueueing event.", "cloud");
+        Resolver.Log.Trace($">>> Queue count: {_dataQueue.Count}", "cloud");
         _dataQueue.Enqueue(cloudEvent);
         _dataReadyEvent.Set();
         return Task.CompletedTask;
@@ -1008,6 +1126,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task<bool> Send<T>(T item, string endpoint)
     {
+        Resolver.Log.Trace($">>> Send() entered for {endpoint}", "cloud");
         if (item == null) throw new ArgumentNullException(nameof(item));
 
         if (!IsEnabled)
@@ -1017,56 +1136,87 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
         if (ConnectionState != CloudConnectionState.Connected)
         {
+            Resolver.Log.Trace($">>> Send() not connected, returning false", "cloud");
             return false;
         }
 
-        HttpClient client = new HttpClient();
-
         try
         {
-            await _semaphoreSlim.WaitAsync();
+            Resolver.Log.Trace($">>> Send() waiting for semaphore", "cloud");
+            if (!await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(60)))
+            {
+                Resolver.Log.Error($">>> Send() semaphore timeout after 60 seconds - possible deadlock!", "cloud");
+                return false;
+            }
+            Resolver.Log.Trace($">>> Send() semaphore acquired", "cloud");
 
             int attempt = 0;
             int maxRetries = 1;
+            int authRetries = 0;
+            int maxAuthRetries = 3;
             string errorMessage;
 
+            Resolver.Log.Trace($">>> Send() serializing", "cloud");
             var json = Resolver.JsonSerializer.Serialize(item);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         retry:
-            client.BaseAddress = new Uri(Settings.DataHostname);
+            Resolver.Log.Trace($">>> Send() retry label (attempt={attempt}, authRetries={authRetries})", "cloud");
 
             if (Settings.UseAuthentication)
             {
                 if (_jwt == null)
                 {
+                    Resolver.Log.Trace($">>> Send() authenticating", "cloud");
                     if (await Authenticate() == false)
                     {
-                        Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds...");
+                        authRetries++;
+                        if (authRetries >= maxAuthRetries)
+                        {
+                            Resolver.Log.Error($"Send() failed to authenticate after {maxAuthRetries} attempts, giving up", "cloud");
+                            return false;
+                        }
+                        Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds... (attempt {authRetries}/{maxAuthRetries})");
                         await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                        Resolver.Log.Trace($">>> Send() auth failed, goto retry", "cloud");
                         goto retry;
                     }
                 }
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
+                _dataHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
             }
 
             Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
 
-            HttpResponseMessage response = await client.PostAsync($"{endpoint}", content);
+            Resolver.Log.Trace($">>> Send() posting to {endpoint}", "cloud");
+
+            // Wrap HTTP POST with timeout to prevent infinite hangs
+            var postTask = _dataHttpClient.PostAsync($"{endpoint}", content);
+            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds));
+            var completedTask = await Task.WhenAny(postTask, timeoutTask);
+
+            if (completedTask == timeoutTask)
+            {
+                Resolver.Log.Error($"Send() HTTP POST to {endpoint} timed out after {HttpClientTimeoutSeconds} seconds - network may be hung", "cloud");
+                return false;
+            }
+
+            HttpResponseMessage response = await postTask;
+            Resolver.Log.Trace($">>> Send() post complete", "cloud");
 
             try
             {
                 if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
                 {
                     attempt++;
+                    Resolver.Log.Trace($">>> Send() unauthorized, invalidating auth and retry", "cloud");
                     InvalidateAuthentication();
-                    client.Dispose();
-                    client = new HttpClient();
+                    _dataHttpClient.DefaultRequestHeaders.Authorization = null; // Clear old auth header
                     goto retry;
                 }
 
                 if (!response.IsSuccessStatusCode)
                 {
+                    Resolver.Log.Trace($">>> Send() reading error response", "cloud");
                     var responseContent = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.InternalServerError)
                     {
@@ -1077,29 +1227,41 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
                     }
                     LogAndRaiseOnErrorOccurredEvent(errorMessage);
+                    Resolver.Log.Trace($">>> Send() returning false (not success)", "cloud");
                     return false;
                 }
                 else
                 {
                     Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
                     MessageSent?.Invoke(this, EventArgs.Empty);
+                    LastSuccessfulSend = DateTimeOffset.UtcNow;
+                    Resolver.Log.Trace($">>> Send() returning true", "cloud");
                     return true;
                 }
             }
             finally
             {
+                Resolver.Log.Trace($">>> Send() disposing response", "cloud");
                 response.Dispose();
             }
         }
+        catch (TaskCanceledException ex)
+        {
+            Resolver.Log.Trace($">>> Send() timeout or cancellation: {ex.Message}", "cloud");
+            LogAndRaiseOnErrorOccurredEvent($"Cloud request to {endpoint} timed out after {HttpClientTimeoutSeconds} seconds", ex);
+            return false;
+        }
         catch (Exception ex)
         {
+            Resolver.Log.Trace($">>> Send() caught exception: {ex.Message}", "cloud");
             LogAndRaiseOnErrorOccurredEvent("Exception sending cloud message", ex);
             return false;
         }
         finally
         {
-            client.Dispose();
+            Resolver.Log.Trace($">>> Send() releasing semaphore", "cloud");
             _semaphoreSlim.Release();
+            Resolver.Log.Trace($">>> Send() semaphore released", "cloud");
         }
     }
 

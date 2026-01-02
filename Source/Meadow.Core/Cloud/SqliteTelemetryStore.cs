@@ -16,14 +16,20 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 {
     private const int DefaultBatchSize = 50;
     private const int DefaultBatchIntervalMs = 1000;
-    private const int MaxPendingItems = 10000;
-    private const int DefaultMaxDbItems = 50000;
+    private const int MaxPendingItems = 800;
+    private const int DefaultMaxDbItems = 1000;
+    private const int CleanupBatchSize = 50;
+    private const int DbLockTimeoutMs = 10000;
+
+    private const string LogGroup = "SqliteTelemetryStore";
 
     private readonly string _databasePath;
     private readonly ConcurrentQueue<CloudTelemetryItem> _pendingWrites;
     private readonly SemaphoreSlim _batchSignal;
+    private readonly SemaphoreSlim _cleanupSignal;
     private readonly CancellationTokenSource _cancellationSource;
     private readonly Task _batchWriterTask;
+    private readonly Task _cleanupTask;
     private readonly object _dbLock = new object();
     private readonly int _batchSize;
     private readonly int _batchIntervalMs;
@@ -39,10 +45,20 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
     {
         get
         {
-            lock (_dbLock)
+            if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+            {
+                Resolver.Log.Warn($"Count: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
+                return -1;
+            }
+
+            try
             {
                 EnsureConnection();
                 return _connection!.ExecuteScalar<int>("SELECT COUNT(*) FROM telemetry");
+            }
+            finally
+            {
+                Monitor.Exit(_dbLock);
             }
         }
     }
@@ -60,6 +76,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 
         _pendingWrites = new ConcurrentQueue<CloudTelemetryItem>();
         _batchSignal = new SemaphoreSlim(0);
+        _cleanupSignal = new SemaphoreSlim(0);
         _cancellationSource = new CancellationTokenSource();
 
         // Ensure directory exists
@@ -78,7 +95,10 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         // Start background batch writer
         _batchWriterTask = Task.Run(BatchWriterLoop, _cancellationSource.Token);
 
-        Resolver.Log.Info($"SQLite Telemetry Store initialized at {_databasePath} (batch size: {_batchSize}, interval: {_batchIntervalMs}ms, max items: {_maxDbItems})");
+        // Start background cleanup task
+        _cleanupTask = Task.Run(CleanupLoop, _cancellationSource.Token);
+
+        Resolver.Log.Info($"Telemetry Store initialized at {_databasePath} (batch size: {_batchSize}, interval: {_batchIntervalMs}ms, max items: {_maxDbItems})", LogGroup);
     }
 
     private void InitializeDatabase()
@@ -99,6 +119,18 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 
                 // Increase cache size for better performance (10MB)
                 _connection.Execute("PRAGMA cache_size=-10000");
+
+                // verify the settings we just sent
+                var checks = new string[] { "journal_mode", "synchronous", "cache_size" };
+                foreach (var check in checks)
+                {
+                    var pragma = _connection!.ExecuteScalar<string?>($"PRAGMA {check}");
+
+                    if (pragma is not null)
+                    {
+                        Resolver.Log.Info($"check: {pragma}", LogGroup);
+                    }
+                }
 
                 // Create telemetry table
                 _connection.Execute(@"
@@ -121,11 +153,11 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                     CREATE INDEX IF NOT EXISTS idx_sequence
                     ON telemetry(sequence ASC)");
 
-                Resolver.Log.Info("SQLite database initialized successfully");
+                Resolver.Log.Info("Database initialized successfully", LogGroup);
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Failed to initialize SQLite database: {ex.Message}");
+                Resolver.Log.Error($"Failed to initialize SQLite database: {ex.Message}", LogGroup);
                 throw;
             }
         }
@@ -159,12 +191,12 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                 if (result.HasValue)
                 {
                     _nextSequence = result.Value + 1;
-                    Resolver.Log.Info($"SQLite: Recovered sequence counter: {_nextSequence}");
+                    Resolver.Log.Info($"Recovered sequence counter: {_nextSequence}", LogGroup);
                 }
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"Failed to recover sequence counter: {ex.Message}");
+                Resolver.Log.Error($"Failed to recover sequence counter: {ex.Message}", LogGroup);
             }
         }
     }
@@ -179,7 +211,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         // Check if queue is getting too full (backpressure)
         if (_pendingCount >= MaxPendingItems)
         {
-            Resolver.Log.Warn($"SQLite: Pending queue full ({_pendingCount} items), dropping oldest");
+            Resolver.Log.Warn($"Pending queue full ({_pendingCount} items), dropping oldest", LogGroup);
             // Drop one item to make room
             if (_pendingWrites.TryDequeue(out _))
             {
@@ -230,7 +262,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
             }
             catch (Exception ex)
             {
-                Resolver.Log.Error($"SQLite batch writer error: {ex.Message}");
+                Resolver.Log.Error($"Batch writer error: {ex.Message}", LogGroup);
                 // Continue running despite errors
                 await Task.Delay(1000); // Back off on error
             }
@@ -249,90 +281,193 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
     }
 
+    private async Task CleanupLoop()
+    {
+        while (!_cancellationSource.Token.IsCancellationRequested)
+        {
+            try
+            {
+                // Wait for cleanup signal (or timeout every 30 seconds to check)
+                await _cleanupSignal.WaitAsync(30000, _cancellationSource.Token);
+
+                // Keep deleting batches until we're under the limit
+                bool needsMoreCleanup = true;
+                while (needsMoreCleanup && !_cancellationSource.Token.IsCancellationRequested)
+                {
+                    int currentCount = 0;
+                    int deleted = 0;
+
+                    if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+                    {
+                        Resolver.Log.Warn($"CleanupLoop: Lock acquisition timeout after {DbLockTimeoutMs}ms, skipping cleanup cycle", LogGroup);
+                        needsMoreCleanup = false;
+                        continue;
+                    }
+
+                    try
+                    {
+                        EnsureConnection();
+
+                        Resolver.Log.Trace($"Cleanup: max items {_maxDbItems})", LogGroup);
+
+                        // Check current count
+                        currentCount = _connection!.ExecuteScalar<int>("SELECT COUNT(*) FROM telemetry");
+
+                        Resolver.Log.Trace($"Cleanup: current count {currentCount})", LogGroup);
+
+                        if (currentCount > _maxDbItems)
+                        {
+                            // Delete one batch of oldest items
+                            _connection.Execute(@"
+                                DELETE FROM telemetry
+                                WHERE id IN (
+                                    SELECT id FROM telemetry
+                                    ORDER BY priority DESC, sequence ASC
+                                    LIMIT ?
+                                )", CleanupBatchSize);
+
+                            deleted = CleanupBatchSize;
+                            Resolver.Log.Trace($"Cleanup: Deleted batch of {deleted} items (count was {currentCount})", LogGroup);
+                        }
+                        else
+                        {
+                            needsMoreCleanup = false;
+                            Resolver.Log.Trace($"Cleanup: Nothing to delete (count: {currentCount})", LogGroup);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Resolver.Log.Error($"Cleanup: Error during delete: {ex.Message}", LogGroup);
+                        needsMoreCleanup = false;
+                    }
+                    finally
+                    {
+                        Monitor.Exit(_dbLock);
+                    }
+
+                    // Release lock between batches to allow other operations
+                    if (needsMoreCleanup)
+                    {
+                        await Task.Delay(100); // Small delay between batches
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected during shutdown
+                break;
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"Cleanup loop error: {ex.Message}", LogGroup);
+                await Task.Delay(5000); // Back off on error
+            }
+        }
+    }
+
     private void WriteBatch(List<CloudTelemetryItem> items)
     {
         if (items.Count == 0) return;
 
-        lock (_dbLock)
+        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
         {
-            try
+            Resolver.Log.Warn($"WriteBatch: Lock acquisition timeout after {DbLockTimeoutMs}ms, skipping batch of {items.Count} items", LogGroup);
+            return;
+        }
+
+        try
+        {
+            EnsureConnection();
+
+            // Prepare records for bulk insert
+            var records = new List<TelemetryDbRecord>(items.Count);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            foreach (var item in items)
             {
-                EnsureConnection();
-
-                // Prepare records for bulk insert
-                var records = new List<TelemetryDbRecord>(items.Count);
-                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-                foreach (var item in items)
+                try
                 {
-                    try
-                    {
-                        var json = MicroJson.Serialize(item.Item);
-                        if (json == null) continue;
+                    var json = MicroJson.Serialize(item.Item);
+                    if (json == null) continue;
 
-                        records.Add(new TelemetryDbRecord
-                        {
-                            Sequence = item.ReceptionSequence,
-                            Priority = (int)item.Priority,
-                            Endpoint = item.EndPoint ?? "",
-                            JsonData = json,
-                            CreatedAt = timestamp
-                        });
-                    }
-                    catch (Exception ex)
+                    records.Add(new TelemetryDbRecord
                     {
-                        Resolver.Log.Error($"SQLite: Failed to serialize item: {ex.Message}");
-                    }
+                        Sequence = item.ReceptionSequence,
+                        Priority = (int)item.Priority,
+                        Endpoint = item.EndPoint ?? "",
+                        JsonData = json,
+                        CreatedAt = timestamp
+                    });
                 }
-
-                if (records.Count > 0)
+                catch (Exception ex)
                 {
-                    // Use InsertAll for true bulk insert - much faster than individual inserts
-                    _connection!.InsertAll(records);
-
-                    // Check if we've exceeded max capacity and trim if needed
-                    var currentCount = _connection.ExecuteScalar<int>("SELECT COUNT(*) FROM telemetry");
-                    if (currentCount > _maxDbItems)
-                    {
-                        // Delete oldest items (lowest priority first, then oldest sequence)
-                        var deleteCount = currentCount - _maxDbItems;
-                        _connection.Execute(@"
-                            DELETE FROM telemetry
-                            WHERE id IN (
-                                SELECT id FROM telemetry
-                                ORDER BY priority DESC, sequence ASC
-                                LIMIT ?
-                            )", deleteCount);
-
-                        Resolver.Log.Trace($"SQLite: Trimmed {deleteCount} oldest items (max capacity: {_maxDbItems})");
-                    }
-
-                    if (records.Count > 1)
-                    {
-                        Resolver.Log.Trace($"SQLite: Wrote batch of {records.Count} items");
-                    }
+                    Resolver.Log.Error($"Failed to serialize item: {ex.Message}", LogGroup);
                 }
             }
-            catch (Exception ex)
+
+            if (records.Count > 0)
             {
-                Resolver.Log.Error($"SQLite: Batch write failed: {ex.Message}");
+                // Use InsertAll for true bulk insert - much faster than individual inserts
+                _connection!.InsertAll(records);
+
+                // Check if we've exceeded max capacity - signal cleanup task if needed
+                var currentCount = _connection.ExecuteScalar<int>("SELECT COUNT(*) FROM telemetry");
+                if (currentCount > _maxDbItems)
+                {
+                    // Signal cleanup task to delete in background
+                    _cleanupSignal.Release();
+                    Resolver.Log.Trace($"Signaled cleanup task (count: {currentCount}, max: {_maxDbItems})", LogGroup);
+                }
+
+                if (records.Count > 1)
+                {
+                    Resolver.Log.Trace($"Wrote batch of {records.Count} items", LogGroup);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Batch write failed: {ex.Message}", LogGroup);
+        }
+        finally
+        {
+            Monitor.Exit(_dbLock);
         }
     }
 
     public CloudTelemetryItem? Peek()
     {
-        lock (_dbLock)
+        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+        {
+            Resolver.Log.Warn($"Peek: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
+            return null;
+        }
+
+        try
         {
             return GetNextItem(remove: false);
+        }
+        finally
+        {
+            Monitor.Exit(_dbLock);
         }
     }
 
     public CloudTelemetryItem? Dequeue()
     {
-        lock (_dbLock)
+        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+        {
+            Resolver.Log.Warn($"Dequeue: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
+            return null;
+        }
+
+        try
         {
             return GetNextItem(remove: true);
+        }
+        finally
+        {
+            Monitor.Exit(_dbLock);
         }
     }
 
@@ -359,7 +494,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                     {
                         DeleteItem(record.Id);
                     }
-                    Resolver.Log.Warn($"SQLite: Corrupted item {record.Id}, removed");
+                    Resolver.Log.Warn($"Corrupted item {record.Id}, removed", LogGroup);
                     return null;
                 }
 
@@ -379,7 +514,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"SQLite: Failed to retrieve item: {ex.Message}");
+            Resolver.Log.Error($"Failed to retrieve item: {ex.Message}", LogGroup);
             return null;
         }
     }
@@ -392,35 +527,42 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"SQLite: Failed to delete item {id}: {ex.Message}");
+            Resolver.Log.Error($"Failed to delete item {id}: {ex.Message}", LogGroup);
         }
     }
 
     public Dictionary<int, int> CountByPriority()
     {
-        lock (_dbLock)
+        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
         {
-            try
+            Resolver.Log.Warn($"CountByPriority: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
+            return new Dictionary<int, int>();
+        }
+
+        try
+        {
+            EnsureConnection();
+
+            var counts = new Dictionary<int, int>();
+
+            var results = _connection!.Query<PriorityCount>(
+                "SELECT priority, COUNT(*) as count FROM telemetry GROUP BY priority");
+
+            foreach (var result in results)
             {
-                EnsureConnection();
-
-                var counts = new Dictionary<int, int>();
-
-                var results = _connection!.Query<PriorityCount>(
-                    "SELECT priority, COUNT(*) as count FROM telemetry GROUP BY priority");
-
-                foreach (var result in results)
-                {
-                    counts[result.Priority] = result.Count;
-                }
-
-                return counts;
+                counts[result.Priority] = result.Count;
             }
-            catch (Exception ex)
-            {
-                Resolver.Log.Error($"SQLite: Failed to count by priority: {ex.Message}");
-                return new Dictionary<int, int>();
-            }
+
+            return counts;
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Failed to count by priority: {ex.Message}", LogGroup);
+            return new Dictionary<int, int>();
+        }
+        finally
+        {
+            Monitor.Exit(_dbLock);
         }
     }
 
@@ -428,7 +570,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
     {
         if (_disposed) return;
 
-        // Signal shutdown and wait for batch writer to finish
+        // Signal shutdown and wait for background tasks to finish
         _cancellationSource.Cancel();
 
         try
@@ -437,22 +579,43 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         catch (Exception ex)
         {
-            Resolver.Log.Error($"SQLite: Error waiting for batch writer shutdown: {ex.Message}");
+            Resolver.Log.Error($"Error waiting for batch writer shutdown: {ex.Message}", LogGroup);
         }
 
-        lock (_dbLock)
+        try
         {
-            _connection?.Close();
-            _connection?.Dispose();
-            _connection = null;
+            _cleanupTask.Wait(5000); // Wait up to 5 seconds
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Error waiting for cleanup task shutdown: {ex.Message}", LogGroup);
+        }
+
+        if (!Monitor.TryEnter(_dbLock, 10000)) // Longer timeout for dispose
+        {
+            Resolver.Log.Error($"Dispose: Lock acquisition timeout after 10000ms, forcing disposal", LogGroup);
+        }
+        else
+        {
+            try
+            {
+                _connection?.Close();
+                _connection?.Dispose();
+                _connection = null;
+            }
+            finally
+            {
+                Monitor.Exit(_dbLock);
+            }
         }
 
         _batchSignal?.Dispose();
+        _cleanupSignal?.Dispose();
         _cancellationSource?.Dispose();
 
         _disposed = true;
 
-        Resolver.Log.Info("SQLite Telemetry Store disposed");
+        Resolver.Log.Info("Telemetry Store disposed", LogGroup);
     }
 
     // Database record class for InsertAll bulk operations
