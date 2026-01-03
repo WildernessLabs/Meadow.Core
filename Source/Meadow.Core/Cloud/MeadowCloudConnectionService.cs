@@ -60,8 +60,9 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
     private Task? _stateMachineTask;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+    private readonly SemaphoreSlim _forwarderSemaphore = new(1, 1);
     private readonly CloudDataQueue _dataQueue;
-    private readonly AutoResetEvent _dataReadyEvent = new(false);
+    private Timer? _dataForwarderTimer;
 
     private MqttClientOptions? ClientOptions { get; set; } = default!;
     private MqttClient MqttClient { get; set; } = default!;
@@ -135,12 +136,15 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private async Task DataForwarderProc()
     {
         Resolver.Log.Trace($">>> DataForwarderProc started", "cloud");
-        while (!Resolver.App.CancellationToken.IsCancellationRequested)
-        {
-            Resolver.Log.Trace($">>> Data queue wait...", "cloud");
-            _dataReadyEvent.WaitOne(TimeSpan.FromSeconds(30));
-            Resolver.Log.Trace($">>> Data queue wait complete", "cloud");
 
+        if (!await _forwarderSemaphore.WaitAsync(0))
+        {
+            Resolver.Log.Trace("DataForwarder already running", "cloud");
+            return;
+        }
+
+        try
+        {
             while (_dataQueue.Count > 0)
             {
                 Resolver.Log.Trace($">>> Data queue: {_dataQueue.Count}", "cloud");
@@ -260,11 +264,11 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                 }
                 Resolver.Log.Trace($">>> Inner loop iteration complete", "cloud");
             }
-            Resolver.Log.Trace($">>> Exited inner loop, count={_dataQueue.Count}", "cloud");
         }
-
-        Resolver.Log.Trace($">>> Data queue cancelled!", "cloud");
-
+        finally
+        {
+            _forwarderSemaphore.Release();
+        }
     }
 
     private string GetBulkEndpoint(string endpoint)
@@ -492,7 +496,11 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     /// </summary>
     public void Start()
     {
-        Task.Run(DataForwarderProc).RethrowUnhandledExceptions();
+        _dataForwarderTimer = new Timer(
+            (s) => DataForwarderProc().RethrowUnhandledExceptions(),
+            null,
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(30));
 
         if (_stateMachineTask == null)
         {
@@ -504,6 +512,9 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     /// <inheritdoc/>
     public void Stop()
     {
+        _dataForwarderTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+        _dataForwarderTimer?.Dispose();
+        _dataForwarderTimer = null;
         _stopService = true;
         IsEnabled = false;
     }
@@ -1104,7 +1115,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
         // enqueue and trigger the timer - this will send any older data before this record
         _dataQueue.Enqueue(log, priority);
-        _dataReadyEvent.Set();
+        DataForwarderProc().RethrowUnhandledExceptions();
         return Task.CompletedTask;
     }
 
@@ -1120,7 +1131,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         Resolver.Log.Trace($">>> SendEvent() enqueueing event.", "cloud");
         Resolver.Log.Trace($">>> Queue count: {_dataQueue.Count}", "cloud");
         _dataQueue.Enqueue(cloudEvent);
-        _dataReadyEvent.Set();
+        DataForwarderProc().RethrowUnhandledExceptions();
         return Task.CompletedTask;
     }
 
