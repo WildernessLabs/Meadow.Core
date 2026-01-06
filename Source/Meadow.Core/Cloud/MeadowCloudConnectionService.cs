@@ -68,12 +68,12 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private MqttClient MqttClient { get; set; } = default!;
 
     // Static HttpClient instances for connection reuse (prevent socket exhaustion)
-    private static readonly HttpClient _dataHttpClient = new HttpClient
+    private static readonly DeadlockDetectingHttpClient _dataHttpClient = new DeadlockDetectingHttpClient
     {
         Timeout = TimeSpan.FromSeconds(HttpClientTimeoutSeconds)
     };
 
-    private static readonly HttpClient _authHttpClient = new HttpClient
+    private static readonly DeadlockDetectingHttpClient _authHttpClient = new DeadlockDetectingHttpClient
     {
         Timeout = TimeSpan.FromSeconds(HttpClientTimeoutSeconds) // Will be updated from Settings in Initialize()
     };
@@ -116,6 +116,17 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             _dataQueue = new CloudDataQueue(
                 new InMemoryTelemetryStore());
         }
+
+        _dataHttpClient.SendDeadlocked += (s, e) =>
+        {
+            Resolver.Log.Error($"Data HttpClient deadlocked - resetting", "cloud");
+            Resolver.Device?.PlatformOS.Reset();
+        };
+        _authHttpClient.SendDeadlocked += (s, e) =>
+        {
+            Resolver.Log.Error($"Auth HttpClient deadlocked - resetting", "cloud");
+            Resolver.Device?.PlatformOS.Reset();
+        };
     }
 
     /// <inheritdoc/>
