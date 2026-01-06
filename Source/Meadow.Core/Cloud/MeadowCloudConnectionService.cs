@@ -146,8 +146,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task DataForwarderProc()
     {
-        Resolver.Log.Trace($">>> DataForwarderProc started", "cloud");
-
         if (!await _forwarderSemaphore.WaitAsync(0))
         {
             Resolver.Log.Trace("DataForwarder already running", "cloud");
@@ -158,21 +156,16 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         {
             while (_dataQueue.Count > 0)
             {
-                Resolver.Log.Trace($">>> Data queue: {_dataQueue.Count}", "cloud");
                 try
                 {
-                    Resolver.Log.Trace($">>> Connection state: {ConnectionState}", "cloud");
                     if (ConnectionState == CloudConnectionState.Connected)
                     {
                         // optimization: if more than one item is queued, try bulk send
                         if (_dataQueue.Count > 1)
                         {
-                            Resolver.Log.Trace($">>> Attempting bulk send path", "cloud");
                             // gather a batch of items with same endpoint (up to a reasonable limit)
                             const int MaxBatchSize = 50; // arbitrary cap to avoid overly large payloads
-                            Resolver.Log.Trace($">>> Peeking first item", "cloud");
                             var first = _dataQueue.Peek();
-                            Resolver.Log.Trace($">>> Peek complete. Item {(first is null ? "IS" : "IS NOT")} null", "cloud");
                             if (first == null)
                             {
                                 break;
@@ -184,8 +177,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
                             // We only dequeue after successful send; so peek then dequeue into temp list
                             // copy items with same original endpoint (not bulk) to maintain grouping
-                            Resolver.Log.Trace($">>> queue has {_dataQueue.Count} items", "cloud");
-
                             while (_dataQueue.Count > 0 && batch.Count < MaxBatchSize)
                             {
                                 var next = _dataQueue.Peek();
@@ -201,11 +192,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                 originalItems.Add(next);
                             }
 
-                            Resolver.Log.Trace($">>> batch has {batch.Count} items", "cloud");
-
                             if (batch.Count == 1)
                             {
-                                Resolver.Log.Trace($">>> Calling Send (batch=1)", "cloud");
                                 // fallback to single send semantics
                                 if (await Send(batch[0], first.EndPoint))
                                 {
@@ -222,7 +210,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             }
                             else if (batch.Count > 1)
                             {
-                                Resolver.Log.Trace($">>> Calling BulkSend for {batch.Count} items", "cloud");
                                 // perform bulk send
                                 if (await BulkSend(batch, endpoint))
                                 {
@@ -243,11 +230,9 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         }
                         else // single item path
                         {
-                            Resolver.Log.Trace($">>> Single item path", "cloud");
                             var info = _dataQueue.Peek();
                             if (info != null)
                             {
-                                Resolver.Log.Trace($">>> Calling Send (single)", "cloud");
                                 if (await Send(info.Item, info.EndPoint))
                                 {
                                     Resolver.Log.Trace("Data queue sent an item", "cloud");
@@ -263,7 +248,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                     }
                     else
                     {
-                        Resolver.Log.Trace($">>> Not connected, delaying", "cloud");
                         await Task.Delay(TimeSpan.FromSeconds(3));
                     }
                 }
@@ -273,7 +257,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                     LogAndRaiseOnErrorOccurredEvent("Unable to forward Meadow Cloud record", ex);
                     break;
                 }
-                Resolver.Log.Trace($">>> Inner loop iteration complete", "cloud");
             }
         }
         finally
@@ -298,7 +281,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task<bool> BulkSend<T>(IEnumerable<T> items, string endpoint)
     {
-        Resolver.Log.Trace($">>> BulkSend() entered for {endpoint}", "cloud");
         if (items == null) throw new ArgumentNullException(nameof(items));
 
         if (!IsEnabled)
@@ -308,7 +290,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
         if (ConnectionState != CloudConnectionState.Connected)
         {
-            Resolver.Log.Trace($">>> BulkSend() not connected, returning false", "cloud");
             return false;
         }
 
@@ -316,13 +297,11 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         var itemList = items as IList<T> ?? items.ToList();
         if (itemList.Count == 0) return true; // nothing to send
 
-        Resolver.Log.Trace($">>> BulkSend() waiting for semaphore", "cloud");
         if (!await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(60)))
         {
-            Resolver.Log.Error($">>> BulkSend() semaphore timeout after 60 seconds - possible deadlock!", "cloud");
             return false;
         }
-        Resolver.Log.Trace($">>> BulkSend() semaphore acquired", "cloud");
+
         try
         {
             int attempt = 0;
@@ -331,36 +310,29 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             int maxAuthRetries = 3;
             while (true)
             {
-                Resolver.Log.Trace($">>> BulkSend() retry loop (attempt={attempt}, authRetries={authRetries})", "cloud");
-
                 if (Settings.UseAuthentication)
                 {
                     if (_jwt == null)
                     {
-                        Resolver.Log.Trace($">>> BulkSend() authenticating", "cloud");
                         if (await Authenticate() == false)
                         {
                             authRetries++;
                             if (authRetries >= maxAuthRetries)
                             {
-                                Resolver.Log.Error($"BulkSend() failed to authenticate after {maxAuthRetries} attempts, giving up", "cloud");
                                 return false;
                             }
                             Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds... (attempt {authRetries}/{maxAuthRetries})");
                             await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                            Resolver.Log.Trace($">>> BulkSend() auth failed, continue loop", "cloud");
                             continue; // retry auth
                         }
                     }
                     _dataHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _jwt);
                 }
 
-                Resolver.Log.Trace($">>> BulkSend() serializing {itemList.Count} items", "cloud");
                 var json = Resolver.JsonSerializer.Serialize(itemList);
                 using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 Resolver.Log.Debug($"making bulk cloud request to {endpoint} with {itemList.Count} items", "cloud");
-                Resolver.Log.Trace($">>> BulkSend() posting to {endpoint}", "cloud");
 
                 // Wrap HTTP POST with timeout to prevent infinite hangs
                 var postTask = _dataHttpClient.PostAsync(endpoint, content);
@@ -388,45 +360,37 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        Resolver.Log.Trace($">>> BulkSend() reading error response", "cloud");
                         var responseContent = await response.Content.ReadAsStringAsync();
                         string errorMessage = response.StatusCode == HttpStatusCode.InternalServerError
                             ? $"bulk cloud request to {endpoint} failed with {response.StatusCode}: '{responseContent}'"
                             : $"bulk cloud request to {endpoint} failed with {response.StatusCode}";
                         LogAndRaiseOnErrorOccurredEvent(errorMessage);
-                        Resolver.Log.Trace($">>> BulkSend() returning false (not success)", "cloud");
                         return false;
                     }
                     Resolver.Log.Debug($"bulk cloud request to {endpoint} completed successfully", messageGroup: "cloud");
                     MessageSent?.Invoke(this, EventArgs.Empty);
                     LastSuccessfulSend = DateTime.UtcNow;
-                    Resolver.Log.Trace($">>> BulkSend() returning true", "cloud");
                     return true;
                 }
                 finally
                 {
-                    Resolver.Log.Trace($">>> BulkSend() disposing response", "cloud");
                     response.Dispose();
                 }
             }
         }
         catch (TaskCanceledException ex)
         {
-            Resolver.Log.Trace($">>> BulkSend() timeout or cancellation: {ex.Message}", "cloud");
             LogAndRaiseOnErrorOccurredEvent($"Bulk cloud request to {endpoint} timed out after {HttpClientTimeoutSeconds} seconds", ex);
             return false;
         }
         catch (Exception ex)
         {
-            Resolver.Log.Trace($">>> BulkSend() caught exception: {ex.Message}", "cloud");
             LogAndRaiseOnErrorOccurredEvent("Exception sending bulk cloud message", ex);
             return false;
         }
         finally
         {
-            Resolver.Log.Trace($">>> BulkSend() releasing semaphore", "cloud");
             _semaphoreSlim.Release();
-            Resolver.Log.Trace($">>> BulkSend() semaphore released", "cloud");
         }
         return true;
     }
@@ -1139,8 +1103,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         // enqueue and trigger the timer - this will send any older data before this record
-        Resolver.Log.Trace($">>> SendEvent() enqueueing event.", "cloud");
-        Resolver.Log.Trace($">>> Queue count: {_dataQueue.Count}", "cloud");
         _dataQueue.Enqueue(cloudEvent);
         DataForwarderProc().RethrowUnhandledExceptions();
         return Task.CompletedTask;
@@ -1148,7 +1110,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task<bool> Send<T>(T item, string endpoint)
     {
-        Resolver.Log.Trace($">>> Send() entered for {endpoint}", "cloud");
         if (item == null) throw new ArgumentNullException(nameof(item));
 
         if (!IsEnabled)
@@ -1158,19 +1119,16 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
         if (ConnectionState != CloudConnectionState.Connected)
         {
-            Resolver.Log.Trace($">>> Send() not connected, returning false", "cloud");
             return false;
         }
 
         try
         {
-            Resolver.Log.Trace($">>> Send() waiting for semaphore", "cloud");
             if (!await _semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(60)))
             {
                 Resolver.Log.Error($">>> Send() semaphore timeout after 60 seconds - possible deadlock!", "cloud");
                 return false;
             }
-            Resolver.Log.Trace($">>> Send() semaphore acquired", "cloud");
 
             int attempt = 0;
             int maxRetries = 1;
@@ -1178,18 +1136,15 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             int maxAuthRetries = 3;
             string errorMessage;
 
-            Resolver.Log.Trace($">>> Send() serializing", "cloud");
             var json = Resolver.JsonSerializer.Serialize(item);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         retry:
-            Resolver.Log.Trace($">>> Send() retry label (attempt={attempt}, authRetries={authRetries})", "cloud");
 
             if (Settings.UseAuthentication)
             {
                 if (_jwt == null)
                 {
-                    Resolver.Log.Trace($">>> Send() authenticating", "cloud");
                     if (await Authenticate() == false)
                     {
                         authRetries++;
@@ -1200,7 +1155,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         }
                         Resolver.Log.Error($"Failed to authenticate with Meadow.Cloud. Retrying in {Settings.ConnectRetrySeconds} seconds... (attempt {authRetries}/{maxAuthRetries})");
                         await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                        Resolver.Log.Trace($">>> Send() auth failed, goto retry", "cloud");
                         goto retry;
                     }
                 }
@@ -1208,8 +1162,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             }
 
             Resolver.Log.Debug($"making cloud request to {endpoint} with payload: {json}", "cloud");
-
-            Resolver.Log.Trace($">>> Send() posting to {endpoint}", "cloud");
 
             // Wrap HTTP POST with timeout to prevent infinite hangs
             var postTask = _dataHttpClient.PostAsync($"{endpoint}", content);
@@ -1223,14 +1175,13 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             }
 
             HttpResponseMessage response = await postTask;
-            Resolver.Log.Trace($">>> Send() post complete", "cloud");
 
             try
             {
                 if (response.StatusCode == HttpStatusCode.Unauthorized && attempt < maxRetries)
                 {
                     attempt++;
-                    Resolver.Log.Trace($">>> Send() unauthorized, invalidating auth and retry", "cloud");
+                    Resolver.Log.Trace($"Send() unauthorized, invalidating auth and retry", "cloud");
                     InvalidateAuthentication();
                     _dataHttpClient.DefaultRequestHeaders.Authorization = null; // Clear old auth header
                     goto retry;
@@ -1238,7 +1189,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Resolver.Log.Trace($">>> Send() reading error response", "cloud");
                     var responseContent = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == HttpStatusCode.InternalServerError)
                     {
@@ -1249,7 +1199,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         errorMessage = $"cloud request to {endpoint} failed with {response.StatusCode}";
                     }
                     LogAndRaiseOnErrorOccurredEvent(errorMessage);
-                    Resolver.Log.Trace($">>> Send() returning false (not success)", "cloud");
                     return false;
                 }
                 else
@@ -1257,33 +1206,27 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                     Resolver.Log.Debug($"cloud request to {endpoint} completed successfully", messageGroup: "cloud");
                     MessageSent?.Invoke(this, EventArgs.Empty);
                     LastSuccessfulSend = DateTimeOffset.UtcNow;
-                    Resolver.Log.Trace($">>> Send() returning true", "cloud");
                     return true;
                 }
             }
             finally
             {
-                Resolver.Log.Trace($">>> Send() disposing response", "cloud");
                 response.Dispose();
             }
         }
         catch (TaskCanceledException ex)
         {
-            Resolver.Log.Trace($">>> Send() timeout or cancellation: {ex.Message}", "cloud");
             LogAndRaiseOnErrorOccurredEvent($"Cloud request to {endpoint} timed out after {HttpClientTimeoutSeconds} seconds", ex);
             return false;
         }
         catch (Exception ex)
         {
-            Resolver.Log.Trace($">>> Send() caught exception: {ex.Message}", "cloud");
             LogAndRaiseOnErrorOccurredEvent("Exception sending cloud message", ex);
             return false;
         }
         finally
         {
-            Resolver.Log.Trace($">>> Send() releasing semaphore", "cloud");
             _semaphoreSlim.Release();
-            Resolver.Log.Trace($">>> Send() semaphore released", "cloud");
         }
     }
 

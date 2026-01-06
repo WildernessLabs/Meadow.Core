@@ -11,8 +11,6 @@ internal class DeadlockDetectingHttpClient : HttpClient
 
     public override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        Resolver.Log.Info($"---ReliableHttpClient.SendAsync", "cloud");
-
         var sendTask = base.SendAsync(request, cancellationToken);
         var timeoutTask = Task.Delay(TimeSpan.FromMinutes(3));
         var completedTask = await Task.WhenAny(sendTask, timeoutTask);
