@@ -170,6 +170,19 @@ public abstract class Linux : IMeadowDevice
         }
     }
 
+    /// <summary>
+    /// Creates a digital interrupt port for the specified pin, configured with the given interrupt and resistor modes.
+    /// </summary>
+    /// <param name="pin">The pin to associate with the digital interrupt port.</param>
+    /// <param name="interruptMode">The mode that determines how interrupts are triggered on the pin.</param>
+    /// <param name="resistorMode">The resistor configuration to apply to the pin, such as pull-up or pull-down.</param>
+    /// <returns>An <see cref="IDigitalInterruptPort"/> instance configured with the specified pin, interrupt mode, and resistor
+    /// mode.</returns>
+    public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode)
+    {
+        return CreateDigitalInterruptPort(pin, interruptMode, resistorMode, TimeSpan.Zero, TimeSpan.Zero);
+    }
+
     /// <inheritdoc/>
     public IDigitalInterruptPort CreateDigitalInterruptPort(IPin pin, InterruptMode interruptMode, ResistorMode resistorMode, TimeSpan debounceDuration, TimeSpan glitchDuration)
     {
