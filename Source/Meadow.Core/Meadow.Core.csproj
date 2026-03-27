@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Authors>Wilderness Labs, Inc</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net9.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <AssemblyName>Meadow</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
@@ -19,10 +19,18 @@
     <LangVersion>12.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+      <NoWarn Condition="'$(TargetFramework)' == 'net9.0'">CS8597;CS8600;CS8601;CS8602;CS8603;CS8604;CS8612;CS8618;CS8619;CS8622;CS8714;CS8765;CS8767</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="CryptographyService.cs" />
     <Compile Remove="MeadowCloudConnectionService.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <Compile Remove="Cloud\MeadowCloudCommandService.cs" />
+    <Compile Remove="Cloud\MeadowCloudUpdateService.cs" />
+    <Compile Remove="Cloud\MeadowCloudConnectionService.cs" />
+    <Compile Remove="Cloud\SqliteTelemetryStore.cs" />
+    <Compile Remove="Cloud\UpdateStore.cs" />
   </ItemGroup>
     <ItemGroup>
         <None Include="..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
@@ -30,12 +38,12 @@
         <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Logging\Source\Meadow.Logging\lib\Meadow.Logging.csproj" />
-        <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
+        <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="System.IO.Hashing" />
+        <PackageReference Include="System.IO.Hashing" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
         <PackageReference Include="NetEscapades.Configuration.Yaml" />
-        <PackageReference Include="System.IO.Ports" />
-        <PackageReference Include="sqlite-net-static" />
+        <PackageReference Include="System.IO.Ports" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
+        <PackageReference Include="sqlite-net-static" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
     </ItemGroup>
 </Project>

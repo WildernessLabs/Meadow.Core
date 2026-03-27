@@ -44,21 +44,33 @@ public partial class F7PlatformOS : IPlatformOS
     /// <inheritdoc/>
     public IMeadowCloudService GetCloudConnectionService(IMeadowCloudSettings settings)
     {
+#if NETSTANDARD2_1
         return new MeadowCloudConnectionService(settings);
+#else
+        throw new NotSupportedException("Cloud services not available on this target");
+#endif
     }
 
     /// <inheritdoc/>
     public IUpdateService GetUpdateService(IMeadowCloudService meadowCloudService)
     {
+#if NETSTANDARD2_1
         return new MeadowCloudUpdateService(
             FileSystem.FileSystemRoot,
             meadowCloudService);
+#else
+        throw new NotSupportedException("Update service not available on this target");
+#endif
     }
 
     /// <inheritdoc/>
     public ICommandService GetCloudCommandService(IMeadowCloudService meadowCloudService)
     {
+#if NETSTANDARD2_1
         return new MeadowCloudCommandService(meadowCloudService);
+#else
+        throw new NotSupportedException("Command service not available on this target");
+#endif
     }
 
     /// <summary>

@@ -365,6 +365,15 @@ public static partial class MeadowOS
 
     private static MeadowPlatform DetectPlatform()
     {
+        // Check for NuttX first — .NET 10 on NuttX reports as Linux/ARM (TARGET_LINUX
+        // is baked into System.Private.CoreLib), but uname().sysname returns "NuttX".
+        // OSDescription falls back to uname() when /etc/os-release is absent.
+        if (RTI.OSDescription?.StartsWith("NuttX", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            // F7 device running NuttX — exact variant resolved later via meadow_os_hardware_version()
+            return MeadowPlatform.Unknown;
+        }
+
         if (RTI.IsOSPlatform(OSPlatform.Windows))
         {
             return MeadowPlatform.Windows;
@@ -386,7 +395,7 @@ public static partial class MeadowOS
         }
         else if (Directory.Exists("/meadow0"))
         {
-            // we're an F7 - but with the current OS we can't tell exctly what type of F7
+            // we're an F7 - but with the current OS we can't tell exactly what type of F7
         }
 
         return MeadowPlatform.Unknown;
