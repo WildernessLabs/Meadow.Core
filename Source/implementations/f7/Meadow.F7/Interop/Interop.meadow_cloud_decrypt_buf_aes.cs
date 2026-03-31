@@ -43,7 +43,7 @@ internal static partial class Interop
 
                 var decryptLength = meadow_cloud_decrypt_buf_aes(encryptedBufferPtr, encrypted_data.Length, keyBufferPtr, ivBufferPtr, decryptedBufferPtr);
 
-                byte[] result = new byte[decryptLength];
+                byte[] result = GC.AllocateUninitializedArray<byte>(decryptLength);
                 Marshal.Copy(decryptedBufferPtr, result, 0, result.Length);
                 return result;
             }

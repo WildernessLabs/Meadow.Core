@@ -256,7 +256,7 @@ namespace Meadow
 
         private void InterruptProc(int gpio, int handle, CancellationToken cancelToken, Action callback)
         {
-            var readBuffer = new byte[64];
+            var readBuffer = GC.AllocateUninitializedArray<byte>(64);
             var fdset = new Interop.pollfd();
 
             fdset.fd = handle;

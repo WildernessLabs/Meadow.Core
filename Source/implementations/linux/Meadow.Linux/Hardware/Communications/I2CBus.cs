@@ -174,7 +174,7 @@ public partial class I2CBus : II2cBus, IDisposable
         fixed (byte* pWrite = writeBuffer)
         fixed (byte* pRead = readBuffer)
         {
-            if (writeBuffer != null)
+            if (writeBuffer.Length > 0)
             {
                 pMessages[index] = new I2CIoctlData()
                 {
@@ -186,7 +186,7 @@ public partial class I2CBus : II2cBus, IDisposable
                 index++;
             }
 
-            if (readBuffer != null)
+            if (readBuffer.Length > 0)
             {
                 pMessages[index] = new I2CIoctlData()
                 {

@@ -266,7 +266,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = systemConfiguration.MaximumMessageQueueLength;
             offset += 1;
             EncodeInt32(systemConfiguration.MaximumRetryCount, buffer, offset);
@@ -402,7 +401,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(configurationValue.Item, buffer, offset);
             offset += 4;
             EncodeUInt32(configurationValue.ValueLength, buffer, offset);
@@ -468,7 +466,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(errorEvent.ErrorCode, buffer, offset);
             offset += 4;
             buffer[offset] = errorEvent.Interface;
@@ -539,7 +536,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeString(accessPointInformation.NetworkName, buffer, offset);
             offset += accessPointInformation.NetworkName.Length + 1;
             EncodeString(accessPointInformation.Password, buffer, offset);
@@ -618,7 +614,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = disconnectFromAccessPointRequest.TurnOffWiFiInterface;
             return buffer;
         }
@@ -668,7 +663,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(connectEventData.IpAddress, buffer, offset);
             offset += 4;
             EncodeUInt32(connectEventData.SubnetMask, buffer, offset);
@@ -754,7 +748,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(nodeConnectionChangeEventData.IpAddress, buffer, offset);
             offset += 4;
             Array.Copy(nodeConnectionChangeEventData.MacAddress, 0, buffer, offset, 6);
@@ -807,7 +800,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = disconnectEventData.SsidLength;
             offset += 1;
             Array.Copy(buffer, offset, disconnectEventData.Bssid, 0, 6);
@@ -898,7 +890,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             int amount = accessPoint.Ssid.Length >= 33 ? 33 - 1 : accessPoint.Ssid.Length;
             for (int index = 0; index < amount; index++)
             {
@@ -980,7 +971,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(accessPointList.NumberOfAccessPoints, buffer, offset);
             offset += 4;
             EncodeUInt32(accessPointList.AccessPointsLength, buffer, offset);
@@ -1046,7 +1036,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = sockAddr.Family;
             offset += 1;
             EncodeUInt16(sockAddr.Port, buffer, offset);
@@ -1117,7 +1106,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(addrInfo.MyHeapAddress, buffer, offset);
             offset += 4;
             EncodeInt32(addrInfo.Flags, buffer, offset);
@@ -1213,7 +1201,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeString(getAddrInfoRequest.NodeName, buffer, offset);
             offset += getAddrInfoRequest.NodeName.Length + 1;
             EncodeString(getAddrInfoRequest.ServName, buffer, offset);
@@ -1285,7 +1272,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(getAddrInfoResponse.AddrInfoResponseErrno, buffer, offset);
             offset += 4;
             EncodeUInt32(getAddrInfoResponse.ResLength, buffer, offset);
@@ -1350,7 +1336,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(socketRequest.AddressInformation, buffer, offset);
             offset += 4;
             EncodeInt32(socketRequest.Domain, buffer, offset);
@@ -1410,7 +1395,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(integerResponse.Result, buffer, offset);
             return buffer;
         }
@@ -1458,7 +1442,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(integerAndErrnoResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(integerAndErrnoResponse.ResponseErrno, buffer, offset);
@@ -1511,7 +1494,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(connectRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeUInt32(connectRequest.AddrLength, buffer, offset);
@@ -1576,7 +1558,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(freeAddrInfoRequest.AddrInfoAddress, buffer, offset);
             return buffer;
         }
@@ -1624,7 +1605,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(timeVal.TvSec, buffer, offset);
             offset += 4;
             EncodeUInt32(timeVal.TvUsec, buffer, offset);
@@ -1677,7 +1657,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(setSockOptRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(setSockOptRequest.Level, buffer, offset);
@@ -1754,7 +1733,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(getSockOptRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(getSockOptRequest.Level, buffer, offset);
@@ -1811,7 +1789,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(getSockOptResponse.Result, buffer, offset);
             offset += 4;
             EncodeInt32(getSockOptResponse.ResponseErrno, buffer, offset);
@@ -1884,7 +1861,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(linger.LOnOff, buffer, offset);
             offset += 4;
             EncodeInt32(linger.LLinger, buffer, offset);
@@ -1937,7 +1913,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(writeRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeUInt32(writeRequest.BufferLength, buffer, offset);
@@ -2006,7 +1981,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(readRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(readRequest.Count, buffer, offset);
@@ -2059,7 +2033,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(readResponse.BufferLength, buffer, offset);
             offset += 4;
             if (readResponse.BufferLength > 0)
@@ -2128,7 +2101,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(closeRequest.SocketHandle, buffer, offset);
             return buffer;
         }
@@ -2176,7 +2148,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(getBatteryChargeLevelResponse.Level, buffer, offset);
             return buffer;
         }
@@ -2225,7 +2196,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(sendRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeUInt32(sendRequest.BufferLength, buffer, offset);
@@ -2300,7 +2270,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(sendToRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeUInt32(sendToRequest.BufferLength, buffer, offset);
@@ -2389,7 +2358,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(recvFromRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(recvFromRequest.Length, buffer, offset);
@@ -2451,7 +2419,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(recvFromResponse.BufferLength, buffer, offset);
             offset += 4;
             if (recvFromResponse.BufferLength > 0)
@@ -2540,7 +2507,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(pollRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeUInt16(pollRequest.Events, buffer, offset);
@@ -2604,7 +2570,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt16(pollResponse.ReturnedEvents, buffer, offset);
             offset += 2;
             EncodeInt32(pollResponse.Result, buffer, offset);
@@ -2660,7 +2625,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(interruptPollResponse.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(interruptPollResponse.Result, buffer, offset);
@@ -2724,7 +2688,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(listenRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeInt32(listenRequest.BackLog, buffer, offset);
@@ -2777,7 +2740,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(bindRequest.SocketHandle, buffer, offset);
             offset += 4;
             EncodeUInt32(bindRequest.AddrLength, buffer, offset);
@@ -2842,7 +2804,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(acceptRequest.SocketHandle, buffer, offset);
             return buffer;
         }
@@ -2891,7 +2852,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(acceptResponse.AddrLength, buffer, offset);
             offset += 4;
             if (acceptResponse.AddrLength > 0)
@@ -2960,7 +2920,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(ioctlRequest.Command, buffer, offset);
             return buffer;
         }
@@ -3009,7 +2968,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(ioctlResponse.AddrLength, buffer, offset);
             offset += 4;
             if (ioctlResponse.AddrLength > 0)
@@ -3082,7 +3040,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeInt32(getSockPeerNameRequest.SocketHandle, buffer, offset);
             return buffer;
         }
@@ -3131,7 +3088,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(getSockPeerNameResponse.AddrLength, buffer, offset);
             offset += 4;
             if (getSockPeerNameResponse.AddrLength > 0)
@@ -3200,7 +3156,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = eventData.Interface;
             offset += 1;
             EncodeUInt32(eventData.Function, buffer, offset);
@@ -3261,7 +3216,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt32(eventDataPayload.MessageId, buffer, offset);
             offset += 4;
             EncodeUInt32(eventDataPayload.PayloadLength, buffer, offset);
@@ -3326,7 +3280,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             buffer[offset] = setAntennaRequest.Antenna;
             offset += 1;
             buffer[offset] = setAntennaRequest.Persist;
@@ -3378,7 +3331,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeString(bTStackConfig.Config, buffer, offset);
             return buffer;
         }
@@ -3429,7 +3381,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt16(bTDataWriteRequest.Handle, buffer, offset);
             offset += 2;
             EncodeUInt32(bTDataWriteRequest.DataLength, buffer, offset);
@@ -3495,7 +3446,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt16(bTGetHandlesResponse.HandleCount, buffer, offset);
             offset += 2;
             EncodeUInt32(bTGetHandlesResponse.HandlesLength, buffer, offset);
@@ -3561,7 +3511,6 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             //  Now allocate a new buffer and copy the data in to the buffer.
             //
             byte[] buffer = new byte[length];
-            Array.Clear(buffer, 0, buffer.Length);
             EncodeUInt16(bTServerDataSet.Handle, buffer, offset);
             offset += 2;
             EncodeUInt32(bTServerDataSet.SetDataLength, buffer, offset);

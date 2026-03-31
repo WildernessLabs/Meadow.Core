@@ -219,8 +219,8 @@ public partial class SpiBus : ISpiBus, IDisposable
     /// <inheritdoc/>
     public unsafe void Exchange(IDigitalOutputPort? chipSelect, Span<byte> writeBuffer, Span<byte> readBuffer, ChipSelectMode csMode = ChipSelectMode.ActiveLow)
     {
-        if (writeBuffer == null) throw new ArgumentNullException("A non-null sendBuffer is required");
-        if (readBuffer == null) throw new ArgumentNullException("A non-null receiveBuffer is required");
+        if (writeBuffer.Length == 0) throw new ArgumentException("A non-empty sendBuffer is required", nameof(writeBuffer));
+        if (readBuffer.Length == 0) throw new ArgumentException("A non-empty receiveBuffer is required", nameof(readBuffer));
         if (writeBuffer.Length != readBuffer.Length) throw new Exception("Both buffers must be equal size");
 
         _busSemaphore.Wait();

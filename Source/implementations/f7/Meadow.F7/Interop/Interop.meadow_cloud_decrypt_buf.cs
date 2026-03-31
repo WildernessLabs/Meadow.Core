@@ -25,7 +25,7 @@ internal static partial class Interop
                 Marshal.Copy(buf, 0, encryptedBufferPtr, buf.Length);
                 int result_len = meadow_cloud_decrypt_buf(encryptedBufferPtr, buf.Length, decryptedBufferPtr);
 
-                byte[] result = new byte[result_len];
+                byte[] result = GC.AllocateUninitializedArray<byte>(result_len);
                 Marshal.Copy(decryptedBufferPtr, result, 0, result_len);
                 return result;
             }

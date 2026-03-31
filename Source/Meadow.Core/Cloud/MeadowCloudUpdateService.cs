@@ -2,6 +2,7 @@
 using Meadow.Update;
 using MQTTnet;
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -39,8 +40,7 @@ public class MeadowCloudUpdateService : IUpdateService
     private const int RetryDelayMilliseconds = 1000;
     private const int UpdateServicePulseMilliseconds = 10000;
 
-    private readonly byte[] read_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
-    private readonly byte[] write_buffer = new byte[1024 * 384]; // TODO: make this configurable/platform dependent
+    private const int DownloadBufferSize = 1024 * 384;
 
     private readonly MeadowCloudConnectionService _connectionService;
     private UpdateState _state = UpdateState.Disconnected;
@@ -290,6 +290,8 @@ public class MeadowCloudUpdateService : IUpdateService
 
         long totalBytesDownloaded = 0;
 
+        var read_buffer = ArrayPool<byte>.Shared.Rent(DownloadBufferSize);
+        var write_buffer = ArrayPool<byte>.Shared.Rent(DownloadBufferSize);
         try
         {
             using var httpClient = new HttpClient();
@@ -420,6 +422,11 @@ public class MeadowCloudUpdateService : IUpdateService
             await Task.Delay(RetryDelayMilliseconds);
             throw;
         }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(read_buffer);
+            ArrayPool<byte>.Shared.Return(write_buffer);
+        }
     }
 
     private async Task DownloadProc(UpdateMessage message, CancellationTokenSource cancel)
@@ -475,7 +482,7 @@ public class MeadowCloudUpdateService : IUpdateService
         catch (Exception ex)
         {
             Log.Error($"Failed to extract update package: {ex.Message}", LogMessageGroup);
-            throw ex;
+            throw;
         }
         finally
         {
