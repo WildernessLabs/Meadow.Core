@@ -7,9 +7,21 @@ namespace Meadow.Core
     {
         public static partial class Nuttx
         {
-            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
-            public static partial AllocationInfo mallinfo();
+            /// <summary>
+            /// Blittable layout-compatible struct for the native mallinfo() return value.
+            /// </summary>
+            [StructLayout(LayoutKind.Sequential)]
+            internal struct NativeAllocationInfo
+            {
+                public int Arena;
+                public int FreeBlocks;
+                public int LargestFreeBlock;
+                public int TotalAllocated;
+                public int TotalFree;
+            }
 
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial NativeAllocationInfo mallinfo();
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true)]
             public static partial int meadow_idle_monitor_get_value();

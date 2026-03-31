@@ -1,9 +1,20 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Meadow
 {
     internal static partial class Interop
     {
+        /// <summary>
+        /// Inline array for the 20-byte termios control character buffer.
+        /// Replaces MarshalAs(ByValArray) which is unsupported by LibraryImport.
+        /// </summary>
+        [InlineArray(20)]
+        public struct TermiosControlChars
+        {
+            private byte _element;
+        }
+
         [StructLayout(LayoutKind.Explicit)]
 #pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
         public struct termios
@@ -18,8 +29,7 @@ namespace Meadow
             [FieldOffset(12)]
             public LocalFlags c_lflag;
             [FieldOffset(16)]
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-            public byte[] c_cc;
+            public TermiosControlChars c_cc;
             [FieldOffset(36)] // I *think* this is the right offset (20 bytes of control characters)
             public int c_ispeed;
             [FieldOffset(40)]

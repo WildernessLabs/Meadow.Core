@@ -36,7 +36,7 @@ namespace Meadow.Core
             public struct GPIOPinState
             {
                 public PinDesignator PinDesignator;
-                public bool State;
+                public byte State;
             }
             //#define _TIOCBASE       (0x0100) /* Terminal I/O ioctl commands */
             //#define _WDIOCBASE      (0x0200) /* Watchdog driver ioctl commands */

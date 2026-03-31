@@ -10,6 +10,7 @@ internal static partial class Interop
     public static partial class Nuttx
     {
         [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static partial bool meadow_cell_is_connected();
 
         [LibraryImport(LIBRARY_NAME, SetLastError = true)]

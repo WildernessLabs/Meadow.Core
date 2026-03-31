@@ -142,7 +142,15 @@ public partial class F7PlatformOS : IPlatformOS
     /// <inheritdoc/>
     public AllocationInfo GetMemoryAllocationInfo()
     {
-        return Core.Interop.Nuttx.mallinfo();
+        var native = Core.Interop.Nuttx.mallinfo();
+        return new AllocationInfo
+        {
+            Arena = native.Arena,
+            FreeBlocks = native.FreeBlocks,
+            LargestFreeBlock = native.LargestFreeBlock,
+            TotalAllocated = native.TotalAllocated,
+            TotalFree = native.TotalFree
+        };
     }
 
     /// <inheritdoc/>

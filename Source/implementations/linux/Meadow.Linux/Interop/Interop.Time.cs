@@ -12,9 +12,6 @@ namespace Meadow
         public static partial void tzset();
 
         [LibraryImport(LIBC, SetLastError = true)]
-        public static partial ref Rtc_time localtime(ref long time_t);
-
-        [LibraryImport(LIBC, SetLastError = true)]
         public static partial IntPtr localtime_r(ref long time_t, ref Tm tm);
 
         [LibraryImport(LIBC, SetLastError = true)]

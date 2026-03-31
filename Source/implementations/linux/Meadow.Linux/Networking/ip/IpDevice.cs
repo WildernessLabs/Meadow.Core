@@ -86,7 +86,7 @@ internal class IpDevice
 
         // Convert prefix length to subnet mask
         uint mask = 0xFFFFFFFF << (32 - prefixLen);
-        byte[] bytes = new byte[4];
+        Span<byte> bytes = stackalloc byte[4];
         bytes[0] = (byte)(mask >> 24);
         bytes[1] = (byte)(mask >> 16);
         bytes[2] = (byte)(mask >> 8);

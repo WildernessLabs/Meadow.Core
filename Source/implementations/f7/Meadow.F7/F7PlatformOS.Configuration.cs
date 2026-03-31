@@ -2,6 +2,8 @@
 using Meadow.Devices;
 using Meadow.Devices.Esp32.MessagePayloads;
 using System;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -207,22 +209,70 @@ public partial class F7PlatformOS
     }
 
     /// <summary>
+    /// Get or Set the specified value in the OS configuration using a span buffer.
+    /// Enables callers to use stackalloc for small fixed-size buffers.
+    /// </summary>
+    internal static unsafe (bool Result, int Length) GetSetValue(ConfigurationValues item, Direction direction, Span<byte> buffer)
+    {
+        bool result = true;
+        int length = 0;
+        try
+        {
+            fixed (byte* ptr = buffer)
+            {
+                var request = new Interop.Nuttx.UpdConfigurationValue()
+                {
+                    Item = (int)item,
+                    Direction = (byte)direction,
+                    ValueBufferSize = buffer.Length,
+                    ValueBuffer = (IntPtr)ptr,
+                    ReturnDataLength = 0
+                };
+                int updResult = UPD.Ioctl(Interop.Nuttx.UpdIoctlFn.GetSetConfigurationValue, ref request);
+                if (updResult == 0)
+                {
+                    length = request.ReturnDataLength;
+                }
+                else
+                {
+                    Resolver.Log.Error($"Configuration ioctl failed, result code: {updResult}", MessageGroup.Core);
+                    result = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Error($"Configuration ioctl failed: {ex.Message}", MessageGroup.Core);
+            result = false;
+        }
+
+        return (result, length);
+    }
+
+    /// <summary>
     /// Get a string configuration item.
     /// </summary>
     /// <param name="item">Configuration item to read.</param>
     /// <returns>Configuration value if present, String.Empty if no item could be found.</returns>
     public static string GetString(ConfigurationValues item)
     {
-        byte[] buffer = new byte[1024];
-        string str = String.Empty;
-
-        (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
-        if (result && (length > 0))
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(1024);
+        try
         {
-            str = Encoding.ASCII.GetString(buffer, 0, length);
-        }
+            string str = String.Empty;
 
-        return str;
+            (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
+            if (result && (length > 0))
+            {
+                str = Encoding.ASCII.GetString(buffer, 0, length);
+            }
+
+            return str;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 
     /// <summary>
@@ -246,13 +296,13 @@ public partial class F7PlatformOS
     /// <returns>Configuration value if present, 0 if it could not be found.</returns>
     public static uint GetUInt(ConfigurationValues item)
     {
-        byte[] buffer = new byte[4];
+        Span<byte> buffer = stackalloc byte[4];
         uint ui = 0;
 
         (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
         if (result && (length == 4))
         {
-            ui = Encoders.ExtractUInt32(buffer, 0);
+            ui = BinaryPrimitives.ReadUInt32LittleEndian(buffer);
         }
 
         return ui;
@@ -265,7 +315,7 @@ public partial class F7PlatformOS
     /// <returns>Configuration value if present, 0 if the item count not be found.</returns>
     public static byte GetByte(ConfigurationValues item)
     {
-        byte[] buffer = new byte[1];
+        Span<byte> buffer = stackalloc byte[1];
         byte b = 0;
 
         (bool result, int length) = GetSetValue(item, Direction.Get, buffer);
@@ -333,7 +383,8 @@ public partial class F7PlatformOS
     /// <returns>True if the configuration value was set, false if there is a problem.</returns>
     public static bool SetUInt(ConfigurationValues item, uint value)
     {
-        byte[] buffer = BitConverter.GetBytes(value);
+        Span<byte> buffer = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(buffer, value);
 
         (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
 
@@ -348,8 +399,7 @@ public partial class F7PlatformOS
     /// <returns>True if the configuration value was set, false if there is a problem.</returns>
     public static bool SetByte(ConfigurationValues item, byte value)
     {
-        byte[] buffer = new byte[1];
-        buffer[0] = value;
+        Span<byte> buffer = stackalloc byte[] { value };
 
         (bool result, int length) = GetSetValue(item, Direction.Set, buffer);
 

@@ -265,7 +265,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     private void EventHandlerServiceTask()
     {
         Resolver.Log.Trace("Starting Esp32Coprocessor event handler task.", MessageGroup.Esp);
-        IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
+        IntPtr queue = Interop.Nuttx.mq_open("/Esp32Events", Nuttx.QueueOpenFlag.ReadOnly);
         byte[] rxBuffer = ArrayPool<byte>.Shared.Rent(22);       // Maximum amount of data that can be read from a NuttX message queue.
         try
         {

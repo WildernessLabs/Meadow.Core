@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Meadow.Core
 {
@@ -11,13 +10,13 @@ namespace Meadow.Core
         public static partial class Nuttx
         {
             [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
-            public static partial IntPtr mq_open(StringBuilder name, QueueOpenFlag oflag);
+            public static partial IntPtr mq_open(string name, QueueOpenFlag oflag);
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
             public static partial IntPtr mq_open(string name, QueueOpenFlag oflag, int mode, IntPtr attr);
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
-            public static partial IntPtr mq_open(StringBuilder name, QueueOpenFlag oflag, int mode, ref QueueAttributes attr);
+            public static partial IntPtr mq_open(string name, QueueOpenFlag oflag, int mode, ref QueueAttributes attr);
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true)]
             public static partial int mq_close(IntPtr mqdes);
@@ -36,6 +35,9 @@ namespace Meadow.Core
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true)]
             public static partial int mq_receive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio);
+
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_receive(IntPtr mqdes, Span<byte> msg_ptr, int msg_len, ref int msg_prio);
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true)]
             public static partial int mq_notify(IntPtr mqdes, ref SigEvent sevp);

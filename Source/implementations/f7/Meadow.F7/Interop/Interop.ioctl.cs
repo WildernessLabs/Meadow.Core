@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Meadow.Core
 {
@@ -88,9 +87,6 @@ namespace Meadow.Core
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true)]
             public static partial int ioctl(IntPtr fd, UpdIoctlFn request, ref int dwData);
-
-            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
-            public static partial int ioctl(IntPtr fd, UpdIoctlFn request, StringBuilder sb);
 
             [LibraryImport(LIBRARY_NAME, SetLastError = true)]
             public static partial int ioctl(IntPtr fd, UpdIoctlFn request, ref UpdEnumDirCmd command);

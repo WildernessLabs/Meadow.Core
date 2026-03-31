@@ -24,7 +24,6 @@
     <PackageReference Include="Silk.NET" />
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="System.IO.Ports" />
-    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Silk\Driver\Displays.Silk.csproj" />

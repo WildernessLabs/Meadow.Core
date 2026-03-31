@@ -256,11 +256,11 @@ public partial class F7GPIOManager : IMeadowIOController
 
     private void InterruptServiceTaskProc()
     {
-        IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/mdw_int"), Nuttx.QueueOpenFlag.ReadOnly);
+        IntPtr queue = Interop.Nuttx.mq_open("/mdw_int", Nuttx.QueueOpenFlag.ReadOnly);
 
         // We get 2 bytes from Nuttx. the first is the GPIOs port and pin the second
         // the debounced state of the GPIO
-        var rx_buffer = new byte[2];
+        Span<byte> rx_buffer = stackalloc byte[2];
         int lockvar = 0;
 
         while (true) // Resolver.App.CancellationToken doesn't yet exist
