@@ -1,6 +1,8 @@
 ﻿using Meadow.Devices;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
 
@@ -192,6 +194,34 @@ namespace Meadow.Hardware
             {
                 _busSemaphore.Release();
             }
+        }
+
+        /// <summary>
+        /// Writes a number of bytes to the bus. Accepts read-only data sources
+        /// such as stackalloc buffers and UTF-8 string literals.
+        /// Zero-copy: delegates directly to the Span-based overload.
+        /// </summary>
+        /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
+        /// <param name="data">Data to be written.</param>
+        public void Write(byte peripheralAddress, ReadOnlySpan<byte> data)
+        {
+            ref byte r = ref Unsafe.AsRef(in MemoryMarshal.GetReference(data));
+            Write(peripheralAddress, MemoryMarshal.CreateSpan(ref r, data.Length));
+        }
+
+        /// <summary>
+        /// Writes data from the write buffer to a peripheral on the bus, then
+        /// resets the bus and reads the return data into the read buffer.
+        /// Accepts a read-only write buffer. Zero-copy: delegates directly
+        /// to the Span-based overload.
+        /// </summary>
+        /// <param name="peripheralAddress">Address of the I2C peripheral.</param>
+        /// <param name="writeBuffer">Buffer to read data from.</param>
+        /// <param name="readBuffer">Buffer to read returning data into.</param>
+        public void Exchange(byte peripheralAddress, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        {
+            ref byte r = ref Unsafe.AsRef(in MemoryMarshal.GetReference(writeBuffer));
+            Exchange(peripheralAddress, MemoryMarshal.CreateSpan(ref r, writeBuffer.Length), readBuffer);
         }
 
         private void DecipherI2cError(Nuttx.ErrorCode ec)

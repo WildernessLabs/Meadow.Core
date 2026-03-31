@@ -10,10 +10,10 @@ namespace Meadow;
 /// <summary>
 /// A high-speed IAnalogInputArray specific to the Meadow F7 platforms
 /// </summary>
-public class F7AnalogInputArray : IAnalogInputArray, IDisposable
+public unsafe class F7AnalogInputArray : IAnalogInputArray, IDisposable
 {
     private readonly double[] _dataBuffer;
-    private GCHandle _bufferHandle;
+    private readonly double* _nativeBuffer;
     private IPin[] _pins;
     private IMeadowIOController _controller;
 
@@ -68,15 +68,18 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
 
         _dataBuffer = new double[pins.Length];
 
-        // pin the buffer
-        _bufferHandle = GCHandle.Alloc(_dataBuffer, GCHandleType.Pinned);
+        // allocate cache-line-aligned native memory for DMA
+        _nativeBuffer = (double*)NativeMemory.AlignedAlloc(
+            (nuint)(pins.Length * sizeof(double)),
+            64); // 64-byte alignment for cache-line / DMA
 
         try
         {
-            Nuttx.meadow_adc_configure(pinNumbers, pins.Length, _bufferHandle.AddrOfPinnedObject());
+            Nuttx.meadow_adc_configure(pinNumbers, pins.Length, (IntPtr)_nativeBuffer);
         }
         catch (EntryPointNotFoundException)
         {
+            NativeMemory.AlignedFree(_nativeBuffer);
             throw new PlatformNotSupportedException("The current OS version on this device does not support high-speed ADCs. You must use a newer version (1.6 or later)");
         }
     }
@@ -98,6 +101,10 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
         {
             Resolver.Log.Info($"read returned {result}", MessageGroup.Core);
         }
+
+        // copy from the native DMA buffer into the managed array
+        new ReadOnlySpan<double>(_nativeBuffer, _dataBuffer.Length)
+            .CopyTo(_dataBuffer);
     }
 
     /// <inheritdoc/>
@@ -107,10 +114,7 @@ public class F7AnalogInputArray : IAnalogInputArray, IDisposable
         {
             Nuttx.meadow_adc_configure(Array.Empty<byte>(), 0, IntPtr.Zero);
 
-            if (_bufferHandle.IsAllocated)
-            {
-                _bufferHandle.Free();
-            }
+            NativeMemory.AlignedFree(_nativeBuffer);
 
             // return pins to the available pool and reconfigure from analog to high-z inputs
             foreach (var pin in _pins)

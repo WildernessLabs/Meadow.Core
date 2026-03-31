@@ -16,10 +16,10 @@ namespace Meadow
         private const string GpioFolder = "/sys/class/gpio";
         private const int InterruptCheckPeriodMs = 1000;
 
-        private readonly byte[] GPIO_IN = new byte[] { 0x69, 0x6e, 0x00 }; // the string "in"
-        private readonly byte[] GPIO_OUT = new byte[] { 0x6f, 0x75, 0x74, 0x00 }; // the string "out"
-        private readonly byte[] GPIO_HIGH = new byte[] { 0x31, 0x00 }; // the string "1"
-        private readonly byte[] GPIO_LOW = new byte[] { 0x30, 0x00 }; // the string "0"
+        private static ReadOnlySpan<byte> GPIO_IN => "in\0"u8;
+        private static ReadOnlySpan<byte> GPIO_OUT => "out\0"u8;
+        private static ReadOnlySpan<byte> GPIO_HIGH => "1\0"u8;
+        private static ReadOnlySpan<byte> GPIO_LOW => "0\0"u8;
 
         private Dictionary<int, CancellationTokenSource> _cancelTokens = new();
 
@@ -109,7 +109,7 @@ namespace Meadow
             }
         }
 
-        public void SetDirection(int gpio, GpioDirection direction)
+        public unsafe void SetDirection(int gpio, GpioDirection direction)
         {
             var path = $"{GpioFolder}/gpio{gpio}/direction";
 
@@ -121,10 +121,13 @@ namespace Meadow
             try
             {
                 var content = direction == GpioDirection.Input ? GPIO_IN : GPIO_OUT;
-                var result = Interop.write(handle, content, content.Length);
-                if (result < 0)
+                fixed (byte* ptr = content)
                 {
-                    throw new NativeException($"Unable to write to GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
+                    var result = Interop.write(handle, ptr, content.Length);
+                    if (result < 0)
+                    {
+                        throw new NativeException($"Unable to write to GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
+                    }
                 }
             }
             finally
@@ -133,7 +136,7 @@ namespace Meadow
             }
         }
 
-        public void SetValue(int gpio, bool value)
+        public unsafe void SetValue(int gpio, bool value)
         {
             var path = $"{GpioFolder}/gpio{gpio}/value";
 
@@ -145,10 +148,13 @@ namespace Meadow
             try
             {
                 var content = value ? GPIO_HIGH : GPIO_LOW;
-                var result = Interop.write(handle, content, content.Length);
-                if (result < 0)
+                fixed (byte* ptr = content)
                 {
-                    throw new NativeException($"Unable to write to GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
+                    var result = Interop.write(handle, ptr, content.Length);
+                    if (result < 0)
+                    {
+                        throw new NativeException($"Unable to write to GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
+                    }
                 }
             }
             finally
@@ -183,7 +189,7 @@ namespace Meadow
             }
         }
 
-        private void SetEdge(int gpio, InterruptMode mode)
+        private unsafe void SetEdge(int gpio, InterruptMode mode)
         {
             var path = $"{GpioFolder}/gpio{gpio}/edge";
 
@@ -194,27 +200,21 @@ namespace Meadow
             }
             try
             {
-                byte[] content;
-                switch (mode)
+                ReadOnlySpan<byte> content = mode switch
                 {
-                    case InterruptMode.EdgeBoth:
-                        content = Encoding.ASCII.GetBytes("both\0");
-                        break;
-                    case InterruptMode.EdgeRising:
-                        content = Encoding.ASCII.GetBytes("rising\0");
-                        break;
-                    case InterruptMode.EdgeFalling:
-                        content = Encoding.ASCII.GetBytes("falling\0");
-                        break;
-                    default:
-                        content = Encoding.ASCII.GetBytes("none\0");
-                        break;
-                }
+                    InterruptMode.EdgeBoth => "both\0"u8,
+                    InterruptMode.EdgeRising => "rising\0"u8,
+                    InterruptMode.EdgeFalling => "falling\0"u8,
+                    _ => "none\0"u8,
+                };
 
-                var result = Interop.write(handle, content, content.Length);
-                if (result < 0)
+                fixed (byte* ptr = content)
                 {
-                    throw new NativeException($"Unable to set interrupt edge for GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
+                    var result = Interop.write(handle, ptr, content.Length);
+                    if (result < 0)
+                    {
+                        throw new NativeException($"Unable to set interrupt edge for GPIO {gpio} (error code {Marshal.GetLastWin32Error()})");
+                    }
                 }
             }
             finally

@@ -1,5 +1,7 @@
 ﻿using Meadow.Devices;
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using static Meadow.Core.Interop;
 
@@ -275,6 +277,42 @@ namespace Meadow.Hardware
             {
                 _busSemaphore.Release();
             }
+        }
+
+        /// <summary>
+        /// Writes data to the SPI bus. Accepts read-only data sources
+        /// such as stackalloc buffers and UTF-8 string literals.
+        /// Zero-copy: delegates directly to the Span-based overload.
+        /// </summary>
+        /// <param name="chipSelect">IPin to use as the chip select to activate the bus</param>
+        /// <param name="writeBuffer">Data to write</param>
+        /// <param name="csMode">Describes which level on the chip select activates the bus</param>
+        public void Write(
+            IDigitalOutputPort? chipSelect,
+            ReadOnlySpan<byte> writeBuffer,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
+        {
+            ref byte r = ref Unsafe.AsRef(in MemoryMarshal.GetReference(writeBuffer));
+            Write(chipSelect, MemoryMarshal.CreateSpan(ref r, writeBuffer.Length), csMode);
+        }
+
+        /// <summary>
+        /// Writes data from the write buffer to a peripheral on the bus while
+        /// at the same time reading return data into the read buffer.
+        /// Accepts a read-only write buffer. Zero-copy: delegates directly
+        /// to the Span-based overload.
+        /// </summary>
+        /// <param name="chipSelect">Port to use as the chip select to activate the peripheral.</param>
+        /// <param name="writeBuffer">Buffer to read data from.</param>
+        /// <param name="readBuffer">Buffer to read returning data into.</param>
+        /// <param name="csMode">Describes which level on the chip select activates the peripheral.</param>
+        public void Exchange(
+            IDigitalOutputPort? chipSelect,
+            ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer,
+            ChipSelectMode csMode = ChipSelectMode.ActiveLow)
+        {
+            ref byte r = ref Unsafe.AsRef(in MemoryMarshal.GetReference(writeBuffer));
+            Exchange(chipSelect, MemoryMarshal.CreateSpan(ref r, writeBuffer.Length), readBuffer, csMode);
         }
 
         /// <summary>
