@@ -33,16 +33,16 @@ namespace Meadow.Core
             */
 
             //int meadow_adc_configure(uint8_t gpioList[], uint32_t gpioCount, double* userDataBuf);
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int meadow_adc_configure(byte[] gpioList, int gpioCount, IntPtr userDataBuf);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int meadow_adc_configure(byte[] gpioList, int gpioCount, IntPtr userDataBuf);
 
             //int meadow_adc_read_values(void);
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int meadow_adc_read_values();
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int meadow_adc_read_values();
 
             //int meadow_adc_read_temp_vbat(double* batteryVoltage, double* temperatureValue);
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int meadow_adc_read_temp_vbat(ref double batteryVoltage, ref double temperatureValue);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int meadow_adc_read_temp_vbat(ref double batteryVoltage, ref double temperatureValue);
         }
     }
 }

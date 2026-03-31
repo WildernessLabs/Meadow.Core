@@ -9,17 +9,17 @@ internal static partial class Interop
 {
     public static partial class Nuttx
     {
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern bool meadow_cell_is_connected();
+        [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+        public static partial bool meadow_cell_is_connected();
 
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern int meadow_get_cell_at_cmds_output(IntPtr buf);
+        [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+        public static partial int meadow_get_cell_at_cmds_output(IntPtr buf);
 
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern void meadow_cell_change_state(int s);
+        [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+        public static partial void meadow_cell_change_state(int s);
 
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern int meadow_get_cell_error();
+        [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+        public static partial int meadow_get_cell_error();
 
         public static List<CellNetwork>? ParseCellNetworkScannerOutput(string input)
         {

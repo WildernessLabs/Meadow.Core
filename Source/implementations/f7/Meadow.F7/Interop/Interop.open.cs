@@ -45,7 +45,7 @@ internal static partial class Interop
             //#define O_TEXT      0               /* Open the file in text (translated) mode.
         }
 
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern IntPtr open(string pathname, DriverFlags flags);
+        [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr open(string pathname, DriverFlags flags);
     }
 }

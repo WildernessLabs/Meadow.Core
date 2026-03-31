@@ -33,7 +33,7 @@ internal static partial class Interop
         }
 
         // int statfs(FAR const char *path, FAR struct statfs *buf);
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        public static extern int statfs(string path, ref StatFs buf);
+        [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int statfs(string path, ref StatFs buf);
     }
 }

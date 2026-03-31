@@ -5,7 +5,7 @@ internal static partial class Interop
 {
     public static partial class Nuttx
     {
-        [DllImport(MBEDTLS_LIBRARY_NAME, SetLastError = true)]
-        public static extern int mono_mbedtls_set_server_cert_authmode(int authmode);
+        [LibraryImport(MBEDTLS_LIBRARY_NAME, SetLastError = true)]
+        public static partial int mono_mbedtls_set_server_cert_authmode(int authmode);
     }
 }

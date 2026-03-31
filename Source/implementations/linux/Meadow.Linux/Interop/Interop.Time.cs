@@ -8,20 +8,20 @@ namespace Meadow
     internal static partial class Interop
     {
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern void tzset();
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial void tzset();
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern ref Rtc_time localtime(ref long time_t);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial ref Rtc_time localtime(ref long time_t);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern IntPtr localtime_r(ref long time_t, ref Tm tm);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial IntPtr localtime_r(ref long time_t, ref Tm tm);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern IntPtr gmtime_r(ref long time_t, ref Tm tm);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial IntPtr gmtime_r(ref long time_t, ref Tm tm);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int clock_settime(Clock clock, ref Timespec timespec);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int clock_settime(Clock clock, ref Timespec timespec);
 
         public enum Clock
         {

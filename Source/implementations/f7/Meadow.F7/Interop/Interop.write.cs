@@ -7,8 +7,8 @@ namespace Meadow.Core
     {
         public static partial class Nuttx
         {
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int write(IntPtr handle, byte[] buf, int count);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int write(IntPtr handle, byte[] buf, int count);
         }
     }
 }

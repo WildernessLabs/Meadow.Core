@@ -7,12 +7,12 @@ namespace Meadow.Core
     {
         public static partial class Nuttx
         {
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern AllocationInfo mallinfo();
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial AllocationInfo mallinfo();
 
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int meadow_idle_monitor_get_value();
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int meadow_idle_monitor_get_value();
         }
     }
 }

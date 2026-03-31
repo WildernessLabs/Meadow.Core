@@ -1,10 +1,12 @@
 ﻿using Meadow.Hardware;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Meadow.Devices
 {
     public abstract partial class F7MicroBase
     {
+        private readonly Lock _i2cBusCacheLock = new();
         private Dictionary<int, II2cBus> _i2cBusCache = new();
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace Meadow.Devices
             I2cBusSpeed busSpeed = I2cBusSpeed.Standard
         )
         {
-            lock (_i2cBusCache)
+            lock (_i2cBusCacheLock)
             {
                 var busNumber = GetI2cBusNumberForPins(clock, data);
                 if (!_i2cBusCache.ContainsKey(busNumber))

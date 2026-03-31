@@ -62,11 +62,11 @@ namespace Meadow.Core
                 public int GpioCount;
             }
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern AnalyzerCallStatus meadow_measure_freq_configure(ref AnalyzerConfig config);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial AnalyzerCallStatus meadow_measure_freq_configure(ref AnalyzerConfig config);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern AnalyzerCallStatus meadow_measure_freq_return_freq_info(ref AnalyzerData config);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial AnalyzerCallStatus meadow_measure_freq_return_freq_info(ref AnalyzerData config);
 
             public enum AnalyzerCallStatus
             {

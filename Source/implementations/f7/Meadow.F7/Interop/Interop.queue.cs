@@ -10,41 +10,41 @@ namespace Meadow.Core
     {
         public static partial class Nuttx
         {
-            [DllImport(LIBRARY_NAME, SetLastError = true, CharSet = CharSet.Ansi)]
-            public static extern IntPtr mq_open(StringBuilder name, QueueOpenFlag oflag);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial IntPtr mq_open(StringBuilder name, QueueOpenFlag oflag);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true, CharSet = CharSet.Ansi)]
-            public static extern IntPtr mq_open(string name, QueueOpenFlag oflag, int mode, IntPtr attr);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial IntPtr mq_open(string name, QueueOpenFlag oflag, int mode, IntPtr attr);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true, CharSet = CharSet.Ansi)]
-            public static extern IntPtr mq_open(StringBuilder name, QueueOpenFlag oflag, int mode, ref QueueAttributes attr);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial IntPtr mq_open(StringBuilder name, QueueOpenFlag oflag, int mode, ref QueueAttributes attr);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_close(IntPtr mqdes);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_close(IntPtr mqdes);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true, CharSet = CharSet.Ansi)]
-            public static extern int mq_unlink(string name);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial int mq_unlink(string name);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_send(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_send(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_timedsend(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio, ref timespec abs_timeout);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_timedsend(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio, ref timespec abs_timeout);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_timedreceive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio, ref timespec abs_timeout);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_timedreceive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio, ref timespec abs_timeout);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_receive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_receive(IntPtr mqdes, byte[] msg_ptr, int msg_len, ref int msg_prio);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_notify(IntPtr mqdes, ref SigEvent sevp);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_notify(IntPtr mqdes, ref SigEvent sevp);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_getattr(IntPtr mqdes, ref QueueAttributes attr);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_getattr(IntPtr mqdes, ref QueueAttributes attr);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int mq_setattr(IntPtr mqdes, ref QueueAttributes newattr, ref QueueAttributes oldattr);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int mq_setattr(IntPtr mqdes, ref QueueAttributes newattr, ref QueueAttributes oldattr);
 
             [Flags]
             public enum QueueOpenFlag

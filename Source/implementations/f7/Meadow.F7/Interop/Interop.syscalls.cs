@@ -16,17 +16,17 @@ namespace Meadow.Core
 
         public static partial class Nuttx
         {
-            [DllImport("nuttx")]
-            public static extern HardwareVersion meadow_os_hardware_version();
+            [LibraryImport("nuttx")]
+            public static partial HardwareVersion meadow_os_hardware_version();
 
-            [DllImport("nuttx")]
-            public static extern uint meadow_os_reset_reason();
+            [LibraryImport("nuttx")]
+            public static partial uint meadow_os_reset_reason();
 
-            [DllImport("nuttx")]
-            public static extern uint meadow_os_reset_cycle_count();
+            [LibraryImport("nuttx")]
+            public static partial uint meadow_os_reset_cycle_count();
 
-            [DllImport("nuttx")]
-            public static extern uint meadow_os_power_cycle_count();
+            [LibraryImport("nuttx")]
+            public static partial uint meadow_os_power_cycle_count();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -21,6 +22,7 @@ namespace Meadow.Devices
             public int AlternateFunctionNumber { get; set; }
         }
 
+        private readonly Lock _currentConfigsLock = new();
         private readonly List<GpioConfig> _currentConfigs = new List<GpioConfig>();
 
         /// <summary>
@@ -31,7 +33,7 @@ namespace Meadow.Devices
         public void ReassertConfig(IPin pin, bool validateInterruptGroup = true)
         {
             var designator = GetPortAndPin(pin);
-            lock (_currentConfigs)
+            lock (_currentConfigsLock)
             {
                 var cfg = _currentConfigs.FirstOrDefault(c => c.Port == designator.port && c.Pin == designator.pin);
                 if (cfg != null)
@@ -45,7 +47,7 @@ namespace Meadow.Devices
         {
             Output.WriteLineIf((DebugFeatures & DebugFeature.GpioDetail) != 0, $" + RegisterConfig");
 
-            lock (_currentConfigs)
+            lock (_currentConfigsLock)
             {
                 var cfg = _currentConfigs.FirstOrDefault(c => c.Port == port && c.Pin == pin);
                 if (cfg == null)

@@ -3,6 +3,7 @@ using Meadow.Units;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static Meadow.Logging.Logger;
 
 namespace Meadow.Hardware
@@ -14,7 +15,7 @@ namespace Meadow.Hardware
         /// Used internally so that we can safely new up ports.
         /// </summary>
         private IDictionary<IPin, ChannelConfig> _channelStates;
-        private readonly object _channelLock = new object();
+        private readonly Lock _channelLock = new();
         private IDictionary<uint, double> _pwmTimerFrequencies;
         private List<uint> _pwmTimersInitialized = new List<uint>();
         private KeyValuePair<IPin, ChannelConfig>[]? _pinsToReasssertForPwm = null;

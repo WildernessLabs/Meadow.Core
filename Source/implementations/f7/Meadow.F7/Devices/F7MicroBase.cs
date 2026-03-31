@@ -77,7 +77,7 @@ public abstract partial class F7MicroBase : IF7MeadowDevice
     /// <summary>
     /// Lock for initializing the coprocessor
     /// </summary>
-    protected object coprocInitLock = new object();
+    protected readonly Lock coprocInitLock = new();
 
     /// <summary>
     /// The IO controller for the device

@@ -12,43 +12,43 @@ namespace Meadow
         public const int TCSADRAIN = 1;
         public const int TCSAFLUSH = 2;
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int open(string pathname, DriverFlags flags);
+        [LibraryImport(LIBC, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int open(string pathname, DriverFlags flags);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int close(int handle);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int close(int handle);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int write(int handle, byte[] buf, int count);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int write(int handle, byte[] buf, int count);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern unsafe int write(int handle, byte* buf, int count);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static unsafe partial int write(int handle, byte* buf, int count);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int read(int handle, byte[] buf, int count);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int read(int handle, byte[] buf, int count);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern unsafe int read(int handle, byte* buf, int count);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static unsafe partial int read(int handle, byte* buf, int count);
 
         //int tcgetattr(int fildes, struct termios *termios_p);
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int tcgetattr(int fd, ref termios termios_p);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int tcgetattr(int fd, ref termios termios_p);
 
         // int tcsetattr(int fildes, int optional_actions, const struct termios *termios_p);
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int tcsetattr(int fd, int optional_actions, ref termios termios_p);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int tcsetattr(int fd, int optional_actions, ref termios termios_p);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int cfsetspeed(ref termios termiosp, int speed);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int cfsetspeed(ref termios termiosp, int speed);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int lseek(int fd, int offset, SeekWhence whence);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int lseek(int fd, int offset, SeekWhence whence);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int poll(pollfd[] fds, int nfds, int timeout);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int poll(pollfd[] fds, int nfds, int timeout);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int poll(ref pollfd fds, int nfds, int timeout);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int poll(ref pollfd fds, int nfds, int timeout);
 
         public enum SeekWhence
         {

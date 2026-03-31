@@ -6,11 +6,11 @@ namespace Meadow.Core
     {
         public static partial class Nuttx
         {
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int pwrmgmt_most_recent_wakeup_reason();
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int pwrmgmt_most_recent_wakeup_reason();
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int meadow_os_native_protocol_version();
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int meadow_os_native_protocol_version();
         }
     }
 }

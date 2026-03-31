@@ -5,7 +5,7 @@ namespace Meadow;
 
 internal partial class Gpiod3
 {
-    internal static class Interop
+    internal static partial class Interop
     {
         private const string LIB_GPIOD = "libgpiod.so.3";
 
@@ -51,132 +51,133 @@ internal partial class Gpiod3
 
         // ===== Chip Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr gpiod_chip_open([MarshalAs(UnmanagedType.LPStr)] string path);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr gpiod_chip_open(string path);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_chip_close(IntPtr chip);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_chip_close(IntPtr chip);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_get_info(IntPtr chip);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_get_info(IntPtr chip);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_request_lines(IntPtr chip, IntPtr req_cfg, IntPtr line_cfg);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_request_lines(IntPtr chip, IntPtr req_cfg, IntPtr line_cfg);
 
         // ===== Chip Info Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_chip_info_free(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_chip_info_free(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr gpiod_chip_info_get_name(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr gpiod_chip_info_get_name(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr gpiod_chip_info_get_label(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr gpiod_chip_info_get_label(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern uint gpiod_chip_info_get_num_lines(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial uint gpiod_chip_info_get_num_lines(IntPtr info);
 
         // ===== Line Info Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_get_line_info(IntPtr chip, uint offset);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_get_line_info(IntPtr chip, uint offset);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_line_info_free(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_line_info_free(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern uint gpiod_line_info_get_offset(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial uint gpiod_line_info_get_offset(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr gpiod_line_info_get_name(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr gpiod_line_info_get_name(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr gpiod_line_info_get_consumer(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr gpiod_line_info_get_consumer(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern gpiod_line_direction gpiod_line_info_get_direction(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial gpiod_line_direction gpiod_line_info_get_direction(IntPtr info);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern bool gpiod_line_info_is_used(IntPtr info);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool gpiod_line_info_is_used(IntPtr info);
 
         // ===== Request Config Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_request_config_new();
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_request_config_new();
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_request_config_free(IntPtr config);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_request_config_free(IntPtr config);
 
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern void gpiod_request_config_set_consumer(IntPtr config, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial void gpiod_request_config_set_consumer(IntPtr config, string consumer);
 
         // ===== Line Config Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_line_config_new();
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_line_config_new();
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_line_config_free(IntPtr config);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_line_config_free(IntPtr config);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_config_add_line_settings(IntPtr config, uint[] offsets, UIntPtr num_offsets, IntPtr settings);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_config_add_line_settings(IntPtr config, uint[] offsets, UIntPtr num_offsets, IntPtr settings);
 
         // ===== Line Settings Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_line_settings_new();
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_line_settings_new();
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_line_settings_free(IntPtr settings);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_line_settings_free(IntPtr settings);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_settings_set_direction(IntPtr settings, gpiod_line_direction direction);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_settings_set_direction(IntPtr settings, gpiod_line_direction direction);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_settings_set_edge_detection(IntPtr settings, gpiod_line_edge edge);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_settings_set_edge_detection(IntPtr settings, gpiod_line_edge edge);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_settings_set_bias(IntPtr settings, gpiod_line_bias bias);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_settings_set_bias(IntPtr settings, gpiod_line_bias bias);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_settings_set_output_value(IntPtr settings, gpiod_line_value value);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_settings_set_output_value(IntPtr settings, gpiod_line_value value);
 
         // ===== Line Request Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_line_request_release(IntPtr request);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_line_request_release(IntPtr request);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern gpiod_line_value gpiod_line_request_get_value(IntPtr request, uint offset);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial gpiod_line_value gpiod_line_request_get_value(IntPtr request, uint offset);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_set_value(IntPtr request, uint offset, gpiod_line_value value);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_request_set_value(IntPtr request, uint offset, gpiod_line_value value);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_wait_edge_events(IntPtr request, long timeout_ns);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_request_wait_edge_events(IntPtr request, long timeout_ns);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_read_edge_events(IntPtr request, IntPtr buffer, UIntPtr max_events);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_request_read_edge_events(IntPtr request, IntPtr buffer, UIntPtr max_events);
 
         // ===== Edge Event Operations =====
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_edge_event_buffer_new(UIntPtr capacity);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_edge_event_buffer_new(UIntPtr capacity);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_edge_event_buffer_free(IntPtr buffer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_edge_event_buffer_free(IntPtr buffer);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_edge_event_buffer_get_event(IntPtr buffer, ulong index);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_edge_event_buffer_get_event(IntPtr buffer, ulong index);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern UIntPtr gpiod_edge_event_buffer_get_num_events(IntPtr buffer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial UIntPtr gpiod_edge_event_buffer_get_num_events(IntPtr buffer);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern uint gpiod_edge_event_get_line_offset(IntPtr evt);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial uint gpiod_edge_event_get_line_offset(IntPtr evt);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern ulong gpiod_edge_event_get_timestamp_ns(IntPtr evt);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial ulong gpiod_edge_event_get_timestamp_ns(IntPtr evt);
     }
 }

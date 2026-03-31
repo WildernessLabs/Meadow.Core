@@ -12,6 +12,7 @@ namespace Meadow
 {
     public partial class F7PlatformOS
     {
+        private readonly Lock _sleepAwarePeripheralsLock = new();
         private readonly List<ISleepAwarePeripheral> _sleepAwarePeripherals = new List<ISleepAwarePeripheral>();
 
         /// <inheritdoc/>
@@ -73,7 +74,7 @@ namespace Meadow
 
         private void DoSleepNotifications()
         {
-            lock (_sleepAwarePeripherals)
+            lock (_sleepAwarePeripheralsLock)
             {
                 foreach (var p in _sleepAwarePeripherals)
                 {
@@ -88,7 +89,7 @@ namespace Meadow
         {
             AfterWake?.Invoke(this, source);
 
-            lock (_sleepAwarePeripherals)
+            lock (_sleepAwarePeripheralsLock)
             {
                 foreach (var p in _sleepAwarePeripherals)
                 {
@@ -100,7 +101,7 @@ namespace Meadow
         /// <inheritdoc/>
         public void RegisterForSleep(ISleepAwarePeripheral peripheral)
         {
-            lock (_sleepAwarePeripherals)
+            lock (_sleepAwarePeripheralsLock)
             {
                 if (_sleepAwarePeripherals.Contains(peripheral))
                 {

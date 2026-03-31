@@ -30,7 +30,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
     private readonly CancellationTokenSource _cancellationSource;
     private readonly Task _batchWriterTask;
     private readonly Task _cleanupTask;
-    private readonly object _dbLock = new object();
+    private readonly Lock _dbLock = new();
     private readonly int _batchSize;
     private readonly int _batchIntervalMs;
     private readonly int _maxDbItems;
@@ -45,7 +45,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
     {
         get
         {
-            if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+            if (!_dbLock.TryEnter(DbLockTimeoutMs))
             {
                 Resolver.Log.Warn($"Count: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
                 return -1;
@@ -58,7 +58,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
             }
             finally
             {
-                Monitor.Exit(_dbLock);
+                _dbLock.Exit();
             }
         }
     }
@@ -297,7 +297,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                     int currentCount = 0;
                     int deleted = 0;
 
-                    if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+                    if (!_dbLock.TryEnter(DbLockTimeoutMs))
                     {
                         Resolver.Log.Warn($"CleanupLoop: Lock acquisition timeout after {DbLockTimeoutMs}ms, skipping cleanup cycle", LogGroup);
                         needsMoreCleanup = false;
@@ -342,7 +342,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                     }
                     finally
                     {
-                        Monitor.Exit(_dbLock);
+                        _dbLock.Exit();
                     }
 
                     // Release lock between batches to allow other operations
@@ -369,7 +369,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
     {
         if (items.Count == 0) return;
 
-        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+        if (!_dbLock.TryEnter(DbLockTimeoutMs))
         {
             Resolver.Log.Warn($"WriteBatch: Lock acquisition timeout after {DbLockTimeoutMs}ms, skipping batch of {items.Count} items", LogGroup);
             return;
@@ -431,13 +431,13 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         finally
         {
-            Monitor.Exit(_dbLock);
+            _dbLock.Exit();
         }
     }
 
     public CloudTelemetryItem? Peek()
     {
-        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+        if (!_dbLock.TryEnter(DbLockTimeoutMs))
         {
             Resolver.Log.Warn($"Peek: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
             return null;
@@ -449,13 +449,13 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         finally
         {
-            Monitor.Exit(_dbLock);
+            _dbLock.Exit();
         }
     }
 
     public CloudTelemetryItem? Dequeue()
     {
-        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+        if (!_dbLock.TryEnter(DbLockTimeoutMs))
         {
             Resolver.Log.Warn($"Dequeue: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
             return null;
@@ -467,7 +467,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         finally
         {
-            Monitor.Exit(_dbLock);
+            _dbLock.Exit();
         }
     }
 
@@ -533,7 +533,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
 
     public Dictionary<int, int> CountByPriority()
     {
-        if (!Monitor.TryEnter(_dbLock, DbLockTimeoutMs))
+        if (!_dbLock.TryEnter(DbLockTimeoutMs))
         {
             Resolver.Log.Warn($"CountByPriority: Lock acquisition timeout after {DbLockTimeoutMs}ms", LogGroup);
             return new Dictionary<int, int>();
@@ -562,7 +562,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         }
         finally
         {
-            Monitor.Exit(_dbLock);
+            _dbLock.Exit();
         }
     }
 
@@ -591,7 +591,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
             Resolver.Log.Error($"Error waiting for cleanup task shutdown: {ex.Message}", LogGroup);
         }
 
-        if (!Monitor.TryEnter(_dbLock, 10000)) // Longer timeout for dispose
+        if (!_dbLock.TryEnter(10000)) // Longer timeout for dispose
         {
             Resolver.Log.Error($"Dispose: Lock acquisition timeout after 10000ms, forcing disposal", LogGroup);
         }
@@ -605,7 +605,7 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
             }
             finally
             {
-                Monitor.Exit(_dbLock);
+                _dbLock.Exit();
             }
         }
 

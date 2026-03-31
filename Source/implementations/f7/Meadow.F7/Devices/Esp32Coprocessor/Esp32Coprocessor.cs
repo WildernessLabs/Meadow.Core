@@ -2,9 +2,11 @@ using Meadow.Core;
 using Meadow.Devices.Esp32.MessagePayloads;
 using Meadow.Gateways;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static Meadow.Core.Interop;
 using static Meadow.Logging.Logger;
@@ -32,6 +34,7 @@ public partial class Esp32Coprocessor : ICoprocessor
     internal event EventHandler<(SystemFunction fn, StatusCodes status)>? SystemMessageReceived = default!;
 
     private EventHandler<(EthernetFunction fn, StatusCodes status, byte[] data)>? _ethernetMessageHandlers;
+    private readonly Lock _queuedEthernetEventsLock = new();
     private readonly Queue<RawEventData> _queuedEthernetEvents = new();
 
     private record RawEventData
@@ -48,7 +51,7 @@ public partial class Esp32Coprocessor : ICoprocessor
         {
             _ethernetMessageHandlers += value;
 
-            lock (_queuedEthernetEvents)
+            lock (_queuedEthernetEventsLock)
             {
                 foreach (var evt in _queuedEthernetEvents)
                 {
@@ -219,17 +222,17 @@ public partial class Esp32Coprocessor : ICoprocessor
         Resolver.Log.Trace($"Getting event data for message ID 0x{eventData.MessageId:x08}", MessageGroup.Esp);
         var resultGcHandle = default(GCHandle);
         StatusCodes result = StatusCodes.CompletedOk;
+        byte[] encodedResult = ArrayPool<byte>.Shared.Rent(4000);
         try
         {
-            byte[] encodedResult = new byte[4000];
-            Array.Clear(encodedResult, 0, encodedResult.Length);
+            Array.Clear(encodedResult, 0, 4000);
             resultGcHandle = GCHandle.Alloc(encodedResult, GCHandleType.Pinned);
 
             var request = new Nuttx.UpdEsp32EventDataPayload()
             {
                 MessageID = eventData.MessageId,
                 Payload = resultGcHandle.AddrOfPinnedObject(),
-                PayloadLength = (UInt32)encodedResult.Length
+                PayloadLength = 4000
             };
 
             int updResult = UPD.Ioctl(Nuttx.UpdIoctlFn.UpdEsp32EventDataPayload, ref request);
@@ -251,6 +254,7 @@ public partial class Esp32Coprocessor : ICoprocessor
             {
                 resultGcHandle.Free();
             }
+            ArrayPool<byte>.Shared.Return(encodedResult);
         }
         return result;
     }
@@ -262,7 +266,9 @@ public partial class Esp32Coprocessor : ICoprocessor
     {
         Resolver.Log.Trace("Starting Esp32Coprocessor event handler task.", MessageGroup.Esp);
         IntPtr queue = Interop.Nuttx.mq_open(new StringBuilder("/Esp32Events"), Nuttx.QueueOpenFlag.ReadOnly);
-        byte[] rxBuffer = new byte[22];       // Maximum amount of data that can be read from a NuttX message queue.
+        byte[] rxBuffer = ArrayPool<byte>.Shared.Rent(22);       // Maximum amount of data that can be read from a NuttX message queue.
+        try
+        {
         while (true)
         {
             int priority = 0;
@@ -272,7 +278,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                 int result;
                 do
                 {
-                    result = Interop.Nuttx.mq_receive(queue, rxBuffer, rxBuffer.Length, ref priority);
+                    result = Interop.Nuttx.mq_receive(queue, rxBuffer, 22, ref priority);
                 } while (result < 0 && UPD.GetLastError() == Nuttx.ErrorCode.InterruptedSystemCall);
 
                 Resolver.Log.Trace("Event received.", MessageGroup.Esp);
@@ -321,7 +327,7 @@ public partial class Esp32Coprocessor : ICoprocessor
                         switch ((Esp32Interfaces)eventData.Interface)
                         {
                             case Esp32Interfaces.WiredEthernet:
-                                lock (_queuedEthernetEvents)
+                                lock (_queuedEthernetEventsLock)
                                 {
                                     if (_ethernetMessageHandlers == null)
                                     {
@@ -367,6 +373,11 @@ public partial class Esp32Coprocessor : ICoprocessor
                 throw ex;
             }
         }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(rxBuffer);
+        }
     }
 
     /// <summary>
@@ -382,13 +393,20 @@ public partial class Esp32Coprocessor : ICoprocessor
     /// </summary>
     public double GetBatteryLevel()
     {
-        byte[] result = new byte[MAXIMUM_SPI_BUFFER_LENGTH];
-        double voltage = 0;
-        if (SendCommand((byte)Esp32Interfaces.System, (UInt32)SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
+        byte[] result = ArrayPool<byte>.Shared.Rent((int)MAXIMUM_SPI_BUFFER_LENGTH);
+        try
         {
-            GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
-            voltage = response.Level / 1000f;
+            double voltage = 0;
+            if (SendCommand((byte)Esp32Interfaces.System, (UInt32)SystemFunction.GetBatteryChargeLevel, true, result) == StatusCodes.CompletedOk)
+            {
+                GetBatteryChargeLevelResponse response = Encoders.ExtractGetBatteryChargeLevelResponse(result, 0);
+                voltage = response.Level / 1000f;
+            }
+            return voltage;
         }
-        return voltage;
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(result);
+        }
     }
 }

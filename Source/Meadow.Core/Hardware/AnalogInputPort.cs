@@ -40,7 +40,7 @@ namespace Meadow.Hardware;
 public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Voltage>>
 {
     // only one ADC across the entire processor can be read at one time.  This is the sync object for that.
-    private static readonly object _analogSyncRoot = new();
+    private static readonly Lock _analogSyncRoot = new();
 
     /// <summary>
     /// The default sampling interval for the Input (40ms)
@@ -57,7 +57,7 @@ public class AnalogInputPort : AnalogInputPortBase, IObservable<IChangeResult<Vo
     protected IMeadowIOController IOController { get; }
 
     // internal thread lock
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private CancellationTokenSource? SamplingTokenSource;
 
     /// <summary>

@@ -7,8 +7,8 @@ internal static partial class Interop
 {
     public static partial class Nuttx
     {
-        [DllImport(LIBRARY_NAME, SetLastError = true)]
-        private static extern int meadow_cloud_decrypt_buf(IntPtr encrypted_buf, int encrypted_len, IntPtr decrypted_buf);
+        [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+        private static partial int meadow_cloud_decrypt_buf(IntPtr encrypted_buf, int encrypted_len, IntPtr decrypted_buf);
 
         const int max_buf_size = 1024;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace Meadow.Hardware
         /// <summary>
         /// Lock object for thread synchronization when accessing critical sections of code.
         /// </summary>
-        protected object _accessLock = new();
+        protected readonly Lock _accessLock = new();
 
         /// <summary>
         /// Sets the hardware port settings for the specified handle.
@@ -66,6 +67,34 @@ namespace Meadow.Hardware
         /// <param name="count">The number of bytes to write</param>
         /// <returns>The number of bytes actually written</returns>
         protected abstract int WriteHardwarePort(IntPtr handle, byte[] writeBuffer, int count);
+
+        /// <summary>
+        /// Writes data from a region of a buffer to the hardware serial port.
+        /// Override to provide a zero-copy implementation.
+        /// </summary>
+        /// <param name="handle">The handle to the port</param>
+        /// <param name="writeBuffer">The source data buffer</param>
+        /// <param name="offset">The offset into writeBuffer to start writing from</param>
+        /// <param name="count">The number of bytes to write</param>
+        /// <returns>The number of bytes actually written</returns>
+        protected virtual int WriteHardwarePort(IntPtr handle, byte[] writeBuffer, int offset, int count)
+        {
+            if (offset == 0)
+            {
+                return WriteHardwarePort(handle, writeBuffer, count);
+            }
+
+            var rented = ArrayPool<byte>.Shared.Rent(count);
+            try
+            {
+                Buffer.BlockCopy(writeBuffer, offset, rented, 0, count);
+                return WriteHardwarePort(handle, rented, count);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(rented);
+            }
+        }
 
         /// <summary>
         /// Override this method to read data from a hardware serial port
@@ -386,17 +415,7 @@ namespace Meadow.Hardware
                 {
                     while (totalBytesWritten < count)
                     {
-                        // if there's an offset, we want to slice
-                        var result = 0;
-                        if (currentIndex > 0)
-                        {
-                            Span<byte> data = buffer.AsSpan<byte>().Slice(currentIndex, bytesToWriteThisLoop);
-                            result = WriteHardwarePort(_driverHandle, data.ToArray(), count);
-                        }
-                        else
-                        {
-                            result = WriteHardwarePort(_driverHandle, buffer, count);
-                        }
+                        var result = WriteHardwarePort(_driverHandle, buffer, currentIndex, bytesToWriteThisLoop);
 
                         // otherwise,
                         totalBytesWritten += result;
@@ -422,8 +441,9 @@ namespace Meadow.Hardware
 
         private async Task ReadTaskProc(CancellationToken cancellationToken)
         {
-            var readBuffer = new byte[4096];
-
+            var readBuffer = ArrayPool<byte>.Shared.Rent(4096);
+            try
+            {
             while (IsOpen && !cancellationToken.IsCancellationRequested)
             {
                 try
@@ -469,6 +489,11 @@ namespace Meadow.Hardware
                 {
                     Resolver.Log.Error($"{nameof(ReadTaskProc)} error: {ex.Message}");
                 }
+            }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(readBuffer);
             }
         }
 

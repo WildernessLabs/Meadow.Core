@@ -1,10 +1,12 @@
 ﻿using Meadow.Hardware;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Meadow.Devices
 {
     public abstract partial class F7MicroBase
     {
+        private readonly Lock _spiBusCacheLock = new();
         private Dictionary<int, ISpiBus> _spiBusCache = new();
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace Meadow.Devices
             Units.Frequency speed
         )
         {
-            lock (_spiBusCache)
+            lock (_spiBusCacheLock)
             {
                 var busNumber = GetSpiBusNumberForPins(clock, copi, cipo);
                 if (!_spiBusCache.ContainsKey(busNumber))
@@ -107,7 +109,7 @@ namespace Meadow.Devices
             SpiClockConfiguration config
         )
         {
-            lock (_spiBusCache)
+            lock (_spiBusCacheLock)
             {
                 var busNumber = GetSpiBusNumberForPins(clock, copi, cipo);
                 if (!_spiBusCache.ContainsKey(busNumber))
@@ -127,7 +129,7 @@ namespace Meadow.Devices
             Units.Frequency speed
         )
         {
-            lock (_spiBusCache)
+            lock (_spiBusCacheLock)
             {
                 if (!_spiBusCache.ContainsKey(busNumber))
                 {

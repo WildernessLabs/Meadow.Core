@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using static Meadow.Core.Interop;
 
 namespace Meadow.Devices
@@ -25,12 +26,12 @@ namespace Meadow.Devices
     /// </summary>
     public partial class F7GPIOManager : IMeadowIOController
     {
-        private readonly object _cacheLock = new();
+        private readonly Lock _cacheLock = new();
         private readonly IPin?[,] _interruptPins = new IPin?[16, 16];
 
         private bool DirectRegisterAccess { get; set; } = true;
 
-        private readonly Dictionary<string, Tuple<STM32.GpioPort, int, uint>> _portPinCache = new Dictionary<string, Tuple<STM32.GpioPort, int, uint>>();
+        private readonly Dictionary<string, (STM32.GpioPort port, int pin, uint address)> _portPinCache = new();
 
         internal DebugFeature DebugFeatures { get; set; }
 
@@ -150,11 +151,11 @@ namespace Meadow.Devices
             STM32.GpioPort port;
             uint address;
 
-            lock (_portPinCache)
+            lock (_cacheLock)
             {
-                if (_portPinCache.ContainsKey(key))
+                if (_portPinCache.TryGetValue(key, out var cached))
                 {
-                    return (_portPinCache[key].Item1, _portPinCache[key].Item2, _portPinCache[key].Item3);
+                    return cached;
                 }
                 switch (key[1])
                 {
@@ -208,7 +209,9 @@ namespace Meadow.Devices
 
                 if (int.TryParse(key.Substring(2), out int pinID))
                 {
-                    return (port, pinID, address);
+                    var result = (port, pinID, address);
+                    _portPinCache[key] = result;
+                    return result;
                 }
 
                 throw new NotSupportedException();

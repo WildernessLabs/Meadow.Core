@@ -2,6 +2,7 @@
 using Meadow.Gateway.WiFi;
 using Meadow.Hardware;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -36,7 +37,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     /// Lock object to make sure the events and the methods do not try to access
     /// properties simultaneously.
     /// </summary>
-    private readonly object _lock = new object();
+    private readonly Lock _lock = new();
     private readonly Esp32Coprocessor _esp32;
     private TimeSpan _scanPeriod = DefaultScanPeriod;
 
@@ -330,7 +331,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     private Task<IList<WifiNetwork>> Scan(TimeSpan timeout, CancellationToken token)
     {
         var networks = new List<WifiNetwork>();
-        var resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
+        var resultBuffer = ArrayPool<byte>.Shared.Rent((int)Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH);
         var tasks = new List<Task>();
 
         var scanTask = Task.Run(() =>
@@ -376,6 +377,10 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
                   token.ThrowIfCancellationRequested();
                   throw ex;
+              }
+              finally
+              {
+                  ArrayPool<byte>.Shared.Return(resultBuffer);
               }
           }, token);
 
@@ -451,7 +456,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                 SubnetMask = ConfiguredSubnetMask
             };
             byte[] encodedPayload = Encoders.EncodeAccessPointInformation(request);
-            byte[] resultBuffer = new byte[Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH];
+            byte[] resultBuffer = ArrayPool<byte>.Shared.Rent((int)Esp32Coprocessor.MAXIMUM_SPI_BUFFER_LENGTH);
 
             ClearNetworkDetails();
 
@@ -487,6 +492,10 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
 
                 token.ThrowIfCancellationRequested();
                 throw new NetworkException(ex.Message);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(resultBuffer);
             }
 
             await WaitForConnectionToComplete(timeout, token);
@@ -692,15 +701,22 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             request.Antenna = (byte)AntennaTypes.External;
         }
         byte[] encodedPayload = Encoders.EncodeSetAntennaRequest(request);
-        byte[] encodedResult = new byte[4000];
-        StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
-        if (result == StatusCodes.CompletedOk)
+        byte[] encodedResult = ArrayPool<byte>.Shared.Rent(4000);
+        try
         {
-            _antenna = antenna;
+            StatusCodes result = _esp32.SendCommand((byte)Esp32Interfaces.WiFi, (UInt32)WiFiFunction.SetAntenna, true, encodedPayload, encodedResult);
+            if (result == StatusCodes.CompletedOk)
+            {
+                _antenna = antenna;
+            }
+            else
+            {
+                throw new Exception("Failed to change the antenna in use.");
+            }
         }
-        else
+        finally
         {
-            throw new Exception("Failed to change the antenna in use.");
+            ArrayPool<byte>.Shared.Return(encodedResult);
         }
     }
 

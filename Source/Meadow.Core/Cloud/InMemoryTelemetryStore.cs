@@ -14,7 +14,7 @@ internal class InMemoryTelemetryStore : IMeadowCloudTelemetryStore
     private readonly CircularBuffer<CloudTelemetryItem> _highPriorityBuffer;
     private readonly CircularBuffer<CloudTelemetryItem> _normalPriorityBuffer;
     private readonly CircularBuffer<CloudTelemetryItem> _lowPriorityBuffer;
-    private readonly object _lock = new object();
+    private readonly Lock _lock = new();
     private long _nextSequence = 1;
 
     public int Count

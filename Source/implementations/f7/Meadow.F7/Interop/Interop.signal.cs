@@ -10,26 +10,26 @@ namespace Meadow.Core
         public static partial class Nuttx
         {
             //int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigprocmask(int how, ref int set, out int oldset);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigprocmask(int how, ref int set, out int oldset);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigaction(int signum, ref SigAction act, ref SigAction oldact);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigaction(int signum, ref SigAction act, ref SigAction oldact);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigemptyset(ref int set);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigemptyset(ref int set);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigaddset(ref int set, int signum);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigaddset(ref int set, int signum);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigwaitinfo(ref int set, ref SigInfo info);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigwaitinfo(ref int set, ref SigInfo info);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigtimedwait(ref int set, ref SigInfo info, ref timespec ts);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigtimedwait(ref int set, ref SigInfo info, ref timespec ts);
 
-            [DllImport(LIBRARY_NAME, SetLastError = true)]
-            public static extern int sigpending(ref int set);
+            [LibraryImport(LIBRARY_NAME, SetLastError = true)]
+            public static partial int sigpending(ref int set);
 
             public static int sigfillset(ref int set)
             {

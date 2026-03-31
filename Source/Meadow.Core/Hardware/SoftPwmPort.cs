@@ -1,6 +1,5 @@
 using Meadow.Units;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Meadow.Hardware;
 
@@ -128,14 +127,14 @@ public class SoftPwmPort : IPwmPort
         running = true;
 
         // create a new thread that actually writes the pwm to the output port
-        thread = new Thread(async () =>
+        thread = new Thread(() =>
         {
             while (running)
             {
                 Port.State = !Inverted;
-                await Task.Delay(onTimeMilliseconds);
+                Thread.Sleep(onTimeMilliseconds);
                 Port.State = Inverted;
-                await Task.Delay(offTimeMilliseconds);
+                Thread.Sleep(offTimeMilliseconds);
             }
         });
         thread.Start();

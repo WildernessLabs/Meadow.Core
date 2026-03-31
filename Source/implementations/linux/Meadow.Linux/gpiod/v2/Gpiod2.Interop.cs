@@ -7,7 +7,7 @@ internal partial class Gpiod2
 {
     // https://github.com/brgl/libgpiod/blob/master/include/gpiod.h
 
-    internal static class Interop
+    internal static partial class Interop
     {
         /*
         struct gpiod_chip {
@@ -188,24 +188,24 @@ internal partial class Gpiod2
         private const string LIB_GPIOD = "libgpiod.so.2";
 
         // struct gpiod_chip *gpiod_chip_open_by_name(const char *name)
-        [DllImport(LIB_GPIOD, SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern IntPtr gpiod_chip_open_by_name([MarshalAs(UnmanagedType.LPStr)] string name);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial IntPtr gpiod_chip_open_by_name(string name);
 
         // struct gpiod_chip *gpiod_chip_open_by_number(unsigned int num) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_open_by_number(uint num);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_open_by_number(uint num);
 
         // void gpiod_chip_close(struct gpiod_chip *chip)
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_chip_close(IntPtr chip);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_chip_close(IntPtr chip);
 
         // struct gpiod_line *gpiod_chip_get_line(struct gpiod_chip *chip, unsigned int offset)
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_get_line(IntPtr chip, int offset);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_get_line(IntPtr chip, int offset);
 
         // int gpiod_line_update(struct gpiod_line *line)
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_update(IntPtr line);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_update(IntPtr line);
 
         /**
          * @brief Reserve a single line.
@@ -220,8 +220,8 @@ internal partial class Gpiod2
          * it's released.
          */
         // int gpiod_line_request(struct gpiod_line *line, const struct gpiod_line_request_config *config, int default_val) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request(IntPtr line, IntPtr config, int default_val);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_request(IntPtr line, IntPtr config, int default_val);
 
         /**
          * @brief Reserve a single line, set the direction to input.
@@ -230,8 +230,8 @@ internal partial class Gpiod2
          * @return 0 if the line was properly reserved, -1 on failure.
          */
         //int gpiod_line_request_input(struct gpiod_line *line, const char *consumer) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_input(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_input(IntPtr line, string consumer);
 
         /**
          * @brief Reserve a single line, set the direction to input.
@@ -241,8 +241,8 @@ internal partial class Gpiod2
          * @return 0 if the line was properly reserved, -1 on failure.
          */
         // int gpiod_line_request_input_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_input_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_input_flags(IntPtr line, string consumer, line_request_flags flags);
 
         /**
          * @brief Reserve a single line, set the direction to output.
@@ -252,12 +252,12 @@ internal partial class Gpiod2
          * @return 0 if the line was properly reserved, -1 on failure.
          */
         //int gpiod_line_request_output(struct gpiod_line *line, const char *consumer, int default_val) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_output(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, int default_val);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_output(IntPtr line, string consumer, int default_val);
 
         //int gpiod_line_request_output(struct gpiod_line *line, const char *consumer, int default_val) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_output_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags, int default_val);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_output_flags(IntPtr line, string consumer, line_request_flags flags, int default_val);
 
         /**
          * @brief Read current value of a single GPIO line.
@@ -266,8 +266,8 @@ internal partial class Gpiod2
          *         and sets the last error number.
          */
         // int gpiod_line_get_value(struct gpiod_line *line) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_get_value(IntPtr line);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_get_value(IntPtr line);
 
         /**
          * @brief Set the value of a single GPIO line.
@@ -277,16 +277,16 @@ internal partial class Gpiod2
          *         returns -1 and sets the last error number.
          */
         // int gpiod_line_set_value(struct gpiod_line *line, int value) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_set_value(IntPtr line, int value);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_set_value(IntPtr line, int value);
 
         /**
          * @brief Release a previously reserved line.
          * @param line GPIO line object.
          */
         // void gpiod_line_release(struct gpiod_line *line) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_line_release(IntPtr line);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_line_release(IntPtr line);
 
         // bool gpiod_line_is_requested(struct gpiod_line *line) GPIOD_API;
         // bool gpiod_line_is_free(struct gpiod_line *line) GPIOD_API;
@@ -348,8 +348,8 @@ internal partial class Gpiod2
          *         occurred.
          */
         //int gpiod_line_event_wait(struct gpiod_line *line, const struct timespec *timeout) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_event_wait(IntPtr line, ref timespec timeout);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_event_wait(IntPtr line, ref timespec timeout);
 
 
         /*
@@ -359,8 +359,8 @@ internal partial class Gpiod2
          * @return 0 if the operation succeeds, -1 on failure.
          */
         //int gpiod_line_request_rising_edge_events(struct gpiod_line *line, const char* consumer) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_rising_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_rising_edge_events(IntPtr line, string consumer);
 
         /*
          * @brief Request rising edge event notifications on a single line.
@@ -370,8 +370,8 @@ internal partial class Gpiod2
          * @return 0 if the operation succeeds, -1 on failure.
          */
         // int gpiod_line_request_rising_edge_events_flags(struct gpiod_line *line, const char* consumer, int flags) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_rising_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_rising_edge_events_flags(IntPtr line, string consumer, line_request_flags flags);
 
         /*
          * @brief Request falling edge event notifications on a single line.
@@ -380,11 +380,11 @@ internal partial class Gpiod2
          * @return 0 if the operation succeeds, -1 on failure.
          */
         //int gpiod_line_request_falling_edge_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_falling_edge_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_falling_edge_events(IntPtr line, string consumer);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_falling_edge_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_falling_edge_events_flags(IntPtr line, string consumer, line_request_flags flags);
 
         /*
          * @brief Request all event type notifications on a single line.
@@ -393,11 +393,11 @@ internal partial class Gpiod2
          * @return 0 if the operation succeeds, -1 on failure.
          */
         //int gpiod_line_request_both_edges_events(struct gpiod_line *line, const char *consumer) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_both_edges_events(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_both_edges_events(IntPtr line, string consumer);
 
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_request_both_edges_events_flags(IntPtr line, [MarshalAs(UnmanagedType.LPStr)] string consumer, line_request_flags flags);
+        [LibraryImport(LIB_GPIOD, SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+        public static partial int gpiod_line_request_both_edges_events_flags(IntPtr line, string consumer, line_request_flags flags);
 
         /*
          * @brief Request falling edge event notifications on a single line.
@@ -425,23 +425,23 @@ internal partial class Gpiod2
          * @note This function will block if no event was queued for this line.
          */
         //int gpiod_line_event_read(struct gpiod_line *line, struct gpiod_line_event *event) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern int gpiod_line_event_read(IntPtr line, ref gpiod_line_event evnt);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial int gpiod_line_event_read(IntPtr line, ref gpiod_line_event evnt);
 
         // struct gpiod_chip_iter *gpiod_chip_iter_new(void) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_iter_new();
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_iter_new();
 
         // void gpiod_chip_iter_free(struct gpiod_chip_iter *iter) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern void gpiod_chip_iter_free(IntPtr iter);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial void gpiod_chip_iter_free(IntPtr iter);
 
         // struct gpiod_chip *gpiod_chip_iter_next(struct gpiod_chip_iter *iter) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_iter_next(IntPtr iter);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_iter_next(IntPtr iter);
 
         // struct gpiod_chip *gpiod_chip_iter_next_noclose(struct gpiod_chip_iter *iter) GPIOD_API;
-        [DllImport(LIB_GPIOD, SetLastError = true)]
-        public static extern IntPtr gpiod_chip_iter_next_noclose(IntPtr iter);
+        [LibraryImport(LIB_GPIOD, SetLastError = true)]
+        public static partial IntPtr gpiod_chip_iter_next_noclose(IntPtr iter);
     }
 }

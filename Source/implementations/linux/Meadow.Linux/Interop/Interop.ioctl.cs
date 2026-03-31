@@ -52,17 +52,17 @@ namespace Meadow
             return _IOC(_IOC_READ | _IOC_WRITE, type, nr, size);
         }
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int ioctl(int fd, int request, byte data);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int ioctl(int fd, int request, byte data);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern unsafe int ioctl(int fd, int request, byte* data);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static unsafe partial int ioctl(int fd, int request, byte* data);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int ioctl(int fd, int request, IntPtr pData);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int ioctl(int fd, int request, IntPtr pData);
 
-        [DllImport(LIBC, SetLastError = true)]
-        public static extern int ioctl(int fd, int request, ref uint data);
+        [LibraryImport(LIBC, SetLastError = true)]
+        public static partial int ioctl(int fd, int request, ref uint data);
 
         public static class Ioctl
         {

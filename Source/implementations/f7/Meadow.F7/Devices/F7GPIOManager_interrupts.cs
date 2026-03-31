@@ -19,7 +19,9 @@ public partial class F7GPIOManager : IMeadowIOController
     public event InterruptHandler Interrupt = default!;
 
     private Task? _ist;
+    private readonly Lock _interruptGroupsInUseLock = new();
     private readonly List<int> _interruptGroupsInUse = new();
+    private readonly Lock _configuredInterruptsLock = new();
     private bool _firstInterrupt = true;
 
     private readonly IPin _nullPin = new NullPin();
@@ -49,7 +51,7 @@ public partial class F7GPIOManager : IMeadowIOController
         else
         {
             DisconnectInterrupt((int)designator.port, designator.pin);
-            lock (_configuredInterrupts)
+            lock (_configuredInterruptsLock)
             {
                 if (_configuredInterrupts.ContainsKey(pin))
                 {
@@ -63,7 +65,7 @@ public partial class F7GPIOManager : IMeadowIOController
 
     internal UpdGpioInterruptConfiguration? GetConfiguredInterruptMode(IPin pin)
     {
-        lock (_configuredInterrupts)
+        lock (_configuredInterruptsLock)
         {
             if (_configuredInterrupts.ContainsKey(pin))
             {
@@ -127,7 +129,7 @@ public partial class F7GPIOManager : IMeadowIOController
     private void ConnectInterrupt(IPin pin, int portNumber, int pinNumber, InterruptMode interruptMode, ResistorMode resistorMode,
         TimeSpan debounceDuration, TimeSpan glitchDuration)
     {
-        lock (_interruptGroupsInUse)
+        lock (_interruptGroupsInUseLock)
         {
             Output.WriteLineIf((DebugFeatures & DebugFeature.Interrupts) != 0, $" ConnectInterrupt {portNumber}:{pinNumber}");
 
@@ -200,7 +202,7 @@ public partial class F7GPIOManager : IMeadowIOController
         }
         else
         {
-            lock (_configuredInterrupts)
+            lock (_configuredInterruptsLock)
             {
                 if (!_configuredInterrupts.ContainsKey(pin))
                 {
@@ -234,7 +236,7 @@ public partial class F7GPIOManager : IMeadowIOController
 
             UPD.Ioctl(Nuttx.UpdIoctlFn.RegisterGpioIrq, ref cfg);
 
-            lock (_interruptGroupsInUse)
+            lock (_interruptGroupsInUseLock)
             {
                 if (_interruptGroupsInUse.Contains(pinNumber))
                 {
