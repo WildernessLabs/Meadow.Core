@@ -20,9 +20,9 @@
 2. Clone your fork locally: `git clone https://github.com/WildernessLabs/Meadow.Core`
 3. Switch to the `develop` branch
 4. Create a new branch: `git checkout -b feature/your-contribution`
-5. Make your changes and commit: `git commit -m 'Added/Updated [feature/fix]`
+5. Make your changes and commit: `git commit -m 'Added/Updated [feature/fix]'`
 6. Push to your fork: `git push origin feature/your-contribution`
-7. Open a pull request at [Meadow.Core/pulls](https://github.com/WildernessLabs/Meadow.Core/pulls) targetting the `develop` branch
+7. Open a pull request at [Meadow.Core/pulls](https://github.com/WildernessLabs/Meadow.Core/pulls) targeting the `develop` branch
 ## Need Help?
 
 If you have questions or need assistance, please join the Wilderness Labs [community on Slack](http://slackinvite.wildernesslabs.co/).
