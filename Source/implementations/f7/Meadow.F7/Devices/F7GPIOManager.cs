@@ -90,6 +90,21 @@ namespace Meadow.Devices
             SetDiscrete(designator.address, designator.port, designator.pin, value);
         }
 
+        /// <summary>
+        /// Resolves a pin to the GPIO register addresses needed for direct one-cycle
+        /// digital writes/reads: BSRR (set/clear) and ODR (output data, for reading back
+        /// the actual electrical state). Intended for use by a port type that caches
+        /// these values at construction so its hot-path setters/getters skip the
+        /// per-call dictionary lookup.
+        /// </summary>
+        internal (uint bsrrAddress, uint odrAddress, uint pinBit) GetDiscreteWriteHandle(IPin pin)
+        {
+            var d = GetPortAndPin(pin);
+            return (d.address + STM32.GPIO_BSRR_OFFSET,
+                    d.address + STM32.GPIO_ODR_OFFSET,
+                    1u << d.pin);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal unsafe void SetDiscrete(uint baseAddress, STM32.GpioPort port, int pin, bool value)
         {

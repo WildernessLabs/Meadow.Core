@@ -20,6 +20,13 @@ public abstract partial class F7MicroBase
         bool initialState = false,
         OutputType initialOutputType = OutputType.PushPull)
     {
+        // F7 uses a port impl that writes the GPIO BSRR register directly from the
+        // cached pin handle, avoiding the IPin → (port,pin,address) dictionary lookup
+        // and lock on every State write.
+        if (this.IoController is F7GPIOManager f7)
+        {
+            return F7DigitalOutputPort.From(pin, f7, initialState, initialOutputType);
+        }
         return DigitalOutputPort.From(pin, this.IoController, initialState, initialOutputType);
     }
 

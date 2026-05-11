@@ -30,6 +30,7 @@
             public const int GPIO_OSPEED_OFFSET = 0x08;
             public const int GPIO_PUPDR_OFFSET = 0x0c;
             public const int GPIO_IDR_OFFSET = 0x10;
+            public const int GPIO_ODR_OFFSET = 0x14;
             public const int GPIO_BSRR_OFFSET = 0x18;
             public const int GPIO_AFRL_OFFSET = 0x20;
             public const int GPIO_AFRH_OFFSET = 0x24;
