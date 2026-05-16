@@ -423,9 +423,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         var raisedException = new MeadowCloudException(message, ex);
-        // Was Debug; bumped to Error so users see why cloud features
-        // aren't working at the default LogLevel=Information.
-        Resolver.Log.Error(message, "cloud");
+        Resolver.Log.Debug(message);
 
         ErrorOccurred?.Invoke(this, raisedException);
     }
@@ -930,11 +928,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         try
         {
             Resolver.Log.Info($"Posting authentication request...", "cloud");
-            // Honor the configured AuthTimeoutSeconds; the hard-coded 10s used here previously
-            // wasn't enough on slow links (NuttX/mbedTLS handshake is ~2-3s and the
-            // DeadlockDetectingHttpClient firstSend delay burns another 5s upfront).
-            var authTimeoutMs = Math.Max(5_000, Settings.AuthTimeoutSeconds * 1000);
-            using var response = await _authHttpClient.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: authTimeoutMs).Token);
+            using var response = await _authHttpClient.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: 10000).Token);
             Resolver.Log.Info($"Authentication response received: {response.StatusCode}", "cloud");
             var responseContent = await response.Content.ReadAsStringAsync();
 
