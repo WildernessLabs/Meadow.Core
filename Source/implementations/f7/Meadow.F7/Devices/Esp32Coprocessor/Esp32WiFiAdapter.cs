@@ -4,6 +4,7 @@ using Meadow.Hardware;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -762,6 +763,7 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
     private NetworkState _state;
     private NetworkAuthenticationType _authenticationType;
     private StatusCodes _lastStatus;
+    private Task? _ipWatchdogTask;
 
     private NetworkState CurrentState
     {
@@ -776,7 +778,12 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
             switch (CurrentState)
             {
                 case NetworkState.Connecting:
-                    // the ESP code itself will raise the event
+                    // the ESP code itself will normally raise the connected event,
+                    // but a coprocessor-firmware bug (WiFiAlreadyStarted early-return
+                    // in ConnectToAccessPoint) suppresses NetworkConnectedEvent when
+                    // the ESP auto-connected before mono was enabled. Bridge it here
+                    // by polling lwip for an IP and synthesizing the transition.
+                    StartIpWatchdog();
                     break;
                 case NetworkState.Connected:
                     Refresh();
@@ -792,6 +799,50 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     break;
             }
         }
+    }
+
+    private void StartIpWatchdog()
+    {
+        if (_ipWatchdogTask != null && !_ipWatchdogTask.IsCompleted) return;
+
+        // We only need a watchdog for ONE specific firmware bug: when ESP32
+        // auto-connects before mono is enabled, `ConnectToAccessPoint` early-
+        // returns `WiFiAlreadyStarted` without firing `NetworkConnectedEvent`,
+        // and the managed adapter is stuck at Connecting forever. We bridge
+        // that by synthesizing the missing Connected transition.
+        //
+        // We do NOT poll wlan0 for an IP — that's misleading. There's a
+        // documented bug (project_dhcp_bug.md) where ESP32's DHCP succeeds
+        // but the `NetworkGotIpEvent` (fn 48) is never sent to NuttX, so
+        // wlan0 shows Down / 0.0.0.0 even while the network is fully working
+        // through ESP32's usrsock layer (DNS, HTTP, HTTPS all succeed).
+        //
+        // So this watchdog just unsticks the Connecting-state issue and
+        // otherwise trusts the ESP.
+        Resolver.Log.Info("WiFi adapter IP watchdog: armed (will bridge missing NetworkConnectedEvent if needed)", MessageGroup.Esp);
+
+        _ipWatchdogTask = Task.Run(async () =>
+        {
+            const int BridgeAfterSec = 8;
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(BridgeAfterSec));
+                if (CurrentState == NetworkState.Connecting)
+                {
+                    Resolver.Log.Info($"WiFi adapter IP watchdog: still Connecting after {BridgeAfterSec}s; synthesizing Connected transition (ESP NetworkConnectedEvent likely dropped during mono-enable)", MessageGroup.Esp);
+                    Refresh();
+                    CurrentState = NetworkState.Connected;
+                }
+                else
+                {
+                    Resolver.Log.Trace($"WiFi adapter IP watchdog: state={CurrentState} after grace period; no action needed", MessageGroup.Esp);
+                }
+            }
+            catch (Exception ex)
+            {
+                Resolver.Log.Error($"WiFi adapter IP watchdog: unhandled exception: {ex.GetType().Name}: {ex.Message}", MessageGroup.Esp);
+            }
+        });
     }
 
     private enum NetworkState
