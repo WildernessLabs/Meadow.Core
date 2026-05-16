@@ -844,6 +844,11 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         return new AuthenticationHeaderValue("Bearer", _jwt);
     }
 
+    // MicroJson reads OId via reflection; the trimmer can't see that and
+    // strips the public setter on JsonWebTokenPayload. Anchor it.
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties,
+        typeof(JsonWebTokenPayload))]
     private JsonWebTokenPayload GetJsonWebTokenPayload(string jwt)
     {
         if (string.IsNullOrWhiteSpace(jwt))
@@ -900,6 +905,15 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     }
 
     /// <inheritdoc/>
+    // MicroJson reads/writes these private payloads via reflection; the trimmer
+    // can't see that and strips their accessors. Anchor them so authentication
+    // doesn't fail with "Property Get method was not found" on a published F7.
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties,
+        typeof(JsonIdPayload))]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties,
+        typeof(MeadowCloudLoginResponseMessage))]
     public async Task<bool> Authenticate()
     {
         string errorMessage;
