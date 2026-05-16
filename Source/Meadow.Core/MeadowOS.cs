@@ -608,6 +608,13 @@ public static partial class MeadowOS
         }
     }
 
+    // The trimmer cannot see reflection-only writes to these properties and
+    // strips their internal setters by default, which leaves Hardware /
+    // CancellationToken / Settings null at runtime on a published F7 image.
+    // DynamicDependency anchors the setters so the trimmer preserves them.
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(nameof(IApp.CancellationToken), typeof(AppBase))]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(nameof(IApp.Settings), typeof(AppBase))]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency("Hardware", typeof(App<,,>))]
     private static bool Initialize(string[]? args, IApp? app, Type? appType)
     {
         try
