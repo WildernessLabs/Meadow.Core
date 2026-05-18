@@ -810,6 +810,10 @@ public enum ConfigurationItems
     /// ConfigurationItems - BluetoothMacAddress
     /// </summary>
     BluetoothMacAddress = 16,
+    /// <summary>
+    /// ConfigurationItems - WiFiCountryCode
+    /// </summary>
+    WiFiCountryCode = 17,
 };
 
 /// <summary>
