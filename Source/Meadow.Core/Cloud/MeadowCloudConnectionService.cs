@@ -934,7 +934,13 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             // wasn't enough on slow links (NuttX/mbedTLS handshake is ~2-3s and the
             // DeadlockDetectingHttpClient firstSend delay burns another 5s upfront).
             var authTimeoutMs = Math.Max(5_000, Settings.AuthTimeoutSeconds * 1000);
-            using var response = await _authHttpClient.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: authTimeoutMs).Token);
+            // Force a fresh TCP+TLS connection per attempt to dodge a NuttX/mbedTLS-port
+            // bug: a second HTTPS request reusing a kept-alive TLS connection produces a
+            // record the server rejects (bad_record_mac), ~50% failure rate. Real fix
+            // belongs in pal_ssl_mbedtls.c; this is a working harness until then.
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint) { Content = content };
+            request.Headers.ConnectionClose = true;
+            using var response = await _authHttpClient.SendAsync(request, new CancellationTokenSource(millisecondsDelay: authTimeoutMs).Token);
             Resolver.Log.Info($"Authentication response received: {response.StatusCode}", "cloud");
             var responseContent = await response.Content.ReadAsStringAsync();
 
