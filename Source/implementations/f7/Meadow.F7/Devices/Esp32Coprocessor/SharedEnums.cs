@@ -250,6 +250,14 @@ public enum StatusCodes
     /// Reset over SDIO.
     /// </summary>
     EspResetSDIO = 60,
+    /// <summary>
+    /// Invalid Request.
+    /// </summary>
+    InvalidRequest = 61,
+    /// <summary>
+    /// Invalid WiFi country code.
+    /// </summary>
+    InvalidWiFiCountryCode = 62,
 }
 
 /// <summary>
