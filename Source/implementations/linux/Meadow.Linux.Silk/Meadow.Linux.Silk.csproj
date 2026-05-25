@@ -2,34 +2,32 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AssemblyName>Meadow.Linux</AssemblyName>   
+    <AssemblyName>Meadow.Linux.Silk</AssemblyName>
     <Company>Wilderness Labs, Inc</Company>
     <Authors>Wilderness Labs, Inc</Authors>
     <PackageProjectUrl>http://developer.wildernesslabs.co/Meadow/</PackageProjectUrl>
-    <PackageId>Meadow.Linux</PackageId>
+    <PackageId>Meadow.Linux.Silk</PackageId>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
-    <Description>Linux .NET libraries for Wilderness Labs Meadow</Description>
+    <Description>Silk.NET/SkiaSharp display support for Meadow Linux devices</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.IO.Ports" />
+    <PackageReference Include="Silk.NET" />
+    <PackageReference Include="SkiaSharp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.Core\Meadow.Core.csproj" />
+    <ProjectReference Include="..\Meadow.Linux\Meadow.Linux.csproj" />
+    <ProjectReference Include="..\..\..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Peripherals\Displays.Silk\Driver\Displays.Silk.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\icon.png" Link="icon.png" Pack="true" PackagePath="" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Networking\ip\" />
   </ItemGroup>
 </Project>

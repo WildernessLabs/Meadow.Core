@@ -1,5 +1,4 @@
-﻿using Meadow.Foundation.Displays;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using Meadow.Networking;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
@@ -60,10 +59,22 @@ public abstract class Linux : IMeadowDevice, IEmbeddedLinuxDevice
             );
     }
 
+    /// <summary>
+    /// Gets or sets the factory used by <see cref="CreateDisplay"/> to create a display instance.
+    /// Set this via <c>UsesSilkDisplay()</c> from the <c>Meadow.Linux.Silk</c> package,
+    /// or supply your own factory for a different display backend.
+    /// </summary>
+    public static Func<int, int, IResizablePixelDisplay>? DisplayFactory { get; set; }
+
     /// <inheritdoc/>
     public IResizablePixelDisplay CreateDisplay(int? width = null, int? height = null)
     {
-        return new SilkDisplay(width ?? 320, height ?? 240);
+        if (DisplayFactory == null)
+        {
+            throw new InvalidOperationException(
+                "No display factory registered. Add the Meadow.Linux.Silk package and call UsesSilkDisplay() during initialization.");
+        }
+        return DisplayFactory(width ?? 320, height ?? 240);
     }
 
     /// <inheritdoc/>
