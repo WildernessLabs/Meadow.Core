@@ -12,7 +12,7 @@ namespace Meadow;
 /// <summary>
 /// Represents a Linux-based Meadow device.
 /// </summary>
-public abstract class Linux : IMeadowDevice
+public abstract class Linux : IMeadowDevice, IEmbeddedLinuxDevice
 #if NET7_0
     , IPixelDisplayProvider
 #endif

@@ -516,47 +516,30 @@ public static partial class MeadowOS
 
                 throw new Exception("Cannot find an IApp that targets Desktop or Mac");
             case MeadowPlatform.DesktopLinux:
-                (Type, Type, Type?)? linuxTypeTuple = null;
-
                 foreach (var app in allApps)
                 {
                     var devicetype = FindDeviceTypeParameter(app);
 
-                    if (devicetype.DeviceType.FullName.StartsWith("Meadow.Desktop"))
+                    if (devicetype.DeviceType.FullName.StartsWith("Meadow.Desktop")
+                        || typeof(IDesktopLinuxDevice).IsAssignableFrom(devicetype.DeviceType))
                     {
                         return (app, devicetype.DeviceType, devicetype.HardwareProviderType);
                     }
-                    else if (devicetype.DeviceType.FullName == "Meadow.Linux")
-                    {
-                        // keep a ref in case Desktop isn't found
-                        linuxTypeTuple = (app, devicetype.DeviceType, devicetype.HardwareProviderType);
-                    }
-                }
-
-                if (linuxTypeTuple != null)
-                {
-                    return linuxTypeTuple;
                 }
 
                 throw new Exception("Cannot find an IApp that targets Desktop or Linux");
             case MeadowPlatform.EmbeddedLinux:
-                // TODO: improve this by finding a way to specifically differentiate Linux ARM
                 foreach (var app in allApps)
                 {
                     var devicetype = FindDeviceTypeParameter(app);
 
-                    switch (devicetype.DeviceType.FullName)
+                    if (typeof(IEmbeddedLinuxDevice).IsAssignableFrom(devicetype.DeviceType))
                     {
-                        case "Meadow.BeagleBoneBlack":
-                        case "Meadow.RaspberryPi":
-                        case "Meadow.JetsonNano":
-                        case "Meadow.JetsonXavierAgx":
-                        case "Meadow.SnickerdoodleBlack":
-                            return (app, devicetype.DeviceType, devicetype.HardwareProviderType);
+                        return (app, devicetype.DeviceType, devicetype.HardwareProviderType);
                     }
                 }
 
-                throw new Exception("Cannot find an IApp that targets a supported ARM Linux");
+                throw new Exception("Cannot find an IApp that targets a supported ARM Linux device. Ensure your device type implements IEmbeddedLinuxDevice.");
             case MeadowPlatform.Unknown:
                 Interop.HardwareVersion hw = Interop.HardwareVersion.Unknown;
                 try
