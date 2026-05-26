@@ -1,4 +1,4 @@
-<Project Sdk="Meadow.Sdk/1.1.0">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>Wilderness Labs, Inc</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -19,6 +19,7 @@
     <LangVersion>preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <NoWarn>CS8597;CS8600;CS8601;CS8602;CS8603;CS8604;CS8612;CS8618;CS8619;CS8622;CS8714;CS8765;CS8767</NoWarn>
   </PropertyGroup>
   <ItemGroup>

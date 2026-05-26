@@ -182,6 +182,10 @@ public static partial class MeadowOS
 
                 AppAbort.CancelAfter(millisecondsDelay: LifecycleSettings.AppFailureRestartDelaySeconds * 1000);
                 await App.OnShutdown();
+                if (CurrentDevice is IPowerManagement pm)
+                {
+                    await pm.OnShutdown();
+                }
             }
             catch (Exception e)
             {
