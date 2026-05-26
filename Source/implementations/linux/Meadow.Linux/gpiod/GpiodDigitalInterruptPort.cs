@@ -11,7 +11,8 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
 {
     private Gpiod Driver { get; }
     private ILineInfo Line { get; }
-    private int? _lastInterrupt = null;
+    private int _lastHighTime = 0;
+    private int _lastLowTime = 0;
     private InterruptMode _interruptMode;
     private ResistorMode _resistorMode;
 
@@ -94,19 +95,24 @@ public class GpiodDigitalInterruptPort : DigitalInterruptPortBase
 
     private void OnInterruptOccurred(ILineInfo sender, GpiodEdgeEventArgs e)
     {
+        // Read the actual pin state rather than trusting e.EventType, which can
+        // misreport on some kernel/gpiod versions.
+        var state = Line.GetValue();
+
         if (DebounceDuration.TotalMilliseconds > 0)
         {
             var now = Environment.TickCount;
+            var debounceMs = (int)DebounceDuration.TotalMilliseconds;
 
-            if (_lastInterrupt != null &&
-                now - _lastInterrupt < DebounceDuration.TotalMilliseconds) { return; }
-
-            _lastInterrupt = now;
+            // Filter same-direction repeats within the debounce window.
+            // Direction changes (press→release or release→press) are always passed
+            // through so a fast click never loses its release edge.
+            ref var lastTime = ref (state ? ref _lastHighTime : ref _lastLowTime);
+            if (now - lastTime < debounceMs) { return; }
+            lastTime = now;
         }
 
-        var state = e.EventType == GpiodEdgeEventType.Rising;
-
-        this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) }); // TODO: convert event time?
+        this.RaiseChangedAndNotify(new DigitalPortResult { New = new DigitalState(state, DateTime.UtcNow) });
     }
 
     /// <inheritdoc/>
