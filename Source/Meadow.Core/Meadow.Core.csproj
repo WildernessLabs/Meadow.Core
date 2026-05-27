@@ -20,6 +20,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <RuntimeIdentifiers>win-x64;linux-arm64;linux-x64;osx-arm64;osx-x64</RuntimeIdentifiers>
     <NoWarn>CS8597;CS8600;CS8601;CS8602;CS8603;CS8604;CS8612;CS8618;CS8619;CS8622;CS8714;CS8765;CS8767</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -32,9 +33,9 @@
         <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Logging\Source\Meadow.Logging\lib\Meadow.Logging.csproj" />
-        <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="MQTTnet" />
         <PackageReference Include="NetEscapades.Configuration.Yaml" />
         <PackageReference Include="sqlite-net-static" />
         <PackageReference Include="System.IO.Hashing" />

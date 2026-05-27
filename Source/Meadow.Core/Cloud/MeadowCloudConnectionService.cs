@@ -3,7 +3,6 @@ using Meadow.Hardware;
 using Meadow.Update;
 using MQTTnet;
 using MQTTnet.Adapter;
-using MQTTnet.Client;
 using MQTTnet.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -496,7 +495,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private void Initialize()
     {
-        var factory = new MqttFactory();
+        var factory = new MqttClientFactory();
         MqttClient = (MqttClient)factory.CreateMqttClient();
 
         MqttClient.ConnectedAsync += (args) =>
@@ -690,6 +689,14 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                     break;
                                 }
 
+                                if (connectTask.Result.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                                {
+                                    Resolver.Log.Debug("MQTT authentication error, invalidating credentials", "cloud");
+
+                                    InvalidateAuthentication();
+                                    await MqttClient.DisconnectAsync();
+                                }
+
                                 await connectTask; // Re-await to get any exceptions
                             }
                             catch (InvalidOperationException ioe)
@@ -707,21 +714,13 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
-                            catch (MqttConnectingFailedException e)
+                            catch (MqttConnectingFailedException ce)
                             {
-                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
+                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {ce}", "cloud");
                                 ConnectionState = CloudConnectionState.Disconnected;
-                                if (e.ResultCode == MqttClientConnectResultCode.NotAuthorized)
-                                {
-                                    Resolver.Log.Debug($"MQTT authentication error, invalidating credentials", "cloud");
-                                    InvalidateAuthentication();
-                                    await MqttClient.DisconnectAsync();
-                                }
-                                else
-                                {
-                                    //  just delay for a while
-                                    await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
-                                }
+
+                                //  just delay for a while
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
                             catch (MqttCommunicationException e)
                             {
