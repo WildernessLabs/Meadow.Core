@@ -9,6 +9,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,7 +66,7 @@ public static partial class MeadowOS
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
-    public static Task Start<TApp>()
+    public static Task Start<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] TApp>()
         where TApp : IApp
     {
         return Start(null, null, typeof(TApp));
@@ -74,6 +75,16 @@ public static partial class MeadowOS
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
+    public static Task Start<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] TApp>(string[]? args)
+        where TApp : IApp
+    {
+        return Start(args, null, typeof(TApp));
+    }
+
+    /// <summary>
+    /// Initializes and starts up the Meadow Core software stack
+    /// </summary>
+    [RequiresUnreferencedCode("Scans the entry assembly for IApp implementations at runtime. Use Start<TApp>() instead to preserve trim compatibility.")]
     public static Task Start(string[]? args)
     {
         return Start(args, null);
@@ -84,13 +95,14 @@ public static partial class MeadowOS
     /// </summary>
     public static Task Start(IApp app, string[]? args = null)
     {
-        return Start(args, app);
+        return Start(args, app, app.GetType());
     }
 
     /// <summary>
     /// Initializes and starts up the Meadow Core software stack
     /// </summary>
-    private static async Task Start(string[]? args, IApp? app, Type? appType = null)
+    private static async Task Start(string[]? args, IApp? app,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] Type? appType = null)
     {
         bool systemInitialized = false;
         try
@@ -310,6 +322,7 @@ public static partial class MeadowOS
         return settings.Settings;
     }
 
+    [RequiresUnreferencedCode("Scans assembly via GetTypes() which is not trim-safe. Use Start<TApp>() instead.")]
     private static Type[] FindAppType(string? root)
     {
         Resolver.Log.Trace($"Looking for app assembly...", MessageGroup.Core);
@@ -602,7 +615,8 @@ public static partial class MeadowOS
     [System.Diagnostics.CodeAnalysis.DynamicDependency(nameof(IApp.CancellationToken), typeof(AppBase))]
     [System.Diagnostics.CodeAnalysis.DynamicDependency(nameof(IApp.Settings), typeof(AppBase))]
     [System.Diagnostics.CodeAnalysis.DynamicDependency("Hardware", typeof(App<,,>))]
-    private static bool Initialize(string[]? args, IApp? app, Type? appType)
+    private static bool Initialize(string[]? args, IApp? app,
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)] Type? appType)
     {
         try
         {
@@ -631,9 +645,11 @@ public static partial class MeadowOS
         var platform = DetectPlatform();
 
         var appTypes = GetConstructionTypesForPlatform(platform, appType);
+#pragma warning disable IL2072 // tuple fields carry no DynamicallyAccessedMembers annotation; preservation is guaranteed via ILLink.Descriptors.xml and Start<TApp> call-site annotation
         appType = appTypes!.Value.appType;
         var deviceType = appTypes!.Value.deviceType;
         var hardwareProviderType = appTypes!.Value.hardwareProviderType;
+#pragma warning restore IL2072
 
         try
         {
