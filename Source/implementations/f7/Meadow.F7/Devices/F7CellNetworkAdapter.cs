@@ -288,6 +288,7 @@ internal unsafe class F7CellNetworkAdapter : NetworkAdapterBase, ICellNetworkAda
     /// <summary>
     /// Returns the list of cell networks found, including its operator code, if the device is in scanning mode, otherwise, an empty array
     /// </summary>
+    [Obsolete ("This method has been deprecated. Try use ScanForAvailableNetworks instead.", true)]
     public CellNetwork[] OfflineNetworkScan()
     {
         Resolver.Log.Error("OfflineNetworkScan method has been deprecated! Please consult the cellular docs to learn how to use the network scanner", MessageGroup.Core);
