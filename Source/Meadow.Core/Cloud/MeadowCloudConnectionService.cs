@@ -1134,6 +1134,19 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         return Task.CompletedTask;
     }
 
+    // MicroJson serializes the cloud payload via reflection (PropertyInfo.GetValue);
+    // the trimmer can't see that usage and strips the property getters on the payload
+    // types, so a published/trimmed F7 throws "Property Get method was not found" on
+    // every SendEvent/SendLog. Anchor the serialized payload types (CloudEvent, CloudLog),
+    // mirroring the auth-payload anchors above.
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+        | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor,
+        typeof(CloudEvent))]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+        | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor,
+        typeof(CloudLog))]
     private async Task<bool> Send<T>(T item, string endpoint)
     {
         if (item == null) throw new ArgumentNullException(nameof(item));
