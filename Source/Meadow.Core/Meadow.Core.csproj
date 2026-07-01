@@ -11,7 +11,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
@@ -31,9 +31,11 @@
         <ProjectReference Include="..\..\..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Foundation\Source\Meadow.Foundation.Libraries_and_Frameworks\Serialization.MicroJson\Driver\Serialization.MicroJson.csproj" />
         <ProjectReference Include="..\..\..\Meadow.Logging\Source\Meadow.Logging\lib\Meadow.Logging.csproj" />
-        <ProjectReference Include="..\..\..\MQTTnet\Source\MQTTnet\MQTTnet.csproj" />
     </ItemGroup>
     <ItemGroup>
+        <!-- Stock MQTTnet (was a ProjectReference to a locally-hacked fork whose
+             sync Socket.Connect hack hung on NuttX poll(); canonical async ConnectAsync). -->
+        <PackageReference Include="MQTTnet" />
         <PackageReference Include="NetEscapades.Configuration.Yaml" />
         <PackageReference Include="sqlite-net-static" />
         <PackageReference Include="System.IO.Hashing" />
