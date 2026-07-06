@@ -57,6 +57,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private bool _firstConection = true;
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
     private string? _jwt = null;
+    private int _consecutiveMqttConnectFailures = 0;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
     private Task? _stateMachineTask;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
@@ -449,7 +450,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
             if (previousState == CloudConnectionState.Connected)
             {
-                ConnectionState = CloudConnectionState.Subscribing;
+                _consecutiveMqttConnectFailures = 0;
+            ConnectionState = CloudConnectionState.Subscribing;
             }
             else
             {
@@ -503,6 +505,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         MqttClient.ConnectedAsync += (args) =>
         {
             Resolver.Log.Debug("MQTT connected", "cloud");
+            _consecutiveMqttConnectFailures = 0;
             ConnectionState = CloudConnectionState.Subscribing;
             return Task.CompletedTask;
         };
@@ -718,9 +721,20 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             {
                                 Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
                                 ConnectionState = CloudConnectionState.Disconnected;
-                                if (e.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                                _consecutiveMqttConnectFailures++;
+
+                                // A broker rejecting a stale/expired token does not always
+                                // return a NotAuthorized CONNACK -- it may simply close the
+                                // connection mid-authentication, which surfaces here with a
+                                // generic result code. Retrying with the same token then
+                                // loops forever. Invalidate on explicit NotAuthorized OR
+                                // after repeated connect failures of any kind (re-auth is
+                                // cheap and idempotent).
+                                if (e.ResultCode == MqttClientConnectResultCode.NotAuthorized ||
+                                    _consecutiveMqttConnectFailures >= 3)
                                 {
-                                    Resolver.Log.Debug($"MQTT authentication error, invalidating credentials", "cloud");
+                                    Resolver.Log.Debug($"MQTT authentication error ({e.ResultCode}, {_consecutiveMqttConnectFailures} consecutive failures), invalidating credentials", "cloud");
+                                    _consecutiveMqttConnectFailures = 0;
                                     InvalidateAuthentication();
                                     await MqttClient.DisconnectAsync();
                                 }
