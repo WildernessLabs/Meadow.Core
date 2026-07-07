@@ -18,6 +18,12 @@ internal class HealthReporter : IHealthReporter
 
     private const string LogGroup = "HealthReporter";
 
+    // Held in a field deliberately: an enabled System.Timers.Timer is NOT
+    // self-rooting -- as a Start() local it was reachable only through the
+    // NetworkConnected closure, and on some boots the GC collected it and
+    // health reporting silently stopped.
+    private Timer? _timer;
+
     /// <summary>
     /// Gets the enabled state of the HealthReporter
     /// </summary>
@@ -47,9 +53,9 @@ internal class HealthReporter : IHealthReporter
 
         IsEnabled = true;
 
-        Timer timer = new(interval: interval * 60 * 1000);
-        timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
-        timer.AutoReset = true;
+        _timer = new(interval: interval * 60 * 1000);
+        _timer.Elapsed += async (sender, e) => await TimerOnElapsed(sender, e);
+        _timer.AutoReset = true;
 
         var anyAdapter = Resolver.Device.NetworkAdapters.Primary<INetworkAdapter>();
 
@@ -57,24 +63,47 @@ internal class HealthReporter : IHealthReporter
         if (anyAdapter != null && anyAdapter.IsConnected)
         {
             Resolver.Log.Trace($"starting health metrics timer", LogGroup);
-            timer.Start();
+            _timer.Start();
 
-            await Send();
+            await SendInitial();
         }
 
         Resolver.Device.NetworkAdapters.NetworkConnected += async (sender, args) =>
         {
             // TODO: what happens if we disconnect and reconnect?
 
-            if (!timer.Enabled)
+            if (_timer != null && !_timer.Enabled)
             {
                 Resolver.Log.Trace($"starting health metrics timer", LogGroup);
-                timer.Start();
+                _timer.Start();
 
                 // send the first health metric
-                await Send();
+                await SendInitial();
             }
         };
+    }
+
+    /// <summary>
+    /// First send after (re)connect. The cloud service registers
+    /// asynchronously during startup, so briefly wait for it -- otherwise
+    /// the boot sample is silently dropped and, with the default 60-minute
+    /// interval, the first report is an hour away.
+    /// </summary>
+    private async Task SendInitial()
+    {
+        try
+        {
+            for (var i = 0; i < 12 && Resolver.Services.Get<IMeadowCloudService>() == null; i++)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10));
+            }
+
+            await Send();
+        }
+        catch (Exception ex)
+        {
+            Resolver.Log.Warn($"initial health metric send failed: {ex.Message}", LogGroup);
+        }
     }
 
     /// <inheritdoc/>
@@ -222,8 +251,18 @@ internal class HealthReporter : IHealthReporter
         }
     }
 
-    private Task TimerOnElapsed(object sender, ElapsedEventArgs e)
+    private async Task TimerOnElapsed(object sender, ElapsedEventArgs e)
     {
-        return Send();
+        try
+        {
+            await Send();
+        }
+        catch (Exception ex)
+        {
+            // Send() only handles MeadowCloudException itself; transport
+            // exceptions (HttpRequestException, TaskCanceledException, ...)
+            // must not escape into the async-void timer context.
+            Resolver.Log.Warn($"health metric send failed: {ex.Message}", LogGroup);
+        }
     }
 }
