@@ -294,7 +294,14 @@ public class MeadowCloudUpdateService : IUpdateService
         var write_buffer = ArrayPool<byte>.Shared.Rent(DownloadBufferSize);
         try
         {
-            using var httpClient = new HttpClient();
+            // PooledConnectionLifetime=Zero forces a fresh TCP+TLS connection per
+            // request to avoid a TLS connection-reuse issue on the Meadow socket
+            // layer (same rationale as MeadowCloudConnectionService's clients).
+            using var httpClient = new HttpClient(new SocketsHttpHandler
+            {
+                PooledConnectionLifetime = TimeSpan.Zero,
+                PooledConnectionIdleTimeout = TimeSpan.Zero,
+            });
 
             // Set timeout for the entire operation
             httpClient.Timeout = TimeSpan.FromMinutes(20); // 20 min should download 10MB at 10KB/sec - and we can always resume

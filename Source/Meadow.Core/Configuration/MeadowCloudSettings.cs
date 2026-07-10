@@ -14,7 +14,13 @@ internal class MeadowCloudSettings : IMeadowCloudSettings
     public int HealthMetricsIntervalMinutes { get; set; } = 60;
     public int MqttPort { get; set; } = 8883;
     public int ConnectRetrySeconds { get; set; } = 5;
-    public int AuthTimeoutSeconds { get; set; } = 20;
+    // 90s covers the cold-start cost on the .NET 10 / Meadow port: the first HTTPS
+    // request after boot triggers the one-time mono JIT of the SslStream/HTTP stack
+    // plus a full DNS + TCP + TLS handshake, which together can take ~90s on the F7.
+    // Subsequent requests are fast. Each request also forces a fresh connection
+    // (PooledConnectionLifetime=Zero) to avoid a TLS connection-reuse issue; once
+    // that's resolved this can drop back toward ~20s.
+    public int AuthTimeoutSeconds { get; set; } = 90;
     //    public int MaxQueueDepth { get; set; } = CloudDataQueue.DefaultQueueDepth;
 
     public int MaximumDisconnectTimeMinutes { get; set; } = 180;

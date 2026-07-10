@@ -478,6 +478,14 @@ internal class Esp32WiFiAdapter : NetworkAdapterBase, IWiFiNetworkAdapter
                     case StatusCodes.CannotConnectToAccessPoint:
                         ne = new NetworkException("Network error", (int)_lastStatus);
                         break;
+                    case StatusCodes.WiFiAlreadyStarted:
+                        // The ESP auto-connected (AutomaticallyStartNetwork) before mono
+                        // was enabled, so ConnectToAccessPoint short-circuits without
+                        // re-raising NetworkConnectedEvent. The adapter is already
+                        // associated, so reflect Connected directly instead of waiting
+                        // in WaitForConnectionToComplete for an event that won't come.
+                        CurrentState = NetworkState.Connected;
+                        break;
                 }
 
                 if (ne != null)

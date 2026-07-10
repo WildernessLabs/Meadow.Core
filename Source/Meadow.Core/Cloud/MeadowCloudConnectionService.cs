@@ -56,6 +56,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private bool _firstConection = true;
     private DateTime _lastAuthenticationTime = DateTime.MinValue;
     private string? _jwt = null;
+    private int _consecutiveMqttConnectFailures = 0;
     private CloudConnectionState _connectionState = CloudConnectionState.Unknown;
     private Task? _stateMachineTask;
     private static readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
@@ -66,16 +67,26 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     private MqttClientOptions? ClientOptions { get; set; } = default!;
     private MqttClient MqttClient { get; set; } = default!;
 
-    // Static HttpClient instances for connection reuse (prevent socket exhaustion)
-    private static readonly DeadlockDetectingHttpClient _dataHttpClient = new DeadlockDetectingHttpClient
-    {
-        Timeout = TimeSpan.FromSeconds(HttpClientTimeoutSeconds)
-    };
+    // Static HttpClient instances for connection reuse (prevent socket exhaustion).
+    // PooledConnectionLifetime=Zero disables HTTPS connection reuse: a separate
+    // usrsock/mbedTLS connection-reuse issue (a kept-alive TLS connection can
+    // produce a record the server rejects as bad_record_mac) is still open, so a
+    // fresh TCP+TLS connection per request keeps the cloud path reliable. Revisit
+    // once that's fixed (see project_meadowcloud_tls_intermittent).
+    private static HttpClient CreateCloudHttpClient(int timeoutSeconds) =>
+        new HttpClient(new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.Zero,
+            PooledConnectionIdleTimeout = TimeSpan.Zero,
+        })
+        {
+            Timeout = TimeSpan.FromSeconds(timeoutSeconds)
+        };
 
-    private static readonly DeadlockDetectingHttpClient _authHttpClient = new DeadlockDetectingHttpClient
-    {
-        Timeout = TimeSpan.FromSeconds(HttpClientTimeoutSeconds) // Will be updated from Settings in Initialize()
-    };
+    private static readonly HttpClient _dataHttpClient = CreateCloudHttpClient(HttpClientTimeoutSeconds);
+
+    // Timeout is updated from Settings.AuthTimeoutSeconds in Initialize().
+    private static readonly HttpClient _authHttpClient = CreateCloudHttpClient(HttpClientTimeoutSeconds);
 
     /// <inheritdoc/>
     public bool IsEnabled { get; private set; }
@@ -115,17 +126,6 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             _dataQueue = new CloudDataQueue(
                 new InMemoryTelemetryStore());
         }
-
-        _dataHttpClient.SendDeadlocked += (s, e) =>
-        {
-            Resolver.Log.Error($"Data HttpClient deadlocked - resetting", "cloud");
-            Resolver.Device?.PlatformOS.Reset();
-        };
-        _authHttpClient.SendDeadlocked += (s, e) =>
-        {
-            Resolver.Log.Error($"Auth HttpClient deadlocked - resetting", "cloud");
-            Resolver.Device?.PlatformOS.Reset();
-        };
     }
 
     /// <inheritdoc/>
@@ -422,7 +422,9 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         }
 
         var raisedException = new MeadowCloudException(message, ex);
-        Resolver.Log.Debug(message);
+        // Was Debug; bumped to Error so users see why cloud features
+        // aren't working at the default LogLevel=Information.
+        Resolver.Log.Error(message, "cloud");
 
         ErrorOccurred?.Invoke(this, raisedException);
     }
@@ -447,6 +449,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
             if (previousState == CloudConnectionState.Connected)
             {
+                _consecutiveMqttConnectFailures = 0;
                 ConnectionState = CloudConnectionState.Subscribing;
             }
             else
@@ -501,6 +504,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         MqttClient.ConnectedAsync += (args) =>
         {
             Resolver.Log.Debug("MQTT connected", "cloud");
+            _consecutiveMqttConnectFailures = 0;
             ConnectionState = CloudConnectionState.Subscribing;
             return Task.CompletedTask;
         };
@@ -607,14 +611,17 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                         {
                             stopwatch.Restart();
 
-                            // Wrap authentication with a timeout to prevent infinite hangs
+                            // Wrap authentication with a timeout to prevent infinite hangs.
+                            // Use Settings.AuthTimeoutSeconds so the outer wrapper matches the
+                            // inner cancel-token deadline; otherwise a 60s wrapper around a 90s
+                            // inner timeout fires prematurely and looks like a "network hang".
                             var authTask = Authenticate();
-                            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds));
+                            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds));
                             var completedTask = await Task.WhenAny(authTask, timeoutTask);
 
                             if (completedTask == timeoutTask)
                             {
-                                Resolver.Log.Error($"Authentication timed out after {HttpClientTimeoutSeconds} seconds - network may be hung");
+                                Resolver.Log.Error($"Authentication timed out after {Settings.AuthTimeoutSeconds} seconds - network may be hung");
                                 ConnectionState = CloudConnectionState.Disconnected;
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
@@ -657,6 +664,9 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                 })
                                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                                 .WithCleanSession(false)
+                                // Default MQTTnet keepalive (15s). Left at default so the recvfrom
+                                // non-blocking fix is tested honestly: if the connection survives idle,
+                                // it's because PINGREQ now goes out (thread freed), not a tolerant broker.
                                 .WithSessionExpiryInterval(86400) // Keep the session for 1 day
                                 .WithTimeout(TimeSpan.FromSeconds(HttpClientTimeoutSeconds));
 
@@ -689,10 +699,18 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                     break;
                                 }
 
-                                if (connectTask.Result.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                                if (connectTask.Result.ResultCode == MqttClientConnectResultCode.NotAuthorized ||
+                                        _consecutiveMqttConnectFailures >= 3)
                                 {
-                                    Resolver.Log.Debug("MQTT authentication error, invalidating credentials", "cloud");
-
+                                    // A broker rejecting a stale/expired token does not always
+                                    // return a NotAuthorized CONNACK -- it may simply close the
+                                    // connection mid-authentication, which surfaces here with a
+                                    // generic result code. Retrying with the same token then
+                                    // loops forever. Invalidate on explicit NotAuthorized OR
+                                    // after repeated connect failures of any kind (re-auth is
+                                    // cheap and idempotent).
+                                    Resolver.Log.Debug($"MQTT authentication error ({connectTask.Result.ResultCode}, {_consecutiveMqttConnectFailures} consecutive failures), invalidating credentials", "cloud");
+                                    _consecutiveMqttConnectFailures = 0;
                                     InvalidateAuthentication();
                                     await MqttClient.DisconnectAsync();
                                 }
@@ -718,6 +736,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             {
                                 Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {ce}", "cloud");
                                 ConnectionState = CloudConnectionState.Disconnected;
+                                _consecutiveMqttConnectFailures++;
 
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
@@ -846,7 +865,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     // MicroJson reads OId via reflection; the trimmer can't see that and
     // strips the public setter on JsonWebTokenPayload. Anchor it.
     [System.Diagnostics.CodeAnalysis.DynamicDependency(
-        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties,
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+        | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor,
         typeof(JsonWebTokenPayload))]
     private JsonWebTokenPayload GetJsonWebTokenPayload(string jwt)
     {
@@ -911,7 +931,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties,
         typeof(JsonIdPayload))]
     [System.Diagnostics.CodeAnalysis.DynamicDependency(
-        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties,
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+        | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor,
         typeof(MeadowCloudLoginResponseMessage))]
     public async Task<bool> Authenticate()
     {
@@ -927,7 +948,21 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         try
         {
             Resolver.Log.Info($"Posting authentication request...", "cloud");
-            using var response = await _authHttpClient.PostAsync(endpoint, content, new CancellationTokenSource(millisecondsDelay: 10000).Token);
+            // Honor the configured AuthTimeoutSeconds. The first HTTPS request after
+            // boot is dominated by the one-time mono JIT of the SslStream/HTTP stack
+            // (tens of seconds on the F7), so a generous timeout is required; a small
+            // hard-coded value here would spuriously cancel the cold-start auth.
+            var authTimeoutMs = Math.Max(5_000, Settings.AuthTimeoutSeconds * 1000);
+            // Force a fresh TCP+TLS connection per attempt to dodge a NuttX/mbedTLS-port
+            // bug: a second HTTPS request reusing a kept-alive TLS connection produces a
+            // record the server rejects (bad_record_mac), ~50% failure rate. Real fix
+            // belongs in pal_ssl_mbedtls.c; this is a working harness until then.
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint) { Content = content };
+            // Close the connection after the response so each auth uses a fresh TCP+TLS
+            // connection (belt-and-suspenders with PooledConnectionLifetime=Zero), avoiding
+            // the mbedTLS keep-alive bad_record_mac reuse bug.
+            request.Headers.ConnectionClose = true;
+            using var response = await _authHttpClient.SendAsync(request, new CancellationTokenSource(millisecondsDelay: authTimeoutMs).Token);
             Resolver.Log.Info($"Authentication response received: {response.StatusCode}", "cloud");
             var responseContent = await response.Content.ReadAsStringAsync();
 
@@ -1121,6 +1156,19 @@ public class MeadowCloudConnectionService : IMeadowCloudService
         return Task.CompletedTask;
     }
 
+    // MicroJson serializes the cloud payload via reflection (PropertyInfo.GetValue);
+    // the trimmer can't see that usage and strips the property getters on the payload
+    // types, so a published/trimmed F7 throws "Property Get method was not found" on
+    // every SendEvent/SendLog. Anchor the serialized payload types (CloudEvent, CloudLog),
+    // mirroring the auth-payload anchors above.
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+        | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor,
+        typeof(CloudEvent))]
+    [System.Diagnostics.CodeAnalysis.DynamicDependency(
+        System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+        | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicParameterlessConstructor,
+        typeof(CloudLog))]
     private async Task<bool> Send<T>(T item, string endpoint)
     {
         if (item == null) throw new ArgumentNullException(nameof(item));
@@ -1246,6 +1294,22 @@ public class MeadowCloudConnectionService : IMeadowCloudService
     /// <inheritdoc/>
     public string? GetPrivateKeyInPemFormat()
     {
+        // Check the Meadow platform FIRST. F7 private keys are baked into the
+        // hardware (the firmware's RsaDecrypt uses them), so we return a sentinel
+        // here. This MUST precede the IsOSPlatform checks: on .NET 10 the NuttX
+        // runtime reports IsOSPlatform(Linux)==true, so the F7 would otherwise take
+        // the desktop Linux path (~/.ssh/id_rsa) and fail with "SSH folder not found"
+        // -> null private key -> RSA decrypt skipped -> cloud auth fails. (Legacy
+        // Mono did not identify NuttX as Linux, so it fell through to the F7 branch.)
+        switch (Resolver.Device.Information.Platform)
+        {
+            case MeadowPlatform.F7FeatherV1:
+            case MeadowPlatform.F7FeatherV2:
+            case MeadowPlatform.F7CoreComputeV2:
+                // F7 Private Keys are baked in - we have no API to extract yet
+                return "F7 PRIVATE KEY";
+        }
+
         if (SRI.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             var sshFolder = new DirectoryInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh"));
