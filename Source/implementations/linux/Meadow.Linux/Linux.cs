@@ -1,24 +1,25 @@
-﻿using Meadow.Foundation.Displays;
-using Meadow.Hardware;
+﻿using Meadow.Hardware;
 using Meadow.Networking;
 using Meadow.Peripherals.Displays;
 using Meadow.Units;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Meadow;
 
 /// <summary>
 /// Represents a Linux-based Meadow device.
 /// </summary>
-public abstract class Linux : IMeadowDevice
+public abstract class Linux : IMeadowDevice, IEmbeddedLinuxDevice, IPowerManagement
 #if NET7_0
     , IPixelDisplayProvider
 #endif
 {
     private SysFsGpioDriver _sysfs = null!;
     private Gpiod _gpiod = null!;
+    private bool _shutdownRequested;
 
 #pragma warning disable CS0067
     /// <inheritdoc/>
@@ -60,10 +61,22 @@ public abstract class Linux : IMeadowDevice
             );
     }
 
+    /// <summary>
+    /// Gets or sets the factory used by <see cref="CreateDisplay"/> to create a display instance.
+    /// Set this via <c>UsesSilkDisplay()</c> from the <c>Meadow.Linux.Silk</c> package,
+    /// or supply your own factory for a different display backend.
+    /// </summary>
+    public static Func<int, int, IResizablePixelDisplay>? DisplayFactory { get; set; }
+
     /// <inheritdoc/>
     public IResizablePixelDisplay CreateDisplay(int? width = null, int? height = null)
     {
-        return new SilkDisplay(width ?? 320, height ?? 240);
+        if (DisplayFactory == null)
+        {
+            throw new InvalidOperationException(
+                "No display factory registered. Add the Meadow.Linux.Silk package and call UsesSilkDisplay() during initialization.");
+        }
+        return DisplayFactory(width ?? 320, height ?? 240);
     }
 
     /// <inheritdoc/>
@@ -332,6 +345,29 @@ public abstract class Linux : IMeadowDevice
         return process?.StandardOutput.ReadToEnd() ?? string.Empty;
     }
 
+    private static void ExecutePrivilegedCommand(string command, string args)
+    {
+        var psi = new ProcessStartInfo()
+        {
+            FileName = command,
+            Arguments = args,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+
+        using var process = Process.Start(psi);
+        process?.WaitForExit();
+
+        if (process?.ExitCode != 0)
+        {
+            var error = process?.StandardError.ReadToEnd()?.Trim() ?? string.Empty;
+            throw new UnauthorizedAccessException(
+                $"'{command} {args}' failed (exit {process?.ExitCode}): {error}");
+        }
+    }
+
     /// <inheritdoc/>
     public IDigitalSignalAnalyzer CreateDigitalSignalAnalyzer(IPin pin, bool captureDutyCycle)
     {
@@ -380,11 +416,21 @@ public abstract class Linux : IMeadowDevice
         throw new NotImplementedException();
     }
 
-    /// <inheritdoc/>
-    public void Reset()
+    /// <summary>
+    /// Initiates an ordered shutdown: runs app cleanup via the normal lifecycle,
+    /// then powers off the OS with <c>shutdown now</c>.
+    /// </summary>
+    public void Shutdown()
     {
-        // TODO: $ sudo reboot
-        throw new NotImplementedException();
+        _shutdownRequested = true;
+        MeadowOS.TerminateRun();
+    }
+
+    /// <inheritdoc/>
+    public Task Reset()
+    {
+        ExecutePrivilegedCommand("sudo", "reboot");
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
@@ -395,9 +441,13 @@ public abstract class Linux : IMeadowDevice
     }
 
     /// <inheritdoc/>
-    public void OnShutdown(out bool complete, Exception? e = null)
+    public Task OnShutdown()
     {
-        throw new NotImplementedException();
+        if (_shutdownRequested)
+        {
+            ExecutePrivilegedCommand("sudo", "shutdown -h now");
+        }
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>

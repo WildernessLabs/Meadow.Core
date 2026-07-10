@@ -42,7 +42,7 @@ internal static class WindowsNetworkExtensions
             AuthenticationAlgorithm.Shared => new NetworkSecuritySettings(NetworkAuthenticationType.Wep, NetworkEncryptionType.Wep40),
             AuthenticationAlgorithm.WPA => new NetworkSecuritySettings(NetworkAuthenticationType.Wpa, NetworkEncryptionType.Unknown),
             AuthenticationAlgorithm.WPA_PSK => new NetworkSecuritySettings(NetworkAuthenticationType.WpaPsk, NetworkEncryptionType.Unknown),
-            AuthenticationAlgorithm.WPA3 => new NetworkSecuritySettings(NetworkAuthenticationType.Wpa3Psk, NetworkEncryptionType.Unknown),
+            AuthenticationAlgorithm.WPA3_SAE => new NetworkSecuritySettings(NetworkAuthenticationType.Wpa3Psk, NetworkEncryptionType.Unknown),
             _ => new NetworkSecuritySettings(NetworkAuthenticationType.Unknown, NetworkEncryptionType.Unknown)
         };
     }

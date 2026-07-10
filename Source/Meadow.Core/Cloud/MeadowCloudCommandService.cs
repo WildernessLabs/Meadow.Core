@@ -95,7 +95,7 @@ public class MeadowCloudCommandService : ICommandService
             return;
         }
 
-        var properties = message.UserProperties.ToDictionary(x => x.Name.ToUpperInvariant(), x => x.Value);
+        var properties = message.UserProperties.ToDictionary(x => x.Name.ToUpperInvariant(), x => System.Text.Encoding.UTF8.GetString(x.ValueBuffer.Span));
 
         if (!properties.TryGetValue("COMMANDNAME", out string commandName) ||
             string.IsNullOrWhiteSpace(commandName))
@@ -112,8 +112,11 @@ public class MeadowCloudCommandService : ICommandService
             IReadOnlyDictionary<string, object>? arguments;
             try
             {
-                arguments = message.PayloadSegment.Count > 0
-                    ? Resolver.JsonSerializer.Deserialize<Dictionary<string, object>>(message.PayloadSegment.Array)
+                var payloadBytes = new byte[(int)message.Payload.Length];
+                var pos = 0;
+                foreach (var seg in message.Payload) { seg.Span.CopyTo(payloadBytes.AsSpan(pos, seg.Length)); pos += seg.Length; }
+                arguments = payloadBytes.Length > 0
+                    ? Resolver.JsonSerializer.Deserialize<Dictionary<string, object>>(payloadBytes)
                     : null;
             }
             catch (Exception ex)
@@ -145,8 +148,11 @@ public class MeadowCloudCommandService : ICommandService
             object command;
             try
             {
-                command = message.PayloadSegment.Count > 0
-                    ? Resolver.JsonSerializer.Deserialize(message.PayloadSegment.Array, value.CommandType) ?? Activator.CreateInstance(subscription.Value.commandType)
+                var payloadBytes = new byte[(int)message.Payload.Length];
+                var pos = 0;
+                foreach (var seg in message.Payload) { seg.Span.CopyTo(payloadBytes.AsSpan(pos, seg.Length)); pos += seg.Length; }
+                command = payloadBytes.Length > 0
+                    ? Resolver.JsonSerializer.Deserialize(payloadBytes, value.CommandType) ?? Activator.CreateInstance(subscription.Value.commandType)
                     : Activator.CreateInstance(subscription.Value.commandType);
             }
             catch (Exception ex)

@@ -8,6 +8,10 @@
     <Project Path="extensions/Meadow.AspNetCore.Abstractions/Meadow.AspNetCore.Abstractions.csproj">
       <BuildType Solution="Core|*" Project="Debug" />
     </Project>
+    <Project Path="implementations/linux/Meadow.Linux.Silk/Meadow.Linux.Silk.csproj">
+      <BuildType Solution="Core|*" Project="Debug" />
+      <Deploy />
+    </Project>
   </Folder>
   <Folder Name="/implementations/desktop/">
     <Project Path="implementations/desktop/Meadow.Desktop/Meadow.Desktop.csproj">
@@ -91,6 +95,9 @@
       <BuildType Solution="Core|*" Project="Debug" />
     </Project>
     <Project Path="../../Meadow.Modbus/src/Meadow.Modbus/Meadow.Modbus.csproj">
+      <BuildType Solution="Core|*" Project="Debug" />
+    </Project>
+    <Project Path="../../Meadow.Units/Source/Meadow.Units.Generators/Meadow.Units.Generators.csproj">
       <BuildType Solution="Core|*" Project="Debug" />
     </Project>
     <Project Path="../../Meadow.Units/Source/Meadow.Units/Meadow.Units.csproj">

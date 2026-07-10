@@ -1,3 +1,6 @@
 <Project>
-    <Import Project="../../Meadow.Contracts/Source/Directory.Packages.props" />
+  <Import Project="../../Meadow.Contracts/Source/Directory.Packages.props" />
+  <ItemGroup>
+    <PackageVersion Include="MQTTnet" Version="5.1.0.1559" />
+  </ItemGroup>
 </Project>

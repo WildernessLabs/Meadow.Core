@@ -45,7 +45,7 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
 
         foreach (var network in NativeWifi.EnumerateBssNetworks())
         {
-            if (network.Interface.Id.Equals(testID))
+            if (network.InterfaceInfo.Id.Equals(testID))
             {
                 var net = new WifiNetwork(
                     network.Ssid.ToString(),
@@ -55,7 +55,7 @@ public class WindowsWifiNetworkAdapter : NetworkAdapterBase, IWirelessNetworkAda
                     new NetworkSecuritySettings(NetworkAuthenticationType.Unknown, NetworkEncryptionType.Unknown),
                     (int)network.Band * 10,
                     NetworkProtocol.Protocol11B, // todo
-                    (sbyte)network.SignalStrength
+                    network.LinkQuality.PercentageSignalToEstimatedDB()
                 );
 
                 list.Add(net);

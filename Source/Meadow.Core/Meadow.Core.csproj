@@ -1,4 +1,4 @@
-<Project Sdk="Meadow.Sdk/1.1.0">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>Wilderness Labs, Inc</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -11,7 +11,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
@@ -19,6 +19,15 @@
     <LangVersion>preview</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <RuntimeIdentifiers>win-x64;linux-arm64;linux-x64;osx-arm64;osx-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ILLink.Descriptors.xml">
+      <LogicalName>ILLink.Descriptors.xml</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <PropertyGroup>
     <NoWarn>CS8597;CS8600;CS8601;CS8602;CS8603;CS8604;CS8612;CS8618;CS8619;CS8622;CS8714;CS8765;CS8767</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -33,8 +42,6 @@
         <ProjectReference Include="..\..\..\Meadow.Logging\Source\Meadow.Logging\lib\Meadow.Logging.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <!-- Stock MQTTnet (was a ProjectReference to a locally-hacked fork whose
-             sync Socket.Connect hack hung on NuttX poll(); canonical async ConnectAsync). -->
         <PackageReference Include="MQTTnet" />
         <PackageReference Include="NetEscapades.Configuration.Yaml" />
         <PackageReference Include="sqlite-net-static" />

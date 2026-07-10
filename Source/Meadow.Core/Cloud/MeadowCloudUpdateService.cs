@@ -212,7 +212,7 @@ public class MeadowCloudUpdateService : IUpdateService
 
             File.WriteAllBytes(
                 packageFileName,
-                e.PayloadSegment.Array);
+                e.Payload.ToArray());
 
             var fileInfo = new FileInfo(packageFileName);
             Log.Debug($"file size: {fileInfo.Length}", LogMessageGroup);

@@ -5,7 +5,7 @@ namespace Meadow;
 /// <summary>
 /// Represents a generic desktop Linux operating system.
 /// </summary>
-public class DesktopLinux : Linux
+public class DesktopLinux : Linux, IDesktopLinuxDevice
 {
     /// <inheritdoc/>
     public EmptyPinout Pins { get; }
