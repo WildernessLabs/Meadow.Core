@@ -11,7 +11,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/WildernessLabs/Meadow.Core</RepositoryUrl>
     <PackageTags>Meadow</PackageTags>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Meadow</RootNamespace>
     <Nullable>enable</Nullable>
