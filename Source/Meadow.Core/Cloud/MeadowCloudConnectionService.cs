@@ -145,6 +145,8 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private async Task DataForwarderProc()
     {
+        PetLivenessWatchdog();
+
         if (!await _forwarderSemaphore.WaitAsync(0))
         {
             Resolver.Log.Trace("DataForwarder already running", "cloud");
@@ -845,6 +847,30 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             _stateMachineTask = null;
             // restart the device - see above TODO
             Resolver.Device?.PlatformOS.Reset();
+        }
+    }
+
+    private bool? _livenessDeviceExists;
+
+    /// <summary>
+    /// Pets the OS managed-liveness watchdog (F7: /dev/liveness). Running from
+    /// this timer callback proves the .NET timer machinery is alive; if these
+    /// pets stop, the OS lets the hardware watchdog reset the device instead
+    /// of leaving it silently hung. No-op on platforms without the device.
+    /// </summary>
+    private void PetLivenessWatchdog()
+    {
+        try
+        {
+            _livenessDeviceExists ??= File.Exists("/dev/liveness");
+            if (_livenessDeviceExists == true)
+            {
+                File.WriteAllText("/dev/liveness", "1");
+            }
+        }
+        catch
+        {
+            // never let the heartbeat throw into the timer path
         }
     }
 
