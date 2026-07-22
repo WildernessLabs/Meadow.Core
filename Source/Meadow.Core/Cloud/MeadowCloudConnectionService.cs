@@ -736,7 +736,7 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             }
                             catch (MqttConnectingFailedException ce)
                             {
-                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {ce}", "cloud");
+                                Resolver.Log.Debug(DescribeBrief("MQTT Error connecting to Meadow.Cloud", ce), "cloud");
                                 ConnectionState = CloudConnectionState.Disconnected;
                                 _consecutiveMqttConnectFailures++;
 
@@ -746,14 +746,14 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             catch (MqttCommunicationException e)
                             {
 
-                                Resolver.Log.Debug($"MQTT Error connecting to Meadow.Cloud: {e}", "cloud");
+                                Resolver.Log.Debug(DescribeBrief("MQTT Error connecting to Meadow.Cloud", e), "cloud");
                                 ConnectionState = CloudConnectionState.Disconnected;
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
                             catch (Exception ex)
                             {
-                                Resolver.Log.Error($"Error connecting to Meadow.Cloud: {ex}", "cloud");
+                                Resolver.Log.Error(DescribeBrief("Error connecting to Meadow.Cloud", ex), "cloud");
                                 if (ex.InnerException != null)
                                 {
                                     Resolver.Log.Error($"Inner Exception ({ex.InnerException.GetType().Name}): {ex.InnerException.Message}", "cloud");
@@ -848,6 +848,23 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             // restart the device - see above TODO
             Resolver.Device?.PlatformOS.Reset();
         }
+    }
+
+    /// <summary>
+    /// Bounded, allocation-light exception description for reconnect-path
+    /// logging. Interpolating a full exception (ToString with stack traces)
+    /// rents multi-KB char buffers; during reconnect churn the heap can be
+    /// exhausted enough that the formatting itself throws OutOfMemory and
+    /// kills the state machine (observed twice on hardware). Concatenating
+    /// existing strings keeps the failure path cheap.
+    /// </summary>
+    private static string DescribeBrief(string context, Exception ex)
+    {
+        var inner = ex.InnerException;
+        return inner == null
+            ? string.Concat(context, ": ", ex.GetType().Name, ": ", ex.Message)
+            : string.Concat(context, ": ", ex.GetType().Name, ": ", ex.Message,
+                            " <- ", inner.GetType().Name, ": ", inner.Message);
     }
 
     private bool? _livenessDeviceExists;
