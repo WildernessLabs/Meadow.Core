@@ -92,6 +92,15 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
         // Recover sequence counter
         RecoverSequenceCounter();
 
+        // Warm up the ORM paths now, while memory is plentiful. The first
+        // InsertAll/Query<T> otherwise JIT-compiles sqlite-net's
+        // reflection-heavy mapping at first batch write -- which lands at
+        // MQTT-connect time, on top of the TLS + connect JIT spike, and has
+        // been observed to exhaust the F7's native arena (fatal ~475KB
+        // g_malloc failure). Boot-time warm-up moves that cost to a moment
+        // with megabytes of headroom.
+        WarmUpOrmPaths();
+
         // Start background batch writer
         _batchWriterTask = Task.Run(BatchWriterLoop, _cancellationSource.Token);
 
@@ -117,8 +126,13 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
                 // FULL is safest but very slow on NAND flash
                 _connection.ExecuteScalar<string>("PRAGMA synchronous=NORMAL");
 
-                // Increase cache size for better performance (10MB)
-                _connection.Execute("PRAGMA cache_size=-10000");
+                // Bound the page cache to 1MB. The default request here used to
+                // be 10MB, which on the F7's ~29MB native arena is a large
+                // fraction of total memory for a ~1000-row telemetry table;
+                // sqlite grows the cache on demand under load, competing with
+                // the JIT/TLS allocation spikes that already run the arena
+                // close to exhaustion.
+                _connection.Execute("PRAGMA cache_size=-1024");
 
                 // verify the settings we just sent
                 var checks = new string[] { "journal_mode", "synchronous", "cache_size" };
@@ -159,6 +173,35 @@ internal class SqliteTelemetryStore : IMeadowCloudTelemetryStore, IDisposable
             {
                 Resolver.Log.Error($"Failed to initialize SQLite database: {ex.Message}", LogGroup);
                 throw;
+            }
+        }
+    }
+
+    private void WarmUpOrmPaths()
+    {
+        lock (_dbLock)
+        {
+            try
+            {
+                EnsureConnection();
+
+                var warmup = new TelemetryDbRecord
+                {
+                    Sequence = 0,
+                    Priority = int.MaxValue,
+                    Endpoint = "__warmup__",
+                    JsonData = "{}",
+                    CreatedAt = 0
+                };
+                _connection!.InsertAll(new[] { warmup });
+                _connection.Query<TelemetryRecord>(
+                    "SELECT * FROM telemetry WHERE endpoint = ? LIMIT 1", "__warmup__");
+                _connection.Execute("DELETE FROM telemetry WHERE endpoint = ?", "__warmup__");
+            }
+            catch (Exception ex)
+            {
+                // Warm-up is an optimization; never fail construction over it.
+                Resolver.Log.Warn($"ORM warm-up failed: {ex.Message}", LogGroup);
             }
         }
     }
