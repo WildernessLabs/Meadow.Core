@@ -500,6 +500,15 @@ public class MeadowCloudConnectionService : IMeadowCloudService
 
     private void Initialize()
     {
+        CreateMqttClient();
+
+        // Configure auth client timeout and base address from settings
+        _authHttpClient.Timeout = TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds);
+        _dataHttpClient.BaseAddress = new Uri(Settings.DataHostname);
+    }
+
+    private void CreateMqttClient()
+    {
         var factory = new MqttClientFactory();
         MqttClient = (MqttClient)factory.CreateMqttClient();
 
@@ -524,10 +533,27 @@ public class MeadowCloudConnectionService : IMeadowCloudService
             MqttMessageReceived?.Invoke(this, args.ApplicationMessage);
             return Task.CompletedTask;
         };
+    }
 
-        // Configure auth client timeout and base address from settings
-        _authHttpClient.Timeout = TimeSpan.FromSeconds(Settings.AuthTimeoutSeconds);
-        _dataHttpClient.BaseAddress = new Uri(Settings.DataHostname);
+    /// <summary>
+    /// Replaces the MqttClient with a fresh instance. MQTTnet (5.x especially)
+    /// permanently rejects ConnectAsync while a previous connect/disconnect is
+    /// still pending on the same instance; after an abandoned or interrupted
+    /// connect attempt, recreating the client is the reliable way back to a
+    /// connectable state -- a device reset is not required.
+    /// </summary>
+    private void RecreateMqttClient()
+    {
+        var old = MqttClient;
+        CreateMqttClient();
+
+        // Dispose the old client in the background: its teardown may block on
+        // adapter I/O timeouts and must not stall the state machine.
+        _ = Task.Run(() =>
+        {
+            try { old?.Dispose(); }
+            catch (Exception ex) { Resolver.Log.Trace($"Old MQTT client dispose: {ex.Message}", "cloud"); }
+        });
     }
 
     private async Task ConnectionStateMachine()
@@ -688,20 +714,38 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                             {
                                 Resolver.Log.Debug("Connecting MQTT client", "cloud");
 
-                                // Wrap MQTT connect with timeout to prevent infinite hangs
+                                // Wrap MQTT connect with an outer timeout so a hung network
+                                // can't stall the state machine. The inner 30s token bounds
+                                // the protocol attempt; the outer bound covers MQTTnet's
+                                // post-cancel adapter teardown (up to Options.Timeout more).
                                 var connectTask = MqttClient.ConnectAsync(ClientOptions, new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token);
-                                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds + 15)); // Slightly longer than internal timeout
+                                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(HttpClientTimeoutSeconds + 15));
                                 var completedTask = await Task.WhenAny(connectTask, timeoutTask);
 
                                 if (completedTask == timeoutTask)
                                 {
-                                    Resolver.Log.Error("MQTT connect timed out after 45 seconds - network may be hung");
+                                    // The abandoned ConnectAsync is still running inside
+                                    // MQTTnet and holds the client's connection status;
+                                    // another ConnectAsync on the same instance would throw
+                                    // InvalidOperationException. Recreate the client and log
+                                    // (not throw) the abandoned attempt's eventual outcome.
+                                    Resolver.Log.Error($"MQTT connect exceeded {HttpClientTimeoutSeconds + 15}s - network may be hung; recreating MQTT client", "cloud");
+                                    _consecutiveMqttConnectFailures++;
+                                    _ = connectTask.ContinueWith(
+                                        t => Resolver.Log.Trace($"Abandoned MQTT connect completed: {t.Exception?.InnerException?.GetType().Name ?? t.Status.ToString()}", "cloud"),
+                                        TaskContinuationOptions.ExecuteSynchronously);
+                                    RecreateMqttClient();
                                     ConnectionState = CloudConnectionState.Disconnected;
                                     await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                                     break;
                                 }
 
-                                if (connectTask.Result.ResultCode == MqttClientConnectResultCode.NotAuthorized ||
+                                // Single await: surfaces the REAL exception type for the typed
+                                // catches below. (The previous connectTask.Result access threw
+                                // AggregateException on faulted connects, bypassing them all.)
+                                var connectResult = await connectTask;
+
+                                if (connectResult.ResultCode == MqttClientConnectResultCode.NotAuthorized ||
                                         _consecutiveMqttConnectFailures >= 3)
                                 {
                                     // A broker rejecting a stale/expired token does not always
@@ -711,25 +755,29 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                     // loops forever. Invalidate on explicit NotAuthorized OR
                                     // after repeated connect failures of any kind (re-auth is
                                     // cheap and idempotent).
-                                    Resolver.Log.Debug($"MQTT authentication error ({connectTask.Result.ResultCode}, {_consecutiveMqttConnectFailures} consecutive failures), invalidating credentials", "cloud");
+                                    Resolver.Log.Debug($"MQTT authentication error ({connectResult.ResultCode}, {_consecutiveMqttConnectFailures} consecutive failures), invalidating credentials", "cloud");
                                     _consecutiveMqttConnectFailures = 0;
                                     InvalidateAuthentication();
                                     await MqttClient.DisconnectAsync();
                                 }
-
-                                await connectTask; // Re-await to get any exceptions
                             }
                             catch (InvalidOperationException ioe)
                             {
-                                // Known MQTTnet deadlock: further retries won't clear it; force device reset to recover
-                                Resolver.Log.Error("MQTT deadlock detected (connect/disconnect pending). Resetting device to recover...", "cloud");
-                                ReportFatalErrorToReliabilityService(new MeadowCloudException("MQTT deadlock: connect/disconnect pending", ioe));
-                                Resolver.Device?.PlatformOS.Reset();
-                                return;
+                                // MQTTnet refuses ConnectAsync while a previous
+                                // connect/disconnect is pending on this instance. That is a
+                                // client-object state problem, not a device problem: replace
+                                // the client and keep retrying instead of resetting the
+                                // device (which this path previously did).
+                                Resolver.Log.Error(DescribeBrief("MQTT client in unconnectable state; recreating", ioe), "cloud");
+                                _consecutiveMqttConnectFailures++;
+                                RecreateMqttClient();
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
                             catch (MqttCommunicationTimedOutException)
                             {
                                 Resolver.Log.Debug("Timeout connecting to Meadow.Cloud", "cloud");
+                                _consecutiveMqttConnectFailures++;
                                 ConnectionState = CloudConnectionState.Disconnected;
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
@@ -743,10 +791,21 @@ public class MeadowCloudConnectionService : IMeadowCloudService
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
                             }
+                            catch (OperationCanceledException)
+                            {
+                                // Inner 30s token fired mid-attempt (DNS stall, unreachable
+                                // broker, TLS hang). MQTTnet has already torn the attempt
+                                // down; count it toward credential invalidation and retry.
+                                Resolver.Log.Debug($"MQTT connect attempt canceled after 30s ({_consecutiveMqttConnectFailures + 1} consecutive failures)", "cloud");
+                                _consecutiveMqttConnectFailures++;
+                                ConnectionState = CloudConnectionState.Disconnected;
+                                await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
+                            }
                             catch (MqttCommunicationException e)
                             {
 
                                 Resolver.Log.Debug(DescribeBrief("MQTT Error connecting to Meadow.Cloud", e), "cloud");
+                                _consecutiveMqttConnectFailures++;
                                 ConnectionState = CloudConnectionState.Disconnected;
                                 //  just delay for a while
                                 await Task.Delay(TimeSpan.FromSeconds(Settings.ConnectRetrySeconds));
