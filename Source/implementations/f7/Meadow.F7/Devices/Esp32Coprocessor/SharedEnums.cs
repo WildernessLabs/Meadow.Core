@@ -194,17 +194,17 @@ public enum StatusCodes
     /// </summary>
     NetworkDeadlock = 46,
     /// <summary>
-    /// Possible network deadlock detected on close().
+    /// Battery level on ADC1 cannot be read (used on F7 v1).
     /// </summary>
-    NetworkCloseDeadlock = 47,
+    BatteryLevelCannotBeRead = 47,
     /// <summary>
-    /// Possible network deadlock detected on poll().
+    /// The Bluetooth stack cannot be stopped.
     /// </summary>
-    NetworkPollDeadlock = 48,
+    CannotStopBluetooth = 48,
     /// <summary>
-    /// Possible network deadlock detected on socket().
+    /// The Bluetooth stack is already running.
     /// </summary>
-    NetworkSocketDeadlock = 49,
+    BluetoothAlreadyStarted = 49,
 
     /// <summary>
     /// ESP reset for unknown reason
@@ -250,6 +250,40 @@ public enum StatusCodes
     /// Reset over SDIO.
     /// </summary>
     EspResetSDIO = 60,
+    /// <summary>
+    /// Invalid request.
+    /// </summary>
+    InvalidRequest = 61,
+    /// <summary>
+    /// Invalid WiFi country code.
+    /// </summary>
+    InvalidCountryCode = 62,
+    /// <summary>
+    /// The Bluetooth stack is not running, so a request that needs it cannot be answered.
+    /// </summary>
+    BluetoothNotStarted = 63,
+    /// <summary>
+    /// The device named in a Bluetooth request is not bonded.
+    /// </summary>
+    BluetoothDeviceNotBonded = 64,
+
+    //
+    //  The network deadlock codes are set by the STM32's watchdog, not the ESP32.  They were 47 to
+    //  49, which the ESP32 uses for the codes above, so they have moved to keep one meaning per value.
+    //
+
+    /// <summary>
+    /// Possible network deadlock detected on close().
+    /// </summary>
+    NetworkCloseDeadlock = 65,
+    /// <summary>
+    /// Possible network deadlock detected on poll().
+    /// </summary>
+    NetworkPollDeadlock = 66,
+    /// <summary>
+    /// Possible network deadlock detected on socket().
+    /// </summary>
+    NetworkSocketDeadlock = 67,
 }
 
 /// <summary>
@@ -326,13 +360,54 @@ public enum SystemFunction
     StopHeapTrace = 6,
 
     //
-    //  System functions 7 - 11 inclusive are not exposed to managed code.
+    //  System functions 7 to 11 and 13 to 17 are handled by the STM32 and are not called by
+    //  managed code.  They are listed so that every value the ESP32 defines has a name here.
     //
 
     /// <summary>
+    /// SystemFunction - FileSystemFormat
+    /// </summary>
+    FileSystemFormat = 7,
+    /// <summary>
+    /// SystemFunction - FileSystemListFiles
+    /// </summary>
+    FileSystemListFiles = 8,
+    /// <summary>
+    /// SystemFunction - FileSystemWriteFile
+    /// </summary>
+    FileSystemWriteFile = 9,
+    /// <summary>
+    /// SystemFunction - FileSystemReadFile
+    /// </summary>
+    FileSystemReadFile = 10,
+    /// <summary>
+    /// SystemFunction - FileSystemDeleteFile
+    /// </summary>
+    FileSystemDeleteFile = 11,
+    /// <summary>
     /// SystemFunction - Operating system exception
     /// </summary>
-    OsException = 12
+    OsException = 12,
+    /// <summary>
+    /// SystemFunction - LoggingConfiguration
+    /// </summary>
+    LoggingConfiguration = 13,
+    /// <summary>
+    /// SystemFunction - LogMessage
+    /// </summary>
+    LogMessage = 14,
+    /// <summary>
+    /// SystemFunction - GetCoreDumpInformation
+    /// </summary>
+    GetCoreDumpInformation = 15,
+    /// <summary>
+    /// SystemFunction - GetCoreDumpFragment
+    /// </summary>
+    GetCoreDumpFragment = 16,
+    /// <summary>
+    /// SystemFunction - EraseCoreDump
+    /// </summary>
+    EraseCoreDump = 17
 };
 
 /// <summary>
@@ -536,6 +611,14 @@ internal enum WiFiFunction
     /// WiFiFunction - NetworkConnecting
     /// </summary>
     NetworkConnecting = 47,
+    /// <summary>
+    /// WiFiFunction - NetworkGotIpEvent
+    /// </summary>
+    NetworkGotIpEvent = 48,
+    /// <summary>
+    /// WiFiFunction - MaximumConnectionsReachedEvent
+    /// </summary>
+    MaximumConnectionsReachedEvent = 49,
 };
 
 /// <summary>
@@ -587,6 +670,42 @@ public enum BluetoothFunction
     /// Bluetooth client disconnected event.
     /// </summary>
     ClientDisconnectedEvent = 10,
+    /// <summary>
+    /// Answer a PasskeyRequestEvent with the passkey the user entered, or refuse the pairing.
+    /// </summary>
+    PasskeyReply = 11,
+    /// <summary>
+    /// Answer a NumericComparisonRequestEvent: accept the pairing if the numbers matched.
+    /// </summary>
+    NumericComparisonReply = 12,
+    /// <summary>
+    /// Get the addresses of the devices bonded with the ESP32.
+    /// </summary>
+    GetBondedDevices = 13,
+    /// <summary>
+    /// Remove the bond with one device.
+    /// </summary>
+    RemoveBond = 14,
+    /// <summary>
+    /// Remove the bonds with every device.
+    /// </summary>
+    RemoveAllBonds = 15,
+    /// <summary>
+    /// Show the user this passkey so that they can type it into the client.
+    /// </summary>
+    PasskeyDisplayEvent = 16,
+    /// <summary>
+    /// Ask the user for the passkey the client is showing, answered by PasskeyReply.
+    /// </summary>
+    PasskeyRequestEvent = 17,
+    /// <summary>
+    /// Ask the user whether the client shows this number, answered by NumericComparisonReply.
+    /// </summary>
+    NumericComparisonRequestEvent = 18,
+    /// <summary>
+    /// Pairing, or encryption with a bonded client, has finished, successfully or not.
+    /// </summary>
+    AuthenticationCompleteEvent = 19,
 };
 
 /// <summary>
@@ -802,6 +921,10 @@ public enum ConfigurationItems
     /// ConfigurationItems - BluetoothMacAddress
     /// </summary>
     BluetoothMacAddress = 16,
+    /// <summary>
+    /// ConfigurationItems - CountryCode
+    /// </summary>
+    CountryCode = 17,
 };
 
 /// <summary>
@@ -972,6 +1095,38 @@ public enum WiFiAuthenticationMode
     /// WiFiAuthenticationMode - Wpa2Wpa3Psk
     /// </summary>
     Wpa2Wpa3Psk = 7
+};
+
+/// <summary>
+/// Protocols an access point supports.  The values are flags, one bit each, and are combined with a bitwise OR.
+/// </summary>
+[System.Flags]
+public enum WiFiAccessPointProtocols : uint
+{
+    /// <summary>
+    /// WiFiAccessPointProtocols - None
+    /// </summary>
+    None = 0x00,
+    /// <summary>
+    /// WiFiAccessPointProtocols - Phy11b
+    /// </summary>
+    Phy11b = 0x01,
+    /// <summary>
+    /// WiFiAccessPointProtocols - Phy11g
+    /// </summary>
+    Phy11g = 0x02,
+    /// <summary>
+    /// WiFiAccessPointProtocols - Phy11n
+    /// </summary>
+    Phy11n = 0x04,
+    /// <summary>
+    /// WiFiAccessPointProtocols - PhyLowRate
+    /// </summary>
+    PhyLowRate = 0x08,
+    /// <summary>
+    /// WiFiAccessPointProtocols - Wps
+    /// </summary>
+    Wps = 0x10
 };
 
 /// <summary>
