@@ -1180,4 +1180,72 @@ namespace Meadow.Devices.Esp32.MessagePayloads
         public byte[] SetData;
     };
 
+    /// <summary>
+    /// Structure to hold BTPairingEventData data, the payload of PasskeyDisplayEvent,
+    /// PasskeyRequestEvent and NumericComparisonRequestEvent.
+    /// </summary>
+    public struct BTPairingEventData
+    {
+        /// <summary>
+        /// Address of the client being paired with, six bytes, most significant first.
+        /// </summary>
+        public byte[] Address;
+        /// <summary>
+        /// Passkey or number to show the user; 0 in a PasskeyRequestEvent, which asks for one.
+        /// </summary>
+        public UInt32 Passkey;
+    };
+
+    /// <summary>
+    /// Structure to hold BTAuthenticationCompleteEventData data, the payload of
+    /// AuthenticationCompleteEvent.  The event's status code says whether authentication succeeded.
+    /// </summary>
+    public struct BTAuthenticationCompleteEventData
+    {
+        /// <summary>
+        /// Address of the client, six bytes, most significant first.
+        /// </summary>
+        public byte[] Address;
+        /// <summary>
+        /// Address type of the client: 0 public, 1 random.
+        /// </summary>
+        public byte AddressType;
+        /// <summary>
+        /// Authentication achieved: 0x01 bonded, 0x04 MITM protected, 0x08 Secure Connections.
+        /// </summary>
+        public byte AuthenticationMode;
+        /// <summary>
+        /// Security Manager reason for the failure, 0 when authentication succeeded.
+        /// </summary>
+        public byte FailureReason;
+        /// <summary>
+        /// Non-zero when the client is now in the ESP32's bond list.
+        /// </summary>
+        public byte Bonded;
+    };
+
+    /// <summary>
+    /// Structure to hold BTBondedDevicesResponse data, the response to GetBondedDevices.
+    /// </summary>
+    public struct BTBondedDevicesResponse
+    {
+        /// <summary>
+        /// Number of bytes each device takes in Devices: the address (6) and its type (1).
+        /// </summary>
+        public const int DeviceEntryLength = 7;
+        /// <summary>
+        /// DeviceCount element.
+        /// </summary>
+        public UInt16 DeviceCount;
+        /// <summary>
+        /// Devices element length.
+        /// </summary>
+        public UInt32 DevicesLength;
+        /// <summary>
+        /// Devices element: DeviceCount entries of DeviceEntryLength bytes, each the device's
+        /// address, most significant byte first, followed by its address type (0 public, 1 random).
+        /// </summary>
+        public byte[] Devices;
+    };
+
 }

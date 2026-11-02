@@ -3607,5 +3607,67 @@ namespace Meadow.Devices.Esp32.MessagePayloads
             return result + 6;
         }
 
+        /// <summary>
+        /// Extract a BTPairingEventData object from a byte array.
+        /// </summary>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
+        /// <returns>BTPairingEventData object.</returns>
+        public static MessagePayloads.BTPairingEventData ExtractBTPairingEventData(byte[] buffer, int offset)
+        {
+            BTPairingEventData bTPairingEventData = new MessagePayloads.BTPairingEventData();
+
+            bTPairingEventData.Address = new byte[6];
+            Array.Copy(buffer, offset, bTPairingEventData.Address, 0, 6);
+            offset += 6;
+            bTPairingEventData.Passkey = ExtractUInt32(buffer, offset);
+            return bTPairingEventData;
+        }
+
+        /// <summary>
+        /// Extract a BTAuthenticationCompleteEventData object from a byte array.
+        /// </summary>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
+        /// <returns>BTAuthenticationCompleteEventData object.</returns>
+        public static MessagePayloads.BTAuthenticationCompleteEventData ExtractBTAuthenticationCompleteEventData(byte[] buffer, int offset)
+        {
+            BTAuthenticationCompleteEventData bTAuthenticationCompleteEventData = new MessagePayloads.BTAuthenticationCompleteEventData();
+
+            bTAuthenticationCompleteEventData.Address = new byte[6];
+            Array.Copy(buffer, offset, bTAuthenticationCompleteEventData.Address, 0, 6);
+            offset += 6;
+            bTAuthenticationCompleteEventData.AddressType = buffer[offset];
+            offset++;
+            bTAuthenticationCompleteEventData.AuthenticationMode = buffer[offset];
+            offset++;
+            bTAuthenticationCompleteEventData.FailureReason = buffer[offset];
+            offset++;
+            bTAuthenticationCompleteEventData.Bonded = buffer[offset];
+            return bTAuthenticationCompleteEventData;
+        }
+
+        /// <summary>
+        /// Extract a BTBondedDevicesResponse object from a byte array.
+        /// </summary>
+        /// <param name="buffer">Byte array containing the encoded data.</param>
+        /// <param name="offset">Offset into the buffer where the encoded data can be found.</param>
+        /// <returns>BTBondedDevicesResponse object.</returns>
+        public static MessagePayloads.BTBondedDevicesResponse ExtractBTBondedDevicesResponse(byte[] buffer, int offset)
+        {
+            BTBondedDevicesResponse bTBondedDevicesResponse = new MessagePayloads.BTBondedDevicesResponse();
+
+            bTBondedDevicesResponse.DeviceCount = ExtractUInt16(buffer, offset);
+            offset += 2;
+            bTBondedDevicesResponse.DevicesLength = ExtractUInt32(buffer, offset);
+            offset += 4;
+            if (bTBondedDevicesResponse.DevicesLength > 0)
+            {
+                bTBondedDevicesResponse.Devices = new byte[bTBondedDevicesResponse.DevicesLength];
+                Array.Copy(buffer, offset, bTBondedDevicesResponse.Devices, 0, bTBondedDevicesResponse.DevicesLength);
+            }
+            return bTBondedDevicesResponse;
+        }
+
     }
 }
