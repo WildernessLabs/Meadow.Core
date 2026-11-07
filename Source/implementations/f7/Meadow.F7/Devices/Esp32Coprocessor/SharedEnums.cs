@@ -1589,7 +1589,7 @@ public enum Esp32ErrorCodes
     /// </summary>
     Overflow = 139,
     /// <summary>
-    /// Esp32ErrorCodes - Canceled
+    /// Esp32ErrorCodes - Cancelled
     /// </summary>
     Cancelled = 140,
     /// <summary>
